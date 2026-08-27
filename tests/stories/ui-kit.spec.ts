@@ -1350,3 +1350,31 @@ test('the jewelry row is reachable and pageable by keyboard alone', async ({ pag
   await page.keyboard.press('ArrowRight')
   await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0)
 })
+
+test('every band grows for copy longer than the drawing showed', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+
+  // Every band is drawn with exactly one string. A translation is routinely 30% longer, and the
+  // failure mode is silent: the drawn height holds and the overflow is simply invisible.
+  const CASES = [
+    { id: 'sections-hero--with-longer-copy', root: '#storybook-root section' },
+    { id: 'sections-aboutband--with-longer-copy', root: '#storybook-root section' },
+    { id: 'sections-categoryband--with-longer-names', root: '#storybook-root section' },
+    { id: 'ui-featurecard--with-longer-copy', root: '#storybook-root li' },
+  ]
+
+  for (const { id, root } of CASES) {
+    await page.goto(`${STORYBOOK}/iframe.html?id=${id}&viewMode=story`, { waitUntil: 'load' })
+    const band = page.locator(root).first()
+    await band.waitFor()
+
+    expect(
+      await band.evaluate((el) => el.scrollHeight > el.clientHeight + 1),
+      `${id} clips its own content`,
+    ).toBe(false)
+    expect(
+      await band.evaluate((el) => el.scrollWidth > el.clientWidth + 1),
+      `${id} overflows sideways`,
+    ).toBe(false)
+  }
+})

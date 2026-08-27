@@ -108,6 +108,11 @@ function Certifications() {
         alt="Gemological Institute of America"
         width={174}
         height={58}
+        // Lazy because they are in the FOOTER. Without it React preloads them from the server
+        // markup, and 96KB of certification marks nobody has scrolled to yet compete with the
+        // hero photograph — which is the largest contentful paint on every page that has one.
+        loading="lazy"
+        decoding="async"
         className="h-10 w-auto xl:h-14.5"
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -116,6 +121,8 @@ function Certifications() {
         alt="International Gemological Institute"
         width={173}
         height={58}
+        loading="lazy"
+        decoding="async"
         className="h-10 w-auto xl:h-14.5"
       />
     </div>

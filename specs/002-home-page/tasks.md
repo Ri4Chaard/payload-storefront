@@ -160,30 +160,32 @@ keyboard, and confirm every card stays reachable and openable with no hover avai
 
 **Independent test**: Run the sweeps and the measurements.
 
-- [ ] T128 [US4] Add `tests/e2e/home.spec.ts` — heading hierarchy descends without skipping, one
+- [X] T128 [US4] Add `tests/e2e/home.spec.ts` — heading hierarchy descends without skipping, one
       `h1`, landmarks and labelled regions present, every call to action routes (FR-026, FR-028)
-- [ ] T129 [P] [US4] Verify the page renders and every link works with JavaScript disabled; the
+- [X] T129 [P] [US4] Verify the page renders and every link works with JavaScript disabled; the
       carousel must degrade to a plain scroller rather than disappear (FR-029, SC-004)
-- [ ] T130 [P] [US4] Verify no horizontal page scroll at 320px and at 200% zoom (SC-005)
-- [ ] T131 [P] [US4] Verify reduced motion suppresses every transition and every smooth scroll,
+- [X] T130 [P] [US4] Verify no horizontal page scroll at 320px and at 200% zoom (SC-005)
+- [X] T131 [P] [US4] Verify reduced motion suppresses every transition and every smooth scroll,
       including the carousel's paging
-- [ ] T132 [US4] Run the accessibility sweep at 1920, 1024 and 390 with zero violations (SC-002)
-- [ ] T133 [P] [US4] Measure LCP against the 2.5s budget and the route's JavaScript against 200KB
-      gzipped (FR-030, SC-006)
-- [ ] T134 [P] [US4] Verify every band grows rather than clips with copy longer than drawn — a
+- [X] T132 [US4] Run the accessibility sweep at 1920, 1024 and 390 with zero violations (SC-002)
+- [X] T133 [P] [US4] Measure LCP against the 2.5s budget and the route's JavaScript against 200KB
+      gzipped (FR-030, SC-006). **Measured**: 173.2KB gzipped over 9 files; LCP 0.90s at 390 and
+      2.06s at 1440, both on Slow 4G with 4x CPU throttling against a production build. Both pass,
+      but the JavaScript has only 27KB of headroom — the next client component is worth weighing
+- [X] T134 [P] [US4] Verify every band grows rather than clips with copy longer than drawn — a
       product name past one line, a category name that wraps, a lede a translator made longer
 
 ---
 
 ## Phase 6: Close-out
 
-- [ ] T135 Verify the mock-to-Payload swap costs one file: no component imports from `src/mocks/`
+- [X] T135 Verify the mock-to-Payload swap costs one file: no component imports from `src/mocks/`
       (SC-008)
-- [ ] T136 [P] Confirm the kit was touched exactly twice — `CategoryCard` and the `Carousel`
+- [X] T136 [P] Confirm the kit was touched exactly twice — `CategoryCard` and the `Carousel`
       extraction. A third change means a band was built wrong (SC-009)
-- [ ] T137 Full gate run: naming, stories, styles, contrast, tokens, lint, types, unit, story,
+- [X] T137 Full gate run: naming, stories, styles, contrast, tokens, lint, types, unit, story,
       accessibility, build (SC-010)
-- [ ] T138 [P] Measure the built page against the design at all three widths — section padding,
+- [X] T138 [P] Measure the built page against the design at all three widths — section padding,
       band heights, tile proportions, gaps (SC-001)
 
 ---
