@@ -7,8 +7,8 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { env } from './env'
-import { Admins } from './collections/Admins'
-import { Media } from './collections/Media'
+import { Admins } from './collections/admins'
+import { Media } from './collections/media'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 

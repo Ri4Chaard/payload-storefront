@@ -1,6 +1,13 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 2.0.0 -> 2.1.0
+Bump rationale: MINOR. Guidance materially expanded — "Technology Stack & Project Structure" gains
+                a repository-wide kebab-case path convention, split from the existing identifier
+                naming rule so the two are not confused. No principle changed.
+Migration: all non-compliant paths renamed in the same change; `pnpm check:naming` added as a
+                blocking CI gate so the convention cannot drift.
+
 Version change: 1.0.0 → 2.0.0
 Bump rationale: MAJOR. The principle set is redefined around website construction on Payload CMS
                 rather than security engineering. Three of five v1.0.0 principles were removed or
@@ -180,8 +187,18 @@ schedule.
 - **Structure**: Payload collections, globals, blocks, and reusable field configs live in
   dedicated directories with one concern per file. Shared UI lives in the UI kit directory;
   feature directories may hold only components with a single consumer.
-- **Naming**: Collections are plural, blocks are named for what an editor sees, and components are
-  named for what they are rather than where they are used. `HeroBanner`, not `HomepageTopThing`.
+- **Naming — paths**: Every file and directory in the repository is kebab-case, with no
+  per-directory dialect. `hero-banner.tsx`, never `HeroBanner.tsx` or `heroBanner.tsx`;
+  `button.stories.tsx`, never `Button.stories.tsx`. Framework syntax in a path is exempt from the
+  check but not from the convention — Next.js route groups `(frontend)` and dynamic segments
+  `[slug]` keep their brackets, and the name inside them is still kebab-case. Enforced by
+  `pnpm check:naming`, not by review: macOS has a case-insensitive filesystem, so `import './Button'`
+  resolves against `button.tsx` locally and fails only once CI runs on Linux — a class of defect
+  that is invisible in a diff.
+- **Naming — identifiers**: Exported names are unaffected by the path rule. React components stay
+  PascalCase, so `hero-banner.tsx` exports `HeroBanner`. Collections are plural, blocks are named
+  for what an editor sees, and components are named for what they are rather than where they are
+  used. `HeroBanner`, not `HomepageTopThing`.
 - **Types**: `payload-types.ts` is generated, committed, and MUST be regenerated in the same commit
   as any schema change. A pull request whose generated types are stale fails review.
 - **Styling**: One styling approach for the entire codebase. Mixing paradigms for the same concern
@@ -248,4 +265,4 @@ section; undocumented deviation is a defect.
 for agents and contributors. It MUST remain consistent with this constitution; on conflict, this
 constitution governs.
 
-**Version**: 2.0.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-08-25
+**Version**: 2.1.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-08-27

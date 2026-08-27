@@ -25,6 +25,7 @@
     "check:tokens": "tsx scripts/check-tokens.ts",
     "check:contrast": "tsx scripts/check-contrast.ts",
     "check:stories": "tsx scripts/check-stories.ts",
+    "check:naming": "tsx scripts/check-naming.ts",
     "payload": "payload",
     "generate:types": "payload generate:types",
     "check:styles": "tsx scripts/check-styles.ts",

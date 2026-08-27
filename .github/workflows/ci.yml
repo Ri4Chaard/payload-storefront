@@ -62,6 +62,9 @@ jobs:
       - name: Every UI kit component has stories
         run: pnpm check:stories
 
+      - name: Every path is kebab-case
+        run: pnpm check:naming
+
       - name: Types
         run: pnpm typecheck
 
