@@ -1,0 +1,132 @@
+{
+  "styles": {
+    "textStyles": [
+      {
+        "name": "Заголовки/H1",
+        "token": "h1",
+        "type": "text",
+        "fontFamily": "TT Ramillas Trl",
+        "fontWeight": "500",
+        "fontSize": "36px",
+        "lineHeight": 1.399999976158142,
+        "letterSpacing": "0%",
+        "textTransform": "upper"
+      },
+      {
+        "name": "Заголовки/H2",
+        "token": "h2",
+        "type": "text",
+        "fontFamily": "TT Ramillas Trl",
+        "fontWeight": "500",
+        "fontSize": "30px",
+        "lineHeight": 1.399999976158142,
+        "letterSpacing": "0%",
+        "textTransform": "upper"
+      },
+      {
+        "name": "Заголовки/H3",
+        "token": "h3",
+        "type": "text",
+        "fontFamily": "TT Ramillas Trl",
+        "fontWeight": "500",
+        "fontSize": "24px",
+        "lineHeight": 1.399999976158142,
+        "letterSpacing": "0%",
+        "textTransform": "upper"
+      },
+      {
+        "name": "Заголовки/H4",
+        "token": "h4",
+        "type": "text",
+        "fontFamily": "TT Ramillas Trl",
+        "fontWeight": "500",
+        "fontSize": "20px",
+        "lineHeight": 1.399999976158142,
+        "letterSpacing": "0%",
+        "textTransform": "upper"
+      },
+      {
+        "name": "H3/Medium",
+        "token": "h3-medium",
+        "type": "text",
+        "fontFamily": "Manrope",
+        "fontWeight": "500",
+        "fontSize": "16px",
+        "lineHeight": 1.600000023841858,
+        "letterSpacing": "0%"
+      },
+      {
+        "name": "H3/Bold",
+        "token": "h3-bold",
+        "type": "text",
+        "fontFamily": "Manrope",
+        "fontWeight": "700",
+        "fontSize": "16px",
+        "lineHeight": 1.600000023841858,
+        "letterSpacing": "0%"
+      },
+      {
+        "name": "H/H",
+        "token": "h-h",
+        "type": "text",
+        "fontFamily": "Manrope",
+        "fontWeight": "400",
+        "fontSize": "14px",
+        "lineHeight": 1.3799999952316284,
+        "letterSpacing": "0%"
+      },
+      {
+        "name": "H/2",
+        "token": "h-2",
+        "type": "text",
+        "fontFamily": "Manrope",
+        "fontWeight": "600",
+        "fontSize": "14px",
+        "lineHeight": 1.3799999952316284,
+        "letterSpacing": "0%"
+      }
+    ]
+  },
+  "collections": {
+    "Variable collection": {
+      "id": "VariableCollectionId:22:8",
+      "modes": [
+        {
+          "id": "22:0",
+          "name": "Mode 1"
+        }
+      ],
+      "variables": {
+        "colors": [],
+        "numbers": [
+          {
+            "name": "button",
+            "token": "button",
+            "type": "float",
+            "value": 16
+          },
+          {
+            "name": "default",
+            "token": "default",
+            "type": "float",
+            "value": 0
+          },
+          {
+            "name": "18",
+            "token": "18",
+            "type": "float",
+            "value": 18
+          },
+          {
+            "name": "Number",
+            "token": "number",
+            "type": "float",
+            "value": 0
+          }
+        ],
+        "strings": [],
+        "booleans": []
+      }
+    }
+  }
+}

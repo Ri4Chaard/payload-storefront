@@ -1,0 +1,27 @@
+{
+  "colors": {
+    "primary-default": "#3b171a",
+    "primary-transparent": "#3b171a33",
+    "primary-hover": "#4f2b2e",
+    "neutral-primary": "#050301",
+    "neutral-secondary": "#a7a5a3",
+    "neutral-white": "#ffffff",
+    "background-bg": "#f8f7f6",
+    "background-container": "#ffffff",
+    "background-subtle": "#dddddd",
+    "background-base": "#130000",
+    "border-default": "#0000001a",
+    "border-subtle": "#0000000d",
+    "border-#ffffff": "#ffffff14",
+    "status-error-default": "#f75959",
+    "status-error-transparent": "#f759591a",
+    "status-success-default": "#2a8121",
+    "status-success-transparent": "#2a81211a"
+  },
+  "spacing": {
+    "18": "18px",
+    "button": "16px",
+    "default": "0px",
+    "number": "0px"
+  }
+}

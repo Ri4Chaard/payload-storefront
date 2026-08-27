@@ -1,0 +1,151 @@
+/*
+ * GENERATED FILE — DO NOT EDIT.
+ *
+ * Produced by scripts/build-tokens.ts from design/tokens/{colors,typography}.json and
+ * design/tokens/mapping.ts. Run `pnpm build:tokens` after changing either.
+ *
+ * Hand-editing this file is the one thing that breaks the whole token model: CI regenerates
+ * it and fails on any diff (`pnpm check:tokens`).
+ */
+
+@theme {
+  /* ---------- Colour ---------- */
+  --color-primary-default: #3b171a;
+  --color-primary-hover: #4f2b2e; /* ⚠ unverified against Figma */
+  --color-primary-transparent: #3b171a33; /* ⚠ unverified against Figma */
+  --color-neutral-primary: #050301;
+  --color-neutral-secondary: #343231;
+  --color-neutral-white: #ffffff;
+  --color-background-bg: #f8f7f6;
+  --color-background-container: #ffffff;
+  --color-background-subtle: #dddddd; /* ⚠ unverified against Figma */
+  --color-background-base: #130000;
+  --color-status-error-default: #f75959;
+  --color-status-error-transparent: #f759591a;
+  --color-status-success-default: #2a8121;
+  --color-status-success-transparent: #2a81211a;
+
+  /* Borders are Tailwind built-ins, deliberately not tokens:
+     border-black/10 (default) · border-black/5 (subtle) · border-white/8 (inverse).
+     Figma stores raw colours with opacity applied at the use site; so do we. */
+
+  /* ---------- Typography ---------- */
+  --font-brand-display: var(--font-playfair, 'Playfair Display'), Georgia, serif;
+  --font-brand-body: var(--font-manrope, 'Manrope'), system-ui, -apple-system, sans-serif;
+
+  --text-display: clamp(1.5rem, 1.1892rem + 1.3260vw, 2.25rem);
+  --text-display--line-height: 1.4;
+  --text-display--font-weight: 500;
+  --text-heading-1: clamp(1.25rem, 0.991rem + 1.1050vw, 1.875rem);
+  --text-heading-1--line-height: 1.4;
+  --text-heading-1--font-weight: 500;
+  --text-heading-2: clamp(1.125rem, 0.9696rem + 0.6630vw, 1.5rem);
+  --text-heading-2--line-height: 1.4;
+  --text-heading-2--font-weight: 500;
+  --text-heading-3: clamp(1rem, 0.8964rem + 0.4420vw, 1.25rem);
+  --text-heading-3--line-height: 1.4;
+  --text-heading-3--font-weight: 500;
+  --text-heading-4: clamp(0.9375rem, 0.8598rem + 0.3315vw, 1.125rem);
+  --text-heading-4--line-height: 1.4;
+  --text-heading-4--font-weight: 500;
+  --text-eyebrow: 1.125rem;
+  --text-eyebrow--line-height: 1.3;
+  --text-eyebrow--font-weight: 700;
+  --text-heading-sans: 1.375rem;
+  --text-heading-sans--line-height: 1.25;
+  --text-heading-sans--font-weight: 700;
+  --text-body-base: 1rem;
+  --text-body-base--line-height: 1.6;
+  --text-body-base--font-weight: 400;
+  --text-body-medium: 1rem;
+  --text-body-medium--line-height: 1.6;
+  --text-body-medium--font-weight: 500;
+  --text-body-strong: 1rem;
+  --text-body-strong--line-height: 1.6;
+  --text-body-strong--font-weight: 700;
+  --text-body-small: 0.875rem;
+  --text-body-small--line-height: 1.38;
+  --text-body-small--font-weight: 400;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.38;
+  --text-label--font-weight: 600;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 400;
+
+  /* ---------- Spacing ---------- */
+  --spacing: 0.25rem;
+  --spacing-brand-18: 18px;
+  --spacing-button: 16px;
+
+  /* ---------- Breakpoints ---------- */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* ---------- Shape ---------- */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgb(5 3 1 / 0.04);
+  --shadow-md: 0 4px 12px -2px rgb(5 3 1 / 0.06);
+  --shadow-lg: 0 12px 32px -8px rgb(5 3 1 / 0.10);
+
+  /* ---------- Motion ---------- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+}
+
+@utility text-display-cased {
+  text-transform: uppercase;
+}
+
+@utility text-display {
+  font-family: var(--font-brand-display);
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  font-weight: var(--text-display--font-weight);
+  text-transform: uppercase;
+}
+@utility text-heading-1 {
+  font-family: var(--font-brand-display);
+  font-size: var(--text-heading-1);
+  line-height: var(--text-heading-1--line-height);
+  font-weight: var(--text-heading-1--font-weight);
+  text-transform: uppercase;
+}
+@utility text-heading-2 {
+  font-family: var(--font-brand-display);
+  font-size: var(--text-heading-2);
+  line-height: var(--text-heading-2--line-height);
+  font-weight: var(--text-heading-2--font-weight);
+  text-transform: uppercase;
+}
+@utility text-heading-3 {
+  font-family: var(--font-brand-display);
+  font-size: var(--text-heading-3);
+  line-height: var(--text-heading-3--line-height);
+  font-weight: var(--text-heading-3--font-weight);
+  text-transform: uppercase;
+}
+@utility text-heading-4 {
+  font-family: var(--font-brand-display);
+  font-size: var(--text-heading-4);
+  line-height: var(--text-heading-4--line-height);
+  font-weight: var(--text-heading-4--font-weight);
+  text-transform: uppercase;
+}
+@utility text-eyebrow {
+  font-family: var(--font-brand-body);
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  font-weight: var(--text-eyebrow--font-weight);
+  text-transform: uppercase;
+}
