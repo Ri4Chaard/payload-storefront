@@ -15,9 +15,14 @@ import { iconRegistry, type IconName } from '@/lib/icon-registry'
  * overwhelmingly common case — an icon beside its own label — is one where announcing the icon
  * would make a screen reader say everything twice.
  *
- * The set is NOT optically uniform: viewBoxes are 14, 20 and 24 across six source libraries, so two
- * icons at the same `size` will not read at the same weight. The wrapper is the thing that
- * normalises the box; matching the strokes needs a designer.
+ * The set is NOT optically uniform: viewBoxes are 14, 20, 24 and — since the feature cards at node
+ * 440:12774 — 50, across seven source libraries, so two icons at the same `size` will not read at
+ * the same weight. The wrapper is the thing that normalises the box; matching the strokes needs a
+ * designer.
+ *
+ * `size` stops at 24 because that is where the drawings stopped. The four 50-viewBox glyphs are
+ * display-sized and change per breakpoint (30px on a phone, 50px above), which a prop cannot
+ * express — they set their box with a class, as the header's icons do.
  */
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg'
 

@@ -367,6 +367,39 @@ It is in the kit rather than in spec 002 despite the exclusion of domain-shaped 
 because its vocabulary is not domain vocabulary: a title, a link and a picture. A `ProductCard` —
 price, availability, a basket action — still belongs to spec 002.
 
+### `FeatureCard` / `FeatureStrip`
+
+`FeatureCard`: `icon`, `title`, `description`, `as` (`li | div`).
+`FeatureStrip`: `items`, `label`.
+
+The service-promise cards from node 440:12774 — a glyph, a heading and a line of copy on a white
+panel. Three drawn variants, three breakpoints:
+
+| Figma | | |
+|---|---|---|
+| Default (355:7774) | four across, 100px gutter | 290px tall, 50px glyph |
+| Variant2 (440:12775) | 2x2 grid, 24px gutter | 260px tall, 50px glyph |
+| Variant3 (440:13717) | 250px cards that do not shrink, 16px gutter | 190px tall, 30px glyph |
+
+**Variant3 is a horizontal scroller, and the drawing says so without saying so.** Four 250px cards
+that do not shrink, in a row inside a 390px frame, can only be read by scrolling sideways. That is
+why `FeatureStrip` is built on `ScrollArea` rather than on a stack.
+
+`ScrollArea` brings `tabIndex={0}`, which is what keeps the phone layout reachable — a region that
+scrolls and cannot be focused is `scrollable-region-focusable`, and these cards hold nothing
+focusable of their own to rescue it. The cost is one tab stop above `md`, where the grid no longer
+overflows. That is cheaper than rendering the cards twice to avoid it.
+
+**Heights are `min-h`, not `h`.** The drawn heights are what four short strings happen to need — the
+fourth card's copy is already nearly twice the first's — and a fixed height clips the first
+translation that runs long. Flex and grid equalise the row anyway, so the drawn height is a floor.
+
+The copy drops from 16px medium to 14px regular below `md` (`H/H` in the drawing), which is the one
+place these are not simply the same card at three sizes.
+
+The glyphs are decoration: the heading beside each says the same thing in words, and a named glyph
+would make a screen reader say it twice.
+
 ### `Accordion` / `AccordionItem`
 
 `Accordion`: `items` (`{ id, title, content, icon, disabled }[]`), `icon`, `single`, `defaultOpen`,

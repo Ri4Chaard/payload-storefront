@@ -17,6 +17,12 @@ export { Breadcrumbs, type BreadcrumbItem, type BreadcrumbsProps } from './bread
 export { CategoryCard, type CategoryCardProps } from './category-card'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'
+export {
+  FeatureCard,
+  FeatureStrip,
+  type FeatureCardProps,
+  type FeatureStripProps,
+} from './feature-card'
 export { Field, type FieldProps } from './field'
 export { ImageCarousel, type ImageCarouselProps } from './image-carousel'
 export { Icon, iconNames, type IconName, type IconProps, type IconSize } from './icon'

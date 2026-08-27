@@ -920,3 +920,68 @@ test('product card reveals its controls at rest on a touch device', async ({ bro
 
   await context.close()
 })
+
+test('feature strip is a sideways scroller on a phone and a grid above it', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-featurecard--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const region = page.getByRole('region', { name: 'Why shop with us' })
+  const card = page.getByRole('listitem').first()
+
+  // Phone (node 440:13717) — 250px cards that do not shrink, which can only be read by scrolling.
+  await page.setViewportSize({ width: 390, height: 700 })
+  const phone = (await card.boundingBox())!
+  expect(Math.round(phone.width)).toBe(250)
+  const overflow = await region.evaluate((el) => el.scrollWidth > el.clientWidth)
+  expect(overflow, 'the phone layout does not actually overflow').toBe(true)
+  // A region that scrolls and cannot be focused is `scrollable-region-focusable`, and these cards
+  // hold nothing focusable of their own to rescue it.
+  await expect(region).toHaveAttribute('tabindex', '0')
+
+  // Tablet (node 440:12775) — a 2x2 grid, nothing to scroll.
+  await page.setViewportSize({ width: 1024, height: 900 })
+  await expect.poll(() => region.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
+  const cards = await page.getByRole('listitem').all()
+  const boxes = await Promise.all(cards.map((c) => c.boundingBox()))
+  expect(boxes[1]!.y, 'the tablet layout is not two rows').toBeLessThan(boxes[2]!.y)
+  expect(boxes[0]!.y).toBeCloseTo(boxes[1]!.y, 0)
+
+  // Desktop (node 355:7774) — one row of four.
+  await page.setViewportSize({ width: 1440, height: 700 })
+  const wide = await Promise.all(
+    (await page.getByRole('listitem').all()).map((c) => c.boundingBox()),
+  )
+  for (const box of wide) expect(box!.y).toBeCloseTo(wide[0]!.y, 0)
+})
+
+test('feature card grows past the drawn height rather than clipping', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-featurecard--with-longer-copy&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const first = page.getByRole('listitem').first()
+  const box = (await first.boundingBox())!
+  // The drawn 290px is what four short strings happen to need. `min-h` makes it a floor.
+  expect(box.height).toBeGreaterThan(290)
+
+  // And nothing is cut off: the content's own height fits inside the card.
+  const clipped = await first.evaluate((el) => el.scrollHeight > el.clientHeight + 1)
+  expect(clipped, 'the long copy is clipped').toBe(false)
+})
+
+test('feature glyphs are decoration, not a second copy of the heading', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-featurecard--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const svgs = page.locator('#storybook-root svg')
+  await expect(svgs).toHaveCount(4)
+  for (const svg of await svgs.all()) {
+    await expect(svg).toHaveAttribute('aria-hidden', 'true')
+  }
+
+  // The headings are what carries the meaning, and they are real headings.
+  await expect(page.getByRole('heading', { level: 3, name: 'Free shipping' })).toBeVisible()
+})
