@@ -727,3 +727,196 @@ test('search placeholder keeps the drawn grey', async ({ page }) => {
     .evaluate((el) => getComputedStyle(el, '::placeholder').color)
   expect(colour).toBe('rgb(167, 165, 163)')
 })
+
+test('quantity stepper names its buttons per item and stops at both ends', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-quantitystepper--mid-range&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const decrease = page.getByRole('button', { name: 'Decrease quantity' })
+  const increase = page.getByRole('button', { name: 'Increase quantity' })
+  const count = page.locator('#storybook-root span[aria-live]')
+
+  await expect(count).toHaveText('3')
+  await increase.click()
+  await expect(count).toHaveText('4')
+  await decrease.click()
+  await decrease.click()
+  await expect(count).toHaveText('2')
+
+  // The count is a live region, or pressing a button that changes a number elsewhere announces
+  // nothing at all.
+  await expect(count).toHaveAttribute('aria-live', 'polite')
+
+  // Both ends are held by disabling the button, not by clamping silently.
+  await decrease.click()
+  await expect(count).toHaveText('1')
+  await expect(decrease).toBeDisabled()
+
+  for (let i = 0; i < 7; i += 1) await increase.click()
+  await expect(count).toHaveText('8')
+  await expect(increase).toBeDisabled()
+})
+
+test('image carousel pages, wraps, and is reachable by keyboard', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-imagecarousel--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const track = page.locator('#storybook-root ul')
+  const offset = () => track.evaluate((el) => Math.round(el.scrollLeft))
+  const width = await track.evaluate((el) => el.clientWidth)
+
+  expect(await offset()).toBe(0)
+
+  await page.getByRole('button', { name: /^Next photograph/ }).click()
+  await expect.poll(offset).toBe(width)
+
+  // Past the last photograph it wraps rather than stopping dead — the arrows are the only thing
+  // saying there is more, so an arrow that does nothing reads as broken.
+  await page.getByRole('button', { name: /^Next photograph/ }).click()
+  await expect.poll(offset).toBe(width * 2)
+  await page.getByRole('button', { name: /^Next photograph/ }).click()
+  await expect.poll(offset).toBe(0)
+
+  await page.getByRole('button', { name: /^Previous photograph/ }).click()
+  await expect.poll(offset).toBe(width * 2)
+
+  // A scrollable region no keyboard can reach is a WCAG failure, and it is what makes the arrow
+  // keys scroll the strip.
+  await expect(track).toHaveAttribute('tabindex', '0')
+})
+
+test('image carousel drops its arrows for a single photograph', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-imagecarousel--single-image&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await expect(page.locator('#storybook-root button')).toHaveCount(0)
+})
+
+test('product card CTA is hidden but never trapped', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productcard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const cta = page.getByRole('button', { name: 'Select size' })
+  const opacity = () => cta.evaluate((el) => getComputedStyle(el).opacity)
+  await expect.poll(opacity).toBe('0')
+
+  // Pointer: hovering the card reveals it. A pointer over the button is a pointer over the card,
+  // so it can never be clicked while invisible.
+  const card = page.locator('#storybook-root article')
+  await card.hover()
+  await expect.poll(opacity).toBe('1')
+
+  // Keyboard: focus has to reveal it, or tabbing lands on something nobody can see.
+  await page.mouse.move(0, 0)
+  await expect.poll(opacity).toBe('0')
+  await cta.focus()
+  await expect.poll(opacity).toBe('1')
+})
+
+test('product card is one link with the arrows and CTA above it', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productcard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  await expect(page.locator('#storybook-root a')).toHaveCount(1)
+  const link = page.getByRole('link')
+  await expect(link).toHaveAttribute('href', '/products/pink-heart-earrings')
+
+  // The photograph is part of the link...
+  const box = (await page.locator('#storybook-root article').boundingBox())!
+  const overPhoto = await page.evaluate(
+    ([x, y]) => document.elementFromPoint(x!, y!)?.closest('a') !== null,
+    [box.x + box.width / 2, box.y + 40],
+  )
+  expect(overPhoto, 'the photograph is not part of the product link').toBe(true)
+
+  // ...but the arrows and the CTA are not, or they would be dead controls under the overlay.
+  for (const name of [/^Next photograph/, 'Select size']) {
+    const control = page.getByRole('button', { name })
+    const cb = (await control.boundingBox())!
+    const hit = await page.evaluate(
+      ([x, y]) => {
+        const at = document.elementFromPoint(x!, y!)
+        return { isButton: at?.closest('button') !== null, isLink: at?.closest('a') !== null }
+      },
+      [cb.x + cb.width / 2, cb.y + cb.height / 2],
+    )
+    expect(hit.isButton, `${name} is buried under the stretched link`).toBe(true)
+    expect(hit.isLink).toBe(false)
+  }
+})
+
+test('cart item controls carry the row they belong to', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-cartitem--a-basket&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // Two rows, and every control names its own. Without this a basket offers identical bins and
+  // identical plus buttons — unusable by voice or screen reader, and perfect on screen.
+  await expect(page.getByRole('button', { name: 'Remove BUTTERFLY DIAMOND PENDANT' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Remove PINK HEART EARRINGS' })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Increase quantity of PINK HEART EARRINGS' }),
+  ).toBeVisible()
+
+  await expect(page.getByRole('listitem')).toHaveCount(2)
+  await page.getByRole('button', { name: 'Remove BUTTERFLY DIAMOND PENDANT' }).click()
+  await expect(page.getByRole('listitem')).toHaveCount(1)
+})
+
+test('cart item truncates a long name instead of shoving the stepper off the row', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 900, height: 600 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-cartitem--long-name&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const row = page.getByRole('listitem')
+  const rowBox = (await row.boundingBox())!
+  const stepperBox = (await page.getByRole('group').boundingBox())!
+  expect(stepperBox.x + stepperBox.width).toBeLessThanOrEqual(rowBox.x + rowBox.width + 1)
+
+  // `min-w-0` is the whole reason: a flex child defaults to `min-width: auto` and refuses to shrink
+  // below its content, so the name would push everything past the edge instead.
+  const name = page.getByRole('link')
+  const nameBox = (await name.boundingBox())!
+  expect(nameBox.width).toBeLessThan(rowBox.width)
+})
+
+test('product card reveals its controls at rest on a touch device', async ({ browser }) => {
+  // The one case with no hover to give the controls back. Without `pointer-coarse` this ships as
+  // "the Select size button does not exist on phones", and no desktop test would ever say so.
+  const context = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 390, height: 800 },
+  })
+  const page = await context.newPage()
+
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productcard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await page.locator('#storybook-root article').waitFor()
+
+  expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+  await expect
+    .poll(() =>
+      page
+        .getByRole('button', { name: 'Select size' })
+        .evaluate((el) => getComputedStyle(el).opacity),
+    )
+    .toBe('1')
+  await expect
+    .poll(() =>
+      page
+        .getByRole('button', { name: /^Next photograph/ })
+        .evaluate((el) => getComputedStyle(el).opacity),
+    )
+    .toBe('1')
+
+  await context.close()
+})

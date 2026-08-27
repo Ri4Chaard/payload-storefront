@@ -299,6 +299,28 @@ rule in both frames, which would leave a keyboard visitor nothing but the caret 
 are — and the global focus ring is wrong here, because it draws a rectangle around a control whose
 entire design is one line. Escape clears the field, and clearing returns focus to the input.
 
+### `QuantityStepper`
+
+`value`, `onChange`, `min`, `max`, `label`, `disabled`.
+
+Node 255:3545 — two 52px squares either side of a count. Drawn only inside the cart, but a
+primitive: the product page needs the same control before anything reaches a basket, and a stepper
+that lives inside a cart row is one somebody rebuilds.
+
+**Not an `<input type="number">`.** The design draws a plain count, and a number input at 30px wide
+brings native spinners to hide, a keyboard that accepts `-1e5`, and a value that can be typed empty.
+What it gains — typing 12 rather than pressing plus eleven times — matters for a stock system, not
+for jewellery bought one at a time. `max` is what stops the count exceeding what is available, and
+both ends are held by disabling the button rather than clamping silently.
+
+The count is a live region: pressing a button that changes a number elsewhere announces nothing on
+its own. `label` names what is being counted, because a basket of three rows otherwise offers three
+identical "Increase quantity" buttons — unusable by voice or screen reader, and perfect on screen.
+
+Both buttons are `IconButton variant="bare"` with the drawn box on top. `outline` is closer at a
+glance and wrong underneath: it carries a shadow and a lighter hairline that would need overriding
+away, and four overrides fighting a variant means it is the wrong variant.
+
 ---
 
 ## Content
@@ -411,6 +433,36 @@ compile rather than failing in CI.
 
 ## Media
 
+### `ImageCarousel`
+
+`images`, `label`, `controls` (`always | hover`), `sizes`, `priority`.
+
+The image strip inside a product card (node 144:948) — arrows at the edges of the photograph,
+appearing on hover.
+
+**No carousel library.** The brief proposed PhotoSwipe, with Swiper as the fallback. Neither fits:
+
+- **PhotoSwipe is a fullscreen lightbox.** Its whole design is taking over the viewport — it sets
+  body styles, traps focus, and brings its own chrome. Driving it inline means fighting every one of
+  those. It is the right tool for the product page's zoom and should be added there; this is not
+  that.
+- **Swiper is a real carousel**, but it is ~150KB of JavaScript to move between three photographs,
+  and a listing grid renders twenty of these at once.
+
+A scroll-snap track gives native touch swipe, native momentum and native keyboard scrolling, and
+still works with JavaScript disabled — the arrows stop, the strip still scrolls. `scrollBy` is the
+entire runtime cost.
+
+`tabIndex={0}` on the track is not optional: a scrollable region keyboard users cannot reach is a
+WCAG failure (axe's `scrollable-region-focusable`), and it is what makes the arrow keys work.
+
+The container must NOT create a stacking context — no `isolate`, no `z-index`. `ProductCard`
+stretches its title link over the whole card, and the arrows lift above it with `z-10`; a stacking
+context here would trap them underneath, leaving two buttons that look live and do nothing.
+
+Slides are keyed by position, not by `src`. A strip may legitimately repeat a photograph, and React
+silently drops the duplicate when two siblings share a key.
+
 ### `Image`
 
 | Prop | Type | Notes |
@@ -502,11 +554,76 @@ Recorded so their absence reads as a decision rather than an oversight:
 | `Tabs` | No consumer yet. `Accordion` was on this list for the same reason and came off it when node 242:2382 turned up — a drawn design is a consumer. |
 | `Table` | No tabular data until the admin order queue in spec 004, which lives in the Payload admin and uses Payload's own UI. |
 | `Toast` | Requires a portal and a queue. `InlineMessage` covers every need in specs 001–002. |
-| Anything domain-shaped | `ProductCard`, `PriceDisplay`, `DiamondSelector`, `CartLine` — all belong to specs 002 and 004, built **from** this kit. |
+| Anything domain-shaped | `PriceDisplay`, `DiamondSelector` — belong to specs 002 and 004, built **from** this kit. `ProductCard` and `CartItem` were on this list until their designs arrived (nodes 144:947, 255:3556); they are built, and they live in `src/components/commerce/` rather than in the kit, for the reason the row gives. |
 
 When spec 002 needs one of these, it adds it to the kit with a real consumer driving its API —
 which is the point.
 
+
+---
+
+## Commerce
+
+Commerce compositions live in `src/components/commerce/`. Like the shell below, they are consumers
+of the kit rather than part of it: they know about products, prices and baskets, and the kit does
+not.
+
+### `ProductCard`
+
+`name`, `price`, `href`, `images`, `size` (`default | compact`), `cta`, `onCtaClick`, `sizes`,
+`priority`.
+
+Node 144:947. Figma draws three variants; they are two sizes and a hover:
+
+| Figma | |
+|---|---|
+| Default (144:946) | 415px wide, CTA drawn at `opacity: 0` |
+| Variant2 (144:948) | the same card with the CTA visible and the carousel arrows showing |
+| Variant3 (440:13588) | 174px wide, tighter gap, no CTA |
+
+Default and Variant2 differ only in what is revealed, so they are one card and a hover. Variant3 is
+a genuinely different size, so it is `size`.
+
+**A hidden CTA is a trap in three directions, and each needs its own answer.** `opacity: 0` leaves a
+control that is invisible, clickable and focusable:
+
+| | |
+|---|---|
+| pointer | `group-hover`. A pointer over the button is a pointer over the card, so it can never be clicked while invisible. |
+| keyboard | `group-focus-within`, or tabbing lands on something nobody can see. |
+| touch | `pointer-coarse`, where there is no hover to reveal it at all — the one that would have shipped as "the button does not exist on phones". |
+
+**The card is one link with two escape hatches.** The title anchor stretches over the whole tile with
+`after:inset-0`; the carousel arrows and the CTA lift above it with `z-10`. That is what lets the
+photograph be clickable without nesting the arrows and the button inside an anchor, which would be
+invalid markup and would give a screen reader three controls for one tile.
+
+The title is a plain anchor rather than `Link`, which is `relative` for the rule it grows on hover —
+a positioned title would capture `after:inset-0` and the overlay would cover the title and nothing
+else. The design draws no rule under it, and no hover colour either: the link's hit area is the whole
+card, so a colour change would fire on any hover over the tile. The CTA arriving is the feedback.
+
+The name is clamped to one line as drawn. That is a real loss on a name like the drawn one, which is
+why the full name stays in the anchor's accessible name rather than being truncated there too.
+
+### `CartItem`
+
+`name`, `price`, `image`, `quantity`, `onQuantityChange`, `onRemove`, `href`, `max`, `as`.
+
+Node 255:3556. A `<li>` by default — a basket is a list of things, and a screen reader saying "list,
+3 items" before reading them is the difference between knowing how much is in the basket and finding
+out by arrowing to the end. `as="div"` covers the layouts where it is not in a list.
+
+Everything interactive already exists: `QuantityStepper` (node 255:3545) and an `IconButton` for the
+bin (node 258:3980). What is new is the arrangement.
+
+The name carries the accessible context for both controls — "Decrease quantity of BUTTERFLY DIAMOND
+PENDANT", "Remove BUTTERFLY DIAMOND PENDANT". The photograph is `alt=""`: it sits beside a name that
+says what it is, and the row's link is that name.
+
+`min-w-0` on the text column is load-bearing. A flex child defaults to `min-width: auto` and refuses
+to shrink below its content, so a long product name pushes the quantity control off the row instead
+of truncating.
 
 ---
 
