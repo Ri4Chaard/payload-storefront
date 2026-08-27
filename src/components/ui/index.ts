@@ -12,6 +12,7 @@ export {
   type ButtonSize,
   type ButtonVariant,
 } from './button'
+export { Breadcrumbs, type BreadcrumbItem, type BreadcrumbsProps } from './breadcrumbs'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'
 export { Field, type FieldProps } from './field'
@@ -23,6 +24,7 @@ export {
   type IconButtonVariant,
 } from './icon-button'
 export { Link, type LinkProps, type LinkVariant } from './link'
+export { Menu, type MenuProps } from './menu'
 export { MenuOption, type MenuOptionProps } from './menu-option'
 export { NavLink, type NavLinkProps } from './nav-link'
 export { ScrollArea, type ScrollAreaProps } from './scroll-area'
