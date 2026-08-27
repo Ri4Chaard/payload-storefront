@@ -85,7 +85,13 @@ export function Checkbox({
           />
         </svg>
       </span>
-      <span className={cn('text-body-base', hideLabel && 'sr-only', disabled && 'opacity-40')}>
+      <span
+        className={cn(
+          'text-body-base',
+          hideLabel && 'sr-only',
+          disabled && 'text-neutral-secondary',
+        )}
+      >
         {label}
       </span>
     </label>
