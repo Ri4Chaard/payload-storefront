@@ -21,8 +21,10 @@ import { expect, test, type Page } from '@playwright/test'
 const STORYBOOK = process.env.STORYBOOK_URL ?? 'http://localhost:6006'
 
 const COMPONENTS = [
+  'UI/Accordion',
   'UI/Breadcrumbs',
   'UI/Button',
+  'UI/CategoryCard',
   'UI/Checkbox',
   'UI/Chip',
   'UI/Field',
@@ -33,6 +35,7 @@ const COMPONENTS = [
   'UI/MenuOption',
   'UI/NavLink',
   'UI/ScrollArea',
+  'UI/SearchField',
   'UI/Switch',
   'UI/TextInput',
   'Layout/ContactBanner',

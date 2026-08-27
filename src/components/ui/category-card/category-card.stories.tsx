@@ -1,0 +1,56 @@
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import React from 'react'
+
+import { CategoryCard } from './category-card'
+import sampleImage from './sample-image.webp'
+
+/**
+ * Figma's "Default" and "Hover" frames are one component — hover the card for the zoom. The
+ * photograph is a fixture for the guide; in the app it comes from the CMS.
+ */
+const IMAGE = { src: sampleImage.src, alt: 'A ring, earrings and a bracelet on dark velvet' }
+
+const meta = {
+  title: 'UI/CategoryCard',
+  component: CategoryCard,
+  parameters: { layout: 'centered' },
+  args: { title: 'Rings', href: '/rings', image: IMAGE },
+  decorators: [
+    (Story) => (
+      <div className="w-104 max-w-full">
+        <Story />
+      </div>
+    ),
+  ],
+} satisfies Meta<typeof CategoryCard>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+/** Node 138:509 at the drawn size — 415x480, 30px inset. */
+export const Default: Story = {}
+
+export const LongerTitle: Story = { args: { title: 'Engagement rings' } }
+
+/**
+ * The scrim is not in the drawing. It is on by default because the image comes from the CMS, and
+ * white text on a pale photograph is a contrast failure no automated check can catch.
+ */
+export const WithoutScrim: Story = { args: { scrim: false } }
+
+/** How they actually appear — a row of tiles sharing one grid. */
+export const InAGrid: Story = {
+  decorators: [
+    (Story) => (
+      <div className="w-212 max-w-full">
+        <Story />
+      </div>
+    ),
+  ],
+  render: (args) => (
+    <div className="grid grid-cols-2 gap-5">
+      <CategoryCard {...args} title="Rings" href="/rings" />
+      <CategoryCard {...args} title="Bracelets" href="/bracelets" />
+    </div>
+  ),
+}

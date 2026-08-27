@@ -144,6 +144,19 @@ export interface ButtonProps extends React.ComponentProps<'button'> {
   fullWidth?: boolean
   iconStart?: React.ReactNode
   iconEnd?: React.ReactNode
+  /**
+   * Renders an `<a>` instead of a `<button>`, matching `IconButton`. A control that NAVIGATES is a
+   * link — that decides which key activates it and how a screen reader announces it — but plenty of
+   * navigation is DRAWN as a filled button, which is the gap this closes. The category card's
+   * "view the collection" (node 138:492) is one.
+   *
+   * An absolute href is treated as external and gets `rel` and a new tab, as `Link` does.
+   *
+   * `loading` and `disabled` have no anchor equivalent: `<a>` has no `disabled` attribute, and
+   * `aria-disabled` leaves it followable. A link that must be disabled should not be rendered as a
+   * link at all — drop the href and it is a button again.
+   */
+  href?: string
 }
 
 /**
@@ -185,6 +198,7 @@ export function Button({
   iconStart,
   iconEnd,
   disabled,
+  href,
   type = 'button',
   className,
   children,
@@ -194,35 +208,31 @@ export function Button({
   const reveal = hoverEffect === 'reveal' ? revealSkins[variant] : undefined
   const animated = slide ?? reveal
 
-  return (
-    <button
-      type={type}
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      className={cn(
-        'group text-body-medium relative inline-flex items-center justify-center gap-2.5 whitespace-nowrap',
-        'ease-standard transition-colors',
-        // The label's fade is matched to the panel's travel so the two land together. At the
-        // default 120ms the text finished long before the fill had crossed the button, which read
-        // as a flicker rather than an inversion.
-        reveal
-          ? 'duration-[var(--duration-slow)]'
-          : slide
-            ? 'duration-[var(--duration-base)]'
-            : 'duration-[var(--duration-fast)]',
-        'disabled:cursor-not-allowed disabled:opacity-40',
-        // `isolate` keeps the panel's stacking context inside the button, so a button placed over a
-        // positioned ancestor cannot have its own fill escape behind it.
-        animated ? 'isolate overflow-hidden' : undefined,
-        slide?.resting,
-        reveal?.base,
-        animated ? undefined : variantClasses[variant],
-        sizeClasses[size],
-        fullWidth && 'w-full',
-        className,
-      )}
-      {...props}
-    >
+  const classes = cn(
+    'group text-body-medium relative inline-flex items-center justify-center gap-2.5 whitespace-nowrap',
+    'ease-standard transition-colors',
+    // The label's fade is matched to the panel's travel so the two land together. At the
+    // default 120ms the text finished long before the fill had crossed the button, which read
+    // as a flicker rather than an inversion.
+    reveal
+      ? 'duration-[var(--duration-slow)]'
+      : slide
+        ? 'duration-[var(--duration-base)]'
+        : 'duration-[var(--duration-fast)]',
+    'disabled:cursor-not-allowed disabled:opacity-40',
+    // `isolate` keeps the panel's stacking context inside the button, so a button placed over a
+    // positioned ancestor cannot have its own fill escape behind it.
+    animated ? 'isolate overflow-hidden' : undefined,
+    slide?.resting,
+    reveal?.base,
+    animated ? undefined : variantClasses[variant],
+    sizeClasses[size],
+    fullWidth && 'w-full',
+    className,
+  )
+
+  const content = (
+    <>
       {slide ? (
         <span
           aria-hidden="true"
@@ -253,6 +263,38 @@ export function Button({
       {loading ? <Spinner /> : iconStart ? <IconSlot>{iconStart}</IconSlot> : null}
       {children}
       {iconEnd ? <IconSlot>{iconEnd}</IconSlot> : null}
+    </>
+  )
+
+  if (href) {
+    const isExternal = /^(?:[a-z]+:)?\/\//i.test(href)
+    // The rest props are typed for a button because that is the common case. Nothing
+    // anchor-hostile survives the destructure above, so widening them here is safe — the same
+    // arrangement IconButton uses.
+    const anchorProps = props as React.ComponentProps<'a'>
+
+    return (
+      <a
+        href={href}
+        className={classes}
+        {...(isExternal ? { rel: 'noopener noreferrer', target: '_blank' } : {})}
+        {...anchorProps}
+      >
+        {content}
+        {isExternal ? <span className="sr-only"> (opens in a new tab)</span> : null}
+      </a>
+    )
+  }
+
+  return (
+    <button
+      type={type}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={classes}
+      {...props}
+    >
+      {content}
     </button>
   )
 }

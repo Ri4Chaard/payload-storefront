@@ -5,6 +5,7 @@
  * folder is a signal that something is being used in a way the kit does not support — which is the
  * conversation Constitution II wants to happen before a duplicate gets written.
  */
+export { Accordion, AccordionItem, type AccordionItemProps, type AccordionProps } from './accordion'
 export {
   Button,
   type ButtonHoverEffect,
@@ -13,6 +14,7 @@ export {
   type ButtonVariant,
 } from './button'
 export { Breadcrumbs, type BreadcrumbItem, type BreadcrumbsProps } from './breadcrumbs'
+export { CategoryCard, type CategoryCardProps } from './category-card'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'
 export { Field, type FieldProps } from './field'
@@ -28,5 +30,6 @@ export { Menu, type MenuProps } from './menu'
 export { MenuOption, type MenuOptionProps } from './menu-option'
 export { NavLink, type NavLinkProps } from './nav-link'
 export { ScrollArea, type ScrollAreaProps } from './scroll-area'
+export { SearchField, type SearchFieldProps } from './search-field'
 export { Switch, type SwitchProps } from './switch'
 export { TextInput, type TextInputProps } from './text-input'

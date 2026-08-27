@@ -509,3 +509,155 @@ test('contact banner details are reachable, not just readable', async ({ page })
     expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(24)
   }
 })
+
+test('accordion rows wire their panel to their header and toggle it', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-accordion--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const header = page.getByRole('button', { name: 'Description' })
+  await expect(header).toHaveAttribute('aria-expanded', 'false')
+
+  // Closed copy must be out of the accessibility tree, not merely clipped — a `0fr` grid row still
+  // leaves readable text behind for a screen reader if the inner wrapper is not hidden.
+  await expect(page.getByText(/solitaire in 18ct gold/)).toBeHidden()
+
+  await header.click()
+  await expect(header).toHaveAttribute('aria-expanded', 'true')
+
+  const region = page.getByRole('region', { name: 'Description' })
+  await expect(region).toBeVisible()
+  await expect(region).toContainText('solitaire in 18ct gold')
+
+  // The header owns the panel by id, which is what makes "expanded" mean anything.
+  const controls = await header.getAttribute('aria-controls')
+  await expect(region).toHaveAttribute('id', controls!)
+
+  await header.click()
+  await expect(header).toHaveAttribute('aria-expanded', 'false')
+})
+
+test('accordion single mode closes the row that was open', async ({ page }) => {
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=ui-accordion--only-one-open-at-a-time&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+
+  const description = page.getByRole('button', { name: 'Description' })
+  const delivery = page.getByRole('button', { name: 'Delivery & returns' })
+
+  await expect(description).toHaveAttribute('aria-expanded', 'true')
+  await delivery.click()
+  await expect(delivery).toHaveAttribute('aria-expanded', 'true')
+  await expect(description).toHaveAttribute('aria-expanded', 'false')
+})
+
+test('accordion rows take the maroon rule on hover and on keyboard focus', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-accordion--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const row = page
+    .locator('#storybook-root div[class*="border-b"]')
+    .filter({ has: page.getByRole('button', { name: 'Warranty' }) })
+  // `black/10` computes as an oklab colour in this build, so the resting value is matched loosely
+  // and the assertion that matters is the CHANGE to maroon below.
+  await expect(row).toHaveCSS('border-bottom-color', /oklab\(0 0 0 \/ 0\.1\)|rgba\(0, 0, 0, 0\.1\)/)
+
+  await row.hover()
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(59, 23, 26)')
+
+  // Figma draws this state for a pointer only. A keyboard visitor gets the same signal, which is
+  // the entire reason `focus-within` is on the row rather than `hover` alone.
+  await page.mouse.move(0, 0)
+  await page.getByRole('button', { name: 'Warranty' }).focus()
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(59, 23, 26)')
+})
+
+test('search field clears by pointer and by Escape, keeping focus', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-searchfield--with-a-value&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const input = page.getByRole('searchbox', { name: 'Search the catalogue' })
+  await expect(input).toHaveValue('Rings')
+
+  await page.getByRole('button', { name: /clear/i }).click()
+  await expect(input).toHaveValue('')
+  // Clearing and losing focus makes the visitor tab back to where they already were.
+  await expect(input).toBeFocused()
+  await expect(page.getByRole('button', { name: /clear/i })).toHaveCount(0)
+
+  await input.fill('Bracelets')
+  await input.press('Escape')
+  await expect(input).toHaveValue('')
+  await expect(input).toBeFocused()
+})
+
+test('search field rule is the focus indicator', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-searchfield--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const row = page.locator('#storybook-root input').locator('xpath=..')
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(5, 3, 1)')
+
+  // The input suppresses the global focus ring, so if this rule did not change there would be no
+  // focus indicator on the control at all.
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('searchbox')).toBeFocused()
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(59, 23, 26)')
+})
+
+test('category card is one link covering the whole tile', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-categorycard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const card = page.locator('#storybook-root article')
+  // Two links would make a screen reader announce the tile twice and give the pointer two targets
+  // for one destination.
+  await expect(page.locator('#storybook-root a')).toHaveCount(1)
+
+  const link = page.getByRole('link', { name: 'View the collection' })
+  await expect(link).toHaveAttribute('href', '/rings')
+
+  // The drawn CTA is a small block at the bottom; the hit area is the whole card. Without the
+  // stretching pseudo-element the two are the same, and clicking the photograph does nothing.
+  const cardBox = (await card.boundingBox())!
+  await page.mouse.move(cardBox.x + cardBox.width / 2, cardBox.y + 20)
+  await expect(link).toHaveCSS('cursor', 'pointer')
+
+  const hit = await page.evaluate(() => {
+    const article = document.querySelector('#storybook-root article')!
+    const box = article.getBoundingClientRect()
+    const at = document.elementFromPoint(box.x + box.width / 2, box.y + 20)
+    return at?.closest('a') !== null
+  })
+  expect(hit, 'the top of the card is not part of the link').toBe(true)
+})
+
+test('category card zooms its photograph on hover and on focus', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-categorycard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // Tailwind v4 compiles `scale-110` to the `scale` PROPERTY, not to a `transform` matrix. Asserting
+  // on `transform` reads "none" whether or not the zoom works, which is a test that can only pass.
+  const image = page.locator('#storybook-root img')
+  const scale = () => image.evaluate((el) => getComputedStyle(el).scale)
+  await expect.poll(scale).toBe('none')
+
+  await page.getByRole('link', { name: 'View the collection' }).hover()
+  await expect.poll(scale).toBe('1.1')
+
+  // Figma draws the zoom for a pointer. A keyboard visitor reaching the CTA should see the same
+  // thing happen, or the card looks inert to them.
+  await page.mouse.move(0, 0)
+  await expect.poll(scale).toBe('none')
+  await page.keyboard.press('Tab')
+  await expect.poll(scale).toBe('1.1')
+
+  // `transition-transform` has to actually cover the `scale` property, or the zoom snaps.
+  await expect(image).toHaveCSS('transition-property', /scale/)
+})

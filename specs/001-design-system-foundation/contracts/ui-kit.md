@@ -33,9 +33,17 @@ onward must compose from before creating anything new (Principle II).
 | `fullWidth` | `boolean` | `false` | |
 | `iconStart` / `iconEnd` | `ReactNode` | — | |
 | `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | |
+| `href` | `string` | — | Renders `<a>` instead. Absolute hrefs get `rel` and a new tab |
 
 Renders `<button>`. A button that navigates is a `Link`, not a `Button` — the distinction is
 semantic and matters for keyboard and screen-reader behaviour.
+
+`href` is how that rule is kept when a navigation is DRAWN as a filled button, which the design does
+often — `CategoryCard`'s call to action (node 138:492) is one. It renders an `<a>` with the button's
+appearance, the same arrangement `IconButton` already uses, rather than a `<button>` with an
+`onClick` that calls the router. `loading` and `disabled` have no anchor equivalent: an `<a>` has no
+`disabled` attribute and `aria-disabled` leaves it followable, so a control that must be disabled
+should not be a link at all.
 
 The variant list was revised against Figma node 10:169, which draws five variants and none of them
 destructive. `ghost` and `destructive` were speculative when this contract was written: the design
@@ -256,6 +264,95 @@ Not in the original eighteen; added from Figma node 10:202. A `Switch` sets a st
 `Checkbox` marks an intention to be submitted — they are not interchangeable and the design uses
 both.
 
+### `SearchField`
+
+`label` (required, visually hidden), `onClear`, `placeholder`, plus the native input props.
+
+Node 255:3167 — a display-sized serif line over a 2px rule, with a clear affordance once something
+has been typed. Deliberately NOT a `TextInput` variant: it shares no chrome with one, and a `search`
+flag on a bordered box would be a second component wearing the first one's props.
+
+Three things in the drawing are descriptions of browser behaviour rather than component parts:
+
+- The 2px maroon bar at x=0 in "default" and x=90 in "active" is the text caret. It is `caret-color`
+  here. Reproducing it as an element would put a second bar beside the real one, and it could never
+  track the insertion point.
+- The placeholder is not the label. It vanishes the moment anyone types, taking the field's only
+  description with it, so the label is visually hidden rather than absent.
+- The drawn placeholder colour `#a7a5a3` is 2.29:1 on the page ground; `neutral-secondary` is
+  already corrected project-wide to `#343231` and inherits the fix.
+
+The rule is `neutral-primary` at rest and `primary-default` on focus. The drawing shows the same
+rule in both frames, which would leave a keyboard visitor nothing but the caret to say where they
+are — and the global focus ring is wrong here, because it draws a rectangle around a control whose
+entire design is one line. Escape clears the field, and clearing returns focus to the input.
+
+---
+
+## Content
+
+### `CategoryCard`
+
+`title`, `href`, `image`, `cta`, `headingLevel`, `sizes`, `scrim`.
+
+Node 138:509 — a photograph with the collection name at the top and a white call to action at the
+bottom. Figma's "Default" and "Hover" frames are one component: the only difference is the crop,
+which draws the image at 120% width offset up and left. That is a zoom on the photograph, so it is
+`scale` on the image rather than a second layout.
+
+**The card is one link, not a card containing a link.** The drawing shows a button inside a
+clickable tile, which as markup is a control inside a control — invalid, and it gives a screen
+reader two things to announce where the visitor sees one. The CTA is the anchor and stretches over
+the whole card with an inset pseudo-element.
+
+That pseudo-element needs the CTA to be `static`. `Button` sets `relative` for its hover panels, and
+`after:inset-0` resolves against the nearest POSITIONED ancestor — leave it in place and the overlay
+covers the button and nothing else, which looks identical in the source and does nothing on the
+page. The card does not expose `hoverEffect`, so there is no panel here for `relative` to hold.
+
+**The scrim is not in the drawing.** The drawn photograph is a near-black velvet and white text sits
+on it comfortably. `src` comes from the CMS, so the next photograph may be a pale one — and
+white-on-pale is a 1.4.3 failure no automated check catches, because axe cannot measure text over an
+image. `scrim={false}` opts out when the image is known.
+
+It is in the kit rather than in spec 002 despite the exclusion of domain-shaped components below,
+because its vocabulary is not domain vocabulary: a title, a link and a picture. A `ProductCard` —
+price, availability, a basket action — still belongs to spec 002.
+
+### `Accordion` / `AccordionItem`
+
+`Accordion`: `items` (`{ id, title, content, disabled }[]`), `single`, `defaultOpen`,
+`headingLevel`.
+`AccordionItem`: `title`, `open` / `onToggle` or `defaultOpen`, `headingLevel`, `disabled`.
+
+Figma calls this "item info" (node 242:2382) — the product page's description, delivery and warranty
+stack. Filed under `Accordion` because that is what someone will search for; a kit component under a
+name nobody looks up gets rebuilt (Constitution II).
+
+Its three variants are two states and a hover:
+
+| Figma | |
+|---|---|
+| `off` (242:2380) | collapsed — trailing plus, hairline rule |
+| `on` (242:2381) | expanded — trailing minus, description below |
+| `Variant3` (301:5400) | identical to `off` except the rule is `primary-default` |
+
+Variant3 differs in one property, so it is the hover rather than a third row. It is applied to focus
+as well, so a keyboard visitor gets the signal a pointer does.
+
+**The description is not inside the button.** Figma exports the whole row as one `<button>`, which
+would put a paragraph of copy into the control's accessible name. The header is the button; the
+panel is a region it owns through `aria-controls`.
+
+The panel stays in the DOM and collapses with a `0fr → 1fr` grid row — height cannot be transitioned
+from `auto`, and the alternatives either need JavaScript to be correct or clip long copy. The inner
+wrapper is `hidden` when closed, which is what keeps the collapsed copy out of the accessibility
+tree rather than merely clipped.
+
+The leading dash is the `minus` glyph in every state, as drawn: decoration, not the expand control.
+The trailing glyph carries no label, because `aria-expanded` already says the state and naming the
+icon on top of it makes a screen reader say it twice in two vocabularies.
+
 ---
 
 ## Typography
@@ -373,7 +470,7 @@ Recorded so their absence reads as a decision rather than an oversight:
 | Not built | Why |
 |---|---|
 | `Modal`, `Drawer`, `Tooltip`, `Popover` | Focus-trap and layering primitives with real accessibility complexity, and no consumer in this spec. Building them blind is exactly the guessing FR-028 exists to prevent. The mobile nav in Story 4 uses a disclosure pattern, not a drawer abstraction. |
-| `Tabs`, `Accordion` | No consumer yet. The product detail page in spec 002 is the first plausible one. |
+| `Tabs` | No consumer yet. `Accordion` was on this list for the same reason and came off it when node 242:2382 turned up — a drawn design is a consumer. |
 | `Table` | No tabular data until the admin order queue in spec 004, which lives in the Payload admin and uses Payload's own UI. |
 | `Toast` | Requires a portal and a queue. `InlineMessage` covers every need in specs 001–002. |
 | Anything domain-shaped | `ProductCard`, `PriceDisplay`, `DiamondSelector`, `CartLine` — all belong to specs 002 and 004, built **from** this kit. |
