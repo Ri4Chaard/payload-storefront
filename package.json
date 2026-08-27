@@ -22,6 +22,7 @@
     "storybook": "LAUNCH_EDITOR=${LAUNCH_EDITOR:-devin-desktop} storybook dev -p 6006",
     "build:storybook": "storybook build",
     "build:tokens": "tsx scripts/build-tokens.ts",
+    "build:icons": "tsx scripts/build-icons.ts",
     "check:tokens": "tsx scripts/check-tokens.ts",
     "check:contrast": "tsx scripts/check-contrast.ts",
     "check:stories": "tsx scripts/check-stories.ts",
