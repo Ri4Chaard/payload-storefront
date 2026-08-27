@@ -46,3 +46,32 @@
     outline-offset: 2px;
   }
 }
+
+/*
+ * The brand scrollbar (Figma node 301:5934), applied to the native scrollbar rather than a
+ * JavaScript reimplementation — see src/components/ui/scroll-area/scroll-area.tsx for why.
+ *
+ * Declared here rather than in tokens.css because tokens.css is generated: this is a utility, not
+ * a token. Storybook imports this same sheet, so a story scrolls the way the app does.
+ */
+@utility scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-neutral-primary) 12%, transparent) transparent;
+
+  /* Firefox stops at `thin`; WebKit can match the drawn 6px thumb and its radius. */
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--color-neutral-primary) 12%, transparent);
+    border: 3px solid transparent;
+    border-radius: var(--radius-full);
+    background-clip: content-box;
+  }
+}
