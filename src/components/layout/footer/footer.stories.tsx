@@ -1,0 +1,43 @@
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+
+import { Footer } from './footer'
+
+/**
+ * One footer across three breakpoints. Resize rather than looking for three stories.
+ *
+ * The year is pinned so the story does not change on New Year's Day; in the app it comes from the
+ * build.
+ */
+const meta = {
+  title: 'Layout/Footer',
+  component: Footer,
+  parameters: { layout: 'fullscreen' },
+  args: { year: 2026 },
+} satisfies Meta<typeof Footer>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Desktop: Story = {}
+
+export const Tablet: Story = { globals: { viewport: { value: 'md' } } }
+
+export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
+
+/** Hover SUBSCRIBE for the reveal, and the column links for the rule that grows. */
+export const WithoutSocialLinks: Story = { args: { social: [] } }
+
+/** A short group list, to show the grid does not collapse when a column is missing. */
+export const FewerGroups: Story = {
+  args: {
+    groups: [
+      {
+        title: 'About',
+        links: [
+          { label: 'Our Story', href: '/about' },
+          { label: 'Our Blog', href: '/blog' },
+        ],
+      },
+    ],
+  },
+}
