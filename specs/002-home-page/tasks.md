@@ -44,10 +44,10 @@ Everything else needs these two.
 - [X] T100 Export, convert and commit the page's photography to `public/photography/` — ten WebP,
       sized to the largest dimension actually rendered, transparency composited over the surface it
       is drawn on rather than flattened to black (FR-022, FR-023, FR-024, SC-007)
-- [ ] T101 Establish `src/mocks/home.ts` and `src/mocks/index.ts` — hero copy, four categories, the
+- [X] T101 Establish `src/mocks/home.ts` and `src/mocks/index.ts` — hero copy, four categories, the
       featured product list and the about band, each photograph recorded as `src`/`width`/`height`/
       `alt` so the shape matches what Payload's media collection will return (FR-001, FR-002, FR-004)
-- [ ] T102 [P] Create the `src/components/sections/` tier with a barrel and a docstring stating what
+- [X] T102 [P] Create the `src/components/sections/` tier with a barrel and a docstring stating what
       belongs there and what does not — page-level composition with copy-shaped props, not kit
       primitives and not domain components
 
@@ -63,24 +63,24 @@ Everything else needs these two.
 action are real text over the photograph, that the about band renders and routes onward, and that
 the page carries its own title and description.
 
-- [ ] T103 [US1] Build `Hero` in `src/components/sections/hero/` — full-bleed photograph, bottom
+- [X] T103 [US1] Build `Hero` in `src/components/sections/hero/` — full-bleed photograph, bottom
       aligned headline, lede and call to action; drawn heights 950/1226/754; type steps 36/36/24 for
       the headline and 16/16/14 for the lede (FR-005, FR-006)
-- [ ] T104 [US1] Give `Hero` a default gradient scrim behind its text, switchable off for a
+- [X] T104 [US1] Give `Hero` a default gradient scrim behind its text, switchable off for a
       photograph known to be dark — the same rule already recorded on `CategoryCard`, and for the
       same reason: contrast over a photograph cannot be checked automatically (FR-008)
-- [ ] T105 [US1] Load the hero photograph with `priority`, explicit dimensions and responsive
+- [X] T105 [US1] Load the hero photograph with `priority`, explicit dimensions and responsive
       `sizes`; it is this route's LCP element (FR-007)
-- [ ] T106 [P] [US1] Build `AboutBand` in `src/components/sections/about-band/` — photograph beside
+- [X] T106 [P] [US1] Build `AboutBand` in `src/components/sections/about-band/` — photograph beside
       copy at 1920 (`1211`/`709`) and 1024 (`512`/`512`), stacked at 390; the two-tone heading must
       not fragment its accessible name (FR-020, FR-021)
-- [ ] T107 [P] [US1] Build `SectionHeading` — the centred band heading used by three sections, at
+- [X] T107 [P] [US1] Build `SectionHeading` — the centred band heading used by three sections, at
       the drawn 36/36/24 steps, rendering the correct level for its position rather than a fixed one
-- [ ] T108 [US1] Compose `src/app/(frontend)/page.tsx` as a route-level loader: read the mocks, pass
+- [X] T108 [US1] Compose `src/app/(frontend)/page.tsx` as a route-level loader: read the mocks, pass
       them to the sections, render hero → about → existing `FeatureStrip`; the loader is the only
       thing that imports from `src/mocks/` (FR-003, FR-026)
-- [ ] T109 [US1] Add the page's title and description (FR-027)
-- [ ] T110 [P] [US1] Stories for `Hero`, `AboutBand` and `SectionHeading`; add all three to the
+- [X] T109 [US1] Add the page's title and description (FR-027)
+- [X] T110 [P] [US1] Stories for `Hero`, `AboutBand` and `SectionHeading`; add all three to the
       accessibility sweep's component list
 
 **Checkpoint**: `/` is a real, publishable page. US2 and US3 add to it without changing it.

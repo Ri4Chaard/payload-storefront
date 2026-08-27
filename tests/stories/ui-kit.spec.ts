@@ -985,3 +985,120 @@ test('feature glyphs are decoration, not a second copy of the heading', async ({
   // The headings are what carries the meaning, and they are real headings.
   await expect(page.getByRole('heading', { level: 3, name: 'Free shipping' })).toBeVisible()
 })
+
+test('hero holds the drawn height at each breakpoint and keeps its headline as text', async ({
+  page,
+}) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-hero--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const hero = page.locator('#storybook-root section')
+  const headline = page.getByRole('heading', { level: 1 })
+
+  // The headline is REAL TEXT, not part of the photograph. If this ever fails it means someone
+  // exported the frame as one picture, and the page has lost its h1, its translations and its
+  // search result along with it.
+  await expect(headline).toHaveText('The beauty of lab-grown diamonds')
+
+  const DRAWN = [
+    { width: 390, height: 754 }, // node 440:13458
+    { width: 1024, height: 1226 }, // node 440:12503 — deliberately taller than the frame it sits in
+    { width: 1440, height: 950 }, // node 138:309
+  ]
+
+  for (const { width, height } of DRAWN) {
+    await page.setViewportSize({ width, height: 900 })
+    await expect
+      .poll(async () => Math.round((await hero.boundingBox())!.height), {
+        message: `hero is not ${height}px tall at ${width}`,
+      })
+      .toBe(height)
+  }
+
+  // The drawn 508px measure, held as a maximum so a phone gets the column instead of an overflow.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  expect(Math.round((await headline.boundingBox())!.width)).toBe(508)
+  await page.setViewportSize({ width: 390, height: 900 })
+  expect((await headline.boundingBox())!.width).toBeLessThan(390)
+})
+
+test('hero scrim sits behind the text and can be switched off', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-hero--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // A gradient, behind the content and in front of the photograph, and invisible to a reader.
+  const scrim = page.locator('#storybook-root section > span[aria-hidden="true"]')
+  await expect(scrim).toHaveCount(1)
+  await expect(scrim).toHaveCSS('z-index', '-10')
+  expect(await scrim.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('gradient')
+
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-hero--without-scrim&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await expect(page.locator('#storybook-root section > span[aria-hidden="true"]')).toHaveCount(0)
+})
+
+test('about band turns the drawn column into a stack on a phone', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-aboutband--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const heading = page.getByRole('heading', { name: 'About Aurum' })
+  const photo = page.locator('#storybook-root section img')
+
+  // Above `md` the photograph is beside the copy...
+  await page.setViewportSize({ width: 1440, height: 900 })
+  let photoBox = (await photo.boundingBox())!
+  let headingBox = (await heading.boundingBox())!
+  expect(photoBox.x + photoBox.width, 'the photograph is not left of the copy').toBeLessThanOrEqual(
+    headingBox.x + 1,
+  )
+
+  // ...and below it, above.
+  await page.setViewportSize({ width: 390, height: 900 })
+  photoBox = (await photo.boundingBox())!
+  headingBox = (await heading.boundingBox())!
+  expect(photoBox.y + photoBox.height, 'the stack did not stack').toBeLessThanOrEqual(
+    headingBox.y + 1,
+  )
+  expect(Math.round(photoBox.height)).toBe(300)
+})
+
+test('about heading is two colours but one accessible name', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-aboutband--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // One heading, one name — the colour split leaves no trace in what is announced.
+  const heading = page.getByRole('heading', { name: 'About Aurum' })
+  await expect(heading).toHaveCount(1)
+
+  // ...and it really is two colours, not a single ink heading someone forgot to style.
+  const ink = await heading.evaluate((el) => getComputedStyle(el).color)
+  const brand = await heading
+    .locator('span')
+    .evaluate((el: HTMLElement) => getComputedStyle(el).color)
+  expect(brand).not.toBe(ink)
+
+  // The band labels itself with that heading, which is what makes it a navigable region.
+  const section = page.locator('#storybook-root section')
+  const labelledBy = await section.getAttribute('aria-labelledby')
+  expect(labelledBy).toBe(await heading.getAttribute('id'))
+})
+
+test('about band grows for copy the drawing never showed', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-aboutband--with-longer-copy&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const section = page.locator('#storybook-root section')
+  // The drawn 750px is a floor. A third paragraph must push it down, not spill out of it.
+  const clipped = await section.evaluate((el) => el.scrollHeight > el.clientHeight + 1)
+  expect(clipped, 'the extra paragraph is clipped').toBe(false)
+  await expect(page.getByText('independently graded')).toBeVisible()
+})

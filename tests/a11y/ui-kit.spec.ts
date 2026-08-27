@@ -43,6 +43,9 @@ const COMPONENTS = [
   'UI/TextInput',
   'Commerce/CartItem',
   'Commerce/ProductCard',
+  'Sections/AboutBand',
+  'Sections/Hero',
+  'Sections/SectionHeading',
   'Layout/ContactBanner',
   'Layout/Footer',
   'Layout/Header',
@@ -58,11 +61,35 @@ interface StoryIndex {
  * settles, so the collision has to be waited out rather than treated as a failure — the alternative
  * is a suite that goes red at random on whichever component happens to be slowest that day.
  */
+/**
+ * Rules that describe a DOCUMENT, not a component. A story is a fragment rendered into a bare
+ * iframe: it has no `<main>`, no page heading, and its `<title>` belongs to Storybook rather than to
+ * anything under review. Asserting these here measures the harness.
+ *
+ * They are not being waived — `routes.spec.ts` runs the complete rule set over the real routes,
+ * which is the only place they mean anything.
+ *
+ * Until spec 002 they all passed by accident, because Storybook's own shell happens to satisfy
+ * them. `Hero` is what exposed that: `next/image` with `priority` calls `ReactDOM.preload`, React 19
+ * takes ownership of the iframe's `<head>` to hoist the preload, and Storybook's `<title>` goes with
+ * it. A green result that depended on the harness not being disturbed was never worth anything.
+ */
+const DOCUMENT_LEVEL_RULES = [
+  'bypass',
+  'document-title',
+  'html-has-lang',
+  'html-lang-valid',
+  'landmark-one-main',
+  'page-has-heading-one',
+  'region',
+]
+
 async function analyze(page: Page) {
   for (let attempt = 0; attempt < 6; attempt += 1) {
     try {
       return await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .disableRules(DOCUMENT_LEVEL_RULES)
         .analyze()
     } catch (error) {
       if (!String(error).includes('Axe is already running')) throw error
@@ -149,6 +176,8 @@ const RESPONSIVE_STORIES: {
     widths: ['mobile', 'tablet'],
   },
   { title: 'Layout/Footer', id: 'layout-footer--desktop', widths: ['mobile', 'tablet'] },
+  { title: 'Sections/Hero', id: 'sections-hero--desktop', widths: ['mobile', 'tablet'] },
+  { title: 'Sections/AboutBand', id: 'sections-aboutband--desktop', widths: ['mobile', 'tablet'] },
 ]
 
 for (const story of RESPONSIVE_STORIES) {
