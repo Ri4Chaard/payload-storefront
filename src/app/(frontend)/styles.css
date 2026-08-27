@@ -1,0 +1,48 @@
+/*
+ * Storefront styles.
+ *
+ * Full Tailwind, preflight included — there is nothing here for the reset to break. The admin panel
+ * uses a deliberately different entry sheet; see src/app/(payload)/custom.css.
+ */
+
+@import 'tailwindcss';
+
+@import '../../styles/tokens.css';
+
+/*
+ * FR-021 — all motion honours the visitor's reduced-motion preference, globally rather than
+ * per-component. A component author cannot forget this.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  /*
+   * The viewer paints its own ground behind the page, so body background is explicit.
+   * Single committed light appearance — no dark-mode variants (FR-013).
+   */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background-bg);
+    color: var(--color-neutral-primary);
+    font-family: var(--font-brand-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visible focus is not optional (FR-043). */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-default);
+    outline-offset: 2px;
+  }
+}
