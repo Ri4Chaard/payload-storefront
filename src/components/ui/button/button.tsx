@@ -28,15 +28,19 @@ export type ButtonSize = 'sm' | 'md' | 'lg'
  * The hover treatment, from the "Ховер эффекты" board (node 196:941).
  *
  * These are motion applied to an existing variant, not new variants — which is why they are a
- * second prop rather than five more entries above. The design draws three buttons with two
- * mechanics between them:
+ * second prop rather than five more entries above. Two mechanics, and they are structurally
+ * opposite, which is why they do not share a skin table:
  *
- *   slide   nodes 164:748, 158:708   the fill panel travels out to the right, leaving the outline
- *   reveal  node 312:9907            an ellipse sweeps up from below and floods the button
+ *   slide   nodes 164:748, 158:708   the variant's own fill TRAVELS OUT to the right, uncovering
+ *                                    the outline underneath
+ *   reveal  node 312:9907            a circle in a contrasting colour GROWS IN from the top edge
+ *                                    until it floods the button
  *
- * Both invert the label colour as the fill leaves or arrives, so the label is always readable
- * mid-transition. Under `prefers-reduced-motion` the global rule in styles.css collapses the
- * duration and the swap becomes instantaneous rather than absent.
+ * Both invert the label as the fill leaves or arrives, and the label's transition is matched to the
+ * panel's so the two land together rather than the text snapping ahead of the colour behind it.
+ *
+ * Under `prefers-reduced-motion` the global rule in styles.css collapses the duration, so the swap
+ * becomes instantaneous rather than absent.
  */
 export type ButtonHoverEffect = 'fill' | 'slide' | 'reveal'
 
@@ -63,31 +67,57 @@ const variantClasses: Record<ButtonVariant, string> = {
 }
 
 /**
- * An animated variant is styled as its own RESTING state minus the fill, with the fill re-applied
- * as a moving panel. `resting` is what the button looks like once the fill has gone: the border it
- * reveals, and the label colour it lands on.
+ * `slide` styles the button as what it becomes once the fill has gone — the border it uncovers and
+ * the label colour it lands on — and re-applies the fill as a panel that travels away.
  *
- * Only the combinations the design actually draws are defined. Anything else falls back to the
- * plain colour-change hover rather than inventing a motion the designer has not seen.
+ * The label uses `hover:`, NOT `group-hover:`. `group-hover:` compiles to `.group:hover &`, a
+ * DESCENDANT selector, so on the very element that carries `group` it can never match. An earlier
+ * revision had it here and the label silently never changed colour: the rule was emitted, applied
+ * to nothing, and looked correct in the source.
  */
-interface AnimatedSkin {
+interface SlideSkin {
   fill: string
   resting: string
 }
 
-const animatedSkins: Partial<Record<ButtonVariant, AnimatedSkin>> = {
+const slideSkins: Partial<Record<ButtonVariant, SlideSkin>> = {
   primary: {
     fill: 'bg-primary-default',
-    resting: 'border border-neutral-primary text-neutral-white group-hover:text-neutral-primary',
+    resting: 'border border-neutral-primary text-neutral-white hover:text-neutral-primary',
   },
   secondary: {
     fill: 'bg-neutral-primary',
-    resting: 'border border-neutral-primary text-neutral-white group-hover:text-neutral-primary',
+    resting: 'border border-neutral-primary text-neutral-white hover:text-neutral-primary',
   },
   inverse: {
     fill: 'bg-neutral-white',
     resting:
-      'border border-neutral-white text-neutral-primary group-hover:text-neutral-white focus-visible:outline-neutral-white',
+      'border border-neutral-white text-neutral-primary hover:text-neutral-white focus-visible:outline-neutral-white',
+  },
+}
+
+/**
+ * `reveal` is the opposite arrangement: the button keeps its normal filled appearance and the panel
+ * is a circle in a CONTRASTING colour that grows over it. So `base` is the variant's resting fill,
+ * not its outline.
+ */
+interface RevealSkin {
+  base: string
+  circle: string
+}
+
+const revealSkins: Partial<Record<ButtonVariant, RevealSkin>> = {
+  primary: {
+    base: 'bg-primary-default text-neutral-white',
+    circle: 'bg-neutral-primary',
+  },
+  secondary: {
+    base: 'bg-neutral-primary text-neutral-white',
+    circle: 'bg-primary-default',
+  },
+  inverse: {
+    base: 'bg-neutral-white text-neutral-primary hover:text-neutral-white focus-visible:outline-neutral-white',
+    circle: 'bg-primary-default',
   },
 }
 
@@ -160,7 +190,9 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const skin = hoverEffect === 'fill' ? undefined : animatedSkins[variant]
+  const slide = hoverEffect === 'slide' ? slideSkins[variant] : undefined
+  const reveal = hoverEffect === 'reveal' ? revealSkins[variant] : undefined
+  const animated = slide ?? reveal
 
   return (
     <button
@@ -169,28 +201,52 @@ export function Button({
       aria-busy={loading || undefined}
       className={cn(
         'group text-body-medium relative inline-flex items-center justify-center gap-2.5 whitespace-nowrap',
-        'ease-standard transition-colors duration-[var(--duration-fast)]',
+        'ease-standard transition-colors',
+        // The label's fade is matched to the panel's travel so the two land together. At the
+        // default 120ms the text finished long before the fill had crossed the button, which read
+        // as a flicker rather than an inversion.
+        reveal
+          ? 'duration-[var(--duration-slow)]'
+          : slide
+            ? 'duration-[var(--duration-base)]'
+            : 'duration-[var(--duration-fast)]',
         'disabled:cursor-not-allowed disabled:opacity-40',
-        // `isolate` keeps the fill panel's stacking context inside the button, so a button placed
-        // over a positioned ancestor cannot have its own fill escape behind it.
-        skin ? cn('isolate overflow-hidden', skin.resting) : variantClasses[variant],
+        // `isolate` keeps the panel's stacking context inside the button, so a button placed over a
+        // positioned ancestor cannot have its own fill escape behind it.
+        animated ? 'isolate overflow-hidden' : undefined,
+        slide?.resting,
+        reveal?.base,
+        animated ? undefined : variantClasses[variant],
         sizeClasses[size],
         fullWidth && 'w-full',
         className,
       )}
       {...props}
     >
-      {skin ? (
+      {slide ? (
         <span
           aria-hidden="true"
           className={cn(
-            'ease-standard absolute -z-10',
-            skin.fill,
-            hoverEffect === 'slide'
-              ? 'inset-0 transition-transform duration-[var(--duration-base)] group-hover:translate-x-full'
-              : // The ellipse is wider than the button and parked below it, so what sweeps in reads
-                // as a curve rather than a rising bar. Matches the 368x235 shape at node 312:9907.
-                '-inset-x-[6%] bottom-0 h-[450%] translate-y-full rounded-[50%] transition-transform duration-[var(--duration-slow)] group-hover:translate-y-0',
+            'ease-standard absolute inset-0 -z-10 transition-transform duration-[var(--duration-base)]',
+            'group-hover:translate-x-full',
+            slide.fill,
+          )}
+        />
+      ) : null}
+
+      {reveal ? (
+        <span
+          aria-hidden="true"
+          /*
+           * A circle centred on the TOP edge, scaled from nothing. It is wider than the button so
+           * that at full scale its radius clears the button's height from that centre — otherwise a
+           * short, wide button would be left with two uncovered corners at the bottom.
+           */
+          className={cn(
+            'ease-standard absolute top-0 left-1/2 -z-10 aspect-square w-[175%] -translate-x-1/2',
+            '-translate-y-1/2 scale-0 rounded-full transition-transform duration-[var(--duration-slow)]',
+            'group-hover:scale-100',
+            reveal.circle,
           )}
         />
       ) : null}

@@ -255,3 +255,66 @@ test('footer does not scroll horizontally at 320px', async ({ page }) => {
   )
   expect(overflow, 'the footer overflows a 320px viewport').toBeLessThanOrEqual(0)
 })
+
+/**
+ * The animated button hovers, which shipped broken once and looked correct in the source.
+ *
+ * The label colour was written with `group-hover:` on the element that carries `group` — a
+ * descendant selector applied to the ancestor itself, so it matched nothing. Nothing failed: the
+ * rule was emitted, the class was present, and the text simply never changed. Only a computed-style
+ * assertion catches that class of bug.
+ */
+const WHITE = 'rgb(255, 255, 255)'
+const INK = 'rgb(5, 3, 1)'
+
+async function labelColour(button: import('@playwright/test').Locator) {
+  return button.evaluate((el) => getComputedStyle(el).color)
+}
+
+test('slide hover inverts the label colour', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-button--hover-effects&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // Light label on the filled button; dark once the fill has travelled away.
+  const onLight = page.getByRole('button', { name: 'ВЫБРАТЬ РАЗМЕР' })
+  expect(await labelColour(onLight)).toBe(WHITE)
+  await onLight.hover()
+  await expect.poll(() => labelColour(onLight)).toBe(INK)
+
+  // And the mirror image on the dark surface: dark label, light once the white fill leaves.
+  const onDark = page.getByRole('button', { name: 'SHOP NOW' })
+  expect(await labelColour(onDark)).toBe(INK)
+  await onDark.hover()
+  await expect.poll(() => labelColour(onDark)).toBe(WHITE)
+})
+
+test('reveal hover inverts the label and the circle covers the button', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-button--hover-effects&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const button = page.getByRole('button', { name: 'SUBSCRIBE' })
+  expect(await labelColour(button)).toBe(INK)
+
+  await button.hover()
+  await expect.poll(() => labelColour(button)).toBe(WHITE)
+
+  // "Expand full size on button" is geometry, not vibes: at rest the circle is a point, and at full
+  // scale its box must contain the button's, or the corners stay uncovered.
+  const circle = button.locator('span[aria-hidden="true"]').first()
+  const [buttonBox, circleBox] = await Promise.all([button.boundingBox(), circle.boundingBox()])
+
+  expect(buttonBox, 'button has no box').not.toBeNull()
+  expect(circleBox, 'circle has no box').not.toBeNull()
+  expect(circleBox!.x, 'circle does not reach the left edge').toBeLessThanOrEqual(buttonBox!.x)
+  expect(circleBox!.y, 'circle does not reach the top edge').toBeLessThanOrEqual(buttonBox!.y)
+  expect(
+    circleBox!.x + circleBox!.width,
+    'circle does not reach the right edge',
+  ).toBeGreaterThanOrEqual(buttonBox!.x + buttonBox!.width)
+  expect(
+    circleBox!.y + circleBox!.height,
+    'circle does not reach the bottom edge',
+  ).toBeGreaterThanOrEqual(buttonBox!.y + buttonBox!.height)
+})

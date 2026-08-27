@@ -50,9 +50,22 @@ provisional in the source; `sm` clears the 44x44 touch target rather than landin
 
 `hoverEffect` (`fill | slide | reveal`, default `fill`) carries the animated hovers from the
 "Ховер эффекты" board (node 196:941). These are motion applied to an existing variant, not new
-variants — `slide` sends the fill out to the right (nodes 164:748, 158:708), `reveal` sweeps an
-ellipse up from below (node 312:9907). Defined for `primary`, `secondary` and `inverse`; any other
-pairing falls back to the plain colour hover rather than inventing a motion nobody has drawn.
+variants. The two are structurally opposite:
+
+- `slide` (nodes 164:748, 158:708) — the variant's OWN fill travels out to the right, uncovering the
+  outline beneath. The button is styled as what it becomes; the fill is re-applied as a moving panel.
+- `reveal` (node 312:9907) — a circle in a CONTRASTING colour grows from the top edge until it
+  floods the button. The button keeps its normal filled appearance and the circle arrives over it.
+
+Both invert the label, and the label's transition is matched to the panel's so the two land
+together. Defined for `primary`, `secondary` and `inverse`; any other pairing falls back to the
+plain colour hover rather than inventing a motion nobody has drawn.
+
+The label inversion must be written with `hover:`, never `group-hover:`. The latter compiles to
+`.group:hover &` — a descendant selector — so on the element that carries `group` it matches
+nothing. An earlier revision had exactly that: the rule was emitted, the class was present, and the
+text silently never changed. `tests/stories/ui-kit.spec.ts` asserts the computed colour, which is
+the only thing that catches it.
 
 ### `Link`
 
