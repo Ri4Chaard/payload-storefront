@@ -1,0 +1,11 @@
+allowBuilds:
+  esbuild: set this to true or false
+# pnpm 11 reads settings from here rather than package.json.
+# esbuild ships prebuilt platform binaries via optional deps, so its postinstall is unnecessary —
+# but pnpm's pre-run check aborts every `pnpm run` unless the build is approved or the check is off.
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - '@tailwindcss/oxide'
+  - unrs-resolver
+verifyDepsBeforeRun: false

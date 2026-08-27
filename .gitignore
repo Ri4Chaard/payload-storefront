@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+build/
+dist/
+out/
+storybook-static/
+*.tsbuildinfo
+
+# payload
+/media/
+/src/app/(payload)/admin/importMap.js
+
+# env — never commit secrets (Constitution VI)
+.env
+.env.*
+!.env.example
+
+# test output
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editors / os
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.tmp
