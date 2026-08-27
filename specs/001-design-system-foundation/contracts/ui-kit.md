@@ -2,7 +2,7 @@
 
 **Feature**: `001-design-system-foundation` | **Date**: 2026-08-25
 
-The eighteen primitives required by FR-022, with their public APIs. This is the vocabulary spec 002
+The primitives required by FR-022, with their public APIs. This is the vocabulary spec 002
 onward must compose from before creating anything new (Principle II).
 
 **Rules that apply to every primitive without exception:**
@@ -26,7 +26,7 @@ onward must compose from before creating anything new (Principle II).
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'destructive'` | `'primary'` | |
+| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'inverse' \| 'inverse-outline'` | `'primary'` | Last two are for dark surfaces only |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Internal padding uses `--spacing-button` |
 | `loading` | `boolean` | `false` | Shows spinner, sets `aria-busy`, blocks activation |
 | `disabled` | `boolean` | `false` | |
@@ -36,6 +36,17 @@ onward must compose from before creating anything new (Principle II).
 
 Renders `<button>`. A button that navigates is a `Link`, not a `Button` — the distinction is
 semantic and matters for keyboard and screen-reader behaviour.
+
+The variant list was revised against Figma node 10:169, which draws five variants and none of them
+destructive. `ghost` and `destructive` were speculative when this contract was written: the design
+has no border-less button, and no destructive action has been designed. Neither is invented here —
+when a destructive action is drawn, it is added as a variant, not as a second component.
+
+`inverse` and `inverse-outline` assume a dark background and are unreadable without one. That is a
+property of the design, not a defect, and it is why their stories render on `background-base`.
+
+Only `md` (52px) is drawn. `sm` (44px) and `lg` (60px) are derived on the 4px scale and marked
+provisional in the source; `sm` clears the 44x44 touch target rather than landing on 40px.
 
 ### `Link`
 
@@ -78,8 +89,30 @@ keyboard and mobile behaviour that comes free.
 
 ### `Checkbox` / `Radio`
 
-`checked`, `onChange`, `value`, `name`, `indeterminate` (checkbox only), plus the shared wrapper
-props. `RadioGroup` wraps radios with a `fieldset` and `legend`.
+`checked`, `onChange`, `value`, `name`, `shape` (`square | round`, checkbox only), `indeterminate`
+(checkbox only), plus the shared wrapper props. `RadioGroup` wraps radios with a `fieldset` and
+`legend`.
+
+`shape="round"` IS the component the design calls "Multiselectable" (Figma node 10:198). It differs
+from the square checkbox (node 10:194) only in border radius and border opacity, so it is a prop
+rather than a sibling component — a near-duplicate here would be exactly the Principle II violation
+this contract exists to prevent. Semantics are unchanged: both are checkboxes, because
+"multiselectable" describes checkbox behaviour.
+
+Two open design questions, raised rather than silently resolved: a round control that permits
+multiple selection reads as "pick one" to most people, and it will be visually near-identical to
+`Radio`. `indeterminate` is deferred until a visual for it exists — the design draws two states.
+
+### `Switch`
+
+`checked`, `onChange`, `name`, `label` (required), `hideLabel`, `disabled`.
+
+Renders `<input type="checkbox" role="switch">` — on/off to a screen reader, with native form
+participation and Space-key handling that a `<div role="switch">` would have to reimplement.
+
+Not in the original eighteen; added from Figma node 10:202. A `Switch` sets a state immediately, a
+`Checkbox` marks an intention to be submitted — they are not interchangeable and the design uses
+both.
 
 ---
 

@@ -62,8 +62,8 @@ Read before starting. These are recorded in the design docs and affect specific 
 - [X] T008 Install and configure Next.js 16.3.3 with React 19 and the App Router, using route groups `(frontend)` and `(payload)` in `src/app/`
 - [X] T009 Install Payload 3.88.0 with `@payloadcms/next` and `@payloadcms/db-postgres` (all `@payloadcms/*` pinned to the same version) and create `src/payload.config.ts`
 - [X] T010 Mount the Payload admin and REST routes under `src/app/(payload)/admin/[[...segments]]/` and `src/app/(payload)/api/`
-- [X] T011 [P] Create the `admins` collection in `src/collections/Admins.ts` with **explicit** admin-only access control — never the default (Principle IV). Named `admins` rather than `users` so it cannot be confused with the customer collection spec 003 adds
-- [X] T012 [P] Create the `media` collection in `src/collections/Media.ts` with public read, admin write, and the image sizes the `Image` primitive's responsive `sizes` contract depends on
+- [X] T011 [P] Create the `admins` collection in `src/collections/admins.ts` with **explicit** admin-only access control — never the default (Principle IV). Named `admins` rather than `users` so it cannot be confused with the customer collection spec 003 adds
+- [X] T012 [P] Create the `media` collection in `src/collections/media.ts` with public read, admin write, and the image sizes the `Image` primitive's responsive `sizes` contract depends on
 - [X] T013 Add `pnpm payload generate:types`, commit `src/payload-types.ts`, and add a CI check that fails when the committed file is stale (Principle I)
 - [X] T014 Install Tailwind CSS 4.3.3 and PostCSS
 - [X] T015 Create the storefront stylesheet `src/app/(frontend)/styles.css` with a full `@import "tailwindcss"` including preflight
@@ -137,28 +137,30 @@ keyboard-traverse each story confirming visible focus; confirm zero domain compo
 **Note**: The owner is supplying components one at a time. Each task below ships the component
 **and** its `*.stories.tsx` in the same change — never one without the other.
 
-- [ ] T046 [US3] Create the shared form-field wrapper in `src/components/ui/Field/Field.tsx` implementing the common contract — required `label`, `description`, `error`, `required`, `disabled`, wired via `aria-describedby` and `aria-invalid`, with error text in `neutral-primary` and red confined to icon and border (contracts/ui-kit.md)
-- [ ] T047 [P] [US3] `Button` in `src/components/ui/Button/` — variants primary/secondary/ghost/destructive, sizes sm/md/lg, `loading` with `aria-busy`, `fullWidth`, icon slots, plus stories for every variant and state
-- [ ] T048 [P] [US3] `Link` in `src/components/ui/Link/` — variants inline/standalone/muted, external handling with `rel` and a visually-hidden "opens in new tab", underlined by default when inline
-- [ ] T049 [P] [US3] `TextInput` in `src/components/ui/TextInput/` composing `Field`
-- [ ] T050 [P] [US3] `Textarea` in `src/components/ui/Textarea/` with `autoResize`, composing `Field`
-- [ ] T051 [P] [US3] `Select` in `src/components/ui/Select/` — native `<select>`, composing `Field`
-- [ ] T052 [P] [US3] `Checkbox` in `src/components/ui/Checkbox/` with `indeterminate`, composing `Field`
-- [ ] T053 [P] [US3] `Radio` and `RadioGroup` in `src/components/ui/Radio/` using `fieldset` and `legend`
-- [ ] T054 [P] [US3] `Heading` in `src/components/ui/Heading/` with `level` and `styleAs` decoupled so semantics and appearance are independent (FR-042)
-- [ ] T055 [P] [US3] `Text` in `src/components/ui/Text/` — `color` typed to accept only roles that pass contrast on the given surface, so an inaccessible combination fails to compile
-- [ ] T056 [P] [US3] `Image` in `src/components/ui/Image/` — **required** `alt` with no optional escape, required dimensions or `fill` plus `sizes`, `aspectRatio` to reserve space. The only way images enter the app (FR-027)
-- [ ] T057 [P] [US3] `Icon` in `src/components/ui/Icon/` — fixed name set, `currentColor` inheritance, `aria-hidden` without `label`
-- [ ] T058 [P] [US3] `Container` in `src/components/ui/Container/` — sizes narrow/default/wide/full, the only place page width is decided
-- [ ] T059 [P] [US3] `Stack` in `src/components/ui/Stack/` — token-only gaps
-- [ ] T060 [P] [US3] `Grid` in `src/components/ui/Grid/` — responsive column config requiring a base value
-- [ ] T061 [P] [US3] `Divider` in `src/components/ui/Divider/`
-- [ ] T062 [P] [US3] `Badge` in `src/components/ui/Badge/` — non-interactive
-- [ ] T063 [P] [US3] `Spinner` in `src/components/ui/Spinner/` — `role="status"`, degrades to static under reduced motion
-- [ ] T064 [P] [US3] `Skeleton` in `src/components/ui/Skeleton/` — `aria-hidden`, pulse suppressed under reduced motion
-- [ ] T065 [P] [US3] `InlineMessage` in `src/components/ui/InlineMessage/` — `*-transparent` wash background, status colour on icon and border, text in `neutral-primary`, `role="alert"` / `role="status"`
+- [ ] T046 [US3] Create the shared form-field wrapper in `src/components/ui/field/field.tsx` implementing the common contract — required `label`, `description`, `error`, `required`, `disabled`, wired via `aria-describedby` and `aria-invalid`, with error text in `neutral-primary` and red confined to icon and border (contracts/ui-kit.md)
+- [X] T047 [P] [US3] `Button` in `src/components/ui/button/` — variants primary/secondary/outline/inverse/inverse-outline (revised against Figma node 10:169 — no ghost or destructive is drawn), sizes sm/md/lg, `loading` with `aria-busy`, `fullWidth`, icon slots, plus stories for every variant and state
+- [ ] T048 [P] [US3] `Link` in `src/components/ui/link/` — variants inline/standalone/muted, external handling with `rel` and a visually-hidden "opens in new tab", underlined by default when inline
+- [ ] T049 [P] [US3] `TextInput` in `src/components/ui/textinput/` composing `Field`
+- [ ] T050 [P] [US3] `Textarea` in `src/components/ui/textarea/` with `autoResize`, composing `Field`
+- [ ] T051 [P] [US3] `Select` in `src/components/ui/select/` — native `<select>`, composing `Field`
+- [X] T052 [P] [US3] `Checkbox` in `src/components/ui/checkbox/` with `shape` square/round — the round shape is the design's "Multiselectable" (node 10:198), a prop rather than a second component. `indeterminate` deferred: the design draws two states and no indeterminate visual exists
+- [X] T052a [P] [US3] `Switch` in `src/components/ui/switch/` — `role="switch"` on a real checkbox, 46x26 track with a 28x22 knob (Figma node 10:202), plus stories for both states, disabled, and hidden-label
+- [ ] T053 [P] [US3] `Radio` and `RadioGroup` in `src/components/ui/radio/` using `fieldset` and `legend`
+- [ ] T054 [P] [US3] `Heading` in `src/components/ui/heading/` with `level` and `styleAs` decoupled so semantics and appearance are independent (FR-042)
+- [ ] T055 [P] [US3] `Text` in `src/components/ui/text/` — `color` typed to accept only roles that pass contrast on the given surface, so an inaccessible combination fails to compile
+- [ ] T056 [P] [US3] `Image` in `src/components/ui/image/` — **required** `alt` with no optional escape, required dimensions or `fill` plus `sizes`, `aspectRatio` to reserve space. The only way images enter the app (FR-027)
+- [ ] T057 [P] [US3] `Icon` in `src/components/ui/icon/` — fixed name set, `currentColor` inheritance, `aria-hidden` without `label`
+- [ ] T058 [P] [US3] `Container` in `src/components/ui/container/` — sizes narrow/default/wide/full, the only place page width is decided
+- [ ] T059 [P] [US3] `Stack` in `src/components/ui/stack/` — token-only gaps
+- [ ] T060 [P] [US3] `Grid` in `src/components/ui/grid/` — responsive column config requiring a base value
+- [ ] T061 [P] [US3] `Divider` in `src/components/ui/divider/`
+- [ ] T062 [P] [US3] `Badge` in `src/components/ui/badge/` — non-interactive
+- [ ] T063 [P] [US3] `Spinner` in `src/components/ui/spinner/` — `role="status"`, degrades to static under reduced motion
+- [ ] T064 [P] [US3] `Skeleton` in `src/components/ui/skeleton/` — `aria-hidden`, pulse suppressed under reduced motion
+- [ ] T065 [P] [US3] `InlineMessage` in `src/components/ui/inlinemessage/` — `*-transparent` wash background, status colour on icon and border, text in `neutral-primary`, `role="alert"` / `role="status"`
 - [ ] T066 [US3] Add `src/components/ui/index.ts` re-exporting every primitive as the kit's single entry point
 - [ ] T067 [US3] Write `scripts/check-stories.ts` failing when any component in `src/components/ui/` lacks a matching `*.stories.tsx`; wire `pnpm check:stories` into CI (FR-032)
+- [X] T067a [US3] Write `scripts/check-naming.ts` failing on any path that is not kebab-case; wire `pnpm check:naming` into CI. Enforced rather than reviewed because macOS resolves `./Button` against `button.tsx` and only Linux CI catches it (Constitution 2.1.0, Naming)
 - [ ] T068 [P] [US3] Add `tests/a11y/stories.spec.ts` running axe-core across every story, blocking merge on any violation (FR-044)
 - [ ] T069 [P] [US3] Add `tests/e2e/keyboard.spec.ts` traversing each interactive primitive's stories, asserting reachability and a visible focus indicator (FR-043, SC-006)
 - [ ] T070 [US3] Review the kit for domain concepts — products, diamonds, sizes, carts, requests, posts. **Must be zero** (FR-028, SC-009)
