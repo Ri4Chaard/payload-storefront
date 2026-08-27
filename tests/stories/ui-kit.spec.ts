@@ -207,3 +207,51 @@ test('header does not scroll horizontally at 320px', async ({ page }) => {
   )
   expect(overflow, 'the header overflows a 320px viewport').toBeLessThanOrEqual(0)
 })
+
+/**
+ * The footer's semantics, which are the part a screenshot cannot show.
+ */
+test('footer social marks are links, not buttons', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // They navigate, so they must announce as links. Rendered as buttons they would tell a
+  // screen-reader user the wrong thing about what is about to happen.
+  const whatsapp = page.getByRole('link', { name: /WhatsApp/ })
+  await expect(whatsapp).toBeVisible()
+  await expect(whatsapp).toHaveAttribute('rel', 'noopener noreferrer')
+  await expect(whatsapp).toHaveAttribute('target', '_blank')
+})
+
+test('footer newsletter field is named despite its hidden label', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // The design is placeholder-only. A placeholder is not a name, so this checks the real one.
+  await expect(page.getByRole('textbox', { name: 'Email address' })).toBeVisible()
+})
+
+test('certification marks carry real alternative text', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // "GIA" spoken aloud is three letters, not an institution.
+  await expect(page.getByRole('img', { name: 'Gemological Institute of America' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'International Gemological Institute' })).toBeVisible()
+})
+
+test('footer does not scroll horizontally at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--mobile&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await page.locator('#storybook-root > *').first().waitFor()
+
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )
+  expect(overflow, 'the footer overflows a 320px viewport').toBeLessThanOrEqual(0)
+})

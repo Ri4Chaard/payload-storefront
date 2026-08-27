@@ -35,6 +35,7 @@ const COMPONENTS = [
   'UI/ScrollArea',
   'UI/Switch',
   'UI/TextInput',
+  'Layout/Footer',
   'Layout/Header',
 ]
 
@@ -113,29 +114,36 @@ for (const component of COMPONENTS) {
 }
 
 /**
- * The header is three layouts in one component, and the sweep above only ever sees the widest one:
- * a story opened by URL renders at the browser's width, whatever viewport global it declares. These
- * check the two narrow layouts at the widths that actually trigger them.
+ * The header and footer are each three layouts in one component, and the sweep above only ever sees
+ * the widest one: a story opened by URL renders at the browser's width, whatever viewport global it
+ * declares. These check the narrow layouts at the widths that actually trigger them.
  */
-const HEADER_WIDTHS = [
+const NARROW_WIDTHS = [
   { name: 'mobile', width: 390 },
   { name: 'tablet', width: 1024 },
 ]
 
-for (const { name, width } of HEADER_WIDTHS) {
-  test(`Layout/Header has no accessibility violations at ${name} width`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 900 })
-    await page.goto(`${STORYBOOK}/iframe.html?id=layout-header--with-breadcrumbs&viewMode=story`, {
-      waitUntil: 'domcontentloaded',
+const RESPONSIVE_STORIES = [
+  { title: 'Layout/Header', id: 'layout-header--with-breadcrumbs' },
+  { title: 'Layout/Footer', id: 'layout-footer--desktop' },
+]
+
+for (const { name, width } of NARROW_WIDTHS) {
+  for (const story of RESPONSIVE_STORIES) {
+    test(`${story.title} has no accessibility violations at ${name} width`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto(`${STORYBOOK}/iframe.html?id=${story.id}&viewMode=story`, {
+        waitUntil: 'domcontentloaded',
+      })
+      await page.locator('#storybook-root > *').first().waitFor({ timeout: 15_000 })
+
+      const results = await analyze(page)
+      const failures = results.violations.map(
+        (violation) =>
+          `${violation.id} — ${violation.help} [${violation.nodes.map((node) => node.target.join(' ')).join(', ')}]`,
+      )
+
+      expect(failures, `${failures.length} violation(s) at ${name} width`).toEqual([])
     })
-    await page.locator('#storybook-root > *').first().waitFor({ timeout: 15_000 })
-
-    const results = await analyze(page)
-    const failures = results.violations.map(
-      (violation) =>
-        `${violation.id} — ${violation.help} [${violation.nodes.map((node) => node.target.join(' ')).join(', ')}]`,
-    )
-
-    expect(failures, `${failures.length} violation(s) at ${name} width`).toEqual([])
-  })
+  }
 }
