@@ -67,6 +67,29 @@ sufficient affordance — a link that is only "the maroon words" is invisible to
 separate it from the text around it. In a footer column or a nav row the links are identifiable by
 position, so the rule that grows on hover (node 312:8748) is decoration rather than the only signal.
 
+### `Breadcrumbs`
+
+`items: { label, href? }[]`. The trail from the header's breadcrumb bar (nodes 327:7076, 440:12427,
+440:13420).
+
+The design draws seven equal `<p>` elements — four labels and three slashes. That is a picture of a
+breadcrumb, not a breadcrumb. Here it is an ordered list inside a labelled `nav`, the last item
+`aria-current="page"` and unlinked, and the separators `aria-hidden`: a screen reader should hear
+the trail, not "text slash text slash text".
+
+### `Menu`
+
+`label`, `trigger`, `align`, plus `MenuOption` children. A trigger and a popover list, from the
+language switcher at node 337:8233.
+
+The design draws only the open panel, so the behaviour comes from the WAI-ARIA menu button pattern
+rather than from invention: `Escape` closes and returns focus to the trigger, arrows move and wrap,
+`Home`/`End` jump, `Tab` closes, a pointer press outside closes. Focus is deliberately NOT trapped —
+this is a menu, not a dialog.
+
+`Menu` sets `role="menuitem"` on its children, which is why `MenuOption` asserts no role of its own.
+Leaving it to callers is how half of them end up without it.
+
 ### `NavLink`
 
 `href`, `current`. The primary navigation item from node 135:204 — 70px tall, uppercase, taking a
@@ -92,6 +115,10 @@ because the button looks fine.
 
 `hoverEffect="slide"` reproduces node 144:1045: two glyphs on a track, one leaving as the other
 arrives, because the design shows both on screen at once mid-transition.
+
+`badge` pins a count to the top-right corner (node 355:6868). It renders `aria-hidden`, so the count
+MUST also appear in `label` — "Cart, 2 items", not "Cart". A badge left in the accessibility tree
+announces as a bare number after the button's name, which says nothing about what is being counted.
 
 The design draws `filled` at 48px and both `outline` and `social` at 50px. Two pixels between three
 sibling controls reads as drift, so they are normalised onto one scale — worth confirming.
@@ -324,3 +351,47 @@ Recorded so their absence reads as a decision rather than an oversight:
 
 When spec 002 needs one of these, it adds it to the kit with a real consumer driving its API —
 which is the point.
+
+
+---
+
+## Shell
+
+Layout components live in `src/components/layout/` and are NOT part of the kit. They are its first
+consumer — the composition test Storybook cannot perform.
+
+### `Header`
+
+`navItems`, `breadcrumbs`, `cartCount`, `locales`.
+
+**The five Figma variants at node 327:7956 are three breakpoints, not five components.** Figma has
+to draw a frame per width; CSS does not, and five headers would guarantee drift:
+
+| | height | gutter | contents |
+|---|---|---|---|
+| `< md` | 60px | 16px | hamburger, centred wordmark, cart, account |
+| `md–xl` | 70px | 24px | as above plus the language switcher |
+| `xl+` | 70px | 100px | wordmark left, navigation inline, no hamburger |
+
+Variant3 (node 367:6506) is superseded. It drops the hamburger and the cart, keeps the language
+switcher, and left-aligns the wordmark — so on a phone there is no route to the navigation or the
+basket at all. The page reference at node 440:13435 shows the intended mobile header, and that is
+what is built.
+
+The wordmark is absolutely centred below `xl` and returns to the flow above it, which is what lets
+one element sit centred between two unequal flanks at small widths and flush-left at large ones
+without being rendered twice.
+
+### `Logo`, `MobileNav`, `LanguageSelector`
+
+`Logo` writes the wordmark in sentence case and uppercases it in CSS — a screen reader given
+"AURUM" may spell it out; given "Aurum" it says the name.
+
+`MobileNav`'s open panel is **not designed**. Every header variant draws the closed state only, so
+the panel is the plainest thing that works and should be replaced once there is a drawer to build.
+Its behaviour is not improvised: `aria-expanded`/`aria-controls`, `Escape` closes and returns focus,
+focus moves to the first link on open, outside press closes. Focus is not trapped — this is a
+disclosure, not a dialog.
+
+`LanguageSelector` composes `Menu` and `MenuOption` and is not wired to routing; locale is local
+state until i18n lands.

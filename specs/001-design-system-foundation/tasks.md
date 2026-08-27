@@ -185,10 +185,13 @@ footer, working mobile navigation, skip link, and no horizontal scroll at 320px 
 **Note**: The shell is the kit's first consumer inside the app — the composition test Storybook
 cannot perform. Awkwardness here means the kit is wrong; fix the kit, not the shell.
 
-- [ ] T071 [US4] Build the page shell in `src/app/(frontend)/layout.tsx` — header, `<main>`, footer, semantic landmarks, correct heading hierarchy (FR-034, FR-042)
+- [~] T071 [US4] Build the page shell in `src/app/(frontend)/layout.tsx` — header, `<main>`, footer, semantic landmarks, correct heading hierarchy (FR-034, FR-042)
 - [ ] T072 [P] [US4] Build `SkipLink` in `src/components/layout/SkipLink/` as the first focusable element, moving focus to `<main>` (FR-039)
-- [ ] T073 [US4] Build `Header` in `src/components/layout/Header/` with the brand mark, **hardcoded placeholder** navigation, and clearly marked slots for search, account, and cart that later specs fill (FR-035, FR-038)
-- [ ] T074 [US4] Build the mobile navigation in `src/components/layout/Nav/` using an accessible disclosure pattern — dismissible with `Escape`, correct focus management, operable by keyboard and screen reader (FR-036)
+- [X] T072a [P] [US3] `Breadcrumbs` in `src/components/ui/breadcrumbs/` — an ordered list in a labelled `nav` with `aria-current` and hidden separators, not the seven equal paragraphs the design draws
+- [X] T072b [P] [US3] `Menu` in `src/components/ui/menu/` — WAI-ARIA menu button behaviour (Escape returns focus, arrows wrap, Tab closes, no focus trap), sets `role="menuitem"` on its children
+- [X] T072c [P] [US4] `Logo` and `LanguageSelector` in `src/components/layout/` — wordmark uppercased in CSS rather than typed in capitals; language switcher composed from `Menu` and `MenuOption`
+- [X] T073 [US4] Build `Header` in `src/components/layout/header/` — the five Figma variants at node 327:7956 collapsed into three responsive breakpoints, with placeholder navigation, breadcrumb bar, cart count and language switcher. Variant3's mobile header is superseded by the page reference at node 440:13435 (FR-035, FR-038)
+- [X] T074 [US4] Build the mobile navigation in `src/components/layout/mobile-nav/` using an accessible disclosure pattern — the open panel is NOT designed and is deliberately plain until a drawer exists — dismissible with `Escape`, correct focus management, operable by keyboard and screen reader (FR-036)
 - [ ] T075 [P] [US4] Build `Footer` in `src/components/layout/Footer/` with placeholder link groups and a legal area (FR-037)
 - [ ] T076 [P] [US4] Add default metadata, favicon, and app icons in `src/app/(frontend)/layout.tsx`, with per-page title and description overrides available to later specs (FR-040)
 - [ ] T077 [US4] Build the footer newsletter block using the **approved decisions**: type sizes snap to the scale with `eyebrow` and `heading-sans` added (T036); success text keeps `#2a8121` on the dark surface and the `white/20` unsubscribe note keeps its opacity — both are **accepted accessibility exceptions** recorded in `contracts/design-tokens.md` and allowlisted in `scripts/check-contrast.ts`, not silent violations
