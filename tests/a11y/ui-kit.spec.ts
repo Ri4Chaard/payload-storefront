@@ -35,6 +35,7 @@ const COMPONENTS = [
   'UI/ScrollArea',
   'UI/Switch',
   'UI/TextInput',
+  'Layout/ContactBanner',
   'Layout/Footer',
   'Layout/Header',
 ]
@@ -118,18 +119,34 @@ for (const component of COMPONENTS) {
  * the widest one: a story opened by URL renders at the browser's width, whatever viewport global it
  * declares. These check the narrow layouts at the widths that actually trigger them.
  */
-const NARROW_WIDTHS = [
-  { name: 'mobile', width: 390 },
-  { name: 'tablet', width: 1024 },
+const NARROW_WIDTHS = {
+  mobile: 390,
+  tablet: 1024,
+} as const
+
+/**
+ * `widths` is per story rather than global because not every component has three layouts. The
+ * contact banner has two and a deliberate absence — below `md` it is `display: none`, so a mobile
+ * run has nothing to audit and would only ever time out waiting for something that is not coming.
+ */
+const RESPONSIVE_STORIES: {
+  title: string
+  id: string
+  widths: (keyof typeof NARROW_WIDTHS)[]
+}[] = [
+  { title: 'Layout/ContactBanner', id: 'layout-contactbanner--desktop', widths: ['tablet'] },
+  {
+    title: 'Layout/Header',
+    id: 'layout-header--with-breadcrumbs',
+    widths: ['mobile', 'tablet'],
+  },
+  { title: 'Layout/Footer', id: 'layout-footer--desktop', widths: ['mobile', 'tablet'] },
 ]
 
-const RESPONSIVE_STORIES = [
-  { title: 'Layout/Header', id: 'layout-header--with-breadcrumbs' },
-  { title: 'Layout/Footer', id: 'layout-footer--desktop' },
-]
+for (const story of RESPONSIVE_STORIES) {
+  for (const name of story.widths) {
+    const width = NARROW_WIDTHS[name]
 
-for (const { name, width } of NARROW_WIDTHS) {
-  for (const story of RESPONSIVE_STORIES) {
     test(`${story.title} has no accessibility violations at ${name} width`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 })
       await page.goto(`${STORYBOOK}/iframe.html?id=${story.id}&viewMode=story`, {

@@ -389,6 +389,42 @@ which is the point.
 Layout components live in `src/components/layout/` and are NOT part of the kit. They are its first
 consumer — the composition test Storybook cannot perform.
 
+### `ContactBanner`
+
+`email`, `phone`, `phoneHref`, `social`.
+
+The contact strip above the header, node 367:6428. Two drawn variants and no third:
+
+| | height | gutter | contact glyph | social glyph |
+|---|---|---|---|---|
+| `< md` | — | — | — | — |
+| `md–xl` | 60px | 24px | 24px | 24px |
+| `xl+` | 70px | 100px | 32px | 30px |
+
+**There is no phone variant because the strip does not exist on a phone.** 16px of gutter cannot
+hold an address, a number and three marks, and every item on it is repeated in the footer. It is
+`hidden` below `md`, which takes it out of the accessibility tree as well as off the screen —
+acceptable only because of that duplication.
+
+The two drawn widths land on the header's own breakpoints, so the strip and the header step
+together rather than at different widths.
+
+Reproduced as drawn but worth noting:
+
+- Email and phone are links, though the design sets them as plain text — the same reasoning as the
+  footer's. The displayed number carries spaces and brackets, so `tel:` gets a stripped copy.
+- The WhatsApp glyph beside the number is kept as drawn, but the link dials. `phoneHref` points it
+  at `wa.me` if that is what it is meant to be.
+- Text is pure white here rather than the footer's 80%: the drawing sets `#FFFFFF`, and the hover
+  affordance is the white rule, not a shift in opacity.
+- The drawn address reads `hello@aurum.exampIe` — the same capital-I typo the footer has. Corrected.
+- The social glyphs are the tap target, with no padding around them, so 24px at tablet is exactly
+  the WCAG 2.2 minimum (2.5.8) rather than comfortably over it.
+
+The surface is `background-base`, NOT `background-bg`. Those two token names differ by three
+characters and one is a near-black and the other a near-white; the wrong one here produced white
+text on `#f8f7f6`, caught by the axe sweep rather than by reading the diff.
+
 ### `Header`
 
 `navItems`, `breadcrumbs`, `cartCount`, `locales`.

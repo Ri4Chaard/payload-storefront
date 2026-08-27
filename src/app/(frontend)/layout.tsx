@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import { colorValue } from '@tokens/mapping'
+import { ContactBanner } from '@/components/layout/contact-banner'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { fontVariables } from '@/styles/fonts'
@@ -29,6 +30,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
   return (
     <html lang="en" className={fontVariables}>
       <body>
+        <ContactBanner />
         <Header />
         {/*
           `<main>` is the landmark the skip link (T072) will target. The skip link is still its own

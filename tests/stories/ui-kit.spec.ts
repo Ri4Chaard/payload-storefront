@@ -452,3 +452,60 @@ test('certification marks stack from tablet up and sit side by side on a phone',
   const phone = await marks()
   expect(phone.igi.x, 'marks are not side by side on a phone').toBeGreaterThan(phone.gia.x)
 })
+
+/**
+ * The contact strip is drawn at two widths and deliberately absent at a third. "Absent" is the part
+ * worth a test: it is the only state with no drawing to compare against, so nothing but an
+ * assertion says whether it is hidden on purpose or hidden by accident.
+ */
+test('contact banner appears at tablet and desktop and is gone on a phone', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-contactbanner--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const email = page.getByRole('link', { name: /hello@aurum\.example/ })
+
+  // Desktop — 70px tall, 100px gutter (node 196:868).
+  await page.setViewportSize({ width: 1440, height: 800 })
+  await expect(email).toBeVisible()
+  const strip = page.locator('#storybook-root > div')
+  expect((await strip.boundingBox())!.height).toBe(70)
+  expect((await email.boundingBox())!.x).toBeCloseTo(100, 0)
+
+  // Tablet — 60px tall, 24px gutter (node 440:12226).
+  await page.setViewportSize({ width: 1024, height: 800 })
+  await expect(email).toBeVisible()
+  expect((await strip.boundingBox())!.height).toBe(60)
+  expect((await email.boundingBox())!.x).toBeCloseTo(24, 0)
+
+  // Phone — not rendered at all. `display: none` takes it out of the accessibility tree too, which
+  // is what makes hiding it acceptable: everything on it is repeated in the footer.
+  await page.setViewportSize({ width: 390, height: 800 })
+  await expect(email).toBeHidden()
+})
+
+test('contact banner details are reachable, not just readable', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-contactbanner--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  await expect(page.getByRole('link', { name: /hello@aurum\.example/ })).toHaveAttribute(
+    'href',
+    'mailto:hello@aurum.example',
+  )
+  // The displayed number carries spaces and brackets; `tel:` will not take them.
+  await expect(page.getByRole('link', { name: /010 20-30/ })).toHaveAttribute(
+    'href',
+    'tel:+15550102030',
+  )
+
+  for (const name of ['WhatsApp', 'Instagram', 'Telegram']) {
+    const mark = page.getByRole('link', { name: new RegExp(name) })
+    await expect(mark).toBeVisible()
+    // WCAG 2.2 target size (2.5.8): the glyph IS the target here, so it has to clear 24px on its
+    // own — there is no padding around it to make up the difference.
+    const box = (await mark.boundingBox())!
+    expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(24)
+  }
+})
