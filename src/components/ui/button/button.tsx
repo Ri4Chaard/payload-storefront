@@ -157,6 +157,19 @@ export interface ButtonProps extends React.ComponentProps<'button'> {
    * link at all — drop the href and it is a button again.
    */
   href?: string
+  /**
+   * Renders a NON-INTERACTIVE `<span>` that only looks like a button.
+   *
+   * It exists for one shape: a whole tile that is a single link, where the drawn button is the
+   * affordance inside it. A `<button>` or an `<a>` nested in a link is invalid markup and gives a
+   * screen reader two controls where the visitor sees one, and duplicating the variant, size and
+   * hover styling in the consumer is how a design system stops being one. `CategoryCard` is the
+   * case that drove it.
+   *
+   * Never reach for this on something clickable. A span has no role, no keyboard activation and no
+   * focus — if the thing responds to a click, it is a `Button` or a `Link`.
+   */
+  as?: 'button' | 'span'
 }
 
 /**
@@ -199,6 +212,7 @@ export function Button({
   iconEnd,
   disabled,
   href,
+  as = 'button',
   type = 'button',
   className,
   children,
@@ -265,6 +279,16 @@ export function Button({
       {iconEnd ? <IconSlot>{iconEnd}</IconSlot> : null}
     </>
   )
+
+  if (as === 'span') {
+    // The surrounding control owns interaction; this only draws. `group` still resolves, so the
+    // hover effects run from whatever wraps it.
+    return (
+      <span className={classes} {...(props as React.ComponentProps<'span'>)}>
+        {content}
+      </span>
+    )
+  }
 
   if (href) {
     const isExternal = /^(?:[a-z]+:)?\/\//i.test(href)

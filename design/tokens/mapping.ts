@@ -77,6 +77,19 @@ export const colors: ColorToken[] = [
     provenance: 'figma',
     reason: 'Read from Figma. colors.json is stale and gives a near-inverse light grey (#a7a5a3).',
   },
+  {
+    name: 'neutral-placeholder',
+    // The light grey the design actually draws placeholder copy in (node 255:3167). It is the
+    // value `colors.json` carries for neutral-secondary, kept here under its own name rather than
+    // reverting that token — everything else using neutral-secondary depends on the corrected
+    // #343231, and a placeholder is the one place the owner has asked for the drawn grey.
+    //
+    // It is 2.29:1 on the page ground, which fails AA even at the 3:1 large-text threshold. Listed
+    // in acceptedExceptions below.
+    value: raw['neutral-secondary'],
+    provenance: 'supplied',
+    reason: 'Owner decision: the placeholder keeps the drawn grey. See acceptedExceptions.',
+  },
   { name: 'neutral-white', value: raw['neutral-white'], provenance: 'figma' },
 
   { name: 'background-bg', value: raw['background-bg'], provenance: 'figma' },
@@ -425,6 +438,13 @@ export const permittedPairings: Pairing[] = [
  * deviations. The gate still blocks any NEW undeclared failure.
  */
 export const acceptedExceptions: (Pairing & { reason: string })[] = [
+  {
+    foreground: 'neutral-placeholder',
+    background: 'background-bg',
+    minimum: 3,
+    reason:
+      'Search placeholder at 30px, 2.29:1 — below even the 3:1 large-text threshold. Owner elected to keep the drawn grey. The field carries a visually hidden label, so the placeholder is not the only description of the control.',
+  },
   {
     foreground: 'status-success-default',
     background: 'background-base',

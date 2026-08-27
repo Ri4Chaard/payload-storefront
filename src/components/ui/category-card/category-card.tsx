@@ -12,16 +12,26 @@ import { cn } from '@/lib/cn'
  * frames is the crop: the hover frame draws the image at 120% width, offset up and left, which is a
  * zoom on the photograph with the card's own bounds unchanged.
  *
- * **The card is one link, not a card containing a link.** The drawing shows a white button inside
- * a clickable tile, which as markup would be a control inside a control — invalid, and it gives a
- * screen reader two things to announce where the visitor sees one. Instead the CTA is the anchor
- * (`Button href`) and it stretches over the whole card with an inset pseudo-element, so the entire
- * tile is clickable, the accessible name is read once, and the focus ring lands on the CTA where
- * the affordance is drawn.
+ * **The card IS the link.** The drawing shows a white button inside a clickable tile, which as
+ * markup would be a control inside a control — invalid, and it gives a screen reader two things to
+ * announce where the visitor sees one. So the root element is the anchor and the drawn button is a
+ * `Button as="span"`: the same variant, size and hover machinery, none of the interactivity.
  *
- * The title is a heading, so a page of these produces a real outline rather than a wall of links.
- * `headingLevel` exists because the right level depends on what surrounds it, and getting that
- * wrong is the difference between a navigable page and a flat one.
+ * An earlier revision kept the CTA as the anchor and stretched it over the card with
+ * `after:inset-0`. That cannot survive the `slide` hover, because `slide` makes the button
+ * `overflow-hidden` — the stretched overlay is then clipped back to the button, and the rest of the
+ * tile stops being clickable. Inverting which element is the link is what makes the two compatible.
+ *
+ * The photograph is decorative here — see `image.alt`.
+ *
+ * The heading stays a heading inside the anchor (`<a>` may contain flow content; only interactive
+ * content is forbidden), so a page of these still produces a real outline. `headingLevel` exists
+ * because the right level depends on what surrounds it.
+ *
+ * The card's group is NAMED. `Button` uses the unnamed `group` for its own hover, and an unnamed
+ * group on the card would capture it: the fill would slide away whenever the pointer entered the
+ * tile anywhere, while the label — which Button colours with plain `hover:` — stayed put. Dark text
+ * on a photograph, for as long as the pointer was over the card but not over the button.
  *
  * **The scrim is not in the drawing.** The drawn photograph is a near-black velvet and white text
  * sits on it comfortably. The `src` here comes from the CMS, which means the next photograph may be
@@ -29,10 +39,17 @@ import { cn } from '@/lib/cn'
  * cannot measure text over an image. A gradient behind the two text zones costs nothing on a dark
  * photograph and rescues a light one. `scrim={false}` opts out when the image is known.
  */
-export interface CategoryCardProps extends Omit<React.ComponentProps<'article'>, 'title'> {
+export interface CategoryCardProps extends Omit<React.ComponentProps<'a'>, 'href' | 'title'> {
   title: string
   href: string
-  image: { src: string; alt: string }
+  /**
+   * The photograph. `alt` defaults to empty and should usually stay that way: the card is one link,
+   * and anything in `alt` lands in front of the title in the link's accessible name — "A ring on
+   * dark velvet, Rings, view the collection" for a tile whose meaning is "Rings". Inside a link
+   * that carries its own text, the picture is decoration. Fill it in only when the photograph
+   * carries something the title does not.
+   */
+  image: { src: string; alt?: string }
   /** Defaults to the drawn label. */
   cta?: string
   headingLevel?: 2 | 3 | 4
@@ -58,9 +75,10 @@ export function CategoryCard({
   const Heading = `h${headingLevel}` as const
 
   return (
-    <article
+    <a
+      href={href}
       className={cn(
-        'group relative isolate flex aspect-83/96 flex-col justify-between overflow-hidden p-7.5',
+        'group/card relative isolate flex aspect-83/96 flex-col justify-between overflow-hidden p-7.5',
         className,
       )}
       {...props}
@@ -72,12 +90,12 @@ export function CategoryCard({
       */}
       <Image
         src={image.src}
-        alt={image.alt}
+        alt={image.alt ?? ''}
         fill
         sizes={sizes}
         className={cn(
           'ease-standard -z-10 object-cover transition-transform duration-[var(--duration-slow)]',
-          'group-focus-within:scale-110 group-hover:scale-110',
+          'group-focus-within/card:scale-110 group-hover/card:scale-110',
         )}
       />
 
@@ -90,22 +108,9 @@ export function CategoryCard({
 
       <Heading className="text-heading-1 text-neutral-white">{title}</Heading>
 
-      {/*
-        `after:` is what makes the whole tile clickable from a single anchor.
-        
-        `static` is load-bearing: `Button` sets `relative` for its hover panels, and an
-        `after:inset-0` resolves against the nearest POSITIONED ancestor — so with it left in place
-        the overlay covers the button itself and nothing else, which looks identical in the source
-        and does nothing on the page. The card does not expose `hoverEffect`, so there is no panel
-        here for `relative` to be holding.
-      */}
-      <Button
-        href={href}
-        variant="inverse"
-        className="static self-start after:absolute after:inset-0"
-      >
+      <Button as="span" variant="inverse" hoverEffect="slide" className="self-start">
         {cta}
       </Button>
-    </article>
+    </a>
   )
 }

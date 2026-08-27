@@ -614,27 +614,60 @@ test('category card is one link covering the whole tile', async ({ page }) => {
     waitUntil: 'load',
   })
 
-  const card = page.locator('#storybook-root article')
   // Two links would make a screen reader announce the tile twice and give the pointer two targets
-  // for one destination.
+  // for one destination. The drawn button is a span for exactly that reason.
   await expect(page.locator('#storybook-root a')).toHaveCount(1)
+  await expect(page.locator('#storybook-root button')).toHaveCount(0)
 
-  const link = page.getByRole('link', { name: 'View the collection' })
+  const link = page.getByRole('link', { name: /Rings/ })
   await expect(link).toHaveAttribute('href', '/rings')
+  // The photograph is decorative inside a link that carries its own text — a descriptive alt would
+  // be announced ahead of the title.
+  await expect(link).toHaveAccessibleName('Rings View the collection')
 
-  // The drawn CTA is a small block at the bottom; the hit area is the whole card. Without the
-  // stretching pseudo-element the two are the same, and clicking the photograph does nothing.
-  const cardBox = (await card.boundingBox())!
-  await page.mouse.move(cardBox.x + cardBox.width / 2, cardBox.y + 20)
-  await expect(link).toHaveCSS('cursor', 'pointer')
+  // The heading survives being inside the anchor, so a page of these still has an outline.
+  await expect(page.getByRole('heading', { level: 3, name: 'Rings' })).toBeVisible()
 
+  // The hit area is the whole card, not the drawn block at the bottom.
   const hit = await page.evaluate(() => {
-    const article = document.querySelector('#storybook-root article')!
-    const box = article.getBoundingClientRect()
-    const at = document.elementFromPoint(box.x + box.width / 2, box.y + 20)
-    return at?.closest('a') !== null
+    const card = document.querySelector('#storybook-root a')!
+    const box = card.getBoundingClientRect()
+    const corners = [
+      [box.x + 4, box.y + 4],
+      [box.right - 4, box.y + 4],
+      [box.x + 4, box.bottom - 4],
+      [box.right - 4, box.bottom - 4],
+    ]
+    return corners.map(([x, y]) => document.elementFromPoint(x!, y!)?.closest('a') !== null)
   })
-  expect(hit, 'the top of the card is not part of the link').toBe(true)
+  expect(hit, 'some of the card is outside the link').toEqual([true, true, true, true])
+})
+
+test('category card CTA slides without the card hover capturing it', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-categorycard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const cta = page.locator('#storybook-root a > span').last()
+  const fill = cta.locator('span[aria-hidden="true"]').first()
+  await expect(fill).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  // Tailwind v4 compiles `translate-x-full` to the `translate` PROPERTY, not to a transform matrix
+  // — the same trap `scale-110` sets above. `transform` reads "none" either way.
+  const travel = () => fill.evaluate((el) => getComputedStyle(el).translate)
+
+  // The card's group is named so that Button's own unnamed `group` is not captured by it. If it
+  // were, the fill would travel on card hover while the label — coloured with plain `hover:` —
+  // stayed dark, leaving dark text on a photograph.
+  const card = page.locator('#storybook-root a')
+  const box = (await card.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + 20)
+  await expect.poll(travel).toBe('none')
+
+  await cta.hover()
+  await expect.poll(travel).not.toBe('none')
+  await expect
+    .poll(() => cta.evaluate((el) => getComputedStyle(el).color))
+    .toBe('rgb(255, 255, 255)')
 })
 
 test('category card zooms its photograph on hover and on focus', async ({ page }) => {
@@ -648,7 +681,7 @@ test('category card zooms its photograph on hover and on focus', async ({ page }
   const scale = () => image.evaluate((el) => getComputedStyle(el).scale)
   await expect.poll(scale).toBe('none')
 
-  await page.getByRole('link', { name: 'View the collection' }).hover()
+  await page.getByRole('link', { name: /Rings/ }).hover()
   await expect.poll(scale).toBe('1.1')
 
   // Figma draws the zoom for a pointer. A keyboard visitor reaching the CTA should see the same
@@ -660,4 +693,37 @@ test('category card zooms its photograph on hover and on focus', async ({ page }
 
   // `transition-transform` has to actually cover the `scale` property, or the zoom snaps.
   await expect(image).toHaveCSS('transition-property', /scale/)
+})
+
+test('accordion leading glyph is swappable and removable', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-accordion--with-its-own-icons&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const header = page.getByRole('button', { name: 'Delivery & returns' })
+  // Two glyphs: the swapped leading one and the expand indicator.
+  await expect(header.locator('svg')).toHaveCount(2)
+  // Whatever the glyph is, it stays decoration — a named icon beside its own label makes a screen
+  // reader say the same thing twice.
+  await expect(header).toHaveAccessibleName('Delivery & returns')
+
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=ui-accordion--without-the-leading-glyph&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+  const bare = page.getByRole('button', { name: 'Delivery & returns' })
+  await expect(bare.locator('svg')).toHaveCount(1)
+})
+
+test('search placeholder keeps the drawn grey', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-searchfield--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // `neutral-placeholder`, not the corrected `neutral-secondary` the rest of the kit uses. An
+  // accepted exception of record — see design/tokens/mapping.ts.
+  const colour = await page
+    .locator('#storybook-root input')
+    .evaluate((el) => getComputedStyle(el, '::placeholder').color)
+  expect(colour).toBe('rgb(167, 165, 163)')
 })

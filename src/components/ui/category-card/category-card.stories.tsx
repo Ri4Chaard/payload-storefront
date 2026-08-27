@@ -8,7 +8,8 @@ import sampleImage from './sample-image.webp'
  * Figma's "Default" and "Hover" frames are one component — hover the card for the zoom. The
  * photograph is a fixture for the guide; in the app it comes from the CMS.
  */
-const IMAGE = { src: sampleImage.src, alt: 'A ring, earrings and a bracelet on dark velvet' }
+// No `alt`: the card is one link, and alt text would be read out ahead of the title.
+const IMAGE = { src: sampleImage.src }
 
 const meta = {
   title: 'UI/CategoryCard',

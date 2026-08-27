@@ -29,6 +29,7 @@ Generated into `src/styles/tokens.css` as a Tailwind v4 `@theme` block by
 | `--color-primary-transparent` | `#3b171a33` | supplied ⚠ unverified | 20% primary; focus rings, subtle fills |
 | `--color-neutral-primary` | `#050301` | supplied | Body text on light surfaces |
 | `--color-neutral-secondary` | `#343231` | supplied (Figma) | Secondary text on light surfaces — 11.92:1 on `background/bg` |
+| `--color-neutral-placeholder` | `#a7a5a3` | supplied (owner) | Search placeholder only (node 255:3167). `colors.json`'s value for neutral/secondary, kept under its own name so the corrected `#343231` is not reverted for everything else. 2.29:1 — an accepted exception below |
 | `--color-neutral-white` | `#ffffff` | supplied | Text and icons on dark surfaces |
 | `--color-background-bg` | `#f8f7f6` | supplied | Page background |
 | `--color-background-container` | `#ffffff` | supplied | Card and container surfaces |
@@ -97,17 +98,19 @@ review defect.
 
 ### Accepted accessibility exceptions
 
-Two pairings in the design fall below WCAG 2.2 AA and are **kept as designed** by owner decision.
+Three pairings in the design fall below WCAG 2.2 AA and are **kept as designed** by owner decision.
 They are allowlisted in `scripts/check-contrast.ts`, each with a written reason, so the gate still
 blocks any *new* undeclared failure. They are exceptions of record, not silent violations — the
 Governance section's documented-deviation requirement.
 
 | Pairing | Ratio | Required | Reason accepted |
 |---|---:|---:|---|
+| `neutral-placeholder` `#a7a5a3` on `background-bg` | 2.29 | 3.0 | Search placeholder at 30px — below even the large-text threshold. Owner elected to keep the drawn grey. The field carries a visually hidden label, so the placeholder is not the only description of the control. |
 | `status-success-default` `#2a8121` on `background-base` | 4.15 | 4.5 | Footer newsletter success text. Owner elected to keep the palette and the design as drawn. |
 | `neutral-white` at 20% on `background-base` | 1.71 | 4.5 | Footer unsubscribe note. Decorative-weight text; owner elected to keep the design as drawn. |
 
-Both are in the footer. Revisiting either is an opacity or colour change, not a redesign.
+Two of the three are in the footer. Revisiting any of them is an opacity or colour change, not a
+redesign — the placeholder in particular is one token away from `neutral-secondary` at 11.92:1.
 
 ### Status colours — owner decision to keep the `colors.json` values
 

@@ -55,6 +55,20 @@ export const OnlyOneOpenAtATime: Story = {
   args: { single: true, defaultOpen: ['description'] },
 }
 
+/** `icon` swaps the leading dash; a row can override it, and `null` drops it entirely. */
+export const WithItsOwnIcons: Story = {
+  args: {
+    items: [
+      { ...ITEMS[0]!, icon: 'description' },
+      { ...ITEMS[1]!, icon: 'delivery' },
+      { ...ITEMS[2]!, icon: 'warranty' },
+    ],
+    defaultOpen: ['description'],
+  },
+}
+
+export const WithoutTheLeadingGlyph: Story = { args: { icon: null } }
+
 export const WithADisabledRow: Story = {
   args: { items: ITEMS.map((item, i) => (i === 2 ? { ...item, disabled: true } : item)) },
 }

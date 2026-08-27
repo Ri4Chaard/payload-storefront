@@ -3,6 +3,7 @@
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
+import { type IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 /**
@@ -33,14 +34,21 @@ import { cn } from '@/lib/cn'
  * max-height — either need JavaScript to be correct or clip long copy. `hidden` on the inner
  * wrapper keeps the closed copy out of the accessibility tree and out of tab order.
  *
- * The leading dash is the `minus` glyph in every state, exactly as drawn — decoration, not the
- * expand control. It is `aria-hidden` by virtue of carrying no label.
+ * The leading glyph is the `minus` dash in every state, exactly as drawn — decoration, not the
+ * expand control, and `aria-hidden` by virtue of carrying no label. `icon` swaps it, because a row
+ * whose subject has a glyph (delivery, warranty, a certificate) reads better with that glyph than
+ * with three identical dashes, and `icon={null}` drops it for a plain list.
+ *
+ * It is decoration in every case: a meaningful icon beside its own label makes a screen reader say
+ * the same thing twice, so it stays unlabelled whatever it is.
  */
 export interface AccordionItemProps extends Omit<
   React.ComponentProps<'div'>,
   'title' | 'onToggle'
 > {
   title: React.ReactNode
+  /** The decorative glyph before the title. `null` removes it. Defaults to the drawn dash. */
+  icon?: IconName | null
   /** Uncontrolled initial state. Ignored when `open` is supplied. */
   defaultOpen?: boolean
   /** Supply with `onToggle` to control the row from outside — that is how `Accordion` runs `single`. */
@@ -52,6 +60,7 @@ export interface AccordionItemProps extends Omit<
 
 export function AccordionItem({
   title,
+  icon = 'minus',
   defaultOpen = false,
   open,
   onToggle,
@@ -105,7 +114,7 @@ export function AccordionItem({
             'disabled:text-neutral-secondary disabled:cursor-not-allowed',
           )}
         >
-          <Icon name="minus" />
+          {icon ? <Icon name={icon} /> : null}
           <span className="min-w-0 flex-1">{title}</span>
           {/*
             The trailing glyph carries no label. "Expanded"/"collapsed" already reaches assistive
@@ -142,7 +151,16 @@ export function AccordionItem({
  * BETWEEN rows and Figma has no way to say "except the last one".
  */
 export interface AccordionProps extends React.ComponentProps<'div'> {
-  items: { id: string; title: React.ReactNode; content: React.ReactNode; disabled?: boolean }[]
+  items: {
+    id: string
+    title: React.ReactNode
+    content: React.ReactNode
+    /** Overrides `icon` for this row. `null` removes the glyph. */
+    icon?: IconName | null
+    disabled?: boolean
+  }[]
+  /** The glyph every row starts with, unless the row overrides it. `null` removes it throughout. */
+  icon?: IconName | null
   single?: boolean
   /** Ids open on first render. With `single`, only the first of them is used. */
   defaultOpen?: string[]
@@ -151,6 +169,7 @@ export interface AccordionProps extends React.ComponentProps<'div'> {
 
 export function Accordion({
   items,
+  icon = 'minus',
   single = false,
   defaultOpen = [],
   headingLevel = 3,
@@ -174,6 +193,7 @@ export function Accordion({
         <AccordionItem
           key={item.id}
           title={item.title}
+          icon={item.icon === undefined ? icon : item.icon}
           disabled={item.disabled}
           headingLevel={headingLevel}
           open={openIds.includes(item.id)}

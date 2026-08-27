@@ -18,8 +18,11 @@ import { cn } from '@/lib/cn'
  * visually hidden rather than absent — placeholder text disappears the moment anyone types, taking
  * with it the only description of the field, and it is not reliably announced.
  *
- * The drawn placeholder is `#a7a5a3`, which is 2.29:1 on the page ground. `neutral-secondary` is
- * already corrected project-wide to #343231 for exactly this reason, so it inherits the fix.
+ * The placeholder is `neutral-placeholder` — the light grey the design draws (node 255:3167), which
+ * is `colors.json`'s value for neutral/secondary rather than the corrected #343231 the rest of the
+ * kit uses. It is 2.29:1 on the page ground, below even the 3:1 large-text threshold, and is an
+ * accepted exception of record at the owner's direction. The visually hidden label is what keeps
+ * that defensible: the placeholder is a hint, not the only description of the control.
  *
  * The rule is `neutral-primary` at rest and `primary-default` on focus — see the comment on it.
  */
@@ -103,7 +106,7 @@ export function SearchField({
             onKeyDown?.(event)
           }}
           className={cn(
-            'text-heading-1 text-neutral-primary placeholder:text-neutral-secondary',
+            'text-heading-1 text-neutral-primary placeholder:text-neutral-placeholder',
             'caret-primary-default min-w-0 flex-1 bg-transparent outline-none',
             'disabled:text-neutral-secondary disabled:cursor-not-allowed',
             // Safari and Chrome draw their own clear affordance on a search input. Two of them, one

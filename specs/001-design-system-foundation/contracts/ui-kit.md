@@ -34,6 +34,7 @@ onward must compose from before creating anything new (Principle II).
 | `iconStart` / `iconEnd` | `ReactNode` | — | |
 | `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | |
 | `href` | `string` | — | Renders `<a>` instead. Absolute hrefs get `rel` and a new tab |
+| `as` | `'button' \| 'span'` | `'button'` | `span` draws the button without any interactivity |
 
 Renders `<button>`. A button that navigates is a `Link`, not a `Button` — the distinction is
 semantic and matters for keyboard and screen-reader behaviour.
@@ -44,6 +45,12 @@ appearance, the same arrangement `IconButton` already uses, rather than a `<butt
 `onClick` that calls the router. `loading` and `disabled` have no anchor equivalent: an `<a>` has no
 `disabled` attribute and `aria-disabled` leaves it followable, so a control that must be disabled
 should not be a link at all.
+
+`as="span"` exists for one shape: a whole tile that is a single link, where the drawn button is the
+affordance inside it. A `<button>` or an `<a>` nested in a link is invalid markup and gives a screen
+reader two controls where the visitor sees one, and duplicating the variant, size and hover styling
+in the consumer is how a design system stops being one. It must never be used for something
+clickable — a span has no role, no keyboard activation and no focus.
 
 The variant list was revised against Figma node 10:169, which draws five variants and none of them
 destructive. `ghost` and `destructive` were speculative when this contract was written: the design
@@ -198,7 +205,9 @@ departures from the drawing, both deliberate:
    surrounding layout genuinely supplies the name.
 2. **The placeholder is `neutral-secondary` #343231, not the #a7a5a3 in the drawing.** That lighter
    grey is 2.29:1 on white — the stale colours.json value the token module already corrects, and
-   placeholder text is text.
+   placeholder text is text. (`SearchField` keeps the drawn grey under `neutral-placeholder`, at the
+   owner's direction and as an accepted exception. This one does not: a form box is not a display-
+   sized search line, and the exception was granted for the latter.)
 
 The focus ring is on the BOX, not the input, so the indicator traces the control a person sees.
 
@@ -279,8 +288,11 @@ Three things in the drawing are descriptions of browser behaviour rather than co
   track the insertion point.
 - The placeholder is not the label. It vanishes the moment anyone types, taking the field's only
   description with it, so the label is visually hidden rather than absent.
-- The drawn placeholder colour `#a7a5a3` is 2.29:1 on the page ground; `neutral-secondary` is
-  already corrected project-wide to `#343231` and inherits the fix.
+- The placeholder is `neutral-placeholder` — the light grey the design draws, which is
+  `colors.json`'s value for neutral/secondary rather than the `#343231` the rest of the kit uses.
+  It is 2.29:1 on the page ground, below even the 3:1 large-text threshold, and is an accepted
+  exception of record at the owner's direction. The visually hidden label is what keeps that
+  defensible: the placeholder is a hint, not the only description of the control.
 
 The rule is `neutral-primary` at rest and `primary-default` on focus. The drawing shows the same
 rule in both frames, which would leave a keyboard visitor nothing but the caret to say where they
@@ -300,15 +312,29 @@ bottom. Figma's "Default" and "Hover" frames are one component: the only differe
 which draws the image at 120% width offset up and left. That is a zoom on the photograph, so it is
 `scale` on the image rather than a second layout.
 
-**The card is one link, not a card containing a link.** The drawing shows a button inside a
-clickable tile, which as markup is a control inside a control — invalid, and it gives a screen
-reader two things to announce where the visitor sees one. The CTA is the anchor and stretches over
-the whole card with an inset pseudo-element.
+**The card IS the link.** The drawing shows a button inside a clickable tile, which as markup is a
+control inside a control — invalid, and it gives a screen reader two things to announce where the
+visitor sees one. The root element is the anchor and the drawn button is a `Button as="span"`: the
+same variant, size and hover machinery, none of the interactivity.
 
-That pseudo-element needs the CTA to be `static`. `Button` sets `relative` for its hover panels, and
-`after:inset-0` resolves against the nearest POSITIONED ancestor — leave it in place and the overlay
-covers the button and nothing else, which looks identical in the source and does nothing on the
-page. The card does not expose `hoverEffect`, so there is no panel here for `relative` to hold.
+An earlier revision inverted that — the CTA was the anchor, stretched over the card with
+`after:inset-0`, and the card was an `<article>`. That cannot survive the `slide` hover, because
+`slide` makes the button `overflow-hidden`: the stretched overlay is clipped back to the button and
+the rest of the tile stops being clickable. (It also required `static` on the CTA, since
+`after:inset-0` resolves against the nearest POSITIONED ancestor and `Button` sets `relative` for
+its panels.) Making the card the anchor removes both problems at once.
+
+The heading stays a heading inside the anchor — `<a>` may contain flow content, only interactive
+content is forbidden — so a page of these still produces a real outline.
+
+**The card's group is NAMED** (`group/card`). `Button` uses the unnamed `group` for its own hover,
+and an unnamed group on the card captures it: the fill travels away whenever the pointer enters the
+tile anywhere, while the label — which `Button` colours with plain `hover:` — stays dark. Dark text
+on a photograph for as long as the pointer is over the card but not the button.
+
+`image.alt` defaults to empty and should usually stay that way. The card is one link, so anything in
+`alt` is announced ahead of the title: "a ring on dark velvet, Rings, view the collection" for a
+tile whose meaning is "Rings". Inside a link carrying its own text, the picture is decoration.
 
 **The scrim is not in the drawing.** The drawn photograph is a near-black velvet and white text sits
 on it comfortably. `src` comes from the CMS, so the next photograph may be a pale one — and
@@ -321,9 +347,9 @@ price, availability, a basket action — still belongs to spec 002.
 
 ### `Accordion` / `AccordionItem`
 
-`Accordion`: `items` (`{ id, title, content, disabled }[]`), `single`, `defaultOpen`,
+`Accordion`: `items` (`{ id, title, content, icon, disabled }[]`), `icon`, `single`, `defaultOpen`,
 `headingLevel`.
-`AccordionItem`: `title`, `open` / `onToggle` or `defaultOpen`, `headingLevel`, `disabled`.
+`AccordionItem`: `title`, `icon`, `open` / `onToggle` or `defaultOpen`, `headingLevel`, `disabled`.
 
 Figma calls this "item info" (node 242:2382) — the product page's description, delivery and warranty
 stack. Filed under `Accordion` because that is what someone will search for; a kit component under a
@@ -349,7 +375,10 @@ from `auto`, and the alternatives either need JavaScript to be correct or clip l
 wrapper is `hidden` when closed, which is what keeps the collapsed copy out of the accessibility
 tree rather than merely clipped.
 
-The leading dash is the `minus` glyph in every state, as drawn: decoration, not the expand control.
+The leading glyph is the `minus` dash in every state, as drawn: decoration, not the expand control.
+`icon` swaps it — a row whose subject has a glyph reads better with that glyph than with three
+identical dashes — and `icon={null}` drops it. It stays unlabelled whatever it is, because a
+meaningful icon beside its own label makes a screen reader say the same thing twice.
 The trailing glyph carries no label, because `aria-expanded` already says the state and naming the
 icon on top of it makes a screen reader say it twice in two vocabularies.
 
