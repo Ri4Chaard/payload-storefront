@@ -382,6 +382,35 @@ The wordmark is absolutely centred below `xl` and returns to the flow above it, 
 one element sit centred between two unequal flanks at small widths and flush-left at large ones
 without being rendered twice.
 
+### `Footer`
+
+`groups`, `legalLinks`, `social`, `year`.
+
+**The three Figma variants at node 440:12864 are breakpoints, not components** — the same reasoning
+as the header. A three-column grid with the brand spanning two rows produces the tablet layout
+exactly; widening to five columns produces the desktop one.
+
+Almost nothing in it is new. The column links are `Link variant="inverse"` — node 312:8748, built
+for the header. SUBSCRIBE is `Button variant="inverse" hoverEffect="reveal"`, node 312:9907. The
+social marks are `IconButton variant="social"`, node 312:9300. What looked like a large new surface
+was mostly assembly, which is the outcome Principle II is for.
+
+Reproduced as drawn but worth a designer's eye:
+
+- The divider above the legal bar is `border-black/10` on a near-black surface, so it renders
+  invisible. Everything else on that surface uses white-based hairlines. Left as drawn, because the
+  rendered design shows no line either — "fixing" it would ADD something nobody approved.
+- "CUSTOMER CARE" is set at 16px against 18px for the other three headings. Normalised to `eyebrow`.
+- The drawn email address reads `hello@aurum.exampIe` — a capital I where "example" has an l. Corrected.
+- Phone and email are links here, though the design sets them as plain text. A phone number a
+  visitor cannot tap, on a shop's mobile site, is a lost enquiry. `inverse` keeps them looking
+  exactly as drawn.
+
+The GIA and IGI marks are third-party trademarks: they are NOT normalised to `currentColor` the way
+our own icons are, and at 96KB between them they are served from `/public` rather than inlined.
+`next/image` is deliberately not used — it has nothing to offer a fixed-size SVG and would require
+opening `dangerouslyAllowSVG`.
+
 ### `Logo`, `MobileNav`, `LanguageSelector`
 
 `Logo` writes the wordmark in sentence case and uppercases it in CSS — a screen reader given
