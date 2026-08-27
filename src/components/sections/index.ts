@@ -18,5 +18,6 @@
  * (FR-003, SC-008).
  */
 export { AboutBand, type AboutBandProps } from './about-band'
+export { CategoryBand, type CategoryBandProps } from './category-band'
 export { Hero, type HeroProps } from './hero'
 export { SectionHeading, type SectionHeadingProps } from './section-heading'

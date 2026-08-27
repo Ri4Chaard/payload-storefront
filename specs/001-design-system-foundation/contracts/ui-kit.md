@@ -334,6 +334,28 @@ bottom. Figma's "Default" and "Hover" frames are one component: the only differe
 which draws the image at 120% width offset up and left. That is a zoom on the photograph, so it is
 `scale` on the image rather than a second layout.
 
+**The tile changes shape, not just size** (added in spec 002, node 255:3353). The home page draws
+it at 415x480, then 478x350, then 174x242 — portrait, LANDSCAPE, portrait. So the proportion is
+responsive (`aspect-87/121 md:aspect-239/175 xl:aspect-83/96`) rather than fixed, and it lives in
+the component rather than in a prop: a prop cannot change at a breakpoint without rendering the card
+twice. **A caller who needs a different proportion passes `aspect-*` through `className`**, which
+`tailwind-merge` resolves over all three defaults at once — there is a story for it.
+
+The title needed no breakpoint work. The design steps it 30 → 30 → 20 and `text-heading-1` is
+already a clamp from 20 to 30, hitting both endpoints exactly. It reads 27px rather than 30px at the
+1024 frame, which is the fluid scale doing its job; `md:` overrides on top of a clamp would be two
+systems arguing over one number.
+
+**The compact call to action is a recorded deviation from the drawing.** Below `md` it spans the
+tile, as drawn — but the drawn 14px does not fit. 174px wide with a 16px inset leaves 142px, and
+"VIEW COLLECTION" sets to 140px at 14px in Manrope before any padding at all; the design renders
+roughly 127px for the same string, which is why it fits there. `Button` is `whitespace-nowrap`, so
+at the drawn size the label leaves the card. The compact frame therefore takes one further type step
+down, to `caption`, with a 10px inset — landing the label at 120px inside 142px, which reproduces
+the drawing's "label nearly fills the button" proportion. That proportion is the part that carries
+intent; the 14px is the part that does not survive contact with the real typeface. Flagged for the
+designer.
+
 **The card IS the link.** The drawing shows a button inside a clickable tile, which as markup is a
 control inside a control — invalid, and it gives a screen reader two things to announce where the
 visitor sees one. The root element is the anchor and the drawn button is a `Button as="span"`: the

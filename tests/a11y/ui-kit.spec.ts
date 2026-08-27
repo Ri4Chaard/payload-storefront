@@ -44,6 +44,7 @@ const COMPONENTS = [
   'Commerce/CartItem',
   'Commerce/ProductCard',
   'Sections/AboutBand',
+  'Sections/CategoryBand',
   'Sections/Hero',
   'Sections/SectionHeading',
   'Layout/ContactBanner',
@@ -178,6 +179,12 @@ const RESPONSIVE_STORIES: {
   { title: 'Layout/Footer', id: 'layout-footer--desktop', widths: ['mobile', 'tablet'] },
   { title: 'Sections/Hero', id: 'sections-hero--desktop', widths: ['mobile', 'tablet'] },
   { title: 'Sections/AboutBand', id: 'sections-aboutband--desktop', widths: ['mobile', 'tablet'] },
+  {
+    title: 'Sections/CategoryBand',
+    id: 'sections-categoryband--desktop',
+    widths: ['mobile', 'tablet'],
+  },
+  { title: 'UI/CategoryCard', id: 'ui-categorycard--default', widths: ['mobile', 'tablet'] },
 ]
 
 for (const story of RESPONSIVE_STORIES) {

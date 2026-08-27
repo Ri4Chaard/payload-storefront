@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
-import { AboutBand, Hero } from '@/components/sections'
+import { AboutBand, CategoryBand, Hero } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
 import { homeContent } from '@/mocks'
 
@@ -25,11 +25,13 @@ export const metadata: Metadata = {
 }
 
 export default function HomePage() {
-  const { hero, about } = homeContent
+  const { hero, categories, about } = homeContent
 
   return (
     <>
       <Hero {...hero} />
+
+      <CategoryBand {...categories} />
 
       <AboutBand {...about} />
 

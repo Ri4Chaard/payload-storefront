@@ -1102,3 +1102,98 @@ test('about band grows for copy the drawing never showed', async ({ page }) => {
   expect(clipped, 'the extra paragraph is clipped').toBe(false)
   await expect(page.getByText('independently graded')).toBeVisible()
 })
+
+test('category tiles change proportion, not just size, across the breakpoints', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-categoryband--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const tiles = page.getByRole('listitem')
+  await expect(tiles).toHaveCount(4)
+
+  const DRAWN = [
+    { width: 390, tile: { w: 174, h: 242 }, rows: 2 }, // node 440:13487 — portrait
+    { width: 1024, tile: { w: 478, h: 350 }, rows: 2 }, // node 440:12512 — LANDSCAPE
+    { width: 1920, tile: { w: 415, h: 480 }, rows: 1 }, // node 144:835 — portrait again
+  ]
+
+  for (const { width, tile, rows } of DRAWN) {
+    await page.setViewportSize({ width, height: 900 })
+    await expect
+      .poll(async () => {
+        const box = (await tiles.first().boundingBox())!
+        return `${Math.round(box.width)}x${Math.round(box.height)}`
+      })
+      .toBe(`${tile.w}x${tile.h}`)
+
+    // The tablet frame is the one worth asserting on: a card that stayed portrait there would
+    // still be "responsive" and still be wrong.
+    const tops = await Promise.all((await tiles.all()).map(async (t) => (await t.boundingBox())!.y))
+    expect(new Set(tops.map(Math.round)).size, `not ${rows} row(s) at ${width}`).toBe(rows)
+  }
+})
+
+test('a category tile is one link named for its collection, not for its photograph', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1920, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-categoryband--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // Four tiles, four links — not eight, which is what a tile containing its own button would give.
+  const links = page.locator('#storybook-root a')
+  await expect(links).toHaveCount(4)
+  await expect(page.locator('#storybook-root button')).toHaveCount(0)
+
+  const first = links.first()
+  await expect(first).toHaveAttribute('href', '/rings')
+  // "Rings View collection" — the photograph contributes nothing, which is the point of its empty
+  // alt. A description here would be read out in FRONT of the collection name.
+  const name = (await first.evaluate((el) => el.textContent))!.trim()
+  expect(name.startsWith('Rings')).toBe(true)
+
+  // The band is a labelled region and a real list, so its size is known before it is walked.
+  await expect(page.getByRole('region', { name: 'Shop by category' })).toBeVisible()
+  await expect(page.getByRole('list')).toHaveCount(1)
+})
+
+test('the compact tile keeps its label inside the card', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-categoryband--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // 174px wide, 16px inset — 142px for a label `Button` refuses to wrap. "VIEW COLLECTION" sets to
+  // 140px at the drawn 14px in Manrope, so at the drawn size it leaves the card entirely. This is
+  // the assertion that caught it, and the reason the compact frame drops a further type step.
+  const cta = page.locator('#storybook-root a').first().locator('span.group')
+  const box = (await cta.boundingBox())!
+  expect(Math.round(box.width)).toBe(142)
+  expect(
+    await cta.evaluate((el) => el.scrollWidth > el.clientWidth + 1),
+    'the compact label overflows its tile',
+  ).toBe(false)
+})
+
+test('the sliding fill covers a full-width tile CTA at any proportion', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-categoryband--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // `slide` moves a panel pinned to `inset-0`, so unlike `reveal`'s circle it has no geometry that
+  // can come up short on a short, wide button. This is the assertion that says so.
+  const cta = page.locator('#storybook-root a').first().locator('span.group')
+  const panel = cta.locator('span[aria-hidden="true"]')
+  const fits = await panel.evaluate((el) => {
+    const p = el.getBoundingClientRect()
+    const b = (el.parentElement as HTMLElement).getBoundingClientRect()
+    // The panel sits inside the 1px border on each side, and must cover everything within it.
+    return p.width >= b.width - 2 && p.height >= b.height - 2
+  })
+  expect(fits, 'the sliding fill does not cover the button it is meant to').toBe(true)
+
+  await cta.hover()
+  await expect.poll(() => panel.evaluate((el) => getComputedStyle(el).translate)).toBe('100%')
+})

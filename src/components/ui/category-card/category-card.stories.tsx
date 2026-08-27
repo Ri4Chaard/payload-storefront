@@ -55,3 +55,23 @@ export const InAGrid: Story = {
     </div>
   ),
 }
+
+/**
+ * The drawn LANDSCAPE proportion of the 1024 frame (node 440:12515). Resize to see the card change
+ * shape rather than merely scale.
+ */
+export const Tablet: Story = { globals: { viewport: { value: 'lg' } } }
+
+/**
+ * The compact frame below `md` (node 440:13490) — 16px inset, the title a step down, and a call to
+ * action across the tile because 142px of usable width cannot hold the desktop one.
+ */
+export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
+
+/**
+ * The escape hatch: a caller whose layout wants a different proportion passes one through
+ * `className`, and `tailwind-merge` resolves it over all three defaults at once.
+ */
+export const CustomProportion: Story = {
+  args: { className: 'aspect-square' },
+}

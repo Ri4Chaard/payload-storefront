@@ -94,26 +94,26 @@ the page carries its own title and description.
 **Independent test**: Load `/` at all three widths; confirm four tiles in the drawn arrangement,
 each exactly one link named for its collection, all four reachable by keyboard in reading order.
 
-- [ ] T111 [US2] Make `CategoryCard`'s proportion responsive —
+- [X] T111 [US2] Make `CategoryCard`'s proportion responsive —
       `aspect-87/121 md:aspect-239/175 xl:aspect-83/96`, matching the drawn `174×242`, `478×350`
       and `415×480`. The tablet frame is **landscape**; a card that stays portrait there is the
       failure this task exists to prevent (FR-010)
-- [ ] T112 [US2] Add `CategoryCard`'s compact frame below `md` — `p-4` inset, `heading-4` title, and
+- [X] T112 [US2] Add `CategoryCard`'s compact frame below `md` — `p-4` inset, `heading-4` title, and
       a call to action spanning the tile width — stepping to the desktop treatment at `md` and
       above, which the tablet and desktop frames share exactly (FR-011)
-- [ ] T113 [US2] Verify the full-width mobile call to action still reveals correctly: `Button`'s
-      slide disc is `w-[175%]`, and the geometric minimum is `sqrt(1 + 4h²/w²)`. Fix `Button` if the
-      short, wide mobile button exposes it — this is the same class of bug already fixed on
-      `IconButton`
-- [ ] T114 [P] [US2] Record both `CategoryCard` changes in
+- [X] T113 [US2] Verify the full-width mobile call to action still reveals correctly. **No fix
+      needed, and the reason matters**: `w-[175%]` belongs to `hoverEffect="reveal"`, whose growing
+      circle has geometry that can come up short. The tile uses `slide`, which travels a panel
+      pinned to `inset-0` and therefore covers any proportion. Asserted rather than assumed
+- [X] T114 [P] [US2] Record both `CategoryCard` changes in
       [001/contracts/ui-kit.md](../001-design-system-foundation/contracts/ui-kit.md), including the
       `className` override path for a caller that needs a different proportion (FR-013)
-- [ ] T115 [US2] Build `CategoryBand` in `src/components/sections/category-band/` — heading plus
+- [X] T115 [US2] Build `CategoryBand` in `src/components/sections/category-band/` — heading plus
       four tiles, four-across at 1920 and two-by-two below (FR-009)
-- [ ] T116 [US2] Add `CategoryBand` to the page between hero and about, in the drawn order
-- [ ] T117 [P] [US2] Stories for `CategoryBand` and for `CategoryCard`'s new frames, including one
+- [X] T116 [US2] Add `CategoryBand` to the page between hero and about, in the drawn order
+- [X] T117 [P] [US2] Stories for `CategoryBand` and for `CategoryCard`'s new frames, including one
       proving the `className` proportion override; add to the accessibility sweep
-- [ ] T118 [P] [US2] Story tests: four tiles at the drawn proportions per breakpoint, one link per
+- [X] T118 [P] [US2] Story tests: four tiles at the drawn proportions per breakpoint, one link per
       tile, and the accessible name is the collection and not the photograph (FR-012)
 
 **Checkpoint**: the page's primary navigation path into the catalogue works.

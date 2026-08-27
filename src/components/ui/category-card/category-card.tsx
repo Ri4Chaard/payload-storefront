@@ -8,6 +8,31 @@ import { cn } from '@/lib/cn'
  * A collection tile, from Figma node 138:509 — a photograph with the collection name at the top and
  * a white call to action at the bottom, drawn at 415x480 with a 30px inset.
  *
+ * **The tile changes shape, not just size** (002/T111). The home page draws it at 415x480, then
+ * 478x350, then 174x242 — portrait, LANDSCAPE, portrait. The proportion is therefore responsive
+ * here rather than fixed, and it lives in the component rather than in a prop because a prop cannot
+ * change at a breakpoint without rendering the card twice. A caller who needs a different
+ * proportion passes `aspect-*` through `className`, which `tailwind-merge` resolves over the
+ * defaults; there is a story for exactly that.
+ *
+ * **The title needed no breakpoint work at all** (002/T112). The design steps it 30px → 30px → 20px
+ * and `text-heading-1` is already a clamp from 20 to 30, landing on both endpoints exactly. It
+ * reads 27px rather than 30px at the 1024 frame, which is the fluid scale doing its job; stacking
+ * `md:` overrides on top of a clamp would be two systems arguing over one number.
+ *
+ * **The call to action is where the drawing and the typeface disagree.** Below `md` it spans the
+ * tile, as drawn — but the drawn 14px does not fit. At 174px wide with a 16px inset there are 142px
+ * to work with, and "VIEW COLLECTION" sets to 140px at 14px in Manrope, before any padding at all.
+ * The design renders about 127px for the same string, so it fits there with roughly 7px a side.
+ *
+ * Rendered at the drawn size the label simply leaves the card, because `Button` is
+ * `whitespace-nowrap`. So the compact frame takes one more type step down, to `caption`, and
+ * tightens the inset to 10px. That lands the label at 120px inside 142px — the same "label nearly
+ * fills the button" proportion the drawing shows, which is the part of the design that carries
+ * intent. The 14px is the part that does not survive contact with the real typeface.
+ *
+ * Worth a designer's eye, and the reason this is written down rather than quietly adjusted.
+ *
  * Figma's two variants ("Default" and "Hover") are one component. The only difference between the
  * frames is the crop: the hover frame draws the image at 120% width, offset up and left, which is a
  * zoom on the photograph with the card's own bounds unchanged.
@@ -67,7 +92,7 @@ export function CategoryCard({
   image,
   cta = 'View the collection',
   headingLevel = 3,
-  sizes = '(min-width: 1280px) 415px, (min-width: 768px) 50vw, 100vw',
+  sizes = '(min-width: 1280px) 415px, 50vw',
   scrim = true,
   className,
   ...props
@@ -78,7 +103,12 @@ export function CategoryCard({
     <a
       href={href}
       className={cn(
-        'group/card relative isolate flex aspect-83/96 flex-col justify-between overflow-hidden p-7.5',
+        'group/card relative isolate flex flex-col justify-between overflow-hidden',
+        // The tile changes SHAPE, not just size: 174x242, then 478x350, then 415x480. The tablet
+        // frame is landscape, and a card that stays portrait there is the failure this exists to
+        // prevent. A caller who needs a different proportion overrides `aspect-*` through
+        // `className`; `tailwind-merge` resolves it.
+        'aspect-87/121 p-4 md:aspect-239/175 md:p-7.5 xl:aspect-83/96',
         className,
       )}
       {...props}
@@ -108,7 +138,18 @@ export function CategoryCard({
 
       <Heading className="text-heading-1 text-neutral-white">{title}</Heading>
 
-      <Button as="span" variant="inverse" hoverEffect="slide" className="self-start">
+      {/*
+        Below `md` the drawn call to action spans the tile and drops a type step. That is not a
+        stylistic preference: at 174px wide with a 16px inset there are 142px to work with, and the
+        button's own `whitespace-nowrap` would push the label straight out of the card at the
+        desktop padding and size.
+      */}
+      <Button
+        as="span"
+        variant="inverse"
+        hoverEffect="slide"
+        className="text-caption self-stretch px-2.5 uppercase md:text-body-medium md:self-start md:px-7.5"
+      >
         {cta}
       </Button>
     </a>
