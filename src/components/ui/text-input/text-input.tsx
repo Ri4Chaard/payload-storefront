@@ -32,6 +32,12 @@ export interface TextInputProps extends Omit<React.ComponentProps<'input'>, 'siz
   iconEnd?: IconName
   /** Trailing content inside the box — the design puts a "Forgot password?" link here. */
   trailing?: React.ReactNode
+  /**
+   * `inverse` is the footer's newsletter field (node 196:577): a white-on-dark control with a
+   * white/30 hairline. It is a tone rather than a separate component because everything else about
+   * the control — the label wiring, the error handling, the focus ring — is identical.
+   */
+  tone?: 'default' | 'inverse'
 }
 
 export function TextInput({
@@ -42,6 +48,7 @@ export function TextInput({
   iconStart,
   iconEnd,
   trailing,
+  tone = 'default',
   id,
   required,
   disabled,
@@ -65,6 +72,7 @@ export function TextInput({
       errorId={errorId}
       required={required}
       disabled={disabled}
+      tone={tone}
       className={className}
     >
       <div

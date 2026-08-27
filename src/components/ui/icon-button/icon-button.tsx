@@ -63,6 +63,14 @@ export interface IconButtonProps extends Omit<React.ComponentProps<'button'>, 'c
    * which tells a screen-reader user nothing about what the number counts.
    */
   badge?: React.ReactNode
+  /**
+   * Renders an `<a>` instead of a `<button>`. A control that NAVIGATES is a link — the footer's
+   * social marks (node 312:9300) go to WhatsApp and Instagram, and announcing them as buttons tells
+   * a screen-reader user the wrong thing about what will happen.
+   *
+   * An absolute href is treated as external and gets `rel` and a new tab, matching `Link`.
+   */
+  href?: string
 }
 
 export function IconButton({
@@ -72,27 +80,25 @@ export function IconButton({
   size = 'md',
   hoverEffect = 'none',
   badge,
+  href,
   type = 'button',
   className,
   ...props
 }: IconButtonProps) {
-  return (
-    <button
-      type={type}
-      aria-label={label}
-      className={cn(
-        'group relative inline-grid shrink-0 place-items-center',
-        // Clipping is what makes the slide read as travel off the edge. It is scoped to that
-        // effect because it would otherwise cut the corner off the badge.
-        hoverEffect === 'slide' && 'overflow-hidden',
-        'ease-standard transition-colors duration-[var(--duration-fast)]',
-        'disabled:cursor-not-allowed disabled:opacity-40',
-        variantClasses[variant],
-        variant === 'bare' ? 'size-auto' : sizeClasses[size],
-        className,
-      )}
-      {...props}
-    >
+  const classes = cn(
+    'group relative inline-grid shrink-0 place-items-center',
+    // Clipping is what makes the slide read as travel off the edge. It is scoped to that effect
+    // because it would otherwise cut the corner off the badge.
+    hoverEffect === 'slide' && 'overflow-hidden',
+    'ease-standard transition-colors duration-[var(--duration-fast)]',
+    'disabled:cursor-not-allowed disabled:opacity-40',
+    variantClasses[variant],
+    variant === 'bare' ? 'size-auto' : sizeClasses[size],
+    className,
+  )
+
+  const content = (
+    <>
       {hoverEffect === 'slide' ? (
         <span
           aria-hidden="true"
@@ -116,6 +122,32 @@ export function IconButton({
           {badge}
         </span>
       ) : null}
+    </>
+  )
+
+  if (href) {
+    const isExternal = /^(?:[a-z]+:)?\/\//i.test(href)
+    // The rest props are typed for a button because that is the common case. Nothing anchor-hostile
+    // survives the destructure above, so widening them here is safe.
+    const anchorProps = props as React.ComponentProps<'a'>
+
+    return (
+      <a
+        href={href}
+        aria-label={label}
+        className={classes}
+        {...(isExternal ? { rel: 'noopener noreferrer', target: '_blank' } : {})}
+        {...anchorProps}
+      >
+        {content}
+        {isExternal ? <span className="sr-only"> (opens in a new tab)</span> : null}
+      </a>
+    )
+  }
+
+  return (
+    <button type={type} aria-label={label} className={classes} {...props}>
+      {content}
     </button>
   )
 }

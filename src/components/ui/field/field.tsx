@@ -36,6 +36,8 @@ export interface FieldProps {
   errorId?: string
   required?: boolean
   disabled?: boolean
+  /** `inverse` flips the label and description for a dark surface. */
+  tone?: 'default' | 'inverse'
   className?: string
   children: React.ReactNode
 }
@@ -50,6 +52,7 @@ export function Field({
   errorId,
   required = false,
   disabled = false,
+  tone = 'default',
   className,
   children,
 }: FieldProps) {
@@ -59,7 +62,11 @@ export function Field({
         htmlFor={id}
         className={cn(
           'text-label',
-          disabled ? 'text-neutral-secondary' : 'text-neutral-primary',
+          tone === 'inverse'
+            ? 'text-neutral-white'
+            : disabled
+              ? 'text-neutral-secondary'
+              : 'text-neutral-primary',
           hideLabel && 'sr-only',
         )}
       >
@@ -72,7 +79,13 @@ export function Field({
       </label>
 
       {description ? (
-        <p id={descriptionId} className="text-caption text-neutral-secondary">
+        <p
+          id={descriptionId}
+          className={cn(
+            'text-caption',
+            tone === 'inverse' ? 'text-neutral-white/80' : 'text-neutral-secondary',
+          )}
+        >
           {description}
         </p>
       ) : null}
@@ -80,7 +93,14 @@ export function Field({
       {children}
 
       {error ? (
-        <p id={errorId} role="alert" className="text-body-small text-neutral-primary">
+        <p
+          id={errorId}
+          role="alert"
+          className={cn(
+            'text-body-small',
+            tone === 'inverse' ? 'text-neutral-white' : 'text-neutral-primary',
+          )}
+        >
           {error}
         </p>
       ) : null}

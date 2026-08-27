@@ -18,13 +18,15 @@ import { cn } from '@/lib/cn'
  * separate it from the surrounding text. In a footer column or a nav row the links are identifiable
  * by position, so the hover rule is decoration rather than the only signal.
  */
-export type LinkVariant = 'inline' | 'standalone' | 'muted' | 'inverse'
+export type LinkVariant = 'inline' | 'standalone' | 'muted' | 'inverse' | 'inverse-inline'
 
 const variantClasses: Record<LinkVariant, string> = {
   inline: 'text-primary-default underline underline-offset-4 hover:text-primary-hover',
   standalone: 'text-neutral-primary hover:text-primary-default',
   muted: 'text-neutral-secondary hover:text-neutral-primary',
   inverse: 'text-neutral-white/80 hover:text-neutral-white focus-visible:outline-neutral-white',
+  'inverse-inline':
+    'text-neutral-white/80 underline underline-offset-4 hover:text-neutral-white focus-visible:outline-neutral-white',
 }
 
 const ruleClasses: Record<LinkVariant, string> = {
@@ -32,6 +34,7 @@ const ruleClasses: Record<LinkVariant, string> = {
   standalone: 'bg-primary-default',
   muted: 'bg-neutral-primary',
   inverse: 'bg-primary-default',
+  'inverse-inline': '',
 }
 
 export interface LinkProps extends Omit<React.ComponentProps<'a'>, 'href'> {
@@ -50,7 +53,9 @@ export function Link({
   ...props
 }: LinkProps) {
   const isExternal = external ?? /^(?:[a-z]+:)?\/\//i.test(href)
-  const animated = variant !== 'inline'
+  // Only the variants that are NOT underlined at rest get the rule that grows on hover. Drawing
+  // both would double the line.
+  const animated = variant === 'standalone' || variant === 'muted' || variant === 'inverse'
 
   const content = (
     <>
