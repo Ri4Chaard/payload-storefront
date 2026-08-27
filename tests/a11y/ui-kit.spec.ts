@@ -21,18 +21,21 @@ import { expect, test, type Page } from '@playwright/test'
 const STORYBOOK = process.env.STORYBOOK_URL ?? 'http://localhost:6006'
 
 const COMPONENTS = [
-  'Button',
-  'Checkbox',
-  'Chip',
-  'Field',
-  'Icon',
-  'IconButton',
-  'Link',
-  'MenuOption',
-  'NavLink',
-  'ScrollArea',
-  'Switch',
-  'TextInput',
+  'UI/Breadcrumbs',
+  'UI/Button',
+  'UI/Checkbox',
+  'UI/Chip',
+  'UI/Field',
+  'UI/Icon',
+  'UI/IconButton',
+  'UI/Link',
+  'UI/Menu',
+  'UI/MenuOption',
+  'UI/NavLink',
+  'UI/ScrollArea',
+  'UI/Switch',
+  'UI/TextInput',
+  'Layout/Header',
 ]
 
 interface StoryIndex {
@@ -66,11 +69,11 @@ async function storyIndex(request: {
   return Object.values((await response.json()).entries).filter((entry) => entry.type === 'story')
 }
 
-test('the component list covers every kit component', async ({ request }) => {
+test('the component list covers every component with stories', async ({ request }) => {
   const titles = new Set(
     (await storyIndex(request))
-      .filter((entry) => entry.title.startsWith('UI/'))
-      .map((entry) => entry.title.slice('UI/'.length)),
+      .filter((entry) => !entry.title.startsWith('Foundations/'))
+      .map((entry) => entry.title),
   )
 
   expect(
@@ -80,14 +83,14 @@ test('the component list covers every kit component', async ({ request }) => {
 })
 
 for (const component of COMPONENTS) {
-  test(`UI/${component} has no accessibility violations`, async ({ page, request }) => {
+  test(`${component} has no accessibility violations`, async ({ page, request }) => {
     test.setTimeout(120_000)
 
     const ids = (await storyIndex(request))
-      .filter((entry) => entry.title === `UI/${component}`)
+      .filter((entry) => entry.title === component)
       .map((entry) => entry.id)
 
-    expect(ids.length, `no stories found for UI/${component}`).toBeGreaterThan(0)
+    expect(ids.length, `no stories found for ${component}`).toBeGreaterThan(0)
 
     const failures: string[] = []
 
@@ -105,6 +108,34 @@ for (const component of COMPONENTS) {
       }
     }
 
-    expect(failures, `${failures.length} violation(s) in UI/${component}`).toEqual([])
+    expect(failures, `${failures.length} violation(s) in ${component}`).toEqual([])
+  })
+}
+
+/**
+ * The header is three layouts in one component, and the sweep above only ever sees the widest one:
+ * a story opened by URL renders at the browser's width, whatever viewport global it declares. These
+ * check the two narrow layouts at the widths that actually trigger them.
+ */
+const HEADER_WIDTHS = [
+  { name: 'mobile', width: 390 },
+  { name: 'tablet', width: 1024 },
+]
+
+for (const { name, width } of HEADER_WIDTHS) {
+  test(`Layout/Header has no accessibility violations at ${name} width`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto(`${STORYBOOK}/iframe.html?id=layout-header--with-breadcrumbs&viewMode=story`, {
+      waitUntil: 'domcontentloaded',
+    })
+    await page.locator('#storybook-root > *').first().waitFor({ timeout: 15_000 })
+
+    const results = await analyze(page)
+    const failures = results.violations.map(
+      (violation) =>
+        `${violation.id} — ${violation.help} [${violation.nodes.map((node) => node.target.join(' ')).join(', ')}]`,
+    )
+
+    expect(failures, `${failures.length} violation(s) at ${name} width`).toEqual([])
   })
 }

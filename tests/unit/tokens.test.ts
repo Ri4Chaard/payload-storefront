@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  acceptedExceptions,
-  colors,
-  permittedPairings,
-  typeScale,
-} from '@tokens/mapping'
+import { acceptedExceptions, colors, permittedPairings, typeScale } from '@tokens/mapping'
 
 /**
  * The mapping's validation rules from data-model.md. These exist because the raw export violates
@@ -34,8 +29,10 @@ describe('token mapping', () => {
     const PASSTHROUGH = new Set(['figma', 'supplied'])
     const needsReason = [...colors, ...typeScale].filter((t) => !PASSTHROUGH.has(t.provenance))
     for (const token of needsReason) {
-      expect(token.reason, `${token.name} has provenance "${token.provenance}" but no reason`)
-        .toBeTruthy()
+      expect(
+        token.reason,
+        `${token.name} has provenance "${token.provenance}" but no reason`,
+      ).toBeTruthy()
     }
   })
 
@@ -82,8 +79,11 @@ describe('no collision with Payload admin CSS variables', () => {
     if (!existsSync(payloadCss)) return // dependency layout changed; nothing to compare against
 
     const ours = new Set(
-      [...readFileSync(resolve('src/styles/tokens.css'), 'utf8').matchAll(/^\s*(--[a-z0-9-]+)\s*:/gm)]
-        .map((m) => m[1]!),
+      [
+        ...readFileSync(resolve('src/styles/tokens.css'), 'utf8').matchAll(
+          /^\s*(--[a-z0-9-]+)\s*:/gm,
+        ),
+      ].map((m) => m[1]!),
     )
     const theirs = new Set(
       [...readFileSync(payloadCss, 'utf8').matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]!),
