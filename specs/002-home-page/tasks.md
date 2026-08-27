@@ -127,26 +127,26 @@ each exactly one link named for its collection, all four reachable by keyboard i
 **Independent test**: Load `/` at all three widths, page forwards and back with the control and the
 keyboard, and confirm every card stays reachable and openable with no hover available.
 
-- [ ] T119 [US3] Extract the scroll-snap mechanism from `ImageCarousel` into a `Carousel` primitive
+- [X] T119 [US3] Extract the scroll-snap mechanism from `ImageCarousel` into a `Carousel` primitive
       in `src/components/ui/carousel/` — snap track with the scrollbar hidden, focusable labelled
       region, arrows that page by one viewport width, and reveals gated on `group-hover`,
       `group-focus-within` **and** `pointer-coarse` (FR-015, FR-018)
-- [ ] T120 [US3] Make `Carousel`'s paging boundary-aware rather than wrapping, and hide the arrows
+- [X] T120 [US3] Make `Carousel`'s paging boundary-aware rather than wrapping, and hide the arrows
       when there is nowhere to page — three photographs of one product may wrap, a row of products
       may not, and an arrow that pages to nothing is what FR-017 forbids
-- [ ] T121 [US3] Rebuild `ImageCarousel` on `Carousel`, keeping its current behaviour and its
+- [X] T121 [US3] Rebuild `ImageCarousel` on `Carousel`, keeping its current behaviour and its
       existing tests green. A behavioural change here is a regression in `ProductCard`, which is
       already shipped
-- [ ] T122 [P] [US3] Record `Carousel` in the kit contract and note `ImageCarousel`'s new basis
-- [ ] T123 [US3] Build `JewelryCarousel` in `src/components/sections/jewelry-carousel/` — heading,
+- [X] T122 [P] [US3] Record `Carousel` in the kit contract and note `ImageCarousel`'s new basis
+- [X] T123 [US3] Build `JewelryCarousel` in `src/components/sections/jewelry-carousel/` — heading,
       the row of `ProductCard`s, and the band's own call to action; four across the content width at
       1920, drawn card widths with sideways scroll at 1024 and 390 (FR-014, FR-016)
-- [ ] T124 [US3] Consume `ProductCard` **unchanged**. If the row cannot be built without modifying
+- [X] T124 [US3] Consume `ProductCard` **unchanged**. If the row cannot be built without modifying
       it, the card is wrong and the card is what gets fixed — not the section (FR-019)
-- [ ] T125 [US3] Add `JewelryCarousel` to the page between the category band and the about band
-- [ ] T126 [P] [US3] Stories for `Carousel` and `JewelryCarousel`; add both to the accessibility
+- [X] T125 [US3] Add `JewelryCarousel` to the page between the category band and the about band
+- [X] T126 [P] [US3] Stories for `Carousel` and `JewelryCarousel`; add both to the accessibility
       sweep
-- [ ] T127 [P] [US3] Story tests: card count and overflow per breakpoint, paging forwards and back,
+- [X] T127 [P] [US3] Story tests: card count and overflow per breakpoint, paging forwards and back,
       behaviour at both boundaries, arrows absent when there is nowhere to page, and a real touch
       context proving the controls are visible without hover
 

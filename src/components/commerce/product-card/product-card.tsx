@@ -72,7 +72,11 @@ export function ProductCard({
     <article
       className={cn(
         'group relative flex flex-col items-start',
-        compact ? 'gap-2.5' : 'gap-5',
+        // The default card takes the compact spacing on a phone too. `size` cannot do this: a prop
+        // is one value for every viewport, and the home page's row is 174px wide at 390 and 415px
+        // at 1920 (002/T124). `compact` still means "compact at every width", for a caller that
+        // wants the small card on a desktop.
+        compact ? 'gap-2.5' : 'gap-2.5 md:gap-5',
         className,
       )}
       {...props}
@@ -82,7 +86,9 @@ export function ProductCard({
         label={name}
         controls="hover"
         priority={priority}
-        sizes={sizes ?? (compact ? '174px' : '(min-width: 1280px) 415px, 50vw')}
+        sizes={
+          sizes ?? (compact ? '174px' : '(min-width: 1280px) 415px, (min-width: 768px) 400px, 174px')
+        }
         className="bg-background-container"
       />
 
@@ -93,7 +99,9 @@ export function ProductCard({
             // No hover colour on the name. The link's hit area is the whole card, so it would
             // fire on any hover over the tile — and the drawing keeps the name dark in Variant2.
             // The CTA arriving is the hover feedback.
-            'text-body-medium truncate after:absolute after:inset-0',
+            // Uppercased in CSS, not typed in capitals — the same rule the wordmark follows. The
+            // name reaches a screen reader and a translator in its real casing.
+            'text-body-medium truncate uppercase after:absolute after:inset-0',
           )}
         >
           {name}
@@ -107,6 +115,11 @@ export function ProductCard({
           fullWidth
           onClick={onCtaClick}
           className={cn(
+            // Desktop only, as drawn. The card heights say so exactly: 415 + 20 + 58 + 20 + 52 at
+            // 1920 with the action, and 400 + 20 + 58 at 1024 and 174 + 10 + 58 at 390 without it.
+            // `hidden` rather than `opacity-0` matters — an invisible button that is still
+            // focusable is the precise trap this component's reveal exists to avoid.
+            'hidden xl:inline-flex',
             'z-10 opacity-0',
             'ease-standard transition-opacity duration-[var(--duration-base)]',
             'group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100',

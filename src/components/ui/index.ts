@@ -14,6 +14,7 @@ export {
   type ButtonVariant,
 } from './button'
 export { Breadcrumbs, type BreadcrumbItem, type BreadcrumbsProps } from './breadcrumbs'
+export { Carousel, type CarouselProps } from './carousel'
 export { CategoryCard, type CategoryCardProps } from './category-card'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'

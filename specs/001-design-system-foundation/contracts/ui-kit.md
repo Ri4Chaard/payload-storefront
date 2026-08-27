@@ -488,6 +488,40 @@ compile rather than failing in CI.
 
 ## Media
 
+### `Carousel`
+
+`items`, `label`, `prevLabel`, `nextLabel`, `wrap`, `controls` (`always | hover`), `itemClassName`,
+`trackClassName`, `arrowClassName`.
+
+Added in spec 002 by extraction, not by invention. `ImageCarousel` owned a scroll-snap track; the
+home page's jewelry row needed the same mechanism over cards instead of photographs. Two copies of
+that logic is the near-duplicate Constitution II forbids, so the mechanism moved here and
+`ImageCarousel` became its first caller.
+
+**Two paging modes, because the callers mean different things by "the end".**
+
+- **`wrap`** — three photographs of one product. Stopping dead on the third reads as broken, and the
+  arrows are the only affordance saying there are more. Both arrows are always present.
+- **clamped** (the default) — a row of products. Wrapping from the last piece back to the first
+  leaves a visitor unable to tell whether they have seen everything. The arrows stop, and each one
+  is **absent** — not disabled — when there is nothing on its side.
+
+The clamped mode is also the answer to "an arrow that pages to nothing": with four cards in a row
+that fits four, neither arrow ever renders. That is precisely what the home page draws, where the
+desktop frame parks its scroll control at `hidden`.
+
+**Reach is measured, not assumed** — whether a track overflows depends on the viewport, the item
+count and the font, none of them known at build time. A `scroll` listener and a `ResizeObserver`
+keep it current. The consequence is that clamped arrows are absent until the effect runs, which is
+also the correct no-JavaScript behaviour: an arrow that cannot page is worse than no arrow.
+
+Reduced motion is honoured in both places it can be expressed — `motion-reduce:scroll-auto` on the
+track, and a `matchMedia` check before `scrollTo`, because a JS `behavior` overrides the CSS
+declaration and would otherwise animate anyway.
+
+The track is a labelled `<ul>`, so it takes the `list` role rather than `region`. `ScrollArea` is
+the component that exposes `region`; a test looking for one here will not find it.
+
 ### `ImageCarousel`
 
 `images`, `label`, `controls` (`always | hover`), `sizes`, `priority`.
@@ -505,18 +539,16 @@ appearing on hover.
   and a listing grid renders twenty of these at once.
 
 A scroll-snap track gives native touch swipe, native momentum and native keyboard scrolling, and
-still works with JavaScript disabled — the arrows stop, the strip still scrolls. `scrollBy` is the
+still works with JavaScript disabled — the arrows stop, the strip still scrolls. `scrollTo` is the
 entire runtime cost.
 
-`tabIndex={0}` on the track is not optional: a scrollable region keyboard users cannot reach is a
-WCAG failure (axe's `scrollable-region-focusable`), and it is what makes the arrow keys work.
+Since spec 002 this is a thin caller of `Carousel`, and it no longer carries `'use client'`: it is
+pure markup, and the interactivity lives in the primitive. What stayed here is everything specific
+to photographs of one product — `wrap`, square cells, and control names built from the product, so
+that one card's arrows are distinguishable from the next card's in a listing of twenty.
 
-The container must NOT create a stacking context — no `isolate`, no `z-index`. `ProductCard`
-stretches its title link over the whole card, and the arrows lift above it with `z-10`; a stacking
-context here would trap them underneath, leaving two buttons that look live and do nothing.
-
-Slides are keyed by position, not by `src`. A strip may legitimately repeat a photograph, and React
-silently drops the duplicate when two siblings share a key.
+The rules about `tabIndex`, the stacking context and positional keys moved to `Carousel` with the
+mechanism. They still apply.
 
 ### `Image`
 

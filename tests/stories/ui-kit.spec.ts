@@ -889,11 +889,15 @@ test('cart item truncates a long name instead of shoving the stepper off the row
 
 test('product card reveals its controls at rest on a touch device', async ({ browser }) => {
   // The one case with no hover to give the controls back. Without `pointer-coarse` this ships as
-  // "the Select size button does not exist on phones", and no desktop test would ever say so.
+  // "the controls do not exist on touch", and no desktop test would ever say so.
+  //
+  // The viewport is a large touch screen, not a phone: below `xl` the card has no action at all,
+  // as drawn. A tablet held in landscape is exactly this — wide enough for the button, with no
+  // pointer to hover it.
   const context = await browser.newContext({
     hasTouch: true,
     isMobile: true,
-    viewport: { width: 390, height: 800 },
+    viewport: { width: 1366, height: 900 },
   })
   const page = await context.newPage()
 
@@ -910,6 +914,40 @@ test('product card reveals its controls at rest on a touch device', async ({ bro
         .evaluate((el) => getComputedStyle(el).opacity),
     )
     .toBe('1')
+  await expect
+    .poll(() =>
+      page
+        .getByRole('button', { name: /^Next photograph/ })
+        .evaluate((el) => getComputedStyle(el).opacity),
+    )
+    .toBe('1')
+
+  await context.close()
+})
+
+test('the phone card drops its action rather than hiding one nobody can reach', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 390, height: 800 },
+  })
+  const page = await context.newPage()
+
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productcard--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await page.locator('#storybook-root article').waitFor()
+
+  // Node 440:13528 draws no action on the phone card, and 174px of width has no room for one.
+  // What matters is HOW it is absent: `display: none`, so it is gone from the tab order too. An
+  // `opacity-0` button here would be invisible, focusable and 174px wide — the exact trap the
+  // three-way reveal exists to prevent, reintroduced by the fix for it.
+  await expect(page.getByRole('button', { name: 'Select size' })).toHaveCount(0)
+
+  // The carousel arrows are a different matter — they stay, and stay revealed, because a phone is
+  // where swiping through a product's photographs matters most.
   await expect
     .poll(() =>
       page
@@ -1196,4 +1234,119 @@ test('the sliding fill covers a full-width tile CTA at any proportion', async ({
 
   await cta.hover()
   await expect.poll(() => panel.evaluate((el) => getComputedStyle(el).translate)).toBe('100%')
+})
+
+test('the carousel clamps at both ends and drops the arrow that has nowhere to go', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 900, height: 700 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-carousel--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const track = page.getByRole('list', { name: 'Example panels' })
+  const forward = page.getByRole('button', { name: 'Show more panels' })
+  const back = page.getByRole('button', { name: 'Show previous panels' })
+
+  // At the start there is nothing behind, so only one arrow exists. Not disabled — absent.
+  await expect(forward).toBeVisible()
+  await expect(back).toHaveCount(0)
+
+  await forward.click()
+  await expect(back).toBeVisible()
+
+  // Page to the end. The forward arrow must leave rather than scroll to nothing.
+  for (let i = 0; i < 6; i += 1) {
+    if ((await forward.count()) === 0) break
+    await forward.click()
+    await page.waitForTimeout(250)
+  }
+  await expect(forward).toHaveCount(0)
+  await expect(back).toBeVisible()
+
+  // And it really is at the end, not merely missing its control.
+  expect(
+    await track.evaluate((el) => el.scrollLeft >= el.scrollWidth - el.clientWidth - 2),
+  ).toBe(true)
+})
+
+test('a carousel with nothing to page shows no arrows at all', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 700 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-carousel--nothing-to-page&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  await page.getByRole('list', { name: 'Example panels' }).waitFor()
+  // This is the drawn desktop state of the jewelry row: four cards, four fit, control hidden.
+  await expect(page.getByRole('button', { name: /panels$/ })).toHaveCount(0)
+})
+
+test('a wrapping carousel keeps both arrows and comes back round', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 700 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-carousel--wrapping&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const track = page.getByRole('list', { name: 'Example panels' })
+  // Both, always — there is always somewhere to go.
+  await expect(page.getByRole('button', { name: 'Show previous panels' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Show more panels' })).toBeVisible()
+
+  // Backwards from the start lands at the end, which is the behaviour a strip of photographs of one
+  // product needs and a row of products must not have.
+  await page.getByRole('button', { name: 'Show previous panels' }).click()
+  await expect
+    .poll(() => track.evaluate((el) => el.scrollLeft > 0))
+    .toBe(true)
+})
+
+test('the jewelry row keeps the drawn card at every width and pages only when it must', async ({
+  page,
+}) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-jewelrycarousel--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const track = page.getByRole('list', { name: 'Featured jewelry' })
+  const card = page.locator('#storybook-root li').first()
+
+  const DRAWN = [
+    { width: 390, card: 174, overflows: true }, // node 440:13525
+    { width: 1024, card: 400, overflows: true }, // node 440:12540
+    { width: 1920, card: 415, overflows: false }, // node 144:839 — four fit exactly
+  ]
+
+  for (const { width, card: expected, overflows } of DRAWN) {
+    await page.setViewportSize({ width, height: 900 })
+    await expect
+      .poll(async () => Math.round((await card.boundingBox())!.width), {
+        message: `card is not ${expected}px wide at ${width}`,
+      })
+      .toBe(expected)
+
+    await expect
+      .poll(() => track.evaluate((el) => el.scrollWidth > el.clientWidth + 1), {
+        message: `overflow at ${width} is not ${overflows}`,
+      })
+      .toBe(overflows)
+  }
+
+  // 1920 is the state the drawing shows: four cards, nothing beyond the edge, control hidden.
+  await expect(page.getByRole('button', { name: /pieces$/ })).toHaveCount(0)
+})
+
+test('the jewelry row is reachable and pageable by keyboard alone', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-jewelrycarousel--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const track = page.getByRole('list', { name: 'Featured jewelry' })
+  // A scrolling region a keyboard cannot reach is `scrollable-region-focusable`. This is what makes
+  // the arrow keys work, and it is the only way to move the row without a pointer or a swipe.
+  await expect(track).toHaveAttribute('tabindex', '0')
+
+  await track.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0)
 })

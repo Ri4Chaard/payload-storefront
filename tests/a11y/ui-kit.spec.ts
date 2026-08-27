@@ -24,6 +24,7 @@ const COMPONENTS = [
   'UI/Accordion',
   'UI/Breadcrumbs',
   'UI/Button',
+  'UI/Carousel',
   'UI/CategoryCard',
   'UI/Checkbox',
   'UI/Chip',
@@ -46,6 +47,7 @@ const COMPONENTS = [
   'Sections/AboutBand',
   'Sections/CategoryBand',
   'Sections/Hero',
+  'Sections/JewelryCarousel',
   'Sections/SectionHeading',
   'Layout/ContactBanner',
   'Layout/Footer',
@@ -86,7 +88,10 @@ const DOCUMENT_LEVEL_RULES = [
 ]
 
 async function analyze(page: Page) {
-  for (let attempt = 0; attempt < 6; attempt += 1) {
+  // The budget grew with the sweep. At 40-odd components one story eventually loses this race and
+  // fails a run that a re-run passes, which is worse than waiting a little longer. Only the
+  // "already running" collision is retried — a real violation still fails on the first look.
+  for (let attempt = 0; attempt < 12; attempt += 1) {
     try {
       return await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -185,6 +190,12 @@ const RESPONSIVE_STORIES: {
     widths: ['mobile', 'tablet'],
   },
   { title: 'UI/CategoryCard', id: 'ui-categorycard--default', widths: ['mobile', 'tablet'] },
+  { title: 'Commerce/ProductCard', id: 'commerce-productcard--default', widths: ['mobile', 'tablet'] },
+  {
+    title: 'Sections/JewelryCarousel',
+    id: 'sections-jewelrycarousel--desktop',
+    widths: ['mobile', 'tablet'],
+  },
 ]
 
 for (const story of RESPONSIVE_STORIES) {
