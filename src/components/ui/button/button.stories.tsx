@@ -126,3 +126,38 @@ export const FullWidth: Story = {
     </div>
   ),
 }
+
+/**
+ * The "Ховер эффекты" board (node 196:941). Hover each to see it — the fill is what moves.
+ *
+ * `slide` sends the fill out to the right and inverts the label (nodes 164:748, 158:708).
+ * `reveal` sweeps an ellipse up from below (node 312:9907).
+ */
+export const HoverEffects: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: (args) => (
+    <div>
+      <div className="flex flex-col items-start gap-6 p-8">
+        <Button {...args} variant="primary" hoverEffect="slide">
+          ВЫБРАТЬ РАЗМЕР
+        </Button>
+        <Button {...args} variant="secondary" hoverEffect="slide">
+          Slide, secondary
+        </Button>
+      </div>
+      <div className="bg-background-base flex flex-col items-start gap-6 p-8">
+        <Button {...args} variant="inverse" hoverEffect="slide">
+          SHOP NOW
+        </Button>
+        <Button {...args} variant="inverse" hoverEffect="reveal">
+          SUBSCRIBE
+        </Button>
+      </div>
+    </div>
+  ),
+}
+
+/** An undrawn combination falls back to the plain colour hover rather than inventing a motion. */
+export const HoverEffectFallback: Story = {
+  args: { variant: 'outline', hoverEffect: 'slide' },
+}

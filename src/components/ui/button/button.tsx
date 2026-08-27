@@ -25,6 +25,22 @@ export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'inverse' | 'i
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 /**
+ * The hover treatment, from the "Ховер эффекты" board (node 196:941).
+ *
+ * These are motion applied to an existing variant, not new variants — which is why they are a
+ * second prop rather than five more entries above. The design draws three buttons with two
+ * mechanics between them:
+ *
+ *   slide   nodes 164:748, 158:708   the fill panel travels out to the right, leaving the outline
+ *   reveal  node 312:9907            an ellipse sweeps up from below and floods the button
+ *
+ * Both invert the label colour as the fill leaves or arrives, so the label is always readable
+ * mid-transition. Under `prefers-reduced-motion` the global rule in styles.css collapses the
+ * duration and the swap becomes instantaneous rather than absent.
+ */
+export type ButtonHoverEffect = 'fill' | 'slide' | 'reveal'
+
+/**
  * Only the resting fill is drawn in Figma; hover, active, focus and disabled are not. They are
  * derived here and marked as such:
  *
@@ -39,11 +55,40 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     'bg-neutral-primary text-neutral-white hover:bg-neutral-primary/90 active:bg-neutral-primary/80',
   outline:
-    'border border-neutral-primary text-neutral-primary hover:bg-neutral-primary hover:text-neutral-white',
+    'border border-neutral-primary text-neutral-primary hover:bg-primary-default hover:text-neutral-white',
   inverse:
     'bg-neutral-white text-neutral-primary hover:bg-background-bg active:bg-background-subtle focus-visible:outline-neutral-white',
   'inverse-outline':
     'border border-neutral-white text-neutral-white hover:bg-neutral-white hover:text-neutral-primary focus-visible:outline-neutral-white',
+}
+
+/**
+ * An animated variant is styled as its own RESTING state minus the fill, with the fill re-applied
+ * as a moving panel. `resting` is what the button looks like once the fill has gone: the border it
+ * reveals, and the label colour it lands on.
+ *
+ * Only the combinations the design actually draws are defined. Anything else falls back to the
+ * plain colour-change hover rather than inventing a motion the designer has not seen.
+ */
+interface AnimatedSkin {
+  fill: string
+  resting: string
+}
+
+const animatedSkins: Partial<Record<ButtonVariant, AnimatedSkin>> = {
+  primary: {
+    fill: 'bg-primary-default',
+    resting: 'border border-neutral-primary text-neutral-white group-hover:text-neutral-primary',
+  },
+  secondary: {
+    fill: 'bg-neutral-primary',
+    resting: 'border border-neutral-primary text-neutral-white group-hover:text-neutral-primary',
+  },
+  inverse: {
+    fill: 'bg-neutral-white',
+    resting:
+      'border border-neutral-white text-neutral-primary group-hover:text-neutral-white focus-visible:outline-neutral-white',
+  },
 }
 
 /**
@@ -63,6 +108,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 export interface ButtonProps extends React.ComponentProps<'button'> {
   variant?: ButtonVariant
   size?: ButtonSize
+  hoverEffect?: ButtonHoverEffect
   /** Shows a spinner, marks the button `aria-busy`, and blocks activation. */
   loading?: boolean
   fullWidth?: boolean
@@ -103,6 +149,7 @@ function Spinner() {
 export function Button({
   variant = 'primary',
   size = 'md',
+  hoverEffect = 'fill',
   loading = false,
   fullWidth = false,
   iconStart,
@@ -113,22 +160,40 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
+  const skin = hoverEffect === 'fill' ? undefined : animatedSkins[variant]
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        'text-body-medium inline-flex items-center justify-center gap-2.5 whitespace-nowrap',
+        'group text-body-medium relative inline-flex items-center justify-center gap-2.5 whitespace-nowrap',
         'ease-standard transition-colors duration-[var(--duration-fast)]',
         'disabled:cursor-not-allowed disabled:opacity-40',
-        variantClasses[variant],
+        // `isolate` keeps the fill panel's stacking context inside the button, so a button placed
+        // over a positioned ancestor cannot have its own fill escape behind it.
+        skin ? cn('isolate overflow-hidden', skin.resting) : variantClasses[variant],
         sizeClasses[size],
         fullWidth && 'w-full',
         className,
       )}
       {...props}
     >
+      {skin ? (
+        <span
+          aria-hidden="true"
+          className={cn(
+            'ease-standard absolute -z-10',
+            skin.fill,
+            hoverEffect === 'slide'
+              ? 'inset-0 transition-transform duration-[var(--duration-base)] group-hover:translate-x-full'
+              : // The ellipse is wider than the button and parked below it, so what sweeps in reads
+                // as a curve rather than a rising bar. Matches the 368x235 shape at node 312:9907.
+                '-inset-x-[6%] bottom-0 h-[450%] translate-y-full rounded-[50%] transition-transform duration-[var(--duration-slow)] group-hover:translate-y-0',
+          )}
+        />
+      ) : null}
       {loading ? <Spinner /> : iconStart ? <IconSlot>{iconStart}</IconSlot> : null}
       {children}
       {iconEnd ? <IconSlot>{iconEnd}</IconSlot> : null}
