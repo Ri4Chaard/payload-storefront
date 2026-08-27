@@ -120,10 +120,21 @@ export function IconButton({
     // inside the control. It is scoped to those effects because it would otherwise cut the corner
     // off a badge — which is why `badge` and an animated hover do not combine.
     hoverEffect !== 'none' && 'overflow-hidden',
-    'ease-standard transition-colors',
-    // Matched to the disc's travel, so the glyph and the fill land together instead of the glyph
-    // snapping ahead of the colour behind it.
-    reveal ? 'duration-[var(--duration-slow)]' : 'duration-[var(--duration-fast)]',
+    // `isolate` is load-bearing, not tidiness. The disc sits at `-z-10`, and `relative` alone does
+    // NOT open a stacking context — so without this the disc paints behind the nearest ancestor
+    // that has one, which on the footer means behind its own background. It rendered as nothing at
+    // all: the element was in the DOM, correctly sized, and invisible.
+    reveal && 'isolate',
+    'ease-standard transition-colors duration-[var(--duration-fast)]',
+    /*
+     * The glyph inverts AFTER the disc has reached it, not while it is arriving.
+     *
+     * The disc is centred on the top edge and grows to a radius of 0.875x the control's width, so
+     * it reaches the centred glyph at roughly 57% of its travel. Holding the colour until then
+     * keeps a white glyph off a white disc, and lands the flip as the disc finishes. The delay is
+     * symmetric because the leaving direction has the same problem mirrored.
+     */
+    reveal && 'delay-[var(--duration-base)]',
     'disabled:cursor-not-allowed disabled:opacity-40',
     reveal ? reveal.base : variantClasses[variant],
     variant === 'bare' ? 'size-auto' : sizeClasses[size],
@@ -136,11 +147,15 @@ export function IconButton({
         <span
           aria-hidden="true"
           /*
-           * Centred on the TOP edge and scaled from nothing, wider than the control so that at full
-           * scale its radius clears the control's height from that centre.
+           * Centred on the TOP edge and scaled from nothing.
+           *
+           * The width is not decorative. From a centre on the top edge, the far bottom corner of a
+           * SQUARE control is hypot(w/2, h) away — 54px on a 48px button — so a disc must be at
+           * least 224% of the control's width to cover it. At 175% it fell 6px short and left the
+           * bottom of every social mark dark, which reads as the animation not finishing.
            */
           className={cn(
-            'ease-standard absolute top-0 left-1/2 -z-10 aspect-square w-[175%] -translate-x-1/2',
+            'ease-standard absolute top-0 left-1/2 -z-10 aspect-square w-[240%] -translate-x-1/2',
             '-translate-y-1/2 scale-0 rounded-full transition-transform duration-[var(--duration-slow)]',
             'group-hover:scale-100',
             reveal.circle,

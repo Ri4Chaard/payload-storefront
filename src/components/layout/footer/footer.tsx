@@ -101,7 +101,7 @@ const LIST = 'flex flex-col items-center gap-2.5 md:items-start md:gap-3.5'
  */
 function Certifications() {
   return (
-    <div className="flex items-center gap-2.5 xl:flex-col xl:items-start">
+    <div className="flex items-center gap-2.5 md:flex-col md:items-start">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/logos/gia.svg"

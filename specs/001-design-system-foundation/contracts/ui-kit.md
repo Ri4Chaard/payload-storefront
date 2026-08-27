@@ -131,6 +131,13 @@ track, one leaving as the other arrives, because the design shows both on screen
 mid-transition. `reveal` is the `Button` mechanic on a round control — a disc grows from the top
 edge and floods it while the glyph inverts — and is what the footer's social marks use.
 
+The reveal disc must be at least **224% of a square control's width**. From a centre on the top
+edge the far bottom corner is `hypot(w/2, h)` away — 54px on a 48px button — so a narrower disc
+leaves the bottom bare. The glyph's inversion is held back by one `duration-base` so it flips as the
+disc arrives rather than fading behind it, and the control needs `isolate`: the disc sits at
+`-z-10`, and `relative` alone opens no stacking context, so without it the disc paints behind the
+nearest ancestor that has one.
+
 `social` carries a `white/30` hairline ring at rest. That value was measured off the design rather
 than guessed: the exported mark composites to `rgb(89, 76, 76)` over `background-base`, which is
 white at 30% — the same value as the newsletter field beside it.
@@ -431,6 +438,9 @@ affordance was invisible. Changed at the owner's direction.
 - Phone and email are links here, though the design sets them as plain text. A phone number a
   visitor cannot tap, on a shop's mobile site, is a lost enquiry. `inverse` keeps them looking
   exactly as drawn.
+
+The certification marks share a row on a phone and stack into a column from tablet width up —
+below `md` there is no room for a column.
 
 The GIA and IGI marks are third-party trademarks: they are NOT normalised to `currentColor` the way
 our own icons are, and at 96KB between them they are served from `/public` rather than inlined.

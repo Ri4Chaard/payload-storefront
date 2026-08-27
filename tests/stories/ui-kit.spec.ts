@@ -300,24 +300,42 @@ test('reveal hover inverts the label and the circle covers the button', async ({
   await button.hover()
   await expect.poll(() => labelColour(button)).toBe(WHITE)
 
-  // "Expand full size on button" is geometry, not vibes: at rest the circle is a point, and at full
-  // scale its box must contain the button's, or the corners stay uncovered.
-  const circle = button.locator('span[aria-hidden="true"]').first()
-  const [buttonBox, circleBox] = await Promise.all([button.boundingBox(), circle.boundingBox()])
-
-  expect(buttonBox, 'button has no box').not.toBeNull()
-  expect(circleBox, 'circle has no box').not.toBeNull()
-  expect(circleBox!.x, 'circle does not reach the left edge').toBeLessThanOrEqual(buttonBox!.x)
-  expect(circleBox!.y, 'circle does not reach the top edge').toBeLessThanOrEqual(buttonBox!.y)
-  expect(
-    circleBox!.x + circleBox!.width,
-    'circle does not reach the right edge',
-  ).toBeGreaterThanOrEqual(buttonBox!.x + buttonBox!.width)
-  expect(
-    circleBox!.y + circleBox!.height,
-    'circle does not reach the bottom edge',
-  ).toBeGreaterThanOrEqual(buttonBox!.y + buttonBox!.height)
+  await expectDiscToCover(button)
 })
+
+/**
+ * "Expands to full size" is geometry, not vibes — and it has to be measured as a CIRCLE.
+ *
+ * An earlier version of this asserted that the disc's bounding BOX contained the button's, which a
+ * disc can satisfy while still leaving all four corners bare: a circle inscribed in a box only
+ * touches that box at four points. That is exactly how the social marks shipped with their bottom
+ * 6px uncovered, passing a green test.
+ */
+async function expectDiscToCover(control: import('@playwright/test').Locator) {
+  const disc = control.locator('span[aria-hidden="true"]').first()
+  const [box, discBox] = await Promise.all([control.boundingBox(), disc.boundingBox()])
+
+  expect(box, 'control has no box').not.toBeNull()
+  expect(discBox, 'disc has no box').not.toBeNull()
+
+  const centre = { x: discBox!.x + discBox!.width / 2, y: discBox!.y + discBox!.height / 2 }
+  const radius = discBox!.width / 2
+
+  const corners = [
+    { x: box!.x, y: box!.y },
+    { x: box!.x + box!.width, y: box!.y },
+    { x: box!.x, y: box!.y + box!.height },
+    { x: box!.x + box!.width, y: box!.y + box!.height },
+  ]
+
+  for (const corner of corners) {
+    const distance = Math.hypot(corner.x - centre.x, corner.y - centre.y)
+    expect(
+      distance,
+      `corner (${corner.x}, ${corner.y}) is ${distance.toFixed(1)}px from the disc centre, outside its ${radius.toFixed(1)}px radius`,
+    ).toBeLessThanOrEqual(radius)
+  }
+}
 
 /**
  * The footer's dark-surface treatment, asserted on COMPUTED values.
@@ -384,4 +402,53 @@ test('footer link rules are white, not brand maroon', async ({ page }) => {
   })
 
   expect(rule).toBe('rgb(255, 255, 255)')
+})
+
+test('social reveal disc covers the whole mark', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const mark = page.getByRole('link', { name: /WhatsApp/ })
+  await mark.hover()
+  await expect.poll(() => mark.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(5, 3, 1)')
+
+  // The disc must also actually PAINT. It sits at `-z-10`, and without an isolation context on the
+  // control it renders behind the footer's own background — present, correctly sized, invisible.
+  const disc = mark.locator('span[aria-hidden="true"]').first()
+  await expect(disc).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  await expect(mark).toHaveCSS('isolation', 'isolate')
+
+  await expectDiscToCover(mark)
+})
+
+test('certification marks stack from tablet up and sit side by side on a phone', async ({
+  page,
+}) => {
+  const marks = async () => {
+    const gia = await page
+      .getByRole('img', { name: 'Gemological Institute of America' })
+      .boundingBox()
+    const igi = await page
+      .getByRole('img', { name: 'International Gemological Institute' })
+      .boundingBox()
+    return { gia: gia!, igi: igi! }
+  }
+
+  await page.setViewportSize({ width: 1024, height: 1200 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await page.locator('#storybook-root > *').first().waitFor()
+
+  const tablet = await marks()
+  expect(tablet.igi.y, 'marks are not stacked at tablet width').toBeGreaterThan(tablet.gia.y)
+  expect(tablet.igi.x, 'stacked marks are not aligned').toBeCloseTo(tablet.gia.x, 0)
+
+  // Below the tablet breakpoint they share a row — there is no width for a column there.
+  await page.setViewportSize({ width: 390, height: 1400 })
+  await page.locator('#storybook-root > *').first().waitFor()
+
+  const phone = await marks()
+  expect(phone.igi.x, 'marks are not side by side on a phone').toBeGreaterThan(phone.gia.x)
 })
