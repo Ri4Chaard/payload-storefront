@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Every gate here blocks merge. A gate that has never failed is unproven — see T086 in
+# specs/001-design-system-foundation/tasks.md, which deliberately breaks each one.
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: aurum
+          POSTGRES_PASSWORD: aurum
+          POSTGRES_DB: aurum
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U aurum -d aurum"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      DATABASE_URI: postgres://aurum:aurum@localhost:5432/aurum
+      PAYLOAD_SECRET: ci-only-not-a-real-secret
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Generated artifacts must match their sources. Constitution I and research.md R6.
+      - name: Payload types are current
+        run: |
+          pnpm generate:types
+          git diff --exit-code src/payload-types.ts \
+            || { echo "::error::src/payload-types.ts is stale. Run 'pnpm generate:types' and commit."; exit 1; }
+
+      - name: Design tokens are current
+        run: pnpm check:tokens
+
+      - name: No magic values (TS/TSX)
+        run: pnpm lint
+
+      - name: No magic values (CSS)
+        run: pnpm check:styles
+
+      - name: Colour contrast meets WCAG 2.2 AA
+        run: pnpm check:contrast
+
+      - name: Every UI kit component has stories
+        run: pnpm check:stories
+
+      - name: Types
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm test:e2e
+
+      - name: Accessibility
+        run: pnpm test:a11y
+
+      # A build that compiles is not a story that renders — see tests/stories/foundations.spec.ts.
+      - name: Stories render
+        run: pnpm test:stories
