@@ -81,10 +81,15 @@ export function TextInput({
           'ease-standard transition-colors duration-[var(--duration-fast)]',
           // The ring goes on the BOX, not the input. The input's own outline is suppressed so the
           // indicator traces the control a person actually sees rather than the text area inside it.
-          'has-[:focus-visible]:outline-primary-default has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
+          'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
+          tone === 'inverse'
+            ? 'has-[:focus-visible]:outline-neutral-white'
+            : 'has-[:focus-visible]:outline-primary-default',
           error
             ? 'border-status-error-default'
-            : 'hover:border-neutral-primary focus-within:border-neutral-primary border-black/10',
+            : tone === 'inverse'
+              ? 'hover:border-neutral-white focus-within:border-neutral-white border-white/30'
+              : 'hover:border-neutral-primary focus-within:border-neutral-primary border-black/10',
         )}
       >
         {iconStart ? <Icon name={iconStart} /> : null}
@@ -95,8 +100,11 @@ export function TextInput({
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
           className={cn(
-            'text-body-medium text-neutral-primary min-w-0 flex-1 bg-transparent outline-none',
-            'placeholder:text-neutral-secondary disabled:cursor-not-allowed',
+            'text-body-medium min-w-0 flex-1 bg-transparent outline-none',
+            'disabled:cursor-not-allowed',
+            tone === 'inverse'
+              ? 'text-neutral-white placeholder:text-neutral-white/70'
+              : 'text-neutral-primary placeholder:text-neutral-secondary',
           )}
           {...props}
         />

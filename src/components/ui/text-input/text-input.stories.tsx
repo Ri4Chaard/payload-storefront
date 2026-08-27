@@ -68,3 +68,15 @@ export const AllStates: Story = {
     </div>
   ),
 }
+
+/** The footer's newsletter field (node 196:577) — white-on-dark with a white/30 hairline. */
+export const InverseTone: Story = {
+  args: { label: 'Email address', hideLabel: true, tone: 'inverse', placeholder: 'EMAIL' },
+  decorators: [
+    (Story) => (
+      <div className="bg-background-base max-w-sm p-8">
+        <Story />
+      </div>
+    ),
+  ],
+}

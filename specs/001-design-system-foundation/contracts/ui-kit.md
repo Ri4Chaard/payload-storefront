@@ -126,8 +126,17 @@ Drawn across four nodes: `filled` 144:908, `outline` 144:1045, `bare` 258:3981, 
 most common way a keyboard or screen-reader user hits a dead end, and it is invisible in review
 because the button looks fine.
 
-`hoverEffect="slide"` reproduces node 144:1045: two glyphs on a track, one leaving as the other
-arrives, because the design shows both on screen at once mid-transition.
+`hoverEffect` accepts `none | slide | reveal`. `slide` reproduces node 144:1045: two glyphs on a
+track, one leaving as the other arrives, because the design shows both on screen at once
+mid-transition. `reveal` is the `Button` mechanic on a round control — a disc grows from the top
+edge and floods it while the glyph inverts — and is what the footer's social marks use.
+
+`social` carries a `white/30` hairline ring at rest. That value was measured off the design rather
+than guessed: the exported mark composites to `rgb(89, 76, 76)` over `background-base`, which is
+white at 30% — the same value as the newsletter field beside it.
+
+`badge` and an animated `hoverEffect` do not combine: the clipping that keeps the fill inside the
+control also cuts the corner off the badge.
 
 `badge` pins a count to the top-right corner (node 355:6868). It renders `aria-hidden`, so the count
 MUST also appear in `label` — "Cart, 2 items", not "Cart". A badge left in the accessibility tree
@@ -413,6 +422,10 @@ Reproduced as drawn but worth a designer's eye:
 - The divider above the legal bar is `border-black/10` on a near-black surface, so it renders
   invisible. Everything else on that surface uses white-based hairlines. Left as drawn, because the
   rendered design shows no line either — "fixing" it would ADD something nobody approved.
+
+The hover rule under footer links is WHITE, not the `primary-default` Figma draws (node 312:8748).
+On `background-base` the maroon is barely distinguishable from the surface behind it, so the
+affordance was invisible. Changed at the owner's direction.
 - "CUSTOMER CARE" is set at 16px against 18px for the other three headings. Normalised to `eyebrow`.
 - The drawn email address reads `hello@aurum.exampIe` — a capital I where "example" has an l. Corrected.
 - Phone and email are links here, though the design sets them as plain text. A phone number a

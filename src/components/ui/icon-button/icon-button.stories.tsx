@@ -69,3 +69,16 @@ export const SlideOnHover: Story = {
 }
 
 export const Disabled: Story = { args: { disabled: true } }
+
+/** Node 312:9907's mechanic on a round control: a white disc grows from the top, the glyph inverts. */
+export const SocialReveal: Story = {
+  args: { variant: 'social', hoverEffect: 'reveal', size: 'lg' },
+  decorators: [onDark],
+  render: (args) => (
+    <div className="flex items-center gap-5">
+      <IconButton {...args} icon="whatsapp" label="WhatsApp" />
+      <IconButton {...args} icon="instagram" label="Instagram" />
+      <IconButton {...args} icon="telegram" label="Telegram" />
+    </div>
+  ),
+}

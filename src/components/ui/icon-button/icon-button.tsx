@@ -34,7 +34,34 @@ const variantClasses: Record<IconButtonVariant, string> = {
     'border border-black/5 text-neutral-primary shadow-md hover:border-black/10 hover:bg-background-container',
   bare: 'text-neutral-secondary hover:text-neutral-primary',
   social:
-    'rounded-full text-neutral-white hover:bg-neutral-white hover:text-neutral-primary focus-visible:outline-neutral-white',
+    'rounded-full border border-white/30 text-neutral-white hover:bg-neutral-white hover:text-neutral-primary focus-visible:outline-neutral-white',
+}
+
+/**
+ * `reveal` is the button's counterpart of the same effect (node 312:9907): a disc in a contrasting
+ * colour grows from the top edge and floods the control while the glyph inverts.
+ *
+ * Like `Button`, the inversion is written with `hover:` and not `group-hover:` — the latter is a
+ * descendant selector and matches nothing on the element that carries `group`.
+ */
+interface RevealSkin {
+  base: string
+  circle: string
+}
+
+const revealSkins: Partial<Record<IconButtonVariant, RevealSkin>> = {
+  social: {
+    base: 'rounded-full border border-white/30 text-neutral-white hover:text-neutral-primary focus-visible:outline-neutral-white',
+    circle: 'bg-neutral-white',
+  },
+  filled: {
+    base: 'bg-primary-default text-neutral-white',
+    circle: 'bg-neutral-primary',
+  },
+  outline: {
+    base: 'border border-black/5 text-neutral-primary shadow-md hover:text-neutral-white',
+    circle: 'bg-primary-default',
+  },
 }
 
 const sizeClasses: Record<IconButtonSize, string> = {
@@ -54,7 +81,7 @@ export interface IconButtonProps extends Omit<React.ComponentProps<'button'>, 'c
    * identical one arrives from the right. Two glyphs on a track rather than one animated glyph,
    * because the design shows both on screen at once mid-transition.
    */
-  hoverEffect?: 'none' | 'slide'
+  hoverEffect?: 'none' | 'slide' | 'reveal'
   /**
    * A count indicator pinned to the top-right corner (node 355:6868).
    *
@@ -85,20 +112,41 @@ export function IconButton({
   className,
   ...props
 }: IconButtonProps) {
+  const reveal = hoverEffect === 'reveal' ? revealSkins[variant] : undefined
+
   const classes = cn(
     'group relative inline-grid shrink-0 place-items-center',
-    // Clipping is what makes the slide read as travel off the edge. It is scoped to that effect
-    // because it would otherwise cut the corner off the badge.
-    hoverEffect === 'slide' && 'overflow-hidden',
-    'ease-standard transition-colors duration-[var(--duration-fast)]',
+    // Clipping is what makes the slide read as travel off the edge, and what keeps the reveal disc
+    // inside the control. It is scoped to those effects because it would otherwise cut the corner
+    // off a badge — which is why `badge` and an animated hover do not combine.
+    hoverEffect !== 'none' && 'overflow-hidden',
+    'ease-standard transition-colors',
+    // Matched to the disc's travel, so the glyph and the fill land together instead of the glyph
+    // snapping ahead of the colour behind it.
+    reveal ? 'duration-[var(--duration-slow)]' : 'duration-[var(--duration-fast)]',
     'disabled:cursor-not-allowed disabled:opacity-40',
-    variantClasses[variant],
+    reveal ? reveal.base : variantClasses[variant],
     variant === 'bare' ? 'size-auto' : sizeClasses[size],
     className,
   )
 
   const content = (
     <>
+      {reveal ? (
+        <span
+          aria-hidden="true"
+          /*
+           * Centred on the TOP edge and scaled from nothing, wider than the control so that at full
+           * scale its radius clears the control's height from that centre.
+           */
+          className={cn(
+            'ease-standard absolute top-0 left-1/2 -z-10 aspect-square w-[175%] -translate-x-1/2',
+            '-translate-y-1/2 scale-0 rounded-full transition-transform duration-[var(--duration-slow)]',
+            'group-hover:scale-100',
+            reveal.circle,
+          )}
+        />
+      ) : null}
       {hoverEffect === 'slide' ? (
         <span
           aria-hidden="true"

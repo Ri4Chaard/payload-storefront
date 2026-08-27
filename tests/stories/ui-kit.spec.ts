@@ -318,3 +318,70 @@ test('reveal hover inverts the label and the circle covers the button', async ({
     'circle does not reach the bottom edge',
   ).toBeGreaterThanOrEqual(buttonBox!.y + buttonBox!.height)
 })
+
+/**
+ * The footer's dark-surface treatment, asserted on COMPUTED values.
+ *
+ * Every one of these has already been shipped broken once, in the same way: an edit that reformatted
+ * before it applied, leaving a prop that was typed, accepted, threaded through — and connected to
+ * nothing. The class list looked right. Only the rendered value showed it was not.
+ */
+
+/** Works for whatever colour space the browser computes into — `rgb()` or `oklab()`. */
+function lightnessOf(colour: string): number {
+  const numbers = (colour.match(/[\d.]+/g) ?? []).map(Number)
+  if (colour.startsWith('oklab') || colour.startsWith('oklch')) return numbers[0] ?? 0
+  const [r = 0, g = 0, b = 0] = numbers
+  return (r + g + b) / (3 * 255)
+}
+
+test('footer newsletter field uses the inverse tone', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const field = page.getByRole('textbox', { name: 'Email address' })
+  const border = await field.evaluate(
+    (el) => getComputedStyle(el.parentElement as HTMLElement).borderColor,
+  )
+  const text = await field.evaluate((el) => getComputedStyle(el).color)
+
+  // A dark hairline here means the tone fell back to the light default on a near-black surface,
+  // which renders as no border at all.
+  expect(lightnessOf(border), `border is dark: ${border}`).toBeGreaterThan(0.5)
+  expect(text).toBe('rgb(255, 255, 255)')
+})
+
+test('footer social marks carry a ring and invert on hover', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const mark = page.getByRole('link', { name: /WhatsApp/ })
+  const resting = await mark.evaluate((el) => {
+    const s = getComputedStyle(el)
+    return { border: s.borderColor, width: s.borderWidth, colour: s.color }
+  })
+
+  expect(resting.width, 'social mark has no ring').not.toBe('0px')
+  expect(lightnessOf(resting.border), `ring is dark: ${resting.border}`).toBeGreaterThan(0.5)
+  expect(resting.colour).toBe('rgb(255, 255, 255)')
+
+  await mark.hover()
+  await expect.poll(() => mark.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(5, 3, 1)')
+})
+
+test('footer link rules are white, not brand maroon', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  // Figma draws this rule in primary-default. On background-base that is barely distinguishable
+  // from the surface, so a hover affordance nobody can see.
+  const rule = await page.getByRole('link', { name: 'Contact Us' }).evaluate((el) => {
+    const span = el.querySelector('span[aria-hidden="true"]')
+    return span ? getComputedStyle(span).backgroundColor : 'NO RULE ELEMENT'
+  })
+
+  expect(rule).toBe('rgb(255, 255, 255)')
+})

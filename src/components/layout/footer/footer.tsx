@@ -194,6 +194,7 @@ export function Footer({
                 <li key={item.href}>
                   <IconButton
                     variant="social"
+                    hoverEffect="reveal"
                     icon={item.icon}
                     label={item.label}
                     href={item.href}

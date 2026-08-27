@@ -33,7 +33,10 @@ const ruleClasses: Record<LinkVariant, string> = {
   inline: '',
   standalone: 'bg-primary-default',
   muted: 'bg-neutral-primary',
-  inverse: 'bg-primary-default',
+  // Figma draws this rule in `primary-default` (node 312:8748). On `background-base` that measures
+  // barely 1.3:1 against the surface behind it — a hover affordance nobody can see is not one.
+  // White, at the owner's direction.
+  inverse: 'bg-neutral-white',
   'inverse-inline': '',
 }
 
