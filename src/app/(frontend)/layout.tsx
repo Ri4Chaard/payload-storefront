@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import React from 'react'
 
 import { colorValue } from '@tokens/mapping'
+import { Header } from '@/components/layout/header'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -26,7 +27,15 @@ export const viewport: Viewport = {
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables}>
-      <body>{children}</body>
+      <body>
+        <Header />
+        {/*
+          `<main>` is the landmark the skip link (T072) will target. The footer and skip link are
+          their own tasks; this is the header half of the shell, wired up so it is exercised by a
+          real page rather than only by Storybook.
+        */}
+        <main id="main">{children}</main>
+      </body>
     </html>
   )
 }
