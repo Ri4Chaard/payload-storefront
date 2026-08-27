@@ -48,15 +48,65 @@ property of the design, not a defect, and it is why their stories render on `bac
 Only `md` (52px) is drawn. `sm` (44px) and `lg` (60px) are derived on the 4px scale and marked
 provisional in the source; `sm` clears the 44x44 touch target rather than landing on 40px.
 
+`hoverEffect` (`fill | slide | reveal`, default `fill`) carries the animated hovers from the
+"Ховер эффекты" board (node 196:941). These are motion applied to an existing variant, not new
+variants — `slide` sends the fill out to the right (nodes 164:748, 158:708), `reveal` sweeps an
+ellipse up from below (node 312:9907). Defined for `primary`, `secondary` and `inverse`; any other
+pairing falls back to the plain colour hover rather than inventing a motion nobody has drawn.
+
 ### `Link`
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `'inline' \| 'standalone' \| 'muted'` | `'inline'` | |
+| `variant` | `'inline' \| 'standalone' \| 'muted' \| 'inverse'` | `'inline'` | `inverse` is for dark surfaces |
 | `href` | `string` | required | |
 | `external` | `boolean` | inferred | Adds `rel="noopener noreferrer"` and a visually-hidden "opens in new tab" |
 
-Underlined by default when `inline` — colour alone must never be the only affordance.
+Only `inline` is underlined at rest, and deliberately so. Inside a paragraph, colour alone is not a
+sufficient affordance — a link that is only "the maroon words" is invisible to anyone who cannot
+separate it from the text around it. In a footer column or a nav row the links are identifiable by
+position, so the rule that grows on hover (node 312:8748) is decoration rather than the only signal.
+
+### `NavLink`
+
+`href`, `current`. The primary navigation item from node 135:204 — 70px tall, uppercase, taking a
+2px `primary-default` rule on hover.
+
+The rule exists at rest as a TRANSPARENT border. Adding a border on hover would grow the element and
+nudge every sibling sideways; Figma compensates with 2px of top padding on the hover variant, which
+is the same fix expressed as a second state.
+
+`current` is separate from hover and sets `aria-current="page"`. They look alike, but a screen
+reader has no hover — the current page has to be announced, not merely shaded.
+
+### `IconButton`
+
+`icon` (an `IconName`), `label` (**required**), `variant` (`filled | outline | bare | social`),
+`size`, `hoverEffect` (`none | slide`).
+
+Drawn across four nodes: `filled` 144:908, `outline` 144:1045, `bare` 258:3981, `social` 312:9301.
+
+`label` has no visually-hidden escape hatch. An icon-only control with no accessible name is the
+most common way a keyboard or screen-reader user hits a dead end, and it is invisible in review
+because the button looks fine.
+
+`hoverEffect="slide"` reproduces node 144:1045: two glyphs on a track, one leaving as the other
+arrives, because the design shows both on screen at once mid-transition.
+
+The design draws `filled` at 48px and both `outline` and `social` at 50px. Two pixels between three
+sibling controls reads as drift, so they are normalised onto one scale — worth confirming.
+
+### `Chip`
+
+`selected`, plus the native button props. A small selectable pill (node 255:2983).
+
+Figma draws the unselected state as a frame and the selected state as a button; both render
+`<button>` here, because both must be reachable and operable. Selection is exposed with
+`aria-pressed` — the two states differ only by fill and text colour, which is exactly the kind of
+distinction that does not survive a screen reader.
+
+Deliberately NOT `Badge`. A badge is a non-interactive label; this is a toggle. Merging them would
+give the kit one component with a `clickable` prop, which is how a primitive stops being one.
 
 ---
 
@@ -73,9 +123,22 @@ through the icon, the border, and the `status-error-transparent` wash.
 ### `TextInput`
 
 `type` (`text | email | tel | url | search | number`), `value`, `defaultValue`, `onChange`,
-`placeholder`, `prefix`, `suffix`, plus the shared wrapper props.
+`placeholder`, `iconStart`, `iconEnd`, `trailing`, plus the shared wrapper props.
 
-Placeholder is never a substitute for a label.
+Six states are drawn at node 196:1344: normal, hover, focus, filled, error, error-with-message. Two
+departures from the drawing, both deliberate:
+
+1. **It has a label.** Every drawn state is placeholder-only. A placeholder is not a label: it
+   vanishes the moment someone types, it is not announced as a name by every screen reader, and it
+   leaves a half-filled form with no way to tell what any box was for. `hideLabel` exists where the
+   surrounding layout genuinely supplies the name.
+2. **The placeholder is `neutral-secondary` #343231, not the #a7a5a3 in the drawing.** That lighter
+   grey is 2.29:1 on white — the stale colours.json value the token module already corrects, and
+   placeholder text is text.
+
+The focus ring is on the BOX, not the input, so the indicator traces the control a person sees.
+
+The drawn 341px width is dropped per FR-025.
 
 ### `Textarea`
 
@@ -102,6 +165,29 @@ this contract exists to prevent. Semantics are unchanged: both are checkboxes, b
 Two open design questions, raised rather than silently resolved: a round control that permits
 multiple selection reads as "pick one" to most people, and it will be visually near-identical to
 `Radio`. `indeterminate` is deferred until a visual for it exists — the design draws two states.
+
+### `MenuOption`
+
+`meta`, `selected`, plus the native button props. A row in a menu or dropdown (node 301:5920) — a
+label with optional trailing metadata, shading on hover.
+
+The design draws one row with a rule on both edges; stacked, that renders every internal boundary at
+2px. Here the rule is on the bottom edge with the first row taking a top edge, which is what the
+drawing looks like once there is more than one.
+
+No `role="option"`: that role is only valid inside a `listbox`, and asserting it here would make the
+markup invalid the moment this is used in a plain menu. The owning container decides the pattern.
+
+### `ScrollArea`
+
+`orientation`, `label`, plus the native div props. A scroll container with the brand scrollbar
+(node 301:5934).
+
+**Styles the native scrollbar rather than reimplementing one.** The 6px thumb and its colour are
+reproducible in CSS; the two 5px carets are not portably. Rebuilding the scrollbar in JavaScript to
+recover them would cost keyboard scrolling, trackpad momentum, the platform's overlay-scrollbar
+behaviour, and every assistive technology that understands a native scroll container. The carets are
+dropped and the trade recorded rather than made silently.
 
 ### `Switch`
 
@@ -163,6 +249,16 @@ formats, and alt text so CLS and payload budgets cannot be violated one componen
 `name` (from a fixed set), `size` (`sm | md | lg`), `label`. Without `label` the icon renders
 `aria-hidden`; with one it becomes an accessible graphic. Icons inherit `currentColor` — never a
 hardcoded fill.
+
+The name union is generated from `src/assets/icons` by `pnpm build:icons`, so a typo is a type error
+rather than a blank square in production, and adding an icon is dropping in an SVG and re-running.
+
+The set is not optically uniform: viewBoxes are 14, 20 and 24 across six source libraries, so two
+icons at one `size` will not read at one weight. The wrapper normalises the box; matching the
+strokes needs a designer.
+
+There is no warning or alert glyph, which is why the error state in `Field` currently has no icon to
+put the red on.
 
 ---
 

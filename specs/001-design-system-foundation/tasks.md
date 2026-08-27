@@ -137,10 +137,10 @@ keyboard-traverse each story confirming visible focus; confirm zero domain compo
 **Note**: The owner is supplying components one at a time. Each task below ships the component
 **and** its `*.stories.tsx` in the same change — never one without the other.
 
-- [ ] T046 [US3] Create the shared form-field wrapper in `src/components/ui/field/field.tsx` implementing the common contract — required `label`, `description`, `error`, `required`, `disabled`, wired via `aria-describedby` and `aria-invalid`, with error text in `neutral-primary` and red confined to icon and border (contracts/ui-kit.md)
+- [X] T046 [US3] Create the shared form-field wrapper in `src/components/ui/field/field.tsx` implementing the common contract — required `label`, `description`, `error`, `required`, `disabled`, wired via `aria-describedby` and `aria-invalid`, with error text in `neutral-primary` and red confined to icon and border (contracts/ui-kit.md)
 - [X] T047 [P] [US3] `Button` in `src/components/ui/button/` — variants primary/secondary/outline/inverse/inverse-outline (revised against Figma node 10:169 — no ghost or destructive is drawn), sizes sm/md/lg, `loading` with `aria-busy`, `fullWidth`, icon slots, plus stories for every variant and state
-- [ ] T048 [P] [US3] `Link` in `src/components/ui/link/` — variants inline/standalone/muted, external handling with `rel` and a visually-hidden "opens in new tab", underlined by default when inline
-- [ ] T049 [P] [US3] `TextInput` in `src/components/ui/textinput/` composing `Field`
+- [X] T048 [P] [US3] `Link` in `src/components/ui/link/` — variants inline/standalone/muted/inverse (node 312:8748 adds the dark-surface link with a rule that grows on hover), external handling with `rel` and a visually-hidden "opens in new tab", underlined by default when inline
+- [X] T049 [P] [US3] `TextInput` in `src/components/ui/textinput/` composing `Field`
 - [ ] T050 [P] [US3] `Textarea` in `src/components/ui/textarea/` with `autoResize`, composing `Field`
 - [ ] T051 [P] [US3] `Select` in `src/components/ui/select/` — native `<select>`, composing `Field`
 - [X] T052 [P] [US3] `Checkbox` in `src/components/ui/checkbox/` with `shape` square/round — the round shape is the design's "Multiselectable" (node 10:198), a prop rather than a second component. `indeterminate` deferred: the design draws two states and no indeterminate visual exists
@@ -149,7 +149,13 @@ keyboard-traverse each story confirming visible focus; confirm zero domain compo
 - [ ] T054 [P] [US3] `Heading` in `src/components/ui/heading/` with `level` and `styleAs` decoupled so semantics and appearance are independent (FR-042)
 - [ ] T055 [P] [US3] `Text` in `src/components/ui/text/` — `color` typed to accept only roles that pass contrast on the given surface, so an inaccessible combination fails to compile
 - [ ] T056 [P] [US3] `Image` in `src/components/ui/image/` — **required** `alt` with no optional escape, required dimensions or `fill` plus `sizes`, `aspectRatio` to reserve space. The only way images enter the app (FR-027)
-- [ ] T057 [P] [US3] `Icon` in `src/components/ui/icon/` — fixed name set, `currentColor` inheritance, `aria-hidden` without `label`
+- [X] T057 [P] [US3] `Icon` in `src/components/ui/icon/` — name union generated from `src/assets/icons` by `pnpm build:icons`, `currentColor` inheritance, `aria-hidden` without `label`
+- [X] T057a [P] [US3] `IconButton` in `src/components/ui/icon-button/` — variants filled/outline/bare/social (nodes 144:908, 144:1045, 258:3981, 312:9301), **required** `label`, and the two-glyph slide hover
+- [X] T057b [P] [US3] `Chip` in `src/components/ui/chip/` — selectable pill (node 255:2983) with `aria-pressed`; deliberately not `Badge`, which is non-interactive
+- [X] T057c [P] [US3] `NavLink` in `src/components/ui/nav-link/` — node 135:204, transparent resting border so the hover rule cannot shift its siblings, `current` distinct from hover
+- [X] T057d [P] [US3] `MenuOption` in `src/components/ui/menu-option/` — node 301:5920, collapsed rules, no `role="option"` without a `listbox` to put it in
+- [X] T057e [P] [US3] `ScrollArea` in `src/components/ui/scroll-area/` — node 301:5934, native scrollbar restyled rather than reimplemented; the two carets are dropped and the trade recorded
+- [X] T057f [P] [US3] `Button` gains `hoverEffect` slide/reveal from the "Ховер эффекты" board (node 196:941) — motion on existing variants, not new variants
 - [ ] T058 [P] [US3] `Container` in `src/components/ui/container/` — sizes narrow/default/wide/full, the only place page width is decided
 - [ ] T059 [P] [US3] `Stack` in `src/components/ui/stack/` — token-only gaps
 - [ ] T060 [P] [US3] `Grid` in `src/components/ui/grid/` — responsive column config requiring a base value
@@ -158,10 +164,10 @@ keyboard-traverse each story confirming visible focus; confirm zero domain compo
 - [ ] T063 [P] [US3] `Spinner` in `src/components/ui/spinner/` — `role="status"`, degrades to static under reduced motion
 - [ ] T064 [P] [US3] `Skeleton` in `src/components/ui/skeleton/` — `aria-hidden`, pulse suppressed under reduced motion
 - [ ] T065 [P] [US3] `InlineMessage` in `src/components/ui/inlinemessage/` — `*-transparent` wash background, status colour on icon and border, text in `neutral-primary`, `role="alert"` / `role="status"`
-- [ ] T066 [US3] Add `src/components/ui/index.ts` re-exporting every primitive as the kit's single entry point
-- [ ] T067 [US3] Write `scripts/check-stories.ts` failing when any component in `src/components/ui/` lacks a matching `*.stories.tsx`; wire `pnpm check:stories` into CI (FR-032)
+- [X] T066 [US3] Add `src/components/ui/index.ts` re-exporting every primitive as the kit's single entry point
+- [X] T067 [US3] Write `scripts/check-stories.ts` failing when any component in `src/components/ui/` lacks a matching `*.stories.tsx`; wire `pnpm check:stories` into CI (FR-032)
 - [X] T067a [US3] Write `scripts/check-naming.ts` failing on any path that is not kebab-case; wire `pnpm check:naming` into CI. Enforced rather than reviewed because macOS resolves `./Button` against `button.tsx` and only Linux CI catches it (Constitution 2.1.0, Naming)
-- [ ] T068 [P] [US3] Add `tests/a11y/stories.spec.ts` running axe-core across every story, blocking merge on any violation (FR-044)
+- [X] T068 [P] [US3] Add `tests/a11y/stories.spec.ts` running axe-core across every story, blocking merge on any violation (FR-044)
 - [ ] T069 [P] [US3] Add `tests/e2e/keyboard.spec.ts` traversing each interactive primitive's stories, asserting reachability and a visible focus indicator (FR-043, SC-006)
 - [ ] T070 [US3] Review the kit for domain concepts — products, diamonds, sizes, carts, requests, posts. **Must be zero** (FR-028, SC-009)
 
