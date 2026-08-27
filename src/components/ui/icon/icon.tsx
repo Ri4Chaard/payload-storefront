@@ -19,9 +19,12 @@ import { iconRegistry, type IconName } from '@/lib/icon-registry'
  * icons at the same `size` will not read at the same weight. The wrapper is the thing that
  * normalises the box; matching the strokes needs a designer.
  */
-export type IconSize = 'sm' | 'md' | 'lg'
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg'
 
 const sizeClasses: Record<IconSize, string> = {
+  // 12px. Added for the header's language caret (node 196:784), which is smaller than anything the
+  // icon set was previously asked for.
+  xs: 'size-3',
   sm: 'size-4',
   md: 'size-5',
   lg: 'size-6',

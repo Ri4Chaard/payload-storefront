@@ -17,17 +17,27 @@ import { cn } from '@/lib/cn'
  *
  * No `role="option"`. That role is only valid inside a `listbox`, and asserting it here would make
  * the markup invalid the moment this is used in a plain menu. The owning container decides the
- * pattern; this component supplies the row.
+ * pattern; this component supplies the row. `Menu` sets `role="menuitem"` on whatever it is given.
+ *
+ * The selected fill is `primary-transparent`, taken from the language menu (node 337:8233) — the
+ * only place the design actually draws a chosen row. An earlier revision reused the hover shade
+ * here, which made "hovered" and "chosen" indistinguishable.
  */
 export interface MenuOptionProps extends Omit<React.ComponentProps<'button'>, 'type'> {
   /** Trailing metadata — stock state, a count, a price. */
   meta?: React.ReactNode
   selected?: boolean
+  /**
+   * The hairline rule between rows. On by default, as node 301:5920 draws it; off for menus whose
+   * container carries its own border, like the language menu at node 337:8233.
+   */
+  divider?: boolean
 }
 
 export function MenuOption({
   meta,
   selected = false,
+  divider = true,
   className,
   children,
   ...props
@@ -36,11 +46,12 @@ export function MenuOption({
     <button
       type="button"
       className={cn(
-        'flex h-12.5 w-full items-center justify-between gap-4 border-b border-black/5 first:border-t',
+        'flex h-12.5 w-full items-center justify-between gap-4',
+        divider && 'border-b border-black/5 first:border-t',
         'text-body-medium text-neutral-primary px-5 py-3.5 text-left',
         'ease-standard transition-colors duration-[var(--duration-fast)]',
         'hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40',
-        selected && 'bg-black/5',
+        selected && 'bg-primary-transparent',
         className,
       )}
       {...props}

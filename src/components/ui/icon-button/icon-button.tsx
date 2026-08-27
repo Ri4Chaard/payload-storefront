@@ -55,6 +55,14 @@ export interface IconButtonProps extends Omit<React.ComponentProps<'button'>, 'c
    * because the design shows both on screen at once mid-transition.
    */
   hoverEffect?: 'none' | 'slide'
+  /**
+   * A count indicator pinned to the top-right corner (node 355:6868).
+   *
+   * Rendered `aria-hidden`, so the count MUST also appear in `label` — "Cart, 2 items", not "Cart".
+   * A badge left in the accessibility tree announces as a bare number after the button's name,
+   * which tells a screen-reader user nothing about what the number counts.
+   */
+  badge?: React.ReactNode
 }
 
 export function IconButton({
@@ -63,6 +71,7 @@ export function IconButton({
   variant = 'filled',
   size = 'md',
   hoverEffect = 'none',
+  badge,
   type = 'button',
   className,
   ...props
@@ -72,7 +81,10 @@ export function IconButton({
       type={type}
       aria-label={label}
       className={cn(
-        'group inline-grid shrink-0 place-items-center overflow-hidden',
+        'group relative inline-grid shrink-0 place-items-center',
+        // Clipping is what makes the slide read as travel off the edge. It is scoped to that
+        // effect because it would otherwise cut the corner off the badge.
+        hoverEffect === 'slide' && 'overflow-hidden',
         'ease-standard transition-colors duration-[var(--duration-fast)]',
         'disabled:cursor-not-allowed disabled:opacity-40',
         variantClasses[variant],
@@ -96,6 +108,14 @@ export function IconButton({
       ) : (
         <Icon name={icon} />
       )}
+      {badge != null ? (
+        <span
+          aria-hidden="true"
+          className="text-caption bg-primary-default text-neutral-white absolute -top-1.5 -right-1.5 grid h-4 min-w-4 place-items-center rounded-full px-1 font-semibold"
+        >
+          {badge}
+        </span>
+      ) : null}
     </button>
   )
 }
