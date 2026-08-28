@@ -29,6 +29,7 @@
     "check:naming": "tsx scripts/check-naming.ts",
     "payload": "payload",
     "generate:types": "payload generate:types",
+    "generate:importmap": "payload generate:importmap",
     "check:styles": "tsx scripts/check-styles.ts",
     "test:stories": "playwright test --project=stories"
   },
