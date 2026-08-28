@@ -8,8 +8,12 @@
 ARG NODE_VERSION=22.21.0
 
 FROM node:${NODE_VERSION}-alpine AS base
+# COREPACK_HOME is set explicitly because the default lives in the invoking user's home: pnpm
+# fetched by root during the build would be invisible to the `node` user at runtime, and corepack
+# would silently re-download it on every container start.
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
+    COREPACK_HOME=/opt/corepack \
     NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable
 WORKDIR /app
@@ -64,6 +68,11 @@ COPY --from=build /app/migrations ./migrations
 # The @tokens/* alias resolves here; the Payload CLI reads TypeScript source, so keep it resolvable.
 COPY --from=build /app/design ./design
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml next.config.mjs tsconfig.json ./
+
+# Bake in the pnpm that package.json pins. `corepack enable` alone only installs a shim, which
+# downloads pnpm on first use — that would put the npm registry on the critical path of every
+# container start.
+RUN corepack prepare --activate && chmod -R a+rX /opt/corepack
 
 # Uploads land in ./media, relative to the working directory (Payload defaults staticDir to the
 # collection slug). Created here so the named volume mounted over it inherits node's ownership.
