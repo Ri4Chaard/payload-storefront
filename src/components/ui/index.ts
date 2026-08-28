@@ -18,6 +18,7 @@ export { Carousel, type CarouselProps } from './carousel'
 export { CategoryCard, type CategoryCardProps } from './category-card'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'
+export { Container, type ContainerProps } from './container'
 export {
   FeatureCard,
   FeatureStrip,

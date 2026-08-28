@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import React from 'react'
 
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/breadcrumbs'
+import { Container } from '@/components/ui/container'
 import { IconButton } from '@/components/ui/icon-button'
 import { NavLink } from '@/components/ui/nav-link'
 import { LanguageSelector, type Locale } from '@/components/layout/language-selector'
@@ -87,7 +88,7 @@ export function Header({
 
   return (
     <header className={cn('bg-background-bg border-b border-black/10', className)}>
-      <div className="relative flex h-15 items-center justify-between px-4 md:h-17.5 md:px-6 xl:px-25">
+      <Container className="relative flex h-15 items-center justify-between md:h-17.5">
         <MobileNav items={navItems} className="xl:hidden" />
 
         <Logo className="absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0" />
@@ -120,12 +121,12 @@ export function Header({
           />
           <IconButton variant="bare" icon="user" label="Account" className={iconChrome} />
         </div>
-      </div>
+      </Container>
 
       {breadcrumbs && breadcrumbs.length > 0 ? (
-        <div className="px-4 py-2.5 md:px-6 xl:px-25">
+        <Container className="py-2.5">
           <Breadcrumbs items={breadcrumbs} />
-        </div>
+        </Container>
       ) : null}
     </header>
   )

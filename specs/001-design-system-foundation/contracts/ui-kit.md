@@ -587,8 +587,27 @@ put the red on.
 
 ### `Container`
 
-`size` (`narrow | default | wide | full`), `as`. Applies max-width and responsive gutters. The only
-place page width is decided.
+`as` (`div | section | header | footer | main | nav | aside`), plus the native props. Applies the
+page gutter — 16px on a phone, 24px from `md`, 100px from `xl` — and nothing else. The only place
+that measure is written down.
+
+**Built with no `size` and no max-width**, against the sketch above. The design draws three widths
+and caps none of them: every desktop frame is 1920 wide with the content filling it to a 1720px
+measure, so `narrow | wide | full` would have been three invented numbers dressed as an API. Past
+1920 the content keeps growing, which is worth a decision from the designer — the point of the
+component is that the decision then lands in one file instead of six.
+
+It contributes horizontal padding only. No background, no vertical rhythm, no flex: those vary per
+band, and folding them in is how a layout primitive turns into a second way of writing every
+section. `as` is a union rather than `ElementType` so the spread props stay checkable; `ref` is
+widened to `HTMLElement`, which is the one thing those tags genuinely disagree about.
+
+Adopted by `Header` (both rows), `Footer`, `ContactBanner`, `CategoryBand` and `JewelryCarousel`.
+
+Three places carry the same classes and deliberately do NOT use it. `Hero` and `MobileNav` stop at
+`md:px-6` — a centred text column and a panel row are not page gutters, and neither takes the `xl`
+step. `FeatureStrip` puts the gutter inside its scroll container so the row scrolls to the screen
+edge with the gutter as a leading inset; wrapping it would clip the scroller at the gutter instead.
 
 ### `Stack`
 

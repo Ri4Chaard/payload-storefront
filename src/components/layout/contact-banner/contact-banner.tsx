@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { Container } from '@/components/ui/container'
 import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
@@ -67,10 +68,10 @@ export function ContactBanner({
   const dial = phoneHref ?? `tel:${phone.replace(/[^+\d]/g, '')}`
 
   return (
-    <div
+    <Container
       className={cn(
         'bg-background-base text-neutral-white hidden items-center justify-between',
-        'h-15 px-6 xl:h-17.5 xl:px-25',
+        'h-15 xl:h-17.5',
         'md:flex',
         className,
       )}
@@ -110,6 +111,6 @@ export function ContactBanner({
           </li>
         ))}
       </ul>
-    </div>
+    </Container>
   )
 }

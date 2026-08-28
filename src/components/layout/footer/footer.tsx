@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { Container } from '@/components/ui/container'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { type IconName } from '@/lib/icon-registry'
@@ -138,7 +139,7 @@ export function Footer({
 }: FooterProps) {
   return (
     <footer className={cn('bg-background-base text-neutral-white', className)}>
-      <div className="px-4 md:px-6 xl:px-25">
+      <Container>
         <div className="grid gap-7.5 border-b border-black/10 pt-7.5 pb-5 md:grid-cols-3 xl:grid-cols-5 xl:gap-5 xl:pt-25 xl:pb-12.5">
           {/* Brand. Spans both rows on tablet so the four groups fill the 2x2 beside it. */}
           <div className="flex flex-col items-center gap-2.5 md:row-span-2 md:items-start xl:row-span-1 xl:gap-16">
@@ -222,7 +223,7 @@ export function Footer({
             </Link>
           ))}
         </nav>
-      </div>
+      </Container>
     </footer>
   )
 }

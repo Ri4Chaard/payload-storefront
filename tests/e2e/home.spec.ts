@@ -192,3 +192,63 @@ test('the hero photograph is the priority image and reserves its own space', asy
   const bare = await page.locator('main img:not([srcset])').count()
   expect(bare, 'a photograph is not going through the image pipeline').toBe(0)
 })
+
+/**
+ * Every band shares one content edge.
+ *
+ * This is what `Container` is for. The gutter used to be written out at six sites, and six copies
+ * of one measure drift silently — a header inset that no longer matches the band under it is
+ * obvious on screen and invisible in a diff.
+ *
+ * The measurement is each band's CONTENT box — its border box plus its own padding — because that
+ * is the edge a visitor sees text start at, and it is the same number whether the gutter is applied
+ * to the band or to something inside it. The hero is deliberately absent: it is full-bleed with a
+ * centred text column, which is a different measure and not this component's job.
+ */
+for (const { name, width, gutter } of [
+  { name: 'desktop', width: 1920, gutter: 100 },
+  { name: 'tablet', width: 1024, gutter: 24 },
+  { name: 'mobile', width: 390, gutter: 16 },
+]) {
+  test(`the bands share one content edge at ${name} width`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/')
+
+    const BANDS = {
+      header: 'header > *:first-child',
+      footer: 'footer > *:first-child',
+      categories: 'section[aria-labelledby="categories-heading"]',
+      featured: 'section[aria-labelledby="featured-heading"]',
+    }
+
+    const edges = await page.evaluate((bands) => {
+      return Object.fromEntries(
+        Object.entries(bands).map(([label, selector]) => {
+          const node = document.querySelector(selector)
+          if (!node) return [label, null]
+          const box = node.getBoundingClientRect()
+          const style = getComputedStyle(node)
+          return [
+            label,
+            {
+              left: box.left + parseFloat(style.paddingLeft),
+              right: box.right - parseFloat(style.paddingRight),
+            },
+          ]
+        }),
+      )
+    }, BANDS)
+
+    for (const [label, edge] of Object.entries(edges)) {
+      expect(edge, `${label} was not found`).not.toBeNull()
+      expect(edge!.left, `${label} starts at ${edge!.left}px, not the ${gutter}px gutter`).toBeCloseTo(
+        gutter,
+        0,
+      )
+      expect(edge!.right, `${label} ends short of the ${gutter}px gutter`).toBeCloseTo(
+        width - gutter,
+        0,
+      )
+    }
+  })
+}

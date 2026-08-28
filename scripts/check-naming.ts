@@ -26,6 +26,7 @@ const ALLOWED_FILES = new Set([
   'CLAUDE.md',
   'MEMORY.md',
   'SKILL.md',
+  'Dockerfile',
 ])
 
 /** Vendored or generated — we do not own the naming. */

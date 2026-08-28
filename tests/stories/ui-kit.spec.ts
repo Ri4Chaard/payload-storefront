@@ -1256,11 +1256,27 @@ test('the carousel clamps at both ends and drops the arrow that has nowhere to g
   await expect(back).toBeVisible()
 
   // Page to the end. The forward arrow must leave rather than scroll to nothing.
+  //
+  // Settling BEFORE each decision rather than waiting a fixed spell after each click: the arrow
+  // unmounts the instant the track reaches the end, so a smooth scroll that is still travelling
+  // when the next click begins detaches the button mid-action. That is the test racing the
+  // component, not the component misbehaving.
+  const settle = async () => {
+    let previous = -1
+    for (let i = 0; i < 20; i += 1) {
+      const now = await track.evaluate((el) => el.scrollLeft)
+      if (now === previous) return
+      previous = now
+      await page.waitForTimeout(100)
+    }
+  }
+
   for (let i = 0; i < 6; i += 1) {
+    await settle()
     if ((await forward.count()) === 0) break
     await forward.click()
-    await page.waitForTimeout(250)
   }
+  await settle()
   await expect(forward).toHaveCount(0)
   await expect(back).toBeVisible()
 
@@ -1377,4 +1393,64 @@ test('every band grows for copy longer than the drawing showed', async ({ page }
       `${id} overflows sideways`,
     ).toBe(false)
   }
+})
+
+/**
+ * The gutter is drawn: 16px on a phone, 24px from tablet, 100px from 1280 up. It is now written
+ * down once, in `Container`, which is only worth anything if the number is guarded — an extracted
+ * measure that nothing measures is just a shorter way to be wrong everywhere at once.
+ */
+test('the container steps its gutter at the drawn widths', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-container--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const content = page.locator('#storybook-root .bg-background-subtle')
+  await content.waitFor()
+
+  for (const [width, gutter] of [
+    [1920, 100],
+    [1280, 100],
+    [1024, 24],
+    [768, 24],
+    [390, 16],
+  ] as const) {
+    await page.setViewportSize({ width, height: 600 })
+    const box = (await content.boundingBox())!
+    expect(box.x, `left gutter at ${width}px`).toBeCloseTo(gutter, 0)
+    expect(width - (box.x + box.width), `right gutter at ${width}px`).toBeCloseTo(gutter, 0)
+  }
+})
+
+/**
+ * Two containers on a page must agree on where the content edge is. This is the failure the
+ * extraction exists to prevent, and it is invisible in a diff: one band updated, its neighbour not.
+ */
+test('stacked containers share one content edge', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 700 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-container--stacked&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const blocks = page.locator('#storybook-root .bg-background-subtle')
+  await expect(blocks).toHaveCount(2)
+
+  const [first, second] = await blocks.all()
+  const [a, b] = [(await first!.boundingBox())!, (await second!.boundingBox())!]
+  expect(a.x).toBe(b.x)
+  expect(a.width).toBe(b.width)
+})
+
+/**
+ * `as="section"` has to produce a real `<section>`, not a `<div>` wearing the name — a landmark
+ * that is not a landmark is the kind of thing that only shows up in a screen reader.
+ */
+test('the container renders the element it is told to', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-container--as-section&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const band = page.getByRole('region', { name: 'A band' })
+  await expect(band).toBeVisible()
+  expect(await band.evaluate((el) => el.tagName)).toBe('SECTION')
 })

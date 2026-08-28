@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { ProductCard } from '@/components/commerce'
-import { Button, Carousel } from '@/components/ui'
+import { Button, Carousel, Container } from '@/components/ui'
 import { cn } from '@/lib/cn'
 
 import { SectionHeading } from '../section-heading'
@@ -53,13 +53,10 @@ export function JewelryCarousel({
   ...props
 }: JewelryCarouselProps) {
   return (
-    <section
+    <Container
+      as="section"
       aria-labelledby={headingId}
-      className={cn(
-        'flex flex-col items-center gap-5 xl:gap-7.5',
-        'px-4 py-7.5 md:px-6 xl:px-25 xl:py-12.5',
-        className,
-      )}
+      className={cn('flex flex-col items-center gap-5 xl:gap-7.5', 'py-7.5 xl:py-12.5', className)}
       {...props}
     >
       <SectionHeading id={headingId}>{heading}</SectionHeading>
@@ -87,6 +84,6 @@ export function JewelryCarousel({
       <Button href={cta.href} className="uppercase">
         {cta.label}
       </Button>
-    </section>
+    </Container>
   )
 }

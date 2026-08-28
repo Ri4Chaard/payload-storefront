@@ -28,6 +28,7 @@ const COMPONENTS = [
   'UI/CategoryCard',
   'UI/Checkbox',
   'UI/Chip',
+  'UI/Container',
   'UI/FeatureCard',
   'UI/Field',
   'UI/Icon',
