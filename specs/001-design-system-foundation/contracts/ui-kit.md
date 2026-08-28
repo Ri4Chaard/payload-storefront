@@ -107,8 +107,17 @@ the trail, not "text slash text slash text".
 
 ### `Menu`
 
-`label`, `trigger`, `align`, plus `MenuOption` children. A trigger and a popover list, from the
-language switcher at node 337:8233.
+`label`, `trigger`, `align`, `placement`, plus `MenuOption` children. A trigger and a popover list,
+from the language switcher at node 337:8233.
+
+`placement` is `auto` by default and measures the room below the trigger, flipping the panel above
+it when there is not enough and there is more the other way. A tie keeps the ordinary downward menu.
+The measurement runs in a layout effect, so the panel is placed before it is painted. `top`/`bottom`
+force it, for the case where the surrounding layout knows something the measurement cannot.
+
+This exists because the switcher at the foot of the mobile menu opened downward past the bottom of a
+container that scrolls, which grew that container's scroll height — a scrollbar on a drawer that
+fits.
 
 The design draws only the open panel, so the behaviour comes from the WAI-ARIA menu button pattern
 rather than from invention: `Escape` closes and returns focus to the trigger, arrows move and wrap,
@@ -779,7 +788,21 @@ text on `#f8f7f6`, caught by the axe sweep rather than by reading the diff.
 
 ### `Header`
 
-`navItems`, `breadcrumbs`, `cartCount`, `locales`.
+`navItems`, `breadcrumbs`, `cartCount`, `locales`, `reveal`.
+
+**It follows the reading direction.** With `reveal` (the default) the header is `sticky` and steps
+out of the way once the visitor has scrolled two header-heights downward, returning the moment they
+scroll up — so the navigation is one gesture away without ever sitting on what they are reading. A
+6px floor on the movement keeps momentum scrolling from flickering it on and off.
+
+The animation is on `top`, not on a transform, and deliberately: a transform here would make the
+header the containing block for every `position: fixed` descendant, and the menu's panel is one — it
+would be sized to the header instead of to the viewport. `position: sticky` creates a stacking
+context but not a containing block, so the panel is unaffected.
+
+The contact strip is **not** part of this. It stays in the flow above the header and scrolls off
+with the page, which is what makes it the top-of-page thing it is drawn as: a header revealed
+mid-page carries no strip, and that needs no code to say so.
 
 **The five Figma variants at node 327:7956 are three breakpoints, not five components.** Figma has
 to draw a frame per width; CSS does not, and five headers would guarantee drift:
@@ -855,8 +878,18 @@ scrolls. Seven sections at `text-heading-1` with a decorative chevron each, then
 the address, the number and the language switch, because the contact strip is `hidden` there and the
 menu is the phone's only route to them. Social marks at the bottom in both, 50px then 70px.
 
+It unrolls open and rolls shut — `clip-path` from `inset(0 0 100% 0)`, with opacity, over
+`--duration-base`. Clipping rather than sliding because the panel is `bottom-0` on an opaque
+full-screen overlay: any offset would show a sliver of the page it is there to cover. The exit needs
+the element to still exist while it plays, so the panel stays mounted and steps between `display:
+none` and `flex` as a discrete transition with `@starting-style` supplying the frame it enters from.
+`display: none` takes it out of the accessibility tree and the tab order exactly as unmounting did.
+
 Behaviour is the disclosure pattern it always had: `aria-expanded`/`aria-controls`, `Escape` closes
-and returns focus, focus moves to the first link on open, an outside press closes. Focus is still
+and returns focus, focus moves to the first link on open, an outside press closes. `Escape` goes to
+the innermost open layer: the language menu inside the drawer and the drawer itself both listen on
+`document`, and the drawer's listener is registered first, so the inner menu cannot win by
+propagation — the drawer asks whether anything inside it is expanded before acting. Focus is still
 **not** trapped — the cross, the basket and the account button share the header row and are all
 drawn live, so trapping inside the panel would put the control that closes it out of reach.
 

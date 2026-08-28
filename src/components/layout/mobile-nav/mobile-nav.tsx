@@ -43,6 +43,13 @@ import { type IconName } from '@/lib/icon-registry'
  * content that is invisible but still in the tab order is the failure a full-screen overlay
  * introduces and a 200px dropdown does not.
  *
+ * **It is always in the document, and `display` is what changes.** An exit animation needs the
+ * element to still exist while it plays, which a `{open ? … : null}` cannot give it. So the panel
+ * stays mounted and steps between `display: none` and `flex` as a discrete transition, with
+ * `@starting-style` supplying the frame it enters from. `display: none` takes it out of the
+ * accessibility tree and the tab order just as unmounting did — the closed state is as absent as it
+ * ever was, to everything except the DOM.
+ *
  * The rest of the disclosure pattern is unchanged from the panel it replaces: `aria-expanded` and
  * `aria-controls` on the trigger, `Escape` closes and returns focus, focus moves to the first link
  * on open, a press outside closes.
@@ -115,7 +122,13 @@ export function MobileNav({
       setOpen(false)
     }
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') close(true)
+      if (event.key !== 'Escape') return
+      // Escape closes the innermost layer, and the language menu inside this one is a layer. Both
+      // it and this listen on `document`, and this one is registered first because the drawer opens
+      // first — so `stopPropagation` from inside the menu arrives too late to help. Asking whether
+      // anything in the panel is expanded is what actually decides it.
+      if (panelRef.current?.querySelector('[aria-expanded="true"]')) return
+      close(true)
     }
 
     document.addEventListener('pointerdown', onPointerDown)
@@ -188,83 +201,92 @@ export function MobileNav({
         className="text-neutral-primary hover:text-primary-default [&_svg]:size-5 md:[&_svg]:size-6"
       />
 
-      {open ? (
-        <div
-          ref={panelRef}
-          id={panelId}
-          style={{ top }}
-          className="bg-background-bg fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-y-auto"
-        >
-          <Container as="nav" aria-label="Primary" className="border-b border-black/10 py-7.5">
-            <ul className="flex flex-col gap-7.5">
-              {items.map((item) => (
-                <li key={item.href}>
-                  <NextLink
-                    href={item.href}
-                    onClick={() => close(false)}
-                    className={cn(
-                      'text-neutral-primary ease-standard flex items-center justify-between gap-5',
-                      'transition-colors duration-[var(--duration-fast)] hover:text-primary-default',
-                    )}
-                  >
-                    {/* Uppercasing is the heading utility's own; the label is written in sentence
+      <div
+        ref={panelRef}
+        id={panelId}
+        style={{ top }}
+        className={cn(
+          'bg-background-bg fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-y-auto',
+          // The panel unrolls downward from the header rather than sliding into place. A slide
+          // would have to start off its own box, and this one is `bottom-0` on an opaque
+          // full-screen overlay: any offset shows a sliver of the page it is there to cover.
+          // Clipping moves nothing, so there is nothing to show through.
+          'transition-[opacity,clip-path,display] duration-[var(--duration-base)]',
+          'transition-discrete ease-[var(--ease-emphasized)] motion-reduce:transition-none',
+          open
+            ? 'opacity-100 [clip-path:inset(0)] starting:opacity-0 starting:[clip-path:inset(0_0_100%_0)]'
+            : 'hidden opacity-0 [clip-path:inset(0_0_100%_0)]',
+        )}
+      >
+        <Container as="nav" aria-label="Primary" className="border-b border-black/10 py-7.5">
+          <ul className="flex flex-col gap-7.5">
+            {items.map((item) => (
+              <li key={item.href}>
+                <NextLink
+                  href={item.href}
+                  onClick={() => close(false)}
+                  className={cn(
+                    'text-neutral-primary ease-standard flex items-center justify-between gap-5',
+                    'hover:text-primary-default transition-colors duration-[var(--duration-fast)]',
+                  )}
+                >
+                  {/* Uppercasing is the heading utility's own; the label is written in sentence
                         case so that it is spoken as a word rather than an initialism. */}
-                    <span className="text-heading-1">{item.label}</span>
-                    <Icon name="chevron-right" className="size-5 shrink-0 md:size-6" />
-                  </NextLink>
-                </li>
-              ))}
-            </ul>
-          </Container>
+                  <span className="text-heading-1">{item.label}</span>
+                  <Icon name="chevron-right" className="size-5 shrink-0 md:size-6" />
+                </NextLink>
+              </li>
+            ))}
+          </ul>
+        </Container>
 
-          {/*
+        {/*
             Below `md` only: from tablet up these same two facts are in the strip above the header,
             and repeating them here would be the third copy on one screen.
           */}
-          <Container className="flex flex-1 flex-col items-start gap-5 py-7.5 md:hidden">
-            <Link href={`mailto:${email}`} variant="standalone" className={CONTACT_ROW}>
-              <Icon name="mail" className="size-6 shrink-0" />
-              {email}
-            </Link>
-            <Link href={phoneHref} variant="standalone" className={CONTACT_ROW}>
-              <Icon name="whatsapp" className="size-6 shrink-0" />
-              {phone}
-            </Link>
-          </Container>
+        <Container className="flex flex-1 flex-col items-start gap-5 py-7.5 md:hidden">
+          <Link href={`mailto:${email}`} variant="standalone" className={CONTACT_ROW}>
+            <Icon name="mail" className="size-6 shrink-0" />
+            {email}
+          </Link>
+          <Link href={phoneHref} variant="standalone" className={CONTACT_ROW}>
+            <Icon name="whatsapp" className="size-6 shrink-0" />
+            {phone}
+          </Link>
+        </Container>
 
-          {/* The tablet frame has no contact block, so something else has to push the marks down. */}
-          <div className="hidden flex-1 md:block" />
+        {/* The tablet frame has no contact block, so something else has to push the marks down. */}
+        <div className="hidden flex-1 md:block" />
 
-          <div className="flex flex-col items-center gap-5 px-4 pb-7.5 md:px-6">
-            {locales && locale && onLocaleChange ? (
-              <LanguageSelector
-                locales={locales}
-                value={locale}
-                onChange={onLocaleChange}
-                className="md:hidden"
-              />
-            ) : null}
+        <div className="flex flex-col items-center gap-5 px-4 pb-7.5 md:px-6">
+          {locales && locale && onLocaleChange ? (
+            <LanguageSelector
+              locales={locales}
+              value={locale}
+              onChange={onLocaleChange}
+              className="md:hidden"
+            />
+          ) : null}
 
-            <ul className="flex items-center gap-5 md:gap-7.5">
-              {social.map((item) => (
-                <li key={item.href}>
-                  <IconButton
-                    variant="outline"
-                    icon={item.icon}
-                    label={item.label}
-                    href={item.href}
-                    // 50px then 70px, which is the drawn pair. `outline` is already the 50px
-                    // hairline-and-shadow control from node 144:1045 — this is that one, circled
-                    // and larger. The variant is square by default because the card contexts it
-                    // was drawn for are; a disc is what the menu draws.
-                    className="size-12.5 rounded-full [&_svg]:size-6 md:size-17.5 md:[&_svg]:size-8"
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="flex items-center gap-5 md:gap-7.5">
+            {social.map((item) => (
+              <li key={item.href}>
+                <IconButton
+                  variant="outline"
+                  icon={item.icon}
+                  label={item.label}
+                  href={item.href}
+                  // 50px then 70px, which is the drawn pair. `outline` is already the 50px
+                  // hairline-and-shadow control from node 144:1045 — this is that one, circled
+                  // and larger. The variant is square by default because the card contexts it
+                  // was drawn for are; a disc is what the menu draws.
+                  className="size-12.5 rounded-full md:size-17.5 [&_svg]:size-6 md:[&_svg]:size-8"
+                />
+              </li>
+            ))}
+          </ul>
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }

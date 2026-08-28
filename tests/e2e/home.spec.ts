@@ -309,3 +309,54 @@ for (const { name, width, height } of [
     await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
   })
 }
+
+/**
+ * The header follows the reading direction: it steps out of the way going down and comes back the
+ * moment the visitor scrolls up, so the navigation is always one gesture away without ever sitting
+ * on top of what they are reading.
+ *
+ * The contact strip is NOT part of that. It stays in the flow above the header and scrolls off with
+ * the rest of the page, which is what makes it the top-of-page thing it is drawn as — a revealed
+ * header mid-page carries no strip, and needs no code to say so.
+ */
+test('the header steps out of the way going down and returns going up', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+
+  const header = page.locator('header')
+  const strip = page.locator('body > div').filter({ hasText: 'hello@aurum.example' }).first()
+
+  // At the top: the strip, then the header under it.
+  await expect(strip).toBeInViewport()
+  const stripBox = (await strip.boundingBox())!
+  expect((await header.boundingBox())!.y).toBeCloseTo(stripBox.height, 0)
+
+  // Reading downward takes it away entirely, not partly.
+  await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }))
+  await page.waitForTimeout(100)
+  await page.evaluate(() => window.scrollBy({ top: 400, behavior: 'instant' }))
+  await expect
+    .poll(() => header.boundingBox().then((box) => box!.y + box!.height))
+    .toBeLessThanOrEqual(0)
+
+  // Scrolling up brings it back to the top of the screen — and the strip stays where it belongs.
+  await page.evaluate(() => window.scrollBy({ top: -400, behavior: 'instant' }))
+  await expect.poll(() => header.boundingBox().then((box) => box!.y)).toBe(0)
+  await expect(strip).not.toBeInViewport()
+
+  // Back at the top, the strip is above it again.
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+  await expect.poll(() => strip.boundingBox().then((box) => box!.y)).toBe(0)
+  await expect.poll(() => header.boundingBox().then((box) => box!.y)).toBeCloseTo(stripBox.height, 0)
+})
+
+test('a small movement near the top of the page does not take the header away', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+
+  // Two header-heights of runway before it will hide. Someone who has barely started reading
+  // should not lose the navigation to a nudge of the trackpad.
+  await page.evaluate(() => window.scrollTo({ top: 60, behavior: 'instant' }))
+  await page.waitForTimeout(300)
+  await expect(page.locator('header')).toBeInViewport()
+})

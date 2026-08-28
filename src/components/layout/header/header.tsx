@@ -35,6 +35,12 @@ import { cn } from '@/lib/cn'
  */
 export interface HeaderProps {
   navItems?: { label: string; href: string }[]
+  /**
+   * Stick to the top and step out of the way while the visitor is reading downward, coming back
+   * the moment they scroll up. `false` pins it in the flow, which is what a story that wants to
+   * photograph the header rather than watch it wants.
+   */
+  reveal?: boolean
   /** Renders the trail bar beneath the header. Omit or empty for the plain header. */
   breadcrumbs?: BreadcrumbItem[]
   cartCount?: number
@@ -72,6 +78,7 @@ export function Header({
   breadcrumbs,
   cartCount = 0,
   locales = DEFAULT_LOCALES,
+  reveal = true,
   className,
 }: HeaderProps) {
   const pathname = usePathname()
@@ -80,6 +87,44 @@ export function Header({
   // by the router; the shape of the prop does not change.
   const [locale, setLocale] = React.useState(locales[0]?.code ?? 'EN')
 
+  const headerRef = React.useRef<HTMLElement>(null)
+  // How far above its resting place the header sits — 0, or its own height once it has stepped out
+  // of the way. A number rather than a boolean because it is also the animated value.
+  const [lift, setLift] = React.useState(0)
+
+  React.useEffect(() => {
+    if (!reveal) return
+    const element = headerRef.current
+    if (!element) return
+
+    let previous = window.scrollY
+    let frame = 0
+
+    function evaluate() {
+      const height = element!.offsetHeight
+      const y = Math.max(0, window.scrollY)
+      const delta = y - previous
+      // Momentum scrolling and trackpads deliver a pixel at a time in both directions. Without a
+      // floor the header flickers on and off around a single pixel of movement.
+      if (Math.abs(delta) < 6) return
+      previous = y
+      // Two header-heights of runway before it will hide, so that a small nudge near the top of the
+      // page does not take the navigation away from someone who has barely started reading.
+      setLift(delta > 0 && y > height * 2 ? -height : 0)
+    }
+
+    function onScroll() {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(evaluate)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [reveal])
+
   // The header's icons are 20px on a phone and 24px from tablet up (nodes 440:13412, 440:12452).
   // Applied as a class rather than a prop because the change is per-breakpoint, which a prop cannot
   // express.
@@ -87,7 +132,20 @@ export function Header({
     'text-neutral-primary hover:text-primary-default [&_svg]:size-5 md:[&_svg]:size-6'
 
   return (
-    <header className={cn('bg-background-bg border-b border-black/10', className)}>
+    <header
+      ref={headerRef}
+      style={reveal ? { top: lift } : undefined}
+      className={cn(
+        'bg-background-bg border-b border-black/10',
+        // `top` rather than a transform, and deliberately. A transform on this element would make
+        // it the containing block for every `position: fixed` descendant, and the menu's panel is
+        // one — it would be sized to the header instead of to the viewport. `position: sticky`
+        // creates a stacking context but not a containing block, so the panel is unaffected.
+        reveal &&
+          'sticky top-0 z-30 transition-[top] duration-[var(--duration-base)] ease-[var(--ease-standard)] motion-reduce:transition-none',
+        className,
+      )}
+    >
       <Container className="relative flex h-15 items-center justify-between md:h-17.5">
         <MobileNav
           items={navItems}

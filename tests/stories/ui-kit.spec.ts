@@ -1651,3 +1651,131 @@ test('a menu left open when the header goes away closes itself', async ({ page }
     'the page was left inert with no way to release it',
   ).toBe(false)
 })
+
+/**
+ * The drawer arrives and leaves rather than appearing and vanishing.
+ *
+ * Asserted as a contract — what is transitioned, for how long — rather than by sampling a frame
+ * mid-flight, which is a race against the machine the suite happens to be running on. The one
+ * timing-dependent check is the exit, and it is the point: without `display` in the transition and
+ * `allow-discrete` behind it, the panel is gone on the frame it is closed and there is nothing to
+ * animate.
+ */
+test('the drawer animates in and out', async ({ page }) => {
+  const panel = await openMenu(page, 390, 844)
+
+  const style = await panel.evaluate((el) => {
+    const computed = getComputedStyle(el)
+    return {
+      property: computed.transitionProperty,
+      duration: computed.transitionDuration,
+      behavior: computed.transitionBehavior,
+    }
+  })
+  expect(style.property).toContain('clip-path')
+  expect(style.property).toContain('opacity')
+  expect(style.property).toContain('display')
+  expect(style.behavior).toContain('allow-discrete')
+  expect(style.duration).toContain('0.2s')
+
+  // Once it settles the clip is fully open, so nothing of the panel is cut off at rest. Polled,
+  // because `openMenu` returns as soon as the panel has been placed — and a clipped panel has a
+  // box from its first frame, so there is nothing in the layout to wait on.
+  await expect
+    .poll(() => panel.evaluate((el) => getComputedStyle(el).clipPath))
+    .toBe('inset(0px)')
+
+  // The exit plays: the panel is still displayed on the far side of the click that closed it.
+  await page.getByRole('button', { name: 'Close menu' }).click()
+  expect(
+    await panel.evaluate((el) => getComputedStyle(el).display),
+    'the drawer was removed before it could animate out',
+  ).toBe('flex')
+  await expect.poll(() => panel.evaluate((el) => getComputedStyle(el).display)).toBe('none')
+})
+
+test('the drawer does not animate for a visitor who asks for less motion', async ({ browser }) => {
+  const context = await browser.newContext({
+    reducedMotion: 'reduce',
+    viewport: { width: 390, height: 844 },
+  })
+  const page = await context.newPage()
+  await page.goto(MENU_STORY, { waitUntil: 'load' })
+  await page.getByRole('button', { name: 'Open menu' }).click()
+
+  const controls = await page
+    .getByRole('button', { name: 'Close menu' })
+    .getAttribute('aria-controls')
+  const panel = page.locator(`[id="${controls}"]`)
+  // `transition-none` removes the properties rather than zeroing the clock, so the property list is
+  // what carries the guarantee. The duration is left at its declared value and means nothing when
+  // nothing is being transitioned.
+  expect(await panel.evaluate((el) => getComputedStyle(el).transitionProperty)).toBe('none')
+
+  // Still opens and closes — suppressed motion is not suppressed function.
+  await expect(panel).toBeVisible()
+  await page.getByRole('button', { name: 'Close menu' }).click()
+  await expect(panel).toBeHidden()
+
+  await context.close()
+})
+
+/**
+ * The language menu sits 80px from the foot of the drawer. Opening downward there put it past the
+ * bottom of a container that scrolls, which grew that container's scroll height — a scrollbar on a
+ * drawer that fits.
+ */
+test('the language menu opens upward when there is no room below it', async ({ page }) => {
+  const panel = await openMenu(page, 390, 844)
+
+  const trigger = page.getByRole('button', { name: 'Language: EN' })
+  await trigger.click()
+
+  const menu = page.getByRole('menu', { name: 'Language: EN' })
+  const [above, below] = [(await menu.boundingBox())!, (await trigger.boundingBox())!]
+  expect(
+    above.y + above.height,
+    'the language menu opened downward off the screen',
+  ).toBeLessThanOrEqual(below.y + 1)
+
+  expect(
+    await panel.evaluate((el) => el.scrollHeight > el.clientHeight + 1),
+    'the open menu gave the drawer a scrollbar',
+  ).toBe(false)
+})
+
+test('the language menu still opens downward in the header, where there is room', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(MENU_STORY, { waitUntil: 'load' })
+
+  const trigger = page.getByRole('button', { name: 'Language: EN' })
+  await trigger.click()
+
+  const menu = page.getByRole('menu', { name: 'Language: EN' })
+  const [panel, box] = [(await menu.boundingBox())!, (await trigger.boundingBox())!]
+  expect(panel.y, 'the ordinary downward menu flipped for no reason').toBeGreaterThanOrEqual(
+    box.y + box.height - 1,
+  )
+})
+
+/**
+ * Escape belongs to the innermost thing that is open. Both layers listen on `document`, and the
+ * drawer's listener is registered first because the drawer opened first — so the inner menu cannot
+ * stop it by propagation alone.
+ */
+test('Escape closes the language menu without closing the drawer under it', async ({ page }) => {
+  await openMenu(page, 390, 844)
+
+  await page.getByRole('button', { name: 'Language: EN' }).click()
+  await expect(page.getByRole('menu', { name: 'Language: EN' })).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu', { name: 'Language: EN' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Close menu' })).toBeVisible()
+
+  // The second one closes the drawer, and focus comes back to the control that opened it.
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
+})

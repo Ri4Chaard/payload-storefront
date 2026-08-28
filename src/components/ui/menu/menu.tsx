@@ -18,6 +18,16 @@ import { cn } from '@/lib/cn'
  *   would be a worse bug than the one it prevents.
  * - A pointer press outside closes it.
  *
+ * **The panel opens upward when there is no room below it.** `placement` decides between the two,
+ * and `auto` — the default — measures. A menu near the foot of the screen that always opened
+ * downward would extend past the viewport, and inside a scrolling container it would grow that
+ * container's scroll height instead: the language switcher at the bottom of the mobile menu did
+ * exactly that, adding a scrollbar to a drawer that fits.
+ *
+ * The measurement happens in a layout effect, so the panel is placed before it is painted rather
+ * than being seen in the wrong place for a frame. Preferring below on a tie keeps the common case
+ * unchanged.
+ *
  * Items are given `role="menuitem"` and taken out of the tab order here rather than at the call
  * site. `MenuOption` deliberately asserts no role of its own precisely so the container can decide,
  * and requiring every caller to remember it is how half of them end up without it.
@@ -29,6 +39,12 @@ export interface MenuProps {
   trigger: React.ReactNode
   /** Which edge of the trigger the panel lines up with. */
   align?: 'start' | 'end'
+  /**
+   * Which side of the trigger the panel opens on. `auto` measures the room below and flips up when
+   * there is not enough; `top` and `bottom` force it, for the rare case where the surrounding
+   * layout knows something the measurement cannot.
+   */
+  placement?: 'auto' | 'top' | 'bottom'
   className?: string
   triggerClassName?: string
   children: React.ReactNode
@@ -38,11 +54,13 @@ export function Menu({
   label,
   trigger,
   align = 'start',
+  placement = 'auto',
   className,
   triggerClassName,
   children,
 }: MenuProps) {
   const [open, setOpen] = React.useState(false)
+  const [side, setSide] = React.useState<'top' | 'bottom'>('bottom')
   const rootRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const listRef = React.useRef<HTMLDivElement>(null)
@@ -82,6 +100,30 @@ export function Menu({
   React.useEffect(() => {
     if (open) items()[0]?.focus()
   }, [open, items])
+
+  // Before paint, not after: the panel is measured and placed in the same frame it appears in, so
+  // there is no version of it that a visitor sees in the wrong position.
+  React.useLayoutEffect(() => {
+    if (!open) return
+    if (placement !== 'auto') {
+      setSide(placement)
+      return
+    }
+
+    const trigger = triggerRef.current
+    const list = listRef.current
+    if (!trigger || !list) return
+
+    const box = trigger.getBoundingClientRect()
+    // The 8px is the gap the panel sets either way — `mt-2` and `mb-2` are the same measure.
+    const needed = list.offsetHeight + 8
+    const below = window.innerHeight - box.bottom
+    const above = box.top
+
+    // Below unless it genuinely does not fit AND there is more room the other way. A tie keeps the
+    // ordinary downward menu, which is what everything above `md` gets.
+    setSide(below < needed && above > below ? 'top' : 'bottom')
+  }, [open, placement])
 
   function moveFocus(delta: number) {
     const all = items()
@@ -137,7 +179,8 @@ export function Menu({
             }
           }}
           className={cn(
-            'bg-background-container absolute top-full z-20 mt-2 min-w-32 border border-black/10',
+            'bg-background-container absolute z-20 min-w-32 border border-black/10',
+            side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
             align === 'end' ? 'right-0' : 'left-0',
           )}
         >
