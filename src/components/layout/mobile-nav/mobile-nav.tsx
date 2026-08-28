@@ -3,29 +3,56 @@
 import NextLink from 'next/link'
 import React from 'react'
 
+import { LanguageSelector, type Locale } from '@/components/layout/language-selector'
+import { Container } from '@/components/ui/container'
+import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
+import { Link } from '@/components/ui/link'
 import { cn } from '@/lib/cn'
+import { CONTACT, SOCIAL_LINKS } from '@/lib/contact'
+import { type IconName } from '@/lib/icon-registry'
 
 /**
- * The hamburger and the panel it opens (T074, FR-036).
+ * The hamburger and the menu it opens (002/T139–T144), from Figma nodes 440:13282 (tablet) and
+ * 440:14517 (mobile).
  *
- * **The open panel is not designed.** Every header variant draws the closed state only, so the
- * panel here is the plainest thing that works: the same navigation, stacked, in the header's own
- * surface. It is deliberately unstyled beyond that rather than invented, and should be replaced the
- * moment there is a drawer to build.
+ * **This replaces the plain dropdown spec 001 shipped.** That panel was explicitly a placeholder —
+ * every header variant drew the closed state only, so it was built as the plainest thing that
+ * worked and marked for replacement the moment there was a drawer to build. These two frames are
+ * that drawer.
  *
- * The behaviour is not improvised, though — it follows the disclosure pattern:
+ * **Both frames draw the whole screen, not a widget.** Each contains an instance of the contact
+ * strip and an instance of the header, then the menu below them. That is Figma's way of saying "the
+ * page, with the menu open" — so the strip and the header stay exactly as they are, the burger
+ * becomes a cross, and this component owns only what is underneath. Reading it the other way would
+ * have this painting a second wordmark, a second basket and a second account button.
  *
- * - `aria-expanded` and `aria-controls` on the trigger, so the state is announced rather than
- *   merely drawn.
- * - `Escape` closes and returns focus to the trigger. Without the return, focus is stranded on an
- *   element that no longer exists and the next Tab restarts from the top of the document.
- * - Focus moves to the first link on open, so a keyboard user is not left tabbing through the whole
- *   header to reach what they just opened.
- * - A pointer press outside closes it.
+ * The header row it sits under is already pixel-identical to the one drawn here: 70px and a 24px
+ * gutter at tablet, 60px and 16px on a phone. So the menu's own gutter is `Container`'s, and the
+ * cross at the top lines up with `ALL JEWELRY` beneath it without either being positioned.
  *
- * Focus is NOT trapped. This is a disclosure, not a dialog: trapping would strand anyone who wanted
- * to tab past it, which is a worse failure than the one it prevents.
+ * **What the phone carries that the tablet does not.** The contact strip is `hidden` below `md`, so
+ * on a phone the menu is the only route to the address, the number and the language — which is why
+ * the mobile frame draws all three and the tablet frame draws none of them. The social marks are
+ * drawn in both, larger and circled, even though the tablet repeats them in the strip above.
+ *
+ * **It is a disclosure that covers the page, which changes one thing about it.** Focus is still not
+ * trapped: the cross, the basket and the account button share the header row and are all drawn
+ * live, so trapping inside the panel would put the control that closes it out of reach. What DOES
+ * change is everything the panel covers — `main` and `footer` are inert while it is open, because
+ * content that is invisible but still in the tab order is the failure a full-screen overlay
+ * introduces and a 200px dropdown does not.
+ *
+ * The rest of the disclosure pattern is unchanged from the panel it replaces: `aria-expanded` and
+ * `aria-controls` on the trigger, `Escape` closes and returns focus, focus moves to the first link
+ * on open, a press outside closes.
+ *
+ * **The labels are `text-heading-1`.** The drawing sets 30px at 1024 and 20px at 390; the fluid step
+ * runs 20px → 30px over exactly that range but reaches the top at 1280, so a 1024 viewport gets
+ * 27px rather than the drawn 30. That is the same gap `CategoryCard`'s title has, from the same
+ * cause, and it is one question for the designer rather than two: does the tablet step want its own
+ * size, or is the fluid ramp what was meant? Overriding it here would give the menu type that
+ * behaves unlike every other heading in the app.
  */
 export interface MobileNavItem {
   label: string
@@ -34,11 +61,42 @@ export interface MobileNavItem {
 
 export interface MobileNavProps {
   items: MobileNavItem[]
+  /**
+   * Locale is owned by the header, not by this. Both draw a switcher — the header's from `md` up,
+   * this one below it — so exactly one renders at a time, and two components each holding their own
+   * copy of the state would disagree the moment the viewport crossed the breakpoint.
+   */
+  locales?: Locale[]
+  locale?: string
+  onLocaleChange?: (code: string) => void
+  email?: string
+  phone?: string
+  phoneHref?: string
+  social?: { icon: IconName; label: string; href: string }[]
   className?: string
 }
 
-export function MobileNav({ items, className }: MobileNavProps) {
+// `standalone` rather than the default: the design draws these as plain dark text, and an
+// underline at rest here would be the only one on the screen. It is the light-surface counterpart
+// of the `inverse` the contact strip uses for the same two facts.
+const CONTACT_ROW = 'text-body-medium inline-flex items-center gap-2.5'
+
+export function MobileNav({
+  items,
+  locales,
+  locale,
+  onLocaleChange,
+  email = CONTACT.email,
+  phone = CONTACT.phone,
+  phoneHref = CONTACT.phoneHref,
+  social = SOCIAL_LINKS,
+  className,
+}: MobileNavProps) {
   const [open, setOpen] = React.useState(false)
+  // The panel is fixed, so it needs the header's bottom edge in viewport coordinates. It cannot be
+  // `top-full` on an absolute child: the header scrolls, and the panel has to reach the bottom of
+  // the screen from wherever the header actually is.
+  const [top, setTop] = React.useState(0)
   const panelId = React.useId()
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const panelRef = React.useRef<HTMLDivElement>(null)
@@ -72,6 +130,51 @@ export function MobileNav({ items, className }: MobileNavProps) {
     if (open) panelRef.current?.querySelector('a')?.focus()
   }, [open])
 
+  React.useEffect(() => {
+    if (!open) return
+
+    const anchor = triggerRef.current?.closest('header') ?? triggerRef.current
+    if (!anchor) return
+
+    function measure() {
+      // The header is hidden from `xl` up, and with it the cross that closes this. A menu left open
+      // across that boundary would lock the page's scroll with nothing on screen to unlock it.
+      // Asking whether the trigger is still laid out beats hardcoding the breakpoint here, where
+      // the component cannot see the class its parent applied.
+      if (triggerRef.current?.offsetParent === null) {
+        setOpen(false)
+        return
+      }
+      setTop(anchor!.getBoundingClientRect().bottom)
+    }
+
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [open])
+
+  React.useEffect(() => {
+    if (!open) return
+
+    // The page behind is fully covered, so it must not scroll. Overlay scrollbars are the norm at
+    // the widths this component exists at, so there is no gutter to compensate for.
+    const root = document.documentElement
+    const previous = root.style.overflow
+    root.style.overflow = 'hidden'
+
+    // Exactly what the panel covers. The header is deliberately left out: it stays visible, and
+    // everything on it is still meant to work.
+    const covered = [document.querySelector('main'), document.querySelector('footer')].filter(
+      (element): element is HTMLElement => element instanceof HTMLElement,
+    )
+    for (const element of covered) element.setAttribute('inert', '')
+
+    return () => {
+      root.style.overflow = previous
+      for (const element of covered) element.removeAttribute('inert')
+    }
+  }, [open])
+
   return (
     <div className={cn('flex items-center', className)}>
       <IconButton
@@ -89,23 +192,77 @@ export function MobileNav({ items, className }: MobileNavProps) {
         <div
           ref={panelRef}
           id={panelId}
-          className="bg-background-bg absolute top-full left-0 z-20 w-full border-b border-black/10"
+          style={{ top }}
+          className="bg-background-bg fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-y-auto"
         >
-          <nav aria-label="Primary">
-            <ul className="flex flex-col">
+          <Container as="nav" aria-label="Primary" className="border-b border-black/10 py-7.5">
+            <ul className="flex flex-col gap-7.5">
               {items.map((item) => (
                 <li key={item.href}>
                   <NextLink
                     href={item.href}
                     onClick={() => close(false)}
-                    className="text-body-medium text-neutral-primary ease-standard flex h-13 items-center border-b border-black/5 px-4 uppercase transition-colors duration-[var(--duration-fast)] hover:bg-black/5 md:px-6"
+                    className={cn(
+                      'text-neutral-primary ease-standard flex items-center justify-between gap-5',
+                      'transition-colors duration-[var(--duration-fast)] hover:text-primary-default',
+                    )}
                   >
-                    {item.label}
+                    {/* Uppercasing is the heading utility's own; the label is written in sentence
+                        case so that it is spoken as a word rather than an initialism. */}
+                    <span className="text-heading-1">{item.label}</span>
+                    <Icon name="chevron-right" className="size-5 shrink-0 md:size-6" />
                   </NextLink>
                 </li>
               ))}
             </ul>
-          </nav>
+          </Container>
+
+          {/*
+            Below `md` only: from tablet up these same two facts are in the strip above the header,
+            and repeating them here would be the third copy on one screen.
+          */}
+          <Container className="flex flex-1 flex-col items-start gap-5 py-7.5 md:hidden">
+            <Link href={`mailto:${email}`} variant="standalone" className={CONTACT_ROW}>
+              <Icon name="mail" className="size-6 shrink-0" />
+              {email}
+            </Link>
+            <Link href={phoneHref} variant="standalone" className={CONTACT_ROW}>
+              <Icon name="whatsapp" className="size-6 shrink-0" />
+              {phone}
+            </Link>
+          </Container>
+
+          {/* The tablet frame has no contact block, so something else has to push the marks down. */}
+          <div className="hidden flex-1 md:block" />
+
+          <div className="flex flex-col items-center gap-5 px-4 pb-7.5 md:px-6">
+            {locales && locale && onLocaleChange ? (
+              <LanguageSelector
+                locales={locales}
+                value={locale}
+                onChange={onLocaleChange}
+                className="md:hidden"
+              />
+            ) : null}
+
+            <ul className="flex items-center gap-5 md:gap-7.5">
+              {social.map((item) => (
+                <li key={item.href}>
+                  <IconButton
+                    variant="outline"
+                    icon={item.icon}
+                    label={item.label}
+                    href={item.href}
+                    // 50px then 70px, which is the drawn pair. `outline` is already the 50px
+                    // hairline-and-shadow control from node 144:1045 — this is that one, circled
+                    // and larger. The variant is square by default because the card contexts it
+                    // was drawn for are; a disc is what the menu draws.
+                    className="size-12.5 rounded-full [&_svg]:size-6 md:size-17.5 md:[&_svg]:size-8"
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : null}
     </div>

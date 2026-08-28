@@ -4,6 +4,7 @@ import { Container } from '@/components/ui/container'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { type IconName } from '@/lib/icon-registry'
+import { CONTACT, SOCIAL_LINKS } from '@/lib/contact'
 import { cn } from '@/lib/cn'
 
 import { NewsletterForm } from './newsletter-form'
@@ -77,11 +78,7 @@ const DEFAULT_LEGAL = [
 ]
 
 /** Placeholder destinations — these need the real accounts before launch. */
-const DEFAULT_SOCIAL: { icon: IconName; label: string; href: string }[] = [
-  { icon: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/' },
-  { icon: 'instagram', label: 'Instagram', href: 'https://instagram.com/' },
-  { icon: 'telegram', label: 'Telegram', href: 'https://t.me/' },
-]
+
 
 const COLUMN = 'flex flex-col items-center gap-2.5 md:items-start md:gap-5'
 const HEADING = 'text-eyebrow text-neutral-white'
@@ -133,7 +130,7 @@ function Certifications() {
 export function Footer({
   groups = DEFAULT_GROUPS,
   legalLinks = DEFAULT_LEGAL,
-  social = DEFAULT_SOCIAL,
+  social = SOCIAL_LINKS,
   year = new Date().getFullYear(),
   className,
 }: FooterProps) {
@@ -184,8 +181,8 @@ export function Footer({
                 <Link href="tel:+15550102030" variant="inverse">
                   Call us: +1 555 010 2030
                 </Link>
-                <Link href="mailto:hello@aurum.example" variant="inverse">
-                  Email us: hello@aurum.example
+                <Link href={`mailto:${CONTACT.email}`} variant="inverse">
+                  Email us: {CONTACT.email}
                 </Link>
               </div>
             </div>

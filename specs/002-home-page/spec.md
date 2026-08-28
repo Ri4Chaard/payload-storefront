@@ -334,9 +334,52 @@ catalogue spec lands.
 
 ## Out of Scope
 
-- **The navigation overlays** at `440:13282` and `440:14517`. They are drawn in this node but they
-  replace shell navigation, apply to every page, and belong with the shell.
+- ~~**The navigation overlays** at `440:13282` and `440:14517`.~~ **Moved in scope 2026-08-28** at
+  the owner's request — see the addendum below. The reasoning for deferring them still holds (they
+  are shell, not home page); what changed is that the home page is the only page that exists to
+  reach them from, so leaving the placeholder panel in meant the finished page still opened an
+  undesigned drawer.
 - **The collection, product and about pages** the calls to action route to.
 - **Payload collections** for products and categories — see the deviation above.
 - **PhotoSwipe fullscreen zoom**, deferred to the product detail page where it belongs.
 - **Search**, which the header draws but which needs a catalogue to search.
+
+---
+
+## Addendum — the navigation overlays (2026-08-28)
+
+The two Menu frames were deferred when this spec was written and brought back in by the owner once
+the page around them was finished. They are recorded here rather than in a spec of their own because
+they are one component and they close this spec's own loose end: `MobileNav`'s panel had shipped in
+001 as an explicit placeholder, and the home page was the first thing to put it in front of anyone.
+
+**FR-031**: The menu MUST cover the page from the header's lower edge to the bottom of the screen at
+both drawn widths, over the real header and contact strip rather than a copy of them.
+
+**FR-032**: The menu MUST offer the seven sections the frames draw, at the site's real routes.
+
+**FR-033**: Below `md` the menu MUST carry the address, the number and the language switch, because
+the contact strip that carries them elsewhere is hidden at that width.
+
+**FR-034**: While the menu is open, the content it covers MUST be out of the tab order and the page
+behind MUST NOT scroll; both MUST be restored when it closes.
+
+**FR-035**: The menu MUST close itself if the viewport reaches the width at which its own trigger is
+hidden.
+
+**SC-011**: At 1024×1366 and 390×844, the panel starts at the header's lower edge and ends at the
+foot of the viewport; sections sit on the 24px/16px gutter; social marks measure 70px/50px, centred,
+30px clear of the bottom.
+
+**SC-012**: axe reports no violations over the open menu at both widths, with the complete rule set.
+
+### Carried forward
+
+The tablet frame draws its contact-strip instance at 50px where the strip's own component is drawn
+at 60px (node 440:12226). The component's height is what ships, so the menu begins 10px lower than
+this frame shows. Worth a designer's confirmation, along with the `text-heading-1` question the
+menu shares with `CategoryCard`.
+
+The menu frames set the whole screen at `#FFFFFF` where the header ships on `background-bg`
+(`#f8f7f6`). The panel matches the header rather than the frame: a seam at the header's lower border
+would read as a defect, and the difference is otherwise imperceptible.

@@ -24,11 +24,16 @@ import { cn } from '@/lib/cn'
  * flex. Those belong to the band, vary per band, and folding them in here is how a layout primitive
  * turns into a second way of writing every section.
  *
- * **Three places carry the same classes and deliberately do not use this.** `Hero` and `MobileNav`
- * stop at `md:px-6` — a centred text column and a panel row are not page gutters, and neither takes
- * the `xl` step. `FeatureStrip` puts the gutter INSIDE its scroll container so the row scrolls to
- * the screen edge with the gutter as a leading inset; wrapping it would clip the scroller at the
- * gutter instead, which is a worse phone. Same three classes, three different jobs.
+ * **Two places carry the same classes and deliberately do not use this.** `Hero` stops at
+ * `md:px-6` — a centred text column is not a page gutter and takes no `xl` step. `FeatureStrip`
+ * puts the gutter INSIDE its scroll container so the row scrolls to the screen edge with the gutter
+ * as a leading inset; wrapping it would clip the scroller at the gutter instead, which is a worse
+ * phone. Same classes, different jobs.
+ *
+ * `MobileNav` was a third until its menu was drawn (002/T139). A dropdown's inset was its own
+ * business; a full-screen menu has to line up with the header above it, which is this measure. The
+ * `xl` step it never reaches is inert rather than wrong — the whole component is hidden by then,
+ * exactly as the contact strip's phone step is.
  */
 export interface ContainerProps extends Omit<React.ComponentProps<'div'>, 'ref'> {
   /**

@@ -37,3 +37,30 @@ for (const route of ROUTES) {
     })
   }
 }
+
+/**
+ * The menu is a whole screen, and it is the one part of the storefront the component sweep can
+ * never see: it has no story of its own, and it only exists once something has been clicked.
+ *
+ * Run with the complete rule set, like the routes above — an overlay that covers the page inherits
+ * every document-level obligation the page had.
+ */
+for (const { name, width, height } of [
+  { name: 'tablet', width: 1024, height: 1366 },
+  { name: 'mobile', width: 390, height: 844 },
+]) {
+  test(`the open menu has no accessibility violations at ${name} width`, async ({ page }) => {
+    await page.setViewportSize({ width, height })
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    await page.getByRole('button', { name: 'Open menu' }).click()
+    await expect(page.getByRole('button', { name: 'Close menu' })).toBeVisible()
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
+  })
+}

@@ -89,7 +89,13 @@ export function Header({
   return (
     <header className={cn('bg-background-bg border-b border-black/10', className)}>
       <Container className="relative flex h-15 items-center justify-between md:h-17.5">
-        <MobileNav items={navItems} className="xl:hidden" />
+        <MobileNav
+          items={navItems}
+          locales={locales}
+          locale={locale}
+          onLocaleChange={setLocale}
+          className="xl:hidden"
+        />
 
         <Logo className="absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0" />
 

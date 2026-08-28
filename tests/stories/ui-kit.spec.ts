@@ -1454,3 +1454,200 @@ test('the container renders the element it is told to', async ({ page }) => {
   await expect(band).toBeVisible()
   expect(await band.evaluate((el) => el.tagName)).toBe('SECTION')
 })
+
+/**
+ * The menu (002/T139–T144), from nodes 440:13282 and 440:14517.
+ *
+ * Driven through the header rather than through a story of its own, because the component is
+ * defined by where it sits: it measures the header's bottom edge to know where to start, and the
+ * cross that closes it belongs to the header row. A story that rendered it alone would be testing
+ * something the app never shows.
+ */
+const MENU_STORY = `${STORYBOOK}/iframe.html?id=layout-header--on-a-page&viewMode=story`
+
+async function openMenu(page: import('@playwright/test').Page, width: number, height: number) {
+  await page.setViewportSize({ width, height })
+  await page.goto(MENU_STORY, { waitUntil: 'load' })
+  await page.getByRole('button', { name: 'Open menu' }).click()
+
+  // Found through the trigger's own `aria-controls` rather than by guessing at the markup, which
+  // also checks the wiring: if that attribute ever stops pointing at the panel, every test below
+  // fails rather than quietly measuring some other element.
+  const controls = await page
+    .getByRole('button', { name: 'Close menu' })
+    .getAttribute('aria-controls')
+  expect(controls, 'the trigger does not name the panel it controls').toBeTruthy()
+  const panel = page.locator(`[id="${controls}"]`)
+  await expect(panel).toHaveCount(1)
+
+  // The panel's top is measured after mount, so its first frame is at 0. Waiting for the settled
+  // value rather than a timeout keeps this honest about what it is waiting for.
+  await expect.poll(() => panel.boundingBox().then((box) => box?.y ?? 0)).toBeGreaterThan(0)
+  return panel
+}
+
+for (const { name, width, height, gutter, disc } of [
+  { name: 'tablet', width: 1024, height: 1366, gutter: 24, disc: 70 },
+  { name: 'mobile', width: 390, height: 844, gutter: 16, disc: 50 },
+]) {
+  test(`the ${name} menu covers the page from the header's edge to the bottom`, async ({ page }) => {
+    const panel = await openMenu(page, width, height)
+
+    const header = await page.locator('header').boundingBox()
+    const box = (await panel.boundingBox())!
+
+    // It starts exactly where the header ends — not at a guessed offset, and not at the top of the
+    // document, which is where a `fixed` panel lands if nobody measures.
+    expect(box.y, 'the menu does not meet the header').toBeCloseTo(header!.y + header!.height, 0)
+    expect(box.x).toBe(0)
+    expect(box.width).toBe(width)
+    expect(box.y + box.height, 'the menu stops short of the bottom of the screen').toBeCloseTo(
+      height,
+      0,
+    )
+  })
+
+  test(`the ${name} menu draws the seven sections on the ${gutter}px gutter`, async ({ page }) => {
+    await openMenu(page, width, height)
+
+    const nav = page.getByRole('navigation', { name: 'Primary' })
+    const links = nav.getByRole('link')
+    await expect(links).toHaveCount(7)
+
+    // The drawn order. Uppercasing is CSS, so the accessible names stay sentence case.
+    await expect(links).toHaveText([
+      'All jewelry',
+      'Rings',
+      'Bracelets',
+      'Earrings',
+      'Necklaces',
+      'About us',
+      'Contact us',
+    ])
+
+    const first = (await links.first().boundingBox())!
+    expect(first.x, 'the first section is off the gutter').toBeCloseTo(gutter, 0)
+    expect(first.x + first.width, 'the row does not reach the far gutter').toBeCloseTo(
+      width - gutter,
+      0,
+    )
+
+    // Every row ends in the arrow the design draws, and it is decorative — the link is already
+    // named by its label, and "Rings, image" would be a worse name than "Rings".
+    const arrows = nav.locator('svg')
+    await expect(arrows).toHaveCount(7)
+    expect(await arrows.first().getAttribute('aria-hidden')).toBe('true')
+  })
+
+  test(`the ${name} menu pins the social marks to the bottom at ${disc}px`, async ({ page }) => {
+    await openMenu(page, width, height)
+
+    const marks = page.locator('header').getByRole('link', { name: /WhatsApp|Instagram|Telegram/ })
+    await expect(marks).toHaveCount(3)
+
+    const boxes = await Promise.all((await marks.all()).map((mark) => mark.boundingBox()))
+    for (const box of boxes) {
+      expect(box!.width, 'the disc is not the drawn size').toBeCloseTo(disc, 0)
+      expect(box!.height).toBeCloseTo(disc, 0)
+    }
+
+    // 30px clear of the bottom edge, and centred on the screen — both drawn.
+    expect(boxes[2]!.y + boxes[2]!.height).toBeCloseTo(height - 30, 0)
+    const centre = (boxes[0]!.x + boxes[2]!.x + boxes[2]!.width) / 2
+    expect(centre, 'the marks are not centred').toBeCloseTo(width / 2, 0)
+  })
+}
+
+/**
+ * The phone menu carries the address, the number and the language switch; the tablet menu carries
+ * none of them. That is not an oversight in the drawing — above `md` all three are in the contact
+ * strip and the header, and repeating them would put the same fact on one screen twice.
+ */
+test('the phone menu carries what the contact strip cannot', async ({ page }) => {
+  await openMenu(page, 390, 844)
+
+  const header = page.locator('header')
+  await expect(header.getByRole('link', { name: /hello@aurum\.example/ })).toBeVisible()
+  await expect(header.getByRole('link', { name: /010 20-30/ })).toBeVisible()
+  await expect(header.getByRole('button', { name: 'Language: EN' })).toBeVisible()
+
+  // Plain text, as drawn — an underline here would be the only one on the screen.
+  const email = header.getByRole('link', { name: /hello@aurum\.example/ })
+  expect(await email.evaluate((el) => getComputedStyle(el).textDecorationLine)).toBe('none')
+})
+
+test('the tablet menu leaves the contact details to the strip above it', async ({ page }) => {
+  await openMenu(page, 1024, 1366)
+
+  const header = page.locator('header')
+  await expect(header.getByRole('link', { name: /hello@aurum\.example/ })).toHaveCount(0)
+  await expect(header.getByRole('link', { name: /010 20-30/ })).toHaveCount(0)
+  // The header's own switcher is visible from `md`, so the menu does not draw a second one.
+  await expect(header.getByRole('button', { name: 'Language: EN' })).toHaveCount(1)
+})
+
+/**
+ * The failure a full-screen overlay introduces that a small dropdown does not: the page is
+ * invisible but still in the tab order, so a keyboard user walks into content they cannot see.
+ */
+test('the page behind the menu cannot be reached or scrolled', async ({ page }) => {
+  await openMenu(page, 390, 844)
+
+  const state = await page.evaluate(() => ({
+    main: document.querySelector('main')?.hasAttribute('inert'),
+    overflow: getComputedStyle(document.documentElement).overflow,
+  }))
+  expect(state.main, 'the covered page is still in the tab order').toBe(true)
+  expect(state.overflow, 'the page behind can still be scrolled').toBe('hidden')
+
+  // And both are given back — a menu that leaves the page inert is worse than one that never
+  // hid it.
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
+
+  const released = await page.evaluate(() => ({
+    main: document.querySelector('main')?.hasAttribute('inert'),
+    overflow: getComputedStyle(document.documentElement).overflow,
+  }))
+  expect(released.main).toBe(false)
+  expect(released.overflow).not.toBe('hidden')
+})
+
+/**
+ * The cross and the burger are one control, so the state is announced rather than only drawn.
+ */
+test('the burger becomes the cross that closes the menu', async ({ page }) => {
+  await openMenu(page, 390, 844)
+
+  const close = page.getByRole('button', { name: 'Close menu' })
+  await expect(close).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByRole('button', { name: 'Open menu' })).toHaveCount(0)
+
+  await close.click()
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Open menu' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  )
+})
+
+/**
+ * The header — and with it the cross — is hidden from `xl` up. A menu left open across that
+ * boundary would hold the page's scroll with nothing on screen able to release it.
+ */
+test('a menu left open when the header goes away closes itself', async ({ page }) => {
+  await openMenu(page, 1024, 900)
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+
+  // The menu's social marks are the one thing only the menu draws, so their absence is the
+  // unambiguous signal that it closed rather than merely went out of sight.
+  await expect(page.locator('header').getByRole('link', { name: 'WhatsApp' })).toHaveCount(0)
+  await expect
+    .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).overflow))
+    .not.toBe('hidden')
+  expect(
+    await page.evaluate(() => document.querySelector('main')?.hasAttribute('inert')),
+    'the page was left inert with no way to release it',
+  ).toBe(false)
+})

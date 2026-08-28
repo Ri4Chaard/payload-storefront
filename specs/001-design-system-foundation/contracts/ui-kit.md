@@ -604,10 +604,13 @@ widened to `HTMLElement`, which is the one thing those tags genuinely disagree a
 
 Adopted by `Header` (both rows), `Footer`, `ContactBanner`, `CategoryBand` and `JewelryCarousel`.
 
-Three places carry the same classes and deliberately do NOT use it. `Hero` and `MobileNav` stop at
-`md:px-6` — a centred text column and a panel row are not page gutters, and neither takes the `xl`
-step. `FeatureStrip` puts the gutter inside its scroll container so the row scrolls to the screen
-edge with the gutter as a leading inset; wrapping it would clip the scroller at the gutter instead.
+`MobileNav` joined them when its menu was drawn (002/T139): a dropdown's inset was its own
+business, but a full-screen menu has to line up with the header above it.
+
+Two places carry the same classes and deliberately do NOT use it. `Hero` stops at `md:px-6` — a
+centred text column is not a page gutter and takes no `xl` step. `FeatureStrip` puts the gutter
+inside its scroll container so the row scrolls to the screen edge with the gutter as a leading
+inset; wrapping it would clip the scroller at the gutter instead.
 
 ### `Stack`
 
@@ -837,11 +840,36 @@ opening `dangerouslyAllowSVG`.
 `Logo` writes the wordmark in sentence case and uppercases it in CSS — a screen reader given
 "AURUM" may spell it out; given "Aurum" it says the name.
 
-`MobileNav`'s open panel is **not designed**. Every header variant draws the closed state only, so
-the panel is the plainest thing that works and should be replaced once there is a drawer to build.
-Its behaviour is not improvised: `aria-expanded`/`aria-controls`, `Escape` closes and returns focus,
-focus moves to the first link on open, outside press closes. Focus is not trapped — this is a
-disclosure, not a dialog.
+`MobileNav` is the menu drawn at nodes 440:13282 (tablet) and 440:14517 (mobile) — the drawer the
+placeholder panel was waiting for. `items`, plus `locales`/`locale`/`onLocaleChange`, plus optional
+overrides for the contact details it defaults from `@/lib/contact`.
+
+Both frames draw the whole screen: each contains an instance of the contact strip and an instance of
+the header, then the menu below them. That is Figma saying "the page, with the menu open" — the
+strip and the header stay as they are, the burger becomes a cross, and the component owns only what
+is underneath. Read the other way it would paint a second wordmark, basket and account button.
+
+It covers the page from the header's lower edge to the bottom of the screen, so it measures that
+edge rather than assuming it: a `fixed` panel has no parent to be `top-full` of, and the header
+scrolls. Seven sections at `text-heading-1` with a decorative chevron each, then — below `md` only —
+the address, the number and the language switch, because the contact strip is `hidden` there and the
+menu is the phone's only route to them. Social marks at the bottom in both, 50px then 70px.
+
+Behaviour is the disclosure pattern it always had: `aria-expanded`/`aria-controls`, `Escape` closes
+and returns focus, focus moves to the first link on open, an outside press closes. Focus is still
+**not** trapped — the cross, the basket and the account button share the header row and are all
+drawn live, so trapping inside the panel would put the control that closes it out of reach.
+
+What covering the page does change is everything underneath it: `main` and `footer` are `inert`
+while it is open, and the document's scroll is locked. Content that is invisible but still in the
+tab order is the failure a full-screen overlay introduces and a 200px dropdown does not. The menu
+also closes itself if the viewport crosses into `xl`, where the header — and the only cross — is
+hidden; it asks whether its own trigger is still laid out rather than hardcoding a breakpoint the
+component cannot see.
+
+Labels are `text-heading-1`. The drawing sets 30px at 1024 and 20px at 390, and the fluid step runs
+20 → 30 over exactly that range but tops out at 1280, so a 1024 viewport renders 27px. Same gap as
+`CategoryCard`'s title, same cause, one question for the designer rather than two.
 
 `LanguageSelector` composes `Menu` and `MenuOption` and is not wired to routing; locale is local
 state until i18n lands.

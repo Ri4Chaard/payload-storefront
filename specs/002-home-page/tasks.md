@@ -245,3 +245,25 @@ assuming it works.
 | 5 US4 — however they arrive | 7 |
 | 6 Close-out | 4 |
 | **Total** | **39** |
+
+---
+
+## Phase 7 — the navigation overlays (added 2026-08-28)
+
+Brought in scope after close-out; see the spec addendum.
+
+- [X] T139 Read nodes 440:13282 and 440:14517; establish that both draw the whole screen with
+      instances of the strip and the header, so the menu owns only what is below them.
+- [X] T140 Extract the shop's contact details to `src/lib/contact.ts` — the menu would have been the
+      third copy of the address, the number and the three marks.
+- [X] T141 Rebuild `MobileNav` as the drawn menu: full-screen below the header, seven sections,
+      phone-only contacts and language, social marks pinned to the bottom.
+- [X] T142 Take the covered page out of the tab order and lock its scroll while the menu is open;
+      close the menu if the viewport reaches the width that hides its trigger.
+- [X] T143 Story tests for both frames — coverage, gutter, sections, marks, reach, close-and-return.
+- [X] T144 Route tests and an axe sweep over the open menu at both widths.
+
+| Phase | Tasks |
+|---|---|
+| 7 Navigation overlays | 6 |
+| **Total, all phases** | **45** |

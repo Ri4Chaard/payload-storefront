@@ -252,3 +252,60 @@ for (const { name, width, gutter } of [
     }
   })
 }
+
+/**
+ * The menu on a real page (002/T139–T144).
+ *
+ * The story tests cover its measurements against the two frames. These cover what only the route
+ * shows: that it sits under the real header with the real contact strip above it, that its links
+ * are the site's actual routes, and that opening it takes the page it covers out of reach.
+ */
+for (const { name, width, height } of [
+  { name: 'tablet', width: 1024, height: 1366 },
+  { name: 'mobile', width: 390, height: 844 },
+]) {
+  test(`the menu opens over the home page at ${name} width`, async ({ page }) => {
+    await page.setViewportSize({ width, height })
+    await page.goto('/')
+
+    await page.getByRole('button', { name: 'Open menu' }).click()
+
+    const nav = page.getByRole('navigation', { name: 'Primary' })
+    await expect(nav.getByRole('link')).toHaveCount(7)
+
+    // The same real paths the rest of the page uses — not placeholders that will still be
+    // placeholders when the collection pages land.
+    const hrefs = await nav
+      .locator('a[href]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')))
+    for (const href of hrefs) expect(href).toMatch(/^\//)
+    expect(hrefs).toContain('/rings')
+    expect(hrefs).toContain('/about')
+
+    // Everything the panel covers is out of the tab order; the header above it is not, because it
+    // is still on screen and the cross that closes this lives there.
+    const reach = await page.evaluate(() => ({
+      main: document.querySelector('main')?.hasAttribute('inert'),
+      footer: document.querySelector('footer')?.hasAttribute('inert'),
+      header: document.querySelector('header')?.hasAttribute('inert'),
+    }))
+    expect(reach).toEqual({ main: true, footer: true, header: false })
+
+    // Tabbing from the last section reaches the menu's own marks, never the page underneath.
+    // Scoped to the menu: the footer carries a "Contact us" of its own, and although it is inert
+    // while the menu is open, Playwright's role engine still matches it.
+    await nav.getByRole('link', { name: 'Contact us' }).focus()
+    await page.keyboard.press('Tab')
+    const landed = await page.evaluate(() => {
+      const active = document.activeElement
+      return {
+        name: active?.getAttribute('aria-label') ?? active?.textContent?.trim(),
+        insideMain: !!active?.closest('main'),
+      }
+    })
+    expect(landed.insideMain, 'focus walked into the page behind the menu').toBe(false)
+
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
+  })
+}

@@ -5,6 +5,7 @@ import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { cn } from '@/lib/cn'
+import { CONTACT, SOCIAL_LINKS } from '@/lib/contact'
 import { type IconName } from '@/lib/icon-registry'
 
 /**
@@ -30,8 +31,10 @@ import { type IconName } from '@/lib/icon-registry'
  * Pure white rather than the footer's 80%: this is the topmost element on the page and the drawing
  * sets it at #FFFFFF. The hover affordance is the rule, not a shift in opacity.
  *
- * The design's address reads `hello@aurum.exampIe` — a capital I where "example" has an l. Corrected,
- * as it is in the footer.
+ * The address, the number and the three marks come from `@/lib/contact` — the footer and the menu
+ * show the same three facts, and a number updated in two places out of three is worse than one that
+ * was never split. The design's address reads `hello@aurum.exampIe`, a capital I where "gmail" has an
+ * l; it is corrected there, once.
  */
 export interface ContactBannerProps {
   email?: string
@@ -42,13 +45,6 @@ export interface ContactBannerProps {
   className?: string
 }
 
-/** Placeholder destinations — these need the real accounts before launch, as in the footer. */
-const DEFAULT_SOCIAL: { icon: IconName; label: string; href: string }[] = [
-  { icon: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/' },
-  { icon: 'instagram', label: 'Instagram', href: 'https://instagram.com/' },
-  { icon: 'telegram', label: 'Telegram', href: 'https://t.me/' },
-]
-
 /**
  * Icon sizes are classes rather than the `size` prop because they change per breakpoint, which a
  * prop cannot express. 32px is off the icon scale entirely (it stops at 24), which is the other
@@ -58,10 +54,10 @@ const CONTACT_LINK = 'inline-flex items-center gap-2.5 text-body-medium text-neu
 const CONTACT_ICON = 'size-6 xl:size-8'
 
 export function ContactBanner({
-  email = 'hello@aurum.example',
-  phone = '+1 (555) 010 20-30',
+  email = CONTACT.email,
+  phone = CONTACT.phone,
   phoneHref,
-  social = DEFAULT_SOCIAL,
+  social = SOCIAL_LINKS,
   className,
 }: ContactBannerProps) {
   // `tel:` will not accept the spaces and brackets the number is displayed with.
