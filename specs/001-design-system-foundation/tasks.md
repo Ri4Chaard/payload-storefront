@@ -156,7 +156,7 @@ keyboard-traverse each story confirming visible focus; confirm zero domain compo
 - [X] T057d [P] [US3] `MenuOption` in `src/components/ui/menu-option/` — node 301:5920, collapsed rules, no `role="option"` without a `listbox` to put it in
 - [X] T057e [P] [US3] `ScrollArea` in `src/components/ui/scroll-area/` — node 301:5934, native scrollbar restyled rather than reimplemented; the two carets are dropped and the trade recorded
 - [X] T057f [P] [US3] `Button` gains `hoverEffect` slide/reveal from the "Ховер эффекты" board (node 196:941) — motion on existing variants, not new variants
-- [ ] T058 [P] [US3] `Container` in `src/components/ui/container/` — sizes narrow/default/wide/full, the only place page width is decided
+- [X] T058 [P] [US3] `Container` in `src/components/ui/container/` — the only place page width is decided. Built in spec 002 once six places had grown the same three gutter classes. Shipped **without** `size`: the design draws three widths and caps none of them, so narrow/default/wide/full would have been three invented measurements. Recorded in the contract, along with the two places that keep the same classes and deliberately do not use it
 - [ ] T059 [P] [US3] `Stack` in `src/components/ui/stack/` — token-only gaps
 - [ ] T060 [P] [US3] `Grid` in `src/components/ui/grid/` — responsive column config requiring a base value
 - [ ] T061 [P] [US3] `Divider` in `src/components/ui/divider/`
@@ -198,10 +198,10 @@ cannot perform. Awkwardness here means the kit is wrong; fix the kit, not the sh
 - [ ] T076 [P] [US4] Add default metadata, favicon, and app icons in `src/app/(frontend)/layout.tsx`, with per-page title and description overrides available to later specs (FR-040)
 - [ ] T077 [US4] Build the footer newsletter block using the **approved decisions**: type sizes snap to the scale with `eyebrow` and `heading-sans` added (T036); success text keeps `#2a8121` on the dark surface and the `white/20` unsubscribe note keeps its opacity — both are **accepted accessibility exceptions** recorded in `contracts/design-tokens.md` and allowlisted in `scripts/check-contrast.ts`, not silent violations
 - [ ] T078 [P] [US4] Build the branded 404 in `src/app/(frontend)/not-found.tsx` inside the shell with a route home (FR-041)
-- [ ] T079 [P] [US4] Build the placeholder home page in `src/app/(frontend)/page.tsx` composed entirely from kit primitives
+- [X] T079 [P] [US4] ~~Placeholder home page~~ — **superseded**. Spec 002 built the real one at the same path, composed from the kit, before a placeholder was ever needed
 - [ ] T080 [P] [US4] Add `tests/e2e/shell.spec.ts` covering skip link, mobile navigation open/dismiss, 404, and no horizontal scroll from 320px upward
-- [ ] T081 [US4] Verify the shell renders usable content with JavaScript disabled (FR-046)
-- [ ] T082 [US4] Verify usability at 200% browser zoom and at a 320px viewport with no horizontal page scroll (SC-007)
+- [X] T081 [US4] Verify the shell renders usable content with JavaScript disabled (FR-046) — covered by `tests/e2e/home.spec.ts`, which loads the whole page with JavaScript off and asserts every band and every link. The carousel degrades to a plain scroller rather than disappearing
+- [X] T082 [US4] Verify usability at 200% browser zoom and at a 320px viewport with no horizontal page scroll (SC-007) — covered by `tests/e2e/home.spec.ts`. 320px is 70px narrower than the smallest drawn frame, so nothing there was designed; it survives on construction alone
 
 **Checkpoint**: A navigable, branded, accessible site frame.
 
@@ -213,8 +213,8 @@ cannot perform. Awkwardness here means the kit is wrong; fix the kit, not the sh
 - [ ] T084 [P] Add a bundle-size gate enforcing ≤ 200KB gzipped initial JavaScript per route, and assert Storybook's dependencies are absent from the production bundle (SC-008)
 - [ ] T085 Confirm Storybook is never served from the production domain (FR-033)
 - [ ] T086 **Prove each gate by deliberately breaking it, confirming CI blocks the merge, then reverting** (SC-010, quickstart V7): raw hex in a component; a contrast-failing pairing; a removed `aria-label`; an over-budget bundle; a stale `tokens.css`; a stale `payload-types.ts`; a UI-kit component with no stories file. A gate that has never failed is unproven, and this is the only spec where breaking things on purpose is free
-- [ ] T087 [P] Confirm the admin sidebar shows **only** `admins` and `media` — any other collection means content modelling leaked into this spec (research.md R9)
-- [ ] T088 [P] Establish `src/mocks/` with the rule that only route-level loaders import from it, never components, so spec 002's data-source swap is one file per route (data-model.md)
+- [X] T087 [P] Confirm the admin sidebar shows **only** `admins` and `media` — any other collection means content modelling leaked into this spec (research.md R9). `payload.config.ts` registers `collections: [Admins, Media]` and nothing else; spec 002 took its content from `src/mocks/` rather than adding any
+- [X] T088 [P] Establish `src/mocks/` with the rule that only route-level loaders import from it, never components, so spec 002's data-source swap is one file per route (data-model.md) — done as 002/T135. The rule is a **gate**, not a convention: `tests/unit/mocks-boundary.test.ts` walks `src/` and fails on any import outside `src/app/`, with a second test asserting the rule is not vacuous
 - [ ] T089 Run the full quickstart V1–V8 validation and record results
 - [ ] T090 Verify `contracts/design-tokens.md` matches the generated `tokens.css` exactly, and that every derived token carries a `reason` naming the requirement that forced it
 
