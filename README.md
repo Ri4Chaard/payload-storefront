@@ -18,8 +18,8 @@ An online jewelry store with an integrated content platform, built on Payload CM
 
 ```bash
 pnpm install
-docker compose up -d db
-cp .env.example .env          # then fill in PAYLOAD_SECRET
+docker compose --profile local up -d   # Postgres on 127.0.0.1:5432
+cp .env.example .env                   # then fill in PAYLOAD_SECRET
 pnpm payload migrate
 pnpm build:tokens
 pnpm dev
@@ -28,6 +28,33 @@ pnpm dev
 - Storefront — http://localhost:3000
 - Admin — http://localhost:3000/admin
 - Storybook — `pnpm storybook`, http://localhost:6006
+
+## Deployment
+
+`docker-compose.yml` carries two profiles and starts nothing without one. The `local` profile above
+is Postgres alone, for an app running on the host. The `dev` profile is the deployed environment:
+the app, built from the checkout on the machine it runs on. It brings no database — point it at one
+that is provisioned separately.
+
+```bash
+# on the VPS, in a clone of this repository
+cp .env.example .env          # DATABASE_URI, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL
+docker compose --profile dev up -d --build
+```
+
+The container applies the committed migrations before `next start`, so a failed migration stops the
+deploy rather than booting against the wrong schema. To ship a new commit: `git pull` and repeat the
+`up -d --build`. The full runbook — environment, reverse proxy, backups, troubleshooting — is
+[`docs/deployment.md`](./docs/deployment.md).
+
+Three things to know:
+
+- `NEXT_PUBLIC_SERVER_URL` is inlined into the client bundle by `next build`. Changing it needs a
+  rebuild, not a restart.
+- A database running elsewhere on the same host is reachable as `host.docker.internal` — the
+  compose file maps it to the host gateway.
+- The app publishes `${APP_PORT:-3000}` for a reverse proxy (nginx, Caddy) to terminate TLS in
+  front of. Uploads live in the `aurum-media` volume.
 
 ## Commands
 

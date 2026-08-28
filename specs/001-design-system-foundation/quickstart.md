@@ -20,7 +20,7 @@ acceptance criteria and success criteria; each states what to run and what must 
 
 ```bash
 pnpm install
-docker compose up -d db          # Postgres
+docker compose --profile local up -d   # Postgres
 cp .env.example .env             # then fill in values
 pnpm payload migrate             # apply schema
 pnpm build:tokens                # design/tokens/* → src/styles/tokens.css

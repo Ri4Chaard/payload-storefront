@@ -1,0 +1,26 @@
+# Rebuilt inside the image
+node_modules/
+.next/
+storybook-static/
+*.tsbuildinfo
+
+# Secrets never enter the build context — they arrive as compose environment at run time
+.env
+.env.*
+!.env.example
+
+# Not part of the running app
+.git/
+.github/
+.claude/
+.specify/
+.storybook/
+docs/
+specs/
+tests/
+test-results/
+playwright-report/
+coverage/
+media/
+*.log
+.DS_Store

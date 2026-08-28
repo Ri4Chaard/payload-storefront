@@ -1,0 +1,74 @@
+# syntax=docker/dockerfile:1
+
+# The production image for the storefront and the Payload admin.
+#
+# Built on the target machine (`docker compose --profile dev up -d --build`), so the architecture
+# always matches the host and sharp's platform binaries resolve without cross-build tricks.
+
+ARG NODE_VERSION=22.21.0
+
+FROM node:${NODE_VERSION}-alpine AS base
+ENV PNPM_HOME=/pnpm \
+    PATH=/pnpm:$PATH \
+    NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable
+WORKDIR /app
+
+# --- dependencies ---------------------------------------------------------------------------
+# `--config.strict-dep-builds=false` because pnpm otherwise fails the install over esbuild's
+# unapproved postinstall (see pnpm-workspace.yaml — esbuild ships prebuilt binaries and does not
+# need it). It downgrades that error to the warning it is; nothing else is relaxed.
+#
+# Everything, dev dependencies included: the build needs Tailwind, TypeScript and tsx.
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --config.strict-dep-builds=false
+
+# Runtime dependencies only — this is what the final image ships.
+FROM base AS prod-deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --prod --config.strict-dep-builds=false
+
+# --- build ----------------------------------------------------------------------------------
+FROM base AS build
+
+# `next build` inlines every NEXT_PUBLIC_* reference into the bundle, so the public origin is a
+# build input rather than a runtime one. docker-compose.yml passes the deployment's value here;
+# rebuild the image when it changes.
+ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# src/env.ts fails startup on a missing variable (FR-006) and payload.config.ts is imported while
+# building. Neither of these two is *used* at build time — nothing connects to Postgres, nothing
+# encrypts — so placeholders satisfy the check. They are scoped to this one command, so no
+# stand-in secret survives into the image's environment.
+RUN DATABASE_URI=postgres://build:build@127.0.0.1:5432/build \
+    PAYLOAD_SECRET=build-only-not-a-real-secret \
+    pnpm build
+
+# --- runner ---------------------------------------------------------------------------------
+FROM base AS runner
+ENV NODE_ENV=production
+
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/public ./public
+# `payload migrate` reads the config and the committed migrations from source, so they ship too.
+# src comes from the build stage, not the context: the Payload admin import map is generated
+# during the build and lives under src/app/(payload).
+COPY --from=build /app/src ./src
+COPY --from=build /app/migrations ./migrations
+# The @tokens/* alias resolves here; the Payload CLI reads TypeScript source, so keep it resolvable.
+COPY --from=build /app/design ./design
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml next.config.mjs tsconfig.json ./
+
+# Uploads land in ./media, relative to the working directory (Payload defaults staticDir to the
+# collection slug). Created here so the named volume mounted over it inherits node's ownership.
+RUN mkdir -p media && chown -R node:node media .next
+
+USER node
+EXPOSE 3000
+CMD ["pnpm", "start"]
