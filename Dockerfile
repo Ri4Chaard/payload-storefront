@@ -51,6 +51,10 @@ COPY . .
 # stand-in secret survives into the image's environment.
 RUN DATABASE_URI=postgres://build:build@127.0.0.1:5432/build \
     PAYLOAD_SECRET=build-only-not-a-real-secret \
+    pnpm payload generate:importmap
+
+RUN DATABASE_URI=postgres://build:build@127.0.0.1:5432/build \
+    PAYLOAD_SECRET=build-only-not-a-real-secret \
     pnpm build
 
 # --- runner ---------------------------------------------------------------------------------
