@@ -1,0 +1,22 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/aurum_frontend
+            git fetch origin dev
+            git reset --hard origin/dev
+            docker compose -f docker-compose.dev.yml up -d --build
+            docker compose -f docker-compose.dev.yml exec -T app pnpm payload migrate
