@@ -69,7 +69,7 @@ here first, and deliberately narrower: no `_status`, no `inventory` count, no dr
 | `SizeOption`      | the "Size:" selector and the drawer                | `id`, `label`, `value`                                                                                                                                     |
 | `CategorySummary` | listing header, navigation, the drawer             | `slug`, `title`, `subtitle`, `href`                                                                                                                        |
 | `FilterState`     | toolbar, drawer, chips, `queries.ts`               | see §4                                                                                                                                                     |
-| `ListingResult`   | the listing route                                  | `products: ProductSummary[]`, `total`, `page`, `hasMore`, `appliedChips[]`                                                                                 |
+| `ListingResult`   | the listing route                                  | `products: ProductSummary[]`, `total`, `page`, `hasMore`, `appliedChips[]`, `ignored[]`                                                                    |
 | `FilterFacets`    | the drawer                                         | the option lists for every group, read from the catalogue                                                                                                  |
 
 **`price` is a formatted string, never a number.** 002/FR-004 settled this and `ProductCard`'s
@@ -90,6 +90,7 @@ The swap point. These signatures are the contract; the bodies are not.
 | Function                           | Returns                          | Notes                                                                                    |
 | ---------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | `getListing(filters: FilterState)` | `Promise<ListingResult>`         | The whole listing: filtering, sorting, paging. One call per listing page load            |
+| `PAGE_SIZE`                        | `12`                             | Three complete rows of a four-across 1920 grid, and it divides by the narrower layouts  |
 | `getProduct(slug: string)`         | `Promise<ProductDetail \| null>` | `null` is the branded 404 — for a missing slug **and** for a draft requested anonymously |
 | `getCategories()`                  | `Promise<CategorySummary[]>`     | Navigation, the drawer, the listing header                                               |
 | `getFilterFacets(category?)`       | `Promise<FilterFacets>`          | The drawer's option lists, from the catalogue rather than hardcoded                      |
@@ -112,8 +113,13 @@ The swap point. These signatures are the contract; the bodies are not.
 
 ## 4. Filter state and its URL — `src/lib/catalog/filters.ts`
 
-Pure, and symmetrical: `parseFilters(searchParams) → FilterState` and
+Pure, and symmetrical: `parseFilters(searchParams) → { filters, dropped }` and
 `toSearchParams(FilterState) → URLSearchParams`. Round-tripping is the first unit test.
+
+`parseFilters` returns the dropped values alongside the state rather than only the state, because
+FR-030 requires the listing to say what it ignored — a function that silently discarded them could
+not support it. It accepts both `URLSearchParams` and the `Record<string, string | string[]>` a
+route receives, so one function serves the server render and the drawer.
 
 | Key                     | Cardinality | Value                                                    | Group                                   |
 | ----------------------- | ----------- | -------------------------------------------------------- | --------------------------------------- |
@@ -193,6 +199,6 @@ real, built here, and unit-tested here, because it is what FR-038 and FR-040 spe
 | Gate             | Checks                                                                                                                                                                                                  |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm typecheck` | Fixtures still satisfy the generated collection types (§1)                                                                                                                                              |
-| `pnpm lint`      | No import of `src/mocks/` outside `queries.ts`; no import of `payload-types` document types outside `lib/catalog/`. Both are ESLint rules — the repository already has `eslint-rules/` for exactly this |
+| `pnpm lint`      | No import of `src/mocks/` outside `queries.ts`; no import of `payload-types` document types outside the data layer. Both are ESLint rules in `eslint-rules/catalog-boundary.mjs`. Two allowances are recorded there: `src/app/**` may still read mocks, which is spec 002's licence for the home page, and the Payload-side tiers may read document types, because modelling content is what they do |
 | `pnpm test`      | `filters.ts` round-trips; `price.ts` formats; `mappers.ts` narrows relationship unions and computes `available` correctly                                                                               |
 | `pnpm test:e2e`  | A filtered URL renders the same listing in a fresh context; the drawer submits without JavaScript                                                                                                       |

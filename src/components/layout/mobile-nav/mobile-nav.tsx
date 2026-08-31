@@ -8,6 +8,7 @@ import { Container } from '@/components/ui/container'
 import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
+import { useOverlay } from '@/components/ui/overlay'
 import { cn } from '@/lib/cn'
 import { CONTACT, SOCIAL_LINKS } from '@/lib/contact'
 import { type IconName } from '@/lib/icon-registry'
@@ -113,6 +114,25 @@ export function MobileNav({
     if (returnFocus) triggerRef.current?.focus()
   }, [])
 
+  /**
+   * Escape, the scroll lock, the initial focus and the inert regions are all `useOverlay` (003/T240)
+   * — this component is where they were written and the hook is where they now live.
+   *
+   * Two options are what make this a disclosure rather than a dialog, and both were deliberate in
+   * 002. `trapFocus: false`, because the cross that closes this shares the header row with the
+   * basket and the account button and all three stay live — trapping would put the close control
+   * out of reach. `restoreFocus: false`, because focus should return to the burger when Escape
+   * dismisses the menu and NOT when a link inside it navigates; `close(returnFocus)` below is that
+   * distinction, and the hook cannot see it.
+   */
+  useOverlay({
+    open,
+    onClose: () => close(true),
+    panelRef,
+    trapFocus: false,
+    restoreFocus: false,
+  })
+
   React.useEffect(() => {
     if (!open) return
 
@@ -121,26 +141,9 @@ export function MobileNav({
       if (panelRef.current?.contains(target) || triggerRef.current?.contains(target)) return
       setOpen(false)
     }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== 'Escape') return
-      // Escape closes the innermost layer, and the language menu inside this one is a layer. Both
-      // it and this listen on `document`, and this one is registered first because the drawer opens
-      // first — so `stopPropagation` from inside the menu arrives too late to help. Asking whether
-      // anything in the panel is expanded is what actually decides it.
-      if (panelRef.current?.querySelector('[aria-expanded="true"]')) return
-      close(true)
-    }
 
     document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open, close])
-
-  React.useEffect(() => {
-    if (open) panelRef.current?.querySelector('a')?.focus()
+    return () => document.removeEventListener('pointerdown', onPointerDown)
   }, [open])
 
   React.useEffect(() => {
@@ -164,28 +167,6 @@ export function MobileNav({
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [open])
-
-  React.useEffect(() => {
-    if (!open) return
-
-    // The page behind is fully covered, so it must not scroll. Overlay scrollbars are the norm at
-    // the widths this component exists at, so there is no gutter to compensate for.
-    const root = document.documentElement
-    const previous = root.style.overflow
-    root.style.overflow = 'hidden'
-
-    // Exactly what the panel covers. The header is deliberately left out: it stays visible, and
-    // everything on it is still meant to work.
-    const covered = [document.querySelector('main'), document.querySelector('footer')].filter(
-      (element): element is HTMLElement => element instanceof HTMLElement,
-    )
-    for (const element of covered) element.setAttribute('inert', '')
-
-    return () => {
-      root.style.overflow = previous
-      for (const element of covered) element.removeAttribute('inert')
-    }
   }, [open])
 
   return (

@@ -19,6 +19,7 @@ export { CategoryCard, type CategoryCardProps } from './category-card'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'
 export { Container, type ContainerProps } from './container'
+export { Drawer, type DrawerProps } from './drawer'
 export {
   FeatureCard,
   FeatureStrip,
@@ -34,11 +35,15 @@ export {
   type IconButtonSize,
   type IconButtonVariant,
 } from './icon-button'
+export { Lightbox, type LightboxImage, type LightboxProps } from './lightbox'
 export { Link, type LinkProps, type LinkVariant } from './link'
 export { Menu, type MenuProps } from './menu'
 export { MenuOption, type MenuOptionProps } from './menu-option'
 export { NavLink, type NavLinkProps } from './nav-link'
+// Behaviour rather than markup: `Drawer` and `Lightbox` are built on it, and so is `MobileNav`.
+export { useOverlay, usePrefersReducedMotion, type UseOverlayOptions } from './overlay'
 export { QuantityStepper, type QuantityStepperProps } from './quantity-stepper'
+export { RangeSlider, type RangeSliderProps } from './range-slider'
 export { ScrollArea, type ScrollAreaProps } from './scroll-area'
 export { SearchField, type SearchFieldProps } from './search-field'
 export { Switch, type SwitchProps } from './switch'

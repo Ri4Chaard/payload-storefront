@@ -113,11 +113,17 @@ and a migration, not an admin action. Recorded here so nobody discovers it in a 
 | Field          | Type          | Req | Src | Notes                                                                                                                                             |
 | -------------- | ------------- | :-: | :-: | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `availability` | select        | ✅  |  A  | `made-to-order` \| `stock-tracked`. Default `made-to-order`                                                                                       |
-| `inventory`    | number, min 0 |  —  |  P  | Shown only when `availability === 'stock-tracked'` **and** variants are off. Overridden `admin.condition`; read guarded by `adminOnlyFieldAccess` |
+| `inventory`    | number, min 0 |  —  |  P  | Shown only when `availability === 'stock-tracked'` **and** variants are off. Overridden `admin.condition`. **Publicly readable** — see below |
 
 A made-to-order product is always available regardless of `inventory` (FR-021 of the brief). A
 stock-tracked product at zero is **visible and clearly unavailable**, never hidden — the owner still
 wants it seen (spec Edge Cases).
+
+`inventory` is **not** guarded by `adminOnlyFieldAccess`, which an earlier draft of this document
+said it was. The storefront derives "unavailable" from the same access-controlled read a visitor
+gets, so hiding the number hides the answer: every stock-tracked piece would render as available.
+The count never reaches a component either way — `mappers.ts` turns it into a boolean at the
+boundary (contract §2), which is where that concern actually belongs.
 
 ### Options and price
 

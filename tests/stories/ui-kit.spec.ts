@@ -1779,3 +1779,162 @@ test('Escape closes the language menu without closing the drawer under it', asyn
   await page.keyboard.press('Escape')
   await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
 })
+
+/**
+ * The three primitives spec 003 adds (T241–T243). What is tested here is what the drawing cannot
+ * show: a slider whose handles have collapsed onto one another, a dialog's focus, and a viewer
+ * driven from the keyboard.
+ */
+const SLIDER_STORY = `${STORYBOOK}/iframe.html?id=ui-rangeslider--default&viewMode=story`
+const COLLAPSED_STORY = `${STORYBOOK}/iframe.html?id=ui-rangeslider--collapsed&viewMode=story`
+
+test('the range handles meet but never cross', async ({ page }) => {
+  await page.goto(SLIDER_STORY, { waitUntil: 'networkidle' })
+
+  const lower = page.getByRole('slider', { name: 'Minimum price' })
+  const upper = page.getByRole('slider', { name: 'Maximum price' })
+
+  // Drive the lower handle up past the upper one from the keyboard, which is the path that has no
+  // pointer geometry to stop it.
+  await lower.focus()
+  await page.keyboard.press('End')
+  expect(Number(await lower.inputValue())).toBe(Number(await upper.inputValue()))
+
+  await upper.focus()
+  await page.keyboard.press('Home')
+  expect(Number(await lower.inputValue())).toBeGreaterThanOrEqual(Number(await upper.inputValue()))
+})
+
+/**
+ * Two handles on the same value is the state a stacked-input slider gets permanently stuck in:
+ * whichever input is on top swallows every press, and the pair can never be pulled apart.
+ */
+test('a collapsed pair can be pulled apart from either side', async ({ page }) => {
+  await page.goto(COLLAPSED_STORY, { waitUntil: 'networkidle' })
+
+  const group = page.getByRole('group', { name: 'Price' })
+  const box = (await group.boundingBox())!
+  const lower = page.getByRole('slider', { name: 'Minimum price' })
+  const upper = page.getByRole('slider', { name: 'Maximum price' })
+  const before = await lower.inputValue()
+
+  // Approach from the left: the lower handle is the nearer one and must be the one that moves.
+  await page.mouse.move(box.x + box.width * 0.15, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.up()
+  expect(Number(await lower.inputValue()), 'the left press moved neither handle').toBeLessThan(
+    Number(before),
+  )
+
+  // And from the right, the upper one.
+  await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.up()
+  expect(Number(await upper.inputValue()), 'the right press moved neither handle').toBeGreaterThan(
+    Number(before),
+  )
+})
+
+test('the slider submits as two ordinary form fields', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-rangeslider--in-a-form&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+
+  await expect(page.getByRole('slider', { name: 'Minimum price' })).toHaveAttribute(
+    'name',
+    'minPrice',
+  )
+  await expect(page.getByRole('slider', { name: 'Maximum price' })).toHaveAttribute(
+    'name',
+    'maxPrice',
+  )
+})
+
+const DRAWER_STORY = `${STORYBOOK}/iframe.html?id=ui-drawer--default&viewMode=story`
+
+test('the drawer traps focus and gives it back to the trigger', async ({ page }) => {
+  await page.goto(DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  const dialog = page.getByRole('dialog', { name: 'Filters' })
+  await expect(dialog).toBeVisible()
+
+  // Tab all the way round. Focus must never leave the panel — the trigger behind it is reachable
+  // in the DOM and would be the first thing a leaking trap lands on.
+  for (let press = 0; press < 30; press += 1) {
+    await page.keyboard.press('Tab')
+    expect(
+      await dialog.evaluate((panel) => panel.contains(document.activeElement)),
+      `focus escaped the drawer after ${press + 1} presses`,
+    ).toBe(true)
+  }
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Filters' })).toBeFocused()
+})
+
+test('the drawer scrolls its body and keeps the actions in place', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 600 })
+  await page.goto(DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  const apply = page.getByRole('button', { name: 'Apply' })
+  const before = (await apply.boundingBox())!
+
+  const body = page.getByRole('dialog', { name: 'Filters' }).locator('div.overflow-y-auto')
+  expect(
+    await body.evaluate((element) => element.scrollHeight > element.clientHeight + 1),
+    'the story is not tall enough to prove anything about scrolling',
+  ).toBe(true)
+
+  await body.evaluate((element) => element.scrollTo(0, element.scrollHeight))
+  expect((await apply.boundingBox())!.y, 'the actions scrolled away with the body').toBeCloseTo(
+    before.y,
+    0,
+  )
+})
+
+test('a closed drawer is out of the tab order entirely', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-drawer--closed&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+  await expect(page.getByRole('dialog', { name: 'Filters' })).toBeHidden()
+  await expect(page.getByRole('checkbox', { name: 'Rings' })).toBeHidden()
+})
+
+const LIGHTBOX_STORY = `${STORYBOOK}/iframe.html?id=ui-lightbox--default&viewMode=story`
+const RING = 'Paragon Emerald Cut Diamond Engagement Ring'
+
+test('the viewer moves between photographs with the arrow keys, and wraps', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+
+  const status = page.getByRole('dialog', { name: `Photographs of ${RING}` }).locator('.sr-only')
+  await expect(status).toHaveText('Photograph 1 of 5')
+
+  await page.keyboard.press('ArrowRight')
+  await expect(status).toHaveText('Photograph 2 of 5')
+
+  // Backwards past the first: a viewer that stops dead there makes the press do nothing, with no
+  // visible end marker to explain why.
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await expect(status).toHaveText('Photograph 5 of 5')
+})
+
+test('the viewer draws no arrows for a single photograph', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-lightbox--single-photograph&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+  await expect(page.getByRole('button', { name: `Next photograph of ${RING}` })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Close' })).toBeVisible()
+})
+
+test('the viewer closes on Escape and returns focus to what opened it', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+
+  const dialog = page.getByRole('dialog', { name: `Photographs of ${RING}` })
+  await expect(dialog).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Open the photograph' })).toBeFocused()
+})

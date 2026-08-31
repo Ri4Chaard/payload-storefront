@@ -135,39 +135,39 @@ no deployment in between.
 
 **⚠️ Blocks every UI story below.**
 
-- [ ] T230 Write `src/lib/catalog/types.ts` — the view models from
+- [x] T230 Write `src/lib/catalog/types.ts` — the view models from
       [contracts/catalog-data.md](./contracts/catalog-data.md) §2. Narrower than the generated
       document types on purpose: no `_status`, no `inventory` count, no draft metadata
-- [ ] T231 Write `src/mocks/catalog.ts` — fixtures annotated with the **generated** `Product[]`,
+- [x] T231 Write `src/mocks/catalog.ts` — fixtures annotated with the **generated** `Product[]`,
       `Variant[]`, `Category[]`, `Collection[]`, `Size[]`, `Attribute[]`. Enough products to exercise
       three pages of a 1920 grid, both option paths, an unavailable stone and a stock-tracked zero
       (depends on T210)
-- [ ] T232 [P] Write `src/lib/catalog/price.ts` and its unit tests — integer minor units in, display
+- [x] T232 [P] Write `src/lib/catalog/price.ts` and its unit tests — integer minor units in, display
       string out, `Intl.NumberFormat`-based, locale-aware. Never called from a component
-- [ ] T233 [P] Write `src/lib/catalog/filters.ts` and its unit tests — `parseFilters` and
+- [x] T233 [P] Write `src/lib/catalog/filters.ts` and its unit tests — `parseFilters` and
       `toSearchParams` per contract §4. **Round-tripping is the first test.** Prices travel as minor
       units; absent means default; unknown values are dropped and reported
-- [ ] T234 Write `src/lib/catalog/mappers.ts` and its unit tests — generated document → view model.
+- [x] T234 Write `src/lib/catalog/mappers.ts` and its unit tests — generated document → view model.
       Two behaviours carry the most risk and get the most tests: narrowing the `string | Category`
       relationship unions, and computing `available` from availability mode, inventory and variant
       inventory. A component must never see an inventory number (depends on T230, T231)
-- [ ] T235 Write `src/lib/catalog/queries.ts` — the six functions in contract §3, mock-backed, all
+- [x] T235 Write `src/lib/catalog/queries.ts` — the six functions in contract §3, mock-backed, all
       `async` even where the body is synchronous. Filtering, sorting and paging happen **inside**
       `getListing`; a route that fetches everything and filters in JavaScript becomes a rewrite at
       T290, not a swap (depends on T233, T234)
-- [ ] T236 [P] Add two ESLint rules in `eslint-rules/` — no import of `src/mocks/` outside
+- [x] T236 [P] Add two ESLint rules in `eslint-rules/` — no import of `src/mocks/` outside
       `queries.ts`; no import of `payload-types` document types outside `src/lib/catalog/`. These are
       what make SC-010 enforceable rather than aspirational
-- [ ] T240 [P] Extract the modal behaviour built for `MobileNav` in 002 into one shared primitive —
+- [x] T240 [P] Extract the modal behaviour built for `MobileNav` in 002 into one shared primitive —
       focus trap, scroll lock, Escape, focus restoration, reduced motion. `Drawer` and `Lightbox`
       both consume it. Building them separately is the near-duplication Principle II forbids
       (research R7). The shape icons for the toolbar are already in `src/assets/icons`
-- [ ] T241 [P] Build `src/components/ui/range-slider/` with stories — two overlaid native
+- [x] T241 [P] Build `src/components/ui/range-slider/` with stories — two overlaid native
       `<input type="range">`, pointer-events managed so the nearer handle wins, min never above max.
       No dependency (research R7). Node `225:1369` for the drawn track and handles
-- [ ] T242 Build `src/components/ui/drawer/` with stories — left-anchored panel, scrim, sticky
+- [x] T242 Build `src/components/ui/drawer/` with stories — left-anchored panel, scrim, sticky
       footer, scrollable body. Node `532:12507` (depends on T240)
-- [ ] T243 Build `src/components/ui/lightbox/` with stories — full-screen photograph, previous/next,
+- [x] T243 Build `src/components/ui/lightbox/` with stories — full-screen photograph, previous/next,
       close. Node `308:6392` (depends on T240)
 
 **Checkpoint**: data flows and the three missing primitives exist. UI can start.
