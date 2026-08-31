@@ -61,3 +61,26 @@ export const ControlsOnHover: Story = {
     </div>
   ),
 }
+
+/**
+ * Pages itself every 1.2s — quick here so the behaviour is visible without waiting.
+ *
+ * Try to catch it out: hover the track and it holds, tab into it and it holds, and the moment you
+ * page it yourself — a press, a key, a wheel, a swipe — it gives up for good rather than fighting
+ * you for the scroll position. It also never starts at all if your system asks for reduced motion,
+ * which is the one case with no way to demonstrate it other than turning that setting on.
+ */
+export const AutoAdvancing: Story = {
+  args: { autoAdvance: 1200 },
+}
+
+/**
+ * No ends. Swipe or drag past the last panel and the first is already there — the track itself
+ * loops, not just the arrows, which is what `wrap` cannot do.
+ *
+ * The copies at either end are `inert`, so the eight panels are still eight things to a screen
+ * reader and eight tab stops, however many are painted.
+ */
+export const Looping: Story = {
+  args: { loop: true },
+}
