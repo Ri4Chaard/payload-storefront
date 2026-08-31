@@ -42,6 +42,7 @@ export { MenuOption, type MenuOptionProps } from './menu-option'
 export { NavLink, type NavLinkProps } from './nav-link'
 // Behaviour rather than markup: `Drawer` and `Lightbox` are built on it, and so is `MobileNav`.
 export { useOverlay, type UseOverlayOptions } from './overlay'
+export { Pagination, type PaginationProps } from './pagination'
 export { QuantityStepper, type QuantityStepperProps } from './quantity-stepper'
 export { RangeSlider, type RangeSliderProps } from './range-slider'
 export { ScrollArea, type ScrollAreaProps } from './scroll-area'

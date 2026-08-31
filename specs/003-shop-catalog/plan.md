@@ -139,8 +139,11 @@ src/
 ├── mocks/
 │   └── catalog.ts                       # fixtures typed as the GENERATED collection types
 ├── app/(frontend)/
-│   ├── (shop)/[category]/page.tsx       # rings | bracelets | earrings | necklaces
-│   ├── all-jewelry/page.tsx
+│   ├── not-found.tsx                    # NEW — 001/FR-041, first reached by an unknown category
+│   ├── (shop)/
+│   │   ├── listing.tsx                  # the renderer both listings share
+│   │   ├── [category]/page.tsx          # rings | bracelets | earrings | necklaces
+│   │   └── all-jewelry/page.tsx         # inside the group, so US4's toolbar layout reaches both
 │   └── products/[slug]/page.tsx
 └── components/
     ├── ui/

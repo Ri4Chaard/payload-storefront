@@ -109,11 +109,22 @@ describe('getProduct', () => {
 })
 
 describe('getFilterFacets', () => {
-  it('counts within a category and offers zero-count options anyway', async () => {
+  it('offers every option in a group, whatever the category holds', async () => {
     const facets = await getFilterFacets('rings')
     expect(facets.shapes).toHaveLength(7)
-    expect(facets.shapes.some((option) => option.count === 0)).toBe(true)
+    expect(facets.colours).toHaveLength(4)
     expect(facets.price.min).toBeLessThan(facets.price.max)
+  })
+
+  it('offers an option no piece in the category has, rather than hiding it', async () => {
+    // Hiding zero-count options makes the drawer change shape as a visitor filters, which loses
+    // the option they were reaching for. A zero is the honest answer to "do you have this".
+    const facets = await getFilterFacets('bracelets')
+    const empty = facets.shapes.filter((option) => option.count === 0)
+    expect(empty.length, 'no shape is absent from bracelets — pick a sparser group').toBeGreaterThan(
+      0,
+    )
+    expect(facets.shapes).toHaveLength(7)
   })
 
   it('always counts categories over the whole catalogue', async () => {

@@ -399,34 +399,42 @@ const DRAWN: Piece[] = [
  * names and rotate through the categories, colours, shapes and price bands so that every filter in
  * the drawer matches something and excludes something.
  */
-const FILLER_NAMES = [
-  'Halo Solitaire Ring',
-  'Baguette Eternity Band',
-  'Marquise Cluster Ring',
-  'Princess Cut Signet Ring',
-  'Oval Trilogy Ring',
-  'Tennis Bracelet',
-  'Bezel Link Bracelet',
-  'Pear Drop Bracelet',
-  'Emerald Bar Bracelet',
-  'Round Stud Earrings',
-  'Baguette Huggie Earrings',
-  'Oval Drop Earrings',
-  'Marquise Threader Earrings',
-  'Princess Halo Earrings',
-  'Solitaire Necklace',
-  'Riviera Necklace',
-  'Pear Pendant Necklace',
-  'Baguette Bar Necklace',
-  'Emerald Station Necklace',
-  'Cushion Halo Ring',
-  'Twisted Pavé Ring',
-  'Open Cuff Bracelet',
-  'Double Hoop Earrings',
-  'Layered Chain Necklace',
+/**
+ * Filler. A 1920 grid is four across and the listing pages at twelve, so a grid that pages needs
+ * more than two dozen pieces — and sorting by price proves nothing over five.
+ *
+ * **The name and the category are one entry, not two rotating lists.** An earlier version picked
+ * the category from the index and the name from a parallel array, which put an "Emerald Bar
+ * Bracelet" in Diamond Rings. Nothing was broken except the fixture, and it took a screenshot to
+ * see — which is exactly the sort of thing development content is for.
+ */
+const FILLER_PIECES: { title: string; categorySlug: string }[] = [
+  { title: 'Halo Solitaire Ring', categorySlug: 'rings' },
+  { title: 'Baguette Eternity Band', categorySlug: 'rings' },
+  { title: 'Marquise Cluster Ring', categorySlug: 'rings' },
+  { title: 'Princess Cut Signet Ring', categorySlug: 'rings' },
+  { title: 'Oval Trilogy Ring', categorySlug: 'rings' },
+  { title: 'Cushion Halo Ring', categorySlug: 'rings' },
+  { title: 'Twisted Pavé Ring', categorySlug: 'rings' },
+  { title: 'Tennis Bracelet', categorySlug: 'bracelets' },
+  { title: 'Bezel Link Bracelet', categorySlug: 'bracelets' },
+  { title: 'Pear Drop Bracelet', categorySlug: 'bracelets' },
+  { title: 'Emerald Bar Bracelet', categorySlug: 'bracelets' },
+  { title: 'Open Cuff Bracelet', categorySlug: 'bracelets' },
+  { title: 'Round Stud Earrings', categorySlug: 'earrings' },
+  { title: 'Baguette Huggie Earrings', categorySlug: 'earrings' },
+  { title: 'Oval Drop Earrings', categorySlug: 'earrings' },
+  { title: 'Marquise Threader Earrings', categorySlug: 'earrings' },
+  { title: 'Princess Halo Earrings', categorySlug: 'earrings' },
+  { title: 'Double Hoop Earrings', categorySlug: 'earrings' },
+  { title: 'Solitaire Necklace', categorySlug: 'necklaces' },
+  { title: 'Riviera Necklace', categorySlug: 'necklaces' },
+  { title: 'Pear Pendant Necklace', categorySlug: 'necklaces' },
+  { title: 'Baguette Bar Necklace', categorySlug: 'necklaces' },
+  { title: 'Emerald Station Necklace', categorySlug: 'necklaces' },
+  { title: 'Layered Chain Necklace', categorySlug: 'necklaces' },
 ]
 
-const FILLER_CATEGORIES = ['rings', 'bracelets', 'earrings', 'necklaces']
 const FILLER_COLOURS: NonNullable<Product['colour']>[] = [
   ['clear'],
   ['black'],
@@ -443,7 +451,14 @@ const FILLER_SHAPES: NonNullable<Product['diamondShape']>[] = [
   ['princess'],
   ['baguette'],
 ]
-const FILLER_GALLERIES = [[image(5)], [image(6)], [image(7)], [image(8)], [image(0), image(1)]]
+
+/** A piece is photographed as what it is. Rings get the ring, necklaces get a necklace. */
+const GALLERY_FOR: Record<string, Media[]> = {
+  rings: [image(0), image(1)],
+  bracelets: [image(5)],
+  earrings: [image(7)],
+  necklaces: [image(6), image(8)],
+}
 
 const pick = <T,>(list: readonly T[], index: number): T => {
   const found = list[index % list.length]
@@ -451,8 +466,7 @@ const pick = <T,>(list: readonly T[], index: number): T => {
   return found
 }
 
-const FILLER: Piece[] = FILLER_NAMES.map((title, index) => {
-  const categorySlug = pick(FILLER_CATEGORIES, index)
+const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
   const stocked = index % 4 === 3
 
   return {
@@ -460,7 +474,7 @@ const FILLER: Piece[] = FILLER_NAMES.map((title, index) => {
     slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     title,
     categorySlug,
-    gallery: pick(FILLER_GALLERIES, index),
+    gallery: GALLERY_FOR[categorySlug] ?? [image(0)],
     // 1,200 → 46,000 in even steps, so a price filter always has something on each side of it.
     price: 1200 + index * 1950,
     description: `${title}, made to order in our atelier.`,

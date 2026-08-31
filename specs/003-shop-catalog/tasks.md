@@ -186,24 +186,25 @@ says so.
 
 **Note**: the toolbar is not part of this story. It arrives complete in US4 and gains sort in US5.
 
-- [ ] T250 [P] [US2] Build `src/components/sections/listing-header/` with stories — title and
+- [x] T250 [P] [US2] Build `src/components/sections/listing-header/` with stories — title and
       subtitle. Nodes `222:709` (1920) · `412:7735` (1024) · `412:7870` (390)
-- [ ] T251 [US2] Build `src/components/commerce/product-grid/` with stories — four/three/two columns
+- [x] T251 [US2] Build `src/components/commerce/product-grid/` with stories — four/three/two columns
       at the drawn gaps and gutters, consuming `ProductCard` unchanged (FR-017). Nodes `222:982`
       (1920) · `412:7764` + `525:12186` (1024) · `412:7881` + `525:12212` (390)
-- [ ] T252 [US2] Build the empty state — nothing is drawn for it (spec Open Question 6). Title block,
+- [x] T252 [US2] Build the empty state — nothing is drawn for it (spec Open Question 6). Title block,
       chips, a sentence, and a control that clears the filters (FR-019)
-- [ ] T253 [US2] Build the route `src/app/(frontend)/(shop)/[category]/page.tsx` — validates the
+- [x] T253 [US2] Build the route `src/app/(frontend)/(shop)/[category]/page.tsx` — validates the
       segment against `getCategories()`, 404s on an unknown one, calls `getListing` once. Node
       `222:706`
-- [ ] T254 [P] [US2] Build `src/app/(frontend)/all-jewelry/page.tsx` — the same listing with no
+- [x] T254 [P] [US2] Build `src/app/(frontend)/all-jewelry/page.tsx` — the same listing with no
       category applied. Node `355:7139`
-- [ ] T255 [US2] Add paging beyond the first set of results, with position in the URL (FR-018).
-      Nothing is drawn; default to a "load more" control per spec Open Question 1, and `log` what is
-      not shown rather than truncating silently
-- [ ] T256 [P] [US2] Emit per-route metadata — title, description, canonical URL — and schema.org
+- [x] T255 [US2] Add paging beyond the first set of results, with position in the URL (FR-018).
+      Nothing is drawn; **numbered pages at the owner's direction**, closing spec Open Question 1 —
+      every page is a real address, which a "load more" button gives neither the back button nor a
+      crawler. New `src/components/ui/pagination/`
+- [x] T256 [P] [US2] Emit per-route metadata — title, description, canonical URL — and schema.org
       `BreadcrumbList` (FR-014, Constitution V)
-- [ ] T257 [US2] Route-level Playwright spec `tests/e2e/listing.spec.ts` — column counts at three
+- [x] T257 [US2] Route-level Playwright spec `tests/e2e/listing.spec.ts` — column counts at three
       widths, one link per card, category filtering, the empty state
 
 **Checkpoint**: the shop is browsable. The home page's links resolve for the first time.

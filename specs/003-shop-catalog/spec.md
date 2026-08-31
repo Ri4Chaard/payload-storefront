@@ -116,6 +116,14 @@ These are recorded rather than resolved, and are listed again under [Open Questi
 8. **No empty state is drawn** for a filter combination that matches nothing.
 9. **COLOR is a filter group with no counterpart on the product page.** Nothing in the product
    information column shows a colour.
+10. **The listing card is drawn twice and differs.** The 1920 listing (`222:982`) places the same
+    `Default` card the home page uses, whose action is revealed on hover. The 768 and 375 listings
+    (`412:7764`, `412:7881`) draw a permanently visible **BUY NOW** under every card — an action
+    spec 002 established as desktop-only, from the home page's own drawn card heights. Built to the
+    1920 frame and to the component that exists, per FR-017.
+11. **The narrow listing frames use a 40px gutter**, where every other band at that width uses 24.
+    The listing follows `Container` rather than the frame; a listing inset further than the header
+    above it would be the only page in the shop that is.
 
 ## Clarifications
 
