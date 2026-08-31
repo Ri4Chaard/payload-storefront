@@ -76,6 +76,9 @@ export function ProductGrid({
           images={product.images}
           cta={cta}
           ctaVisibility="always"
+          // The listing's own drawing sets the name at 14px and lets it run to as many lines as it
+          // needs (`412:7765`). The home row keeps the single truncated line it was drawn with.
+          nameFit="wrap"
           // Where the card already goes. The action is the drawn affordance for a pointer; the
           // card's own anchor is the one link a screen reader and a keyboard see.
           ctaHref={product.href}

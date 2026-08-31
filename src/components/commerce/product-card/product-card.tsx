@@ -73,6 +73,23 @@ export interface ProductCardProps extends Omit<React.ComponentProps<'article'>, 
    * card was built around. For a pointer it is the drawn button, and it works.
    */
   ctaHref?: string
+  /**
+   * How the name is set below `xl`.
+   *
+   * `truncate` (default) is one line with an ellipsis, at 16px — what the 1920 card draws
+   * (`I225:1494;144:885`, `whitespace-nowrap`) and what the home row's own 390 card draws too
+   * (`440:13594`), placeholder name a hundred characters long and all.
+   *
+   * `wrap` is the listing's later drawing (`412:7765`, `412:7773`): 14px, and the name runs to as
+   * many lines as it needs. Two different answers to the same question in the same file, and both
+   * are deliberate rather than a slip — the home row is a rail of fixed-width cards where ragged
+   * names would make the rail ragged, and the listing is a grid where the name is the only thing
+   * telling one piece from another. At 174px wide, one truncated line of 16px type is about eleven
+   * characters: "PARAGON EMERAL…". That is not a name.
+   *
+   * At `xl` both drawings agree again, so both settings truncate at 16px there.
+   */
+  nameFit?: 'truncate' | 'wrap'
   onCtaClick?: () => void
   sizes?: string
   priority?: boolean
@@ -87,6 +104,7 @@ export function ProductCard({
   cta = 'Select size',
   ctaVisibility = 'desktop-hover',
   ctaHref,
+  nameFit = 'truncate',
   onCtaClick,
   sizes,
   priority = false,
@@ -114,7 +132,8 @@ export function ProductCard({
         controls="hover"
         priority={priority}
         sizes={
-          sizes ?? (compact ? '174px' : '(min-width: 1280px) 415px, (min-width: 768px) 400px, 174px')
+          sizes ??
+          (compact ? '174px' : '(min-width: 1280px) 415px, (min-width: 768px) 400px, 174px')
         }
         className="bg-background-container"
       />
@@ -128,7 +147,10 @@ export function ProductCard({
             // The CTA arriving is the hover feedback.
             // Uppercased in CSS, not typed in capitals — the same rule the wordmark follows. The
             // name reaches a screen reader and a translator in its real casing.
-            'text-body-medium truncate uppercase after:absolute after:inset-0',
+            'uppercase after:absolute after:inset-0',
+            nameFit === 'wrap'
+              ? 'text-body-small xl:text-body-medium xl:truncate'
+              : 'text-body-medium truncate',
           )}
         >
           {name}
@@ -155,7 +177,13 @@ export function ProductCard({
             // `hidden` rather than `opacity-0` for the widths that draw no action at all — an
             // invisible button that is still focusable is the precise trap the reveal exists to
             // avoid, and it is a trap `opacity-0` alone would walk straight into.
-            ctaVisibility === 'always' ? 'inline-flex xl:h-13 xl:opacity-0' : 'hidden opacity-0 xl:inline-flex',
+            ctaVisibility === 'always'
+              ? 'inline-flex xl:h-13 xl:opacity-0'
+              : 'hidden opacity-0 xl:inline-flex',
+            // Pinned to the foot of the card, so a two-line name and a one-line name beside it
+            // still put their actions on the same line. The grid stretches every tile to its row's
+            // height already; without this the buttons follow the text and the row goes ragged.
+            'mt-auto',
             'group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100',
           )}
         >
