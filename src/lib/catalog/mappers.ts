@@ -31,7 +31,7 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 
 import type { Category, Media, Product, Shop, Size, Variant } from '@/payload-types'
 
-import { formatPrice } from './price'
+import { CATALOG_CURRENCY, formatPrice } from './price'
 import type {
   CatalogImage,
   CategorySummary,
@@ -208,6 +208,8 @@ export function toProductDetail(product: Product): ProductDetail {
     ...summary,
     categoryName: category.title,
     categorySlug: category.slug,
+    priceMinor: lowestPriceMinor(product),
+    currency: CATALOG_CURRENCY,
     description: product.description ?? null,
     gallery: summary.images,
     detailsHtml: html(product.details),

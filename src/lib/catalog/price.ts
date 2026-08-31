@@ -22,6 +22,16 @@
 const DEFAULT_LOCALE = 'en-US'
 const DEFAULT_CURRENCY = 'USD'
 
+/**
+ * The currency every amount in the catalogue is counted in, as an ISO 4217 code.
+ *
+ * Exported because structured data has to state it: `schema.org/Offer` wants `priceCurrency`
+ * beside a machine-readable `price`, and a search engine reading "USD" from a hardcoded string in
+ * a route while the formatter uses something else is the kind of divergence nobody notices until a
+ * rich result quotes the wrong money.
+ */
+export const CATALOG_CURRENCY = DEFAULT_CURRENCY
+
 /** How many decimal places this currency's minor unit occupies. USD 2, JPY 0, BHD 3. */
 export function minorUnitDigits(currency: string = DEFAULT_CURRENCY, locale?: string): number {
   const { maximumFractionDigits } = new Intl.NumberFormat(locale ?? DEFAULT_LOCALE, {

@@ -74,6 +74,17 @@ export interface ProductAttribute {
 export interface ProductDetail extends ProductSummary {
   categoryName: string
   categorySlug: string
+  /**
+   * The same amount as `price`, before formatting — an integer count of minor units, and the
+   * currency it counts.
+   *
+   * The one place a raw amount travels outside `DiamondOption`, and it exists for `schema.org`
+   * rather than for a component: an `Offer` has to carry a machine-readable number, and the only
+   * alternative is parsing `"$38,320"` back into money — which is exactly what the rule at the top
+   * of this file forbids. Nothing that DRAWS a price should read it.
+   */
+  priceMinor: number
+  currency: string
   description: string | null
   gallery: CatalogImage[]
   /** Serialised from the `details` rich text. `null` where the owner left it empty. */
