@@ -29,7 +29,7 @@ import {
 } from '@/mocks/catalog'
 import type { Product } from '@/payload-types'
 
-import { COLOURS, SHAPES } from './filters'
+import { COLOURS, DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
 import { formatPrice } from './price'
 import {
   isProductAvailable,
@@ -53,8 +53,10 @@ import type {
 } from './types'
 
 /**
- * Twelve. A 1920 grid is four across, so a page is three complete rows and never a ragged one; the
- * same number divides cleanly by the two-across phone layout and the three-across tablet.
+ * Twelve — how many pieces each press of LOAD MORE adds.
+ *
+ * A 1920 grid is four across, so a set is three complete rows and never a ragged one; the same
+ * number divides cleanly by the two-across phone layout and the three-across tablet.
  */
 export const PAGE_SIZE = 12
 
@@ -200,6 +202,13 @@ function chipsFor(filters: FilterState): AppliedFilterChip[] {
 
   if (filters.inStock) chips.push({ key: 'inStock', value: '1', label: 'In stock only' })
 
+  // The ordering is a chip too (T281). It is not a filter — it removes nothing from the grid — but
+  // it is a thing the visitor chose and therefore a thing they must be able to undo without
+  // reopening the menu to find which of the four is current. Dismissing it restores the default.
+  if (filters.sort !== DEFAULT_SORT) {
+    chips.push({ key: 'sort', value: filters.sort, label: SORT_LABELS[filters.sort] })
+  }
+
   return chips
 }
 
@@ -241,14 +250,32 @@ export async function getListing(filters: FilterState): Promise<ListingResult> {
     applied.sort,
   )
 
-  const start = (applied.page - 1) * PAGE_SIZE
-  const page = found.slice(start, start + PAGE_SIZE)
+  /**
+   * `page` counts how many sets are SHOWN, not which one is.
+   *
+   * The listing extends rather than replacing (FR-018, spec Open Question 1), so `page=3` is the
+   * first thirty-six pieces and not the third twelve. Keeping the arithmetic here rather than
+   * letting the route ask three times is what makes the swap in 004 one query — `limit: page *
+   * PAGE_SIZE` — instead of a loop.
+   */
+  /**
+   * Clamped, not refused. Numbered pagination could answer a page past the end with a 404, because
+   * there was genuinely nothing there. Under LOAD MORE a large `page` means "everything up to
+   * this much", and a link that asked for sixty pieces should show forty-five when three got
+   * unpublished rather than turning into a dead end in someone's inbox.
+   *
+   * It is also what keeps `limit: page * PAGE_SIZE` from becoming a query for ten million rows
+   * when the swap lands — a hand-typed `?page=999999` is bounded here, once, for both bodies.
+   */
+  const sets = Math.max(1, Math.ceil(found.length / PAGE_SIZE))
+  const page = Math.min(applied.page, sets)
+  const shown = found.slice(0, page * PAGE_SIZE)
 
   return {
-    products: page.map(toProductSummary),
+    products: shown.map(toProductSummary),
     total: found.length,
-    page: applied.page,
-    hasMore: start + page.length < found.length,
+    page,
+    hasMore: shown.length < found.length,
     appliedChips: chipsFor(applied),
     ignored,
   }

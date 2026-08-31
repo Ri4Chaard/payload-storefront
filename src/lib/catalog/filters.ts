@@ -55,6 +55,21 @@ export const SHAPES = Object.keys(SHAPE_KEYS) as DiamondShape[]
 
 export const DEFAULT_SORT: SortOrder = 'recommended'
 
+/**
+ * The four orderings, worded as the sort menu draws them (node 225:1854).
+ *
+ * Here rather than beside the menu because the chip row names the ordering too, and a chip reading
+ * "Newest" beside a menu reading "Most recent" is one label written twice. The drawing's own chip
+ * says `Best selling`, which is not one of the four — spec inconsistency 1, resolved in favour of
+ * the menu.
+ */
+export const SORT_LABELS: Record<SortOrder, string> = {
+  recommended: 'Recommended',
+  'price-asc': 'Price Ascending',
+  'price-desc': 'Price Descending',
+  newest: 'Newest',
+}
+
 /** The empty listing — every key at its default, which is also the state that writes no query. */
 export const DEFAULT_FILTERS: FilterState = {
   category: [],
@@ -261,7 +276,11 @@ export function removeFilter(filters: FilterState, key: FilterKey, value?: strin
       break
     case 'minPrice':
     case 'maxPrice':
-      delete next[key]
+      // Both ends, whichever one is named. A price range is drawn as ONE chip — "$1,200 – $7,300"
+      // — so dismissing it has to clear the whole thing; leaving the other end behind would empty
+      // half a filter the visitor believes they just removed.
+      delete next.minPrice
+      delete next.maxPrice
       break
     case 'inStock':
       next.inStock = false
@@ -288,4 +307,61 @@ export function hasActiveFilters(filters: FilterState): boolean {
     filters.maxPrice !== undefined ||
     filters.inStock
   )
+}
+
+/** The keys that hold a list. Every one of them is a group of checkboxes somewhere. */
+export type MultiFilterKey = 'category' | 'collection' | 'size' | 'colour' | 'shape'
+
+/**
+ * Tick or untick one value in one group.
+ *
+ * `value` is a plain string rather than the key's own union, because every caller has one: a
+ * `FacetOption.value`, a checkbox's `value` attribute, a segment of a URL. Narrowing at the call
+ * site would put a cast in seven components instead of one function. It is safe in the direction
+ * that matters — `parseFilters` drops anything the closed sets do not contain, so a bad value
+ * cannot survive a round trip through the URL even if one reached here.
+ */
+export function toggleFilter(filters: FilterState, key: MultiFilterKey, value: string): FilterState {
+  const current: readonly string[] = filters[key]
+  const next = current.includes(value)
+    ? current.filter((entry) => entry !== value)
+    : [...current, value]
+
+  return { ...filters, [key]: next, page: 1 } as FilterState
+}
+
+/**
+ * Change anything and return to page one.
+ *
+ * Every commit goes through here for that one reason. Narrowing a search while standing on page
+ * four is how a visitor lands on an empty grid that has results — the grid got shorter than the
+ * page they were on, and nothing about the screen explains it.
+ */
+export function applyChange(filters: FilterState, patch: Partial<FilterState>): FilterState {
+  return { ...filters, ...patch, page: 1 }
+}
+
+/**
+ * Drop whichever end of the price range is sitting where the catalogue already ends.
+ *
+ * Both ends are always submitted — the slider is a pair of native inputs inside a
+ * `<form method="GET">`, which is what makes the price reachable without scripting (FR-029). So a
+ * visitor who never touched it sends the catalogue's own minimum and maximum, and one who pulled
+ * only the top handle down still sends the minimum. Neither of those removes a single piece from
+ * the grid, and a chip claiming otherwise is a filter the visitor did not apply.
+ *
+ * Each end is judged on its own, which is also what produces the drawn chip: `Up to $7,300` rather
+ * than `$1,200 – $7,300` when only the maximum was moved (node 225:1487).
+ *
+ * `bounds` are the facet's raw ends. The control rounds them outward to a round step, so a handle
+ * left alone lands at or beyond them — hence the inclusive comparison.
+ */
+export function dropIdlePriceEnds(
+  filters: FilterState,
+  bounds: { min: number; max: number },
+): FilterState {
+  const next = { ...filters }
+  if (next.minPrice !== undefined && next.minPrice <= bounds.min) delete next.minPrice
+  if (next.maxPrice !== undefined && next.maxPrice >= bounds.max) delete next.maxPrice
+  return next
 }

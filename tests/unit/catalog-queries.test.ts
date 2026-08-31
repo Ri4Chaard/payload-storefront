@@ -21,34 +21,36 @@ const listing = (overrides: Partial<FilterState> = {}) =>
   getListing({ ...DEFAULT_FILTERS, ...overrides })
 
 describe('getListing', () => {
-  it('pages rather than returning the catalogue', async () => {
+  /**
+   * `page` counts how many sets are shown, not which one — the listing EXTENDS (FR-018). Page three
+   * therefore opens with page one's twelve rather than replacing them, which is the property the
+   * whole LOAD MORE arrangement rests on: pressing it must never move a card the visitor was
+   * already looking at.
+   */
+  it('extends rather than replacing, and never returns the whole catalogue at once', async () => {
     const first = await listing()
     expect(first.products).toHaveLength(PAGE_SIZE)
     expect(first.total).toBeGreaterThan(PAGE_SIZE * 2)
     expect(first.hasMore).toBe(true)
 
-    const third = await listing({ page: 3 })
-    expect(third.page).toBe(3)
-    expect(third.products.map((product) => product.id)).not.toEqual(
-      first.products.map((product) => product.id),
-    )
+    const second = await listing({ page: 2 })
+    expect(second.page).toBe(2)
+    expect(second.products).toHaveLength(PAGE_SIZE * 2)
+    expect(second.products.slice(0, PAGE_SIZE)).toEqual(first.products)
   })
 
-  it('runs past the last page without throwing', async () => {
+  it('runs past the last set without throwing, and says there is no more', async () => {
     const beyond = await listing({ page: 99 })
-    expect(beyond.products).toEqual([])
+    expect(beyond.products).toHaveLength(beyond.total)
     expect(beyond.hasMore).toBe(false)
   })
 
   it('never contains a draft', async () => {
-    const everything = await listing({ page: 1 })
-    const all = await Promise.all(
-      Array.from({ length: Math.ceil(everything.total / PAGE_SIZE) }, (_, index) =>
-        listing({ page: index + 1 }),
-      ),
+    const everything = await listing({ page: 99 })
+    expect(everything.products).toHaveLength(everything.total)
+    expect(everything.products.map((product) => product.slug)).not.toContain(
+      'unreleased-spartan-cuff',
     )
-    const slugs = all.flatMap((result) => result.products.map((product) => product.slug))
-    expect(slugs).not.toContain('unreleased-spartan-cuff')
   })
 
   it('combines groups with AND and values within a group with OR', async () => {

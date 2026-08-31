@@ -103,11 +103,16 @@ The swap point. These signatures are the contract; the bodies are not.
    changes shape at swap time is not a seam.
 2. Filtering, sorting and paging happen **inside** `getListing`. A route that fetches everything and
    filters in JavaScript does not become a Payload query later; it becomes a rewrite.
-3. Drafts are excluded by the access rule, not by a filter in this module. The mock body simulates
+3. `page` counts how many sets are **shown**, not which one is. The listing extends rather than
+   replacing (FR-018), so `page=3` is the first thirty-six pieces — `limit: page * PAGE_SIZE` once
+   the body is a `find()`. A page past the end is **clamped**, not refused: a shared link that asked
+   for sixty pieces should show forty-five once three are unpublished, and the clamp is also what
+   stops a hand-typed `?page=999999` becoming a query for ten million rows.
+4. Drafts are excluded by the access rule, not by a filter in this module. The mock body simulates
    it by excluding `_status !== 'published'`.
-4. Nothing outside this module imports from `src/mocks/`. This is the rule 001/T088 set and 002
+5. Nothing outside this module imports from `src/mocks/`. This is the rule 001/T088 set and 002
    carried; it is what makes the swap one file.
-5. Nothing outside this module imports `payload-types` document types. Components see view models.
+6. Nothing outside this module imports `payload-types` document types. Components see view models.
 
 ---
 

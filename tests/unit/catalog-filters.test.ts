@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import {
   DEFAULT_FILTERS,
+  applyChange,
+  dropIdlePriceEnds,
   hasActiveFilters,
   parseFilters,
   removeFilter,
   toQueryString,
   toSearchParams,
+  toggleFilter,
 } from '@/lib/catalog/filters'
 import type { FilterState } from '@/lib/catalog/types'
 
@@ -137,5 +140,87 @@ describe('hasActiveFilters', () => {
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, sort: 'newest', page: 4 })).toBe(false)
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, inStock: true })).toBe(true)
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, minPrice: 1 })).toBe(true)
+  })
+})
+
+describe('toggleFilter', () => {
+  it('adds a value that is absent and removes one that is present', () => {
+    const on = toggleFilter(DEFAULT_FILTERS, 'shape', 'oval')
+    expect(on.shape).toEqual(['oval'])
+    expect(toggleFilter(on, 'shape', 'oval').shape).toEqual([])
+  })
+
+  it('returns to page one, because a narrower grid may not have the page you are standing on', () => {
+    expect(toggleFilter({ ...DEFAULT_FILTERS, page: 4 }, 'colour', 'black').page).toBe(1)
+  })
+
+  it('leaves every other group alone', () => {
+    const filters = { ...DEFAULT_FILTERS, category: ['rings'], colour: ['black' as const] }
+    expect(toggleFilter(filters, 'size', '2.5')).toMatchObject({
+      category: ['rings'],
+      colour: ['black'],
+      size: ['2.5'],
+    })
+  })
+})
+
+describe('applyChange', () => {
+  it('patches and returns to page one', () => {
+    const next = applyChange({ ...DEFAULT_FILTERS, page: 7 }, { sort: 'price-desc' })
+    expect(next.sort).toBe('price-desc')
+    expect(next.page).toBe(1)
+  })
+})
+
+/**
+ * A price range is drawn as ONE chip, so dismissing it has to clear both ends. Removing only the
+ * end that was named would leave half a filter applied under a chip that has gone.
+ */
+describe('removeFilter, on a price range', () => {
+  it('clears both ends whichever one is named', () => {
+    const ranged = { ...DEFAULT_FILTERS, minPrice: 120_000, maxPrice: 730_000 }
+    for (const named of ['minPrice', 'maxPrice'] as const) {
+      const next = removeFilter(ranged, named)
+      expect(next.minPrice).toBeUndefined()
+      expect(next.maxPrice).toBeUndefined()
+      expect(toQueryString(next)).toBe('')
+    }
+  })
+})
+
+/**
+ * The slider always submits both of its ends, so an end left where the catalogue already stops is
+ * a value that removes nothing. Judged one end at a time, which is what produces the drawn
+ * "Up to $7,300" chip rather than "$1,200 – $7,300".
+ */
+describe('dropIdlePriceEnds', () => {
+  const BOUNDS = { min: 120_000, max: 3_840_000 }
+
+  it('drops both ends of an untouched slider', () => {
+    const submitted = { ...DEFAULT_FILTERS, minPrice: 120_000, maxPrice: 3_840_000 }
+    const settled = dropIdlePriceEnds(submitted, BOUNDS)
+    expect(settled.minPrice).toBeUndefined()
+    expect(settled.maxPrice).toBeUndefined()
+  })
+
+  it('keeps the end that moved and drops the one that did not', () => {
+    const submitted = { ...DEFAULT_FILTERS, minPrice: 120_000, maxPrice: 730_000 }
+    const settled = dropIdlePriceEnds(submitted, BOUNDS)
+    expect(settled.minPrice).toBeUndefined()
+    expect(settled.maxPrice).toBe(730_000)
+  })
+
+  /** The control rounds the ends outward to a whole step, so a handle can sit past the bound. */
+  it('drops an end that sits beyond its bound', () => {
+    const submitted = { ...DEFAULT_FILTERS, minPrice: 120_000, maxPrice: 3_850_000 }
+    expect(dropIdlePriceEnds(submitted, BOUNDS).maxPrice).toBeUndefined()
+  })
+
+  it('leaves a genuine range alone', () => {
+    const submitted = { ...DEFAULT_FILTERS, minPrice: 200_000, maxPrice: 730_000 }
+    expect(dropIdlePriceEnds(submitted, BOUNDS)).toMatchObject({
+      minPrice: 200_000,
+      maxPrice: 730_000,
+    })
   })
 })
