@@ -34,13 +34,28 @@ export interface JewelryCarouselProps extends React.ComponentProps<'section'> {
     href: string
     images: { src: string; alt?: string }[]
   }[]
-  cta: { label: string; href: string }
+  /**
+   * The route to the full catalogue, drawn beneath the row on the home page (node 144:839).
+   *
+   * Optional because the product page reuses this band for _Complete the Collection_ (FR-037) and
+   * draws no button there (node `242:2585`): the pieces in the row already ARE the destinations,
+   * and "view all" would point at a listing the visitor did not ask for.
+   */
+  cta?: { label: string; href: string }
   /**
    * The scrolling region's own name. It cannot simply repeat the heading — the band is already
    * labelled by that, and two regions with one name is worse than a slightly redundant second one.
    */
   trackLabel?: string
   headingId?: string
+  /**
+   * Milliseconds between automatic pages, passed straight to `Carousel`. Off by default.
+   *
+   * On for _Complete the Collection_ on the product page, where the row is a shop window beside a
+   * piece someone is already looking at, and off on the home page, where the same band is the
+   * visitor's first sight of the catalogue and moving it under them is not a welcome.
+   */
+  autoAdvance?: number
 }
 
 export function JewelryCarousel({
@@ -49,6 +64,7 @@ export function JewelryCarousel({
   cta,
   trackLabel = 'Featured jewelry',
   headingId = 'featured-heading',
+  autoAdvance,
   className,
   ...props
 }: JewelryCarouselProps) {
@@ -65,6 +81,7 @@ export function JewelryCarousel({
         label={trackLabel}
         prevLabel="Show previous pieces"
         nextLabel="Show more pieces"
+        autoAdvance={autoAdvance}
         trackClassName="gap-2.5 md:gap-5"
         // 174px, then 400px, then a quarter of the content width less the three gaps between the
         // four cards. `var(--spacing) * 15` is three `gap-5`s — the same token the gap comes from.
@@ -81,9 +98,11 @@ export function JewelryCarousel({
         ))}
       />
 
-      <Button href={cta.href} className="uppercase">
-        {cta.label}
-      </Button>
+      {cta ? (
+        <Button href={cta.href} className="uppercase">
+          {cta.label}
+        </Button>
+      ) : null}
     </Container>
   )
 }

@@ -3,6 +3,7 @@ import React from 'react'
 
 import { AboutBand, CategoryBand, Hero, JewelryCarousel } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
+import { SHOP_PROMISES } from '@/lib/shop-promises'
 import { homeContent } from '@/mocks'
 
 /**
@@ -47,36 +48,8 @@ export default function HomePage() {
         outline that jumped h1 → h3 and skipped a level (FR-026). The drawn order puts it here
         anyway; the heading hierarchy is the reason to keep it here.
       */}
-      <FeatureStrip items={FEATURES} />
+      <FeatureStrip items={SHOP_PROMISES} />
     </>
   )
 }
 
-/**
- * Static until an editor needs them. These four are fixed promises about how the shop operates
- * rather than content that changes, so they stay beside the page that shows them instead of
- * inflating the content model for a later spec.
- */
-const FEATURES = [
-  {
-    icon: 'shipping' as const,
-    title: 'Free shipping',
-    description: 'Carefully packaged and delivered with guaranteed protection',
-  },
-  {
-    icon: 'seal-check' as const,
-    title: 'Quality guarantee',
-    description:
-      'If your piece doesn’t meet your expectations, we’ll assist you with a return or exchange',
-  },
-  {
-    icon: 'customer-support' as const,
-    title: 'Personal support',
-    description: 'Our specialists will help you choose the perfect piece and answer any questions',
-  },
-  {
-    icon: 'secure-payment' as const,
-    title: 'Secure payments',
-    description: 'Your information is protected with modern encryption technology',
-  },
-]
