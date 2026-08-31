@@ -497,6 +497,11 @@ page and the open full-screen gallery at three widths; load each route with Java
   be operable by keyboard, and the dots MUST be controls, not decoration.
 - **FR-034**: The main photograph MUST open full screen, with paging, a close control, Escape to
   close, focus trapped while open and focus restored on close.
+- **FR-034a**: The full-screen photograph MUST be zoomable — shallow, enough to read a stone rather
+  than to inspect pixels — with pinch on touch, and MUST offer a control so that the feature is
+  reachable from a keyboard. Node `308:6392` draws no zoom affordance because the frame predates
+  this requirement; the control is a deliberate addition to the drawing, recorded here rather than
+  invented in the component. See [research.md](./research.md) R11.
 - **FR-035**: The information column MUST present the category as an eyebrow, the name as the page's
   only first-level heading, the price, the description, the selectors, the actions and the drawn
   accordions, in that order.

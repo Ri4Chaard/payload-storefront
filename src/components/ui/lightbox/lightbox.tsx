@@ -1,41 +1,55 @@
 'use client'
 
-import Image from 'next/image'
+import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import React from 'react'
 
-import { IconButton } from '@/components/ui/icon-button'
-import { useOverlay } from '@/components/ui/overlay'
-import { cn } from '@/lib/cn'
+import { iconRegistry, type IconName } from '@/lib/icon-registry'
+
+import 'photoswipe/style.css'
+import './lightbox.css'
 
 /**
- * The full-screen photograph viewer from node 308:6392 — one photograph on white, filling the
- * height, with a close control at the top right and a 50px arrow at each side.
+ * The full-screen photograph viewer from node 308:6392, built on **PhotoSwipe 5**.
  *
- * Drawn for the product gallery and built as a primitive for the same reason `Drawer` is: it takes
- * photographs and an index, and knows nothing about products.
+ * The frame draws paging, a close control and nothing else, and an earlier version of this file
+ * implemented exactly that on top of `useOverlay`. Zoom was then added to the brief — people buy
+ * jewellery on the stone, and a viewer they cannot look into is the wrong viewer. Pinch, pan with
+ * momentum, bounded panning and a wheel that zooms instead of scrolling are the class of thing that
+ * takes a week to write and a year to get right on real devices, so this is the case where
+ * Constitution II's "reuse before creation" points at a dependency. See research.md R11.
  *
- * **The arrows are drawn asymmetrically and are built symmetrically.** The frame puts the left one
- * 150px from the edge and the right one 100px, while the close control above it sits at 100px. One
- * of those three is a nudge that was never straightened, and matching it would put a permanent
- * 50px lean into a component whose whole subject is centred. Recorded rather than reproduced.
+ * **Cost, measured rather than assumed.** 4.5KB gzipped in the route bundle, plus 16.4KB fetched on
+ * first open — the core is behind `pswpModule`, which is a dynamic import — and 2.4KB of CSS. A
+ * route that never opens the viewer pays the 4.5KB and nothing else.
  *
- * **Arrow keys move between photographs.** A viewer that can only be driven by finding and pressing
- * a 50px target is one a keyboard cannot really use, and `←`/`→` is what a viewer of anything is
- * expected to answer to. Escape closes, via `useOverlay`.
+ * **The props did not change.** `open`, `index`, `onIndexChange`, `onClose`, `label` and
+ * `triggerRef` are what they were, and the component is still controlled on the index so that the
+ * gallery underneath stays on whatever photograph the viewer was closed on. PhotoSwipe keeps its
+ * own index internally; the `change` event is what keeps the two in step, and it is the one place
+ * this wrapper has real work to do. `LightboxImage` gained `width` and `height`, which the zoom
+ * arithmetic needs and which `CatalogImage` already carries.
  *
- * **The count is announced even though it is not drawn.** Pressing "next" changes a picture and
- * nothing else — with no caption and no counter on screen there is no feedback at all for a screen
- * reader, so a live region says "2 of 5". It is `sr-only` because the design deliberately shows
- * nothing, and that is a visual decision rather than an informational one.
+ * **Zoom is deliberately shallow.** The levels are expressed as multiples of the fitted size rather
+ * than of the file's natural size, because "1.75" should mean "a bit closer than it sits on screen"
+ * regardless of whether the photograph is 1000px or 4000px wide.
  *
- * **Always mounted, `display` toggled** — the pattern `MobileNav` set in 002 and `Drawer` follows.
+ * **The zoom button is drawn even though the frame has none.** The frame has none because the frame
+ * predates zoom. Pinch and double-tap and the wheel are all pointer gestures; without a control
+ * there is no keyboard path to the feature at all, and SC-006 covers the open viewer.
+ *
+ * **What PhotoSwipe does not label, we label.** Its root is `role="dialog"` with no accessible name
+ * and no `aria-modal`, which is an axe violation on a gate this repository actually enforces. Both
+ * are set on `afterInit`.
  */
 export interface LightboxImage {
   src: string
+  /** Natural dimensions. PhotoSwipe needs them to compute the fitted size and the zoom ceiling. */
+  width: number
+  height: number
   alt?: string
 }
 
-export interface LightboxProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
+export interface LightboxProps {
   open: boolean
   onClose: () => void
   images: LightboxImage[]
@@ -46,9 +60,20 @@ export interface LightboxProps extends Omit<React.ComponentProps<'div'>, 'onChan
   label: string
   /** Focus returns here on close — the photograph that was pressed to open the viewer. */
   triggerRef?: React.RefObject<HTMLElement | null>
+  /**
+   * The thumbnail a given photograph is opening FROM. Supply it and the viewer grows out of that
+   * element instead of fading in; omit it and the transition is a fade. This is the whole of the
+   * "opens from the picture you pressed" effect, and it needs a live DOM node rather than a
+   * measurement, because the page may have scrolled between opening and closing.
+   */
+  thumbnailFor?: (index: number) => HTMLElement | null
 }
 
-const ARROW = 'absolute top-1/2 z-10 -translate-y-1/2 size-12.5 [&_svg]:size-4'
+/** Our own glyphs, handed over as markup. PhotoSwipe inserts a plain SVG string verbatim. */
+function glyph(name: IconName): string {
+  const { viewBox, body } = iconRegistry[name]
+  return `<svg class="pswp__icn" viewBox="${viewBox}" aria-hidden="true" focusable="false">${body}</svg>`
+}
 
 export function Lightbox({
   open,
@@ -58,106 +83,107 @@ export function Lightbox({
   onIndexChange,
   label,
   triggerRef,
-  className,
-  ...props
+  thumbnailFor,
 }: LightboxProps) {
-  const panelRef = React.useRef<HTMLDivElement>(null)
-  const total = images.length
-  const current = images[index]
+  const instance = React.useRef<PhotoSwipeLightbox | null>(null)
 
-  useOverlay({
-    open,
-    onClose,
-    panelRef,
-    triggerRef,
-    // The viewer covers everything, the header included — unlike the menu, which leaves the header
-    // live because its own close control lives there.
-    inertSelectors: ['header', 'main', 'footer'],
+  // The callbacks are read through refs inside the effect below. Without this, an inline arrow —
+  // which every caller passes — would tear down and rebuild the whole viewer on each render, and
+  // rebuilding it mid-gesture closes it.
+  const handlers = React.useRef({ onClose, onIndexChange, thumbnailFor })
+  React.useEffect(() => {
+    handlers.current = { onClose, onIndexChange, thumbnailFor }
   })
 
-  // Wrapping, because a viewer of five photographs that stops at the fifth makes the sixth press
-  // do nothing, and there is no visible end marker to explain why.
-  const go = React.useCallback(
-    (step: number) => {
-      if (total === 0) return
-      onIndexChange((index + step + total) % total)
-    },
-    [index, total, onIndexChange],
-  )
+  // `index` is seeded at open and then owned by PhotoSwipe, so it is read rather than depended on:
+  // re-running this effect for a change the library itself reported would fight the gesture that
+  // caused it.
+  const openIndex = React.useRef(index)
+  openIndex.current = index
 
   React.useEffect(() => {
-    if (!open) return
+    if (!open || images.length === 0) return
 
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'ArrowLeft') go(-1)
-      else if (event.key === 'ArrowRight') go(1)
-      else return
-      event.preventDefault()
+    const lightbox = new PhotoSwipeLightbox({
+      dataSource: images.map((image) => ({
+        src: image.src,
+        width: image.width,
+        height: image.height,
+        alt: image.alt ?? label,
+      })),
+      index: openIndex.current,
+      pswpModule: () => import('photoswipe'),
+
+      // The frame's chrome. `counter` is off because the frame draws none; `zoom` is on because
+      // otherwise the feature has no keyboard path. See the note above.
+      counter: false,
+      zoom: true,
+      closeSVG: glyph('close'),
+      zoomSVG: glyph('search'),
+      arrowPrevSVG: glyph('chevron-left'),
+      arrowNextSVG: glyph('chevron-right'),
+      closeTitle: 'Close',
+      zoomTitle: `Zoom into the photograph of ${label}`,
+      arrowPrevTitle: `Previous photograph of ${label}`,
+      arrowNextTitle: `Next photograph of ${label}`,
+
+      // Shallow on purpose, and relative to the fitted size rather than to the file.
+      initialZoomLevel: 'fit',
+      secondaryZoomLevel: (zoom) => zoom.fit * 1.75,
+      maxZoomLevel: (zoom) => zoom.fit * 2.5,
+
+      // `zoom` needs a thumbnail to grow out of; without one the library falls back to `fade`
+      // anyway, so saying so up front keeps the two paths honest.
+      showHideAnimationType: thumbnailFor ? 'zoom' : 'fade',
+      bgOpacity: 1,
+    })
+
+    lightbox.on('afterInit', () => {
+      const root = lightbox.pswp?.element
+      if (!root) return
+      // Its own root is an unnamed `role="dialog"`, which axe fails and a screen reader cannot
+      // introduce. Both attributes are ours to supply.
+      root.setAttribute('aria-label', `Photographs of ${label}`)
+      root.setAttribute('aria-modal', 'true')
+    })
+
+    lightbox.on('change', () => {
+      const next = lightbox.pswp?.currIndex
+      if (typeof next === 'number') handlers.current.onIndexChange(next)
+    })
+
+    // Fires for every route out — the close button, Escape, the swipe-down gesture, the scrim.
+    // Reporting it is what keeps `open` from going stale and refusing to reopen.
+    lightbox.on('destroy', () => {
+      handlers.current.onClose()
+      triggerRef?.current?.focus()
+    })
+
+    lightbox.addFilter('thumbEl', (fallback, _data, slideIndex) =>
+      // Declared as returning an element, but the library both passes and accepts `undefined` —
+      // `getThumbBounds` checks for one before it measures. Narrowing to the declared type would
+      // mean inventing an element that is not there.
+      (handlers.current.thumbnailFor?.(slideIndex) ?? fallback) as HTMLElement,
+    )
+
+    lightbox.init()
+    lightbox.loadAndOpen(openIndex.current)
+    instance.current = lightbox
+
+    return () => {
+      instance.current = null
+      lightbox.destroy()
     }
+    // `index` is deliberately absent — see `openIndex` above.
+  }, [open, images, label, triggerRef, thumbnailFor])
 
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, go])
+  // A caller may move the index while the viewer is open — the thumbnail rail beneath it does
+  // exactly that. Driving PhotoSwipe rather than remounting it keeps the gesture state intact.
+  React.useEffect(() => {
+    const pswp = instance.current?.pswp
+    if (pswp && pswp.currIndex !== index) pswp.goTo(index)
+  }, [index])
 
-  return (
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Photographs of ${label}`}
-      className={cn(
-        'bg-background-container fixed inset-0 z-50 flex items-center justify-center',
-        'transition-[opacity,display] duration-[var(--duration-base)]',
-        'transition-discrete ease-[var(--ease-standard)] motion-reduce:transition-none',
-        open ? 'opacity-100 starting:opacity-0' : 'hidden opacity-0',
-        className,
-      )}
-      {...props}
-    >
-      <IconButton
-        variant="bare"
-        icon="close"
-        label="Close"
-        onClick={onClose}
-        className="text-neutral-primary hover:text-primary-default absolute top-10 right-6 z-10 [&_svg]:size-5 md:top-25 md:right-25"
-      />
-
-      {total > 1 ? (
-        <>
-          <IconButton
-            variant="outline"
-            icon="chevron-left"
-            label={`Previous photograph of ${label}`}
-            onClick={() => go(-1)}
-            className={cn(ARROW, 'left-4 md:left-25')}
-          />
-          <IconButton
-            variant="outline"
-            icon="chevron-right"
-            label={`Next photograph of ${label}`}
-            onClick={() => go(1)}
-            className={cn(ARROW, 'right-4 md:right-25')}
-          />
-        </>
-      ) : null}
-
-      {current ? (
-        <div className="relative h-full w-full">
-          <Image
-            key={current.src}
-            src={current.src}
-            alt={current.alt ?? label}
-            fill
-            // The photograph is the entire screen here, so there is nothing smaller to ask for.
-            sizes="100vw"
-            className="object-contain"
-          />
-        </div>
-      ) : null}
-
-      <p aria-live="polite" className="sr-only">
-        {total > 0 ? `Photograph ${index + 1} of ${total}` : 'No photographs'}
-      </p>
-    </div>
-  )
+  // PhotoSwipe renders into the document itself, so there is nothing for React to place.
+  return null
 }

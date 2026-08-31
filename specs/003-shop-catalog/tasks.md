@@ -168,7 +168,9 @@ no deployment in between.
 - [x] T242 Build `src/components/ui/drawer/` with stories — left-anchored panel, scrim, sticky
       footer, scrollable body. Node `532:12507` (depends on T240)
 - [x] T243 Build `src/components/ui/lightbox/` with stories — full-screen photograph, previous/next,
-      close. Node `308:6392` (depends on T240)
+      close. Node `308:6392` (depends on T240). **Built twice**: first on `useOverlay`, then rebuilt
+      on `photoswipe@5.4.4` when zoom entered the brief (FR-034a). It no longer depends on T240;
+      `Drawer` and `MobileNav` still do. See [research.md](./research.md) R11
 
 **Checkpoint**: data flows and the three missing primitives exist. UI can start.
 

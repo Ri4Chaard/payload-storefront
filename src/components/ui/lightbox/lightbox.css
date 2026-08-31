@@ -1,0 +1,109 @@
+/*
+ * PhotoSwipe, dressed as node 308:6392.
+ *
+ * The library ships a dark viewer with a light-on-dark icon set and a halo behind each glyph. The
+ * frame draws the opposite: a white ground, dark chrome, and the kit's own 50px outline control for
+ * the arrows. Everything below is that translation, and nothing below is decoration.
+ *
+ * The glyphs themselves are NOT restyled here — they are our own SVGs, handed to PhotoSwipe through
+ * `closeSVG` / `arrowPrevSVG` / `arrowNextSVG` / `zoomSVG` in lightbox.tsx, so the icon set stays a
+ * single source of truth. What this file restates is the button chrome: a hairline and a shadow
+ * that `IconButton`'s `outline` variant also owns. That is a real duplication and a deliberate one
+ * — the alternative is portalling React controls into a DOM tree the library manages imperatively,
+ * which buys one copy of six declarations at the price of a focus trap that has to agree with a
+ * lifecycle we do not control.
+ *
+ * Spacing is expressed through `--spacing` rather than written in pixels, because scripts/
+ * check-styles.ts reads padding and margin and is right to.
+ */
+
+.pswp {
+  --pswp-bg: var(--color-background-container);
+  --pswp-placeholder-bg: var(--color-background-bg);
+  --pswp-icon-color: var(--color-neutral-primary);
+  /* A halo drawn for a black ground. On white it is the only thing that would show. */
+  --pswp-icon-color-secondary: transparent;
+  --pswp-icon-stroke-width: 0;
+  /* Referenced by the library's own transitions and left undefined by its stylesheet. */
+  --pswp-transition-duration: var(--duration-base);
+
+  /* 16px at a phone, 100px from `md` up — the inset the frame draws for the close and the arrows. */
+  --lightbox-inset: calc(var(--spacing) * 4);
+}
+
+@media (min-width: 48rem) {
+  .pswp {
+    --lightbox-inset: calc(var(--spacing) * 25);
+  }
+}
+
+.pswp__button {
+  color: var(--color-neutral-primary);
+  /* The drawing has no dimmed chrome; the library fades every control to 0.85 at rest. */
+  opacity: 1;
+}
+
+.pswp__button:hover {
+  color: var(--color-primary-default);
+}
+
+/*
+ * Close and zoom. The bar is `justify-content: flex-end`, so padding is what places them.
+ */
+.pswp__top-bar {
+  height: auto;
+  padding: var(--lightbox-inset);
+  gap: calc(var(--spacing) * 2);
+}
+
+.pswp__button--close,
+.pswp__button--zoom {
+  width: calc(var(--spacing) * 5);
+  height: calc(var(--spacing) * 5);
+  margin-right: 0;
+}
+
+/*
+ * The arrows: the kit's 50px outline control, restated. See the note at the top of this file.
+ */
+.pswp__button--arrow {
+  width: calc(var(--spacing) * 12.5);
+  height: calc(var(--spacing) * 12.5);
+  margin-top: calc(var(--spacing) * -6.25);
+  border: 1px solid color-mix(in srgb, var(--color-neutral-primary) 5%, transparent);
+  background: var(--color-background-container);
+  box-shadow:
+    0 4px 6px -1px color-mix(in srgb, var(--color-neutral-primary) 10%, transparent),
+    0 2px 4px -2px color-mix(in srgb, var(--color-neutral-primary) 10%, transparent);
+}
+
+.pswp__button--arrow:hover {
+  border-color: color-mix(in srgb, var(--color-neutral-primary) 10%, transparent);
+}
+
+.pswp__button--arrow--prev {
+  left: var(--lightbox-inset);
+}
+
+.pswp__button--arrow--next {
+  right: var(--lightbox-inset);
+}
+
+/* Our glyphs are sized by their own box; the library positions a 32px icon inside a 75px button. */
+.pswp__button .pswp__icn {
+  position: static;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.pswp__button--arrow .pswp__icn {
+  margin-top: 0;
+  padding: calc(var(--spacing) * 4.25);
+}
+
+/* FR-043 — a visible focus indicator, matching the one the storefront sets globally. */
+.pswp__button:focus-visible {
+  outline: 2px solid var(--color-primary-default);
+  outline-offset: 2px;
+}

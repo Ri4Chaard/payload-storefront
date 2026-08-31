@@ -202,23 +202,3 @@ export function useOverlay({
     }
   }, [open, selectors, panelRef])
 }
-
-/**
- * Whether the viewer asked for less motion. CSS answers this for transitions with
- * `motion-reduce:`; this is for the cases only JavaScript can reach — a programmatic scroll, an
- * autoplaying carousel — where the utility has nothing to apply to.
- */
-export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(false)
-
-  React.useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setReduced(query.matches)
-
-    const onChange = (event: MediaQueryListEvent) => setReduced(event.matches)
-    query.addEventListener('change', onChange)
-    return () => query.removeEventListener('change', onChange)
-  }, [])
-
-  return reduced
-}

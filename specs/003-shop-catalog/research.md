@@ -230,7 +230,11 @@ filter form (rejected: not shareable, not cacheable, breaks the back button).
 | ------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `RangeSlider` | Two overlaid native `<input type="range">`, one per handle, with pointer-events managed so the nearer handle wins    | Native range inputs are keyboard-operable, screen-reader-labelled and touch-friendly for free. Every popular slider library reimplements that badly and costs 15–40KB      |
 | `Drawer`      | `<dialog>` with a modal open, plus the focus and scroll-lock behaviour already written for `MobileNav` in 002/FR-034 | The behaviour exists in this repository; Principle II says extend it, not import it                                                                                        |
-| `Lightbox`    | The same `<dialog>`, with the gallery's existing paging                                                              | 002 deferred PhotoSwipe to this spec precisely so it could be judged here. Judged: it is 30KB+ and its own theming surface, for a viewer that is one dialog and two arrows |
+| `Lightbox`    | ~~The same `<dialog>`, with the gallery's existing paging~~ — **superseded by R11**                                  | 002 deferred PhotoSwipe to this spec precisely so it could be judged here. Judged, and then re-judged once zoom entered the brief: see R11                                 |
+
+**⚠ Superseded in part**: the `Lightbox` row above was decided on a brief with no zoom in it, and
+that premise did not hold. R11 records the reversal, the measurement that the estimate above got
+wrong, and what it cost. `RangeSlider` and `Drawer` stand as written.
 
 **⚠ Finding**: `Drawer` and `Lightbox` share their whole modal behaviour — focus trap, scroll lock,
 Escape, focus restoration, `prefers-reduced-motion`. That is one primitive with two skins, not two
@@ -423,3 +427,58 @@ absent from the navigation, and the product's edit page renders its "Available v
 behaviour, not just presentation. Spreading it and changing one key is how that behaviour gets lost
 quietly. `products` and `carts` keep their `group: 'Shop'` — neither has an invariant riding on it —
 but that is now a checked claim rather than an assumption.
+
+---
+
+## R11. PhotoSwipe, after zoom entered the brief
+
+**Decision**: adopt `photoswipe@5.4.4` for the full-screen viewer. **This reverses R7's third row.**
+
+R7 judged PhotoSwipe against a brief that asked for paging, a close control and Escape — all of
+which `useOverlay` already provided, and the first implementation of `Lightbox` did exactly that,
+in about 160 lines with no dependency. That judgment was correct for the brief it was given.
+
+The brief then changed: the owner wants to look **into** the stone. Zoom is not a variation on
+paging — it is pinch with two pointers, panning bounded by the zoomed image's edges, momentum,
+double-tap, a wheel that magnifies rather than scrolls, and a pointer that behaves differently
+again on a trackpad. That is the class of work where "reuse before creation" points at a library
+rather than away from one, and Principle VI's neighbouring instinct applies: hand-rolled
+geometry that is subtly wrong on one device is worse than a dependency that is right on all of them.
+
+**The 30KB in R7 was an estimate and it was wrong.** Measured from the installed package:
+
+| Artefact                            | Gzipped | When it loads                    |
+| ----------------------------------- | ------- | -------------------------------- |
+| `photoswipe-lightbox.esm.min.js`    | 4.5KB   | With the route                   |
+| `photoswipe.esm.min.js`             | 16.4KB  | On first open, via `pswpModule`  |
+| `photoswipe.css`                    | 2.4KB   | With the route                   |
+
+So a product page that is never opened full screen carries 6.9KB, and the 16.4KB core arrives only
+when someone asks for it. Against Constitution V's 200KB per route that is comfortable, and it is
+the reason the dynamic `pswpModule` import is used rather than a static one.
+
+**What it cost, honestly:**
+
+- **The chrome is themed, not adopted.** PhotoSwipe ships a dark viewer; node 308:6392 draws a white
+  one. `lightbox.css` translates it. The glyphs come from our own registry through `closeSVG` and
+  friends, so the icon set stays single-sourced, but the arrow's hairline and shadow are restated
+  there and also live in `IconButton`'s `outline` variant. Recorded at the top of that file.
+- **Its root is an unnamed `role="dialog"` with no `aria-modal`.** That is an axe violation on a
+  gate this repository enforces, so both attributes are set on `afterInit`.
+- **Two indices instead of one.** The component stays controlled so the thumbnail rail can follow;
+  PhotoSwipe owns its index internally. The `change` event and a `goTo` in the other direction are
+  what keep them in step, and that is the only real work in the wrapper.
+- **`usePrefersReducedMotion` lost its consumer** and was deleted. PhotoSwipe disables its own
+  animations under `prefers-reduced-motion`, and the storefront's global rule in
+  `app/(frontend)/styles.css` already covers CSS transitions.
+
+**What it bought beyond zoom**: touch swipe with momentum — which the hand-rolled viewer did not
+have, and which the mobile gallery beneath it (FR-033) does, so the interaction no longer changes
+when a visitor goes full screen. And an opening transition that grows out of the pressed thumbnail,
+wired through the optional `thumbnailFor` prop.
+
+**Alternatives considered**: `react-photoswipe-gallery` (rejected: a third-party wrapper over the
+thing we actually want, and its `<Gallery><Item>` render-prop shape would dictate the product
+gallery's markup). Keeping the hand-rolled viewer and adding only pinch-zoom (rejected: pinch
+without bounded pan and momentum is the half that feels broken). `medium-zoom` (rejected: it zooms
+an image in place; it is not a full-screen viewer and does not page).

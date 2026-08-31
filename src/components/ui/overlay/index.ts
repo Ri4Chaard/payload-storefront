@@ -1,1 +1,1 @@
-export { useOverlay, usePrefersReducedMotion, type UseOverlayOptions } from './use-overlay'
+export { useOverlay, type UseOverlayOptions } from './use-overlay'

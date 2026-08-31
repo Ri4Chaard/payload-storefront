@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 /**
  * Every UI-kit story must actually RENDER — the same gate the Foundations stories get, for the same
@@ -1904,26 +1904,60 @@ test('a closed drawer is out of the tab order entirely', async ({ page }) => {
 const LIGHTBOX_STORY = `${STORYBOOK}/iframe.html?id=ui-lightbox--default&viewMode=story`
 const RING = 'Paragon Emerald Cut Diamond Engagement Ring'
 
+/**
+ * The viewer is PhotoSwipe (003/R11), which renders into the document rather than into the story,
+ * and reports the showing photograph by leaving exactly one slide `aria-hidden="false"`. That is
+ * what these read: the alt text of the photograph actually on screen, not a counter we control.
+ */
+const showing = (page: Page) =>
+  page.locator('.pswp__item[aria-hidden="false"] img').first().getAttribute('alt')
+
 test('the viewer moves between photographs with the arrow keys, and wraps', async ({ page }) => {
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
 
-  const status = page.getByRole('dialog', { name: `Photographs of ${RING}` }).locator('.sr-only')
-  await expect(status).toHaveText('Photograph 1 of 5')
+  await expect.poll(() => showing(page)).toBe('The ring, photographed on white')
 
   await page.keyboard.press('ArrowRight')
-  await expect(status).toHaveText('Photograph 2 of 5')
+  await expect.poll(() => showing(page)).toBe('The ring worn with a tailored jacket')
 
   // Backwards past the first: a viewer that stops dead there makes the press do nothing, with no
   // visible end marker to explain why.
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowLeft')
-  await expect(status).toHaveText('Photograph 5 of 5')
+  await expect.poll(() => showing(page)).toBe('The ring against denim')
+})
+
+/**
+ * Zoom is the reason the viewer is PhotoSwipe at all. The control is here even though node
+ * 308:6392 draws none — the frame predates the feature, and pinch, double-tap and the wheel are all
+ * pointer gestures, which would leave a keyboard with no route to it (SC-006).
+ */
+test('the viewer zooms, and can be zoomed from the keyboard', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  const viewer = page.locator('.pswp')
+  await expect(viewer).toHaveClass(/pswp--zoom-allowed/)
+
+  const zoom = page.getByRole('button', { name: `Zoom into the photograph of ${RING}` })
+  await zoom.focus()
+  await expect(zoom).toBeFocused()
+  await page.keyboard.press('Enter')
+
+  await expect(viewer).toHaveClass(/pswp--zoomed-in/)
+
+  // Shallow on purpose — a stone wants a closer look, not a pixel inspection.
+  const scale = await page
+    .locator('.pswp__item[aria-hidden="false"] img')
+    .first()
+    .evaluate((image) => image.getBoundingClientRect().width / (image as HTMLImageElement).naturalWidth)
+  expect(scale).toBeLessThan(1)
 })
 
 test('the viewer draws no arrows for a single photograph', async ({ page }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=ui-lightbox--single-photograph&viewMode=story`, {
     waitUntil: 'networkidle',
   })
+  await page.locator('.pswp--ui-visible').waitFor()
   await expect(page.getByRole('button', { name: `Next photograph of ${RING}` })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Close' })).toBeVisible()
 })
@@ -1935,6 +1969,30 @@ test('the viewer closes on Escape and returns focus to what opened it', async ({
   await expect(dialog).toBeVisible()
 
   await page.keyboard.press('Escape')
-  await expect(dialog).toBeHidden()
+  // PhotoSwipe removes its own root rather than hiding it, so the dialog goes away entirely.
+  await expect(dialog).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Open the photograph' })).toBeFocused()
+})
+
+/**
+ * The drawn viewer is white with dark chrome; the library ships the opposite. This is the assertion
+ * that the theme in lightbox.css is actually reaching it — a stylesheet that silently fails to load
+ * would leave a black viewer that still passes every behavioural test above.
+ */
+test('the viewer wears the drawn white theme, not the library default', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
+
+  await expect(page.locator('.pswp__bg')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+
+  // 50px squares, 100px in from each edge — the frame's arrow, which is the kit's outline control.
+  const next = (await page.locator('.pswp__button--arrow--next').boundingBox())!
+  expect(next.width).toBe(50)
+  expect(next.height).toBe(50)
+  expect(1280 - (next.x + next.width)).toBe(100)
+
+  const close = (await page.locator('.pswp__button--close').boundingBox())!
+  expect(close.width).toBe(20)
+  expect(close.y).toBe(100)
 })

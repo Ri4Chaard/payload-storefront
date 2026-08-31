@@ -25,7 +25,7 @@ function Groups() {
     <>
       {GROUPS.map((group) => (
         <fieldset key={group.label} className="border-b border-black/10 py-5 last:border-b-0">
-          <legend className="text-label text-neutral-primary pb-4">{group.label}</legend>
+          <legend className="text-label text-neutral-primary pt-4">{group.label}</legend>
           <div className="flex flex-col gap-2.5">
             {group.options.map((option) => (
               <Checkbox key={option} label={option} />
