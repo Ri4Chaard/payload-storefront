@@ -519,8 +519,9 @@ compile rather than failing in CI.
 
 ### `Carousel`
 
-`items`, `label`, `prevLabel`, `nextLabel`, `wrap`, `controls` (`always | hover`), `itemClassName`,
-`trackClassName`, `arrowClassName`.
+`items`, `label`, `prevLabel`, `nextLabel`, `wrap`, `loop`, `controls` (`always | hover | none`),
+`activeIndex`, `onActiveIndexChange`, `autoAdvance`, `itemClassName`, `trackClassName`,
+`arrowClassName`.
 
 Added in spec 002 by extraction, not by invention. `ImageCarousel` owned a scroll-snap track; the
 home page's jewelry row needed the same mechanism over cards instead of photographs. Two copies of
@@ -538,6 +539,70 @@ that logic is the near-duplicate Constitution II forbids, so the mechanism moved
 The clamped mode is also the answer to "an arrow that pages to nothing": with four cards in a row
 that fits four, neither arrow ever renders. That is precisely what the home page draws, where the
 desktop frame parks its scroll control at `hidden`.
+
+**Changed by 003/T260.** Two additions, both for the product gallery, which is a track paged from
+somewhere other than its own arrows.
+
+- **`controls: 'none'`** removes the arrows entirely. The gallery's photograph is driven by the
+  thumbnail rail beside it; a second pair of arrows over the picture is not drawn and not wanted.
+- **`activeIndex` / `onActiveIndexChange`** make the track controlled. Supplying the number scrolls
+  there; supplying the callback reports a swipe, an arrow key or a drag back out. Together they are
+  what lets one gallery keep its thumbnails, its dots and its full-screen viewer pointing at the
+  same photograph — the alternative was a second scroll-snap implementation in `commerce/`, which is
+  the duplicate this component exists to prevent.
+
+**Changed again by 003/T267.** `autoAdvance` — milliseconds between automatic pages, off by
+default. Owner-requested for _Complete the Collection_ on the product page; the home page's copy of
+the same band leaves it off, because that row is a visitor's first sight of the catalogue and moving
+it under them is not a welcome.
+
+The rules live in **`useAutoAdvance`** (`components/ui/carousel/use-auto-advance.ts`), a hook beside
+the component in the way `useOverlay` sits beside `Overlay`, and for the same reason: the product
+gallery needs the same timer over a **different root**. Its photograph is a `Carousel`; its rail,
+dots and arrows are not — and a visitor who has just chosen the fourth thumbnail must not be moved
+off it five seconds later. What has to pause is the whole gallery, so the root is the caller's to
+name.
+
+Auto-advancing content has to be stoppable to meet WCAG 2.2.2, and this stops four ways: it never
+starts for `prefers-reduced-motion: reduce`, it holds while the root is hovered or holds focus, it
+holds while the tab is in the background, and it gives up **permanently** on the first
+`pointerdown`, `keydown`, `wheel` or `touchstart` inside the root. Someone who has started reading is
+not interrupted by a timer they have already overridden. Deliberately NOT stopped by `scroll`, which
+fires for the component's own paging — a carousel that stops on its own first tick is a slower
+static row. At the end `Carousel` returns to the start regardless of `wrap`, which governs what an
+ARROW does at the last item, not what a finished loop does.
+
+**Changed again by 003/T262.** `loop` — a track with no ends, where the SWIPE loops and not merely
+the arrows. Owner-requested for the product gallery.
+
+`wrap` and `loop` answer different questions and are not alternatives. `wrap` decides what an ARROW
+at the last item does; the gesture underneath it still stops dead, because native scrolling has
+ends. `loop` removes the ends: a copy of the last item goes before the first and a copy of the first
+after the last, and landing on a copy is silently repositioned onto its original once the scrolling
+settles — instantly, never smoothly, and only after the scrolling has stopped, so there is no
+momentum left to fight and nothing for the visitor to see.
+
+Three details are load-bearing:
+
+- The copies are `inert` and `aria-hidden`. Each item is announced once and tabbed to once, however
+  many times it is painted. They cost no downloads — same `src`, same cache entry.
+- They are added **after mount**, not server-rendered. The copy of the last item would otherwise sit
+  at scroll offset zero, so the first paint would show the LAST item until hydration corrected it.
+  A layout effect compensates the scroll position in the same frame the copies appear.
+- Driving `activeIndex` to the first or last item measures **both places that item lives** and
+  scrolls to the nearer. Pressing "next" on the last item asks for item 0; scrolling to the real
+  item 0 rakes backwards past everything, while the copy just to the right carries on the way the
+  visitor was already going. Only the first and last have a twin — offering one for the items
+  between them flings the track onto an unrelated copy, which is how this was got wrong once.
+
+"Active" means the item nearest the scroll start: exact for a track of full-width photographs, and
+deliberate for a row of four cards, where it is the leftmost visible one.
+
+The report fires when scrolling **stops**, after a short quiet period, not while it is happening. A
+smooth scroll from the first photograph to the third passes over the second, and reporting that
+hands the caller an index nobody asked for — which, when the caller is also driving the track, turns
+into the two directions fighting until it settles wherever the argument ended. `scrollend` says this
+exactly and is not in Safari yet; 120ms of quiet says it everywhere.
 
 **Reach is measured, not assumed** — whether a track overflows depends on the viewport, the item
 count and the font, none of them known at build time. A `scroll` listener and a `ResizeObserver`

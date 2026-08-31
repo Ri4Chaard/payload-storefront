@@ -221,29 +221,29 @@ says so.
 **Independent Test**: open a product at three widths; page the gallery with the rail, the keyboard
 and full screen; open every accordion; confirm the name is the only `h1`.
 
-- [ ] T260 [P] [US3] Build `src/components/commerce/product-gallery/` with stories — desktop rail
+- [X] T260 [P] [US3] Build `src/components/commerce/product-gallery/` with stories — desktop rail
       beside the photograph with its own up/down paging. Nodes `297:4567` (rail `297:4568`, main
       `297:4574`)
-- [ ] T261 [US3] Tablet gallery — rail **beneath** the photograph, five 68px thumbnails. Node
+- [X] T261 [US3] Tablet gallery — rail **beneath** the photograph, five 68px thumbnails. Node
       `410:7300` (thumbnails `410:7302`)
-- [ ] T262 [US3] Mobile gallery — **swipe carousel with dot indicators, no rail.** Nodes `410:7635`
+- [X] T262 [US3] Mobile gallery — **swipe carousel with dot indicators, no rail.** Nodes `410:7635`
       (dots `410:7637`). The dots are controls, not decoration, and the carousel must be
       keyboard-operable (FR-033, corrected)
-- [ ] T263 [US3] Wire the gallery into `Lightbox` — open, page, Escape, focus restoration
+- [X] T263 [US3] Wire the gallery into `Lightbox` — open, page, Escape, focus restoration
       (FR-034, depends on T243)
-- [ ] T264 [US3] Build the information column — eyebrow from the category, name as the only `h1`,
+- [X] T264 [US3] Build the information column — eyebrow from the category, name as the only `h1`,
       price, description that closes over its own absence. Nodes `242:2479` / `301:5025` (1920) ·
       `410:7308` / `410:7309` (1024) · `410:7641` / `410:7642` (390)
-- [ ] T265 [P] [US3] Build the three accordions on the existing `Accordion` — PRODUCT DETAILS from
+- [X] T265 [P] [US3] Build the three accordions on the existing `Accordion` — PRODUCT DETAILS from
       the product, warranty and delivery from the `shop` global (FR-036). Nodes `242:2478` (1920) ·
       `410:7377` (1024) · `410:7709` (390)
-- [ ] T266 [US3] Build `src/app/(frontend)/products/[slug]/page.tsx` — `getProduct` returns `null`
+- [X] T266 [US3] Build `src/app/(frontend)/products/[slug]/page.tsx` — `getProduct` returns `null`
       for a missing slug **and** for a draft requested anonymously, both rendering the branded 404.
       Node `231:1901`
-- [ ] T267 [P] [US3] Add _Complete the Collection_, reusing `JewelryCarousel` unchanged, absent
+- [X] T267 [P] [US3] Add _Complete the Collection_, reusing `JewelryCarousel` unchanged, absent
       rather than empty when there is nothing to show (FR-037). Node `242:2585` (grid `231:1963`)
-- [ ] T268 [P] [US3] Emit product metadata and schema.org `Product` + `Offer` (Constitution V)
-- [ ] T269 [US3] Route-level Playwright spec `tests/e2e/product.spec.ts` — heading order, gallery
+- [X] T268 [P] [US3] Emit product metadata and schema.org `Product` + `Offer` (Constitution V)
+- [X] T269 [US3] Route-level Playwright spec `tests/e2e/product.spec.ts` — heading order, gallery
       paging at three widths, lightbox focus restoration, single-photograph product offers no dead
       controls, empty description closes the gap
 
@@ -348,6 +348,13 @@ disappears, including from its own URL. No mock involved.
       the result; nothing else measures this
 - [ ] T292 [US1b] Upload the T202 photography as Payload media with real alternative text, and attach
       it to the seeded products (FR-044)
+- [ ] T292a [US1b] Move the three accordion TITLES into the `shop` global — `detailsTitle`,
+      `warrantyTitle`, `deliveryTitle`, defaulting to the drawn strings — and surface them through
+      `ShopContent`. `ProductDetails` already takes them as props with those defaults, so this is a
+      schema field, a migration and one call site. **Owner-requested (2026-08-31):** "3 YEAR
+      WARRANTY + FREE RETURNS" is a factual claim about how the shop operates, and Constitution I
+      does not let a claim like that need a deployment to change. `shop.ts` originally modelled the
+      bodies only, on the reasoning that the headings never move; the owner has said they do
 - [ ] T293 [US1b] Tighten the T236 ESLint rule — `src/mocks/` is now forbidden in app code entirely,
       tests and stories excepted. The fixtures stay: still typed against the generated types, still
       a drift alarm

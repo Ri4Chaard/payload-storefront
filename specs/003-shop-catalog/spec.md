@@ -177,6 +177,31 @@ These are recorded rather than resolved, and are listed again under [Open Questi
     16px in a 52px one, and both its photograph and its button are drawn with a 4px radius where
     1920 draws square. **Not built** — recorded and left for the owner, because it recolours every
     price on the listing and rounds a card the home page shares.
+19. **The product description is drawn at 1920 and absent at 1024 and 390.** `231:2339` sits under
+    the price on the desktop frame; `410:7309` and `410:7642` stop after it. **Resolved: it renders
+    at every width.** FR-035 puts the description in the column, and the visitor least able to go
+    and find the information elsewhere is the one on a phone. It closes over its own absence, so a
+    piece the owner has not described still has no empty paragraph and no reserved gap.
+20. **The mobile gallery's dots are a 14px target.** 8px circles 6px apart (`410:7637`), against
+    WCAG 2.2 AA 2.5.8's 24px, and the spacing exception does not rescue them at that pitch.
+    **Resolved: the control is 24px and the drawn dot is what it contains.** The dots look exactly
+    as drawn; the row is 120px wide for five photographs rather than the drawn 36px for three.
+21. **The mobile photograph is 390×360, the tablet one square, the desktop one 850×853.**
+    **Resolved: square throughout.** 850:853 is square to within three pixels, and one aspect ratio
+    is what lets the same track hold the same photographs at every width instead of reflowing them.
+22. **The gallery's arrows are drawn INSIDE the rail frame** (`297:4591` sits within `297:4568`),
+    which reads as a scrollbar for the thumbnails. **Resolved, owner 2026-08-31: they page the
+    photographs.** A rail that only ever scrolls is a control for a control; the thing a visitor
+    wants to move is the picture. They are therefore present whenever there is more than one
+    photograph rather than only when the rail overflows, and the rail scrolls itself to keep the
+    current thumbnail in view. The set also loops — next from the last is the first, the same
+    reasoning `ImageCarousel` uses for `wrap`. **The swipe loops too** (owner, 2026-08-31):
+    `Carousel` gained `loop`, which puts an `inert` copy of the last photograph before the first and
+    of the first after the last, so native scrolling never runs out of track in either direction.
+23. **`Complete the Collection` is a 2×2 grid at 390 and a row of four at 768 and 1920**
+    (`410:7848` against `410:7516`). **Resolved: the carousel, at every width.** FR-037 says the
+    band IS the home page's `JewelryCarousel`, and building a second grid for one breakpoint is the
+    near-duplicate that requirement exists to prevent.
 
 ## Clarifications
 
@@ -646,7 +671,7 @@ page and the open full-screen gallery at three widths; load each route with Java
   is recorded in the contract with a story. More than three such changes means a band is being built
   wrong.
 
-  **Standing at five, and assessed rather than counted.** The threshold is a smell detector for a
+  **Standing at nine, and assessed rather than counted.** The threshold is a smell detector for a
   band FIGHTING the kit — reshaping primitives because the composition is wrong. That is not what
   these are, and the test is what the alternative would have been:
 
@@ -657,10 +682,24 @@ page and the open full-screen gallery at three widths; load each route with Java
   | `Switch` gained `as="span"` | The same: `Button` already documents `as="span"` for a drawing inside a link that owns the interaction | hand-drawing the toggle in the toolbar, duplicating Switch's visual |
   | `ProductCard` gained `ctaHref` | A **defect repair**. The action was a `<button>` with an `onClick` no caller passed, at `z-10` over the card's own anchor. It did nothing, and hover was hiding it | none — it was dead |
   | `ProductCard` gained `ctaVisibility`, `nameFit` | FR-017 doing exactly what it says: "the card is wrong and the card is what gets fixed" | a second card in the grid |
+  | `Carousel` gained `controls: 'none'`, `activeIndex`/`onActiveIndexChange` | The **extraction of 002 finishing its job**. `Carousel` exists because two callers needed one scroll-snap track; the gallery is the third, and the only thing it needed that the primitive lacked was the ability to say and be told which item is showing | a second scroll-snap track in `product-gallery`, which is the exact duplicate `Carousel` was extracted to prevent |
+  | `Carousel` gained `loop` | Owner-requested. `wrap` only ever governed the arrows — the swipe underneath still stopped at the ends, because native scrolling has them. Removing them is the track's own business, and the track is this component | edge copies hand-managed in `product-gallery`, reaching into a track it does not own |
+  | `Carousel` gained `autoAdvance`, and `useAutoAdvance` joined the kit | Owner-requested for two bands. The timer is a hook rather than a `Carousel` internal because the gallery's pause has to cover its rail and dots, which are outside the carousel | two timers, and a gallery that moves the visitor off the thumbnail they just chose |
+  | `JewelryCarousel`'s `cta` became optional | The band is reused for _Complete the Collection_ (FR-037) and the product page draws no button there (`242:2585`) | a second copy of the band, or a button the design does not have pointing at a listing nobody asked for |
 
-  Two defects, two applications of an existing convention, and two variants the drawing asks for.
-  Every one is additive with the previous behaviour as its default, and the only pre-existing
-  consumer of any changed primitive — `LanguageSelector` — was repaired rather than disturbed.
+  Two defects, two applications of an existing convention, two variants the drawing asks for, two
+  reuses that needed the shared thing to admit a second caller, and two owner requests.
+
+  Four of the nine are `Carousel`, which is worth saying plainly: that is not the component being
+  fought, it is the component finally being finished. 002 extracted it from `ImageCarousel` with
+  exactly the two callers it then had, and everything since — a position it can report and be told,
+  arrows it can do without, a timer, and ends it can do without — is the third caller asking for
+  what a shared scroll-snap track always needed. None of it changed how the first two behave. Every one is additive with the
+  previous behaviour as its default, and the only pre-existing consumers of any changed component —
+  `LanguageSelector`, and the home page's own carousel — were repaired or left untouched.
+
+  `JewelryCarousel` is a section rather than a kit primitive, so it is listed here for honesty
+  rather than because FR-042 counts it.
 
   **What to watch instead of the count**: `ProductCard` has taken three of the five, and two of its
   props (`ctaVisibility`, `nameFit`) both mean "this is the listing's card". Figma models those as
