@@ -44,6 +44,19 @@ export interface DrawerProps extends Omit<React.ComponentProps<'div'>, 'title'> 
   /** Wraps the whole panel, for the form the no-JavaScript path submits. */
   asForm?: boolean
   formProps?: React.ComponentProps<'form'>
+  /**
+   * Where the close control points when there is no scripting.
+   *
+   * A panel opened by the address bar has to be closable by the address bar. `FilterDrawer` makes
+   * its trigger a link to this panel's own id so that `:target` can open it without JavaScript
+   * (FR-029); the same visitor then needs a way back, and `onClose` is a handler that will never
+   * run for them. Give it the listing's current address — following it re-renders the page with no
+   * fragment, which is the panel closed.
+   *
+   * With scripting the link is never followed: the press is cancelled and `onClose` runs as usual,
+   * so nothing navigates and no history entry is added.
+   */
+  closeHref?: string
 }
 
 export function Drawer({
@@ -55,6 +68,7 @@ export function Drawer({
   triggerRef,
   asForm = false,
   formProps,
+  closeHref,
   children,
   className,
   id,
@@ -81,10 +95,17 @@ export function Drawer({
           variant="bare"
           icon="close"
           label={`Close ${title.toLowerCase()}`}
-          onClick={onClose}
+          {...(closeHref ? { href: closeHref } : {})}
+          onClick={(event) => {
+            // Cancel the navigation the no-JavaScript path depends on. Scripting is here, so the
+            // panel closes in place rather than reloading the listing it is sitting on.
+            if (closeHref) event.preventDefault()
+            onClose()
+          }}
           // Not a submit button. Inside a form, a button with no explicit type submits it — which
-          // for the filter panel would apply the filters while dismissing them.
-          type="button"
+          // for the filter panel would apply the filters while dismissing them. On the link branch
+          // there is nothing to submit and `type` on an `<a>` means something else entirely.
+          {...(closeHref ? {} : { type: 'button' as const })}
           className="text-neutral-primary hover:text-primary-default shrink-0 [&_svg]:size-5"
         />
       </div>
