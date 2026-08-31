@@ -119,6 +119,9 @@ export function Lightbox({
     let torn = false
     let gone = false
 
+    // Captured BEFORE the viewer opens and takes focus for itself.
+    const opener = document.activeElement as HTMLElement | null
+
     const lightbox = new PhotoSwipeLightbox({
       dataSource: photographs.map((image) => ({
         src: image.src,
@@ -149,6 +152,18 @@ export function Lightbox({
       // anyway, so saying so up front keeps the two paths honest.
       showHideAnimationType: thumbnail ? 'zoom' : 'fade',
       bgOpacity: 1,
+
+      /**
+       * Focus restoration is OURS, through `triggerRef`, and the library's own is a second
+       * implementation of it that cannot be steered.
+       *
+       * PhotoSwipe captures `document.activeElement` when it is constructed and focuses that on
+       * close, forever. A caller whose trigger MOVES while the viewer is open — the product
+       * gallery, where paging to the fourth photograph should send you back to the fourth — has no
+       * way to say so, and the two restorations then race. Turning the library's off makes the
+       * documented prop authoritative instead of merely first.
+       */
+      returnFocus: false,
     })
 
     lightbox.on('afterInit', () => {
@@ -172,7 +187,10 @@ export function Lightbox({
       gone = true
       if (torn) return
       latest.current.onClose()
-      latest.current.triggerRef?.current?.focus()
+      // `opener` is the fallback for a caller that supplies no `triggerRef`: focus still has to
+      // land somewhere, and the thing that was focused when the viewer opened is the only sensible
+      // candidate. It is what the library would have done.
+      ;(latest.current.triggerRef?.current ?? opener)?.focus()
     })
 
     lightbox.addFilter('thumbEl', (fallback, _data, slideIndex) =>
