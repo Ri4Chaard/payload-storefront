@@ -54,6 +54,8 @@ const COMPONENTS = [
   'Commerce/ListingEmpty',
   'Commerce/LoadMore',
   'Commerce/ProductCard',
+  'Commerce/ProductDetails',
+  'Commerce/ProductGallery',
   'Commerce/ProductGrid',
   'Sections/AboutBand',
   'Sections/CategoryBand',

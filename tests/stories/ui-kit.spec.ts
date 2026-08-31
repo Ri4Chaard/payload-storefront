@@ -2166,3 +2166,157 @@ test('the price boxes will not let the minimum pass the maximum', async ({ page 
   await expect(page.getByRole('slider', { name: 'Minimum price' })).toHaveValue('730000')
   await expect(page.getByRole('textbox', { name: 'MIN' })).toHaveValue('$7,300')
 })
+
+/**
+ * The gallery's arrows page the PHOTOGRAPHS and the set is a loop (owner, 2026-08-31).
+ *
+ * Figma draws them inside the rail frame, which reads as a scrollbar for the thumbnails; they are
+ * previous/next over the set instead, present whenever there is more than one photograph. The rail
+ * scrolls itself to follow, which is why it has no scroll control of its own.
+ *
+ * This also guards a layout bug it took a ten-photograph story to see: a flex row is as tall as its
+ * tallest item's content, so the rail used to make the ROW 1580px tall and the photograph simply
+ * sat inside it.
+ */
+test('the gallery arrows page the photographs, and the set loops', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+
+  const previous = page.getByRole('button', { name: 'Show the previous photograph' })
+  const next = page.getByRole('button', { name: 'Show the next photograph' })
+  const thumbnail = (n: number) => page.getByRole('button', { name: `Show photograph ${n} of 5` })
+
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  await expect(previous).toBeVisible()
+  await expect(next).toBeVisible()
+  await expect(thumbnail(1)).toHaveAttribute('aria-current', 'true')
+
+  await next.click()
+  await expect(thumbnail(2)).toHaveAttribute('aria-current', 'true')
+
+  // Back past the first, which is where a clamped carousel would stop dead.
+  await previous.click()
+  await previous.click()
+  await expect(thumbnail(5)).toHaveAttribute('aria-current', 'true')
+
+  await next.click()
+  await expect(thumbnail(1)).toHaveAttribute('aria-current', 'true')
+
+  // The photograph still stops at the width it is drawn at, rather than following the rail.
+  const box = await page.getByRole('button', { name: /open full screen$/ }).first().boundingBox()
+  expect(Math.round(box!.width), 'the photograph is not the drawn 850px').toBe(850)
+  expect(Math.round(box!.height), 'the photograph is not square').toBe(850)
+})
+
+/** One photograph is one photograph. Nothing to page, so nothing offering to. */
+test('the gallery offers no arrows for a single photograph', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=commerce-productgallery--single-photograph&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+
+  await expect(page.getByRole('button', { name: /open full screen$/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Show the next photograph' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Show the previous photograph' })).toHaveCount(0)
+})
+
+/**
+ * The gallery advances itself, and every way of saying "stop" works (WCAG 2.2.2).
+ *
+ * The interesting case is the RAIL. The photograph is a `Carousel` and the rail is not, so a timer
+ * living inside the carousel would keep running while someone read the thumbnails and would move
+ * them off the photograph they had just chosen. That is why `useAutoAdvance` watches the whole
+ * gallery, and it is what this test is actually for.
+ */
+test('the gallery advances on its own, and stops when it is touched', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+
+  // Role-based, so it resolves to the rail at this width and not also to the `display: none` dots,
+  // which carry the same names and the same marks.
+  const thumbnail = (n: number) => page.getByRole('button', { name: `Show photograph ${n} of 5` })
+
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=commerce-productgallery--auto-advancing&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+  await expect(thumbnail(1)).toHaveAttribute('aria-current', 'true')
+
+  // It moves on its own, without anything being pressed.
+  await expect(thumbnail(2)).toHaveAttribute('aria-current', 'true', { timeout: 4000 })
+
+  // Choosing one stops it for good. The assertion is that the choice SURVIVES several intervals —
+  // a timer still running would have moved on within 1.2s.
+  await thumbnail(4).click()
+  await expect(thumbnail(4)).toHaveAttribute('aria-current', 'true')
+  await page.waitForTimeout(4000)
+  await expect(thumbnail(4)).toHaveAttribute('aria-current', 'true')
+})
+
+/** A visitor who asks for less motion is not asking to be surprised later. */
+test('the gallery does not advance under reduced motion', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=commerce-productgallery--auto-advancing&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+
+  const first = page.getByRole('button', { name: 'Show photograph 1 of 5' })
+  await expect(first).toHaveAttribute('aria-current', 'true')
+  await page.waitForTimeout(4000)
+  await expect(first).toHaveAttribute('aria-current', 'true')
+})
+
+/**
+ * The gallery's SWIPE loops, not only its arrows (owner, 2026-08-31).
+ *
+ * Driven by scrolling the track rather than by pressing a control, because the arrows looped
+ * already and the gesture is the thing that did not: native scrolling has ends, and the copies at
+ * either end are what remove them. Scrolling past the last photograph must arrive at the first and
+ * leave the track able to keep going, not pinned against a wall.
+ */
+test('the gallery loops when it is swiped, not only when it is paged', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+
+  const dot = (n: number) => page.getByRole('button', { name: `Show photograph ${n} of 5` })
+  const track = page.locator('ul[aria-label^="Photographs of"]')
+  await expect(dot(1)).toHaveAttribute('aria-current', 'true')
+
+  // Five photographs, so a looping track holds seven cells: the five, plus a copy at each end.
+  await expect(track.locator('> li')).toHaveCount(7)
+
+  // Swipe to the far end — onto the copy of the first photograph, which sits past the last.
+  await track.evaluate((element) => {
+    element.scrollLeft = element.scrollWidth - element.clientWidth
+  })
+  await expect(dot(1)).toHaveAttribute('aria-current', 'true')
+
+  // And the correction has left room to keep going forward, which is the whole point: on a track
+  // with ends this position would be pinned against the right-hand wall.
+  const room = await track.evaluate(
+    (element) => element.scrollWidth - element.clientWidth - element.scrollLeft,
+  )
+  expect(room, 'the loop ran out of track').toBeGreaterThan(10)
+})
+
+/** However many times a photograph is painted, it is one thing to a screen reader and one tab stop. */
+test('the gallery loop copies are hidden from assistive technology', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`,
+    { waitUntil: 'load' },
+  )
+
+  await expect(page.locator('ul[aria-label^="Photographs of"] > li')).toHaveCount(7)
+  // `inert` and `aria-hidden` take the copies out of the accessibility tree, so the role-based
+  // count is the real five.
+  await expect(page.getByRole('button', { name: /open full screen$/ })).toHaveCount(5)
+})
