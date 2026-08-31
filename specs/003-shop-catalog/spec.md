@@ -81,10 +81,15 @@ collapses to two triggers side by side: `FILTERS (2)` — carrying a count of wh
 
 ### What the drawer contains
 
-Seven groups, in this order: **CATEGORY** (All jewelry, Rings, Bracelets, Earrings, Necklaces),
-**COLOR** (Black, Clear, Green, Multicolor), **PRICE** (MIN and MAX boxes over a two-handle slider),
-**SIZE** (2, 2.25, 2.5, 2.75, 3), **COLLECTION** (Deia, Marvel, Molten, Spartan), **DIAMOND SHAPE**
-(Oval, Round, Emerald). The list scrolls under a fixed footer holding **CLEAR** and **APPLY**.
+Six groups are drawn, in this order: **CATEGORY** (All jewelry, Rings, Bracelets, Earrings,
+Necklaces), **COLOR** (Black, Clear, Green, Multicolor), **PRICE** (MIN and MAX boxes over a
+two-handle slider), **SIZE** (2, 2.25, 2.5, 2.75, 3), **COLLECTION** (Deia, Marvel, Molten,
+Spartan), **DIAMOND SHAPE** (Oval, Round, Emerald). The list scrolls under a fixed footer holding
+**CLEAR** and **APPLY**.
+
+A seventh was added in build: **IN-STOCK ONLY**. The toolbar carries that toggle at 1920 and drops
+it at both narrower widths, so as drawn it is a filter a phone can never turn off. It is in the
+drawer, hidden at `xl` where the toolbar owns it. See inconsistency 12.
 
 ### What the product page contains
 
@@ -101,6 +106,8 @@ These are recorded rather than resolved, and are listed again under [Open Questi
 
 1. **The sort menu and the sort chip disagree.** The menu offers Recommended, Price Ascending, Price
    Descending, Newest. The chip beneath the toolbar reads `Best selling`, which is not one of them.
+   **Resolved: the menu is authoritative.** The four orderings are written once, in
+   `SORT_LABELS`, and the chip is built from the same record the menu draws from.
 2. **Seven shapes in the toolbar, three in the drawer.** The toolbar's quick shape row draws seven
    silhouettes; the drawer's DIAMOND SHAPE group lists Oval, Round and Emerald only.
 3. **Three price formats in one design.** `$ 24,900` on the cards, `$38 320,00` on the desktop
@@ -112,7 +119,8 @@ These are recorded rather than resolved, and are listed again under [Open Questi
 6. **Frame widths do not match the project's breakpoints.** Listing frames are 768 and 375; product
    frames are 768 and 390; handoff frames are 1024 and 390. The home page settled on 1920/1024/390.
 7. **Nothing is drawn for a listing beyond twelve cards.** No pagination, no "load more", and the
-   carousel arrow parked in the grid is hidden.
+   carousel arrow parked in the grid is hidden. **Resolved: LOAD MORE**, with a count above it —
+   see Open Question 1.
 8. **No empty state is drawn** for a filter combination that matches nothing.
 9. **COLOR is a filter group with no counterpart on the product page.** Nothing in the product
    information column shows a colour.
@@ -128,6 +136,47 @@ These are recorded rather than resolved, and are listed again under [Open Questi
 11. **The narrow listing frames use a 40px gutter**, where every other band at that width uses 24.
     The listing follows `Container` rather than the frame; a listing inset further than the header
     above it would be the only page in the shop that is.
+12. **The drawer is described as seven groups and draws six.** IN-STOCK ONLY is drawn in the
+    toolbar instead — and only in the 1920 toolbar, which the 768 and 375 frames both drop along
+    with the price. **Resolved: the drawer carries it as a seventh group**, `xl:hidden` so that the
+    two are never both on screen. Every control the narrow toolbars drop is in the drawer, which is
+    what makes the drawer the complete filtering surface a phone and a scriptless browser both need.
+13. **The sort trigger reads two different things.** `SORT BY` at 1920 (`225:1475`) and 390
+    (`412:7876`); `RECOMMENDED` — the current ordering — at 1024 (`412:7750`). **Resolved in favour
+    of `SORT BY` at every width**: the chip row already names the current ordering, and the menu
+    marks it. A trigger that reads the value at one width and the label at two others is a
+    difference nobody chose.
+14. **The FILTERS trigger differs by width in two more ways**, and here the frames are consistent
+    enough to follow: the funnel glyph is drawn only at 1920, and the applied count `(2)` only at
+    375. Both are honoured as drawn. Above `md` the count would repeat the chip row directly
+    beneath it.
+15. **The two triggers are drawn as two different controls.** On the same phone frame
+    (`412:7873`), FILTERS is Manrope **Bold** in a 32px box and SORT BY is Manrope **Medium** in a
+    36px one; the tablet frame repeats the weight difference. **Confirmed by the owner as a mistake
+    in the file.** They are one control: one weight, one height (36px, the larger of the two), and
+    one width (160px at 768, the drawn width of the wider pill; 200px at 1920; half the row on a
+    phone, as drawn).
+16. **The filter bar is a white strip at 768 and 375 and no fill at all at 1920.** Not an
+    inconsistency once measured — `412:7738` and `412:7873` both paint `#FFFFFF` between two
+    hairlines, `225:1437` paints nothing and carries the bottom hairline alone — but worth writing
+    down, because it is the difference between a band laid over the listing and a row sitting on
+    it. Both are built. The type follows the same split: 16px at 1920, 12–13px below it, which is
+    what makes the narrow bar read as a strip rather than a shrunken toolbar. 13px and 11px have no
+    step on the scale and land on `caption`.
+17. **The card's name is drawn two different ways at the same width.** The home row's 390 card
+    (`440:13594`) sets it at 16px, one line, `white-space: nowrap`, ellipsis — with a
+    hundred-character placeholder name to prove the point. The listing's 375 and 768 cards
+    (`412:7765`, `412:7773`) set it at 14px and let it run to as many lines as it needs.
+    **Resolved: both.** They are different jobs rather than a slip — a rail of fixed-width cards
+    stays tidy with one line, and a grid needs the name because it is the only thing telling one
+    piece from another. At 174px, one truncated line of 16px type is about eleven characters.
+    `ProductCard` gained `nameFit` to say which. At 1920 the two drawings agree again and both
+    truncate.
+18. **The narrow listing card's price is maroon and 15px** (`primary-default`, `412:7770`), where
+    the 1920 card's price is 16px and inherits neutral; its action is 13px in a 40px box against
+    16px in a 52px one, and both its photograph and its button are drawn with a 4px radius where
+    1920 draws square. **Not built** — recorded and left for the owner, because it recolours every
+    price on the listing and rounds a card the home page shares.
 
 ## Clarifications
 
@@ -463,9 +512,10 @@ page and the open full-screen gallery at three widths; load each route with Java
   proportions, gaps and gutters.
 - **FR-017**: The grid MUST reuse `ProductCard` unchanged. If it cannot, the card is wrong and the
   card is what gets fixed — the rule 002/FR-019 set.
-- **FR-018**: The listing MUST page beyond the first set of results, and the current position MUST
-  be part of the URL so that a back button returns to it. Nothing is drawn for this; see
-  [Open Questions](#open-questions).
+- **FR-018**: The listing MUST go beyond the first set of results by EXTENDING rather than
+  replacing — a count of what is shown against what there is, and one control that adds the next
+  set — and how much is shown MUST be part of the URL so that a back button and a shared link both
+  return to it. Nothing is drawn for this; see [Open Questions](#open-questions).
 - **FR-019**: A listing matching no products MUST render a designed empty state naming the filters
   responsible and offering a way to widen them.
 
@@ -595,6 +645,28 @@ page and the open full-screen gallery at three widths; load each route with Java
   `ScrollArea` are consumed as built. Every kit change this spec makes
   is recorded in the contract with a story. More than three such changes means a band is being built
   wrong.
+
+  **Standing at five, and assessed rather than counted.** The threshold is a smell detector for a
+  band FIGHTING the kit — reshaping primitives because the composition is wrong. That is not what
+  these are, and the test is what the alternative would have been:
+
+  | Change | What it is | The alternative |
+  | --- | --- | --- |
+  | `Menu` closes on choose | A **defect repair**, not an API change. The menu button pattern requires it; focus was stranded in a dismissed panel. `LanguageSelector` had the same bug since 002 and is fixed by it | none — it was broken |
+  | `Chip` gained `href` | Applying a convention the kit **already had**: `Button` and `IconButton` both take `href` for a control that navigates. Chip was the odd one out | a second pill in `active-filters`, duplicating Chip's styling — what FR-024 forbids |
+  | `Switch` gained `as="span"` | The same: `Button` already documents `as="span"` for a drawing inside a link that owns the interaction | hand-drawing the toggle in the toolbar, duplicating Switch's visual |
+  | `ProductCard` gained `ctaHref` | A **defect repair**. The action was a `<button>` with an `onClick` no caller passed, at `z-10` over the card's own anchor. It did nothing, and hover was hiding it | none — it was dead |
+  | `ProductCard` gained `ctaVisibility`, `nameFit` | FR-017 doing exactly what it says: "the card is wrong and the card is what gets fixed" | a second card in the grid |
+
+  Two defects, two applications of an existing convention, and two variants the drawing asks for.
+  Every one is additive with the previous behaviour as its default, and the only pre-existing
+  consumer of any changed primitive — `LanguageSelector` — was repaired rather than disturbed.
+
+  **What to watch instead of the count**: `ProductCard` has taken three of the five, and two of its
+  props (`ctaVisibility`, `nameFit`) both mean "this is the listing's card". Figma models those as
+  variants of one component. Inconsistency 18 lists three more narrow-card differences left
+  unbuilt; if any of them lands as a fourth independent axis, the card HAS been built wrong, and
+  the fix at that point is one `variant` prop rather than a fourth.
 - **SC-010**: Wiring the cart in `004` touches the seam module and no component built here.
 - **SC-011**: The catalogue schema survives `004` and `005` without a destructive migration — the
   Phase 2 constraint the brief exists to protect.
@@ -621,7 +693,11 @@ page and the open full-screen gallery at three widths; load each route with Java
 For the designer or the owner. None of them blocks starting; each has a stated default.
 
 1. **What happens past twelve cards?** Nothing is drawn. Default: a "load more" control that extends
-   the grid and records position in the URL.
+   the grid and records position in the URL. **Resolved at the owner's direction, twice.** Built
+   first as numbered pages, then replaced with the default after the owner checked how comparable
+   houses do it: `Showing 24 of 29 pieces` over a LOAD MORE control. `?page=N` survives and changes
+   meaning — it counts how many sets are SHOWN rather than which one is, so `?page=3` contains
+   `?page=1`.
 2. **Is the sort chip "Best selling" a fifth ordering?** It is not in the menu. Default: the menu is
    authoritative and the chip is stale.
 3. **Which price format is correct?** Three appear. Default: `$24,900` — the card format, which is

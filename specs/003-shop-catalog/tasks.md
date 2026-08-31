@@ -199,9 +199,12 @@ says so.
 - [x] T254 [P] [US2] Build `src/app/(frontend)/all-jewelry/page.tsx` — the same listing with no
       category applied. Node `355:7139`
 - [x] T255 [US2] Add paging beyond the first set of results, with position in the URL (FR-018).
-      Nothing is drawn; **numbered pages at the owner's direction**, closing spec Open Question 1 —
-      every page is a real address, which a "load more" button gives neither the back button nor a
-      crawler. New `src/components/ui/pagination/`
+      Nothing is drawn. Built first as **numbered pages at the owner's direction**, then replaced
+      with **LOAD MORE and a `Showing 24 of 29 pieces` count** — also at the owner's direction, and
+      the default Open Question 1 had stated. `?page=N` survives and changes meaning: it counts how
+      many sets are shown rather than which one is. The control is a real `<a href>`, so the back
+      button, a shared link and a crawler all still work — which was the argument for numbering.
+      New `src/components/commerce/load-more/`; `src/components/ui/pagination/` is now unused
 - [x] T256 [P] [US2] Emit per-route metadata — title, description, canonical URL — and schema.org
       `BreadcrumbList` (FR-014, Constitution V)
 - [x] T257 [US2] Route-level Playwright spec `tests/e2e/listing.spec.ts` — column counts at three
@@ -256,29 +259,29 @@ and full screen; open every accordion; confirm the name is the only `h1`.
 reload the URL in a fresh session; remove a chip; press CLEAR; repeat at 390; then do it all with
 JavaScript disabled.
 
-- [ ] T270 [US4] Build `src/components/commerce/filter-drawer/` with stories on `Drawer` — the seven
+- [x] T270 [US4] Build `src/components/commerce/filter-drawer/` with stories on `Drawer` — the seven
       drawn groups in the drawn order, scrolling beneath a fixed CLEAR/APPLY footer. The drawer edits
       a **draft**; APPLY commits, CLEAR empties, dismissal discards (FR-022). Nodes `532:12507`,
       buttons `231:2322`, in context `225:1431` (depends on T242)
-- [ ] T271 [US4] Build `src/components/commerce/filter-toolbar/` with stories — FILTERS, the shape
+- [x] T271 [US4] Build `src/components/commerce/filter-toolbar/` with stories — FILTERS, the shape
       row from catalogue data, the price slider with its two boxes, IN-STOCK ONLY. These commit
       **immediately**, with no APPLY (FR-023). Nodes `355:7627` / `225:1437` (1920) · `412:7738`
       (1024) · `412:7873` with triggers `412:7874` and `412:7876` (390) (depends on T241)
-- [ ] T272 [P] [US4] Build `src/components/commerce/active-filters/` with stories on the existing
+- [x] T272 [P] [US4] Build `src/components/commerce/active-filters/` with stories on the existing
       `Chip` — one removable chip per applied filter, wrapping rather than overflowing the gutter.
       Nodes `I355:7627;355:7602` · `225:1482`
-- [ ] T273 [US4] Wire filter state through the route — `parseFilters` on the server, `toSearchParams`
+- [x] T273 [US4] Wire filter state through the route — `parseFilters` on the server, `toSearchParams`
       on every commit, route-level category seeded from the segment rather than the query string, and
       removing the category chip navigating to `/all-jewelry` (contract §4)
-- [ ] T274 [US4] Make the drawer a `<form method="GET">` whose control names are the query keys, so
+- [x] T274 [US4] Make the drawer a `<form method="GET">` whose control names are the query keys, so
       the no-JavaScript path is the same path with less scripting (FR-029). APPLY is the submit
       button; CLEAR is a link to the bare route
-- [ ] T275 [P] [US4] Below `md`: the trigger carries the applied count (`FILTERS (2)`, node
+- [x] T275 [P] [US4] Below `md`: the trigger carries the applied count (`FILTERS (2)`, node
       `412:7875`); the drawer covers the viewport, traps focus, locks the page behind and restores
       focus on close (FR-027, FR-028)
-- [ ] T276 [US4] Report ignored filter values — an unknown collection slug in a shared URL must be
+- [x] T276 [US4] Report ignored filter values — an unknown collection slug in a shared URL must be
       dropped **and** said out loud (FR-030)
-- [ ] T277 [US4] Extend `tests/e2e/listing.spec.ts` — URL round-trip in a fresh context, chip
+- [x] T277 [US4] Extend `tests/e2e/listing.spec.ts` — URL round-trip in a fresh context, chip
       removal, CLEAR, dismissal-without-APPLY, immediate toolbar commits, no-JS form submission, and
       the 390 drawer's focus behaviour
 
@@ -293,10 +296,10 @@ JavaScript disabled.
 **Independent Test**: choose each option in turn; confirm order, chip and URL agree and survive a
 reload; drive the menu entirely from the keyboard.
 
-- [ ] T280 [US5] Wire the sort menu on the existing `Menu` and `MenuOption` — the four drawn options,
+- [x] T280 [US5] Wire the sort menu on the existing `Menu` and `MenuOption` — the four drawn options,
       the current one marked, focus returned to the trigger on close. Node `225:1854`; trigger
       `225:1475` (1920), `412:7750` (1024), `412:7876` (390)
-- [ ] T281 [P] [US5] Add the ordering to `getListing` and to the chip row, and confirm sorting and
+- [x] T281 [P] [US5] Add the ordering to `getListing` and to the chip row, and confirm sorting and
       filtering hold together (FR-031)
 
 **Checkpoint**: US2, US4 and US5 together are the complete listing.

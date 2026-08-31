@@ -495,3 +495,41 @@ thing we actually want, and its `<Gallery><Item>` render-prop shape would dictat
 gallery's markup). Keeping the hand-rolled viewer and adding only pinch-zoom (rejected: pinch
 without bounded pan and momentum is the half that feels broken). `medium-zoom` (rejected: it zooms
 an image in place; it is not a full-screen viewer and does not page).
+
+---
+
+## R12. Opening the filter drawer without JavaScript
+
+**Decision**: The FILTERS control is a link to the panel's own id, and one unlayered CSS rule —
+`.filter-drawer:target { display: flex; translate: none }` — is what opens it. With scripting the
+press is cancelled before the fragment is ever set and React opens the panel exactly as before.
+
+**Why it came up**: R6 settled that the drawer would be a `<form method="GET">` so that FR-029 is
+the same code path with less scripting. T242 then built `Drawer` to stay in the document with
+`display` toggled, which makes the form *render* for a visitor with no scripting. Neither decision
+made the panel **openable** for them: `open` is React state and the trigger was a click handler that
+would never run. The form was server-rendered, correct, and unreachable.
+
+**Why `:target`**: the fragment is the only piece of state a browser will change on its own, and
+`:target` is how that state reaches CSS. Everything else was worse:
+
+- `<details>`/`<summary>` opens natively and would have worked — but it replaces `Drawer` rather
+  than using it, discarding the focus trap, the scroll lock and the drawn transition, and leaving
+  the kit with a primitive built for this and used by nothing.
+- A `<noscript>` copy of the form is a second implementation of the thing R6 exists to avoid, and
+  it duplicates every control name in the document.
+- A checkbox-and-sibling-selector toggle is the same trick with worse semantics: an unlabelled
+  control that is not a disclosure, announced as a checkbox.
+
+**What it costs**, recorded rather than hidden. Without scripting there is no scrim — `Drawer` draws
+that as a sibling with no id, so no fragment can reach it — and the panel's close control has to be
+a link, which is what `closeHref` is for. Both are acceptable: the panel is opaque, it covers the
+viewport on a phone, and CLEAR, APPLY, the close link and the Back button are all routes out of it.
+
+**The other half of the same problem**: a `<form method="GET">` posts to a fixed `action` and cannot
+choose a path from what is ticked inside it, so the drawer always submits to `/all-jewelry` with the
+category as a parameter — and with both ends of the price slider attached whether or not anyone
+moved them. `canonicalListing` sends that request on to the address a scripted visitor would have
+produced, which is what makes FR-029's "the same URL" literally true rather than approximately. It
+refuses to move any request that had a value to report (FR-030), because the redirect rewrites the
+query from the parsed state and that is exactly where the reported value would vanish.
