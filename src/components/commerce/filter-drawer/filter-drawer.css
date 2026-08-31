@@ -1,0 +1,28 @@
+/*
+ * Opening the filter panel without JavaScript (003/T274, FR-029).
+ *
+ * `Drawer` is always in the document and toggles `display`, which is what lets its form be
+ * server-rendered for a visitor with scripting off. It does not make the panel OPENABLE for them:
+ * `open` is React state and the trigger is a click handler that will never run.
+ *
+ * So the trigger is a link to the panel's own id, and this is the rule that shows it. The fragment
+ * is the only state a browser will change on its own, and `:target` is how that state reaches CSS.
+ *
+ * With scripting the fragment is never set — the press is cancelled and React opens the panel — so
+ * this rule matches nothing and the drawn transition runs exactly as it always did.
+ *
+ * Unlayered on purpose. Tailwind's utilities live in `@layer utilities`, and an unlayered rule beats
+ * any layered one regardless of specificity, which is what lets four declarations override the
+ * closed state without a single `!important`.
+ */
+.filter-drawer:target {
+  display: flex;
+  translate: none;
+}
+
+/*
+ * No scrim on this path. `Drawer` draws it as a sibling with no id of its own, so a fragment cannot
+ * reach it — and a dimmed page is decoration here rather than behaviour. The panel is opaque, it
+ * covers the viewport on a phone, and CLEAR, APPLY, the close link and the Back button are all
+ * still routes out of it.
+ */

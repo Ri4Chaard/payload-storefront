@@ -3,6 +3,7 @@ import tseslint from 'typescript-eslint'
 import next from '@next/eslint-plugin-next'
 import storybook from 'eslint-plugin-storybook'
 import prettier from 'eslint-config-prettier'
+import catalogBoundary from './eslint-rules/catalog-boundary.mjs'
 import designTokens from './eslint-rules/design-tokens.mjs'
 
 export default tseslint.config(
@@ -42,6 +43,16 @@ export default tseslint.config(
       'design-tokens/no-raw-color': 'error',
       'design-tokens/no-arbitrary-font-size': 'error',
       'design-tokens/no-arbitrary-spacing': 'error',
+    },
+  },
+  {
+    // Constitution I — the mock deviation ends in one file, and components never see a document.
+    // Scoped to `src` and `tests`: the rules are about the app's own tiers, not about tooling.
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts'],
+    plugins: { catalog: catalogBoundary },
+    rules: {
+      'catalog/no-mock-imports': 'error',
+      'catalog/no-document-types': 'error',
     },
   },
   {

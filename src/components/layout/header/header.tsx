@@ -50,7 +50,7 @@ export interface HeaderProps {
 
 /** Placeholder navigation (T073). Later specs replace this with Payload-managed content. */
 const DEFAULT_NAV = [
-  { label: 'All jewelry', href: '/jewelry' },
+  { label: 'All jewelry', href: '/all-jewelry' },
   { label: 'Rings', href: '/rings' },
   { label: 'Bracelets', href: '/bracelets' },
   { label: 'Earrings', href: '/earrings' },

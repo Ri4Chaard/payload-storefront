@@ -27,9 +27,50 @@ export interface SwitchProps extends Omit<React.ComponentProps<'input'>, 'type' 
   label: React.ReactNode
   /** Keeps the label in the accessibility tree but out of the layout. */
   hideLabel?: boolean
+  /**
+   * Renders a NON-INTERACTIVE drawing of the switch, the way `Button` does for the same reason.
+   *
+   * It exists for one shape: a control that is drawn as a toggle but IS a link, because what it
+   * changes is the address. The listing's IN-STOCK ONLY is exactly that — every filter lives in the
+   * URL, so turning it on is a navigation, and a real `<input>` inside an `<a>` is invalid markup
+   * that hands a screen reader two controls where the visitor sees one.
+   *
+   * The surrounding link owns the state and announces it; this only paints. Never reach for it on
+   * something that toggles in place — that is a `Switch`.
+   */
+  as?: 'input' | 'span'
 }
 
-export function Switch({ label, hideLabel = false, className, disabled, ...props }: SwitchProps) {
+/** The two painted halves, shared by both branches so the drawing is written once. */
+const TRACK = 'bg-background-subtle relative block h-6.5 w-11.5 shrink-0 rounded-full'
+const KNOB = [
+  'absolute top-1/2 left-0.5 block h-5.5 w-7 -translate-y-1/2 rounded-full',
+  'bg-neutral-secondary shadow-sm',
+  'ease-standard transition-[translate,background-color] duration-[var(--duration-fast)]',
+].join(' ')
+
+export function Switch({
+  label,
+  hideLabel = false,
+  as = 'input',
+  className,
+  disabled,
+  ...props
+}: SwitchProps) {
+  if (as === 'span') {
+    return (
+      <span className={cn('inline-flex items-center gap-3', className)}>
+        <span
+          aria-hidden="true"
+          className={cn(TRACK, props.checked && '[&>span]:bg-primary-default [&>span]:translate-x-3.5')}
+        >
+          <span className={KNOB} />
+        </span>
+        <span className={cn('text-body-base', hideLabel && 'sr-only')}>{label}</span>
+      </span>
+    )
+  }
+
   return (
     <label
       className={cn(
@@ -52,19 +93,13 @@ export function Switch({ label, hideLabel = false, className, disabled, ...props
       <span
         aria-hidden="true"
         className={cn(
-          'bg-background-subtle relative block h-6.5 w-11.5 shrink-0 rounded-full',
+          TRACK,
           'peer-focus-visible:outline-primary-default peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
           'peer-disabled:opacity-40',
           'peer-checked:[&>span]:bg-primary-default peer-checked:[&>span]:translate-x-3.5',
         )}
       >
-        <span
-          className={cn(
-            'absolute top-1/2 left-0.5 block h-5.5 w-7 -translate-y-1/2 rounded-full',
-            'bg-neutral-secondary shadow-sm',
-            'ease-standard transition-[translate,background-color] duration-[var(--duration-fast)]',
-          )}
-        />
+        <span className={KNOB} />
       </span>
       <span
         className={cn(

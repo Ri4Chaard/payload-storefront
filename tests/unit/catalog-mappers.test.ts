@@ -1,0 +1,159 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  isProductAvailable,
+  toCatalogImage,
+  toCategorySummary,
+  toProductDetail,
+  toProductSummary,
+  toShopContent,
+} from '@/lib/catalog/mappers'
+import { categoryFixtures, productFixtures, shopFixture } from '@/mocks/catalog'
+import type { Media, Product } from '@/payload-types'
+
+/**
+ * Contract §2. The two behaviours worth testing are the ones that fail quietly in production:
+ * narrowing a relationship union at the wrong depth, and answering "is this available" differently
+ * in two places.
+ */
+const bySlug = (slug: string): Product => {
+  const found = productFixtures.find((entry) => entry.slug === slug)
+  if (!found) throw new Error(`no fixture "${slug}"`)
+  return found
+}
+
+const first = <T,>(list: T[], what: string): T => {
+  const [found] = list
+  if (found === undefined) throw new Error(`no ${what}`)
+  return found
+}
+
+const RING = bySlug('paragon-emerald-cut-diamond-engagement-ring')
+const BRACELET = bySlug('pave-butterfly-diamond-bracelet')
+const IN_STOCK = bySlug('butterfly-diamond-pendant')
+const SOLD_OUT = bySlug('butterfly-ruby-pink-sapphire-diamond-mini-pendant')
+
+describe('availability is decided once', () => {
+  it('is true for a made-to-order piece whatever the count says', () => {
+    expect(BRACELET.availability).toBe('made-to-order')
+    expect(isProductAvailable(BRACELET)).toBe(true)
+  })
+
+  it('is true for a stock-tracked piece above zero', () => {
+    expect(isProductAvailable(IN_STOCK)).toBe(true)
+  })
+
+  it('is false for a stock-tracked piece at zero — which is still shown', () => {
+    expect(isProductAvailable(SOLD_OUT)).toBe(false)
+    expect(toProductSummary(SOLD_OUT).price).toBe('$9,600')
+  })
+
+  it('follows the stones when a piece has them, not the parent mode', () => {
+    // The ring is made-to-order, so the parent mode alone would say "always available". What
+    // actually decides it is whether any stone is left.
+    expect(RING.availability).toBe('made-to-order')
+    expect(isProductAvailable(RING)).toBe(true)
+
+    const allTaken: Product = {
+      ...RING,
+      variants: {
+        ...RING.variants,
+        docs: (RING.variants?.docs ?? []).map((variant) =>
+          typeof variant === 'number' ? variant : { ...variant, inventory: 0 },
+        ),
+      },
+    }
+    expect(isProductAvailable(allTaken)).toBe(false)
+  })
+
+  it('never lets a count reach the view model', () => {
+    expect(toProductSummary(IN_STOCK)).not.toHaveProperty('inventory')
+    expect(toProductDetail(IN_STOCK)).not.toHaveProperty('inventory')
+  })
+})
+
+describe('relationship unions are narrowed, loudly', () => {
+  it('reads the populated branch', () => {
+    expect(toProductDetail(RING).categoryName).toBe('Diamond Rings')
+    expect(toProductDetail(RING).categorySlug).toBe('rings')
+  })
+
+  it('throws rather than rendering a blank when the query asked for too little depth', () => {
+    const shallow: Product = { ...RING, category: 1 }
+    expect(() => toProductDetail(shallow)).toThrow(/greater depth/)
+  })
+
+  it('names the document in the error, so the cause is not three files away', () => {
+    const shallow: Product = { ...RING, category: 1 }
+    expect(() => toProductDetail(shallow)).toThrow(/paragon-emerald-cut/)
+  })
+})
+
+describe('prices', () => {
+  it('advertises the cheapest stone on the card', () => {
+    // Base 38,320 with the free stone; the dearest adds 18,400.
+    expect(toProductSummary(RING).price).toBe('$38,320')
+  })
+
+  it('says "from" only when the stones actually differ', () => {
+    expect(toProductDetail(RING).fromPrice).toBe('$38,320')
+    expect(toProductDetail(BRACELET).fromPrice).toBeNull()
+  })
+
+  it('orders the stones cheapest first and keeps the sold-out one', () => {
+    const options = toProductDetail(RING).diamondOptions
+    expect(options.map((option) => option.priceMinor)).toEqual([
+      3832000, 4252000, 4792000, 5672000,
+    ])
+    expect(options.at(-1)?.available).toBe(false)
+    expect(options.at(-1)?.label).toBe('Natural 1.5 ct E VS2')
+  })
+})
+
+describe('images', () => {
+  it('carries intrinsic dimensions through', () => {
+    expect(toProductSummary(RING).images[0]).toEqual({
+      src: '/photography/product-ring-packshot.webp',
+      width: 1274,
+      height: 1600,
+      alt: 'Paragon emerald cut diamond engagement ring',
+    })
+  })
+
+  it('drops the alt text for a photograph the admin marked decorative', () => {
+    const decorative: Media = { ...first(RING.gallery as Media[], 'photograph'), alt: ' ' }
+    expect(toCatalogImage(decorative)).not.toHaveProperty('alt')
+  })
+
+  it('returns null for an unpopulated or fileless upload rather than half an image', () => {
+    expect(toCatalogImage(7)).toBeNull()
+    expect(toCatalogImage(null)).toBeNull()
+  })
+})
+
+describe('rich text', () => {
+  it('serialises the details to HTML and closes over an empty field', () => {
+    expect(toProductDetail(RING).detailsHtml).toContain('our atelier')
+    expect(toProductDetail({ ...RING, details: null }).detailsHtml).toBeNull()
+  })
+
+  it('serialises both shop accordions', () => {
+    const content = toShopContent(shopFixture)
+    expect(content.warrantyHtml).toContain('three years')
+    expect(content.deliveryHtml).toContain('3 to 4 weeks')
+    expect(content.listingSubtitle).toBe('Timeless brilliance, made for every moment')
+  })
+})
+
+describe('categories', () => {
+  it('maps to a listing link and keeps the subtitle', () => {
+    const summary = toCategorySummary(first(categoryFixtures, 'category'))
+    expect(summary).toEqual({
+      id: 1,
+      slug: 'rings',
+      title: 'Diamond Rings',
+      subtitle: 'Timeless brilliance, made for every moment',
+      href: '/rings',
+    })
+  })
+})

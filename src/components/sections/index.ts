@@ -20,6 +20,7 @@
 export { AboutBand, type AboutBandProps } from './about-band'
 export { CategoryBand, type CategoryBandProps } from './category-band'
 export { Hero, type HeroProps } from './hero'
+export { ListingHeader, type ListingHeaderProps } from './listing-header'
 export {
   JewelryCarousel,
   type JewelryCarouselProps,

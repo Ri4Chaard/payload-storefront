@@ -3,6 +3,8 @@ node_modules/
 .next/
 storybook-static/
 *.tsbuildinfo
+# Generated in the build stage. Never copied in — a developer's local copy is stale by definition.
+src/app/(payload)/admin/importMap.js
 
 # Secrets never enter the build context — they arrive as compose environment at run time
 .env

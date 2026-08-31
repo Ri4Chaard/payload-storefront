@@ -16,6 +16,8 @@ import { cn } from '@/lib/cn'
  * - `ArrowDown` / `ArrowUp` move between items and wrap; `Home` / `End` jump to the ends.
  * - `Tab` closes rather than trapping — this is a menu, not a dialog, and trapping focus in it
  *   would be a worse bug than the one it prevents.
+ * - Choosing an item closes it and returns focus to the trigger. That is the container's job here
+ *   rather than each caller's, because every caller needs it and forgetting it strands focus.
  * - A pointer press outside closes it.
  *
  * **The panel opens upward when there is no room below it.** `placement` decides between the two,
@@ -48,6 +50,13 @@ export interface MenuProps {
   className?: string
   triggerClassName?: string
   children: React.ReactNode
+}
+
+/** What `Menu` writes onto each child. Anything a row already had is called first, then closed. */
+interface MenuItemProps {
+  role?: string
+  tabIndex?: number
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void
 }
 
 export function Menu({
@@ -185,8 +194,24 @@ export function Menu({
           )}
         >
           {React.Children.map(children, (child) =>
-            React.isValidElement<{ role?: string; tabIndex?: number }>(child)
-              ? React.cloneElement(child, { role: 'menuitem', tabIndex: -1 })
+            React.isValidElement<MenuItemProps>(child)
+              ? React.cloneElement(child, {
+                  role: 'menuitem',
+                  tabIndex: -1,
+                  /*
+                   * Choosing closes, and focus goes back to the trigger.
+                   *
+                   * The menu button pattern says a menu is dismissed by the choice, and leaving it
+                   * open is not a cosmetic slip: focus stays on a row inside a panel the visitor has
+                   * finished with, and the next Tab walks the rest of the list rather than the page.
+                   * It is done HERE rather than at each call site because every consumer needs it and
+                   * the first two both forgot it.
+                   */
+                  onClick: (event: React.MouseEvent<HTMLElement>) => {
+                    child.props.onClick?.(event)
+                    close(true)
+                  },
+                })
               : child,
           )}
         </div>

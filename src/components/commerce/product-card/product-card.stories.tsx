@@ -68,3 +68,16 @@ export const InAGrid: Story = {
     </div>
   ),
 }
+
+/**
+ * The listing's card (nodes 412:7714 at 768, 412:7860 at 375). The action is solid at every width
+ * rather than absent below `xl`, and it is a link to the piece — marked `aria-hidden` so the tile
+ * stays one control for a keyboard and a screen reader.
+ */
+export const OnAListing: Story = {
+  args: {
+    cta: 'Buy now',
+    ctaVisibility: 'always',
+    ctaHref: '/products/paragon-emerald-cut-diamond-engagement-ring',
+  },
+}

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 /**
  * Every UI-kit story must actually RENDER — the same gate the Foundations stories get, for the same
@@ -1778,4 +1778,391 @@ test('Escape closes the language menu without closing the drawer under it', asyn
   // The second one closes the drawer, and focus comes back to the control that opened it.
   await page.keyboard.press('Escape')
   await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
+})
+
+/**
+ * The three primitives spec 003 adds (T241–T243). What is tested here is what the drawing cannot
+ * show: a slider whose handles have collapsed onto one another, a dialog's focus, and a viewer
+ * driven from the keyboard.
+ */
+const SLIDER_STORY = `${STORYBOOK}/iframe.html?id=ui-rangeslider--default&viewMode=story`
+const COLLAPSED_STORY = `${STORYBOOK}/iframe.html?id=ui-rangeslider--collapsed&viewMode=story`
+
+test('the range handles meet but never cross', async ({ page }) => {
+  await page.goto(SLIDER_STORY, { waitUntil: 'networkidle' })
+
+  const lower = page.getByRole('slider', { name: 'Minimum price' })
+  const upper = page.getByRole('slider', { name: 'Maximum price' })
+
+  // Drive the lower handle up past the upper one from the keyboard, which is the path that has no
+  // pointer geometry to stop it.
+  await lower.focus()
+  await page.keyboard.press('End')
+  expect(Number(await lower.inputValue())).toBe(Number(await upper.inputValue()))
+
+  await upper.focus()
+  await page.keyboard.press('Home')
+  expect(Number(await lower.inputValue())).toBeGreaterThanOrEqual(Number(await upper.inputValue()))
+})
+
+/**
+ * Two handles on the same value is the state a stacked-input slider gets permanently stuck in:
+ * whichever input is on top swallows every press, and the pair can never be pulled apart.
+ */
+test('a collapsed pair can be pulled apart from either side', async ({ page }) => {
+  await page.goto(COLLAPSED_STORY, { waitUntil: 'networkidle' })
+
+  const group = page.getByRole('group', { name: 'Price' })
+  const box = (await group.boundingBox())!
+  const lower = page.getByRole('slider', { name: 'Minimum price' })
+  const upper = page.getByRole('slider', { name: 'Maximum price' })
+  const before = await lower.inputValue()
+
+  // Approach from the left: the lower handle is the nearer one and must be the one that moves.
+  await page.mouse.move(box.x + box.width * 0.15, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.up()
+  expect(Number(await lower.inputValue()), 'the left press moved neither handle').toBeLessThan(
+    Number(before),
+  )
+
+  // And from the right, the upper one.
+  await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.up()
+  expect(Number(await upper.inputValue()), 'the right press moved neither handle').toBeGreaterThan(
+    Number(before),
+  )
+})
+
+test('the slider submits as two ordinary form fields', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-rangeslider--in-a-form&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+
+  await expect(page.getByRole('slider', { name: 'Minimum price' })).toHaveAttribute(
+    'name',
+    'minPrice',
+  )
+  await expect(page.getByRole('slider', { name: 'Maximum price' })).toHaveAttribute(
+    'name',
+    'maxPrice',
+  )
+})
+
+const DRAWER_STORY = `${STORYBOOK}/iframe.html?id=ui-drawer--default&viewMode=story`
+
+test('the drawer traps focus and gives it back to the trigger', async ({ page }) => {
+  await page.goto(DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  const dialog = page.getByRole('dialog', { name: 'Filters' })
+  await expect(dialog).toBeVisible()
+
+  // Tab all the way round. Focus must never leave the panel — the trigger behind it is reachable
+  // in the DOM and would be the first thing a leaking trap lands on.
+  for (let press = 0; press < 30; press += 1) {
+    await page.keyboard.press('Tab')
+    expect(
+      await dialog.evaluate((panel) => panel.contains(document.activeElement)),
+      `focus escaped the drawer after ${press + 1} presses`,
+    ).toBe(true)
+  }
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Filters' })).toBeFocused()
+})
+
+test('the drawer scrolls its body and keeps the actions in place', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 600 })
+  await page.goto(DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  const apply = page.getByRole('button', { name: 'Apply' })
+  const before = (await apply.boundingBox())!
+
+  const body = page.getByRole('dialog', { name: 'Filters' }).locator('div.overflow-y-auto')
+  expect(
+    await body.evaluate((element) => element.scrollHeight > element.clientHeight + 1),
+    'the story is not tall enough to prove anything about scrolling',
+  ).toBe(true)
+
+  await body.evaluate((element) => element.scrollTo(0, element.scrollHeight))
+  expect((await apply.boundingBox())!.y, 'the actions scrolled away with the body').toBeCloseTo(
+    before.y,
+    0,
+  )
+})
+
+test('a closed drawer is out of the tab order entirely', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-drawer--closed&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+  await expect(page.getByRole('dialog', { name: 'Filters' })).toBeHidden()
+  await expect(page.getByRole('checkbox', { name: 'Rings' })).toBeHidden()
+})
+
+const LIGHTBOX_STORY = `${STORYBOOK}/iframe.html?id=ui-lightbox--default&viewMode=story`
+const RING = 'Paragon Emerald Cut Diamond Engagement Ring'
+
+/**
+ * The viewer is PhotoSwipe (003/R11), which renders into the document rather than into the story,
+ * and reports the showing photograph by leaving exactly one slide `aria-hidden="false"`. That is
+ * what these read: the alt text of the photograph actually on screen, not a counter we control.
+ */
+const showing = (page: Page) =>
+  page.locator('.pswp__item[aria-hidden="false"] img').first().getAttribute('alt')
+
+/**
+ * The viewer takes focus a beat after it opens, and the library reads the keyboard through it. A
+ * press sent before that lands on whatever opened the viewer and is silently lost — which is a race
+ * a test loses far more often than a person does.
+ */
+const focused = (page: Page) =>
+  expect
+    .poll(() =>
+      page.evaluate(() => document.activeElement?.classList.contains('pswp') ?? false),
+    )
+    .toBe(true)
+
+test('the viewer moves between photographs with the arrow keys, and wraps', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await focused(page)
+
+  await expect.poll(() => showing(page)).toBe('The ring, photographed on white')
+
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => showing(page)).toBe('The ring worn with a tailored jacket')
+
+  // Backwards past the first: a viewer that stops dead there makes the press do nothing, with no
+  // visible end marker to explain why.
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await expect.poll(() => showing(page)).toBe('The ring against denim')
+})
+
+/**
+ * Zoom is the reason the viewer is PhotoSwipe at all. The control is here even though node
+ * 308:6392 draws none — the frame predates the feature, and pinch, double-tap and the wheel are all
+ * pointer gestures, which would leave a keyboard with no route to it (SC-006).
+ */
+test('the viewer zooms, and does it from the keyboard', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  const viewer = page.locator('.pswp')
+  await expect(viewer).toHaveClass(/pswp--zoom-allowed/)
+  await focused(page)
+
+  // No magnifier is drawn — the frame has two controls and draws two. `+` and `-` are what keep the
+  // feature reachable without a pointer (SC-006).
+  await expect(page.locator('.pswp__button--zoom')).toHaveCount(0)
+
+  await page.keyboard.press('+')
+  await expect(viewer).toHaveClass(/pswp--zoomed-in/)
+
+  // Shallow on purpose — a stone wants a closer look, not a pixel inspection.
+  const scale = await page
+    .locator('.pswp__item[aria-hidden="false"] img')
+    .first()
+    .evaluate((image) => image.getBoundingClientRect().width / (image as HTMLImageElement).naturalWidth)
+  expect(scale).toBeLessThan(1)
+
+  await page.keyboard.press('-')
+  await expect(viewer).not.toHaveClass(/pswp--zoomed-in/)
+})
+
+test('the viewer draws no arrows for a single photograph', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-lightbox--single-photograph&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+  await page.locator('.pswp--ui-visible').waitFor()
+  await expect(page.getByRole('button', { name: `Next photograph of ${RING}` })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Close' })).toBeVisible()
+})
+
+test('the viewer closes on Escape and returns focus to what opened it', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+
+  const dialog = page.getByRole('dialog', { name: `Photographs of ${RING}` })
+  await expect(dialog).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  // PhotoSwipe removes its own root rather than hiding it, so the dialog goes away entirely.
+  await expect(dialog).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Open the photograph' })).toBeFocused()
+})
+
+/**
+ * The drawn viewer is white with dark chrome; the library ships the opposite. This is the assertion
+ * that the theme in lightbox.css is actually reaching it — a stylesheet that silently fails to load
+ * would leave a black viewer that still passes every behavioural test above.
+ */
+test('the viewer wears the drawn white theme, not the library default', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
+
+  await expect(page.locator('.pswp__bg')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+
+  // 50px squares, 100px in from each edge — the frame's arrow, which is the kit's outline control.
+  const next = (await page.locator('.pswp__button--arrow--next').boundingBox())!
+  expect(next.width).toBe(50)
+  expect(next.height).toBe(50)
+  expect(1280 - (next.x + next.width)).toBe(100)
+
+  const close = (await page.locator('.pswp__button--close').boundingBox())!
+  expect(close.width).toBe(20)
+  expect(close.y).toBe(100)
+})
+
+/**
+ * Both of these are regressions, and both slipped through the first round of tests because those
+ * tests measured the BOX and never the mark inside it: the four controls were the right size, in
+ * the right place, and completely blank.
+ */
+test("the viewer's controls actually draw their glyphs", async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
+
+  const blank = await page.locator('.pswp__button .pswp__icn').evaluateAll((icons) =>
+    icons
+      .map((icon) => {
+        const shape = icon.querySelector('path, circle, rect, line, polygon')
+        if (!shape) return `${icon.parentElement?.className}: no shape at all`
+        const { fill, stroke } = getComputedStyle(shape)
+        const unpainted =
+          (fill === 'none' || fill === 'rgba(0, 0, 0, 0)') &&
+          (stroke === 'none' || stroke === 'rgba(0, 0, 0, 0)')
+        return unpainted ? `${icon.parentElement?.className}: fill ${fill}, stroke ${stroke}` : ''
+      })
+      .filter(Boolean),
+  )
+
+  expect(blank, 'a control rendered an invisible glyph').toEqual([])
+
+  // Pointing where they should. The library mirrors one glyph to make the other, and we supply
+  // both already facing the right way — so the mirror has to be undone, and a left-pointing "next"
+  // arrow is exactly the kind of thing a geometry assertion sails straight past.
+  await expect(page.locator('.pswp__button--arrow--next .pswp__icn')).toHaveCSS('transform', 'none')
+  await expect(page.locator('.pswp__button--arrow--prev .pswp__icn')).toHaveCSS('transform', 'none')
+
+  // And painted in the ink the theme asked for, not in the library's. Every glyph in the registry
+  // declares `currentColor`, so this is the assertion that `color` reaches them at all.
+  const closeShape = page.locator('.pswp__button--close .pswp__icn path').first()
+  await expect(closeShape).toHaveCSS('fill', 'rgb(5, 3, 1)')
+})
+
+/**
+ * Paging must not tear the viewer down. `thumbnailFor` and `images` are a fresh identity on every
+ * render at every call site, so an effect that depended on them closed the viewer the moment a
+ * swipe reported its new index — the loop being: swipe, report, re-render, tear down.
+ */
+/**
+ * The library strips its buttons' `border`, `background` and `box-shadow` on hover, focus and
+ * active — so the drawn outline square disappeared the instant a pointer touched it. The frame
+ * draws one arrow, in one state.
+ */
+test('the viewer\'s controls do not change under a pointer', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
+
+  const next = page.locator('.pswp__button--arrow--next')
+  const at = async () => {
+    const style = await next.evaluate((button) => {
+      const { borderTopWidth, boxShadow, backgroundColor, color, opacity } = getComputedStyle(button)
+      return JSON.stringify({ borderTopWidth, boxShadow, backgroundColor, color, opacity })
+    })
+    return style
+  }
+
+  const atRest = await at()
+  expect(atRest, 'the arrow has no outline to begin with').toContain('1px')
+
+  await next.hover()
+  expect(await at(), 'the arrow changed on hover').toBe(atRest)
+
+  await next.focus()
+  expect(await at(), 'the arrow changed on focus').toBe(atRest)
+})
+
+test('the viewer survives being paged from a caller that re-renders', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-lightbox--from-a-thumbnail&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+
+  // By name, not by position — the Storybook iframe carries hidden buttons of its own ahead of the
+  // story, and a thumbnail's accessible name is its photograph's alt text.
+  await page.getByRole('button', { name: 'The ring, photographed on white' }).click()
+  const dialog = page.getByRole('dialog', { name: `Photographs of ${RING}` })
+  await expect(dialog).toBeVisible()
+
+  await focused(page)
+
+  // Each of these reports a new index, which re-renders the caller.
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => showing(page)).toBe('The ring worn with a tailored jacket')
+  await expect(dialog, 'the viewer closed itself when the index moved').toBeVisible()
+
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => showing(page)).toBe('The ring on a resting hand')
+  await expect(dialog).toBeVisible()
+
+  // And the same through a pointer drag, which is the gesture the report came from.
+  const box = (await dialog.boundingBox())!
+  const y = box.y + box.height / 2
+  await page.mouse.move(box.x + box.width * 0.7, y)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.25, y, { steps: 20 })
+  await page.mouse.up()
+
+  await expect(dialog, 'the viewer closed itself on a swipe').toBeVisible()
+  await expect.poll(() => showing(page)).toBe('The ring worn, in portrait')
+})
+
+/**
+ * FR-026 — the price boxes and the slider are two views of one range.
+ *
+ * Worth a test because they are two separate controls that only LOOK like one: the slider carries
+ * the query keys and submits the real integers, the boxes are typed in. A pair that drifted would
+ * be a panel showing one number and applying another.
+ */
+const FILTER_DRAWER_STORY = `${STORYBOOK}/iframe.html?id=commerce-filterdrawer--default&viewMode=story`
+
+test('the price boxes and the slider stay in step', async ({ page }) => {
+  await page.goto(FILTER_DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  const minBox = page.getByRole('textbox', { name: 'MIN' })
+  const maxBox = page.getByRole('textbox', { name: 'MAX' })
+  const minHandle = page.getByRole('slider', { name: 'Minimum price' })
+  const maxHandle = page.getByRole('slider', { name: 'Maximum price' })
+
+  // The catalogue's ends, formatted. Minor units in the control, dollars on the face of it.
+  await expect(minBox).toHaveValue('$500')
+  await expect(maxBox).toHaveValue('$24,900')
+
+  await minBox.fill('$1,200')
+  await minBox.blur()
+  await expect(minHandle).toHaveValue('120000')
+
+  await maxBox.fill('7300')
+  await maxBox.blur()
+  await expect(maxHandle).toHaveValue('730000')
+
+  // And back the other way: the slider moves, the box follows.
+  await maxHandle.fill('1000000')
+  await expect(maxBox).toHaveValue('$10,000')
+})
+
+/** FR-026, the other half: a minimum above the maximum is not permitted, it is clamped. */
+test('the price boxes will not let the minimum pass the maximum', async ({ page }) => {
+  await page.goto(FILTER_DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  await page.getByRole('textbox', { name: 'MAX' }).fill('7300')
+  await page.getByRole('textbox', { name: 'MAX' }).blur()
+
+  await page.getByRole('textbox', { name: 'MIN' }).fill('20000')
+  await page.getByRole('textbox', { name: 'MIN' }).blur()
+
+  // Clamped to the maximum rather than swapped: the handle the visitor grabbed stays the one they
+  // grabbed, and the range never inverts.
+  await expect(page.getByRole('slider', { name: 'Minimum price' })).toHaveValue('730000')
+  await expect(page.getByRole('textbox', { name: 'MIN' })).toHaveValue('$7,300')
 })

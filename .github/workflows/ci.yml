@@ -47,6 +47,14 @@ jobs:
           git diff --exit-code src/payload-types.ts \
             || { echo "::error::src/payload-types.ts is stale. Run 'pnpm generate:types' and commit."; exit 1; }
 
+      # Gitignored, and `next build` does NOT create it — it fails on the missing module. Every
+      # clean checkout has to generate its own.
+      - name: Admin import map
+        run: pnpm generate:importmap
+        env:
+          DATABASE_URI: postgres://ci:ci@127.0.0.1:5432/ci
+          PAYLOAD_SECRET: ci-only-not-a-real-secret
+
       - name: Design tokens are current
         run: pnpm check:tokens
 

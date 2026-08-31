@@ -119,6 +119,12 @@ This exists because the switcher at the foot of the mobile menu opened downward 
 container that scrolls, which grew that container's scroll height — a scrollbar on a drawer that
 fits.
 
+**Changed by 003/T280.** Choosing an item now closes the menu and returns focus to the trigger. That
+is the menu button pattern, and its absence was not cosmetic: focus stayed on a row inside a panel
+the visitor had finished with, so the next Tab walked the rest of the list rather than the page. It
+is done in the container rather than at each call site because every consumer needs it and both of
+the first two forgot it — the language switcher had the same defect and this fixes it too.
+
 The design draws only the open panel, so the behaviour comes from the WAI-ARIA menu button pattern
 rather than from invention: `Escape` closes and returns focus to the trigger, arrows move and wrap,
 `Home`/`End` jump, `Tab` closes, a pointer press outside closes. Focus is deliberately NOT trapped —
@@ -187,6 +193,13 @@ distinction that does not survive a screen reader.
 
 Deliberately NOT `Badge`. A badge is a non-interactive label; this is a toggle. Merging them would
 give the kit one component with a `clickable` prop, which is how a primitive stops being one.
+
+**Changed by 003/T272.** Gained `href`, which renders an `<a>` — `next/link`, as `Pagination` does —
+instead of a button. The listing's applied-filter chips NAVIGATE: every filter lives in the URL, so
+removing one is a different address rather than a state change, which is also what lets the chip row
+work with scripting disabled (FR-029). `aria-pressed` is dropped on that branch; a pressed link is a
+contradiction, and selection on a link is `aria-current`, which is the caller's to set. The door was
+already open — `Button` and `IconButton` both take `href` for the same reason.
 
 ---
 
@@ -281,6 +294,13 @@ participation and Space-key handling that a `<div role="switch">` would have to 
 Not in the original eighteen; added from Figma node 10:202. A `Switch` sets a state immediately, a
 `Checkbox` marks an intention to be submitted — they are not interchangeable and the design uses
 both.
+
+**Changed by 003/T271.** Gained `as="span"`, a non-interactive drawing of the switch, matching what
+`Button` already offers and for the same reason. The listing's IN-STOCK ONLY is drawn as a toggle but
+IS a link, because what it changes is the address — and a real `<input>` inside an `<a>` is invalid
+markup that hands a screen reader two controls where the visitor sees one. The surrounding link owns
+the state and announces it; the span only paints. Never reach for it on something that toggles in
+place.
 
 ### `SearchField`
 
