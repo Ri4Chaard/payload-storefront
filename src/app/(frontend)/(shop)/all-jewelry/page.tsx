@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import React from 'react'
 
-import { getShopContent } from '@/lib/catalog/queries'
+import { dropIdlePriceEnds, parseFilters } from '@/lib/catalog/filters'
+import { canonicalListing } from '@/lib/catalog/listing-url'
+import { getCategories, getFilterFacets, getShopContent } from '@/lib/catalog/queries'
 
 import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
 
@@ -15,19 +18,13 @@ import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
 const TITLE = 'All jewelry'
 const BASE = '/all-jewelry'
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}): Promise<Metadata> {
-  const { page } = await searchParams
+export async function generateMetadata(): Promise<Metadata> {
   const shop = await getShopContent()
 
   return listingMetadata({
     title: TITLE,
     subtitle: shop.listingSubtitle,
     basePath: BASE,
-    page: Number(page) > 1 ? Number(page) : 1,
   })
 }
 
@@ -36,6 +33,29 @@ export default async function AllJewelryPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const query = await searchParams
+
+  /**
+   * `?category=rings&minPrice=…&maxPrice=…` is `/rings` (003/T274).
+   *
+   * The drawer is a `<form method="GET">`, and a form cannot choose its own path from what is
+   * ticked inside it — so without scripting it always posts here, with the category as a parameter
+   * and with both ends of the price slider attached whether or not anyone moved them. Sending that
+   * visitor on to the address a scripted one would have produced is what makes FR-029's "the same
+   * URL" literally true rather than approximately.
+   *
+   * It also tidies a hand-typed or advertised link, which is worth having on its own.
+   * `canonicalListing` refuses to move anything whose query carried a value the catalogue rejected,
+   * because rewriting the query from the parsed state is exactly how that report would be lost.
+   */
+  const { filters, dropped } = parseFilters(query)
+  const [categories, facets] = await Promise.all([
+    getCategories(),
+    getFilterFacets(filters.category.length === 1 ? filters.category[0] : undefined),
+  ])
+  const canonical = canonicalListing(filters, dropIdlePriceEnds(filters, facets.price), categories, dropped)
+  if (canonical) redirect(canonical)
+
   const shop = await getShopContent()
 
   return (
@@ -46,7 +66,7 @@ export default async function AllJewelryPage({
         title={TITLE}
         subtitle={shop.listingSubtitle}
         basePath={BASE}
-        searchParams={await searchParams}
+        searchParams={query}
       />
     </>
   )

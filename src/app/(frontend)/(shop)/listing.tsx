@@ -1,15 +1,22 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { ActiveFilters, type RemovableFilter } from '@/components/commerce/active-filters'
+import { FilterToolbar } from '@/components/commerce/filter-toolbar'
 import { ListingEmpty } from '@/components/commerce/listing-empty'
+import { LoadMore } from '@/components/commerce/load-more'
 import { ProductGrid } from '@/components/commerce/product-grid'
 import { ListingHeader } from '@/components/sections/listing-header'
 import { Container } from '@/components/ui/container'
-import { Pagination } from '@/components/ui/pagination'
-import { parseFilters, toQueryString } from '@/lib/catalog/filters'
-import { PAGE_SIZE, getListing } from '@/lib/catalog/queries'
-import type { DroppedFilter } from '@/lib/catalog/types'
+import {
+  dropIdlePriceEnds,
+  hasActiveFilters,
+  parseFilters,
+  removeFilter,
+} from '@/lib/catalog/filters'
+import { listingHref } from '@/lib/catalog/listing-url'
+import { getCategories, getFilterFacets, getListing } from '@/lib/catalog/queries'
+import type { DroppedFilter, FilterState } from '@/lib/catalog/types'
 
 /**
  * The listing, shared by `/[category]` and `/all-jewelry` (003/T253, T254).
@@ -25,8 +32,10 @@ import type { DroppedFilter } from '@/lib/catalog/types'
  *
  * **The route's category is not a query parameter.** `/rings` seeds `category: ['rings']` from the
  * segment, so the address stays `/rings?colour=black` rather than growing a redundant
- * `?category=rings`. Every URL this page writes — the pagination especially — is built from the
- * parsed filters WITHOUT that seed, which is what keeps one listing at one address.
+ * `?category=rings`. Every URL written from here — the chips, the pagination, everything the
+ * toolbar commits — goes through `listingHref`, which is the one place that knows a single category
+ * belongs in the path. Six callers assembling `basePath + toQueryString(...)` themselves is six
+ * chances to write the category twice.
  */
 interface ListingProps {
   /** The slug this route is fixed to, or `null` for the whole shop. */
@@ -46,54 +55,96 @@ export async function Listing({
   searchParams,
 }: ListingProps) {
   const { filters, dropped } = parseFilters(searchParams)
-  const applied = categorySlug ? { ...filters, category: [categorySlug] } : filters
+  const seeded: FilterState = categorySlug ? { ...filters, category: [categorySlug] } : filters
 
+  const [categories, facets] = await Promise.all([
+    getCategories(),
+    // Scoped to the category being looked at, so SIZE offers ring sizes on `/rings`. More than one
+    // category applied has no single scope, and the whole catalogue is the honest answer.
+    getFilterFacets(seeded.category.length === 1 ? seeded.category[0] : undefined),
+  ])
+
+  /**
+   * The facets are read BEFORE the listing rather than beside it, because one of them decides what
+   * the listing is asked for: a price handle sitting on the catalogue's own end is the slider where
+   * it started, not a filter, and both ends arrive on every no-JavaScript submit. Dropping them
+   * here means the grid, the chips and every link this page writes agree that nothing was narrowed
+   * — including the next address the visitor follows, which is where the redundant pair disappears.
+   */
+  const applied = dropIdlePriceEnds(seeded, facets.price)
   const result = await getListing(applied)
-  const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE))
-
-  // A page past the end is a stale link or a crawler walking off the edge. 404 rather than an
-  // endless run of empty pages that all render successfully and all get indexed.
-  if (result.total > 0 && applied.page > totalPages) notFound()
 
   const ignored: DroppedFilter[] = [...dropped, ...result.ignored]
+
+  /**
+   * Each chip, with the address that drops it (FR-025).
+   *
+   * Built here rather than in the component for the reason the whole data layer exists: knowing
+   * which key to strip and whether the result is a path or a query is catalogue arithmetic, and
+   * `ActiveFilters` is a drawing. `removeFilter` returns to page one, and `listingHref` decides
+   * that dropping the last category means `/all-jewelry` rather than `/rings` with nothing on it.
+   */
+  const chips: RemovableFilter[] = result.appliedChips.map((chip) => ({
+    id: `${chip.key}:${chip.value}`,
+    label: chip.label,
+    href: listingHref(removeFilter(applied, chip.key, chip.value), categories),
+  }))
 
   return (
     <>
       <ListingHeader title={title} subtitle={subtitle} />
 
-      {/*
-        The filter toolbar belongs here, between the title and the grid (node 355:7627). It arrives
-        complete in US4 and gains sort in US5; the space it occupies is deliberately empty until
-        then rather than filled with a placeholder that has to be removed.
-      */}
+      <FilterToolbar
+        filters={applied}
+        facets={facets}
+        categories={categories}
+        clearHref={basePath}
+        // Everything the visitor can remove, which is exactly what the chip row beneath draws. The
+        // route's own category counts: on `/rings` it is applied, it is dismissible, and a trigger
+        // reading "Filters" above a chip reading "Rings" would be two answers to one question.
+        appliedCount={chips.length}
+      />
+
+      {/* Beneath the strip rather than inside it — neither narrow frame puts chips on the white. */}
+      {chips.length > 0 ? (
+        <Container className="pt-4 xl:pt-5">
+          <ActiveFilters filters={chips} />
+        </Container>
+      ) : null}
 
       {ignored.length > 0 ? (
-        <Container className="pb-5">
+        <Container className="pt-4 pb-4 xl:pt-0 xl:pb-5">
           {/*
-            Plain prose for now. US4 draws the chip row that names each of these and offers to
-            remove it; until a visitor can produce a filtered URL from the interface, this exists so
-            that a hand-typed or stale one is answered rather than silently ignored (FR-030).
+            FR-030. A shared link can name a colour we stopped stocking or a collection that was
+            renamed, and an empty grid is the wrong answer to it — it reads as "we sell none of
+            these" rather than "that part of the link is stale". `role="status"` so a screen reader
+            hears it when the listing re-renders around it.
           */}
           <p className="text-body-small text-neutral-secondary" role="status">
-            {`Ignored ${ignored.length === 1 ? 'a filter' : `${ignored.length} filters`} this shop does not have: ${ignored
-              .map((entry) => entry.value)
+            {`Ignored ${ignored.length === 1 ? 'one filter' : `${ignored.length} filters`} this shop does not have: ${ignored
+              .map((entry) => `${entry.key} “${entry.value}”`)
               .join(', ')}.`}
           </p>
         </Container>
       ) : null}
 
       {result.products.length === 0 ? (
-        <ListingEmpty {...emptyState(categorySlug, basePath, hasNarrowing(filters))} />
+        <ListingEmpty {...emptyState(categorySlug, basePath, hasActiveFilters(filters))} />
       ) : (
         <>
-          <ProductGrid products={result.products} label={title} />
+          <ProductGrid className="pt-4 xl:pt-5" products={result.products} label={title} />
 
           <Container className="py-10 xl:py-15">
-            <Pagination
-              page={result.page}
-              totalPages={totalPages}
-              hrefFor={(page) => `${basePath}${toQueryString({ ...filters, page })}`}
-              label={`${title} pages`}
+            <LoadMore
+              shown={result.products.length}
+              total={result.total}
+              // `result.page`, not the URL's — a page past the end is clamped by `getListing`,
+              // and building the next address from an unclamped one would offer 100 after 99.
+              moreHref={
+                result.hasMore
+                  ? listingHref({ ...applied, page: result.page + 1 }, categories)
+                  : null
+              }
             />
           </Container>
         </>
@@ -122,45 +173,32 @@ function emptyState(categorySlug: string | null, basePath: string, narrowed: boo
   return { clearHref: categorySlug ? basePath : '/all-jewelry' }
 }
 
-/** Whether anything beyond the route's own category is narrowing the result. */
-function hasNarrowing(filters: ReturnType<typeof parseFilters>['filters']): boolean {
-  return (
-    filters.category.length > 0 ||
-    filters.collection.length > 0 ||
-    filters.size.length > 0 ||
-    filters.colour.length > 0 ||
-    filters.shape.length > 0 ||
-    filters.minPrice !== undefined ||
-    filters.maxPrice !== undefined ||
-    filters.inStock
-  )
-}
-
 /**
  * Per-route metadata (003/T256, Constitution V).
  *
- * **The canonical URL drops the filters and keeps the page.** A filtered listing is a view of a
- * catalogue rather than a page of its own, and letting every combination of five filter groups
- * become its own indexable address is how a shop of forty pieces reports ten thousand pages. Page
- * two of a category IS its own page, so that part is kept.
+ * **The canonical URL is the bare route.** A filtered listing is a view of a catalogue rather than
+ * a page of its own, and letting every combination of five filter groups become its own indexable
+ * address is how a shop of forty pieces reports ten thousand pages.
+ *
+ * `page` goes the same way, and that is a change from the numbered pagination this replaced. Under
+ * LOAD MORE the deeper views are not separate pages — `?page=3` CONTAINS `?page=1`, so indexing
+ * both would file the same twelve pieces twice. The control is a real `<a href>`, so a crawler
+ * still walks the whole catalogue by following it; it simply reports one address for the listing
+ * it walked.
  */
 export function listingMetadata({
   title,
   subtitle,
   basePath,
-  page,
 }: {
   title: string
   subtitle: string | null
   basePath: string
-  page: number
 }): Metadata {
-  const canonical = page > 1 ? `${basePath}?page=${page}` : basePath
-
   return {
-    title: page > 1 ? `${title} — page ${page}` : title,
+    title,
     ...(subtitle ? { description: subtitle } : {}),
-    alternates: { canonical },
+    alternates: { canonical: basePath },
   }
 }
 
@@ -179,6 +217,9 @@ export function ListingBreadcrumbs({ title, basePath }: { title: string; basePat
   }
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(trail) }} />
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(trail) }}
+    />
   )
 }

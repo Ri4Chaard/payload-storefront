@@ -33,23 +33,19 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: {
   params: Promise<{ category: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
 }): Promise<Metadata> {
   const { category: slug } = await params
   const category = await resolve(slug)
   if (!category) return {}
 
-  const { page } = await searchParams
   const shop = await getShopContent()
 
   return listingMetadata({
     title: category.title,
     subtitle: category.subtitle ?? shop.listingSubtitle,
     basePath: category.href,
-    page: Number(page) > 1 ? Number(page) : 1,
   })
 }
 
