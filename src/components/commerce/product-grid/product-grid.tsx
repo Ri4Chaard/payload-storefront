@@ -17,11 +17,11 @@ import { cn } from '@/lib/cn'
  * rename and nothing else. If this file ever needs to reach past the card's props, FR-017 says the
  * card is what gets fixed.
  *
- * **The narrow frames draw a card this does not build.** Nodes `412:7764` and `412:7881` put a
- * visible BUY NOW under every card, while the 1920 listing places the same `Default` card the home
- * page uses — whose action is revealed on hover and, per 002, absent below `md` entirely. Two
- * drawings of one component, and the 1920 one agrees with the component that exists. Recorded in
- * spec.md rather than resolved here.
+ * **The action is drawn at every width here**, which the home row's card does not do. Nodes
+ * `412:7714` and `412:7860` put a solid BUY NOW under every card at 768 and 375; the 1920 listing
+ * (`222:982`) places the same card with its action revealed on hover. `ctaVisibility="always"` is
+ * both of those, and it went into `ProductCard` rather than into a second card here — FR-017 says
+ * that when the listing cannot reuse the card, the card is what gets fixed.
  *
  * **Availability is not drawn on a card and is not rendered on one.** A stock-tracked piece at zero
  * still appears in the grid — the owner wants it seen — and says so on its own page.
@@ -35,6 +35,12 @@ export interface ProductGridProps extends React.ComponentProps<'div'> {
   priorityCount?: number
   /** The heading this grid answers to, for assistive technology. The listing's `h1` by default. */
   label?: string
+  /**
+   * The action under every card. It reads "Buy now" as drawn, and it goes to the piece's own page
+   * rather than to a basket — a size and a stone cannot be chosen from a grid, and FR-038 will not
+   * let anything be bought until they are.
+   */
+  cta?: string
 }
 
 /**
@@ -47,6 +53,7 @@ export function ProductGrid({
   products,
   priorityCount = 4,
   label,
+  cta = 'Buy now',
   className,
   ...props
 }: ProductGridProps) {
@@ -67,6 +74,11 @@ export function ProductGrid({
           price={product.price}
           href={product.href}
           images={product.images}
+          cta={cta}
+          ctaVisibility="always"
+          // Where the card already goes. The action is the drawn affordance for a pointer; the
+          // card's own anchor is the one link a screen reader and a keyboard see.
+          ctaHref={product.href}
           sizes={SIZES}
           priority={index < priorityCount}
         />

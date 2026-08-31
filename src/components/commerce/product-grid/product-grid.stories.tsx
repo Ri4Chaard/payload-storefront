@@ -59,6 +59,12 @@ type Story = StoryObj<typeof meta>
 /** A full page. Four columns at 1920, three from `md`, two below it. */
 export const Default: Story = {}
 
+/**
+ * The action is drawn under every card and is solid below `xl` — nodes 412:7714 and 412:7860.
+ * At 1920 it is the same card the home row uses, revealed on hover.
+ */
+export const WithTheAction: Story = { args: { products: PRODUCTS.slice(0, 4) } }
+
 /** A ragged last row — the columns hold their width rather than stretching to fill. */
 export const PartialRow: Story = { args: { products: PRODUCTS.slice(0, 7) } }
 

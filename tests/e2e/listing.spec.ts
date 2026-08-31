@@ -77,6 +77,39 @@ test('the categories partition the shop between them', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/all jewelry/i)
 })
 
+/**
+ * The action under every card (nodes 412:7714 at 768, 412:7860 at 375) — solid at the widths that
+ * draw it that way, and still hover-revealed at 1920 where the same card is drawn at `opacity: 0`.
+ */
+test('every card offers its action at tablet and mobile widths', async ({ page }) => {
+  for (const width of [768, 375]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/all-jewelry')
+
+    const cards = page.locator('main article')
+    const actions = page.locator('main article a[aria-hidden="true"]')
+    await expect(actions).toHaveCount(await cards.count())
+
+    const first = actions.first()
+    expect(await first.evaluate((element) => getComputedStyle(element).opacity)).toBe('1')
+    await expect(first).toHaveAttribute('href', /^\/products\//)
+  }
+})
+
+test('the desktop card keeps its action until the card is hovered', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.goto('/all-jewelry')
+
+  const card = page.locator('main article').first()
+  const action = card.locator('a[aria-hidden="true"]')
+
+  expect(await action.evaluate((element) => getComputedStyle(element).opacity)).toBe('0')
+  await card.hover()
+  await expect
+    .poll(() => action.evaluate((element) => getComputedStyle(element).opacity))
+    .toBe('1')
+})
+
 test('a category shows the pieces it is named for', async ({ page }) => {
   await page.goto('/rings')
 
