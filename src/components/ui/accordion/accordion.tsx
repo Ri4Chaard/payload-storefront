@@ -31,8 +31,15 @@ import { cn } from '@/lib/cn'
  *
  * The panel stays in the DOM when closed and is collapsed with a `0fr → 1fr` grid row. Height
  * cannot be transitioned from `auto`, and the alternatives — measuring in an effect, or a fixed
- * max-height — either need JavaScript to be correct or clip long copy. `hidden` on the inner
- * wrapper keeps the closed copy out of the accessibility tree and out of tab order.
+ * max-height — either need JavaScript to be correct or clip long copy.
+ *
+ * **The closed copy is hidden with `visibility`, not with the `hidden` attribute.** Both keep it
+ * out of the accessibility tree and out of tab order, and only one of them can wait: `hidden`
+ * applies the instant `open` flips, so the panel vanished on the first frame and the row expanded
+ * smoothly but collapsed by disappearing. `visibility` is transitionable, and its interpolation is
+ * defined to hold the VISIBLE value for the whole duration whenever either end is visible — so the
+ * copy stays on screen, clipped by the collapsing row, and goes out of the tree exactly when the
+ * row finishes closing. Opening is unaffected: visible wins from the first frame there too.
  *
  * The leading glyph is the `minus` dash in every state, exactly as drawn — decoration, not the
  * expand control, and `aria-hidden` by virtue of carrying no label. `icon` swaps it, because a row
@@ -134,7 +141,13 @@ export function AccordionItem({
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
         )}
       >
-        <div className="overflow-hidden" hidden={!isOpen}>
+        <div
+          className={cn(
+            'ease-standard overflow-hidden transition-[visibility]',
+            'duration-[var(--duration-base)]',
+            isOpen ? 'visible' : 'invisible',
+          )}
+        >
           <div className="text-body-medium text-neutral-primary pb-7.5">{children}</div>
         </div>
       </div>
