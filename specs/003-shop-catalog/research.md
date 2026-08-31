@@ -465,12 +465,25 @@ the reason the dynamic `pswpModule` import is used rather than a static one.
   there and also live in `IconButton`'s `outline` variant. Recorded at the top of that file.
 - **Its root is an unnamed `role="dialog"` with no `aria-modal`.** That is an axe violation on a
   gate this repository enforces, so both attributes are set on `afterInit`.
+- **A control the frame does not draw was added and then removed again.** A magnifier beside the
+  close button was the first answer to "how does a keyboard zoom". The owner rejected it — the frame
+  draws two controls and should draw two — so `zoom: false`, and `+`/`-` are bound in the wrapper
+  instead. Same coverage of SC-006, nothing added to the drawing. The controls take no hover state
+  either, for the same reason: the frame draws none.
 - **Two indices instead of one.** The component stays controlled so the thumbnail rail can follow;
   PhotoSwipe owns its index internally. The `change` event and a `goTo` in the other direction are
   what keep them in step, and that is the only real work in the wrapper.
 - **`usePrefersReducedMotion` lost its consumer** and was deleted. PhotoSwipe disables its own
   animations under `prefers-reduced-motion`, and the storefront's global rule in
   `app/(frontend)/styles.css` already covers CSS transitions.
+
+**Two defects it introduced, both found by eye and not by the tests.** Every glyph rendered blank,
+because the library sets `color` on the icon to the tint of a halo our icons do not have and ours
+paint themselves with `currentColor`; the magnifier rendered as a black disc, because the library's
+own `fill` flooded a stroked outline. And the "next" arrow pointed left, because the library draws
+one arrow and mirrors it. All three passed a suite that measured the button and never the mark
+inside it — the lesson being that a themed third-party control needs an assertion about what is
+drawn, not only about where it sits. There are now three.
 
 **What it bought beyond zoom**: touch swipe with momentum — which the hand-rolled viewer did not
 have, and which the mobile gallery beneath it (FR-033) does, so the interaction no longer changes

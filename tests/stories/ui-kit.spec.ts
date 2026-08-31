@@ -1912,9 +1912,21 @@ const RING = 'Paragon Emerald Cut Diamond Engagement Ring'
 const showing = (page: Page) =>
   page.locator('.pswp__item[aria-hidden="false"] img').first().getAttribute('alt')
 
+/**
+ * The viewer takes focus a beat after it opens, and the library reads the keyboard through it. A
+ * press sent before that lands on whatever opened the viewer and is silently lost — which is a race
+ * a test loses far more often than a person does.
+ */
+const focused = (page: Page) =>
+  expect
+    .poll(() =>
+      page.evaluate(() => document.activeElement?.classList.contains('pswp') ?? false),
+    )
+    .toBe(true)
+
 test('the viewer moves between photographs with the arrow keys, and wraps', async ({ page }) => {
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
-  await page.locator('.pswp--ui-visible').waitFor()
+  await focused(page)
 
   await expect.poll(() => showing(page)).toBe('The ring, photographed on white')
 
@@ -1933,16 +1945,17 @@ test('the viewer moves between photographs with the arrow keys, and wraps', asyn
  * 308:6392 draws none — the frame predates the feature, and pinch, double-tap and the wheel are all
  * pointer gestures, which would leave a keyboard with no route to it (SC-006).
  */
-test('the viewer zooms, and can be zoomed from the keyboard', async ({ page }) => {
+test('the viewer zooms, and does it from the keyboard', async ({ page }) => {
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
   const viewer = page.locator('.pswp')
   await expect(viewer).toHaveClass(/pswp--zoom-allowed/)
+  await focused(page)
 
-  const zoom = page.getByRole('button', { name: `Zoom into the photograph of ${RING}` })
-  await zoom.focus()
-  await expect(zoom).toBeFocused()
-  await page.keyboard.press('Enter')
+  // No magnifier is drawn — the frame has two controls and draws two. `+` and `-` are what keep the
+  // feature reachable without a pointer (SC-006).
+  await expect(page.locator('.pswp__button--zoom')).toHaveCount(0)
 
+  await page.keyboard.press('+')
   await expect(viewer).toHaveClass(/pswp--zoomed-in/)
 
   // Shallow on purpose — a stone wants a closer look, not a pixel inspection.
@@ -1951,6 +1964,9 @@ test('the viewer zooms, and can be zoomed from the keyboard', async ({ page }) =
     .first()
     .evaluate((image) => image.getBoundingClientRect().width / (image as HTMLImageElement).naturalWidth)
   expect(scale).toBeLessThan(1)
+
+  await page.keyboard.press('-')
+  await expect(viewer).not.toHaveClass(/pswp--zoomed-in/)
 })
 
 test('the viewer draws no arrows for a single photograph', async ({ page }) => {
@@ -1995,4 +2011,108 @@ test('the viewer wears the drawn white theme, not the library default', async ({
   const close = (await page.locator('.pswp__button--close').boundingBox())!
   expect(close.width).toBe(20)
   expect(close.y).toBe(100)
+})
+
+/**
+ * Both of these are regressions, and both slipped through the first round of tests because those
+ * tests measured the BOX and never the mark inside it: the four controls were the right size, in
+ * the right place, and completely blank.
+ */
+test("the viewer's controls actually draw their glyphs", async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
+
+  const blank = await page.locator('.pswp__button .pswp__icn').evaluateAll((icons) =>
+    icons
+      .map((icon) => {
+        const shape = icon.querySelector('path, circle, rect, line, polygon')
+        if (!shape) return `${icon.parentElement?.className}: no shape at all`
+        const { fill, stroke } = getComputedStyle(shape)
+        const unpainted =
+          (fill === 'none' || fill === 'rgba(0, 0, 0, 0)') &&
+          (stroke === 'none' || stroke === 'rgba(0, 0, 0, 0)')
+        return unpainted ? `${icon.parentElement?.className}: fill ${fill}, stroke ${stroke}` : ''
+      })
+      .filter(Boolean),
+  )
+
+  expect(blank, 'a control rendered an invisible glyph').toEqual([])
+
+  // Pointing where they should. The library mirrors one glyph to make the other, and we supply
+  // both already facing the right way — so the mirror has to be undone, and a left-pointing "next"
+  // arrow is exactly the kind of thing a geometry assertion sails straight past.
+  await expect(page.locator('.pswp__button--arrow--next .pswp__icn')).toHaveCSS('transform', 'none')
+  await expect(page.locator('.pswp__button--arrow--prev .pswp__icn')).toHaveCSS('transform', 'none')
+
+  // And painted in the ink the theme asked for, not in the library's. Every glyph in the registry
+  // declares `currentColor`, so this is the assertion that `color` reaches them at all.
+  const closeShape = page.locator('.pswp__button--close .pswp__icn path').first()
+  await expect(closeShape).toHaveCSS('fill', 'rgb(5, 3, 1)')
+})
+
+/**
+ * Paging must not tear the viewer down. `thumbnailFor` and `images` are a fresh identity on every
+ * render at every call site, so an effect that depended on them closed the viewer the moment a
+ * swipe reported its new index — the loop being: swipe, report, re-render, tear down.
+ */
+/**
+ * The library strips its buttons' `border`, `background` and `box-shadow` on hover, focus and
+ * active — so the drawn outline square disappeared the instant a pointer touched it. The frame
+ * draws one arrow, in one state.
+ */
+test('the viewer\'s controls do not change under a pointer', async ({ page }) => {
+  await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
+  await page.locator('.pswp--ui-visible').waitFor()
+
+  const next = page.locator('.pswp__button--arrow--next')
+  const at = async () => {
+    const style = await next.evaluate((button) => {
+      const { borderTopWidth, boxShadow, backgroundColor, color, opacity } = getComputedStyle(button)
+      return JSON.stringify({ borderTopWidth, boxShadow, backgroundColor, color, opacity })
+    })
+    return style
+  }
+
+  const atRest = await at()
+  expect(atRest, 'the arrow has no outline to begin with').toContain('1px')
+
+  await next.hover()
+  expect(await at(), 'the arrow changed on hover').toBe(atRest)
+
+  await next.focus()
+  expect(await at(), 'the arrow changed on focus').toBe(atRest)
+})
+
+test('the viewer survives being paged from a caller that re-renders', async ({ page }) => {
+  await page.goto(`${STORYBOOK}/iframe.html?id=ui-lightbox--from-a-thumbnail&viewMode=story`, {
+    waitUntil: 'networkidle',
+  })
+
+  // By name, not by position — the Storybook iframe carries hidden buttons of its own ahead of the
+  // story, and a thumbnail's accessible name is its photograph's alt text.
+  await page.getByRole('button', { name: 'The ring, photographed on white' }).click()
+  const dialog = page.getByRole('dialog', { name: `Photographs of ${RING}` })
+  await expect(dialog).toBeVisible()
+
+  await focused(page)
+
+  // Each of these reports a new index, which re-renders the caller.
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => showing(page)).toBe('The ring worn with a tailored jacket')
+  await expect(dialog, 'the viewer closed itself when the index moved').toBeVisible()
+
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => showing(page)).toBe('The ring on a resting hand')
+  await expect(dialog).toBeVisible()
+
+  // And the same through a pointer drag, which is the gesture the report came from.
+  const box = (await dialog.boundingBox())!
+  const y = box.y + box.height / 2
+  await page.mouse.move(box.x + box.width * 0.7, y)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.25, y, { steps: 20 })
+  await page.mouse.up()
+
+  await expect(dialog, 'the viewer closed itself on a swipe').toBeVisible()
+  await expect.poll(() => showing(page)).toBe('The ring worn, in portrait')
 })

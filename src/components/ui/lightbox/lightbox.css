@@ -20,9 +20,9 @@
 .pswp {
   --pswp-bg: var(--color-background-container);
   --pswp-placeholder-bg: var(--color-background-bg);
+  /* Used by the error text. The button glyphs paint themselves — see the `.pswp__icn` rule below. */
   --pswp-icon-color: var(--color-neutral-primary);
-  /* A halo drawn for a black ground. On white it is the only thing that would show. */
-  --pswp-icon-color-secondary: transparent;
+  --pswp-icon-color-secondary: var(--color-neutral-primary);
   --pswp-icon-stroke-width: 0;
   /* Referenced by the library's own transitions and left undefined by its stylesheet. */
   --pswp-transition-duration: var(--duration-base);
@@ -43,12 +43,14 @@
   opacity: 1;
 }
 
-.pswp__button:hover {
-  color: var(--color-primary-default);
-}
+/*
+ * No hover state, deliberately — not ours, and not the library's either. The frame draws these two
+ * controls one way and they stay that way under a pointer. `:focus-visible` below is untouched;
+ * that one is not decoration.
+ */
 
 /*
- * Close and zoom. The bar is `justify-content: flex-end`, so padding is what places them.
+ * Close. The bar is `justify-content: flex-end`, so padding is what places it.
  */
 .pswp__top-bar {
   height: auto;
@@ -56,8 +58,7 @@
   gap: calc(var(--spacing) * 2);
 }
 
-.pswp__button--close,
-.pswp__button--zoom {
+.pswp__button--close {
   width: calc(var(--spacing) * 5);
   height: calc(var(--spacing) * 5);
   margin-right: 0;
@@ -65,8 +66,14 @@
 
 /*
  * The arrows: the kit's 50px outline control, restated. See the note at the top of this file.
+ *
+ * Selected as `.pswp .pswp__button--arrow` rather than `.pswp__button--arrow` on purpose. The
+ * library carries its own `.pswp__button:hover, :active, :focus` rule that sets `border: 0`,
+ * `box-shadow: none` and `background: none` — so at one class the outline square vanished the
+ * moment a pointer touched it. Two classes ties that rule's specificity, and this sheet is imported
+ * after theirs, so the chrome now holds in every state. The frame draws one arrow, not two.
  */
-.pswp__button--arrow {
+.pswp .pswp__button--arrow {
   width: calc(var(--spacing) * 12.5);
   height: calc(var(--spacing) * 12.5);
   margin-top: calc(var(--spacing) * -6.25);
@@ -77,10 +84,6 @@
     0 2px 4px -2px color-mix(in srgb, var(--color-neutral-primary) 10%, transparent);
 }
 
-.pswp__button--arrow:hover {
-  border-color: color-mix(in srgb, var(--color-neutral-primary) 10%, transparent);
-}
-
 .pswp__button--arrow--prev {
   left: var(--lightbox-inset);
 }
@@ -89,12 +92,36 @@
   right: var(--lightbox-inset);
 }
 
-/* Our glyphs are sized by their own box; the library positions a 32px icon inside a 75px button. */
+/*
+ * The library draws ONE arrow glyph and mirrors it for "next" with `transform: scale(-1, 1)`. We
+ * hand it a left chevron and a right chevron, both already pointing where they should — so the
+ * mirror turns the right one back round. Undoing it is the whole fix, and it is invisible to every
+ * test that measures the button rather than the mark inside it.
+ */
+.pswp__button--arrow--next .pswp__icn {
+  transform: none;
+}
+
+/*
+ * Our glyphs are sized by their own box; the library positions a 32px icon inside a 75px button.
+ *
+ * The two paint declarations are the whole reason the controls were invisible on first go, and each
+ * fixes a different half of it. Every icon in `src/lib/icon-registry.ts` declares its own
+ * `fill="currentColor"` or `stroke="currentColor"` — that is the contract `Icon` relies on too — so:
+ *
+ *   `color: inherit`  makes `currentColor` resolve to the button's colour. The library sets it to
+ *                     `--pswp-icon-color-secondary`, which is the tint of a halo our glyphs do not
+ *                     have; a fill-based glyph took that colour and painted itself in it.
+ *   `fill: none`      stops the library's own `fill` from reaching a stroke-based glyph, where it
+ *                     floods the outline into a solid blob. That is what the magnifier was.
+ */
 .pswp__button .pswp__icn {
   position: static;
   width: 100%;
   height: 100%;
   padding: 0;
+  color: inherit;
+  fill: none;
 }
 
 .pswp__button--arrow .pswp__icn {

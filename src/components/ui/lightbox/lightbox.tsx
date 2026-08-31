@@ -33,9 +33,11 @@ import './lightbox.css'
  * than of the file's natural size, because "1.75" should mean "a bit closer than it sits on screen"
  * regardless of whether the photograph is 1000px or 4000px wide.
  *
- * **The zoom button is drawn even though the frame has none.** The frame has none because the frame
- * predates zoom. Pinch and double-tap and the wheel are all pointer gestures; without a control
- * there is no keyboard path to the feature at all, and SC-006 covers the open viewer.
+ * **There is no zoom button, and the keyboard still reaches zoom.** A magnifier beside the close
+ * control was the first answer and the owner rejected it: the frame draws two controls and it
+ * should draw two. But pinch, double-tap and the wheel are all pointer gestures, so removing the
+ * button alone would have left a keyboard with no route to the feature, which SC-006 does not
+ * allow. `+` and `-` are bound instead — the shortcut every image viewer already answers to.
  *
  * **What PhotoSwipe does not label, we label.** Its root is `role="dialog"` with no accessible name
  * and no `aria-modal`, which is an axe violation on a gate this repository actually enforces. Both
@@ -87,45 +89,56 @@ export function Lightbox({
 }: LightboxProps) {
   const instance = React.useRef<PhotoSwipeLightbox | null>(null)
 
-  // The callbacks are read through refs inside the effect below. Without this, an inline arrow —
-  // which every caller passes — would tear down and rebuild the whole viewer on each render, and
-  // rebuilding it mid-gesture closes it.
-  const handlers = React.useRef({ onClose, onIndexChange, thumbnailFor })
+  /**
+   * Everything the viewer needs, read through a ref rather than depended on.
+   *
+   * This is load-bearing and was got wrong once. The effect below builds a PhotoSwipe instance, and
+   * its cleanup destroys it — so anything in its dependency array that changes identity between
+   * renders closes the viewer. `images` is usually a fresh array, and `thumbnailFor` is an inline
+   * arrow at every call site. Worse, the loop closes: a swipe reports a new index, the parent
+   * re-renders, the callbacks get new identities, the effect tears down, and the viewer shuts
+   * itself the moment anyone pages it.
+   *
+   * So the effect depends on `open` alone, and everything else is read at the moment it is needed.
+   */
+  const latest = React.useRef({ images, label, index, onClose, onIndexChange, thumbnailFor, triggerRef })
   React.useEffect(() => {
-    handlers.current = { onClose, onIndexChange, thumbnailFor }
+    latest.current = { images, label, index, onClose, onIndexChange, thumbnailFor, triggerRef }
   })
 
-  // `index` is seeded at open and then owned by PhotoSwipe, so it is read rather than depended on:
-  // re-running this effect for a change the library itself reported would fight the gesture that
-  // caused it.
-  const openIndex = React.useRef(index)
-  openIndex.current = index
-
   React.useEffect(() => {
-    if (!open || images.length === 0) return
+    if (!open) return
+
+    const { images: photographs, label: name, index: from, thumbnailFor: thumbnail } = latest.current
+    if (photographs.length === 0) return
+
+    // `torn` marks a teardown WE started, which happens when the caller sets `open` to false — it
+    // already knows, and telling it again would be an echo. `gone` stops us destroying an instance
+    // that has already destroyed itself, which is the ordinary path out through Escape or the
+    // close button.
+    let torn = false
+    let gone = false
 
     const lightbox = new PhotoSwipeLightbox({
-      dataSource: images.map((image) => ({
+      dataSource: photographs.map((image) => ({
         src: image.src,
         width: image.width,
         height: image.height,
-        alt: image.alt ?? label,
+        alt: image.alt ?? name,
       })),
-      index: openIndex.current,
+      index: from,
       pswpModule: () => import('photoswipe'),
 
       // The frame's chrome. `counter` is off because the frame draws none; `zoom` is on because
       // otherwise the feature has no keyboard path. See the note above.
       counter: false,
-      zoom: true,
+      zoom: false,
       closeSVG: glyph('close'),
-      zoomSVG: glyph('search'),
       arrowPrevSVG: glyph('chevron-left'),
       arrowNextSVG: glyph('chevron-right'),
       closeTitle: 'Close',
-      zoomTitle: `Zoom into the photograph of ${label}`,
-      arrowPrevTitle: `Previous photograph of ${label}`,
-      arrowNextTitle: `Next photograph of ${label}`,
+      arrowPrevTitle: `Previous photograph of ${name}`,
+      arrowNextTitle: `Next photograph of ${name}`,
 
       // Shallow on purpose, and relative to the fitted size rather than to the file.
       initialZoomLevel: 'fit',
@@ -134,7 +147,7 @@ export function Lightbox({
 
       // `zoom` needs a thumbnail to grow out of; without one the library falls back to `fade`
       // anyway, so saying so up front keeps the two paths honest.
-      showHideAnimationType: thumbnailFor ? 'zoom' : 'fade',
+      showHideAnimationType: thumbnail ? 'zoom' : 'fade',
       bgOpacity: 1,
     })
 
@@ -143,39 +156,69 @@ export function Lightbox({
       if (!root) return
       // Its own root is an unnamed `role="dialog"`, which axe fails and a screen reader cannot
       // introduce. Both attributes are ours to supply.
-      root.setAttribute('aria-label', `Photographs of ${label}`)
+      root.setAttribute('aria-label', `Photographs of ${name}`)
       root.setAttribute('aria-modal', 'true')
     })
 
     lightbox.on('change', () => {
       const next = lightbox.pswp?.currIndex
-      if (typeof next === 'number') handlers.current.onIndexChange(next)
+      if (typeof next === 'number') latest.current.onIndexChange(next)
     })
 
-    // Fires for every route out — the close button, Escape, the swipe-down gesture, the scrim.
-    // Reporting it is what keeps `open` from going stale and refusing to reopen.
+    // Fires for every route out the visitor can take — the close button, Escape, the swipe-down
+    // gesture, a press on the ground. Reporting it is what keeps `open` from going stale and
+    // refusing to reopen.
     lightbox.on('destroy', () => {
-      handlers.current.onClose()
-      triggerRef?.current?.focus()
+      gone = true
+      if (torn) return
+      latest.current.onClose()
+      latest.current.triggerRef?.current?.focus()
     })
 
     lightbox.addFilter('thumbEl', (fallback, _data, slideIndex) =>
       // Declared as returning an element, but the library both passes and accepts `undefined` —
       // `getThumbBounds` checks for one before it measures. Narrowing to the declared type would
       // mean inventing an element that is not there.
-      (handlers.current.thumbnailFor?.(slideIndex) ?? fallback) as HTMLElement,
+      (latest.current.thumbnailFor?.(slideIndex) ?? fallback) as HTMLElement,
     )
 
     lightbox.init()
-    lightbox.loadAndOpen(openIndex.current)
+    lightbox.loadAndOpen(from)
     instance.current = lightbox
 
     return () => {
+      torn = true
       instance.current = null
-      lightbox.destroy()
+      if (!gone) lightbox.destroy()
     }
-    // `index` is deliberately absent — see `openIndex` above.
-  }, [open, images, label, triggerRef, thumbnailFor])
+  }, [open])
+
+  /**
+   * `+` and `-`, because the zoom control is gone and a gesture is not a keyboard.
+   *
+   * `toggleZoom` steps between the fitted size and `secondaryZoomLevel`, which is the same pair
+   * double-tap moves between — so the two paths land in the same place rather than offering a
+   * keyboard user a different zoom from everyone else.
+   */
+  React.useEffect(() => {
+    if (!open) return
+
+    function onKeyDown(event: KeyboardEvent) {
+      const pswp = instance.current?.pswp
+      const slide = pswp?.currSlide
+      if (!pswp || !slide) return
+
+      const zoomedIn = slide.currZoomLevel > slide.zoomLevels.initial
+      if ((event.key === '+' || event.key === '=') && !zoomedIn) pswp.toggleZoom()
+      else if (event.key === '-' && zoomedIn) pswp.toggleZoom()
+      else return
+
+      event.preventDefault()
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open])
 
   // A caller may move the index while the viewer is open — the thumbnail rail beneath it does
   // exactly that. Driving PhotoSwipe rather than remounting it keeps the gesture state intact.

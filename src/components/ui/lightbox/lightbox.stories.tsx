@@ -63,8 +63,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * As drawn — the first photograph, an arrow at each side, close at the top right. The magnifier
- * beside the close is the keyboard's route to a feature the frame predates.
+ * As drawn — the first photograph, an arrow at each side, close at the top right, and no fourth
+ * control. Zoom is pinch, double-tap, the wheel, and `+`/`-` for a keyboard.
  */
 export const Default: Story = {}
 
