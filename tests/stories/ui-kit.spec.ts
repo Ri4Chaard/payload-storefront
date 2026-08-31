@@ -2116,3 +2116,53 @@ test('the viewer survives being paged from a caller that re-renders', async ({ p
   await expect(dialog, 'the viewer closed itself on a swipe').toBeVisible()
   await expect.poll(() => showing(page)).toBe('The ring worn, in portrait')
 })
+
+/**
+ * FR-026 — the price boxes and the slider are two views of one range.
+ *
+ * Worth a test because they are two separate controls that only LOOK like one: the slider carries
+ * the query keys and submits the real integers, the boxes are typed in. A pair that drifted would
+ * be a panel showing one number and applying another.
+ */
+const FILTER_DRAWER_STORY = `${STORYBOOK}/iframe.html?id=commerce-filterdrawer--default&viewMode=story`
+
+test('the price boxes and the slider stay in step', async ({ page }) => {
+  await page.goto(FILTER_DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  const minBox = page.getByRole('textbox', { name: 'MIN' })
+  const maxBox = page.getByRole('textbox', { name: 'MAX' })
+  const minHandle = page.getByRole('slider', { name: 'Minimum price' })
+  const maxHandle = page.getByRole('slider', { name: 'Maximum price' })
+
+  // The catalogue's ends, formatted. Minor units in the control, dollars on the face of it.
+  await expect(minBox).toHaveValue('$500')
+  await expect(maxBox).toHaveValue('$24,900')
+
+  await minBox.fill('$1,200')
+  await minBox.blur()
+  await expect(minHandle).toHaveValue('120000')
+
+  await maxBox.fill('7300')
+  await maxBox.blur()
+  await expect(maxHandle).toHaveValue('730000')
+
+  // And back the other way: the slider moves, the box follows.
+  await maxHandle.fill('1000000')
+  await expect(maxBox).toHaveValue('$10,000')
+})
+
+/** FR-026, the other half: a minimum above the maximum is not permitted, it is clamped. */
+test('the price boxes will not let the minimum pass the maximum', async ({ page }) => {
+  await page.goto(FILTER_DRAWER_STORY, { waitUntil: 'networkidle' })
+
+  await page.getByRole('textbox', { name: 'MAX' }).fill('7300')
+  await page.getByRole('textbox', { name: 'MAX' }).blur()
+
+  await page.getByRole('textbox', { name: 'MIN' }).fill('20000')
+  await page.getByRole('textbox', { name: 'MIN' }).blur()
+
+  // Clamped to the maximum rather than swapped: the handle the visitor grabbed stays the one they
+  // grabbed, and the range never inverts.
+  await expect(page.getByRole('slider', { name: 'Minimum price' })).toHaveValue('730000')
+  await expect(page.getByRole('textbox', { name: 'MIN' })).toHaveValue('$7,300')
+})
