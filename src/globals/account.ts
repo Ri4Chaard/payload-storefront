@@ -76,8 +76,18 @@ export const Account: GlobalConfig = {
             {
               name: 'signInCreatePrompt',
               type: 'text',
-              defaultValue: 'Don’t have an account? Create one',
+              defaultValue: 'Don’t have an account?',
               label: 'Create-account prompt',
+              admin: {
+                description:
+                  'The lead-in only. The underlined half is the next field — the design links “Create one”, not the whole sentence.',
+              },
+            },
+            {
+              name: 'signInCreateLink',
+              type: 'text',
+              defaultValue: 'Create one',
+              label: 'Create-account link text',
             },
             {
               name: 'signInFailed',
@@ -128,8 +138,15 @@ export const Account: GlobalConfig = {
             {
               name: 'createSignInPrompt',
               type: 'text',
-              defaultValue: 'Already have an account? Log in',
+              defaultValue: 'Already have an account?',
               label: 'Sign-in prompt',
+              admin: { description: 'The lead-in only; the link text is the next field.' },
+            },
+            {
+              name: 'createSignInLink',
+              type: 'text',
+              defaultValue: 'Log in',
+              label: 'Sign-in link text',
             },
             {
               name: 'createMarketingConsent',
@@ -140,6 +157,12 @@ export const Account: GlobalConfig = {
                 description:
                   'The design draws no such control. It is here because marketing email is opt-in, so consent has to be asked for rather than assumed — and it is never a condition of registering.',
               },
+            },
+            {
+              name: 'createEmailInvalid',
+              type: 'text',
+              defaultValue: 'That does not look like an email address.',
+              label: 'Invalid email message',
             },
             {
               name: 'createPasswordMismatch',

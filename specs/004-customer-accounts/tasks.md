@@ -210,17 +210,17 @@ involvement.
       a customer gets stuck
 - [X] T454 [US1] Implement `resendCode` in `src/lib/auth/actions.ts` with the cooldown from T404, superseding the previous code
       (FR-005, FR-006)
-- [ ] T455 [US1] Build `/create-account` in `src/app/(frontend)/(account)/create-account/page.tsx` —
+- [X] T455 [US1] Build `/create-account` in `src/app/(frontend)/(account)/create-account/page.tsx` —
       node `428:11594`. Email, password, confirm password, **plus the marketing consent control the
       design does not draw** (FR-036, FR-036a: unticked, and never a condition of registering)
-- [ ] T456 [US1] Build `/verify-email` in `src/app/(frontend)/(account)/verify-email/page.tsx` —
+- [X] T456 [US1] Build `/verify-email` in `src/app/(frontend)/(account)/verify-email/page.tsx` —
       nodes `428:11869` and `429:12615` for the error state. `OtpInput`, submit, resend prompt
-- [ ] T457 [US1] Build the registration success screen in `src/components/account/registration-success/` — node `432:13049`. Check emblem, heading,
+- [X] T457 [US1] Build the registration success screen in `src/components/account/registration-success/` — node `432:13049`. Check emblem, heading,
       body, one onward action
-- [ ] T458 [P] [US1] E2E in `tests/e2e/registration.spec.ts` — the full journey including
+- [X] T458 [P] [US1] E2E in `tests/e2e/registration.spec.ts` — the full journey including
       **pasting the code**, plus the mismatch, duplicate-address and expired-code paths. Mail
       transport stubbed so CI needs no API key
-- [ ] T459 [P] [US1] Add the three new routes to `tests/a11y/routes.spec.ts`, and set `noindex` on
+- [X] T459 [P] [US1] Add the three new routes to `tests/a11y/routes.spec.ts`, and set `noindex` on
       all auth routes — a sign-in page in search results is not a feature
 
 **Checkpoint**: US1 is fully functional and demonstrable on its own. This is the MVP.

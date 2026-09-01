@@ -26,6 +26,11 @@ const ROUTES = [
   // them rather than leaving labelled controls behind (003/T296).
   '/products/paragon-emerald-cut-diamond-engagement-ring',
   '/products/butterfly-diamond-pendant',
+  // The account flow (004/T459). A form is where a keyboard or a screen reader has the most to
+  // lose — an unlabelled field or an error nobody announces is the difference between registering
+  // and giving up — and these two are the only pages on the site a visitor MUST complete.
+  '/create-account',
+  '/verify-email?email=a11y%40aurum-testing.dev',
 ]
 
 const WIDTHS = [

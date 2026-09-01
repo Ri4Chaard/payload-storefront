@@ -1,0 +1,49 @@
+import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+import React from 'react'
+
+import { VerifyEmailScreen } from './verify-email-screen'
+import { getAccountCopy } from '@/lib/auth/copy'
+
+/** Nodes `428:11869` and `432:13049` (spec 004, US1). */
+export const metadata: Metadata = {
+  title: 'Verify your email',
+  robots: { follow: false, index: false },
+}
+
+export default async function VerifyEmailPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const { email } = await searchParams
+  const address = typeof email === 'string' ? email : ''
+
+  // Arriving here without an address means the flow was entered sideways — there is nothing to
+  // verify and no way to ask, so send them back to the start rather than showing empty boxes.
+  if (!address) redirect('/create-account')
+
+  const copy = await getAccountCopy()
+
+  return (
+    <VerifyEmailScreen
+      copy={{
+        codeAlreadyUsed: copy.codeAlreadyUsed,
+        codeExpired: copy.codeExpired,
+        codeInvalid: copy.codeInvalid,
+        codeSuperseded: copy.codeSuperseded,
+        codeTooManyAttempts: copy.codeTooManyAttempts,
+        successAction: copy.successAction,
+        successBody: copy.successBody,
+        successTitle: copy.successTitle,
+        verifyCodeLabel: copy.verifyCodeLabel,
+        verifyResendPrompt: copy.verifyResendPrompt,
+        verifyResendSent: copy.verifyResendSent,
+        verifySubmit: copy.verifySubmit,
+        verifySubtitle: copy.verifySubtitle,
+        verifyTitle: copy.verifyTitle,
+      }}
+      email={address}
+    />
+  )
+}

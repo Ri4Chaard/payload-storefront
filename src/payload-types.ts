@@ -1577,7 +1577,11 @@ export interface Account {
    */
   signInForgotLink?: string | null;
   signInSubmit?: string | null;
+  /**
+   * The lead-in only. The underlined half is the next field — the design links “Create one”, not the whole sentence.
+   */
   signInCreatePrompt?: string | null;
+  signInCreateLink?: string | null;
   /**
    * Shown for a wrong password AND for an address with no account. It must not distinguish between them — saying “no such account” tells an attacker which addresses are registered.
    */
@@ -1587,11 +1591,16 @@ export interface Account {
   createSubtitle?: string | null;
   createConfirmLabel?: string | null;
   createSubmit?: string | null;
+  /**
+   * The lead-in only; the link text is the next field.
+   */
   createSignInPrompt?: string | null;
+  createSignInLink?: string | null;
   /**
    * The design draws no such control. It is here because marketing email is opt-in, so consent has to be asked for rather than assumed — and it is never a condition of registering.
    */
   createMarketingConsent?: string | null;
+  createEmailInvalid?: string | null;
   createPasswordMismatch?: string | null;
   createPasswordTooWeak?: string | null;
   verifyTitle?: string | null;
@@ -1723,6 +1732,7 @@ export interface AccountSelect<T extends boolean = true> {
   signInForgotLink?: T;
   signInSubmit?: T;
   signInCreatePrompt?: T;
+  signInCreateLink?: T;
   signInFailed?: T;
   signInLocked?: T;
   createTitle?: T;
@@ -1730,7 +1740,9 @@ export interface AccountSelect<T extends boolean = true> {
   createConfirmLabel?: T;
   createSubmit?: T;
   createSignInPrompt?: T;
+  createSignInLink?: T;
   createMarketingConsent?: T;
+  createEmailInvalid?: T;
   createPasswordMismatch?: T;
   createPasswordTooWeak?: T;
   verifyTitle?: T;

@@ -2,6 +2,7 @@ import * as migration_20260827_101931_initial from './20260827_101931_initial';
 import * as migration_20260828_161241_catalog from './20260828_161241_catalog';
 import * as migration_20260901_104008_shop_accordion_titles from './20260901_104008_shop_accordion_titles';
 import * as migration_20260901_160441_customer_accounts from './20260901_160441_customer_accounts';
+import * as migration_20260901_183138_account_copy_fields from './20260901_183138_account_copy_fields';
 
 export const migrations = [
   {
@@ -22,6 +23,11 @@ export const migrations = [
   {
     up: migration_20260901_160441_customer_accounts.up,
     down: migration_20260901_160441_customer_accounts.down,
-    name: '20260901_160441_customer_accounts'
+    name: '20260901_160441_customer_accounts',
+  },
+  {
+    up: migration_20260901_183138_account_copy_fields.up,
+    down: migration_20260901_183138_account_copy_fields.down,
+    name: '20260901_183138_account_copy_fields'
   },
 ];

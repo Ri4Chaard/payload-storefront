@@ -76,10 +76,32 @@ export function OtpInput({
     (next: string) => {
       if (value === undefined) setInternal(next)
       onChange?.(next)
-      if (next.length === length) onComplete?.(next)
     },
-    [length, onChange, onComplete, value],
+    [onChange, value],
   )
+
+  /**
+   * `onComplete` fires from an effect, NOT from `commit`.
+   *
+   * Calling it inline looks equivalent and is not: it runs synchronously inside the same update
+   * that sets the value, before React has re-rendered. The usual consumer submits the form on
+   * complete — and the form then posts the hidden input's PREVIOUS value, so a pasted six-digit
+   * code arrives at the server five digits long and is rejected as invalid. That is a bug the
+   * component can prevent for every caller, and a footgun if left to each of them to remember.
+   *
+   * The ref stops it re-firing while the code stays complete, and resets when the customer edits.
+   */
+  const completed = React.useRef<null | string>(null)
+
+  React.useEffect(() => {
+    if (current.length !== length) {
+      completed.current = null
+      return
+    }
+    if (completed.current === current) return
+    completed.current = current
+    onComplete?.(current)
+  }, [current, length, onComplete])
 
   const focusBox = (index: number) => {
     const clamped = Math.max(0, Math.min(length - 1, index))

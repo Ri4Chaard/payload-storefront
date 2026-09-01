@@ -1,5 +1,21 @@
 import { defineConfig, devices } from '@playwright/test'
 
+/**
+ * Environment, read the same way `vitest.integration.config.ts` reads it and for the same reason.
+ *
+ * Since spec 004 an e2e spec imports server modules — the registration journey mints a verification
+ * code through the Local API, because the stored code is a keyed hash and cannot be read back. That
+ * pulls in `src/env.ts`, which refuses to load without the database and mail variables.
+ *
+ * A missing FILE is not an error: CI injects the values directly, and `env.ts` is what complains if
+ * they are absent either way.
+ */
+try {
+  process.loadEnvFile('.env')
+} catch {
+  // Already in the environment, or there is nothing to load.
+}
+
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 const STORYBOOK_URL = process.env.STORYBOOK_URL ?? 'http://localhost:6006'
 
