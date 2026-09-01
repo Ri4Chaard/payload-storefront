@@ -88,26 +88,44 @@ async function upsertMedia(file: string, alt: string) {
 }
 
 console.log('› categories')
+/**
+ * The four category photographs, uploaded before the categories that reference them.
+ *
+ * They were served straight from `public/photography` while the home page read fixtures. Now that
+ * the band reads Payload, the owner has to be able to change the picture on a category without a
+ * deployment — which means it has to be a Media document like every other photograph in the shop.
+ */
+const categoryMedia = {
+  rings: await upsertMedia('category-rings.webp', 'A hand wearing a diamond ring'),
+  bracelets: await upsertMedia('category-bracelets.webp', 'A diamond bracelet on a wrist'),
+  earrings: await upsertMedia('category-earrings.webp', 'Diamond earrings worn'),
+  necklaces: await upsertMedia('category-necklaces.webp', 'A diamond necklace worn'),
+}
+
 const categories = {
   rings: await upsert('categories', 'slug', 'rings', {
+    image: categoryMedia.rings.id,
     title: 'Diamond Rings',
     slug: 'rings',
     subtitle: 'Timeless brilliance, made for every moment',
     order: 1,
   }),
   bracelets: await upsert('categories', 'slug', 'bracelets', {
+    image: categoryMedia.bracelets.id,
     title: 'Diamond Bracelets',
     slug: 'bracelets',
     subtitle: 'Timeless brilliance, made for every moment',
     order: 2,
   }),
   earrings: await upsert('categories', 'slug', 'earrings', {
+    image: categoryMedia.earrings.id,
     title: 'Diamond Earrings',
     slug: 'earrings',
     subtitle: 'Timeless brilliance, made for every moment',
     order: 3,
   }),
   necklaces: await upsert('categories', 'slug', 'necklaces', {
+    image: categoryMedia.necklaces.id,
     title: 'Diamond Necklaces',
     slug: 'necklaces',
     subtitle: 'Timeless brilliance, made for every moment',

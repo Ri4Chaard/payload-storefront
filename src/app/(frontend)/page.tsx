@@ -3,6 +3,7 @@ import React from 'react'
 
 import { AboutBand, CategoryBand, Hero, JewelryCarousel } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
+import { getCategories, getFeatured } from '@/lib/catalog/queries'
 import { SHOP_PROMISES } from '@/lib/shop-promises'
 import { homeContent } from '@/mocks'
 
@@ -10,9 +11,19 @@ import { homeContent } from '@/mocks'
  * The home page (002/T108), from Figma node 255:3353.
  *
  * **This file is the only thing on the route that reads content.** Every band below takes what it
- * renders as props. That is not ceremony — it is the entire mechanism behind SC-008: when the
- * catalogue spec lands, `homeContent` is replaced by a Payload query here and no component changes.
- * A section that imported the mocks itself would quietly convert that one-line swap into a rewrite.
+ * renders as props — which is what let the featured row swap from fixtures to Payload (003/T290) by
+ * changing one prop here, with `JewelryCarousel` untouched. A section that imported the mocks
+ * itself would have made that a rewrite.
+ *
+ * **The categories and the featured pieces are real; the rest of this page is not, yet.** The hero
+ * and the about band are not modelled in Payload at all, so they still read `homeContent` — this is
+ * the one file the T293 lint rule still lets do that, named rather than covered by a wildcard so
+ * that how much is left stays visible.
+ *
+ * The two bands' HEADINGS stay with the fixtures for the same reason: "Shop by category" and the
+ * "View all" link are copy, and copy has no home in the schema yet. What came from Payload is the
+ * part an owner changes weekly — which pieces are shown, which categories exist, and the
+ * photograph on each tile.
  *
  * The heading hierarchy is decided here rather than inside the bands, because it is a property of
  * the page: the hero owns the only `h1`, and every band heading is an `h2` beneath it (FR-026).
@@ -25,16 +36,60 @@ export const metadata: Metadata = {
     'refined luxury, made with a responsible approach.',
 }
 
-export default function HomePage() {
+/**
+ * Per-tile copy the schema does not hold. One sentence, identical on every tile, drawn at node
+ * 138:492 — a field for it would be four copies of the same words for an owner to keep in step.
+ */
+const CATEGORY_CTA = 'View collection'
+
+export default async function HomePage() {
   const { hero, categories, featured, about } = homeContent
+  const [pieces, shopCategories] = await Promise.all([getFeatured(), getCategories()])
+
+  /**
+   * Only the categories that have a photograph. `CategoryCard` is a picture with a title over it,
+   * so a tile without one is not a smaller tile — it is a hole. A category the owner has not
+   * photographed yet stays out of the band and keeps its listing route, and adding the photograph
+   * in the admin is what puts it back.
+   */
+  const tiles = shopCategories
+    .filter((category) => category.image !== null)
+    .map((category) => ({
+      title: category.title,
+      href: category.href,
+      cta: CATEGORY_CTA,
+      image: category.image!,
+    }))
 
   return (
     <>
       <Hero {...hero} />
 
-      <CategoryBand {...categories} />
+      {/*
+        Real categories, in the order the owner arranged them. The heading is still fixture copy;
+        the tiles are the catalogue. Absent rather than empty when none of them is photographed,
+        for the same reason the featured row is.
+      */}
+      {tiles.length > 0 ? <CategoryBand heading={categories.heading} items={tiles} /> : null}
 
-      <JewelryCarousel {...featured} />
+      {/*
+        Real pieces, with the band's copy still coming from the fixtures. `JewelryCarousel` takes
+        the shape it always did, so nothing about the component changed — the swap is this prop.
+
+        Absent rather than empty when the catalogue is: a heading and a "View all" over no pieces
+        advertises a shop with nothing in it, which is worse than a page that is one band shorter.
+      */}
+      {pieces.length > 0 ? (
+        <JewelryCarousel
+          {...featured}
+          items={pieces.map((piece) => ({
+            name: piece.title,
+            price: piece.price,
+            href: piece.href,
+            images: piece.images,
+          }))}
+        />
+      ) : null}
 
       <AboutBand {...about} />
 

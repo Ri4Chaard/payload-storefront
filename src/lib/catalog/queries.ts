@@ -469,6 +469,23 @@ export async function getRelated(productId: number, limit = 4): Promise<ProductS
     .map(toProductSummary)
 }
 
+/**
+ * The pieces the home page puts in front of a first-time visitor.
+ *
+ * **Catalogue order, which is the order the owner arranged in the admin.** There is no "featured"
+ * flag on a product, and adding one is a schema decision rather than a query decision — so this
+ * takes the first few in the order the shop already has, and the owner changes what is featured by
+ * dragging a product up. If that turns out to be the wrong control, the fix is a field and this
+ * function's body, not its callers.
+ *
+ * Four by default: the drawn row is four cards across at 1920 and the band's own arrows appear only
+ * when there are more than fit, so four is the number that draws exactly as designed.
+ */
+export async function getFeatured(limit = 4): Promise<ProductSummary[]> {
+  const all = await catalogue()
+  return all.slice(0, limit).map(toProductSummary)
+}
+
 export async function getShopContent(): Promise<ShopContent> {
   const payload = await client()
   const shop = await payload.findGlobal({ slug: 'shop', depth: 0, overrideAccess: false })
