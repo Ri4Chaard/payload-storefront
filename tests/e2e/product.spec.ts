@@ -413,3 +413,145 @@ test('the ceiling follows the chosen diamond', async ({ page }) => {
   await expect(count, 'the quantity outlived a stone that cannot supply it').toHaveText('1')
   await expect(increase).toBeDisabled()
 })
+
+// ---------------------------------------------------------------------------------------------
+// However a visitor arrives — US7 (003/T297–T299)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * SC-004 asks for a product page that is FULLY READABLE with JavaScript switched off, which is a
+ * stronger claim than "it renders": two of the three accordions are collapsed at first paint, and
+ * the button that would open them is a click handler that will never run.
+ *
+ * `accordion.css` answers that with `@media (scripting: none)`, and this is the test that says the
+ * answer works. Collapsed is not merely invisible — the panel sits at `visibility: hidden` inside a
+ * zero-height grid row, which takes it out of the accessibility tree too, so without the rule a
+ * third of the details would be unreadable rather than merely out of sight.
+ */
+test('the page is fully readable with JavaScript disabled', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false })
+  const page = await context.newPage()
+  await page.goto(RING)
+
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByText('$38,320').first()).toBeVisible()
+  await expect(page.locator('main img').first()).toBeVisible()
+
+  // Every section, not just the one that happens to start open.
+  for (const name of [/PRODUCT DETAILS/, /WARRANTY/, /DELIVERY/]) {
+    const panel = page.getByRole('region', { name })
+    await expect(panel, `${name} is not readable without scripting`).toBeVisible()
+    expect((await panel.innerText()).trim().length, `${name} is empty`).toBeGreaterThan(0)
+  }
+
+  await context.close()
+})
+
+/**
+ * And the one thing that IS unavailable, stated rather than left to be discovered. The viewer is a
+ * script; the photograph underneath it is not, so the page loses a way to look closer and nothing
+ * else.
+ */
+test('without JavaScript the full-screen viewer is the only thing missing', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false })
+  const page = await context.newPage()
+  await page.goto(RING)
+
+  await page.getByRole('button', { name: /open full screen$/ }).first().click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  // The photograph it would have opened is still on the page, at the size the layout gives it.
+  await expect(page.locator('main img').first()).toBeVisible()
+
+  await context.close()
+})
+
+/** SC-007, on the route with the widest single element on the site. */
+test('the page reflows at 320px and at 200% zoom without scrolling sideways', async ({ page }) => {
+  const scrollsSideways = () =>
+    page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    )
+
+  await page.setViewportSize({ width: 320, height: 800 })
+  await page.goto(RING)
+  expect(await scrollsSideways(), 'the page scrolls horizontally at 320px').toBe(false)
+
+  // 200% zoom on a 1280 screen presents as a 640px viewport — the width at which the gallery is
+  // still full-bleed but the information column has come out from beside it.
+  await page.setViewportSize({ width: 640, height: 512 })
+  await page.reload()
+  expect(await scrollsSideways(), 'the page scrolls horizontally at 200% zoom').toBe(false)
+
+  // Present, not merely not-overflowing.
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'PRODUCT DETAILS' })).toBeVisible()
+})
+
+/**
+ * The gallery under `prefers-reduced-motion` (003/T299).
+ *
+ * Two different mechanisms have to hold at once, which is why this is one test and not two: the
+ * page carries a five-second auto-advance, and paging by hand scrolls the track. A visitor who
+ * asked for less motion should get neither — nothing that moves on its own, and nothing that
+ * travels when they press a control.
+ */
+test('the gallery neither advances by itself nor travels when asked for less motion', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    reducedMotion: 'reduce',
+    viewport: { width: 1024, height: 900 },
+  })
+  const page = await context.newPage()
+  await page.goto(RING)
+
+  const first = rail(page).first()
+  await expect(first).toHaveAttribute('aria-current', 'true')
+
+  // Longer than the 5s the page asks for. The timer never starts under this preference.
+  await page.waitForTimeout(6000)
+  await expect(first, 'the gallery advanced on its own').toHaveAttribute('aria-current', 'true')
+
+  // And the visitor's own press lands immediately rather than gliding. `.first()` because
+  // _Complete the Collection_ puts a gallery on every card beneath this one.
+  const track = page.getByRole('list', { name: /^Photographs of / }).first()
+  await expect(track).toHaveCSS('scroll-behavior', 'auto')
+
+  await context.close()
+})
+
+/**
+ * The viewer under `prefers-reduced-motion` (003/T299).
+ *
+ * This is the one animation on the site a stylesheet cannot reach. The global rule in `styles.css`
+ * collapses every CSS transition, which covers the drawer and the gallery — but PhotoSwipe drives
+ * its open frame by frame in JavaScript, so it has to be told, and `lightbox.tsx` tells it.
+ *
+ * The assertion is the PHOTOGRAPH'S OWN BOX, not the ground behind it. The ground fades through a
+ * CSS transition, which the global rule already collapses whether or not the library was told
+ * anything — so it would pass with the option removed. The zoom is the part PhotoSwipe drives
+ * itself: measured here, it grows 471×591 → 717×900 over about four hundred milliseconds when the
+ * preference is absent, and is at its final size in the first frame when it is not.
+ */
+test('the full-screen viewer opens without animating when asked for less motion', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    reducedMotion: 'reduce',
+    viewport: { width: 1280, height: 900 },
+  })
+  const page = await context.newPage()
+  await page.goto(RING)
+
+  await page.getByRole('button', { name: /open full screen$/ }).first().click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+
+  const photograph = page.locator('.pswp__img').first()
+  const box = () => photograph.evaluate((node) => JSON.stringify(node.getBoundingClientRect()))
+
+  const first = await box()
+  await page.waitForTimeout(500)
+  expect(await box(), 'the photograph was still growing — the open was animated').toBe(first)
+
+  await context.close()
+})

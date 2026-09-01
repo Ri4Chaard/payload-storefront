@@ -406,12 +406,12 @@ disappears, including from its own URL. No mock involved.
 
 ## Phase 10: User Story 7 — The Shop Works However a Visitor Arrives (P7)
 
-- [ ] T296 [P] [US7] Accessibility sweep at 1920, 1024 and 390 over four states — the listing, the
+- [x] T296 [P] [US7] Accessibility sweep at 1920, 1024 and 390 over four states — the listing, the
       open drawer, the product page and the open lightbox — with the complete rule set (SC-005)
-- [ ] T297 [P] [US7] No-JavaScript pass: the listing renders and filters; the product page is fully
+- [x] T297 [P] [US7] No-JavaScript pass: the listing renders and filters; the product page is fully
       readable; only the lightbox is unavailable (FR-029, SC-004)
-- [ ] T298 [P] [US7] 320px and 200% zoom on every route — no horizontal page scroll (SC-007)
-- [ ] T299 [P] [US7] Reduced motion — no transition on the drawer, the gallery or the lightbox
+- [x] T298 [P] [US7] 320px and 200% zoom on every route — no horizontal page scroll (SC-007)
+- [x] T299 [P] [US7] Reduced motion — no transition on the drawer, the gallery or the lightbox
 - [ ] T300 [US7] Performance: product-page LCP within 2.5s on a throttled mid-range mobile profile;
       each route's initial JavaScript under 200KB gzipped; listing photographs below the fold lazy
       (SC-008)

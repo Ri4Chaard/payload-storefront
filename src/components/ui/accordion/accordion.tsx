@@ -6,6 +6,8 @@ import { Icon } from '@/components/ui/icon'
 import { type IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
+import './accordion.css'
+
 /**
  * The expandable detail row Figma calls "item info" (node 242:2382) — a dash, a bold label, a
  * plus/minus on the right, and a description that appears beneath. It is the product page's
@@ -137,6 +139,9 @@ export function AccordionItem({
         role="region"
         aria-labelledby={`${id}-header`}
         className={cn(
+          // `accordion-panel` is not a style — it is the handle `accordion.css` needs to open every
+          // row when there is no scripting to open them with (SC-004).
+          'accordion-panel',
           'ease-standard grid transition-[grid-template-rows] duration-[var(--duration-base)]',
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
         )}

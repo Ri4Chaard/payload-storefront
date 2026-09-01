@@ -27,7 +27,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 const MARKER = 'acceptance-t295'
 
 let payload: Payload
-let created: number[] = []
+const created: number[] = []
 let attributeId: number
 let categoryId: number
 let gallery: number[]
@@ -68,7 +68,7 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
   it('3. an attribute defined in the admin is usable on a product immediately', async () => {
     const attribute = await payload.create({
       collection: 'attributes',
-      data: { label: 'Setting style', name: MARKER },
+      data: { label: 'Setting style', name: MARKER, type: 'text' },
       context: skipRevalidation,
     })
     attributeId = attribute.id

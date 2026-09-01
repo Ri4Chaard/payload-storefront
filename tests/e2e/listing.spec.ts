@@ -211,7 +211,10 @@ test('the listing renders without JavaScript', async ({ browser }) => {
   await context.close()
 })
 
-for (const width of [320, 390]) {
+// 320 is the narrowest viewport WCAG 1.4.10 asks for, 390 is the narrowest frame the design draws,
+// and 640 is what a 1280 screen presents at 200% zoom — the third is the same requirement reached by
+// a different route, and it is the one where the grid changes shape rather than merely narrowing.
+for (const width of [320, 390, 640]) {
   test(`nothing scrolls sideways at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 })
     await page.goto('/all-jewelry')

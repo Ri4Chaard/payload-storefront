@@ -21,6 +21,11 @@ const ROUTES = [
   // exactly when they can least afford to be unusable.
   '/all-jewelry?maxPrice=1',
   '/rungs',
+  // A piece with stones and sizes, and one with neither: the selectors, the quantity stepper and
+  // the two actions only exist on the first, and the second is what proves the column closes over
+  // them rather than leaving labelled controls behind (003/T296).
+  '/products/paragon-emerald-cut-diamond-engagement-ring',
+  '/products/butterfly-diamond-pendant',
 ]
 
 const WIDTHS = [
@@ -66,6 +71,69 @@ for (const { name, width, height } of [
 
     await page.getByRole('button', { name: 'Open menu' }).click()
     await expect(page.getByRole('button', { name: 'Close menu' })).toBeVisible()
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
+  })
+}
+
+/**
+ * The filter drawer, open (003/T296).
+ *
+ * Like the menu below it, this is a state no component sweep can reach: `FilterDrawer` has stories,
+ * but a story renders the panel beside a page rather than OVER one, and the obligations that come
+ * with covering a document — the trap, the labelled dialog, what is left reachable behind it — only
+ * exist once it does.
+ *
+ * At every width, including 1920. The panel is the same overlay at all three; only what is drawn
+ * behind it changes, and "the desktop has room" is not a reason to check it less.
+ */
+for (const { name, width, height } of [
+  { name: 'desktop', width: 1920, height: 1080 },
+  { name: 'tablet', width: 1024, height: 1366 },
+  { name: 'mobile', width: 390, height: 844 },
+]) {
+  test(`the open filter drawer has no accessibility violations at ${name} width`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height })
+    await page.goto('/all-jewelry')
+    await page.waitForLoadState('networkidle')
+
+    await page.getByRole('link', { name: /^Filters/ }).click()
+    await expect(page.locator('#filters')).toBeVisible()
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
+  })
+}
+
+/**
+ * The lightbox, open (003/T296).
+ *
+ * The fourth state, and the one furthest from anything a story can show: PhotoSwipe builds its own
+ * dialog outside the React tree, so what axe audits here is markup this repository does not write.
+ * That is precisely why it is worth auditing — a third-party viewer that covers the page inherits
+ * every obligation the page had, and the only way to know it meets them is to open it.
+ */
+for (const { name, width, height } of [
+  { name: 'desktop', width: 1920, height: 1080 },
+  { name: 'tablet', width: 1024, height: 1366 },
+  { name: 'mobile', width: 390, height: 844 },
+]) {
+  test(`the open lightbox has no accessibility violations at ${name} width`, async ({ page }) => {
+    await page.setViewportSize({ width, height })
+    await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+    await page.waitForLoadState('networkidle')
+
+    await page.getByRole('button', { name: /open full screen$/ }).first().click()
+    await expect(page.getByRole('dialog')).toBeVisible()
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])

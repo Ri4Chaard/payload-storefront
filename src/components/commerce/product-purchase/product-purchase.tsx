@@ -113,7 +113,18 @@ export function ProductPurchase({
         className="mt-5"
       />
 
-      <div className="mt-3 flex items-center gap-3 md:mt-4 md:gap-4 xl:mt-5 xl:gap-5">
+      {/*
+        The stepper and ADD TO CART share a line, and below the narrowest drawn frame they stop
+        sharing it (003/T298).
+
+        `flex-wrap` is the whole of that. The button's label does not wrap — no button's does — so
+        the row's minimum width is the stepper plus the words "ADD TO CART" laid end to end, which
+        is 355px. That fits the 390 frame this was drawn at and does not fit a 320 viewport, where
+        it pushed the whole page sideways: the grid column took its width from this row, and the
+        gallery beside it stretched to match. Wrapping drops the button onto its own line at that
+        width and changes nothing at any width the design names.
+      */}
+      <div className="mt-3 flex flex-wrap items-center gap-3 md:mt-4 md:gap-4 xl:mt-5 xl:gap-5">
         <QuantityStepper
           value={quantity}
           onChange={setWanted}

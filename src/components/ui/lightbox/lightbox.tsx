@@ -122,6 +122,10 @@ export function Lightbox({
     // Captured BEFORE the viewer opens and takes focus for itself.
     const opener = document.activeElement as HTMLElement | null
 
+    // Asked once, here, rather than watched: a preference that changes while a viewer is open
+    // should not restyle the transition it is already halfway through.
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     const lightbox = new PhotoSwipeLightbox({
       dataSource: photographs.map((image) => ({
         src: image.src,
@@ -148,9 +152,18 @@ export function Lightbox({
       secondaryZoomLevel: (zoom) => zoom.fit * 1.75,
       maxZoomLevel: (zoom) => zoom.fit * 2.5,
 
-      // `zoom` needs a thumbnail to grow out of; without one the library falls back to `fade`
-      // anyway, so saying so up front keeps the two paths honest.
-      showHideAnimationType: thumbnail ? 'zoom' : 'fade',
+      /**
+       * `zoom` needs a thumbnail to grow out of; without one the library falls back to `fade`
+       * anyway, so saying so up front keeps the two paths honest.
+       *
+       * **`none` under reduced motion, and this is the one place that has to be said in
+       * JavaScript** (003/T299). The global rule in `styles.css` collapses every CSS transition on
+       * the page, which is what covers the drawer and the gallery — but this animation is not CSS.
+       * PhotoSwipe drives the open and close itself, frame by frame, and a declaration cannot reach
+       * it. A viewer that flies up out of a thumbnail is exactly the whole-screen movement the
+       * preference is about.
+       */
+      showHideAnimationType: still ? 'none' : thumbnail ? 'zoom' : 'fade',
       bgOpacity: 1,
 
       /**

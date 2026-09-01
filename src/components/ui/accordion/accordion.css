@@ -1,0 +1,34 @@
+/*
+ * Every row is open when there is no scripting (003/T297, SC-004).
+ *
+ * A row is a button that flips React state, so with scripting off the button does nothing and two
+ * of a product page's three sections stay collapsed. Collapsed here is not merely invisible: the
+ * panel is `visibility: hidden` inside a zero-height grid row, which takes it out of the
+ * accessibility tree as well. SC-004 asks for a product page that is FULLY READABLE without
+ * JavaScript, and two thirds of the details are not that.
+ *
+ * `scripting: none` is the media feature written for exactly this question, so the rule needs no
+ * class toggled by a script that would not run anyway. Opening every row is the right answer rather
+ * than a fallback: the accordion is a way to shorten a long page for someone who can collapse it
+ * again, and a visitor who cannot collapse anything is better served by the whole page than by a
+ * control that does not work.
+ *
+ * The trailing glyph still reads `plus`, which is honest — nothing here can be opened or closed.
+ *
+ * Unlayered on purpose, exactly as `filter-drawer.css` is: Tailwind's utilities live in
+ * `@layer utilities`, and an unlayered rule beats a layered one whatever its specificity, which is
+ * what lets two declarations override the collapsed state without `!important`.
+ *
+ * `scripting` is Media Queries Level 5 — Chrome 120, Safari 17, Firefox 113. An older browser with
+ * scripting switched off keeps the collapsed rows; it is a narrow enough gap to name rather than to
+ * carry a second mechanism for.
+ */
+@media (scripting: none) {
+  .accordion-panel {
+    grid-template-rows: 1fr;
+  }
+
+  .accordion-panel > * {
+    visibility: visible;
+  }
+}
