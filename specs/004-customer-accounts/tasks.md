@@ -193,22 +193,22 @@ can now begin — in parallel, if staffed.
 and confirm a verified account exists and the visitor is signed in. No catalog, cart or profile
 involvement.
 
-- [ ] T450 [P] [US1] Integration test in `tests/integration/us1-registration.test.ts` — registration
+- [X] T450 [P] [US1] Integration test in `tests/integration/us1-registration.test.ts` — registration
       creates an unverified account; a correct code verifies and signs in; expired, spent, superseded
       and wrong codes are each refused distinctly
-- [ ] T451 [US1] Wire `verify.generateEmailHTML` in `src/collections/customers.ts` — mint a code against Payload's token
+- [X] T451 [US1] Wire `verify.generateEmailHTML` in `src/collections/customers.ts` — mint a code against Payload's token
       via `issueCode`, and return the **code** email rather than a link (R3). Document the side
       effect at the call site so the next reader does not mistake it for a pure template
-- [ ] T452 [US1] Implement `registerCustomer` in `src/lib/auth/actions.ts` — validates email shape,
+- [X] T452 [US1] Implement `registerCustomer` in `src/lib/auth/actions.ts` — validates email shape,
       password strength and the confirmation match (FR-002, FR-003); creates the customer with
       `marketingEmail` from the **unticked-by-default** consent box. **An already-registered address
       returns the same success and creates no second account** (FR-009), re-sending a code if that
       account is still unverified
-- [ ] T453 [US1] Implement `verifyEmailCode` in `src/lib/auth/actions.ts` — `consumeCode`, then
+- [X] T453 [US1] Implement `verifyEmailCode` in `src/lib/auth/actions.ts` — `consumeCode`, then
       `payload.verifyEmail({ collection: 'customers', token })`, then sign in (FR-007). Each failure
       reason gets its own message key: "invalid code" when the real problem is an expired one is how
       a customer gets stuck
-- [ ] T454 [US1] Implement `resendCode` in `src/lib/auth/actions.ts` with the cooldown from T404, superseding the previous code
+- [X] T454 [US1] Implement `resendCode` in `src/lib/auth/actions.ts` with the cooldown from T404, superseding the previous code
       (FR-005, FR-006)
 - [ ] T455 [US1] Build `/create-account` in `src/app/(frontend)/(account)/create-account/page.tsx` —
       node `428:11594`. Email, password, confirm password, **plus the marketing consent control the

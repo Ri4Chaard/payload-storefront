@@ -2,6 +2,10 @@ import type { CollectionConfig } from 'payload'
 
 import { composeCustomerName, stampMarketingConsent } from '@/collections/customer-hooks'
 import { isAdmin, publicAccess } from '@/lib/access'
+import {
+  generateVerificationEmailHTML,
+  generateVerificationEmailSubject,
+} from '@/lib/auth/verification-email'
 import { LOGIN_LOCK_MS, LOGIN_MAX_ATTEMPTS, SESSION_TTL_SECONDS } from '@/lib/auth/config'
 
 /**
@@ -35,10 +39,13 @@ export const Customers: CollectionConfig = {
      * permitted disclosure: an unverified customer is routed to the verification step instead of
      * being told nothing.
      *
-     * `generateEmailHTML` is wired in a later task and is where the link becomes a six-digit code —
-     * see `src/lib/auth/codes.ts` and 004/research.md R3.
+     * `generateEmailHTML` is where the link becomes a six-digit code — see
+     * `src/lib/auth/verification-email.ts` and 004/research.md R3.
      */
-    verify: true,
+    verify: {
+      generateEmailHTML: generateVerificationEmailHTML,
+      generateEmailSubject: generateVerificationEmailSubject,
+    },
 
     /** Reset is code-based too; same interception, same reason. FR-018. */
     forgotPassword: {},

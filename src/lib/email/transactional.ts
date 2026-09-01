@@ -1,5 +1,3 @@
-import 'server-only'
-
 import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
@@ -72,26 +70,44 @@ async function copy() {
   return payload.findGlobal({ slug: 'account', overrideAccess: true })
 }
 
-export async function sendVerificationCode(to: string, code: string): Promise<void> {
-  const payload = await client()
-  const text = await copy()
+export interface BuiltEmail {
+  html: string
+  subject: string
+}
 
-  await payload.sendEmail({
+/**
+ * Built rather than sent, because these two messages leave by two different doors.
+ *
+ * At registration, Payload sends the verification mail itself — `verify.generateEmailHTML` hands it
+ * HTML and it does the rest. On a resend there is no Payload operation to hook, so we send it. Both
+ * paths must produce the same message, which they do by sharing this.
+ */
+export async function buildVerificationEmail(code: string): Promise<BuiltEmail> {
+  const text = await copy()
+  return {
     html: renderCodeEmail(text.verifyEmailBody ?? '', code),
     subject: text.verifyEmailSubject ?? 'Your verification code',
-    to,
-  })
+  }
+}
+
+export async function buildResetEmail(code: string): Promise<BuiltEmail> {
+  const text = await copy()
+  return {
+    html: renderCodeEmail(text.resetEmailBody ?? '', code),
+    subject: text.resetEmailSubject ?? 'Your password reset code',
+  }
+}
+
+export async function sendVerificationCode(to: string, code: string): Promise<void> {
+  const payload = await client()
+  const { html, subject } = await buildVerificationEmail(code)
+  await payload.sendEmail({ html, subject, to })
 }
 
 export async function sendResetCode(to: string, code: string): Promise<void> {
   const payload = await client()
-  const text = await copy()
-
-  await payload.sendEmail({
-    html: renderCodeEmail(text.resetEmailBody ?? '', code),
-    subject: text.resetEmailSubject ?? 'Your password reset code',
-    to,
-  })
+  const { html, subject } = await buildResetEmail(code)
+  await payload.sendEmail({ html, subject, to })
 }
 
 /**

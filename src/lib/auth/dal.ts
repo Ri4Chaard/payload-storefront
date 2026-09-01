@@ -1,5 +1,3 @@
-import 'server-only'
-
 import config from '@payload-config'
 import { headers as nextHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'

@@ -1,9 +1,7 @@
-import 'server-only'
-
 import { createHmac, randomInt, timingSafeEqual } from 'node:crypto'
 
 import config from '@payload-config'
-import { getPayload } from 'payload'
+import { getPayload, type PayloadRequest } from 'payload'
 
 import {
   CODE_LENGTH,
@@ -86,16 +84,31 @@ export async function issueCode(
   email: string,
   purpose: CodePurpose,
   token: string,
-  customerId?: number | string,
+  options: {
+    bypassThrottle?: boolean
+    customerId?: number | string
+    /**
+     * The originating request, when there is one.
+     *
+     * Passed so the code row joins the caller's TRANSACTION. At registration this matters twice
+     * over: `verify.generateEmailHTML` runs inside the customer-create transaction, so a separate
+     * client cannot see the customer row yet and the relationship insert fails outright — and if
+     * the create later rolls back, a code row written on its own connection would survive as an
+     * alias to an account that does not exist.
+     */
+    req?: PayloadRequest
+  } = {},
 ): Promise<IssueResult> {
   const payload = await client()
   const address = normalizeEmail(email)
   const now = Date.now()
+  const { bypassThrottle = false, customerId, req } = options
 
   const recent = await payload.find({
     collection: 'verification-codes',
     limit: CODE_REQUESTS_PER_HOUR,
     overrideAccess: true,
+    req,
     sort: '-createdAt',
     where: {
       and: [
@@ -105,16 +118,24 @@ export async function issueCode(
     },
   })
 
-  const newest = recent.docs[0]
+  /**
+   * The account-creation path skips the throttle, and only that path may.
+   *
+   * It is reached exactly once per new account, and creating an account is itself the rate limit —
+   * a second attempt on the same address does not create a second account (FR-009), so there is no
+   * loop here to abuse. Without the bypass a customer whose address had a code minutes earlier (a
+   * purged registration, say) would be handed an email with no code in it, which is the one outcome
+   * worse than being asked to wait.
+   */
+  const newest = bypassThrottle ? undefined : recent.docs[0]
+  if (!bypassThrottle && recent.totalDocs >= CODE_REQUESTS_PER_HOUR) {
+    return { ok: false, retryAfterMs: 60 * 60 * 1000, throttled: 'hourly' }
+  }
   if (newest) {
     const since = now - new Date(newest.createdAt).getTime()
     if (since < CODE_RESEND_COOLDOWN_MS) {
       return { ok: false, retryAfterMs: CODE_RESEND_COOLDOWN_MS - since, throttled: 'cooldown' }
     }
-  }
-
-  if (recent.totalDocs >= CODE_REQUESTS_PER_HOUR) {
-    return { ok: false, retryAfterMs: 60 * 60 * 1000, throttled: 'hourly' }
   }
 
   // Retire live codes for this address and purpose BEFORE writing the new one, so there is never a
@@ -123,6 +144,7 @@ export async function issueCode(
     collection: 'verification-codes',
     data: { supersededAt: new Date(now).toISOString() },
     overrideAccess: true,
+    req,
     where: {
       and: [
         { email: { equals: address } },
@@ -147,6 +169,7 @@ export async function issueCode(
       ...(customerId ? { customer: customerId as number } : {}),
     },
     overrideAccess: true,
+    req,
   })
 
   return { code, ok: true }

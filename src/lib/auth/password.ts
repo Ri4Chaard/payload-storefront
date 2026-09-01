@@ -1,5 +1,3 @@
-import 'server-only'
-
 import { PASSWORD_MIN_LENGTH } from '@/lib/auth/config'
 
 /**

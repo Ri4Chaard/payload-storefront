@@ -33,12 +33,6 @@ try {
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  resolve: {
-    alias: {
-      // See tests/stubs/server-only.ts — the real package throws outside a bundler context.
-      'server-only': new URL('./tests/stubs/server-only.ts', import.meta.url).pathname,
-    },
-  },
   test: {
     environment: 'node',
     include: ['tests/integration/**/*.test.ts'],
