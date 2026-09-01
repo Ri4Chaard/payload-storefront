@@ -154,6 +154,33 @@ describe('categories', () => {
       title: 'Diamond Rings',
       subtitle: 'Timeless brilliance, made for every moment',
       href: '/rings',
+      // The home page's tile. `null` here because the fixtures set none, which is the state the
+      // band has to survive: an unphotographed category is left out rather than drawn as a hole.
+      image: null,
+    })
+  })
+
+  /** With a photograph, it travels as a `CatalogImage` like every other picture in the catalogue. */
+  it('carries the tile photograph when the owner has set one', () => {
+    const category = first(categoryFixtures, 'category')
+    const summary = toCategorySummary({
+      ...category,
+      image: {
+        id: 99,
+        alt: 'A hand wearing a diamond ring',
+        url: '/api/media/file/category-rings.webp',
+        width: 960,
+        height: 1040,
+        updatedAt: category.updatedAt,
+        createdAt: category.createdAt,
+      },
+    })
+
+    expect(summary.image).toEqual({
+      src: '/api/media/file/category-rings.webp',
+      width: 960,
+      height: 1040,
+      alt: 'A hand wearing a diamond ring',
     })
   })
 })

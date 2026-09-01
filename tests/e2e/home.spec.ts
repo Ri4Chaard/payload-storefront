@@ -360,3 +360,63 @@ test('a small movement near the top of the page does not take the header away', 
   await page.waitForTimeout(300)
   await expect(page.locator('header')).toBeInViewport()
 })
+
+/**
+ * The featured row is the catalogue, not a fixture (003/T290).
+ *
+ * Asserted through the links rather than the names: a piece's title is content the owner may change
+ * at any moment, but every card on this band must point at a real product page, and that page must
+ * exist. A fixture row would have passed the first half and failed the second.
+ */
+test('the featured row shows real pieces that resolve to real pages', async ({ page }) => {
+  await page.goto('/')
+
+  const band = page.getByRole('region', { name: 'All jewelry' })
+  const links = band.getByRole('link').filter({ hasNot: page.getByText('View all') })
+
+  const hrefs = await links.evaluateAll((nodes) =>
+    nodes.map((node) => node.getAttribute('href')).filter((href): href is string => Boolean(href)),
+  )
+  const products = hrefs.filter((href) => href.startsWith('/products/'))
+  expect(products.length, 'the featured band has no product links').toBeGreaterThan(0)
+
+  // Every one of them is a page that exists — which is what tells a real catalogue from a fixture.
+  for (const href of products) {
+    const response = await page.request.get(href)
+    expect(response.status(), `${href} is not a real product page`).toBe(200)
+  }
+})
+
+/**
+ * The category band is the catalogue too (owner, 2026-09-01).
+ *
+ * Asserted through the links and the photographs rather than the titles: what a category is called
+ * is the owner's to change in the admin, but every tile must point at a listing that exists and
+ * must carry a picture served by Payload rather than from `public/`.
+ */
+test('the category band shows real categories with real photographs', async ({ page }) => {
+  await page.goto('/')
+
+  const band = page.getByRole('region', { name: 'Shop by category' })
+  const tiles = band.getByRole('link')
+  expect(await tiles.count(), 'the band drew no categories').toBeGreaterThan(0)
+
+  const hrefs = await tiles.evaluateAll((nodes) =>
+    nodes.map((node) => node.getAttribute('href') ?? ''),
+  )
+  for (const href of hrefs) {
+    const response = await page.request.get(href)
+    expect(response.status(), `${href} is not a real listing`).toBe(200)
+  }
+
+  // Served through Payload's media route, which is what says the owner can change them.
+  const sources = await band.locator('img').evaluateAll((nodes) =>
+    nodes.map((node) => (node as HTMLImageElement).currentSrc || node.getAttribute('src') || ''),
+  )
+  expect(sources.length).toBeGreaterThan(0)
+  for (const source of sources) {
+    expect(decodeURIComponent(source), 'a tile is still served from /public').toContain(
+      '/api/media/file/',
+    )
+  }
+})

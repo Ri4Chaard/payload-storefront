@@ -26,6 +26,19 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
+  /**
+   * Ten seconds rather than five, since 003/T290.
+   *
+   * Every storefront navigation now renders from Postgres, so the wait an assertion is really
+   * making — for a page to arrive — grew for the whole suite at once. The failures moved between
+   * tests from run to run and each passed alone in three to nine seconds, which is latency rather
+   * than a bug; the previous budget was set when pages came from an array in memory.
+   *
+   * Raised here rather than test by test on purpose. A per-test timeout says "this assertion is
+   * special", and none of them is — three different tests had already been patched individually
+   * before it was clear they were all measuring the same thing.
+   */
+  expect: { timeout: 10_000 },
   use: {
     baseURL: BASE_URL,
     trace: 'on-first-retry',

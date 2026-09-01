@@ -292,8 +292,8 @@ test('the price slider commits when it is moved, with no APPLY', async ({ page }
          *
          * It is a race by construction: the slider is a real `<input type="range">` that moves
          * under the arrow keys as soon as the HTML lands, while the commit is a React handler that
-         * arrives later. Since 003/T290 the HTML also waits on Postgres, so the gap between the two
-         * is wider. Fifteen seconds is measured, not guessed: alone the test takes six to nine.
+         * arrives later — so it needs more room than the raised global default, not merely the
+         * same. Fifteen seconds is measured, not guessed: alone the test takes six to nine.
          */
         timeout: 15_000,
       },

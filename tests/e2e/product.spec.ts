@@ -357,3 +357,59 @@ test('the size picker exposes its value and its state', async ({ page }) => {
   // Focus comes back to the trigger rather than being stranded in a panel that has gone.
   await expect(sizes).toBeFocused()
 })
+
+/**
+ * A piece with counted stock cannot be ordered past it (owner, 2026-09-01).
+ *
+ * The signet ring is stock-tracked with two in the shop and offers no stones, so its ceiling is the
+ * product's own. Pressing past the ceiling must not merely clamp the number — the control has to
+ * say it has stopped, which for a stepper means the plus goes disabled.
+ */
+test('the quantity stepper stops at the stock a piece actually has', async ({ page }) => {
+  await page.goto('/products/princess-cut-signet-ring')
+
+  const increase = page.getByRole('button', { name: /increase/i })
+  const decrease = page.getByRole('button', { name: /decrease/i })
+  const count = page.locator('[role="group"] span[aria-live="polite"]')
+
+  await expect(count).toHaveText('1')
+  await expect(decrease, 'the minimum is one, so this starts disabled').toBeDisabled()
+
+  await increase.click()
+  await expect(count).toHaveText('2')
+  await expect(increase, 'the stepper went past the stock').toBeDisabled()
+})
+
+/** A made-to-order piece has no ceiling to reach, so the control never stops. */
+test('a made-to-order piece counts past any stock number', async ({ page }) => {
+  await page.goto(RING)
+
+  const increase = page.getByRole('button', { name: /increase/i })
+  const count = page.locator('[role="group"] span[aria-live="polite"]')
+
+  for (let press = 0; press < 5; press += 1) await increase.click()
+  await expect(count).toHaveText('6')
+  await expect(increase).toBeEnabled()
+})
+
+/**
+ * The ceiling belongs to the chosen stone, and stones differ — four of one, one of another. The
+ * quantity is stored as what was ASKED FOR and capped at the moment of use, so moving to a scarcer
+ * stone lowers it and moving back restores it rather than leaving the visitor stuck at the low mark.
+ */
+test('the ceiling follows the chosen diamond', async ({ page }) => {
+  await page.goto(RING)
+
+  const count = page.locator('[role="group"] span[aria-live="polite"]')
+  const increase = page.getByRole('button', { name: /increase/i })
+  for (let press = 0; press < 3; press += 1) await increase.click()
+  await expect(count).toHaveText('4')
+
+  // The scarcest stone the fixtures offer has one in the shop.
+  await page.getByRole('combobox', { name: /diamond/i }).click()
+  const scarce = page.getByRole('option').filter({ hasText: /2\.0 ct/ })
+  await scarce.first().click()
+
+  await expect(count, 'the quantity outlived a stone that cannot supply it').toHaveText('1')
+  await expect(increase).toBeDisabled()
+})
