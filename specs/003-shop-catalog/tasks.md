@@ -397,8 +397,8 @@ disappears, including from its own URL. No mock involved.
 - [x] T294 [US1b] Set the caching and revalidation strategy per route, with publishing invalidating
       the affected pages. Constitution V calls stale content after publish a defect — recorded in
       [research.md R13](research.md#r13-what-is-cached-and-what-invalidates-it)
-- [ ] T295 [US1b] Re-run the full US1 acceptance from the spec end to end — the scenarios that could
-      not pass on mocks are the point of this phase
+- [x] T295 [US1b] Re-run the full US1 acceptance from the spec end to end — the scenarios that could
+      not pass on mocks are the point of this phase — `tests/integration/us1-acceptance.test.ts`
 
 **Checkpoint**: Principle I holds. The deviation opened in 002 is closed.
 
