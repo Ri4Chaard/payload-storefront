@@ -2307,6 +2307,57 @@ test('the gallery loops when it is swiped, not only when it is paged', async ({ 
   expect(room, 'the loop ran out of track').toBeGreaterThan(10)
 })
 
+/**
+ * Stepping off a loop copy must be a JUMP, not a journey.
+ *
+ * The track carries `scroll-behavior: smooth`, and that applies to a scroll started by assigning
+ * `scrollLeft` just as much as to one started by a click. So the correction animated all the way
+ * back across the track in full view: the first photograph arrived, then visibly rewound to itself.
+ *
+ * Counted in scroll events, because that is the difference. A jump fires one; the animation fired
+ * thirty-six. Position alone cannot tell them apart — both end up in the right place eventually,
+ * which is exactly why the earlier loop test passed while the bug was there.
+ */
+test('the gallery steps off a loop copy without animating back', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
+
+  const track = page.locator('ul[aria-label^="Photographs of"]')
+  await expect(track).toBeVisible()
+  // The copies arrive after mount, and the compensation that comes with them is a scroll of its
+  // own. Let it finish before counting anything.
+  await page.waitForTimeout(300)
+
+  await track.evaluate((element) => {
+    ;(window as unknown as { scrolls: number[] }).scrolls = []
+    element.addEventListener(
+      'scroll',
+      () => (window as unknown as { scrolls: number[] }).scrolls.push(element.scrollLeft),
+      { passive: true },
+    )
+    // Land on the copy of the first photograph, past the last. Instant, so it costs one event.
+    element.scrollTo({ left: element.scrollWidth - element.clientWidth, behavior: 'instant' })
+  })
+  await page.waitForTimeout(700)
+
+  const settled = await track.evaluate((element) => ({
+    events: (window as unknown as { scrolls: number[] }).scrolls.length,
+    left: Math.round(element.scrollLeft),
+    firstPhotograph: Math.round(
+      element.children[1]!.getBoundingClientRect().left -
+        element.getBoundingClientRect().left +
+        element.scrollLeft,
+    ),
+  }))
+
+  expect(settled.left, 'the correction did not land on the real first photograph').toBe(
+    settled.firstPhotograph,
+  )
+  expect(settled.events, 'the correction animated instead of jumping').toBeLessThanOrEqual(6)
+})
+
 /** However many times a photograph is painted, it is one thing to a screen reader and one tab stop. */
 test('the gallery loop copies are hidden from assistive technology', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })

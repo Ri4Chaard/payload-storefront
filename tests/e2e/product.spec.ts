@@ -124,12 +124,23 @@ test('the gallery stops growing past the width it is drawn at', async ({ page })
   await page.goto(RING)
 
   const photograph = page.getByRole('button', { name: /open full screen$/ }).first()
-  // `boundingBox` does not wait for anything, so under a loaded machine it measures a page that
-  // has not painted yet and returns null. The visibility check is the wait.
-  await expect(photograph).toBeVisible()
 
-  const box = await photograph.boundingBox()
-  expect(box!.width, 'the photograph grew past its drawn width').toBeLessThanOrEqual(852)
+  /**
+   * Polled, because the track's children are REPLACED shortly after mount: the loop's copies are
+   * added then, deliberately, so the first paint cannot show the last photograph. A plain
+   * `boundingBox()` measures whatever it finds, and between the copies arriving and React
+   * reconciling it can find a node that has just detached — which returns null, not a width.
+   *
+   * 850px exactly: the 990px the gallery is capped at, less the 140px the rail and its gap
+   * occupy. Asserting the number rather than a ceiling also catches the opposite failure, a
+   * collapsed box measuring zero.
+   */
+  await expect
+    .poll(async () => {
+      const box = await photograph.boundingBox()
+      return box ? Math.round(box.width) : 0
+    }, { message: 'the photograph is not the drawn 850px at a 2560px viewport' })
+    .toBe(850)
 })
 
 /**

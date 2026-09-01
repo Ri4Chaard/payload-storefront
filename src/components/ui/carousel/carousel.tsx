@@ -107,6 +107,21 @@ export interface CarouselProps extends Omit<React.ComponentProps<'div'>, 'childr
 }
 
 /**
+ * Move the track by `delta` with no animation, whatever the stylesheet says.
+ *
+ * `scrollLeft = x` is NOT instant here. The track carries `scroll-behavior: smooth`, and that
+ * applies to a scroll started by assignment just as much as to one started by a click — so the
+ * correction that steps off a loop copy animated all the way back across the track in full view.
+ * The visitor saw the first photograph arrive and then rewind to itself.
+ *
+ * `behavior: 'instant'` is the one value that overrides the declaration rather than deferring to it
+ * — which is what `'auto'` does, and why `'auto'` would have the same bug.
+ */
+function jump(track: HTMLElement, delta: number): void {
+  track.scrollTo({ left: track.scrollLeft + delta, behavior: 'instant' })
+}
+
+/**
  * `useLayoutEffect` on the client, `useEffect` on the server — where it does nothing either way and
  * React says so out loud. The compensation below has to run before paint, which rules out the
  * plain effect; the warning is noise about a body that never executes there.
@@ -177,7 +192,7 @@ export function Carousel({
     const first = track?.children[1]
     if (!track || !first) return
 
-    track.scrollLeft += first.getBoundingClientRect().left - track.getBoundingClientRect().left
+    jump(track, first.getBoundingClientRect().left - track.getBoundingClientRect().left)
   }, [looping])
 
   /**
@@ -230,10 +245,7 @@ export function Carousel({
         // has stopped, so there is no momentum left to fight.
         if (looping && (position === 0 || position === items.length + 1)) {
           const twin = track.children[position === 0 ? items.length : 1]
-          if (twin) {
-            track.scrollLeft +=
-              twin.getBoundingClientRect().left - track.getBoundingClientRect().left
-          }
+          if (twin) jump(track, twin.getBoundingClientRect().left - track.getBoundingClientRect().left)
         }
 
         const index = toItem(position)
