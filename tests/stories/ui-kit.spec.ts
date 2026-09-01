@@ -1130,9 +1130,12 @@ test('about heading is two colours but one accessible name', async ({ page }) =>
 
 test('about band grows for copy the drawing never showed', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto(`${STORYBOOK}/iframe.html?id=sections-aboutband--with-longer-copy&viewMode=story`, {
-    waitUntil: 'load',
-  })
+  await page.goto(
+    `${STORYBOOK}/iframe.html?id=sections-aboutband--with-longer-copy&viewMode=story`,
+    {
+      waitUntil: 'load',
+    },
+  )
 
   const section = page.locator('#storybook-root section')
   // The drawn 750px is a floor. A third paragraph must push it down, not spill out of it.
@@ -1141,7 +1144,9 @@ test('about band grows for copy the drawing never showed', async ({ page }) => {
   await expect(page.getByText('independently graded')).toBeVisible()
 })
 
-test('category tiles change proportion, not just size, across the breakpoints', async ({ page }) => {
+test('category tiles change proportion, not just size, across the breakpoints', async ({
+  page,
+}) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=sections-categoryband--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
@@ -1281,9 +1286,9 @@ test('the carousel clamps at both ends and drops the arrow that has nowhere to g
   await expect(back).toBeVisible()
 
   // And it really is at the end, not merely missing its control.
-  expect(
-    await track.evaluate((el) => el.scrollLeft >= el.scrollWidth - el.clientWidth - 2),
-  ).toBe(true)
+  expect(await track.evaluate((el) => el.scrollLeft >= el.scrollWidth - el.clientWidth - 2)).toBe(
+    true,
+  )
 })
 
 test('a carousel with nothing to page shows no arrows at all', async ({ page }) => {
@@ -1311,9 +1316,7 @@ test('a wrapping carousel keeps both arrows and comes back round', async ({ page
   // Backwards from the start lands at the end, which is the behaviour a strip of photographs of one
   // product needs and a row of products must not have.
   await page.getByRole('button', { name: 'Show previous panels' }).click()
-  await expect
-    .poll(() => track.evaluate((el) => el.scrollLeft > 0))
-    .toBe(true)
+  await expect.poll(() => track.evaluate((el) => el.scrollLeft > 0)).toBe(true)
 })
 
 test('the jewelry row keeps the drawn card at every width and pages only when it must', async ({
@@ -1490,7 +1493,9 @@ for (const { name, width, height, gutter, disc } of [
   { name: 'tablet', width: 1024, height: 1366, gutter: 24, disc: 70 },
   { name: 'mobile', width: 390, height: 844, gutter: 16, disc: 50 },
 ]) {
-  test(`the ${name} menu covers the page from the header's edge to the bottom`, async ({ page }) => {
+  test(`the ${name} menu covers the page from the header's edge to the bottom`, async ({
+    page,
+  }) => {
     const panel = await openMenu(page, width, height)
 
     const header = await page.locator('header').boundingBox()
@@ -1681,9 +1686,7 @@ test('the drawer animates in and out', async ({ page }) => {
   // Once it settles the clip is fully open, so nothing of the panel is cut off at rest. Polled,
   // because `openMenu` returns as soon as the panel has been placed — and a clipped panel has a
   // box from its first frame, so there is nothing in the layout to wait on.
-  await expect
-    .poll(() => panel.evaluate((el) => getComputedStyle(el).clipPath))
-    .toBe('inset(0px)')
+  await expect.poll(() => panel.evaluate((el) => getComputedStyle(el).clipPath)).toBe('inset(0px)')
 
   // The exit plays: the panel is still displayed on the far side of the click that closed it.
   await page.getByRole('button', { name: 'Close menu' }).click()
@@ -1919,9 +1922,7 @@ const showing = (page: Page) =>
  */
 const focused = (page: Page) =>
   expect
-    .poll(() =>
-      page.evaluate(() => document.activeElement?.classList.contains('pswp') ?? false),
-    )
+    .poll(() => page.evaluate(() => document.activeElement?.classList.contains('pswp') ?? false))
     .toBe(true)
 
 test('the viewer moves between photographs with the arrow keys, and wraps', async ({ page }) => {
@@ -1962,7 +1963,9 @@ test('the viewer zooms, and does it from the keyboard', async ({ page }) => {
   const scale = await page
     .locator('.pswp__item[aria-hidden="false"] img')
     .first()
-    .evaluate((image) => image.getBoundingClientRect().width / (image as HTMLImageElement).naturalWidth)
+    .evaluate(
+      (image) => image.getBoundingClientRect().width / (image as HTMLImageElement).naturalWidth,
+    )
   expect(scale).toBeLessThan(1)
 
   await page.keyboard.press('-')
@@ -2060,14 +2063,15 @@ test("the viewer's controls actually draw their glyphs", async ({ page }) => {
  * active — so the drawn outline square disappeared the instant a pointer touched it. The frame
  * draws one arrow, in one state.
  */
-test('the viewer\'s controls do not change under a pointer', async ({ page }) => {
+test("the viewer's controls do not change under a pointer", async ({ page }) => {
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
   await page.locator('.pswp--ui-visible').waitFor()
 
   const next = page.locator('.pswp__button--arrow--next')
   const at = async () => {
     const style = await next.evaluate((button) => {
-      const { borderTopWidth, boxShadow, backgroundColor, color, opacity } = getComputedStyle(button)
+      const { borderTopWidth, boxShadow, backgroundColor, color, opacity } =
+        getComputedStyle(button)
       return JSON.stringify({ borderTopWidth, boxShadow, backgroundColor, color, opacity })
     })
     return style
@@ -2205,7 +2209,10 @@ test('the gallery arrows page the photographs, and the set loops', async ({ page
   await expect(thumbnail(1)).toHaveAttribute('aria-current', 'true')
 
   // The photograph still stops at the width it is drawn at, rather than following the rail.
-  const box = await page.getByRole('button', { name: /open full screen$/ }).first().boundingBox()
+  const box = await page
+    .getByRole('button', { name: /open full screen$/ })
+    .first()
+    .boundingBox()
   expect(Math.round(box!.width), 'the photograph is not the drawn 850px').toBe(850)
   expect(Math.round(box!.height), 'the photograph is not square').toBe(850)
 })
@@ -2281,10 +2288,9 @@ test('the gallery does not advance under reduced motion', async ({ page }) => {
  */
 test('the gallery loops when it is swiped, not only when it is paged', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(
-    `${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`,
-    { waitUntil: 'load' },
-  )
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
 
   const dot = (n: number) => page.getByRole('button', { name: `Show photograph ${n} of 5` })
   const track = page.locator('ul[aria-label^="Photographs of"]')
@@ -2361,13 +2367,84 @@ test('the gallery steps off a loop copy without animating back', async ({ page }
 /** However many times a photograph is painted, it is one thing to a screen reader and one tab stop. */
 test('the gallery loop copies are hidden from assistive technology', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(
-    `${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`,
-    { waitUntil: 'load' },
-  )
+  await page.goto(`${STORYBOOK}/iframe.html?id=commerce-productgallery--default&viewMode=story`, {
+    waitUntil: 'load',
+  })
 
   await expect(page.locator('ul[aria-label^="Photographs of"] > li')).toHaveCount(7)
   // `inert` and `aria-hidden` take the copies out of the accessibility tree, so the role-based
   // count is the real five.
   await expect(page.getByRole('button', { name: /open full screen$/ })).toHaveCount(5)
+})
+
+/**
+ * `OtpInput` (spec 004, FR-043, contracts/ui-kit-additions.md O1–O3).
+ *
+ * The paste behaviour is the reason this component exists rather than six inputs in a row, and it
+ * is invisible to the render sweep above: a control that pastes one character into box four looks
+ * perfectly fine in a screenshot. These press the keys.
+ */
+test.describe('OtpInput', () => {
+  const STORY = `${STORYBOOK}/iframe.html?id=ui-otpinput--interactive&viewMode=story`
+
+  async function boxes(page: Page) {
+    return page.getByRole('textbox')
+  }
+
+  test('a paste into ANY box fills the whole code', async ({ page }) => {
+    await page.goto(STORY)
+    const inputs = await boxes(page)
+
+    // Focus the FOURTH box, which is where a per-box paste handler would take a single character.
+    await inputs.nth(3).click()
+    await page.evaluate(() => navigator.clipboard.writeText('482913')).catch(() => {})
+
+    // Dispatch the paste directly — clipboard permissions are not portable across browsers here,
+    // and what is under test is the component's handler, not the OS clipboard.
+    await inputs.nth(3).evaluate((el) => {
+      const data = new DataTransfer()
+      data.setData('text', '482913')
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true }))
+    })
+
+    await expect(page.getByText('Value: 482913')).toBeVisible()
+  })
+
+  test('a pasted sentence still yields the six digits', async ({ page }) => {
+    await page.goto(STORY)
+    const inputs = await boxes(page)
+    await inputs.first().click()
+
+    await inputs.first().evaluate((el) => {
+      const data = new DataTransfer()
+      data.setData('text', 'Your Aurum code is 482913 — it expires in 10 minutes.')
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true }))
+    })
+
+    await expect(page.getByText('Value: 482913')).toBeVisible()
+  })
+
+  test('typing advances, and backspace walks back clearing as it goes', async ({ page }) => {
+    await page.goto(STORY)
+    const inputs = await boxes(page)
+
+    await inputs.first().click()
+    await page.keyboard.type('482')
+    await expect(page.getByText('Value: 482')).toBeVisible()
+
+    // Focus should have advanced to the fourth box; backspace there clears the third.
+    await page.keyboard.press('Backspace')
+    await expect(page.getByText('Value: 48')).toBeVisible()
+  })
+
+  test('the group is one tab stop, not six', async ({ page }) => {
+    await page.goto(STORY)
+    const inputs = await boxes(page)
+    await expect(inputs).toHaveCount(6)
+
+    // Every box after the first is reachable by arrow key rather than by Tab.
+    await inputs.first().focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(inputs.nth(1)).toBeFocused()
+  })
 })

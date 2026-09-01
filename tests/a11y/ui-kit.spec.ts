@@ -21,6 +21,7 @@ import { expect, test, type Page } from '@playwright/test'
 const STORYBOOK = process.env.STORYBOOK_URL ?? 'http://localhost:6006'
 
 const COMPONENTS = [
+  'Account/AuthCard',
   'UI/Accordion',
   'UI/Breadcrumbs',
   'UI/Button',
@@ -39,7 +40,9 @@ const COMPONENTS = [
   'UI/Link',
   'UI/Menu',
   'UI/MenuOption',
+  'UI/Modal',
   'UI/NavLink',
+  'UI/OtpInput',
   'UI/Pagination',
   'UI/QuantityStepper',
   'UI/RangeSlider',
@@ -207,7 +210,11 @@ const RESPONSIVE_STORIES: {
     widths: ['mobile', 'tablet'],
   },
   { title: 'UI/CategoryCard', id: 'ui-categorycard--default', widths: ['mobile', 'tablet'] },
-  { title: 'Commerce/ProductCard', id: 'commerce-productcard--default', widths: ['mobile', 'tablet'] },
+  {
+    title: 'Commerce/ProductCard',
+    id: 'commerce-productcard--default',
+    widths: ['mobile', 'tablet'],
+  },
   {
     title: 'Sections/JewelryCarousel',
     id: 'sections-jewelrycarousel--desktop',

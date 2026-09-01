@@ -161,22 +161,22 @@ arrives blocks every story in this feature.
 
 ### Kit
 
-- [ ] T443 Build `Modal` in `src/components/ui/modal/` on the **existing** `useOverlay` hook, which
+- [X] T443 Build `Modal` in `src/components/ui/modal/` on the **existing** `useOverlay` hook, which
       already implements the focus trap, initial and restored focus, Escape, scroll lock and inert
       backgrounds. Reimplement none of it. Full-bleed below the `md` breakpoint (FR-042). Ship with
       stories; add the story titles to `tests/a11y/ui-kit.spec.ts`
       ([contracts/ui-kit-additions.md](./contracts/ui-kit-additions.md) M1–M7)
-- [ ] T444 [P] Build `OtpInput` in `src/components/ui/otp-input/` — nodes `428:11924`, `429:12404`.
+- [X] T444 [P] Build `OtpInput` in `src/components/ui/otp-input/` — nodes `428:11924`, `429:12404`.
       **The paste handler is on the group, not per box**: ⌘V/Ctrl+V anywhere fills all six and fires
       `onComplete`. `autocomplete="one-time-code"` on the **first** box only. Backspace, arrows,
       Home/End; one tab stop out of the group. One size, not the two drawn (FR-048). Ship with
       stories (contract O1–O13)
-- [ ] T445 [P] Story-level behaviour tests in `tests/stories/ui-kit.spec.ts` for `OtpInput` — paste
+- [X] T445 [P] Story-level behaviour tests in `tests/stories/ui-kit.spec.ts` for `OtpInput` — paste
       into box four fills all six; a `Your code is 482913` paste yields `482913`; backspace walks
       back. These are the behaviours that break silently
-- [ ] T446 Export `Modal` and `OtpInput` from `src/components/ui/index.ts`, the kit's single entry
+- [X] T446 Export `Modal` and `OtpInput` from `src/components/ui/index.ts`, the kit's single entry
       point
-- [ ] T447 [P] Build `AuthCard` in `src/components/account/auth-card/` — the centred 500px column
+- [X] T447 [P] Build `AuthCard` in `src/components/account/auth-card/` — the centred 500px column
       every auth screen shares (heading, subheading, form slot, footer link), responsive rather than
       fixed to the drawn width
 
