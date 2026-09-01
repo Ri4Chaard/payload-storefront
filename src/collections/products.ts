@@ -36,6 +36,35 @@ const adjustInventory = (field: Field): Field => {
 const isInventory = (field: Field) => field.type === 'number' && field.name === 'inventory'
 
 /**
+ * The stones table under "Available variants" shows the PRICE by default.
+ *
+ * Left alone, the join renders whatever the variants collection nominates, which is its title — so
+ * the one column that matters most is the one the owner has to add by hand, on every visit, for
+ * every product. A stone exists to carry a price; a table of stones that does not show prices
+ * cannot answer "is this ladder right" at a glance, which is the whole reason to look at it.
+ *
+ * Set on the JOIN rather than on the variants collection deliberately. That collection's `admin` is
+ * load-bearing — the plugin sets `group: false` to keep it out of the navigation, and a variant
+ * created outside a product throws before its form renders (see `variants.ts`). Configuring the
+ * field touches none of that.
+ *
+ * `defaultColumns` is a default, not a lock: the owner can still add or remove columns from the
+ * table's own control. This decides what they see before they touch anything.
+ */
+const adjustVariantsJoin = (field: Field): Field => {
+  if (field.type !== 'join' || field.name !== 'variants') return field
+
+  return {
+    ...field,
+    admin: {
+      ...field.admin,
+      // The stone, what it costs, and how many there are — the three things a variant IS.
+      defaultColumns: ['title', 'priceInUSD', 'inventory'],
+    },
+  }
+}
+
+/**
  * A piece of jewelry.
  *
  * The e-commerce plugin's own `products` collection is **nearly empty** — it contributes
@@ -266,7 +295,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
           description:
             'The price, and the stones a customer chooses between. Add stones under "Available variants" — each carries its own price and quantity.',
           // Everything the plugin contributes except `inventory`, which is in the sidebar above.
-          fields: defaultCollection.fields.filter((field) => !isInventory(field)),
+          fields: defaultCollection.fields.filter((field) => !isInventory(field)).map(adjustVariantsJoin),
         },
 
         seoTab(),
