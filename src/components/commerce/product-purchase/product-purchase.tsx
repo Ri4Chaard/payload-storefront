@@ -42,6 +42,8 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
   sizes: SizeOption[]
   /** The piece as a whole. An unavailable one says so in text, not in colour (FR-040). */
   available: boolean
+  /** The ceiling for a piece with no stones. With stones, each stone carries its own. */
+  maxQuantity?: number
 }
 
 export function ProductPurchase({
@@ -51,15 +53,33 @@ export function ProductPurchase({
   diamonds,
   sizes,
   available,
+  maxQuantity,
   className,
   ...props
 }: ProductPurchaseProps) {
   const [diamond, setDiamond] = React.useState<number | null>(null)
   const [size, setSize] = React.useState<string | null>(null)
-  const [quantity, setQuantity] = React.useState(1)
+  const [wanted, setWanted] = React.useState(1)
 
   const chosen = diamonds.find((option) => option.id === diamond) ?? null
   const shown = chosen ? chosen.price : fromPrice ? `From ${fromPrice}` : price
+
+  /**
+   * How high the stepper may go: the chosen stone's ceiling, or the piece's own where there are no
+   * stones. Undefined for anything made to order, which has no ceiling to reach.
+   */
+  const ceiling = chosen ? chosen.maxQuantity : maxQuantity
+
+  /**
+   * Clamped on the way OUT rather than corrected in an effect.
+   *
+   * The ceiling moves when the stone does — three of one, twenty of another — so a quantity stored
+   * as final would need watching and rewriting every time. Storing what was ASKED FOR and capping
+   * it at the moment of use means the number can never exceed the stock even for a frame, and a
+   * visitor who wanted five, moved to a stone with two, then moved to one with ten, gets their five
+   * back rather than being silently left at two.
+   */
+  const quantity = ceiling === undefined ? wanted : Math.min(wanted, ceiling)
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
@@ -96,10 +116,11 @@ export function ProductPurchase({
       <div className="mt-3 flex items-center gap-3 md:mt-4 md:gap-4 xl:mt-5 xl:gap-5">
         <QuantityStepper
           value={quantity}
-          onChange={setQuantity}
+          onChange={setWanted}
           min={1}
-          // No ceiling: `ProductDetail` deliberately carries no inventory count, so there is no
-          // stock-tracked maximum to enforce here. It arrives with the seam in 004.
+          // Absent for a made-to-order piece, which is exactly how `QuantityStepper` reads "no
+          // ceiling" — it stops disabling the plus and stops clamping.
+          {...(ceiling === undefined ? {} : { max: ceiling })}
           label="pieces"
           disabled={!available}
           className="shrink-0"

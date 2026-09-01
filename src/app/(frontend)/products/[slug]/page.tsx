@@ -124,6 +124,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               diamonds={product.diamondOptions}
               sizes={product.sizes}
               available={product.available}
+              maxQuantity={product.maxQuantity}
             />
 
             <ProductDetails

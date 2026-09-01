@@ -55,6 +55,17 @@ export interface DiamondOption {
   price: string
   priceMinor: number
   available: boolean
+  /**
+   * The most a customer may order OF THIS STONE. Absent where nothing is counted.
+   *
+   * Not the same thing as `inventory`, which the note at the top of this file keeps out on purpose.
+   * That exclusion is about the AVAILABILITY rule: a component that can see a stock number will
+   * eventually compare it to zero, and then "is this orderable" lives in two places. This answers a
+   * different question — how high the quantity stepper may go — which no boolean can express and
+   * which nothing else in the app decides. `available` remains the only word on whether it can be
+   * bought at all.
+   */
+  maxQuantity?: number
   image?: CatalogImage
 }
 
@@ -85,6 +96,11 @@ export interface ProductDetail extends ProductSummary {
    */
   priceMinor: number
   currency: string
+  /**
+   * The ceiling for a piece that has no stones — the same question `DiamondOption.maxQuantity`
+   * answers for one that does. Absent where the piece is made to order, which has no ceiling.
+   */
+  maxQuantity?: number
   description: string | null
   gallery: CatalogImage[]
   /** Serialised from the `details` rich text. `null` where the owner left it empty. */
@@ -107,6 +123,8 @@ export interface CategorySummary {
   title: string
   subtitle: string | null
   href: string
+  /** The tile's photograph on the home page. `null` where the owner has not set one. */
+  image: CatalogImage | null
 }
 
 /** The shop global — the two accordions every product page repeats, and the listing fallback. */

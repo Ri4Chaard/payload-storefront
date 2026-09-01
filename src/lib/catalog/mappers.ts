@@ -129,6 +129,16 @@ export function isVariantAvailable(variant: Variant): boolean {
   return (variant.inventory ?? 0) > 0
 }
 
+/**
+ * How many of a thing a customer may order, or `undefined` for no ceiling.
+ *
+ * Zero is deliberately NOT returned as a ceiling: a stepper capped at zero is a control stuck below
+ * its own minimum, and something that cannot be bought at all is already answered by `available`.
+ */
+function ceiling(count: number | null | undefined): number | undefined {
+  return typeof count === 'number' && count > 0 ? count : undefined
+}
+
 function productVariants(product: Product): Variant[] {
   if (!product.enableVariants) return []
   return (product.variants?.docs ?? []).filter(
@@ -198,6 +208,8 @@ function toDiamondOption(variant: Variant): DiamondOption {
     id: variant.id,
     label: label === '' ? (variant.title ?? `Option ${variant.id}`) : label,
     price: formatPrice(priceMinor),
+    // A stone always counts: a variant carries a number, and there is no made-to-order flag on one.
+    ...(ceiling(variant.inventory) === undefined ? {} : { maxQuantity: ceiling(variant.inventory) }),
     priceMinor,
     available: isVariantAvailable(variant),
     ...(image ? { image } : {}),
@@ -233,6 +245,12 @@ export function toProductDetail(product: Product): ProductDetail {
     categorySlug: category.slug,
     priceMinor: lowestPriceMinor(product),
     currency: CATALOG_CURRENCY,
+    // Only for a piece with no stones, and only when it is counted. With stones the ceiling belongs
+    // to whichever one is chosen, and a product-level number would contradict it.
+    ...(diamondOptions.length === 0 && product.availability === 'stock-tracked' &&
+    ceiling(product.inventory) !== undefined
+      ? { maxQuantity: ceiling(product.inventory) }
+      : {}),
     description: product.description ?? null,
     gallery: summary.images,
     detailsHtml: html(product.details),
@@ -258,6 +276,7 @@ export function toCategorySummary(category: Category): CategorySummary {
     title: category.title,
     subtitle: category.subtitle ?? null,
     href: categoryHref(category.slug),
+    image: toCatalogImage(category.image),
   }
 }
 
