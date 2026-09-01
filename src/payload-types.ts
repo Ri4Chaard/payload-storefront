@@ -75,6 +75,7 @@ export interface Config {
     collections: Collection;
     sizes: Size;
     attributes: Attribute;
+    'verification-codes': VerificationCode;
     addresses: Address;
     variants: Variant;
     variantTypes: VariantType;
@@ -102,6 +103,7 @@ export interface Config {
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     sizes: SizesSelect<false> | SizesSelect<true>;
     attributes: AttributesSelect<false> | AttributesSelect<true>;
+    'verification-codes': VerificationCodesSelect<false> | VerificationCodesSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -119,9 +121,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     shop: Shop;
+    account: Account;
   };
   globalsSelect: {
     shop: ShopSelect<false> | ShopSelect<true>;
+    account: AccountSelect<false> | AccountSelect<true>;
   };
   locale: null;
   widgets: {
@@ -219,9 +223,29 @@ export interface Admin {
 export interface Customer {
   id: number;
   /**
-   * How the seller addresses them in the conversation.
+   * Set by the customer on their profile.
+   */
+  firstName?: string | null;
+  /**
+   * Set by the customer on their profile.
+   */
+  lastName?: string | null;
+  /**
+   * Composed from the first and last name by a hook. Kept because the admin list, the title and the seller’s view of a customer were all built on it.
    */
   name?: string | null;
+  /**
+   * Opt-in, and off unless the customer said otherwise. Turning this off must never stop a verification code or a password-change notice — those are transactional and travel a different path entirely.
+   */
+  marketingEmail?: boolean | null;
+  /**
+   * Written by a hook, which discards whatever the request supplied. This is the evidence that consent was given or withdrawn, and when.
+   */
+  marketingEmailUpdatedAt?: string | null;
+  /**
+   * Written by the same hook. Where the current choice was made.
+   */
+  marketingEmailSource?: ('registration' | 'profile') | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -229,6 +253,8 @@ export interface Customer {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -449,6 +475,48 @@ export interface Attribute {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verification-codes".
+ */
+export interface VerificationCode {
+  id: number;
+  /**
+   * The address the code was issued to. Every lookup and every throttle is keyed on this rather than on the customer, so a code can still be refused after the account it belonged to is purged.
+   */
+  email: string;
+  /**
+   * Convenience for support. Never the lookup key — see the email field.
+   */
+  customer?: (number | null) | Customer;
+  /**
+   * Part of every lookup. A code minted to verify an address must never be able to complete a password reset.
+   */
+  purpose: 'verify-email' | 'reset-password';
+  /**
+   * The hash of the six digits. The digits themselves are never stored.
+   */
+  codeHash: string;
+  /**
+   * The verification or reset token Payload minted. This is what the code is an alias for.
+   */
+  token: string;
+  expiresAt: string;
+  /**
+   * The code is burned once this reaches the configured limit.
+   */
+  attempts: number;
+  /**
+   * Set on success. A code is single-use.
+   */
+  consumedAt?: string | null;
+  /**
+   * Set when a newer code is issued for the same address and purpose.
+   */
+  supersededAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "addresses".
  */
 export interface Address {
@@ -458,53 +526,273 @@ export interface Address {
   firstName?: string | null;
   lastName?: string | null;
   company?: string | null;
-  addressLine1?: string | null;
+  addressLine1: string;
+  /**
+   * Optional. The second line of the street address.
+   */
   addressLine2?: string | null;
-  city?: string | null;
+  /**
+   * Optional. Apartment, suite, unit, floor — whatever gets the courier to the door.
+   */
+  apartment?: string | null;
+  city: string;
   state?: string | null;
-  postalCode?: string | null;
+  postalCode: string;
   country:
-    | 'US'
-    | 'GB'
-    | 'CA'
+    | 'AF'
+    | 'AX'
+    | 'AL'
+    | 'DZ'
+    | 'AS'
+    | 'AD'
+    | 'AO'
+    | 'AI'
+    | 'AQ'
+    | 'AG'
+    | 'AR'
+    | 'AM'
+    | 'AW'
     | 'AU'
     | 'AT'
+    | 'AZ'
+    | 'BS'
+    | 'BH'
+    | 'BD'
+    | 'BB'
+    | 'BY'
     | 'BE'
+    | 'BZ'
+    | 'BJ'
+    | 'BM'
+    | 'BT'
+    | 'BO'
+    | 'BA'
+    | 'BW'
+    | 'BV'
     | 'BR'
+    | 'IO'
+    | 'VG'
+    | 'BN'
     | 'BG'
+    | 'BF'
+    | 'BI'
+    | 'KH'
+    | 'CM'
+    | 'CA'
+    | 'CV'
+    | 'BQ'
+    | 'KY'
+    | 'CF'
+    | 'TD'
+    | 'CL'
+    | 'CN'
+    | 'CX'
+    | 'CC'
+    | 'CO'
+    | 'KM'
+    | 'CG'
+    | 'CD'
+    | 'CK'
+    | 'CR'
+    | 'CI'
+    | 'HR'
+    | 'CU'
+    | 'CW'
     | 'CY'
     | 'CZ'
     | 'DK'
+    | 'DJ'
+    | 'DM'
+    | 'DO'
+    | 'EC'
+    | 'EG'
+    | 'SV'
+    | 'GQ'
+    | 'ER'
     | 'EE'
+    | 'SZ'
+    | 'ET'
+    | 'FK'
+    | 'FO'
+    | 'FJ'
     | 'FI'
     | 'FR'
+    | 'GF'
+    | 'PF'
+    | 'TF'
+    | 'GA'
+    | 'GM'
+    | 'GE'
     | 'DE'
+    | 'GH'
+    | 'GI'
     | 'GR'
+    | 'GL'
+    | 'GD'
+    | 'GP'
+    | 'GU'
+    | 'GT'
+    | 'GG'
+    | 'GN'
+    | 'GW'
+    | 'GY'
+    | 'HT'
+    | 'HM'
+    | 'HN'
     | 'HK'
     | 'HU'
+    | 'IS'
     | 'IN'
+    | 'ID'
+    | 'IR'
+    | 'IQ'
     | 'IE'
+    | 'IM'
+    | 'IL'
     | 'IT'
+    | 'JM'
     | 'JP'
+    | 'JE'
+    | 'JO'
+    | 'KZ'
+    | 'KE'
+    | 'KI'
+    | 'KW'
+    | 'KG'
+    | 'LA'
     | 'LV'
+    | 'LB'
+    | 'LS'
+    | 'LR'
+    | 'LY'
+    | 'LI'
     | 'LT'
     | 'LU'
+    | 'MO'
+    | 'MG'
+    | 'MW'
     | 'MY'
+    | 'MV'
+    | 'ML'
     | 'MT'
+    | 'MH'
+    | 'MQ'
+    | 'MR'
+    | 'MU'
+    | 'YT'
     | 'MX'
+    | 'FM'
+    | 'MD'
+    | 'MC'
+    | 'MN'
+    | 'ME'
+    | 'MS'
+    | 'MA'
+    | 'MZ'
+    | 'MM'
+    | 'NA'
+    | 'NR'
+    | 'NP'
     | 'NL'
+    | 'NC'
     | 'NZ'
+    | 'NI'
+    | 'NE'
+    | 'NG'
+    | 'NU'
+    | 'NF'
+    | 'KP'
+    | 'MK'
+    | 'MP'
     | 'NO'
+    | 'OM'
+    | 'PK'
+    | 'PW'
+    | 'PS'
+    | 'PA'
+    | 'PG'
+    | 'PY'
+    | 'PE'
+    | 'PH'
+    | 'PN'
     | 'PL'
     | 'PT'
+    | 'PR'
+    | 'QA'
+    | 'RE'
     | 'RO'
+    | 'RU'
+    | 'RW'
+    | 'WS'
+    | 'SM'
+    | 'ST'
+    | 'SA'
+    | 'SN'
+    | 'RS'
+    | 'SC'
+    | 'SL'
     | 'SG'
+    | 'SX'
     | 'SK'
     | 'SI'
+    | 'SB'
+    | 'SO'
+    | 'ZA'
+    | 'GS'
+    | 'KR'
+    | 'SS'
     | 'ES'
+    | 'LK'
+    | 'BL'
+    | 'SH'
+    | 'KN'
+    | 'LC'
+    | 'MF'
+    | 'PM'
+    | 'VC'
+    | 'SD'
+    | 'SR'
+    | 'SJ'
     | 'SE'
-    | 'CH';
+    | 'CH'
+    | 'SY'
+    | 'TW'
+    | 'TJ'
+    | 'TZ'
+    | 'TH'
+    | 'TL'
+    | 'TG'
+    | 'TK'
+    | 'TO'
+    | 'TT'
+    | 'TN'
+    | 'TR'
+    | 'TM'
+    | 'TC'
+    | 'TV'
+    | 'UM'
+    | 'VI'
+    | 'UG'
+    | 'UA'
+    | 'AE'
+    | 'GB'
+    | 'US'
+    | 'UY'
+    | 'UZ'
+    | 'VU'
+    | 'VA'
+    | 'VE'
+    | 'VN'
+    | 'WF'
+    | 'EH'
+    | 'YE'
+    | 'ZM'
+    | 'ZW';
   phone?: string | null;
+  /**
+   * The address used first at checkout. Exactly one of a customer’s addresses is the default; ticking this one clears the previous.
+   */
+  isDefault?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -752,6 +1040,10 @@ export interface PayloadLockedDocument {
         value: number | Attribute;
       } | null)
     | ({
+        relationTo: 'verification-codes';
+        value: number | VerificationCode;
+      } | null)
+    | ({
         relationTo: 'addresses';
         value: number | Address;
       } | null)
@@ -855,7 +1147,12 @@ export interface AdminsSelect<T extends boolean = true> {
  * via the `definition` "customers_select".
  */
 export interface CustomersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
   name?: T;
+  marketingEmail?: T;
+  marketingEmailUpdatedAt?: T;
+  marketingEmailSource?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -863,6 +1160,8 @@ export interface CustomersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1019,6 +1318,23 @@ export interface AttributesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verification-codes_select".
+ */
+export interface VerificationCodesSelect<T extends boolean = true> {
+  email?: T;
+  customer?: T;
+  purpose?: T;
+  codeHash?: T;
+  token?: T;
+  expiresAt?: T;
+  attempts?: T;
+  consumedAt?: T;
+  supersededAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "addresses_select".
  */
 export interface AddressesSelect<T extends boolean = true> {
@@ -1029,11 +1345,13 @@ export interface AddressesSelect<T extends boolean = true> {
   company?: T;
   addressLine1?: T;
   addressLine2?: T;
+  apartment?: T;
   city?: T;
   state?: T;
   postalCode?: T;
   country?: T;
   phone?: T;
+  isDefault?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1246,6 +1564,140 @@ export interface Shop {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "account".
+ */
+export interface Account {
+  id: number;
+  signInTitle?: string | null;
+  signInSubtitle?: string | null;
+  signInEmailLabel?: string | null;
+  signInPasswordLabel?: string | null;
+  /**
+   * The design reads “Fargot password?”. That is a typo, and this is the correction.
+   */
+  signInForgotLink?: string | null;
+  signInSubmit?: string | null;
+  signInCreatePrompt?: string | null;
+  /**
+   * Shown for a wrong password AND for an address with no account. It must not distinguish between them — saying “no such account” tells an attacker which addresses are registered.
+   */
+  signInFailed?: string | null;
+  signInLocked?: string | null;
+  createTitle?: string | null;
+  createSubtitle?: string | null;
+  createConfirmLabel?: string | null;
+  createSubmit?: string | null;
+  createSignInPrompt?: string | null;
+  /**
+   * The design draws no such control. It is here because marketing email is opt-in, so consent has to be asked for rather than assumed — and it is never a condition of registering.
+   */
+  createMarketingConsent?: string | null;
+  createPasswordMismatch?: string | null;
+  createPasswordTooWeak?: string | null;
+  verifyTitle?: string | null;
+  verifySubtitle?: string | null;
+  /**
+   * The accessible name for the six boxes, read as one control.
+   */
+  verifyCodeLabel?: string | null;
+  verifySubmit?: string | null;
+  verifyResendPrompt?: string | null;
+  verifyResendSent?: string | null;
+  verifyResendTooSoon?: string | null;
+  codeInvalid?: string | null;
+  /**
+   * Distinct from “invalid” on purpose. Telling someone their code is wrong when it has simply timed out is how they get stuck retyping it.
+   */
+  codeExpired?: string | null;
+  codeAlreadyUsed?: string | null;
+  codeSuperseded?: string | null;
+  codeTooManyAttempts?: string | null;
+  forgotTitle?: string | null;
+  forgotSubtitle?: string | null;
+  forgotSubmit?: string | null;
+  /**
+   * The design reads “Вернуться к авторизации”. The rest of the design is English; this is the translation.
+   */
+  forgotBackLink?: string | null;
+  /**
+   * Shown whether or not the address is registered, and it must stay that way. A message that differs turns this form into a way to discover who has an account.
+   */
+  forgotSent?: string | null;
+  resetCodeTitle?: string | null;
+  resetCodeSubtitle?: string | null;
+  resetTitle?: string | null;
+  resetSubtitle?: string | null;
+  /**
+   * The design reads “Новый пароль”.
+   */
+  resetNewLabel?: string | null;
+  /**
+   * The design reads “Повторите пароль”.
+   */
+  resetConfirmLabel?: string | null;
+  /**
+   * The design reads “СОХРАНИТЬ”.
+   */
+  resetSubmit?: string | null;
+  resetDone?: string | null;
+  successTitle?: string | null;
+  successBody?: string | null;
+  successAction?: string | null;
+  profileTitle?: string | null;
+  profileEmailLabel?: string | null;
+  profileNameLabel?: string | null;
+  profileNameEmpty?: string | null;
+  profileAddressesLabel?: string | null;
+  profileAddressesEmpty?: string | null;
+  profileMarketingLabel?: string | null;
+  profileMarketingEmailToggle?: string | null;
+  /**
+   * One label, used everywhere. The design says “Security” in one frame and “safety” in three others; this settles it.
+   */
+  profileSecurityLabel?: string | null;
+  profileChangePassword?: string | null;
+  profileSignOut?: string | null;
+  profileSaveFailed?: string | null;
+  nameModalTitle?: string | null;
+  nameModalFirst?: string | null;
+  nameModalLast?: string | null;
+  addressModalTitle?: string | null;
+  addressModalEditTitle?: string | null;
+  addressCountryLabel?: string | null;
+  addressLine1Label?: string | null;
+  addressLine2Label?: string | null;
+  addressApartmentLabel?: string | null;
+  addressCityLabel?: string | null;
+  addressPostcodeLabel?: string | null;
+  addressDefaultLabel?: string | null;
+  addressDeleteConfirm?: string | null;
+  changePasswordTitle?: string | null;
+  changePasswordCurrent?: string | null;
+  changePasswordWrong?: string | null;
+  modalCancel?: string | null;
+  modalSave?: string | null;
+  modalClose?: string | null;
+  verifyEmailSubject?: string | null;
+  /**
+   * The code is inserted beneath this text.
+   */
+  verifyEmailBody?: string | null;
+  resetEmailSubject?: string | null;
+  resetEmailBody?: string | null;
+  passwordChangedSubject?: string | null;
+  /**
+   * Transactional, and sent regardless of marketing preferences — it is how someone finds out their account was taken.
+   */
+  passwordChangedBody?: string | null;
+  /**
+   * Pre-selected in the address form. The design draws “United Kingdom”, which is placeholder content. Two letters, ISO 3166-1 alpha-2.
+   */
+  defaultCountry?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "shop_select".
  */
 export interface ShopSelect<T extends boolean = true> {
@@ -1255,6 +1707,98 @@ export interface ShopSelect<T extends boolean = true> {
   warranty?: T;
   delivery?: T;
   listingSubtitle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "account_select".
+ */
+export interface AccountSelect<T extends boolean = true> {
+  signInTitle?: T;
+  signInSubtitle?: T;
+  signInEmailLabel?: T;
+  signInPasswordLabel?: T;
+  signInForgotLink?: T;
+  signInSubmit?: T;
+  signInCreatePrompt?: T;
+  signInFailed?: T;
+  signInLocked?: T;
+  createTitle?: T;
+  createSubtitle?: T;
+  createConfirmLabel?: T;
+  createSubmit?: T;
+  createSignInPrompt?: T;
+  createMarketingConsent?: T;
+  createPasswordMismatch?: T;
+  createPasswordTooWeak?: T;
+  verifyTitle?: T;
+  verifySubtitle?: T;
+  verifyCodeLabel?: T;
+  verifySubmit?: T;
+  verifyResendPrompt?: T;
+  verifyResendSent?: T;
+  verifyResendTooSoon?: T;
+  codeInvalid?: T;
+  codeExpired?: T;
+  codeAlreadyUsed?: T;
+  codeSuperseded?: T;
+  codeTooManyAttempts?: T;
+  forgotTitle?: T;
+  forgotSubtitle?: T;
+  forgotSubmit?: T;
+  forgotBackLink?: T;
+  forgotSent?: T;
+  resetCodeTitle?: T;
+  resetCodeSubtitle?: T;
+  resetTitle?: T;
+  resetSubtitle?: T;
+  resetNewLabel?: T;
+  resetConfirmLabel?: T;
+  resetSubmit?: T;
+  resetDone?: T;
+  successTitle?: T;
+  successBody?: T;
+  successAction?: T;
+  profileTitle?: T;
+  profileEmailLabel?: T;
+  profileNameLabel?: T;
+  profileNameEmpty?: T;
+  profileAddressesLabel?: T;
+  profileAddressesEmpty?: T;
+  profileMarketingLabel?: T;
+  profileMarketingEmailToggle?: T;
+  profileSecurityLabel?: T;
+  profileChangePassword?: T;
+  profileSignOut?: T;
+  profileSaveFailed?: T;
+  nameModalTitle?: T;
+  nameModalFirst?: T;
+  nameModalLast?: T;
+  addressModalTitle?: T;
+  addressModalEditTitle?: T;
+  addressCountryLabel?: T;
+  addressLine1Label?: T;
+  addressLine2Label?: T;
+  addressApartmentLabel?: T;
+  addressCityLabel?: T;
+  addressPostcodeLabel?: T;
+  addressDefaultLabel?: T;
+  addressDeleteConfirm?: T;
+  changePasswordTitle?: T;
+  changePasswordCurrent?: T;
+  changePasswordWrong?: T;
+  modalCancel?: T;
+  modalSave?: T;
+  modalClose?: T;
+  verifyEmailSubject?: T;
+  verifyEmailBody?: T;
+  resetEmailSubject?: T;
+  resetEmailBody?: T;
+  passwordChangedSubject?: T;
+  passwordChangedBody?: T;
+  defaultCountry?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

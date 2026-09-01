@@ -59,18 +59,18 @@ Read before starting.
 **Purpose**: Get the transport working before anything depends on it. A verification code that never
 arrives blocks every story in this feature.
 
-- [ ] T400 Install `@payloadcms/email-resend@3.88.0` — exact version, not a range. Every
+- [X] T400 Install `@payloadcms/email-resend@3.88.0` — exact version, not a range. Every
       `@payloadcms/*` package in this repo upgrades as a set against `payload@3.88.0` (research R1)
-- [ ] T401 [P] Add `RESEND_API_KEY` and `EMAIL_FROM_ADDRESS` to the `REQUIRED` tuple in `src/env.ts`,
+- [X] T401 [P] Add `RESEND_API_KEY` and `EMAIL_FROM_ADDRESS` to the `REQUIRED` tuple in `src/env.ts`,
       so a missing one fails startup naming it rather than at the first send
-- [ ] T402 [P] Document both variables in `.env.example` with the same comment style as the existing
+- [X] T402 [P] Document both variables in `.env.example` with the same comment style as the existing
       entries, including the `onboarding@resend.dev` note for local development
-- [ ] T403 Configure `resendAdapter` as `email` in `src/payload.config.ts`, reading from `env`
-- [ ] T404 [P] Create `src/lib/auth/config.ts` — code expiry (10 min), resend cooldown (60 s), code
+- [X] T403 Configure `resendAdapter` as `email` in `src/payload.config.ts`, reading from `env`
+- [X] T404 [P] Create `src/lib/auth/config.ts` — code expiry (10 min), resend cooldown (60 s), code
       attempt limit (5), login attempt limit (10), lockout (15 min), unverified purge age (7 days).
       Named exports with documented defaults; these are configuration, not literals scattered in code
       (R14)
-- [ ] T405 Prove the transport: trigger one send and confirm it arrives. Do this **before** T430 —
+- [ ] T405 ⛔ **BLOCKED — needs a real `RESEND_API_KEY`.** Prove the transport: trigger one send and confirm it arrives. Do this **before** T430 —
       debugging a template is a different problem from debugging a domain that is not verified
 
 **Checkpoint**: mail leaves the application and arrives in an inbox.
@@ -84,44 +84,44 @@ arrives blocks every story in this feature.
 
 ### Schema
 
-- [ ] T410 Add `isAuthenticated` to `src/lib/access.ts` and pass it in the plugin's `access` block in
+- [X] T410 Add `isAuthenticated` to `src/lib/access.ts` and pass it in the plugin's `access` block in
       `src/payload.config.ts`. Closes the live omission from R7 — the plugin's addresses collection
       sets `create: access.isAuthenticated` and we have never passed it
-- [ ] T411 [P] Create `src/lib/countries.ts` — the ISO 3166-1 alpha-2 code list, with labels from
+- [X] T411 [P] Create `src/lib/countries.ts` — the ISO 3166-1 alpha-2 code list, with labels from
       `Intl.DisplayNames` rather than a hardcoded English list. No new dependency (R6)
-- [ ] T412 [P] Create `src/fields/address-fields.ts` — an `addressFields` override adding `apartment`
+- [X] T412 [P] Create `src/fields/address-fields.ts` — an `addressFields` override adding `apartment`
       (optional) and `isDefault`, and marking `addressLine1`, `city` and `postalCode` required.
       `apartment` stays **optional** despite the design's error frame flagging it red (FR-030)
-- [ ] T413 Configure `addresses` in `src/payload.config.ts`: `addressFields` from T412,
+- [X] T413 Configure `addresses` in `src/payload.config.ts`: `addressFields` from T412,
       `supportedCountries` from T411, and an `addressesCollectionOverride` carrying the
       default-address hooks (T521 fills the hooks; wire the seam here). Replaces the current
       `addresses: false`, which never disabled anything
-- [ ] T414 Create `src/collections/verification-codes.ts` — the only genuinely new collection.
+- [X] T414 Create `src/collections/verification-codes.ts` — the only genuinely new collection.
       `email` (indexed), `customer`, `purpose`, `codeHash`, `token`, `expiresAt`, `attempts`,
       `consumedAt`, `supersededAt`. **Every access function returns `false`** and
       `admin.hidden: true`: it holds live credentials and nothing reaches it through any API
       ([data-model.md](./data-model.md))
-- [ ] T415 Extend `src/collections/customers.ts` auth config — `verify`, `forgotPassword`,
+- [X] T415 Extend `src/collections/customers.ts` auth config — `verify`, `forgotPassword`,
       `maxLoginAttempts: 10`, `lockTime: 900_000`, `tokenExpiration: 2_592_000`. Payload's default
       token expiry of 7200s would sign customers out every two hours and fail FR-012 outright
-- [ ] T416 In `src/collections/customers.ts`, change `access.create` from `isAdmin` to `publicAccess` and update the
+- [X] T416 In `src/collections/customers.ts`, change `access.create` from `isAdmin` to `publicAccess` and update the
       collection's doc comment — it currently says registration is "deliberately absent … those are
       the customer accounts spec". This is that spec; the comment should say so
-- [ ] T417 [P] Add customer fields in `src/collections/customers.ts` — `firstName`, `lastName`, `marketingEmail` (defaults **false**,
+- [X] T417 [P] Add customer fields in `src/collections/customers.ts` — `firstName`, `lastName`, `marketingEmail` (defaults **false**,
       FR-036), `marketingEmailUpdatedAt`, `marketingEmailSource`. The last two are
       `update: () => false` for everyone: consent evidence a customer can set from a form post is
       evidence of nothing
-- [ ] T418 Add the `beforeChange` hook in `src/collections/customers.ts` — recompose the existing `name` from
+- [X] T418 Add the `beforeChange` hook in `src/collections/customers.ts` — recompose the existing `name` from
       `firstName`/`lastName` so `useAsTitle` and `defaultColumns` keep working, and stamp
       `marketingEmailUpdatedAt`/`marketingEmailSource` only when `marketingEmail` actually changes
       value (FR-034)
-- [ ] T419 [P] Create `src/globals/account.ts` — every customer-visible string, grouped by screen
+- [X] T419 [P] Create `src/globals/account.ts` — every customer-visible string, grouped by screen
       (`signIn`, `createAccount`, `verifyEmail`, `forgotPassword`, `resetPassword`,
       `registrationSuccess`, `profile`, `modals`, `emails`, `defaults`). **Defaults are the corrected
       English**: the Russian strings translated, `Forgot password?` spelled correctly, and one label
       for the Security row (FR-047, FR-049)
-- [ ] T420 Register `VerificationCodes` and the `Account` global in `src/payload.config.ts`
-- [ ] T421 Generate ONE migration covering T412–T420, run `pnpm generate:types`, and commit both in
+- [X] T420 Register `VerificationCodes` and the `Account` global in `src/payload.config.ts`
+- [X] T421 Generate ONE migration covering T412–T420, run `pnpm generate:types`, and commit both in
       the same change. Then **test the `down` with a Kazakhstan address saved** — the rollback
       narrows `addresses.country`'s enum, and a row outside the plugin's 40 values is exactly what
       breaks it ([data-model.md](./data-model.md))
@@ -344,7 +344,7 @@ switch the default, delete one.
 - [ ] T520 [US5] Implement the validation state in `src/components/account/address-modal/` — node `525:12889`: required fields marked
       individually, Save **disabled** while any is empty (FR-030). `apartment` is **not** required,
       whatever the error frame draws
-- [ ] T521 [US5] Implement the default-address hooks in `src/fields/address-hooks.ts`, wired through the
+- [X] T521 [US5] Implement the default-address hooks in `src/fields/address-hooks.ts`, wired through the
       `addressesCollectionOverride` seam from T413 — first address becomes default; setting a default clears the previous; deleting the
       default promotes another (FR-031). **In a hook, not the form**: two tabs, the admin panel and a
       future checkout are all writers, and an invariant enforced in one form holds until the second

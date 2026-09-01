@@ -2,6 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { resendAdapter } from '@payloadcms/email-resend'
 import { USD, ecommercePlugin } from '@payloadcms/plugin-ecommerce'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
@@ -16,17 +17,27 @@ import { Customers } from './collections/customers'
 import { Media } from './collections/media'
 import { productsCollectionOverride } from './collections/products'
 import { Sizes } from './collections/sizes'
+import { VerificationCodes } from './collections/verification-codes'
 import { variantsCollectionOverride } from './collections/variants'
-import { env } from './env'
+import { emailFromName, emailOverrideRecipient, env } from './env'
+import { addressFields } from './fields/address-fields'
+import {
+  assignFirstAddressAsDefault,
+  clearOtherDefaults,
+  promoteDefaultAfterDelete,
+} from './fields/address-hooks'
+import { Account } from './globals/account'
 import { Shop } from './globals/shop'
 import {
   adminOnlyFieldAccess,
   adminOrPublishedStatus,
   isAdmin,
+  isAuthenticated,
   isCustomer,
   isDocumentOwner,
   publicAccess,
 } from './lib/access'
+import { countryOptions } from './lib/countries'
 import { withPrunedEcommerceTypes } from './lib/ecommerce-schema'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -57,9 +68,18 @@ export default buildConfig({
     // config key for it. That stylesheet loads Tailwind WITHOUT preflight; see it for why.
   },
 
-  collections: [Admins, Customers, Media, Categories, Collections, Sizes, Attributes],
+  collections: [
+    Admins,
+    Customers,
+    Media,
+    Categories,
+    Collections,
+    Sizes,
+    Attributes,
+    VerificationCodes,
+  ],
 
-  globals: [Shop],
+  globals: [Shop, Account],
 
   plugins: [
     withPrunedEcommerceTypes(
@@ -73,6 +93,10 @@ export default buildConfig({
           adminOnlyFieldAccess,
           isCustomer,
           publicAccess,
+          // The addresses collection asks for this by name. Omitted until 004, which left its
+          // `create` resolving to undefined and falling through to Payload's default — the access
+          // by omission Constitution IV forbids (R7).
+          isAuthenticated,
         },
 
         // Required, and the reason `customers` exists this early: the carts collection builds a
@@ -102,12 +126,41 @@ export default buildConfig({
         // a second migration, and enabling these later is purely additive (001/research.md R9).
         orders: false,
         transactions: false,
-        // `addresses: false` is IGNORED at 3.88.0 — `sanitizePluginConfig` rewrites any non-`true`
-        // value into an object of address fields, so the collection is created regardless. Verified
-        // in `dist/utilities/sanitizePluginConfig.js`. The value is left here to record the intent;
-        // the extra table is accepted rather than fought, because stripping the collection back out
-        // would risk the relationships the plugin builds against it.
-        addresses: false,
+        /**
+         * Saved delivery addresses land in spec 004.
+         *
+         * This was `addresses: false`, with a note that the value was ignored. The note was right,
+         * and its consequence was larger than it read: `sanitizePluginConfig` rewrites any
+         * non-`true` value into an object of address fields, so the collection has existed —
+         * modelled, access-controlled and migrated — since 003. The profile page does not create
+         * it, it configures it (004/research.md R5).
+         *
+         * `supportedCountries` is replaced because the plugin's default list has forty entries and
+         * contains neither Kazakhstan nor the UAE — the shop's own market, and the country in the
+         * sample address the design draws (R6).
+         */
+        addresses: {
+          addressFields,
+          supportedCountries: countryOptions(),
+          // Fields go through `addressFields` above; only the FR-031 invariant needs the
+          // collection itself. Appended to the plugin's hooks, never replacing them — its own
+          // `beforeChange` assigns ownership and must still run, and must still run first.
+          addressesCollectionOverride: ({ defaultCollection }) => ({
+            ...defaultCollection,
+            hooks: {
+              ...defaultCollection.hooks,
+              afterChange: [...(defaultCollection.hooks?.afterChange ?? []), clearOtherDefaults],
+              afterDelete: [
+                ...(defaultCollection.hooks?.afterDelete ?? []),
+                promoteDefaultAfterDelete,
+              ],
+              beforeChange: [
+                ...(defaultCollection.hooks?.beforeChange ?? []),
+                assignFirstAddressAsDefault,
+              ],
+            },
+          }),
+        },
         // `payments` omitted entirely — no adapter, no Stripe. The site takes no money.
       }),
     ),
@@ -116,6 +169,27 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: env.PAYLOAD_SECRET,
   serverURL: env.NEXT_PUBLIC_SERVER_URL,
+
+  /**
+   * Transactional mail (spec 004, research R1).
+   *
+   * Payload's own auth operations send through whatever adapter is configured here — so without
+   * one, `verify` and `forgotPassword` cannot send at all, and registration has no way to finish.
+   * That is why this is an adapter rather than a call to Resend from our own code.
+   *
+   * **This is the transactional path only.** Marketing mail never comes through here; it is Resend
+   * audience membership, sent from Resend. The split is what makes "unsubscribing from offers must
+   * not stop your password-reset code" a property of the architecture instead of a conditional
+   * somebody has to remember to write. See `src/lib/email/`.
+   */
+  email: resendAdapter({
+    apiKey: env.RESEND_API_KEY,
+    defaultFromAddress: env.EMAIL_FROM_ADDRESS,
+    defaultFromName: emailFromName,
+    // Unset in production. Present so a staging environment holding restored customer data cannot
+    // mail those customers. See src/env.ts.
+    ...(emailOverrideRecipient ? { overrideRecipientAddress: emailOverrideRecipient } : {}),
+  }),
 
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

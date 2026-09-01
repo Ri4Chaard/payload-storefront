@@ -44,3 +44,18 @@ export const isCustomer: FieldAccess = ({ req }) => req.user?.collection === 'cu
 
 /** Deliberately open. Named rather than inlined so that "public" is a decision with a spelling. */
 export const publicAccess: Access = () => true
+
+/**
+ * Signed in as anybody — staff or customer.
+ *
+ * The plugin's addresses collection asks for this by name (`create: access.isAuthenticated`), and
+ * until spec 004 we never passed it. The key is optional in the plugin's types, so the omission was
+ * silent: `create` resolved to `undefined` and fell through to Payload's default. Constitution IV
+ * forbids exactly that — a collection taking the default must say so deliberately — so the feature
+ * that starts writing addresses is the one that closes it (004/research.md R7).
+ *
+ * Broader than `isCustomer` on purpose. An admin creating an address on a customer's behalf from
+ * the panel is a thing the shop should be able to do; the owner check on read and update is what
+ * keeps one customer out of another's, and that is a different function.
+ */
+export const isAuthenticated: Access = ({ req }) => Boolean(req.user)
