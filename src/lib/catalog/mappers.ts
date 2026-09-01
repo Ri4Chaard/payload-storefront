@@ -62,12 +62,35 @@ function optional<T extends object>(value: number | T | null | undefined): T | n
   return value
 }
 
+/**
+ * Payload writes an ABSOLUTE url — `http://localhost:3000/api/media/file/…` in development, the
+ * deployed origin in production — and the fixtures used to write a relative one. That difference is
+ * the whole of what the swap to the Local API changed downstream, and it matters because
+ * `next/image` treats an absolute src as a REMOTE image: it refuses to load one whose host is not
+ * listed in `images.remotePatterns`, which is what turned every product page into a 500.
+ *
+ * Configuring the host would work and would be wrong. The file is served by this very application —
+ * Payload's own route handler — so calling it remote asks Next to treat same-origin content as
+ * foreign, and pins a hostname into the build that differs in every environment.
+ *
+ * So OUR origin is stripped and anything else is left alone: media that genuinely moves to a CDN
+ * later keeps its absolute url and gets a `remotePatterns` entry, which is the case that rule is
+ * actually for.
+ */
+function sameOrigin(url: string): string {
+  const origin = process.env.NEXT_PUBLIC_SERVER_URL
+  if (!origin || !url.startsWith(origin)) return url
+
+  const relative = url.slice(origin.length)
+  return relative.startsWith('/') ? relative : `/${relative}`
+}
+
 export function toCatalogImage(media: number | Media | null | undefined): CatalogImage | null {
   const document = optional(media)
   if (!document?.url) return null
 
   return {
-    src: document.url,
+    src: sameOrigin(document.url),
     width: document.width ?? 0,
     height: document.height ?? 0,
     // A single space is how the admin records "decorative" (see the `alt` field's description), and
@@ -243,5 +266,11 @@ export function toShopContent(shop: Shop): ShopContent {
     warrantyHtml: html(shop.warranty),
     deliveryHtml: html(shop.delivery),
     listingSubtitle: shop.listingSubtitle ?? null,
+    // Falling back to the drawn text rather than to an empty string: the global defaults these, but
+    // a document saved before the fields existed has them null, and an accordion with no heading is
+    // a control nobody can name.
+    detailsTitle: shop.detailsTitle ?? 'PRODUCT DETAILS',
+    warrantyTitle: shop.warrantyTitle ?? '3 YEAR WARRANTY + FREE RETURNS',
+    deliveryTitle: shop.deliveryTitle ?? 'DELIVERY',
   }
 }

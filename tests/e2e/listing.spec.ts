@@ -261,6 +261,10 @@ test('the toolbar commits immediately, with no APPLY (FR-023)', async ({ page })
  */
 test('the price slider commits when it is moved, with no APPLY', async ({ page }) => {
   await page.goto('/rings')
+  // Waits for the scripts to finish arriving before pressing anything. The poll below can survive
+  // a slow hydration, but it should not have to spend its budget on a page that has not finished
+  // downloading — which is what a full parallel run against a dev server produces.
+  await page.waitForLoadState('networkidle')
 
   const handle = page.getByRole('slider', { name: 'Maximum price' })
 
@@ -279,7 +283,20 @@ test('the price slider commits when it is moved, with no APPLY', async ({ page }
         await page.keyboard.press('ArrowLeft')
         return page.url()
       },
-      { message: 'the slider never committed — is the page hydrating?' },
+      {
+        message: 'the slider never committed — is the page hydrating?',
+        /**
+         * The one assertion that genuinely needs more than the 5s default, and the last to be
+         * given it — worker count and route warming came first, because both help every test and
+         * this helps one.
+         *
+         * It is a race by construction: the slider is a real `<input type="range">` that moves
+         * under the arrow keys as soon as the HTML lands, while the commit is a React handler that
+         * arrives later. Since 003/T290 the HTML also waits on Postgres, so the gap between the two
+         * is wider. Fifteen seconds is measured, not guessed: alone the test takes six to nine.
+         */
+        timeout: 15_000,
+      },
     )
     .toMatch(/maxPrice=/)
 

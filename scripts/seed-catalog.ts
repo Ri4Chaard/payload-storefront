@@ -243,6 +243,8 @@ type ProductSeed = {
   inventory?: number
   withStones?: boolean
   attributes?: { attribute: number | string; value: string }[]
+  /** Published unless it says otherwise. One draft exists so FR-009 is exercised, not assumed. */
+  status?: 'draft' | 'published'
 }
 
 const productSeeds: ProductSeed[] = [
@@ -349,6 +351,116 @@ const productSeeds: ProductSeed[] = [
   },
 ]
 
+/**
+ * Twenty-four more pieces, and one draft.
+ *
+ * Ported from `src/mocks/catalog.ts` deliberately: until 003/T290 the storefront read those
+ * fixtures, and the acceptance written against them — that the listing pages at twelve, that a
+ * price filter has something on both sides of it, that IN-STOCK ONLY has both a stocked piece and
+ * an empty one to tell apart — only means anything if the database describes the same shop. Five
+ * hand-written pieces cannot page.
+ *
+ * They are filler in the sense that the copy is generated, not in the sense that they are
+ * disposable: every one of them is what makes some rule testable.
+ */
+const FILLER: { title: string; categorySlug: keyof typeof categories }[] = [
+  { title: 'Halo Solitaire Ring', categorySlug: 'rings' },
+  { title: 'Baguette Eternity Band', categorySlug: 'rings' },
+  { title: 'Marquise Cluster Ring', categorySlug: 'rings' },
+  { title: 'Princess Cut Signet Ring', categorySlug: 'rings' },
+  { title: 'Oval Trilogy Ring', categorySlug: 'rings' },
+  { title: 'Cushion Halo Ring', categorySlug: 'rings' },
+  { title: 'Twisted Pavé Ring', categorySlug: 'rings' },
+  { title: 'Tennis Bracelet', categorySlug: 'bracelets' },
+  { title: 'Bezel Link Bracelet', categorySlug: 'bracelets' },
+  { title: 'Pear Drop Bracelet', categorySlug: 'bracelets' },
+  { title: 'Emerald Bar Bracelet', categorySlug: 'bracelets' },
+  { title: 'Open Cuff Bracelet', categorySlug: 'bracelets' },
+  { title: 'Round Stud Earrings', categorySlug: 'earrings' },
+  { title: 'Baguette Huggie Earrings', categorySlug: 'earrings' },
+  { title: 'Oval Drop Earrings', categorySlug: 'earrings' },
+  { title: 'Marquise Threader Earrings', categorySlug: 'earrings' },
+  { title: 'Princess Halo Earrings', categorySlug: 'earrings' },
+  { title: 'Double Hoop Earrings', categorySlug: 'earrings' },
+  { title: 'Solitaire Necklace', categorySlug: 'necklaces' },
+  { title: 'Riviera Necklace', categorySlug: 'necklaces' },
+  { title: 'Pear Pendant Necklace', categorySlug: 'necklaces' },
+  { title: 'Baguette Bar Necklace', categorySlug: 'necklaces' },
+  { title: 'Emerald Station Necklace', categorySlug: 'necklaces' },
+  { title: 'Layered Chain Necklace', categorySlug: 'necklaces' },
+]
+
+const FILLER_COLOURS = [['clear'], ['black'], ['green'], ['multicolor'], ['clear', 'black']]
+const FILLER_SHAPES = [
+  ['round'], ['oval'], ['emerald'], ['pear'], ['marquise'], ['princess'], ['baguette'],
+]
+
+/** A piece is photographed as what it is. Rings get the ring, necklaces get a necklace. */
+const GALLERY_FOR: Record<string, (number | string)[]> = {
+  rings: [media.ringPackshot.id, media.ringJacket.id],
+  bracelets: [media.bracelet.id],
+  earrings: [media.earClimbers.id],
+  necklaces: [media.pendant.id, media.miniPendant.id],
+}
+
+const pick = <T,>(list: readonly T[], index: number): T => {
+  const found = list[index % list.length]
+  if (found === undefined) throw new Error('cannot pick from an empty list')
+  return found
+}
+
+for (const [index, { title, categorySlug }] of FILLER.entries()) {
+  // Every fourth piece is stock tracked, and one of THOSE is empty — IN-STOCK ONLY needs both a
+  // piece it keeps and a piece it hides, or the filter passes by doing nothing.
+  const stocked = index % 4 === 3
+
+  productSeeds.push({
+    slug: title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, ''),
+    title,
+    category: categories[categorySlug],
+    gallery: GALLERY_FOR[categorySlug] ?? [media.ringPackshot.id],
+    // 1,200 → 46,050 in even steps, so a price filter always has something on each side of it.
+    price: 1200 + index * 1950,
+    description: `${title}, made to order in our atelier.`,
+    collections: [need(collections, pick(['deia', 'marvel', 'molten', 'spartan'], index), 'collection').id],
+    sizes:
+      categorySlug === 'rings'
+        ? [need(sizes, '2', 'size').id, need(sizes, '2.5', 'size').id, need(sizes, '3', 'size').id]
+        : [],
+    colour: pick(FILLER_COLOURS, index),
+    diamondShape: pick(FILLER_SHAPES, index),
+    availability: stocked ? 'stock-tracked' : 'made-to-order',
+    inventory: index === 7 ? 0 : 2,
+    attributes: [
+      { attribute: attributes.metal.id, value: index % 2 === 0 ? '18k white gold' : '18k yellow gold' },
+    ],
+  })
+}
+
+/**
+ * A draft. It has a slug, it is complete, and nothing anonymous may reach it — `getProduct` returns
+ * null for it and the listing never contains it. Keeping one here is what stops FR-009 from being a
+ * rule nobody ever exercises.
+ */
+productSeeds.push({
+  slug: 'unreleased-spartan-cuff',
+  title: 'Unreleased Spartan Cuff',
+  category: categories.bracelets,
+  gallery: [media.bracelet.id],
+  price: 28000,
+  description: 'Not yet announced.',
+  collections: [need(collections, 'spartan', 'collection').id],
+  colour: ['clear'],
+  diamondShape: ['baguette'],
+  availability: 'made-to-order',
+  status: 'draft',
+})
+
 for (const seed of productSeeds) {
   const data = {
     title: seed.title,
@@ -368,7 +480,7 @@ for (const seed of productSeeds) {
     priceInUSD: usd(seed.price),
     enableVariants: Boolean(seed.withStones),
     ...(seed.withStones ? { variantTypes: [diamondType.id] } : {}),
-    _status: 'published' as const,
+    _status: seed.status ?? ('published' as const),
   }
 
   const found = await payload.find({
@@ -413,7 +525,7 @@ for (const seed of productSeeds) {
       inventory: spec.inventory,
       priceInUSDEnabled: true,
       priceInUSD: usd(seed.price + spec.price),
-      _status: 'published' as const,
+      _status: seed.status ?? ('published' as const),
     }
 
     if (existing.docs[0]) {

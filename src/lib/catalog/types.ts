@@ -114,6 +114,14 @@ export interface ShopContent {
   warrantyHtml: string | null
   deliveryHtml: string | null
   listingSubtitle: string | null
+  /**
+   * The three accordion headings. Strings rather than `string | null`: the global defaults them to
+   * the drawn text, and a heading is not a thing a page can close over — a panel with no title is
+   * a control nobody can name.
+   */
+  detailsTitle: string
+  warrantyTitle: string
+  deliveryTitle: string
 }
 
 // ---------------------------------------------------------------------------------------------

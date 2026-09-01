@@ -21,6 +21,40 @@ export const Shop: GlobalConfig = {
     update: isAdmin,
   },
   fields: [
+    /**
+     * The three accordion HEADINGS (003/T292a).
+     *
+     * This global originally modelled the bodies and not the headings, on the reasoning that the
+     * headings never move. "3 year warranty + free returns" is a claim about how the shop
+     * operates, though, and Constitution I does not let a claim like that need a deployment to
+     * change — if the warranty becomes two years, the owner must be able to say so.
+     *
+     * Defaults are the drawn strings, so an untouched install renders exactly what Figma shows.
+     */
+    {
+      name: 'detailsTitle',
+      type: 'text',
+      label: 'Product details heading',
+      defaultValue: 'PRODUCT DETAILS',
+      admin: { description: 'The first accordion’s heading on every product page.' },
+    },
+    {
+      name: 'warrantyTitle',
+      type: 'text',
+      label: 'Warranty heading',
+      defaultValue: '3 YEAR WARRANTY + FREE RETURNS',
+      admin: {
+        description:
+          'The second accordion’s heading. It states the warranty length, so it is editable.',
+      },
+    },
+    {
+      name: 'deliveryTitle',
+      type: 'text',
+      label: 'Delivery heading',
+      defaultValue: 'DELIVERY',
+      admin: { description: 'The third accordion’s heading.' },
+    },
     {
       name: 'warranty',
       type: 'richText',

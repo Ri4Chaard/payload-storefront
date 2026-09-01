@@ -1,33 +1,37 @@
 /**
- * The catalogue's data layer (003/T235, contract §3) — **the swap point**.
+ * The catalogue's data layer (003/T235, T290, contract §3) — **the swap point, now swapped.**
  *
- * This is the only module that knows where a document came from. Today it reads the fixtures in
- * `src/mocks/catalog.ts`; in spec 004 the bodies become `payload.find()` and `payload.findByID()`
- * and nothing above this file changes. SC-010 measures exactly that, and the ESLint rules in
- * `eslint-rules/catalog-boundary.mjs` are what keep it true rather than aspirational.
+ * This is the only module that knows where a document came from. Until 003/T290 it read the
+ * fixtures in `src/mocks/catalog.ts`; it now reads Payload through the Local API, and **no
+ * component and no route changed** — the deviation spec 002 opened is closed. SC-010 is exactly
+ * that measurement, and T291 records the walk that verifies it.
  *
- * Four rules survive the rewrite, and each is here because breaking it turns the swap into one.
+ * Four rules were written down before the rewrite, on the grounds that breaking any of them would
+ * turn a swap into a rewrite. Each one held:
  *
- * 1. **Everything is `async`**, including the bodies that do no waiting. A signature that changes
- *    shape at swap time is not a seam.
- * 2. **Filtering, sorting and paging happen inside `getListing`.** A route that fetched everything
- *    and filtered in JavaScript would not become a Payload query later; it would become a rewrite.
- *    The mock body therefore does the work in the same order a `find()` will: narrow, sort, slice.
- * 3. **Drafts are excluded by the access rule, not by a filter here.** `adminOrPublishedStatus`
- *    already returns `{ _status: { equals: 'published' } }` for anonymous reads, so the real
- *    implementation passes no status condition at all. `published()` below stands in for it, and
- *    is the one line that disappears rather than moving.
- * 4. **Nothing outside this module imports `src/mocks/`.**
+ * 1. **Everything was already `async`**, including bodies that did no waiting. A signature that
+ *    changes shape at swap time is not a seam, and none of these changed.
+ * 2. **Filtering, sorting and paging happen inside `getListing`.** They still do — see the note on
+ *    `catalogue()` for what runs in the database and what cannot.
+ * 3. **Drafts are excluded by the access rule, not by a filter here.** The fixture body needed a
+ *    `published()` predicate because an array has no access control; the real one passes
+ *    `overrideAccess: false` and lets `adminOrPublishedStatus` do it. That predicate was deleted
+ *    rather than translated, exactly as predicted.
+ * 4. **Nothing outside this module imports `src/mocks/`.** 003/T293 tightened that from a
+ *    convention into a rule the linter enforces for app code entirely.
+ *
+ * **Reads are deduplicated per request, not cached across requests.** `cache()` collapses the
+ * several calls a single render makes — a listing asks for the categories, the facets and the
+ * products, and the facets ask again — into one query each. Anything longer-lived is `T294`'s
+ * business and belongs with revalidation, because a cache without an invalidation story is how
+ * Constitution V's "stale content after publish is a defect" gets broken.
  */
 
-import {
-  categoryFixtures,
-  collectionFixtures,
-  productFixtures,
-  shopFixture,
-  sizeFixtures,
-} from '@/mocks/catalog'
-import type { Product } from '@/payload-types'
+import config from '@payload-config'
+import { getPayload } from 'payload'
+import { cache } from 'react'
+
+import type { Category, Collection, Product, Size } from '@/payload-types'
 
 import { COLOURS, DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
 import { formatPrice } from './price'
@@ -60,14 +64,70 @@ import type {
  */
 export const PAGE_SIZE = 12
 
-/**
- * Stands in for `access.adminOrPublishedStatus`. It is a filter here because a fixture array has no
- * access control; in spec 004 it is deleted rather than translated, because the real query never
- * asks — the rule is applied to it.
- */
-const published = (product: Product): boolean => product._status === 'published'
+const client = cache(async () => getPayload({ config }))
 
-const catalogue = (): Product[] => productFixtures.filter(published)
+/**
+ * Every published piece, with its relationships resolved.
+ *
+ * **`overrideAccess: false` is the whole of the draft rule.** The Local API bypasses access control
+ * by default, which would serve unpublished pieces to anonymous visitors — the exact leak FR-009 is
+ * written against. Passing `false` hands the query to `adminOrPublishedStatus`, which narrows it to
+ * published for a request with no user. The fixture body needed a `published()` predicate because
+ * an array has no access control; there is deliberately no equivalent line here, because asking
+ * twice would hide the day the access rule stops working.
+ *
+ * **`depth: 2` is chosen, not defaulted.** The mappers read `category.slug`, `collections[].slug`,
+ * `sizes[].value`, `gallery[]` as media, `attributes[].attribute.label` and `variants.docs[].options[].label`
+ * — that last one is two hops from the product, and depth 1 would leave it as a number and the
+ * stone selector empty.
+ *
+ * **The narrowing happens in JavaScript, and that is a considered trade rather than an oversight.**
+ * The two things every listing sorts and filters on — the price and the availability — are derived
+ * from the variant matrix: the price is the LOWEST across a piece's stones and availability is
+ * whether ANY of them has stock. Neither is a column, so neither can appear in a `where`, and a
+ * query that narrowed on the product's own `priceInUSD` would quietly answer a different question
+ * for every piece that has stones. Correct in memory beats wrong in the database.
+ *
+ * It is bounded work at this size — a jeweller's catalogue is tens of pieces, not tens of
+ * thousands — and it has a known upgrade path: denormalise `priceMinor` and `available` onto the
+ * product with an `afterChange` hook, then the `where` becomes possible and `limit`/`sort` move
+ * into the query. That is recorded as T304 rather than guessed at now, because the hook has to be
+ * written and backfilled and it is not what closes the 002 deviation.
+ */
+const catalogue = cache(async (): Promise<Product[]> => {
+  const payload = await client()
+  const { docs } = await payload.find({
+    collection: 'products',
+    depth: 2,
+    limit: 0,
+    overrideAccess: false,
+    sort: 'createdAt',
+  })
+  return docs
+})
+
+/**
+ * The three reference collections the chips, the facets and the dropped-value check all read.
+ *
+ * Fetched together and passed down rather than looked up one at a time: the fixture bodies could
+ * close over module-level arrays for free, and a query cannot. One round trip each per request,
+ * deduplicated by `cache`.
+ */
+interface Reference {
+  categories: Category[]
+  collections: Collection[]
+  sizes: Size[]
+}
+
+const reference = cache(async (): Promise<Reference> => {
+  const payload = await client()
+  const [categories, collections, sizes] = await Promise.all([
+    payload.find({ collection: 'categories', limit: 0, sort: 'order', overrideAccess: false }),
+    payload.find({ collection: 'collections', limit: 0, sort: 'order', overrideAccess: false }),
+    payload.find({ collection: 'sizes', limit: 0, sort: 'order', overrideAccess: false }),
+  ])
+  return { categories: categories.docs, collections: collections.docs, sizes: sizes.docs }
+})
 
 /** What the listing sorts and filters on — the price the card advertises. */
 const priceOf = lowestPriceMinor
@@ -79,14 +139,14 @@ const priceOf = lowestPriceMinor
 /** `multicolor` → `Multicolor`. The values are single lowercase words in both closed sets. */
 const titleCase = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1)
 
-const categoryTitle = (slug: string): string | undefined =>
-  categoryFixtures.find((entry) => entry.slug === slug)?.title
+const categoryTitle = (refs: Reference, slug: string): string | undefined =>
+  refs.categories.find((entry) => entry.slug === slug)?.title
 
-const collectionTitle = (slug: string): string | undefined =>
-  collectionFixtures.find((entry) => entry.slug === slug)?.title
+const collectionTitle = (refs: Reference, slug: string): string | undefined =>
+  refs.collections.find((entry) => entry.slug === slug)?.title
 
-const sizeLabel = (value: string): string | undefined =>
-  sizeFixtures.find((entry) => entry.value === value)?.label
+const sizeLabel = (refs: Reference, value: string): string | undefined =>
+  refs.sizes.find((entry) => entry.value === value)?.label
 
 // ---------------------------------------------------------------------------------------------
 // getListing
@@ -159,17 +219,17 @@ function sorted(products: Product[], sort: FilterState['sort']): Product[] {
  * way as the panel that produced it. Labels come from the catalogue, which is why they are built
  * here and not in `filters.ts` — that module is pure URL arithmetic and has never seen a category.
  */
-function chipsFor(filters: FilterState): AppliedFilterChip[] {
+function chipsFor(filters: FilterState, refs: Reference): AppliedFilterChip[] {
   const chips: AppliedFilterChip[] = []
 
   for (const slug of filters.category) {
-    chips.push({ key: 'category', value: slug, label: categoryTitle(slug) ?? slug })
+    chips.push({ key: 'category', value: slug, label: categoryTitle(refs, slug) ?? slug })
   }
   for (const slug of filters.collection) {
-    chips.push({ key: 'collection', value: slug, label: collectionTitle(slug) ?? slug })
+    chips.push({ key: 'collection', value: slug, label: collectionTitle(refs, slug) ?? slug })
   }
   for (const value of filters.size) {
-    chips.push({ key: 'size', value, label: `Size ${sizeLabel(value) ?? value}` })
+    chips.push({ key: 'size', value, label: `Size ${sizeLabel(refs, value) ?? value}` })
   }
   for (const value of filters.colour) {
     chips.push({ key: 'colour', value, label: titleCase(value) })
@@ -217,36 +277,37 @@ function chipsFor(filters: FilterState): AppliedFilterChip[] {
  * nothing would otherwise return an empty grid with no explanation, which reads as "we sell none of
  * these" rather than "that link is stale" (FR-030).
  */
-function unknownValues(filters: FilterState): DroppedFilter[] {
+function unknownValues(filters: FilterState, refs: Reference): DroppedFilter[] {
   const dropped: DroppedFilter[] = []
 
   for (const slug of filters.category) {
-    if (!categoryTitle(slug)) dropped.push({ key: 'category', value: slug })
+    if (!categoryTitle(refs, slug)) dropped.push({ key: 'category', value: slug })
   }
   for (const slug of filters.collection) {
-    if (!collectionTitle(slug)) dropped.push({ key: 'collection', value: slug })
+    if (!collectionTitle(refs, slug)) dropped.push({ key: 'collection', value: slug })
   }
   for (const value of filters.size) {
-    if (!sizeLabel(value)) dropped.push({ key: 'size', value })
+    if (!sizeLabel(refs, value)) dropped.push({ key: 'size', value })
   }
 
   return dropped
 }
 
 export async function getListing(filters: FilterState): Promise<ListingResult> {
-  const ignored = unknownValues(filters)
+  const [refs, all] = await Promise.all([reference(), catalogue()])
+  const ignored = unknownValues(filters, refs)
 
   // A dropped value must not narrow the result — the grid shows what WAS applied, and the notice
   // above it names what was not.
   const applied: FilterState = {
     ...filters,
-    category: filters.category.filter((slug) => Boolean(categoryTitle(slug))),
-    collection: filters.collection.filter((slug) => Boolean(collectionTitle(slug))),
-    size: filters.size.filter((value) => Boolean(sizeLabel(value))),
+    category: filters.category.filter((slug) => Boolean(categoryTitle(refs, slug))),
+    collection: filters.collection.filter((slug) => Boolean(collectionTitle(refs, slug))),
+    size: filters.size.filter((value) => Boolean(sizeLabel(refs, value))),
   }
 
   const found = sorted(
-    catalogue().filter((product) => matches(product, applied)),
+    all.filter((product) => matches(product, applied)),
     applied.sort,
   )
 
@@ -276,7 +337,7 @@ export async function getListing(filters: FilterState): Promise<ListingResult> {
     total: found.length,
     page,
     hasMore: shown.length < found.length,
-    appliedChips: chipsFor(applied),
+    appliedChips: chipsFor(applied, refs),
     ignored,
   }
 }
@@ -291,12 +352,28 @@ export async function getListing(filters: FilterState): Promise<ListingResult> {
  * stranger the piece exists, which is the leak FR-009 is written against.
  */
 export async function getProduct(slug: string): Promise<ProductDetail | null> {
-  const found = catalogue().find((product) => product.slug === slug)
+  const payload = await client()
+  const { docs } = await payload.find({
+    collection: 'products',
+    depth: 2,
+    limit: 1,
+    where: { slug: { equals: slug } },
+    // The access rule is what makes a draft indistinguishable from a slug that names nothing: it
+    // narrows the QUERY rather than rejecting the result, so an unpublished piece simply is not
+    // there. A `_status` check here would reach the same 404 down a path that has to be kept right
+    // by hand.
+    overrideAccess: false,
+  })
+
+  const found = docs[0]
   return found ? toProductDetail(found) : null
 }
 
 export async function getCategories(): Promise<CategorySummary[]> {
-  return [...categoryFixtures]
+  const { categories } = await reference()
+  // `order` is the column the owner drags in the admin; ties fall back to id so that two
+  // categories sharing an order do not swap places between requests.
+  return [...categories]
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id)
     .map(toCategorySummary)
 }
@@ -320,19 +397,21 @@ function facet(
  * "do you have this".
  */
 export async function getFilterFacets(categorySlug?: string): Promise<FilterFacets> {
+  const [refs, all] = await Promise.all([reference(), catalogue()])
+
   const within = categorySlug
-    ? catalogue().filter(
+    ? all.filter(
         (product) => typeof product.category !== 'number' && product.category.slug === categorySlug,
       )
-    : catalogue()
+    : all
 
   const prices = within.map(priceOf)
 
   return {
     categories: facet(
-      catalogue(),
+      all,
       (product) => (typeof product.category === 'number' ? [] : [product.category.slug]),
-      categoryFixtures
+      refs.categories
         .slice()
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((entry) => ({ value: entry.slug, label: entry.title })),
@@ -340,7 +419,7 @@ export async function getFilterFacets(categorySlug?: string): Promise<FilterFace
     collections: facet(
       within,
       (product) => slugsOf(product, 'collections'),
-      collectionFixtures
+      refs.collections
         .slice()
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((entry) => ({ value: entry.slug, label: entry.title })),
@@ -349,7 +428,7 @@ export async function getFilterFacets(categorySlug?: string): Promise<FilterFace
       within,
       (product) =>
         (product.sizes ?? []).map((entry) => (typeof entry === 'number' ? String(entry) : entry.value)),
-      sizeFixtures
+      refs.sizes
         .slice()
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((entry) => ({ value: entry.value, label: entry.label })),
@@ -376,13 +455,14 @@ export async function getFilterFacets(categorySlug?: string): Promise<FilterFace
  * strip padded out with whatever else is in the shop is worse than no strip.
  */
 export async function getRelated(productId: number, limit = 4): Promise<ProductSummary[]> {
-  const product = catalogue().find((entry) => entry.id === productId)
+  const all = await catalogue()
+  const product = all.find((entry) => entry.id === productId)
   if (!product) return []
 
   const collections = slugsOf(product, 'collections')
   if (collections.length === 0) return []
 
-  return catalogue()
+  return all
     .filter((entry) => entry.id !== productId)
     .filter((entry) => slugsOf(entry, 'collections').some((slug) => collections.includes(slug)))
     .slice(0, limit)
@@ -390,5 +470,7 @@ export async function getRelated(productId: number, limit = 4): Promise<ProductS
 }
 
 export async function getShopContent(): Promise<ShopContent> {
-  return toShopContent(shopFixture)
+  const payload = await client()
+  const shop = await payload.findGlobal({ slug: 'shop', depth: 0, overrideAccess: false })
+  return toShopContent(shop)
 }

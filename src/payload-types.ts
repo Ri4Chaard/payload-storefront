@@ -1190,6 +1190,18 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Shop {
   id: number;
   /**
+   * The first accordion’s heading on every product page.
+   */
+  detailsTitle?: string | null;
+  /**
+   * The second accordion’s heading. It states the warranty length, so it is editable.
+   */
+  warrantyTitle?: string | null;
+  /**
+   * The third accordion’s heading.
+   */
+  deliveryTitle?: string | null;
+  /**
    * The "3 year warranty + free returns" accordion, shown on every product.
    */
   warranty?: {
@@ -1237,6 +1249,9 @@ export interface Shop {
  * via the `definition` "shop_select".
  */
 export interface ShopSelect<T extends boolean = true> {
+  detailsTitle?: T;
+  warrantyTitle?: T;
+  deliveryTitle?: T;
   warranty?: T;
   delivery?: T;
   listingSubtitle?: T;

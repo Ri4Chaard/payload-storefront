@@ -356,24 +356,44 @@ confirm the refusal names it; open a product with neither option type and confir
 **Independent Test**: publish a product in the admin; it appears on the listing. Unpublish it; it
 disappears, including from its own URL. No mock involved.
 
-- [ ] T290 [US1b] Rewrite `src/lib/catalog/queries.ts` against the Local API — `payload.find` and
+- [X] T290 [US1b] Rewrite `src/lib/catalog/queries.ts` against the Local API — `payload.find` and
       `payload.findByID`, same exported signatures, drafts excluded by the access rule rather than by
       a filter here. **This task touches one file**; if it touches a second, SC-010 has failed and
       the seam is wrong (depends on T235 and every UI story)
-- [ ] T291 [US1b] Verify SC-010 by walking the imports — no component and no route changed. Record
+- [X] T291 [US1b] Verify SC-010 by walking the imports — no component and no route changed. Record
       the result; nothing else measures this
-- [ ] T292 [US1b] Upload the T202 photography as Payload media with real alternative text, and attach
+- [X] T292 [US1b] Upload the T202 photography as Payload media with real alternative text, and attach
       it to the seeded products (FR-044)
-- [ ] T292a [US1b] Move the three accordion TITLES into the `shop` global — `detailsTitle`,
+- [X] T292a [US1b] Move the three accordion TITLES into the `shop` global — `detailsTitle`,
       `warrantyTitle`, `deliveryTitle`, defaulting to the drawn strings — and surface them through
       `ShopContent`. `ProductDetails` already takes them as props with those defaults, so this is a
       schema field, a migration and one call site. **Owner-requested (2026-08-31):** "3 YEAR
       WARRANTY + FREE RETURNS" is a factual claim about how the shop operates, and Constitution I
       does not let a claim like that need a deployment to change. `shop.ts` originally modelled the
       bodies only, on the reasoning that the headings never move; the owner has said they do
-- [ ] T293 [US1b] Tighten the T236 ESLint rule — `src/mocks/` is now forbidden in app code entirely,
+- [X] T293 [US1b] Tighten the T236 ESLint rule — `src/mocks/` is now forbidden in app code entirely,
       tests and stories excepted. The fixtures stay: still typed against the generated types, still
       a drift alarm
+> **T291 result, recorded because nothing else measures it.** The swap touched **one file**:
+> `src/lib/catalog/queries.ts`, +142/−60. `git diff --name-only -- src/components src/app` was
+> empty. SC-010 holds.
+>
+> Two things landed alongside it that the task did not predict, both reported rather than hidden:
+>
+> - **`mappers.ts` gained four lines.** Payload writes an ABSOLUTE media url where the fixtures
+>   wrote a relative one, and `next/image` treats an absolute src as REMOTE — every product page
+>   was a 500 until our own origin was stripped. That is a mapping difference, which is what
+>   `mappers.ts` is for, and it is still not a component or a route.
+> - **The seed grew from 5 pieces to 29 plus a draft**, ported from the fixtures. The acceptance
+>   written against those fixtures — that the listing pages at twelve, that a price filter has
+>   something on both sides, that IN-STOCK ONLY has both a stocked piece and an empty one — only
+>   means anything if the database describes the same shop.
+>
+> `tests/unit/catalog-queries.test.ts` moved to `tests/integration/` and runs against Postgres via
+> `pnpm test:integration`. Sixteen of its seventeen assertions ran unchanged, which is a better
+> proof of the seam than anything they assert individually; the seventeenth named a category that
+> happened to hold the fixtures' sold-out piece and now asks the whole catalogue.
+
 - [ ] T294 [US1b] Set the caching and revalidation strategy per route, with publishing invalidating
       the affected pages. Constitution V calls stale content after publish a defect
 - [ ] T295 [US1b] Re-run the full US1 acceptance from the spec end to end — the scenarios that could

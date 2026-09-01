@@ -88,11 +88,27 @@ describe('getListing', () => {
     ])
   })
 
+  /**
+   * Asked over the whole catalogue rather than one category.
+   *
+   * It used to name `necklaces`, which passed against the fixtures because that is where their
+   * sold-out piece happened to sit. The rule has nothing to do with necklaces — an assertion that
+   * depends on WHICH category holds the empty shelf breaks when the shop is restocked, and reports
+   * a filter bug when the only thing that changed was a number in the admin.
+   *
+   * The first line is the load-bearing one: it fails if the catalogue contains nothing unavailable,
+   * which would let the second pass by filtering nothing at all.
+   */
   it('hides what cannot be ordered only when asked to', async () => {
-    const shown = await listing({ category: ['necklaces'] })
-    const orderable = await listing({ category: ['necklaces'], inStock: true })
-    expect(shown.products.some((product) => !product.available)).toBe(true)
+    const shown = await listing({ page: 99 })
+    const orderable = await listing({ page: 99, inStock: true })
+
+    expect(
+      shown.products.some((product) => !product.available),
+      'nothing in the catalogue is unavailable, so this filter proves nothing',
+    ).toBe(true)
     expect(orderable.products.every((product) => product.available)).toBe(true)
+    expect(orderable.total).toBeLessThan(shown.total)
   })
 })
 

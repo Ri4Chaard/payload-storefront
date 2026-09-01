@@ -43,16 +43,24 @@ const MOCKS = /(^|\/)mocks(\/|$)/
 const PAYLOAD_TYPES = /(^|\/)payload-types$/
 
 /**
- * `src/app/**` is spec 002's licence, not an oversight: the home page reads `@/mocks` directly and
- * predates the catalogue's data layer. It is the second file spec 004 touches, and the comment in
- * `src/mocks/index.ts` is where that is recorded.
+ * **Tightened by 003/T293.** Two entries left when the storefront swapped to Payload:
+ *
+ * - `src/lib/catalog/queries.ts` no longer reads fixtures at all, so its licence is revoked. The
+ *   module that WAS the deviation is now the module that ended it.
+ * - `src/app/**` narrowed to the single file that still needs it. Spec 002 licensed the whole tree
+ *   because the home page reads `@/mocks` directly; every route added since — the listing, the
+ *   category pages, the product page — is now forbidden from doing the same, which is the half of
+ *   the rule that was doing nothing while a wildcard covered it.
+ *
+ * The home page cannot be swapped here: its hero, about band and featured row are not modelled in
+ * Payload at all, and modelling them is a later spec's work. Naming the one file is what stops that
+ * from being forgotten — a wildcard hides how much is left, a path says exactly.
  *
  * Stories are exempt because using real content in the style guide is the point of a style guide.
  */
 const MOCK_READERS = [
   /^src\/mocks\//,
-  'src/lib/catalog/queries.ts',
-  /^src\/app\//,
+  'src/app/(frontend)/page.tsx',
   /\.stories\.tsx$/,
   // Testing a mapper means handing it a document, and a fixture IS a document.
   /^tests\//,

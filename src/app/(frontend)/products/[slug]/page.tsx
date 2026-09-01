@@ -131,6 +131,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               attributes={product.attributes}
               warrantyHtml={shop.warrantyHtml}
               deliveryHtml={shop.deliveryHtml}
+              // Headings from the shop global since T292a. The component still defaults them to the
+              // drawn strings, so it renders correctly in a story with no Payload behind it.
+              detailsTitle={shop.detailsTitle}
+              warrantyTitle={shop.warrantyTitle}
+              deliveryTitle={shop.deliveryTitle}
               className="mt-2 xl:mt-7.5"
             />
           </div>
