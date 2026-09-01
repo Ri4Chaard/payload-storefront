@@ -420,10 +420,10 @@ disappears, including from its own URL. No mock involved.
       (FR-042). More than three changes means a band was built wrong (SC-009) — standing at eleven,
       assessed in the spec; the four primitives this spec ADDED (`Drawer`, `Lightbox`,
       `RangeSlider`, `Pagination`) had never reached the contract at all and are in it now
-- [ ] T302 [US7] Run the whole gate set — `check:naming`, `check:stories`, `check:styles`,
+- [x] T302 [US7] Run the whole gate set — `check:naming`, `check:stories`, `check:styles`,
       `check:tokens`, `check:contrast`, `lint`, `typecheck`, `test`, `test:stories`, `test:a11y`,
-      `test:e2e`, `build` (SC-012)
-- [ ] T303 [P] [US7] Update `README.md` and `docs/` with the catalogue routes, the seeding order and
+      `test:e2e`, `build` (SC-012) — all green: 91 unit, 25 integration, 294 Playwright
+- [x] T303 [P] [US7] Update `README.md` and `docs/` with the catalogue routes, the seeding order and
       the swap that happened in Phase 9
 
 ---
