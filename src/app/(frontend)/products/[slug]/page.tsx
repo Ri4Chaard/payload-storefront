@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-import { ProductDetails, ProductGallery } from '@/components/commerce'
+import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/commerce'
 import { JewelryCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
 import { minorUnitDigits } from '@/lib/catalog/price'
@@ -108,31 +108,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {product.title}
             </h1>
 
-            <p className="text-heading-1 text-primary-default mt-1.5 md:mt-2 xl:mt-5">
-              {/*
-                "From" only where the stones actually differ in price. A piece with one price that
-                said "from" would be quoting a range it does not have.
-              */}
-              {product.fromPrice ? `From ${product.fromPrice}` : product.price}
-            </p>
-
             {/*
-              Drawn at 1920 (`231:2339`) and absent from the 1024 and 390 frames, which stop after
-              the price. FR-035 puts the description in the column at every width, and a visitor on
-              a phone is the one least able to go and find it elsewhere — so it renders throughout.
-              It closes over its own absence: no empty paragraph, no reserved gap.
-            */}
-            {product.description ? (
-              <p className="text-body-medium text-neutral-primary/80 mt-4 xl:mt-5">
-                {product.description}
-              </p>
-            ) : null}
+              The price down to BUY NOW, in one client component. They share the visitor's choice:
+              FR-039 makes the price follow the selected stone, and the description sits between the
+              two in the drawn order — so the run is contiguous and belongs together.
 
-            {/*
-              The rule the 1024 and 390 frames draw between the header and what follows
-              (`410:7313`, `410:7646`). At 1920 the gap alone does that work.
+              The description is drawn at 1920 (`231:2339`) and absent from the 1024 and 390 frames,
+              which stop after the price. FR-035 puts it in the column at every width, and the
+              visitor on a phone is the one least able to go and find it elsewhere.
             */}
-            <hr className="mt-5 border-black/10 xl:hidden" />
+            <ProductPurchase
+              price={product.price}
+              fromPrice={product.fromPrice}
+              description={product.description}
+              diamonds={product.diamondOptions}
+              sizes={product.sizes}
+              available={product.available}
+            />
 
             <ProductDetails
               detailsHtml={product.detailsHtml}
