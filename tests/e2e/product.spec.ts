@@ -282,3 +282,78 @@ test('the page emits Product, Offer and a breadcrumb trail', async ({ page }) =>
   expect(trail, 'no BreadcrumbList').toBeDefined()
   expect((trail!.itemListElement as unknown[]).length).toBe(3)
 })
+
+/**
+ * FR-039 — the price follows the chosen stone. Until one is chosen the piece has a range and says
+ * "From"; afterwards it has a price, and continuing to say "from" would quote a range the visitor
+ * has already resolved.
+ */
+test('choosing a diamond changes the price', async ({ page }) => {
+  await page.goto(RING)
+
+  const price = page.getByText(/^From \$|^\$/).first()
+  await expect(price).toHaveText(/^From \$/)
+
+  const stones = page.getByRole('combobox', { name: /diamond/i })
+  await stones.click()
+
+  const options = page.getByRole('option')
+  const chosen = await options.first().textContent()
+  await options.first().click()
+
+  // The trigger now carries the value, which is what makes a screen reader say "Size, 6" rather
+  // than "Size, button".
+  await expect(stones).toContainText(chosen!.split('$')[0]!.trim())
+  await expect(page.getByText(/^From \$/)).toHaveCount(0)
+})
+
+/** FR-040 — an unavailable stone is drawn, announced as unavailable, and cannot be chosen. */
+test('an unavailable diamond is shown and cannot be selected', async ({ page }) => {
+  await page.goto(RING)
+
+  await page.getByRole('combobox', { name: /diamond/i }).click()
+  const options = page.getByRole('option')
+  expect(await options.count(), 'no stones offered').toBeGreaterThan(0)
+
+  const unavailable = options.filter({ hasText: /out of stock/i })
+  if ((await unavailable.count()) > 0) {
+    await expect(unavailable.first()).toBeDisabled()
+  }
+})
+
+/**
+ * The two actions are disabled until spec 004 builds the seam behind them (FR-041). Asserted so
+ * that wiring them up is a deliberate change with a failing test to notice, rather than something
+ * that quietly half-happens.
+ */
+test('the two actions are present and disabled', async ({ page }) => {
+  await page.goto(RING)
+
+  await expect(page.getByRole('button', { name: 'Add to cart' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Buy now' })).toBeDisabled()
+
+  // The stepper beside them is real, and stops at one.
+  const decrease = page.getByRole('button', { name: /decrease/i })
+  await expect(decrease).toBeDisabled()
+})
+
+/** The picker is a listbox, not a menu: it has a value, and it says so. */
+test('the size picker exposes its value and its state', async ({ page }) => {
+  await page.goto(RING)
+
+  const sizes = page.getByRole('combobox', { name: /size/i })
+  await expect(sizes).toHaveAttribute('aria-expanded', 'false')
+
+  await sizes.click()
+  await expect(sizes).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByRole('listbox')).toBeVisible()
+
+  const first = page.getByRole('option').first()
+  const label = (await first.textContent())!.trim()
+  await first.click()
+
+  await expect(sizes).toHaveAttribute('aria-expanded', 'false')
+  await expect(sizes).toContainText(label)
+  // Focus comes back to the trigger rather than being stranded in a panel that has gone.
+  await expect(sizes).toBeFocused()
+})

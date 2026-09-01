@@ -313,12 +313,21 @@ reload; drive the menu entirely from the keyboard.
 **Independent Test**: change the stone and watch the price; try both actions with a choice unmade and
 confirm the refusal names it; open a product with neither option type and confirm no selectors.
 
-- [ ] T282 [US6] Build `src/components/commerce/product-options/` with stories — the two selects on
+- [X] T282 [US6] Build `src/components/commerce/product-options/` with stories — the two selects on
       the existing `Field`, each showing its stone's price, unavailable stones shown and
       unselectable (FR-040). Nodes `301:5008` / open state `301:5845` (1920) · `410:7314` (1024) ·
       `410:7647` (390)
-- [ ] T283 [US6] Wire the price to the selected stone (FR-039), and the actions row — quantity
+- [X] T283 [US6] Wire the price to the selected stone (FR-039), and the actions row — quantity
       stepper stopping at 1 and at any stock-tracked ceiling, ADD TO CART, BUY NOW. Nodes `231:2468` + `242:2480` (1920) · `410:7351` (1024) · `410:7684`–`410:7703` (390)
+> **T282–T283 landed with both actions DISABLED** (owner, 2026-08-31). The controls above them
+> work — choosing a stone changes the price — but ADD TO CART and BUY NOW hand to the FR-041 seam,
+> and until T284 builds it a live button would either do nothing or lie about what it did. T285's
+> validation is the same story: there is nothing yet to refuse ON BEHALF OF. A route test asserts
+> both are disabled, so enabling them is a deliberate change with a failing test to notice.
+>
+> The quantity stepper stops at 1 and has no ceiling: `ProductDetail` deliberately carries no
+> inventory count, so there is no stock-tracked maximum to enforce until the seam arrives.
+
 - [ ] T284 [US6] Write `src/lib/catalog/cart-intent.ts` — the FR-041 seam. `CartIntent` carries
       **identifiers only, never a price**; the body is a documented no-op resolving `{ ok: true }`
       until spec 004. The validation in front of it is real and unit-tested here (contract §6)

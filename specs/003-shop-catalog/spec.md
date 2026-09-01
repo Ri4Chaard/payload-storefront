@@ -198,7 +198,12 @@ These are recorded rather than resolved, and are listed again under [Open Questi
     reasoning `ImageCarousel` uses for `wrap`. **The swipe loops too** (owner, 2026-08-31):
     `Carousel` gained `loop`, which puts an `inert` copy of the last photograph before the first and
     of the first after the last, so native scrolling never runs out of track in either direction.
-23. **`Complete the Collection` is a 2×2 grid at 390 and a row of four at 768 and 1920**
+23. **The size list draws per-size stock that the catalogue does not hold.** Every row at
+    `301:5845` carries "In stock" or "Made to order"; `Size` has no such field, and the stones
+    carry availability while the sizes do not. **Not invented** — the size rows render without
+    metadata, because printing a promise the shop has not made is worse than leaving the column
+    empty. A question for the owner: either sizes gain a stock state, or the drawing loses one.
+24. **`Complete the Collection` is a 2×2 grid at 390 and a row of four at 768 and 1920**
     (`410:7848` against `410:7516`). **Resolved: the carousel, at every width.** FR-037 says the
     band IS the home page's `JewelryCarousel`, and building a second grid for one breakpoint is the
     near-duplicate that requirement exists to prevent.

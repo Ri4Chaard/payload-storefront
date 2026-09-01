@@ -517,6 +517,32 @@ compile rather than failing in CI.
 
 ## Media
 
+### `Select`
+
+`id`, `options` (`value`, `label`, `meta`, `disabled`), `value`, `onChange`, `placeholder`,
+`disabled`, `describedBy`, `invalid`.
+
+Added by 003/T282 — closed at node `301:4990`, open at `301:5845`, rows at `301:5920`.
+
+**Not `Menu`, and not a native `<select>`.** `Menu`'s docblock names this list as its next consumer
+and the popup mechanics are genuinely the same, but the ARIA is not: a menu button chooses an
+ACTION and has no value, while a select chooses a VALUE and its trigger must expose the current
+one. Announcing "Size, menu" to someone looking at a box that says "6" is the failure, and it is
+not reachable by passing `Menu` a different role — the name and value exposure differ throughout.
+A native `<select>` gets all of that free and cannot draw the second column the design puts on
+every row ("In stock", "Made to order", a price), which is information rather than decoration.
+
+So the ROWS are reused — `MenuOption`, which asserts no role of its own precisely so its container
+can decide — and the pattern around them is the listbox one. Focus moves into the list rather than
+staying on the trigger with `aria-activedescendant`, because the rows are already buttons.
+
+A disabled option is rendered, announced and skipped by both the pointer and the arrow keys
+(FR-040). Hiding it would turn a temporary shortage into a catalogue that looks smaller than it is.
+
+Nothing here works without scripting, which is the accepted cost of the drawn panel. The product
+page stays fully readable without it (FR-029): the price, the description and the accordions are
+all server-rendered, and only the choosing needs JavaScript.
+
 ### `Carousel`
 
 `items`, `label`, `prevLabel`, `nextLabel`, `wrap`, `loop`, `controls` (`always | hover | none`),
