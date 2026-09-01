@@ -328,13 +328,20 @@ confirm the refusal names it; open a product with neither option type and confir
 > The quantity stepper stops at 1 and has no ceiling: `ProductDetail` deliberately carries no
 > inventory count, so there is no stock-tracked maximum to enforce until the seam arrives.
 
-- [ ] T284 [US6] Write `src/lib/catalog/cart-intent.ts` — the FR-041 seam. `CartIntent` carries
+- [X] T284 [US6] Write `src/lib/catalog/cart-intent.ts` — the FR-041 seam. `CartIntent` carries
       **identifiers only, never a price**; the body is a documented no-op resolving `{ ok: true }`
       until spec 004. The validation in front of it is real and unit-tested here (contract §6)
 - [ ] T285 [US6] Refuse both actions until every required choice is made, naming the unmade one in a
       message a screen reader announces, and disable both on an unavailable product with the reason
-      in text, not in colour (FR-038, FR-040)
-- [ ] T286 [P] [US6] Unit-test the seam's payload shape — assert **no price field is present**. This
+      in text, not in colour (FR-038, FR-040). **Carried to 004 (owner, 2026-08-31.)** The refusal
+      is the enabled-button-with-error pattern, and it needs a success path to be honest: with the
+      seam a documented no-op, a press that passes validation would do nothing visible, which reads
+      as a broken button. The buttons therefore stay disabled and say nothing rather than claiming
+      to work. **The rule itself is already built and tested** — `validateIntent` returns the
+      unmet FIELD, and T286 covers every branch of it; what is deferred is only its surfacing.
+      The second half of the task IS done: an unavailable product disables both actions and gives
+      the reason in text (`product-purchase.tsx`)
+- [X] T286 [P] [US6] Unit-test the seam's payload shape — assert **no price field is present**. This
       is the Constitution VI rule, not a style preference, and an assertion is the only thing that
       keeps it true
 

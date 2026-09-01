@@ -197,6 +197,17 @@ Until 004, the body is a documented no-op that resolves `{ ok: true }`. The vali
 it — every required option chosen, the product available, the chosen stone still available — is
 real, built here, and unit-tested here, because it is what FR-038 and FR-040 specify.
 
+`validateIntent` returns the unmet **field** rather than a sentence. FR-038 says the refusal must
+NAME the unmade choice, and the words belong to the interface that has to announce them, in
+whatever language it is speaking; a message built in this module would be a string it cannot
+translate and the caller cannot reword.
+
+**Built and tested, not yet surfaced** (owner, 2026-08-31). Both actions are disabled until 004,
+so nothing calls `addToCart` or `buyNow` yet. The refusal is the enabled-button-with-error pattern
+and it needs an honest success path to be worth having: with the body a no-op, a press that passed
+validation would do nothing visible, which reads as a broken button. A disabled button that claims
+nothing is the better of the two until there is a cart to add to.
+
 ---
 
 ## 7. What the gates check
