@@ -70,7 +70,7 @@ arrives blocks every story in this feature.
       attempt limit (5), login attempt limit (10), lockout (15 min), unverified purge age (7 days).
       Named exports with documented defaults; these are configuration, not literals scattered in code
       (R14)
-- [ ] T405 ⛔ **BLOCKED — needs a real `RESEND_API_KEY`.** Prove the transport: trigger one send and confirm it arrives. Do this **before** T430 —
+- [X] T405 Prove the transport: trigger one send and confirm it arrives. Do this **before** T430 —
       debugging a template is a different problem from debugging a domain that is not verified
 
 **Checkpoint**: mail leaves the application and arrives in an inbox.

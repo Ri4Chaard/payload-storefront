@@ -28,10 +28,22 @@ cp .env.example .env                     # then fill in the values below
 `src/env.ts` lists both as required, so a missing one fails startup naming it rather than failing at
 the first send.
 
-**Developing without a verified domain**: Resend accepts `onboarding@resend.dev` as a from address,
-delivering only to the address that owns the API key. That is enough to run every flow end to end
-locally. It is not enough for staging — a shared environment needs a real verified domain, or every
-tester receives nobody's codes.
+**Developing without a verified domain** (this is the current local setup). Resend accepts
+`onboarding@resend.dev` as a from address without one, but then enforces two rules that are easy to
+lose an hour to:
+
+- **It refuses `example.com` and friends outright**, with `422 Invalid \`to\` field`. Use
+  `delivered@resend.dev` — Resend's own sandbox address — to prove the transport works at all.
+- **It delivers only to the address that owns the API key.** Anything else returns `403` and,
+  helpfully, names the permitted address in the error.
+
+That second rule would make the flow untestable — you register as a test address and the code goes
+nowhere. Hence `EMAIL_OVERRIDE_RECIPIENT`: set it to the key owner's address and every message is
+redirected there, so registering as `anything@wherever` still puts a readable code in your inbox.
+
+None of this is enough for staging. A shared environment needs a verified domain, or every tester
+receives nobody's codes — and the override must be **unset in production**, where redirecting all
+customer mail to one mailbox would be its own incident.
 
 ### Migration and seed
 
