@@ -52,6 +52,29 @@ docker compose --profile dev up -d --build
 The container applies the committed database migrations and then starts the server. A failed
 migration stops the deploy — the app does not boot against the wrong schema.
 
+**The `dev` environment does not use this path.** `.github/workflows/deploy-dev.yml` deploys on
+every push to `dev` over SSH, and it uses `docker-compose.dev.yml` — a separate file that brings its
+own Postgres alongside the app and runs `pnpm payload migrate` as a step after the containers are
+up, rather than as the container's command. Both files are real; this section describes the manual
+path, and the workflow describes the automatic one.
+
+## Content
+
+**Neither path seeds.** A fresh environment comes up with a schema and no shop: no categories, so
+every `/rings`-style route is a 404 and the header's four navigation links are dead; no products, so
+the listing shows its empty state and the home page drops both bands.
+
+Fill it once, from inside the container, so uploads land in the mounted media volume rather than on
+whichever machine ran the command:
+
+```bash
+docker compose -f docker-compose.dev.yml exec -T app pnpm seed
+```
+
+It is idempotent, so it is safe to re-run — but it updates products **in place**, which means it
+also overwrites anything authored in the admin since the last run. That is why it is not part of the
+deploy. Once the owner starts writing real content, stop running it.
+
 Check it came up:
 
 ```bash

@@ -83,10 +83,14 @@ fixed by what references what:
    the parent, so a variant created first is rejected
 6. **Shop settings**, the global holding the accordion headings and the warranty and delivery copy
 
-**On a deployed environment, run it inside the container**:
+**On a deployed environment, run it once, by hand, inside the container.** Nothing seeds
+automatically: the deploy workflow builds, starts and migrates, and that is all. That is deliberate
+— the seed updates products in place, so running it on every push would overwrite anything the owner
+had authored in the admin since the last one.
 
 ```bash
-docker compose exec app pnpm seed
+# on the VPS, in ~/aurum_frontend
+docker compose -f docker-compose.dev.yml exec -T app pnpm seed
 ```
 
 Not from a laptop against the deployment's database. Payload's local storage writes uploads to

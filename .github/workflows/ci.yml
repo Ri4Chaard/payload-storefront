@@ -55,6 +55,19 @@ jobs:
           DATABASE_URI: postgres://ci:ci@127.0.0.1:5432/ci
           PAYLOAD_SECRET: ci-only-not-a-real-secret
 
+      # Everything below this point reads the catalogue. The storefront has read Payload since
+      # 003 Phase 9, so `pnpm build` prerenders product pages, and the end-to-end suite navigates to
+      # specific slugs — an empty database fails the build with `relation "products" does not
+      # exist`, and a migrated-but-empty one fails two dozen tests instead.
+      #
+      # The service container above starts Postgres; it does not start a schema, and it certainly
+      # does not start a shop.
+      - name: Database schema
+        run: pnpm payload migrate
+
+      - name: Development catalogue
+        run: pnpm seed
+
       - name: Design tokens are current
         run: pnpm check:tokens
 
@@ -78,6 +91,12 @@ jobs:
 
       - name: Unit tests
         run: pnpm test
+
+      # The data layer against a real Postgres, including the US1 acceptance walk. It creates and
+      # deletes its own documents under a marker slug, so it leaves the seeded catalogue as it
+      # found it for the suites below.
+      - name: Integration tests
+        run: pnpm test:integration
 
       - name: Build
         run: pnpm build
