@@ -18,17 +18,23 @@ import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
  * **This route sits at the root of the site**, so `/[category]` matches any single segment. That is
  * deliberate: every unrecognised one-segment address should 404, and this is where that happens.
  * `/all-jewelry` is a static sibling and Next resolves it first.
+ *
+ * **It renders per request, and it has no `generateStaticParams`.** It carried one from T253 until
+ * the deployment work, where it turned out to be doing nothing: the page reads `searchParams`, so
+ * a category listing can never be prerendered, and every build had already marked this route
+ * dynamic — the list was a query at build time whose answer was thrown away.
+ *
+ * Worse than useless, in fact. When the container image is built with no database the list comes
+ * back empty, and an EMPTY list is what tells Next the route is static: it then has nothing to
+ * discover the `searchParams` read from, marks the route SSG, and every category answers 500
+ * `DYNAMIC_SERVER_USAGE` at request time. Saying so explicitly is what stops that from depending on
+ * whether a database happened to be reachable during a build.
  */
+export const dynamic = 'force-dynamic'
+
 async function resolve(slug: string) {
   const categories = await getCategories()
   return categories.find((category) => category.slug === slug) ?? null
-}
-
-export async function generateStaticParams() {
-  // Prerenders the four categories that exist at build time. A category added afterwards is still
-  // served — the segment is validated at request time, not against this list.
-  const categories = await getCategories()
-  return categories.map((category) => ({ category: category.slug }))
 }
 
 export async function generateMetadata({

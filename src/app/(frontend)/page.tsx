@@ -28,6 +28,22 @@ import { homeContent } from '@/mocks'
  * The heading hierarchy is decided here rather than inside the bands, because it is a property of
  * the page: the hero owns the only `h1`, and every band heading is an `h2` beneath it (FR-026).
  */
+/**
+ * **Rendered per request, deliberately** — this page reads the catalogue, and the container image is
+ * built with no database to read (see `src/lib/catalog/prerender.ts`).
+ *
+ * The two dynamic routes degrade by prerendering nothing and rendering on demand instead, which
+ * costs the first visitor one render and nothing after that. A page with no dynamic segment has no
+ * such middle ground: Next prerenders it at build if it can, so a build with no database would bake
+ * a home page with no categories and no featured pieces, and it would stay that way until somebody
+ * happened to edit something in the admin. An empty band that never heals is worse than two queries.
+ *
+ * Those two queries are the whole cost — the categories and the first few products, both small,
+ * both from a database in the same process. The photographs, which is what the visitor actually
+ * waits for, are unaffected.
+ */
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   // Not the layout's `%s — Aurum` template: on the home page that would read "Aurum — Aurum".
   title: { absolute: 'Aurum — Lab-grown diamond jewelry' },

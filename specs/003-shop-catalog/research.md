@@ -543,9 +543,8 @@ listings are not cached at all. No route uses time-based revalidation.
 
 | Route | Rendering | Why | Kept fresh by |
 | --- | --- | --- | --- |
-| `/` | Prerendered at build | Nothing on it varies per visitor | `revalidatePath('/')` |
-| `/products/[slug]` | Prerendered per published slug via `generateStaticParams` | The LCP element is the first photograph, and prerendering puts it in the first byte (SC-008) | one `revalidatePath` per slug |
-| `/[category]`, `/all-jewelry` | Dynamic | They read `searchParams` — a filtered grid is a function of the query string | nothing to keep fresh |
+| `/products/[slug]` | Cached — prerendered per published slug where the build can read the catalogue, rendered on demand and kept where it cannot | The LCP element is the first photograph, and prerendering puts it in the first byte (SC-008) | one `revalidatePath` per slug |
+| `/`, `/[category]`, `/all-jewelry` | Per request | The two listings read `searchParams` — a filtered grid is a function of the query string. `/` is `force-dynamic` for a deployment reason, below | nothing to keep fresh |
 
 **Why hooks and not an interval.** An interval is a guess in both directions: too long and a publish
 is late, too short and pages are rebuilt for nobody. Every write that can change a page goes through
@@ -580,6 +579,29 @@ exactly. Caching the LISTING data across requests is what Cache Components would
 worth revisiting alongside T304's denormalisation, which is what makes the query narrow in the first
 place.
 
+**⚠ The container image is built with no database, and that decided two of those rows.** The deploy
+is `next build` inside the image, then `pnpm payload migrate`, then `pnpm start` — so at build time
+the deployment database is not merely unreachable, on a first deploy its tables do not exist. A
+build that needs it puts a chicken-and-egg in front of every new environment. `prerender.ts`
+therefore lets `generateStaticParams` come back empty when Payload cannot connect, and only then:
+any other error still fails the build, because "the catalogue is empty" and "the catalogue could not
+be read" have to stay distinguishable. Measured against a build made with no database and then run
+against a real one, a product page is `x-nextjs-cache: MISS` on the first request, `HIT` after, and
+a write in the admin invalidates it exactly as it invalidates a prerendered one.
+
+`/` cannot degrade that way. A route with no dynamic segment is prerendered at build if it can be,
+so a database-less build would bake a home page with no categories and no featured pieces, and it
+would stay that way until somebody happened to edit something in the admin. `force-dynamic` costs
+two small queries per request — measured at 1272ms LCP against 1252ms prerendered, which is noise —
+and is correct in every environment.
+
+**⚠ `/[category]`'s `generateStaticParams` was dead from the day it was written (T253).** The page
+reads `searchParams`, so a category listing can never be prerendered, and every build had already
+marked the route dynamic — the list was a query at build time whose answer was discarded. It was
+worse than useless: an EMPTY list is what tells Next the route is static, so a database-less build
+marked it SSG, found nothing to discover the `searchParams` read from, and every category answered
+**500 `DYNAMIC_SERVER_USAGE`**. The route says `force-dynamic` now and has no list.
+
 **Seeding is not publishing.** `pnpm seed` runs under `payload run`, where `revalidatePath` has no
 request scope and throws `Invariant: static generation store missing`. Every write in the seed
 passes `context: skipRevalidation`. A dev server running alongside is a different process whose
@@ -594,10 +616,14 @@ viewport, throttled to the Lighthouse mobile profile — 4× CPU slowdown, 1.6Mb
 
 | Route | LCP | Initial JS (gzipped) | Photographs below the fold loading eagerly |
 | --- | --- | --- | --- |
-| `/` | 1.25–1.64s | 190.5 KB | 0 of 12 |
+| `/` | 1.27s | 190.5 KB | 0 of 12 |
 | `/all-jewelry` | 1.05s | 190.5 KB | 0 of 21 |
 | `/rings` | 0.94s | 190.5 KB | 0 of 10 |
 | `/products/[slug]` | 0.96–1.06s | 190.5 KB | 0 of 8 |
+
+Re-measured after `/` became `force-dynamic` for the deployment reason in R13: 1272ms against
+1252ms when it was prerendered, which is inside the run-to-run spread. Rendering the two catalogue
+queries per request does not show up next to the photograph the visitor is actually waiting for.
 
 **The product page is the one the budget names, and it is 1.0s against a 2.5s ceiling.** The
 photograph above the fold is the LCP element at all three widths, and it is prerendered with a

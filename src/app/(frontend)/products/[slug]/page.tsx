@@ -6,6 +6,7 @@ import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/co
 import { JewelryCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
 import { minorUnitDigits } from '@/lib/catalog/price'
+import { prerenderable } from '@/lib/catalog/prerender'
 import { getProduct, getProductSlugs, getRelated, getShopContent } from '@/lib/catalog/queries'
 import type { ProductDetail } from '@/lib/catalog/types'
 import { SHOP_PROMISES } from '@/lib/shop-promises'
@@ -38,14 +39,16 @@ import { SHOP_PROMISES } from '@/lib/shop-promises'
  *
  * **A piece published after the build is still served.** `dynamicParams` is left at its default, so
  * a slug that is not in this list renders on demand and is cached from then on — the list decides
- * what is ready before the first visitor, not what exists.
+ * what is ready before the first visitor, not what exists. That is also why `prerenderable` can
+ * hand back nothing when the container image is built with no database to read: the list empties,
+ * and every page takes the path a newly published piece already takes.
  *
  * Both halves of that would go stale on their own. `src/lib/revalidate.ts` is the other half: a
  * write in the admin marks this whole route pattern for regeneration, so the prerendered page and
  * the on-demand one are invalidated by the same signal.
  */
 export async function generateStaticParams() {
-  const slugs = await getProductSlugs()
+  const slugs = await prerenderable('product pages', getProductSlugs)
   return slugs.map((slug) => ({ slug }))
 }
 

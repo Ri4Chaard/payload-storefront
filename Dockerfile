@@ -79,6 +79,10 @@ COPY --from=build /app/src ./src
 COPY --from=build /app/migrations ./migrations
 # The @tokens/* alias resolves here; the Payload CLI reads TypeScript source, so keep it resolvable.
 COPY --from=build /app/design ./design
+# `pnpm seed` is how a fresh environment gets a catalogue, and it runs through `payload run` in this
+# container so that uploads land in the mounted media volume rather than on whichever machine
+# invoked it. `tsx` arrives as a dependency of payload itself, so nothing else is needed for it.
+COPY --from=build /app/scripts ./scripts
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml next.config.mjs tsconfig.json ./
 
 # Bake in the pnpm that package.json pins. `corepack enable` alone only installs a shim, which

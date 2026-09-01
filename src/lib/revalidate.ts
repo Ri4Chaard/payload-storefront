@@ -1,16 +1,18 @@
 /**
  * Publishing invalidates the pages that draw the published thing (003/T294).
  *
- * Constitution V calls stale content after a publish a defect, and both of this site's cached
- * routes can go stale that way: **the home page is prerendered at build**, and **every published
- * product page is prerendered from `generateStaticParams`**. Without something on this side, an
- * owner could change a price in the admin and watch the old one stay on the page until the next
+ * Constitution V calls stale content after a publish a defect, and one of this site's routes can go
+ * stale that way: **every product page is cached**, whether it was prerendered from
+ * `generateStaticParams` or rendered on demand and kept. Without something on this side, an owner
+ * could change a price in the admin and watch the old one stay on the page until the next
  * deployment.
  *
- * **The listings are deliberately absent from this file.** `/[category]` and `/all-jewelry` read
- * `searchParams` — a filtered grid is a function of the query string — so they render per request
- * and hold nothing to invalidate. If one of them is ever made cacheable, its path belongs in
- * `invalidate()` below, and this paragraph is where to look for why it is not there already.
+ * **Three routes are deliberately absent from this file, for the same reason: they are not cached.**
+ * `/[category]` and `/all-jewelry` read `searchParams` — a filtered grid is a function of the query
+ * string — and `/` is `force-dynamic` because a home page prerendered from a database the container
+ * build cannot reach would bake empty and stay empty. If any of them is ever made cacheable, its
+ * path belongs in `invalidate()` below, and this paragraph is where to look for why it is not there
+ * already.
  *
  * **There is no time-based revalidation anywhere.** An interval is a guess in both directions: too
  * long and a publish is late, too short and pages are rebuilt for nobody. Every write that can
@@ -67,9 +69,6 @@ export const skipRevalidation: RequestContext = { disableRevalidate: true }
  */
 async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void> {
   const { revalidatePath } = await import('next/cache')
-
-  // The featured row and the category band.
-  revalidatePath('/')
 
   const { docs } = await payload.find({
     collection: 'products',

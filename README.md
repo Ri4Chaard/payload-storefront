@@ -44,21 +44,27 @@ is empty.
 
 | Route | What it is | Rendering |
 | --- | --- | --- |
-| `/` | Home. The category band and the featured row read the catalogue | Prerendered |
+| `/` | Home. The category band and the featured row read the catalogue | Per request |
 | `/all-jewelry` | The whole shop, with filters, sort and LOAD MORE | Per request |
 | `/<category>` | One category — `/rings`, `/bracelets`, … | Per request |
-| `/products/<slug>` | One piece: gallery, stones, sizes, the details accordions | Prerendered per published slug |
+| `/products/<slug>` | One piece: gallery, stones, sizes, the details accordions | Cached, and invalidated on publish |
 | `/admin` | Payload | Per request |
 
 **The category segment is validated against the catalogue, not against a list in the code.** A
 category is a document the owner can create, so `/whatever-they-named-it` works the moment they
 publish it, and any unrecognised single segment is the branded 404.
 
-**The two listings render per request because they read `searchParams`** — a filtered grid is a
-function of the query string. The two prerendered routes are kept fresh by Payload hooks: saving
-anything the storefront reads invalidates the home page and every product page, so a publish is
-never waiting on a deployment or an interval. The whole strategy is
+**Everything except the product page renders per request**, because the two listings read
+`searchParams` and the home page must not be baked from a database the container build cannot reach.
+The product page is the cached one: prerendered per published slug where the build can read the
+catalogue, rendered on demand and kept where it cannot, and invalidated by Payload hooks either way
+— saving anything the storefront reads marks every product page stale, so a publish is never waiting
+on a deployment or an interval. The whole strategy is
 [003/research R13](./specs/003-shop-catalog/research.md).
+
+**`next build` does not need a database.** It uses one when there is one, and prerenders the whole
+catalogue; without one it prerenders nothing and says so. That is deliberate — the image is built
+before `pnpm payload migrate` runs, so on a first deploy the tables do not exist yet.
 
 ## Seeding
 
@@ -76,6 +82,16 @@ fixed by what references what:
 5. **Variants**, after their product: the plugin checks that each stone's variant type is enabled on
    the parent, so a variant created first is rejected
 6. **Shop settings**, the global holding the accordion headings and the warranty and delivery copy
+
+**On a deployed environment, run it inside the container**:
+
+```bash
+docker compose exec app pnpm seed
+```
+
+Not from a laptop against the deployment's database. Payload's local storage writes uploads to
+`./media` relative to the working directory, so seeding from outside would put the photographs on
+your machine and leave the site with media rows pointing at files that were never uploaded.
 
 It leaves one product as a **draft** on purpose. A draft that is unreachable by URL is a rule worth
 exercising rather than merely asserting, and several tests reach for that slug.

@@ -26,15 +26,25 @@ const change = (args: Record<string, unknown> = {}) =>
 describe('revalidation hooks', () => {
   beforeEach(() => revalidatePath.mockClear())
 
-  it('names the home page and every product page, one literal path at a time', async () => {
+  it('names every product page, one literal path at a time', async () => {
     await change()
 
-    expect(revalidatePath).toHaveBeenCalledWith('/')
     expect(revalidatePath).toHaveBeenCalledWith('/products/first-piece')
     expect(revalidatePath).toHaveBeenCalledWith('/products/second-piece')
     // Not `/products/[slug]`. The pattern form leaves a prerendered page untouched, which is every
     // published piece — see the note on `invalidate`.
     expect(revalidatePath).not.toHaveBeenCalledWith('/products/[slug]', 'page')
+  })
+
+  /**
+   * The home page and the two listings render per request, so there is nothing of theirs to
+   * invalidate — and a call that does nothing is a claim that something is being kept fresh.
+   */
+  it('leaves the routes that are not cached alone', async () => {
+    await change()
+
+    expect(revalidatePath).not.toHaveBeenCalledWith('/')
+    expect(revalidatePath).not.toHaveBeenCalledWith('/all-jewelry')
   })
 
   it('asks for drafts too, so an unpublished piece stops being served', async () => {
@@ -72,7 +82,8 @@ describe('revalidation hooks', () => {
   it('returns the document from the global hook, which Payload requires', async () => {
     const doc = { detailsTitle: 'PRODUCT DETAILS' }
     expect(await revalidateGlobalOnChange({ context: {}, doc, req } as never)).toBe(doc)
-    expect(revalidatePath).toHaveBeenCalledWith('/')
+    // The shop settings are on every product page, so a change to them reaches all of them.
+    expect(revalidatePath).toHaveBeenCalledWith('/products/first-piece')
   })
 
   /**
