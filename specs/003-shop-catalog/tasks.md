@@ -412,12 +412,14 @@ disappears, including from its own URL. No mock involved.
       readable; only the lightbox is unavailable (FR-029, SC-004)
 - [x] T298 [P] [US7] 320px and 200% zoom on every route — no horizontal page scroll (SC-007)
 - [x] T299 [P] [US7] Reduced motion — no transition on the drawer, the gallery or the lightbox
-- [ ] T300 [US7] Performance: product-page LCP within 2.5s on a throttled mid-range mobile profile;
+- [x] T300 [US7] Performance: product-page LCP within 2.5s on a throttled mid-range mobile profile;
       each route's initial JavaScript under 200KB gzipped; listing photographs below the fold lazy
-      (SC-008)
-- [ ] T301 [US7] Record every kit change in
+      (SC-008) — measured in [research.md R14](research.md#r14-the-performance-budget-measured)
+- [x] T301 [US7] Record every kit change in
       [001/contracts/ui-kit.md](../001-design-system-foundation/contracts/ui-kit.md) with stories
-      (FR-042). More than three changes means a band was built wrong (SC-009)
+      (FR-042). More than three changes means a band was built wrong (SC-009) — standing at eleven,
+      assessed in the spec; the four primitives this spec ADDED (`Drawer`, `Lightbox`,
+      `RangeSlider`, `Pagination`) had never reached the contract at all and are in it now
 - [ ] T302 [US7] Run the whole gate set — `check:naming`, `check:stories`, `check:styles`,
       `check:tokens`, `check:contrast`, `lint`, `typecheck`, `test`, `test:stories`, `test:a11y`,
       `test:e2e`, `build` (SC-012)

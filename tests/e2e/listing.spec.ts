@@ -657,3 +657,27 @@ for (const [name, width, size] of [
     expect(await box(sort), 'the two triggers are different boxes').toBe(await box(filters))
   })
 }
+
+/**
+ * SC-008's third clause: the photographs below the fold do not compete with the ones above it.
+ *
+ * A listing is two dozen photographs on a route whose whole job is the first row, so eager loading
+ * here is not a small waste — it is every card in the grid racing the one the visitor is looking at
+ * for the same connection. `next/image` lazy-loads by default and `priority` opts out, so what this
+ * guards is a `priority` added to the card by someone who meant it for a hero.
+ */
+test('every photograph below the fold waits its turn', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/all-jewelry')
+  await page.waitForLoadState('networkidle')
+
+  const eager = await page.evaluate(() => {
+    const fold = window.innerHeight
+    return Array.from(document.querySelectorAll('main img'))
+      .filter((image) => image.getBoundingClientRect().top > fold)
+      .filter((image) => image.getAttribute('loading') !== 'lazy')
+      .map((image) => image.getAttribute('src')?.slice(0, 80) ?? '')
+  })
+
+  expect(eager, 'these load eagerly below the fold').toEqual([])
+})

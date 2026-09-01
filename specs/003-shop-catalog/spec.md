@@ -676,7 +676,7 @@ page and the open full-screen gallery at three widths; load each route with Java
   is recorded in the contract with a story. More than three such changes means a band is being built
   wrong.
 
-  **Standing at nine, and assessed rather than counted.** The threshold is a smell detector for a
+  **Standing at eleven, and assessed rather than counted.** The threshold is a smell detector for a
   band FIGHTING the kit — reshaping primitives because the composition is wrong. That is not what
   these are, and the test is what the alternative would have been:
 
@@ -690,12 +690,14 @@ page and the open full-screen gallery at three widths; load each route with Java
   | `Carousel` gained `controls: 'none'`, `activeIndex`/`onActiveIndexChange` | The **extraction of 002 finishing its job**. `Carousel` exists because two callers needed one scroll-snap track; the gallery is the third, and the only thing it needed that the primitive lacked was the ability to say and be told which item is showing | a second scroll-snap track in `product-gallery`, which is the exact duplicate `Carousel` was extracted to prevent |
   | `Carousel` gained `loop` | Owner-requested. `wrap` only ever governed the arrows — the swipe underneath still stopped at the ends, because native scrolling has them. Removing them is the track's own business, and the track is this component | edge copies hand-managed in `product-gallery`, reaching into a track it does not own |
   | `Carousel` gained `autoAdvance`, and `useAutoAdvance` joined the kit | Owner-requested for two bands. The timer is a hook rather than a `Carousel` internal because the gallery's pause has to cover its rail and dots, which are outside the carousel | two timers, and a gallery that moves the visitor off the thumbnail they just chose |
+  | `Accordion` collapses with the animation it opens with | Owner-requested. The inner wrapper was `hidden` when closed, and an attribute cannot be transitioned — so the row opened over `--duration-base` and shut in one frame. `visibility` interpolates by holding the visible value and flipping at the end, which keeps the copy out of the accessibility tree AND plays the open backwards | a height animation driven from JavaScript, or a row that opens smoothly and slams shut |
+  | `Accordion` opens every row when there is no scripting | A **defect repair** against SC-004. Two of a product page's three sections were unreadable — not merely hidden: a collapsed panel is `visibility: hidden` in a zero-height row, which is out of the accessibility tree — and the button that would open them is a handler that never runs | none — the page did not meet the criterion. `<details>`/`<summary>` would, at the price of discarding the drawn animation and the primitive |
   | `JewelryCarousel`'s `cta` became optional | The band is reused for _Complete the Collection_ (FR-037) and the product page draws no button there (`242:2585`) | a second copy of the band, or a button the design does not have pointing at a listing nobody asked for |
 
-  Two defects, two applications of an existing convention, two variants the drawing asks for, two
-  reuses that needed the shared thing to admit a second caller, and two owner requests.
+  Three defects, two applications of an existing convention, two variants the drawing asks for, two
+  reuses that needed the shared thing to admit a second caller, and three owner requests.
 
-  Four of the nine are `Carousel`, which is worth saying plainly: that is not the component being
+  Four of the eleven are `Carousel`, which is worth saying plainly: that is not the component being
   fought, it is the component finally being finished. 002 extracted it from `ImageCarousel` with
   exactly the two callers it then had, and everything since — a position it can report and be told,
   arrows it can do without, a timer, and ends it can do without — is the third caller asking for

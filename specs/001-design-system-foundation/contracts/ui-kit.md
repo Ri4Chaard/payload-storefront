@@ -105,6 +105,23 @@ breadcrumb, not a breadcrumb. Here it is an ordered list inside a labelled `nav`
 `aria-current="page"` and unlinked, and the separators `aria-hidden`: a screen reader should hear
 the trail, not "text slash text slash text".
 
+### `Pagination`
+
+`page`, `totalPages`, `hrefFor`, `label`.
+
+Added by 003/T255. **Nothing is drawn for it** — the listing frames stop at twelve cards with a
+carousel arrow parked in the grid and `hidden` set on it (003 inconsistency 7) — so it is assembled
+from vocabulary the kit already had: the 50px square outline control the carousels and the viewer
+use for previous and next, and the same type styles as everything else.
+
+Every page is a LINK. That is what makes the back button work, what lets a crawler reach page four
+of a category at all, and what makes the control work with scripting off without a second
+implementation of it. `hrefFor` is how it stays out of the catalogue: the component never learns how
+a filter is encoded, so it lives in `ui/` rather than in `commerce/`.
+
+The window is first, last, the current page and its neighbours, with a gap where numbers were
+dropped. Seven or fewer pages are all shown — a gap that hides one number is worse than the number.
+
 ### `Menu`
 
 `label`, `trigger`, `align`, `placement`, plus `MenuOption` children. A trigger and a popover list,
@@ -354,6 +371,36 @@ away, and four overrides fighting a variant means it is the wrong variant.
 
 ## Content
 
+### `RangeSlider`
+
+`min`, `max`, `step`, `value` (a `[number, number]` pair), `onChange`, `label`, `formatValue`,
+`nameMin` / `nameMax`.
+
+Added by 003/T241 — node `225:1369`, 304 × 24: a 2px rail with a tick at each end, a heavier bar
+across the selected span, and two 24px rings.
+
+**Two overlaid native `<input type="range">`, and no dependency** (003/research R7). The native
+element already brings arrow and Home/End keys, page steps, touch, `aria-valuenow` maintained by the
+browser, and a control assistive technology recognises without being told what it is. What it does
+not bring is a second handle, so there are two of them, stacked, each owning one end. Everything
+visible is drawn underneath them; the inputs contribute only their thumbs.
+
+**Stacking order is the whole trick.** Both inputs cover the full width, so whichever is on top
+swallows every press — including presses meant for the other handle, which is how two handles
+collapsed onto the same value get stuck together permanently. The input whose handle is nearer the
+pointer is raised on `pointermove`, before the press lands, written straight to the DOM because a
+render between the movement that decides and the press that needs the answer is a click landing on
+the handle that was on top a moment ago. The choice freezes while a drag is in progress.
+
+**It submits without JavaScript.** Give it `nameMin` and `nameMax` and the two inputs are ordinary
+form controls, so the drawer's `<form method="GET">` produces the same URL the interactive path
+produces (003/FR-029). That is the reason this is two real inputs rather than two divs and a
+`pointerdown` handler.
+
+`formatValue` exists because the value is the model's and not the browser's: amounts here are
+integer minor units, and `aria-valuenow` would otherwise announce "seven hundred and thirty
+thousand" for a $7,300 ring.
+
 ### `CategoryCard`
 
 `title`, `href`, `image`, `cta`, `headingLevel`, `sizes`, `scrim`.
@@ -477,9 +524,22 @@ would put a paragraph of copy into the control's accessible name. The header is 
 panel is a region it owns through `aria-controls`.
 
 The panel stays in the DOM and collapses with a `0fr → 1fr` grid row — height cannot be transitioned
-from `auto`, and the alternatives either need JavaScript to be correct or clip long copy. The inner
-wrapper is `hidden` when closed, which is what keeps the collapsed copy out of the accessibility
-tree rather than merely clipped.
+from `auto`, and the alternatives either need JavaScript to be correct or clip long copy.
+
+**Changed by 003/T267.** The inner wrapper was `hidden` when closed, which kept the collapsed copy
+out of the accessibility tree — and also ended the collapse instantly, because an attribute cannot
+be transitioned: the row opened over `--duration-base` and shut in a single frame. It is
+`visibility` now, which interpolates by holding the visible value for the whole duration and
+flipping at the end, so the close plays the open backwards and the copy is still out of the
+accessibility tree once it has.
+
+**Changed again by 003/T297.** `accordion.css` opens every row under `@media (scripting: none)`. A
+row is a button that flips React state, so with scripting off the button does nothing and two of a
+product page's three sections stay shut — and shut is not merely out of sight, it is out of the
+accessibility tree, which is a third of the details unreadable rather than merely hidden (SC-004).
+Opening everything is the right answer rather than a fallback: the accordion shortens a long page
+for someone who can open it again, and a visitor who cannot is better served by the whole page than
+by a control that does not work.
 
 The leading glyph is the `minus` dash in every state, as drawn: decoration, not the expand control.
 `icon` swaps it — a row whose subject has a glyph reads better with that glyph than with three
@@ -773,13 +833,80 @@ text. Error and success announce via `role="alert"` / `role="status"`.
 
 ---
 
+## Overlays
+
+Added by 003. `Modal`, `Drawer`, `Tooltip` and `Popover` were all listed as deliberately excluded in
+001 on the grounds that there was no consumer and building them blind is guessing — the row below
+still says so. The catalogue gave two of them a consumer, so two of them exist now, and the note is
+kept rather than quietly edited: it was right when it was written, and what changed is the
+requirement, not the reasoning.
+
+### `useOverlay`
+
+Not a component — a hook, in `ui/overlay`. It owns what every layer over the page has to get right:
+the focus trap, `Escape`, the scroll lock, the outside press, and returning focus to whatever opened
+the layer. `Drawer` uses it; `Lightbox` deliberately does not, because PhotoSwipe brings its own and
+two traps arguing is worse than one that is not ours.
+
+### `Drawer`
+
+`open`, `onClose`, `title`, `side`, `footer`, `triggerRef`, `asForm` / `formProps`, `closeHref`.
+
+Added by 003/T240 — node `532:12507`, 350px wide: a heading with a close control, a scrolling body of
+hairline-separated groups, and a footer that stays put while the body moves under it. Drawn once, for
+the filter panel, and built as a primitive anyway: it knows nothing about filters.
+
+**It is always in the document, and `display` is what changes** — the decision `MobileNav` documented
+in 002, for two reasons that both still hold here. An exit animation needs the element to exist while
+it plays, and the filter panel is a `<form method="GET">` that has to work with scripting off: a
+panel mounted by a click handler never renders for that visitor.
+
+**It traps focus, where `MobileNav` deliberately does not.** This one is a dialog — it owns its close
+button, `CLEAR` and `APPLY`, and nothing behind it is meant to be reachable — which is the case
+`role="dialog"` with `aria-modal` describes.
+
+`closeHref` is the other half of the no-scripting path: a panel opened by the address bar has to be
+closable by the address bar, and `onClose` is a handler that will never run for that visitor. With
+scripting the link is never followed, so nothing navigates and no history entry is added.
+
+The body is the only thing that scrolls, so `APPLY` is reachable at any content length without the
+visitor scrolling a page that is already locked behind them.
+
+### `Lightbox`
+
+`open`, `onClose`, `images`, `index` / `onIndexChange`, `label`, `triggerRef`, `thumbnailFor`.
+
+Added by 003/T265 — node `308:6392`, built on **PhotoSwipe 5**. The frame draws paging, a close
+control and nothing else, and the first version of this file implemented exactly that on
+`useOverlay`. Zoom then entered the brief, and pinch, double-tap, wheel, drag-within-zoom and the
+keyboard path for all of it is not a component (003/research R11).
+
+The library is dressed as the drawing in `lightbox.css` — white ground, dark chrome, the kit's own
+50px outline control for the arrows — and its glyphs are ours, handed over as SVG strings so the icon
+set stays a single source of truth. What that stylesheet restates is button chrome that
+`IconButton`'s `outline` variant also owns: a real duplication, taken deliberately over portalling
+React controls into a DOM tree the library manages imperatively.
+
+Two of its options are decisions rather than configuration:
+
+- **`returnFocus: false`.** PhotoSwipe captures `document.activeElement` when it is constructed and
+  focuses that on close, forever. A caller whose trigger MOVES while the viewer is open — the product
+  gallery, where paging to the fourth photograph should send you back to the fourth — has no way to
+  say so, and the two restorations race. Turning the library's off makes `triggerRef` authoritative
+  instead of merely first.
+- **`showHideAnimationType: 'none'` under `prefers-reduced-motion`** (003/T299). The global rule in
+  the storefront's stylesheet collapses every CSS transition on the page, which is what covers the
+  drawer and the gallery. This animation is not CSS — PhotoSwipe drives the open frame by frame — so
+  it has to be told. Measured, the photograph grows 471×591 → 717×900 over about four hundred
+  milliseconds without it.
+
 ## Deliberately excluded
 
 Recorded so their absence reads as a decision rather than an oversight:
 
 | Not built | Why |
 |---|---|
-| `Modal`, `Drawer`, `Tooltip`, `Popover` | Focus-trap and layering primitives with real accessibility complexity, and no consumer in this spec. Building them blind is exactly the guessing FR-028 exists to prevent. The mobile nav in Story 4 uses a disclosure pattern, not a drawer abstraction. |
+| `Modal`, `Drawer`, `Tooltip`, `Popover` | Focus-trap and layering primitives with real accessibility complexity, and no consumer in this spec. Building them blind is exactly the guessing FR-028 exists to prevent. The mobile nav in Story 4 uses a disclosure pattern, not a drawer abstraction. **Superseded for two of the four**: 003 gave `Drawer` a consumer (the filter panel) and `Lightbox` one (the gallery), and both are built above. `Tooltip` and `Popover` still have none. |
 | `Tabs` | No consumer yet. `Accordion` was on this list for the same reason and came off it when node 242:2382 turned up — a drawn design is a consumer. |
 | `Table` | No tabular data until the admin order queue in spec 004, which lives in the Payload admin and uses Payload's own UI. |
 | `Toast` | Requires a portal and a queue. `InlineMessage` covers every need in specs 001–002. |

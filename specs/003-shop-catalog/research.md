@@ -584,3 +584,36 @@ place.
 request scope and throws `Invariant: static generation store missing`. Every write in the seed
 passes `context: skipRevalidation`. A dev server running alongside is a different process whose
 cache the seed could not have invalidated anyway.
+
+---
+
+## R14. The performance budget, measured
+
+**SC-008 (T300)**, taken against a production build (`pnpm build && pnpm start`) at a 390×844
+viewport, throttled to the Lighthouse mobile profile — 4× CPU slowdown, 1.6Mbps down, 150ms latency.
+
+| Route | LCP | Initial JS (gzipped) | Photographs below the fold loading eagerly |
+| --- | --- | --- | --- |
+| `/` | 1.25–1.64s | 190.5 KB | 0 of 12 |
+| `/all-jewelry` | 1.05s | 190.5 KB | 0 of 21 |
+| `/rings` | 0.94s | 190.5 KB | 0 of 10 |
+| `/products/[slug]` | 0.96–1.06s | 190.5 KB | 0 of 8 |
+
+**The product page is the one the budget names, and it is 1.0s against a 2.5s ceiling.** The
+photograph above the fold is the LCP element at all three widths, and it is prerendered with a
+`<link rel="preload" as="image">` ahead of it, so the request starts from the HTML rather than from
+the hydrated gallery.
+
+**Every route ships the same twelve files.** That is not a rounding artefact — Turbopack's
+production build emits one shared client bundle for the whole app, so there is no per-route
+variation to report. 190.5 KB against a 200 KB ceiling is **9.5 KB of headroom**, which is the
+number worth watching: the next client component large enough to matter spends most of it. What is
+NOT in there is PhotoSwipe, which `lightbox.tsx` loads through `pswpModule: () => import(…)` and
+which therefore costs nothing until someone opens a photograph.
+
+**A dev-server warning that is not a defect.** `next dev` reports "Image … was detected as the
+Largest Contentful Paint. Please add the `loading="eager"` property" on the product route. The
+production HTML carries the preload for exactly that photograph and the LCP element is the gallery's
+own `<img>` at 32–112ms unthrottled; the warning is a development heuristic that does not see the
+preload path. Recorded here rather than silenced, because the next person to read that line deserves
+to know it was chased.
