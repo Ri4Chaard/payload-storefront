@@ -7,6 +7,7 @@ import {
   getFilterFacets,
   getListing,
   getProduct,
+  getProductSlugs,
   getRelated,
   getShopContent,
 } from '@/lib/catalog/queries'
@@ -123,6 +124,21 @@ describe('getProduct', () => {
   it('returns null for a draft, exactly as it does for a slug that names nothing', async () => {
     expect(await getProduct('unreleased-spartan-cuff')).toBeNull()
     expect(await getProduct('no-such-piece')).toBeNull()
+  })
+})
+
+describe('getProductSlugs', () => {
+  /**
+   * What the product route prerenders (003/T294). A draft in this list would get a prerendered page
+   * and become reachable by URL — FR-009's leak, arriving through the build rather than a query —
+   * so the access rule has to hold on this path too, not only on the one that draws a page.
+   */
+  it('lists every published slug and no draft', async () => {
+    const slugs = await getProductSlugs()
+
+    expect(slugs).toContain('paragon-emerald-cut-diamond-engagement-ring')
+    expect(slugs).not.toContain('unreleased-spartan-cuff')
+    expect(slugs).toHaveLength((await listing({ page: 99 })).total)
   })
 })
 

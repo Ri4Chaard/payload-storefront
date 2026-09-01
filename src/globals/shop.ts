@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { isAdmin } from '@/lib/access'
+import { revalidateGlobalOnChange } from '@/lib/revalidate'
 
 /**
  * Shop-wide copy that is not per-product.
@@ -19,6 +20,11 @@ export const Shop: GlobalConfig = {
   access: {
     read: () => true,
     update: isAdmin,
+  },
+  // Publishing invalidates the cached routes (003/T294). These words are on every product
+  // page, so a change here is a change to all of them.
+  hooks: {
+    afterChange: [revalidateGlobalOnChange],
   },
   fields: [
     /**

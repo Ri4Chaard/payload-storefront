@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
+
 /**
  * Uploads.
  *
@@ -34,6 +36,11 @@ export const Media: CollectionConfig = {
       { name: 'xl', width: 1280, withoutEnlargement: true },
       { name: 'full', width: 1920, withoutEnlargement: true },
     ],
+  },
+  // Publishing invalidates the cached routes (003/T294). A photograph is on both cached routes — the featured row and the gallery.
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

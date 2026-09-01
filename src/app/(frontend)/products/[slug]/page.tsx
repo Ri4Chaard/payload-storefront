@@ -6,7 +6,7 @@ import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/co
 import { JewelryCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
 import { minorUnitDigits } from '@/lib/catalog/price'
-import { getProduct, getRelated, getShopContent } from '@/lib/catalog/queries'
+import { getProduct, getProductSlugs, getRelated, getShopContent } from '@/lib/catalog/queries'
 import type { ProductDetail } from '@/lib/catalog/types'
 import { SHOP_PROMISES } from '@/lib/shop-promises'
 
@@ -28,6 +28,27 @@ import { SHOP_PROMISES } from '@/lib/shop-promises'
  * unpublished piece exists is the leak FR-009 is written against, and the loader is where that
  * decision is made, not this file.
  */
+/**
+ * **Every published piece is prerendered** (003/T294), and stays fresh because publishing says so.
+ *
+ * This is the route the performance budget is written about (SC-008): the photograph above the
+ * fold is the LCP element, and prerendering means it is already in the HTML that the first byte
+ * carries rather than waiting on a query. The catalogue is tens of pieces, so the whole set costs
+ * a few seconds of build.
+ *
+ * **A piece published after the build is still served.** `dynamicParams` is left at its default, so
+ * a slug that is not in this list renders on demand and is cached from then on — the list decides
+ * what is ready before the first visitor, not what exists.
+ *
+ * Both halves of that would go stale on their own. `src/lib/revalidate.ts` is the other half: a
+ * write in the admin marks this whole route pattern for regeneration, so the prerendered page and
+ * the on-demand one are invalidated by the same signal.
+ */
+export async function generateStaticParams() {
+  const slugs = await getProductSlugs()
+  return slugs.map((slug) => ({ slug }))
+}
+
 export async function generateMetadata({
   params,
 }: {

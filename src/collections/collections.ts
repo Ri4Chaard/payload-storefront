@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slugField } from '@/fields/slug'
 import { isAdmin } from '@/lib/access'
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
  * A merchandising grouping a piece belongs to: Deia, Marvel, Molten, Spartan. Zero or more per
@@ -27,6 +28,11 @@ export const Collections: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
+  },
+  // Publishing invalidates the cached routes (003/T294). A collection decides what _Complete the Collection_ shows beside a piece.
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

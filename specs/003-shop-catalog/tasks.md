@@ -394,8 +394,9 @@ disappears, including from its own URL. No mock involved.
 > proof of the seam than anything they assert individually; the seventeenth named a category that
 > happened to hold the fixtures' sold-out piece and now asks the whole catalogue.
 
-- [ ] T294 [US1b] Set the caching and revalidation strategy per route, with publishing invalidating
-      the affected pages. Constitution V calls stale content after publish a defect
+- [x] T294 [US1b] Set the caching and revalidation strategy per route, with publishing invalidating
+      the affected pages. Constitution V calls stale content after publish a defect — recorded in
+      [research.md R13](research.md#r13-what-is-cached-and-what-invalidates-it)
 - [ ] T295 [US1b] Re-run the full US1 acceptance from the spec end to end — the scenarios that could
       not pass on mocks are the point of this phase
 

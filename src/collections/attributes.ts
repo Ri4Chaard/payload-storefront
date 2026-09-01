@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAdmin } from '@/lib/access'
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
  * A descriptive property the owner invents: metal, carat weight, finish, provenance, chain length.
@@ -30,6 +31,11 @@ export const Attributes: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
+  },
+  // Publishing invalidates the cached routes (003/T294). An attribute supplies the labels in the product-details accordion.
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

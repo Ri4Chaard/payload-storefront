@@ -3,6 +3,7 @@ import type { Field } from 'payload'
 
 import { seoTab } from '@/fields/seo'
 import { slugField } from '@/fields/slug'
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
  * The plugin's own `inventory` field, shown only when it means something.
@@ -94,6 +95,19 @@ const adjustVariantsJoin = (field: Field): Field => {
  */
 export const productsCollectionOverride: CollectionOverride = ({ defaultCollection }) => ({
   ...defaultCollection,
+
+  /**
+   * Publishing invalidates the cached routes (003/T294).
+   *
+   * **Appended to the plugin's own hooks rather than replacing them.** `defaultCollection.hooks`
+   * is where the e-commerce plugin keeps its own bookkeeping; spreading it and adding to the two
+   * arrays leaves that intact, where an object literal would silently drop it.
+   */
+  hooks: {
+    ...defaultCollection.hooks,
+    afterChange: [...(defaultCollection.hooks?.afterChange ?? []), revalidateOnChange],
+    afterDelete: [...(defaultCollection.hooks?.afterDelete ?? []), revalidateOnDelete],
+  },
 
   admin: {
     ...defaultCollection.admin,

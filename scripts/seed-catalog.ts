@@ -8,6 +8,11 @@
  * **Idempotent.** Everything is looked up by its slug or name and updated in place, so it can be
  * re-run after the photography lands (T292) without duplicating a catalogue.
  *
+ * **Every write passes `context: skipRevalidation`.** Seeding is not publishing: this runs in its
+ * own process, where `revalidatePath` has no request scope to reach and throws rather than doing
+ * nothing — and a dev server running alongside is a different process whose cache this one could
+ * not have invalidated anyway. See `src/lib/revalidate.ts`.
+ *
  * This is development fixture data, not content. The owner's real catalogue is authored in the
  * admin; what this script guarantees is that there is always something to develop against, and that
  * both option paths — a piece with stones and a piece without — exist for spec FR-008.
@@ -16,6 +21,8 @@
 import { resolve } from 'node:path'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+
+import { skipRevalidation } from '@/lib/revalidate'
 
 const photograph = (name: string) => resolve(process.cwd(), 'public/photography', name)
 
@@ -71,10 +78,11 @@ async function upsert<T extends 'categories' | 'collections' | 'sizes' | 'attrib
       collection,
       id: existing.docs[0].id,
       data: data as never,
+      context: skipRevalidation,
     })
   }
 
-  return payload.create({ collection, data: data as never })
+  return payload.create({ collection, data: data as never, context: skipRevalidation })
 }
 
 async function upsertMedia(file: string, alt: string) {
@@ -84,7 +92,12 @@ async function upsertMedia(file: string, alt: string) {
     limit: 1,
   })
   if (existing.docs[0]) return existing.docs[0]
-  return payload.create({ collection: 'media', data: { alt }, filePath: photograph(file) })
+  return payload.create({
+    collection: 'media',
+    data: { alt },
+    filePath: photograph(file),
+    context: skipRevalidation,
+  })
 }
 
 console.log('› categories')
@@ -179,6 +192,7 @@ const diamondType =
   (await payload.create({
     collection: 'variantTypes',
     data: { name: 'diamond', label: 'Choose Your Diamond:' },
+    context: skipRevalidation,
   }))
 
 const stoneSpecs = [
@@ -206,6 +220,7 @@ for (const spec of stoneSpecs) {
     (await payload.create({
       collection: 'variantOptions',
       data: { variantType: diamondType.id, label: spec.label, value: spec.value },
+      context: skipRevalidation,
     }))
 }
 
@@ -508,8 +523,17 @@ for (const seed of productSeeds) {
   })
 
   const product = found.docs[0]
-    ? await payload.update({ collection: 'products', id: found.docs[0].id, data: data as never })
-    : await payload.create({ collection: 'products', data: data as never })
+    ? await payload.update({
+        collection: 'products',
+        id: found.docs[0].id,
+        data: data as never,
+        context: skipRevalidation,
+      })
+    : await payload.create({
+        collection: 'products',
+        data: data as never,
+        context: skipRevalidation,
+      })
 
   console.log(`  · ${seed.title}`)
 
@@ -521,7 +545,7 @@ for (const seed of productSeeds) {
       limit: 100,
     })
     for (const orphan of orphans.docs) {
-      await payload.delete({ collection: 'variants', id: orphan.id })
+      await payload.delete({ collection: 'variants', id: orphan.id, context: skipRevalidation })
       console.log('      removed a stone that no longer belongs here')
     }
     continue
@@ -551,9 +575,14 @@ for (const seed of productSeeds) {
         collection: 'variants',
         id: existing.docs[0].id,
         data: variantData as never,
+        context: skipRevalidation,
       })
     } else {
-      await payload.create({ collection: 'variants', data: variantData as never })
+      await payload.create({
+        collection: 'variants',
+        data: variantData as never,
+        context: skipRevalidation,
+      })
     }
     console.log(
       `      ${spec.label} — $${(seed.price + spec.price).toLocaleString()}, ${spec.inventory} available`,
@@ -575,6 +604,7 @@ await payload.updateGlobal({
     ]),
     listingSubtitle: 'Timeless brilliance, made for every moment',
   } as never,
+  context: skipRevalidation,
 })
 
 console.log('\nSeeded.')

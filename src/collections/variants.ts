@@ -1,5 +1,7 @@
 import type { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
 
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
+
 /**
  * A stone a customer can choose — one row per option under "Choose Your Diamond:".
  *
@@ -31,6 +33,19 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
    * `NotFound` before the form renders. That is not a plugin bug; it is a collection that was never
    * meant to have a front door.
    */
+
+  /**
+   * Publishing invalidates the cached routes (003/T294).
+   *
+   * **Appended to the plugin's own hooks rather than replacing them.** `defaultCollection.hooks`
+   * is where the e-commerce plugin keeps its inventory and price bookkeeping; spreading it and
+   * adding to the two arrays leaves that intact, where an object literal would silently drop it.
+   */
+  hooks: {
+    ...defaultCollection.hooks,
+    afterChange: [...(defaultCollection.hooks?.afterChange ?? []), revalidateOnChange],
+    afterDelete: [...(defaultCollection.hooks?.afterDelete ?? []), revalidateOnDelete],
+  },
 
   fields: [
     ...defaultCollection.fields,

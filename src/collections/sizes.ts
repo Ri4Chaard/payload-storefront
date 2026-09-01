@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { isAdmin } from '@/lib/access'
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
  * A value a piece can be made in — ring sizes, bracelet lengths, chain lengths.
@@ -26,6 +27,11 @@ export const Sizes: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
+  },
+  // Publishing invalidates the cached routes (003/T294). A size is a row in the size selector on every product made in it.
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

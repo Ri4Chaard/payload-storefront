@@ -369,6 +369,29 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
   return found ? toProductDetail(found) : null
 }
 
+/**
+ * Every published slug, for the product route's `generateStaticParams` (003/T294).
+ *
+ * **Not `catalogue()`.** That cache holds fully resolved documents because a page draws them;
+ * a list of strings has no business filling it, and `depth: 0` with `select` is the difference
+ * between one cheap query at build time and thirty products' worth of joins thrown away.
+ *
+ * `overrideAccess: false` for the same reason it is everywhere else in this file: a draft must not
+ * get a prerendered page, which would make it reachable by URL — the leak FR-009 is written
+ * against, arriving through the build instead of through a query.
+ */
+export async function getProductSlugs(): Promise<string[]> {
+  const payload = await client()
+  const { docs } = await payload.find({
+    collection: 'products',
+    depth: 0,
+    limit: 0,
+    overrideAccess: false,
+    select: { slug: true },
+  })
+  return docs.map((product) => product.slug)
+}
+
 export async function getCategories(): Promise<CategorySummary[]> {
   const { categories } = await reference()
   // `order` is the column the owner drags in the admin; ties fall back to id so that two

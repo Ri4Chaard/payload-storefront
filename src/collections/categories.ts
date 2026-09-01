@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { seoField } from '@/fields/seo'
 import { slugField } from '@/fields/slug'
 import { isAdmin } from '@/lib/access'
+import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
  * What a piece is: rings, bracelets, earrings, necklaces. Exactly one per product.
@@ -26,6 +27,11 @@ export const Categories: CollectionConfig = {
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
+  },
+  // Publishing invalidates the cached routes (003/T294). A category is the band on the home page and the eyebrow above every product in it.
+  hooks: {
+    afterChange: [revalidateOnChange],
+    afterDelete: [revalidateOnDelete],
   },
   fields: [
     {

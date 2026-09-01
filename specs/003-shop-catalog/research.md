@@ -533,3 +533,54 @@ moved them. `canonicalListing` sends that request on to the address a scripted v
 produced, which is what makes FR-029's "the same URL" literally true rather than approximately. It
 refuses to move any request that had a value to report (FR-030), because the redirect rewrites the
 query from the parsed state and that is exactly where the reported value would vanish.
+
+---
+
+## R13. What is cached, and what invalidates it
+
+**Decision (T294)**: two routes are cached and are invalidated by name from Payload hooks; the
+listings are not cached at all. No route uses time-based revalidation.
+
+| Route | Rendering | Why | Kept fresh by |
+| --- | --- | --- | --- |
+| `/` | Prerendered at build | Nothing on it varies per visitor | `revalidatePath('/')` |
+| `/products/[slug]` | Prerendered per published slug via `generateStaticParams` | The LCP element is the first photograph, and prerendering puts it in the first byte (SC-008) | one `revalidatePath` per slug |
+| `/[category]`, `/all-jewelry` | Dynamic | They read `searchParams` — a filtered grid is a function of the query string | nothing to keep fresh |
+
+**Why hooks and not an interval.** An interval is a guess in both directions: too long and a publish
+is late, too short and pages are rebuilt for nobody. Every write that can change a page goes through
+Payload, so an exact signal exists — `src/lib/revalidate.ts` is that signal, attached to
+`afterChange`/`afterDelete` on the seven collections a storefront page reads and to the shop global.
+
+**⚠ `revalidatePath('/products/[slug]', 'page')` does not invalidate a prerendered page.** The
+pattern form is the obvious way to say "every product page", and it is what the first version of
+this used. It was measured against a production build: with a product's title changed in the
+database, the pattern left the page serving stale HTML across repeated requests —
+`x-nextjs-cache: HIT` every time — and the literal `/products/<slug>` fixed it on the next request.
+Against a page that had been rendered on demand the pattern does work, which is what makes this
+easy to miss: the bug only appears once `generateStaticParams` exists, and by then it silently
+covers almost nothing. `invalidate()` therefore queries the slugs and names each path.
+
+**Why every product page rather than the one that changed.** A product page draws its own piece, the
+shop settings, the category name in its eyebrow, and its collection-mates in _Complete the
+Collection_ — so editing one product changes its mates' pages, and editing a category changes the
+eyebrow on every piece in it. One cheap query for the slugs is honest about that; working out
+exactly which pages are affected would take several. It costs little, because marking a path stale
+rebuilds nothing: Next regenerates a page when it is next visited.
+
+**Two paths no query will name**, passed in by the hook instead: the address a renamed piece has
+just left, and the one a deleted piece used to hold. Without them the old URL keeps serving a piece
+that has moved or gone.
+
+**Why not Cache Components.** Next 16 replaces `unstable_cache` with `use cache`, which needs the
+`cacheComponents` flag — a change to how every route renders, including Payload's generated admin,
+and a migration in its own right rather than a step in this one. Nothing here uses `unstable_cache`,
+so no deprecated API is being carried: the route cache and the hooks cover both cached routes
+exactly. Caching the LISTING data across requests is what Cache Components would add, and that is
+worth revisiting alongside T304's denormalisation, which is what makes the query narrow in the first
+place.
+
+**Seeding is not publishing.** `pnpm seed` runs under `payload run`, where `revalidatePath` has no
+request scope and throws `Invariant: static generation store missing`. Every write in the seed
+passes `context: skipRevalidation`. A dev server running alongside is a different process whose
+cache the seed could not have invalidated anyway.
