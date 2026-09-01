@@ -171,6 +171,20 @@ export function ProductGallery({
       ref={rootRef}
       className={cn(
         'relative flex flex-col gap-4',
+        /**
+         * The gallery takes its height from the PHOTOGRAPH, never from whatever it is laid out
+         * beside.
+         *
+         * As a grid or flex item it stretches to the row by default, and on the product page the
+         * row is as tall as the information column — so opening an accordion grew this box, the
+         * rail is `inset-y-0` of it, and the arrows walked down the page with the copy. `self-start`
+         * is what keeps the rail the photograph's height, which is the relationship the design
+         * draws and the one every measurement here assumes.
+         *
+         * On the component rather than at the call site deliberately: a caller cannot be expected
+         * to know that this component's internals depend on its own box.
+         */
+        'self-start',
         // 990px — the 120px rail, the 20px gap and the 850px photograph the design draws at 1920
         // (`297:4567`). Without it the photograph is a square that grows with the viewport, so a
         // 2560px monitor renders a 1200px picture of a ring. `Container` deliberately has no

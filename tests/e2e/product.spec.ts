@@ -144,6 +144,44 @@ test('the gallery stops growing past the width it is drawn at', async ({ page })
 })
 
 /**
+ * The gallery takes its height from the photograph, not from what it is laid out beside.
+ *
+ * It is a grid item, so it stretches to the row by default — and the row is as tall as the
+ * information column. Opening an accordion therefore grew the gallery's box, and since the rail is
+ * `inset-y-0` of it, the arrows walked down the page with the copy while the photograph stayed
+ * where it was. Measured against the gallery's own top so that a page scroll cannot be mistaken
+ * for the failure.
+ */
+test('opening an accordion does not move the gallery’s controls', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1400 })
+  await page.goto(RING)
+
+  const geometry = () =>
+    page.evaluate(() => {
+      const arrows = document.querySelector('[aria-label="Show the next photograph"]')!.parentElement!
+      const root = arrows.parentElement!.parentElement!
+      const photograph = root.querySelector('[aria-label$="open full screen"]')!
+      return {
+        root: Math.round(root.getBoundingClientRect().height),
+        photograph: Math.round(photograph.getBoundingClientRect().height),
+        arrows: Math.round(
+          arrows.getBoundingClientRect().top - root.getBoundingClientRect().top,
+        ),
+      }
+    })
+
+  await expect(page.getByRole('button', { name: 'Show the next photograph' })).toBeVisible()
+  const before = await geometry()
+  expect(before.root, 'the gallery is not the height of its photograph').toBe(before.photograph)
+
+  const details = page.getByRole('button', { name: 'PRODUCT DETAILS' })
+  await details.click()
+  await expect(details).toHaveAttribute('aria-expanded', 'true')
+
+  expect(await geometry(), 'the accordion moved the gallery').toEqual(before)
+})
+
+/**
  * The case that decides whether the controls are affordances. One photograph means no rail, no
  * dots and no rail paging — but the photograph still opens.
  */
