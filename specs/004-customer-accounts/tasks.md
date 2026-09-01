@@ -128,32 +128,34 @@ arrives blocks every story in this feature.
 
 ### Server tier
 
-- [ ] T430 Create `src/lib/email/transactional.ts` — `sendVerificationCode`, `sendResetCode`,
+- [X] T430 Create `src/lib/email/transactional.ts` — `sendVerificationCode`, `sendResetCode`,
       `sendPasswordChangedNotice`, rendering copy from the `account` global. **This module has no
       access to `marketingEmail`**, which is what makes FR-035 hold by construction (R2)
-- [ ] T431 [P] Create `src/lib/email/marketing.ts` — `syncMarketingContact` against the Resend
+- [X] T431 [P] Create `src/lib/email/marketing.ts` — `syncMarketingContact` against the Resend
       audience. **It cannot send a message.** A failure is logged and swallowed: a consent change is
       recorded in Payload whether or not Resend was reachable
-- [ ] T432 Create `src/lib/auth/codes.ts` — `issueCode` and `consumeCode`. Six digits from a
+- [X] T432 Create `src/lib/auth/codes.ts` — `issueCode` and `consumeCode`. Six digits from a
       cryptographically secure source; only the hash stored; constant-time comparison; `purpose` part
       of every lookup; the per-address cooldown from R8. **All four terminal states — consumed,
       expired, attempts-exhausted, superseded — are checked in this one function** so no call site
       can forget one ([contracts/auth-actions.md](./contracts/auth-actions.md) C1–C7)
-- [ ] T433 [P] Create `src/lib/auth/password.ts` — the strength rule (≥8 characters, checked against
+- [X] T433 [P] Create `src/lib/auth/password.ts` — the strength rule (≥8 characters, checked against
       a common-password list). Pure, and the highest-value unit test in the feature
-- [ ] T434 [P] Unit tests in `tests/unit/auth-codes.test.ts` for all four terminal states, the
-      attempt counter, and the purpose separation
-- [ ] T435 [P] Unit tests in `tests/unit/auth-password.test.ts` and `tests/unit/countries.test.ts` —
+- [X] T434 [P] Tests for all four terminal states, the attempt counter, and the purpose separation.
+      **Landed in `tests/integration/auth-codes.test.ts`, not `tests/unit`**: the terminal states are
+      database state — single-use is enforced by the write, not by arithmetic — so testing them
+      against a fake would test the fake. `tests/unit` stays runnable with nothing installed
+- [X] T435 [P] Unit tests in `tests/unit/auth-password.test.ts` and `tests/unit/countries.test.ts` —
       the latter asserting Kazakhstan and the UAE are present, which is the regression that would
       otherwise reappear silently on a plugin upgrade
-- [ ] T440 Create `src/lib/auth/dal.ts` — `getCustomer` and `requireCustomer`, memoized with React
+- [X] T440 Create `src/lib/auth/dal.ts` — `getCustomer` and `requireCustomer`, memoized with React
       `cache`, reading Payload's session through `payload.auth({ headers })`. Returns a **DTO**
       (`id`, `email`, `firstName`, `lastName`, `marketingEmail`), never the Payload document. Returns
       `null` for an unverified customer — unverified is not signed in (FR-008)
-- [ ] T441 Create `src/proxy.ts` — **`proxy.ts`, not `middleware.ts`** (R9). Matches `/account/:path*`
+- [X] T441 Create `src/proxy.ts` — **`proxy.ts`, not `middleware.ts`** (R9). Matches `/account/:path*`
       and redirects to `/sign-in?next=…` on cookie absence. **Cookie presence only, no database
       read**: it runs on prefetches. It is not the security boundary; the DAL is
-- [ ] T442 [P] Integration test in `tests/integration/account-access.test.ts` — the negative cases
+- [X] T442 [P] Integration test in `tests/integration/account-access.test.ts` — the negative cases
       that matter: customer B reading customer A's row, any request to `verification-codes`, and a
       customer session against the admin panel (SC-007, SC-008)
 
