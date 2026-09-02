@@ -3,7 +3,7 @@ import React from 'react'
 
 import { AddressList } from '@/components/account/address-list'
 import { ChangePasswordModal } from '@/components/account/change-password-modal'
-import { NameModal } from '@/components/account/name-modal'
+import { NameRow } from '@/components/account/name-row'
 import { ProfileRow } from '@/components/account/profile-row'
 import { SignOutButton } from '@/components/account/sign-out-button'
 import { Container } from '@/components/ui/container'
@@ -42,7 +42,6 @@ export const metadata: Metadata = {
 
 export default async function AccountPage() {
   const customer = await requireCustomer('/account')
-  const fullName = [customer.firstName, customer.lastName].filter(Boolean).join(' ')
 
   /**
    * The address form's two settings, resolved on the server (FR-028, FR-030).
@@ -65,15 +64,9 @@ export default async function AccountPage() {
                 than no pencil. */}
             <ProfileRow label="Email">{customer.email}</ProfileRow>
 
-            <ProfileRow
-              label="Full name"
-              // FR-025. A customer who has not given a name sees that they have not, rather than a
-              // box that looks like it failed to load.
-              empty="No name added"
-              action={<NameModal firstName={customer.firstName} lastName={customer.lastName} />}
-            >
-              {fullName}
-            </ProfileRow>
+            {/* The row and its modal travel together: the open state is client-side, so the
+                control that opens it cannot live out here. Same for `AddressList` below. */}
+            <NameRow firstName={customer.firstName} lastName={customer.lastName} />
 
             <AddressList
               addresses={await getCustomerAddresses()}

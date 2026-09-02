@@ -27,7 +27,7 @@ import { changePasswordSchema, type ChangePasswordValues } from '@/lib/auth/sche
  * they are being asked to confirm — without it this modal is a dead end for exactly the person most
  * likely to open it. The frame spells it `Fargot password?`; that is design defect 2.
  *
- * **The trigger lives here with the modal it opens**, as `NameModal` does, so `triggerRef` never
+ * **The trigger lives here with the modal it opens**, as `NameRow` does, so `triggerRef` never
  * has to leave this file for focus to return to the link on close.
  */
 const ERRORS: Record<string, string> = {
@@ -87,7 +87,7 @@ export function ChangePasswordModal() {
         onClick={() => setOpen(true)}
         className={[
           'text-body-base text-primary-default hover:text-primary-hover cursor-pointer underline',
-          'underline-offset-4 ease-standard transition-colors duration-[var(--duration-fast)]',
+          'ease-standard underline-offset-4 transition-colors duration-[var(--duration-fast)]',
           'focus-visible:outline-primary-default focus-visible:outline-2 focus-visible:outline-offset-2',
         ].join(' ')}
       >

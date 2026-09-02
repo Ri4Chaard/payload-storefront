@@ -460,8 +460,14 @@ export async function updateName(input: NameValues): Promise<ActionResult> {
    * FR-024 — the row updates without a page reload.
    *
    * The profile is a Server Component, so the new name only exists once its segment is re-rendered.
-   * This invalidates it; the modal's own `router.refresh()` is what asks for the new one. Both
-   * halves are needed — revalidating alone leaves the client showing the tree it already has.
+   * This is the whole of it: Next returns the revalidated payload with the action's own response
+   * and the router applies it.
+   *
+   * **The modals used to call `router.refresh()` as well, and that was wrong twice over.** It is
+   * redundant — the row updates without it, which the profile and address e2e specs both assert —
+   * and every extra application of the server tree is another chance to replace a dialog's inputs
+   * while somebody is typing into them. That is a real defect and not a theoretical one; see the
+   * `useForm` note in `src/components/account/address-modal/address-modal.tsx`.
    */
   revalidatePath('/account')
 

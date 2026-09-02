@@ -393,6 +393,26 @@ switch the default, delete one.
   exporting both put `@payload-config` into the client bundle through `AddressList` — which fails
   with an error naming `file-type`, not anything in this repository.
 
+### Follow-up after Phase 7
+
+- **The whole field opens the editor, not the icon.** A 20px pencil at the right edge of a 1600px
+  row is a target you have to aim at, and it was the only way in. `ProfileRow` grew `onActivate`,
+  which turns the box into one `<button>` carrying the padding and renders the icon inside it as
+  decoration; a filled address list keeps per-line buttons instead, because a button inside a button
+  is invalid HTML. `NameModal` became `NameRow` in the same change — it owns its row now, as
+  `AddressList` already did, because a Server Component cannot hold the open state.
+- **A saved edit could be silently discarded, and the fix is a `key`.** Saving revalidates
+  `/account`; applying that server tree while a dialog is open replaced its inputs underneath the
+  customer — the next keystroke reached a DOM node React was no longer listening to, the form still
+  held what was there before, and Save wrote it back unchanged. Reproduced three times out of three
+  against a **production** build (add an address, then edit it without pausing), and intermittently
+  in dev, which is why the first two full-suite runs looked clean. Both dialogs are now re-keyed on
+  every opening, so the form is always newer than the last tree swap. Covered by a regression test
+  on each row.
+- **`router.refresh()` is gone from all three modals.** It was redundant — `revalidatePath` in the
+  action already returns the payload the router applies — and every extra application of the server
+  tree is another chance to hit the defect above.
+
 **Checkpoint**: US1–US5 work independently.
 
 **Checkpoint**: US1–US5 work independently.

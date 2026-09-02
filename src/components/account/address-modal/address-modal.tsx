@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,7 +19,7 @@ import type { CountryCode, CountryOption } from '@/lib/countries'
 /**
  * Add address — node `583:12968`, its error state `525:12889` (spec 004, US5, FR-027 – FR-031).
  *
- * **Controlled, unlike `NameModal`.** That component owns its own trigger, and says why: keeping
+ * **Controlled, unlike `NameRow`.** That component owns its own trigger, and says why: keeping
  * the two together means `triggerRef` never leaves the file. It cannot work here — a customer with
  * four addresses has five triggers (a pencil each, and the `+`) and one modal between them, so
  * `AddressList` owns the open state and hands back the element focus should return to. Rendering
@@ -68,7 +67,6 @@ export function AddressModal({
   open,
   triggerRef,
 }: AddressModalProps) {
-  const router = useRouter()
   const fieldId = React.useId()
 
   const editing = address !== null
@@ -98,38 +96,35 @@ export function AddressModal({
     [addressCount, defaultCountry],
   )
 
+  /**
+   * **Mounted fresh for each opening, so these are the only values it ever loads.**
+   *
+   * The obvious alternative — one long-lived instance that `reset()`s itself in an effect when
+   * `open` flips — is what this component did first, and it lost edits. Saving an address
+   * revalidates `/account`, and applying that server tree while the modal is open replaces the
+   * inputs underneath the customer: the next keystroke reaches a DOM node React is no longer
+   * listening to, the form still holds what was there before, and Save writes it back unchanged.
+   * `AddressList` gives this component a key that changes on every open, so the instance is always
+   * newer than the last tree swap and there is no state to carry across one.
+   */
   const form = useForm<AddressValues>({
     resolver: zodResolver(addressSchema),
-    defaultValues: emptyValues(),
+    defaultValues: address
+      ? {
+          addressLine1: address.addressLine1,
+          addressLine2: address.addressLine2 ?? '',
+          apartment: address.apartment ?? '',
+          city: address.city,
+          country: address.country,
+          isDefault: address.isDefault,
+          postalCode: address.postalCode,
+        }
+      : emptyValues(),
     mode: 'onTouched',
   })
 
   const { errors, isSubmitting } = form.formState
   const resolve = (key: string | undefined) => errorText(ERRORS, key)
-
-  /**
-   * Reload the form from props every time the modal opens — the same rule `NameModal` follows, and
-   * for the same reason: a customer who typed into the Add form, cancelled, then opened an existing
-   * address must see what is stored, not the draft they abandoned. It runs on `open` rather than on
-   * mount because one instance serves every row.
-   */
-  React.useEffect(() => {
-    if (!open) return
-
-    form.reset(
-      address
-        ? {
-            addressLine1: address.addressLine1,
-            addressLine2: address.addressLine2 ?? '',
-            apartment: address.apartment ?? '',
-            city: address.city,
-            country: address.country,
-            isDefault: address.isDefault,
-            postalCode: address.postalCode,
-          }
-        : emptyValues(),
-    )
-  }, [address, emptyValues, form, open])
 
   const values = form.watch()
   const incomplete =
@@ -139,14 +134,10 @@ export function AddressModal({
     values.postalCode.trim() === ''
 
   const onSubmit = form.handleSubmit(async (submitted) => {
-    const result = await saveAddress(
-      address ? { ...submitted, id: address.id } : { ...submitted },
-    )
+    const result = await saveAddress(address ? { ...submitted, id: address.id } : { ...submitted })
 
     if (result.status === 'success') {
       onClose()
-      // The action revalidated `/account` on the server; this is what asks for the new tree.
-      router.refresh()
       return
     }
 

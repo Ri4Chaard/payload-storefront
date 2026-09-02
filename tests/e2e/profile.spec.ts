@@ -157,6 +157,37 @@ test('cancel keeps the stored name and discards the draft', async ({ page }) => 
 })
 
 /**
+ * The regression the Addresses row found (US5), asserted on the row that shares the mechanism.
+ *
+ * Saving revalidates `/account`, and applying that server tree while a dialog is open replaces the
+ * inputs underneath the customer: the next keystroke reaches a DOM node React is no longer
+ * listening to, the form still holds what was there before, and Save writes it back unchanged. It
+ * only shows when a second edit follows a first closely enough to collide with the revalidation —
+ * which is exactly what somebody correcting a typo does.
+ */
+test('a second edit straight after the first is not discarded', async ({ page }) => {
+  await signedIn(page)
+
+  await page.getByRole('button', { name: 'Edit full name' }).click()
+  const modal = page.getByRole('dialog')
+  await modal.getByPlaceholder('First name').fill('Ada')
+  await modal.getByPlaceholder('Last name').fill('Lovelace')
+  await modal.getByRole('button', { name: 'Save' }).click()
+  await expect(modal).toBeHidden({ timeout: 15_000 })
+
+  // No settling pause — the collision is the point.
+  await page.getByRole('button', { name: 'Edit full name' }).click()
+  await modal.getByPlaceholder('First name').fill('Augusta')
+  await expect(modal.getByPlaceholder('First name')).toHaveValue('Augusta')
+  await modal.getByRole('button', { name: 'Save' }).click()
+  await expect(modal).toBeHidden({ timeout: 15_000 })
+
+  await expect(page.getByText('Augusta Lovelace')).toBeVisible({ timeout: 15_000 })
+  await page.reload()
+  await expect(page.getByText('Augusta Lovelace')).toBeVisible()
+})
+
+/**
  * The dialog is a keyboard trap by design, and Escape is the way out of it. Checked here rather
  * than trusted from `Modal`'s own stories, because focus returning to the pencil is a property of
  * how this screen wires `triggerRef` (FR-046).

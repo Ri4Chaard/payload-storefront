@@ -179,12 +179,19 @@ test('editing an address updates it in place', async ({ page }) => {
     postcode: '010042',
   })
 
+  /*
+   * **No settling pause between the two saves, and that is the test.** Saving revalidates
+   * `/account`; applying that server tree while this modal is open used to replace the inputs
+   * underneath the customer, so the typed city never reached the form and Save wrote the old value
+   * back. It reproduced three times out of three against a production build.
+   */
   await page.getByRole('button', { name: /^Edit address:/ }).click()
   const modal = page.getByRole('dialog')
   await expect(modal.getByPlaceholder('Address line 1')).toHaveValue('Mangilik el 22')
   await expect(modal.getByPlaceholder('City')).toHaveValue('Astana')
 
   await modal.getByPlaceholder('City').fill('Almaty')
+  await expect(modal.getByPlaceholder('City')).toHaveValue('Almaty')
   await modal.getByRole('button', { name: 'Save' }).click()
   await expect(modal).toBeHidden({ timeout: 15_000 })
 
