@@ -47,6 +47,13 @@ export const signInCopy = {
    * Shown for a wrong password AND for an address with no account. Do not split these. Saying “no
    * such account” tells an attacker which addresses are registered (FR-011).
    */
+  /**
+   * A malformed address, caught by the schema before anything is looked up.
+   *
+   * Distinct from `signInFailed` on purpose, and it discloses nothing: whether a string is
+   * shaped like an email is decidable in the browser without asking us.
+   */
+  signInEmailInvalid: 'That does not look like an email address.',
   signInFailed: 'That email address and password do not match.',
   signInLocked:
     'Too many attempts. For your security, try again in a few minutes or reset your password.',

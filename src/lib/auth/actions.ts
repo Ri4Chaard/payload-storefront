@@ -3,14 +3,21 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import { revalidatePath } from 'next/cache'
+
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
+import { authenticateCustomer } from '@/lib/auth/login'
+import { clearSession, establishSession } from '@/lib/auth/session'
 import {
   createAccountSchema,
   resendCodeSchema,
+  safeNextPath,
   schemaFailure,
+  signInSchema,
   verifyCodeSchema,
   type CreateAccountValues,
   type ResendCodeValues,
+  type SignInValues,
   type VerifyCodeValues,
 } from '@/lib/auth/schemas'
 import { sendVerificationCode } from '@/lib/email/transactional'
@@ -121,6 +128,75 @@ async function resendVerificationFor(customerId: number): Promise<'ok' | 'thrott
 
   await sendVerificationCode(customer.email, issued.code)
   return 'ok'
+}
+
+/**
+ * Where a successful sign-in sends the customer. Always a same-origin path — see `safeNextPath`.
+ */
+export interface SignInOutcome {
+  next: string
+}
+
+/**
+ * Sign in (FR-010 – FR-012, FR-014).
+ *
+ * **One message for a wrong password and for an address with no account** (FR-011). They are
+ * genuinely different events and the customer is told the same thing, because a form that
+ * distinguishes them answers "does this person shop here?" for anyone willing to submit a list.
+ * `authenticateCustomer` reports the difference; this is the line that throws it away, and it is
+ * written in one place so it cannot be half-undone later.
+ *
+ * **An unverified account is not a failure, it is a detour.** The customer proved they know the
+ * password, so they are the owner of an abandoned registration; they get a fresh code and the
+ * verify screen rather than a dead end (US2 scenario 3). This is only safe because Payload checks
+ * the password first — see `authenticateCustomer` for the line numbers.
+ */
+export async function signIn(
+  input: SignInValues & { next?: string },
+): Promise<ActionResult<SignInOutcome>> {
+  const parsed = signInSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const { email, password } = parsed.data
+  const outcome = await authenticateCustomer({ email, password })
+
+  if (!outcome.ok) {
+    if (outcome.reason === 'locked') return fail('signInLocked')
+
+    if (outcome.reason === 'unverified') {
+      // Best effort: if the throttle refuses, the verify screen's own resend button is still there.
+      await resendVerificationFor(outcome.customerId)
+      return ok({ next: `/verify-email?email=${encodeURIComponent(email)}` })
+    }
+
+    return fail('signInFailed')
+  }
+
+  await establishSession(outcome.token)
+
+  // The header and any cached shell were rendered for an anonymous visitor. Without this the
+  // customer is signed in and the page still says otherwise until something else forces a refresh.
+  revalidatePath('/', 'layout')
+
+  return ok({ next: safeNextPath(input.next) })
+}
+
+/**
+ * Sign out (FR-013).
+ *
+ * `revalidatePath` is not decoration. The session cookie is gone the moment this returns, but the
+ * client router keeps rendered segments in memory — so without invalidating them, the back button
+ * shows the profile it already has, populated with a signed-out customer's data. The page is not
+ * *reachable* any more, which is what the cookie settles; FR-013 asks for something stronger, which
+ * is that it not be *visible*.
+ */
+export async function signOutCustomer(): Promise<ActionResult> {
+  await clearSession()
+  revalidatePath('/', 'layout')
+  return ok()
 }
 
 /**

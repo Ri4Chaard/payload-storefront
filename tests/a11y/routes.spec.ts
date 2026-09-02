@@ -31,6 +31,10 @@ const ROUTES = [
   // and giving up — and these two are the only pages on the site a visitor MUST complete.
   '/create-account',
   '/verify-email?email=a11y%40aurum-testing.dev',
+  // Sign-in (004/T476). The password reveal is the control most likely to fail here: it is an
+  // icon-only button whose accessible name has to change with its state, and getting that wrong
+  // leaves a screen-reader user unable to tell whether their password is on screen.
+  '/sign-in',
 ]
 
 const WIDTHS = [

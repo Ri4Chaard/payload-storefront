@@ -242,24 +242,28 @@ involvement.
 **Independent Test**: Sign in with a seeded verified account, restart the browser to confirm the
 session survives, sign out, confirm the profile is unreachable.
 
-- [ ] T470 [P] [US2] Integration test in `tests/integration/us2-sign-in.test.ts` — correct
+- [X] T470 [P] [US2] Integration test in `tests/integration/us2-sign-in.test.ts` — correct
       credentials; wrong password and unknown address producing **identical** responses (FR-011);
       lockout after ten failures; the unverified route
-- [ ] T471 [US2] Implement `signIn` in `src/lib/auth/actions.ts` — one message key for both wrong
+- [X] T471 [US2] Implement `signIn` in `src/lib/auth/actions.ts` — one message key for both wrong
       password and unknown address; catch Payload's `UnverifiedEmail` and return
       `requiresVerification` with a fresh code (US2 scenario 3); catch `LockedAuth` and surface the
       retry time (FR-014). **Validate `next` as a same-origin relative path** — an open redirect on a
       sign-in form is the classic version of this bug
-- [ ] T472 [US2] Implement `signOutCustomer` in `src/lib/auth/actions.ts` — ends the session immediately, and the profile must not
+- [X] T472 [US2] Implement `signOutCustomer` in `src/lib/auth/actions.ts` — ends the session immediately, and the profile must not
       be restorable with the browser back button (FR-013)
-- [ ] T473 [US2] Build `/sign-in` in `src/app/(frontend)/(account)/sign-in/page.tsx` — node
+- [X] T473 [US2] Build `/sign-in` in `src/app/(frontend)/(account)/sign-in/page.tsx` — node
       `408:7412`. Use `TextInput`'s existing `trailing` prop for the forgot-password link; its own
       doc comment was written for this control
-- [ ] T474 [P] [US2] Build `PasswordField` in `src/components/account/password-field/` — the show/hide toggle, using `TextInput`'s `iconEnd` and the existing
+- [X] T474 [P] [US2] Build `PasswordField` in `src/components/account/password-field/` — the show/hide toggle, using `TextInput`'s `iconEnd` and the existing
       `eye` / `eye-off` icons (FR-044)
-- [ ] T475 [US2] Point the header's account control at `/sign-in` when anonymous and `/account` when
+- [X] T475 [US2] Point the header's account control at `/sign-in` when anonymous and `/account` when
       signed in, in `src/components/layout/header/header.tsx` (FR-016)
-- [ ] T476 [P] [US2] E2E in `tests/e2e/sign-in.spec.ts` — sign in, restart context to prove the
+- [X] T473a [US2] Build a minimal `/account` in `src/app/(frontend)/(account)/account/page.tsx` —
+      heading, the email, and the sign-out button, guarded by `requireCustomer`. Not in the original
+      plan: US2's Independent Test ends "sign out, confirm the profile is unreachable", and there
+      was no profile to sign out of. Node `266:4382`'s rows land with US4–US7
+- [X] T476 [P] [US2] E2E in `tests/e2e/sign-in.spec.ts` — sign in, restart context to prove the
       30-day session, sign out, back-button check, and a **literal comparison** of the two failure
       messages (SC-010)
 

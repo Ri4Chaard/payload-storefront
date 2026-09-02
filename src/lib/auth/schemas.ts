@@ -68,6 +68,11 @@ export const createAccountSchema = z
     }
   })
 
+export const signInSchema = z.object({
+  email: emailField('signInEmailInvalid'),
+  password: passwordField,
+})
+
 export const verifyCodeSchema = z.object({
   email: emailField('codeInvalid'),
   /**
@@ -85,8 +90,35 @@ export const resendCodeSchema = z.object({
 })
 
 export type CreateAccountValues = z.infer<typeof createAccountSchema>
+export type SignInValues = z.infer<typeof signInSchema>
 export type ResendCodeValues = z.infer<typeof resendCodeSchema>
 export type VerifyCodeValues = z.infer<typeof verifyCodeSchema>
+
+/**
+ * Where signing in should land, given whatever the URL asked for (FR-016).
+ *
+ * **An unchecked `next` is how a sign-in form becomes an open redirect** — the attacker mails
+ * `/sign-in?next=https://aurum-login.example`, the customer signs in on the real site, and the
+ * real site hands them to the fake one already trusting it. This is the single most copied
+ * vulnerability in authentication code, so the rule is a whitelist rather than a blacklist: an
+ * absolute path on this origin, or nothing.
+ *
+ * Rejected, in order: anything not starting with `/`, which covers `https://evil.example` and
+ * `javascript:`; anything starting with `//`, which is protocol-relative and resolves to another
+ * host; and any backslash, because some parsers normalise `\` to `/` and `/\evil.example` has
+ * been a working bypass in more than one library.
+ *
+ * Falls back rather than failing. A bad `next` is not the customer's fault and not worth an error
+ * screen — they asked to sign in, so sign them in and take them somewhere sensible.
+ */
+export function safeNextPath(next: null | string | undefined): string {
+  const fallback = '/account'
+  if (!next) return fallback
+  if (!next.startsWith('/')) return fallback
+  if (next.startsWith('//')) return fallback
+  if (next.includes('\\')) return fallback
+  return next
+}
 
 export interface SchemaFailure {
   fieldErrors?: Record<string, string>

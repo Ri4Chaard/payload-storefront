@@ -183,7 +183,23 @@ export function Header({
             badge={cartCount > 0 ? cartCount : undefined}
             className={iconChrome}
           />
-          <IconButton variant="bare" icon="user" label="Account" className={iconChrome} />
+          {/*
+            One href for both states (spec 004, FR-016). An anonymous visitor is sent to sign-in by
+            `src/proxy.ts`, which already guards `/account` and carries `next` so they land back
+            here afterwards.
+
+            The alternative — branching on the session — means calling `getCustomer()` in the root
+            layout, and reading the session makes every route dynamic. `products/[slug]` is
+            statically generated, so that trades the pages that sell things for a header attribute
+            nobody can see. The customer-visible behaviour FR-016 asks for is identical either way.
+          */}
+          <IconButton
+            variant="bare"
+            href="/account"
+            icon="user"
+            label="Account"
+            className={iconChrome}
+          />
         </div>
       </Container>
 
