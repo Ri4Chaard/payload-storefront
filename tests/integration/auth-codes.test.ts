@@ -84,7 +84,11 @@ describe('consumeCode', () => {
     expect(crossPurpose.ok).toBe(false)
 
     const result = await consumeCode(email, 'verify-email', issued.code)
-    expect(result).toEqual({ ok: true, token: 'the-payload-token' })
+    // `recordId` came with the reset flow: the handle it issues is a signed reference to this
+    // row, so `consumeCode` has to say which row it matched. Asserted loosely on the id and
+    // strictly on everything else.
+    expect(result).toMatchObject({ ok: true, token: 'the-payload-token' })
+    expect(result.ok && result.recordId).toBeTypeOf('number')
     await purge(email)
   })
 
@@ -205,7 +209,7 @@ describe('consumeCode', () => {
 
     // The current code still works, and still has all of its attempts.
     const result = await consumeCode(email, 'verify-email', second.code)
-    expect(result).toEqual({ ok: true, token: 'tok-2' })
+    expect(result).toMatchObject({ ok: true, token: 'tok-2' })
     await purge(email)
   })
 

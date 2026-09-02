@@ -8,8 +8,13 @@ import { TextInput, type TextInputProps } from '@/components/ui/text-input'
 /**
  * A password box with a show/hide control (spec 004, FR-044).
  *
- * Nodes `408:7412` and `429:12884` draw the eye inside the field on the sign-in, reset and
- * change-password screens. It is one control repeated, so it is one component.
+ * Node `408:7412` draws the eye inside the field on sign-in, and `426:11616` does the same in the
+ * change-password modal. It is one control repeated, so it is one component.
+ *
+ * **The reset screen (`429:12884`) does not draw it, and gets it anyway.** That frame shows two
+ * plain boxes — an omission rather than a decision, since FR-044 asks for the control on password
+ * fields and the screen where somebody types a password they invented ten seconds ago is where
+ * being able to look at it matters most.
  *
  * **Feature-local rather than kit** (Principle II): the kit's `TextInput` already does everything
  * except toggle its own type, and a `type="password"` variant with a built-in button would push a

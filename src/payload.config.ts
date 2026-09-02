@@ -20,6 +20,7 @@ import { Sizes } from './collections/sizes'
 import { VerificationCodes } from './collections/verification-codes'
 import { variantsCollectionOverride } from './collections/variants'
 import { emailFromName, emailOverrideRecipient, env } from './env'
+import { logEmailAdapter } from './lib/email/log-adapter'
 import { addressFields } from './fields/address-fields'
 import {
   assignFirstAddressAsDefault,
@@ -182,14 +183,26 @@ export default buildConfig({
    * not stop your password-reset code" a property of the architecture instead of a conditional
    * somebody has to remember to write. See `src/lib/email/`.
    */
-  email: resendAdapter({
-    apiKey: env.RESEND_API_KEY,
-    defaultFromAddress: env.EMAIL_FROM_ADDRESS,
-    defaultFromName: emailFromName,
-    // Unset in production. Present so a staging environment holding restored customer data cannot
-    // mail those customers. See src/env.ts.
-    ...(emailOverrideRecipient ? { overrideRecipientAddress: emailOverrideRecipient } : {}),
-  }),
+  email:
+    process.env.EMAIL_TRANSPORT === 'log'
+      ? /**
+         * The test runners set this, and nothing else does — see `src/lib/email/log-adapter.ts`.
+         * Read from `process.env` rather than through `./env.ts` because it is not a deployment
+         * setting: it exists so `pnpm test:integration` and `pnpm test:e2e` stop spending a real
+         * Resend quota, and an absent value must mean "send the mail".
+         */
+        logEmailAdapter({
+          defaultFromAddress: env.EMAIL_FROM_ADDRESS,
+          defaultFromName: emailFromName,
+        })
+      : resendAdapter({
+          apiKey: env.RESEND_API_KEY,
+          defaultFromAddress: env.EMAIL_FROM_ADDRESS,
+          defaultFromName: emailFromName,
+          // Unset in production. Present so a staging environment holding restored customer data
+          // cannot mail those customers. See src/env.ts.
+          ...(emailOverrideRecipient ? { overrideRecipientAddress: emailOverrideRecipient } : {}),
+        }),
 
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

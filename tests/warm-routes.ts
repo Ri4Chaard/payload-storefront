@@ -15,7 +15,29 @@
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 
 /** One of each distinct route, not one of each URL: the compiler works per route, not per query. */
-const ROUTES = ['/', '/all-jewelry', '/rings', '/products/paragon-emerald-cut-diamond-engagement-ring']
+const ROUTES = [
+  '/',
+  '/all-jewelry',
+  '/rings',
+  '/products/paragon-emerald-cut-diamond-engagement-ring',
+  // The account flow (004). Three specs and the a11y sweep all open these, so whichever worker gets
+  // there first was paying the compilation inside an assertion.
+  '/sign-in',
+  '/create-account',
+  '/verify-email?email=warm%40aurum-testing.dev',
+  '/forgot-password',
+  '/reset-password?email=warm%40aurum-testing.dev',
+]
+
+/**
+ * **`/account` is not here, and cannot be.** `src/proxy.ts` redirects any request without a session
+ * cookie, so an anonymous fetch compiles the REDIRECT and never the page — and it is the one route
+ * two specs reach immediately after signing in. Warming it with a nonsense cookie was tried: the
+ * proxy checks only that a cookie is PRESENT, so in principle the request should reach the route and
+ * build it. In practice the timings could not be told apart from Turbopack's on-disk cache, so
+ * whether it warmed anything is unproven, and an unverified mitigation carrying a confident comment
+ * is worse than none. If the two sign-in assertions keep losing runs, this is the thread to pull.
+ */
 
 /**
  * Refuse to run against a server that is not this application.
@@ -61,4 +83,5 @@ export default async function warmRoutes() {
       // failure to warm is a slower run rather than a broken one.
     }
   }
+
 }

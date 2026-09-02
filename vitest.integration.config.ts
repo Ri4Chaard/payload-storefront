@@ -31,6 +31,14 @@ try {
   // Already in the environment, or there is nothing to load. `env.ts` decides whether that is fatal.
 }
 
+/**
+ * **Nothing here sends real mail.** Registration and password reset both go through Payload's own
+ * auth operations, which send through the configured adapter — so without this line every run
+ * spends a live Resend quota, and the day it runs out the failures read as "no reset code was
+ * issued" rather than as a rate limit. Set after `loadEnvFile` so it wins over `.env`.
+ */
+process.env.EMAIL_TRANSPORT = 'log'
+
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {

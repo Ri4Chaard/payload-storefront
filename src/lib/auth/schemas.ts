@@ -44,6 +44,31 @@ const emailField = (key: string) => z.string().trim().toLowerCase().regex(EMAIL_
  */
 const passwordField = z.string().trim()
 
+/**
+ * The "type it twice, and make it a real password" rule, shared by every screen that sets one.
+ *
+ * Registration and password reset ask the same question and must answer it the same way; the keys
+ * differ only so each screen can word its own sentences. Written once because the ORDER below is
+ * the part that is easy to get wrong twice.
+ *
+ * **Mismatch returns rather than falling through.** A customer who mistyped the confirmation is
+ * told that and only that — two complaints about one typo reads as two problems. Note this governs
+ * these two checks only: zod runs object-level refinements even when a field-level check has
+ * already failed, so an invalid address and a mismatched confirmation do both appear. That is
+ * correct — they are two different mistakes, under two different fields.
+ */
+const passwordPair = (mismatchKey: string, weakKey: string) =>
+  (values: { confirmPassword: string; email: string; password: string }, ctx: z.RefinementCtx) => {
+    if (values.password !== values.confirmPassword) {
+      ctx.addIssue({ code: 'custom', message: mismatchKey, path: ['confirmPassword'] })
+      return
+    }
+
+    if (!checkPassword(values.password, values.email).ok) {
+      ctx.addIssue({ code: 'custom', message: weakKey, path: ['password'] })
+    }
+  }
+
 export const createAccountSchema = z
   .object({
     email: emailField('createEmailInvalid'),
@@ -51,22 +76,7 @@ export const createAccountSchema = z
     confirmPassword: passwordField,
     marketingConsent: z.boolean(),
   })
-  .superRefine((values, ctx) => {
-    if (values.password !== values.confirmPassword) {
-      // Returns rather than falling through, so a customer who mistyped the confirmation is told
-      // that and only that. Two complaints about one typo reads as two problems.
-      ctx.addIssue({
-        code: 'custom',
-        message: 'createPasswordMismatch',
-        path: ['confirmPassword'],
-      })
-      return
-    }
-
-    if (!checkPassword(values.password, values.email).ok) {
-      ctx.addIssue({ code: 'custom', message: 'createPasswordTooWeak', path: ['password'] })
-    }
-  })
+  .superRefine(passwordPair('createPasswordMismatch', 'createPasswordTooWeak'))
 
 export const signInSchema = z.object({
   email: emailField('signInEmailInvalid'),
@@ -89,7 +99,31 @@ export const resendCodeSchema = z.object({
   purpose: z.enum(['reset-password', 'verify-email']),
 })
 
+/** Forgot password, step one. One field, and the response never varies (FR-017). */
+export const requestResetSchema = z.object({
+  email: emailField('resetEmailInvalid'),
+})
+
+/**
+ * Forgot password, step three. The handle is what step two issued — see `./reset-handle.ts`.
+ *
+ * **`email` is here for the browser's benefit only.** It lets this schema run the identical weak-
+ * password check the create form runs, so the customer is told about a password that is their own
+ * address before making a round trip. The server does not trust it: `resetPassword` re-runs the
+ * check against the address on the code row, which is the one the handle actually points at.
+ */
+export const resetPasswordSchema = z
+  .object({
+    email: emailField('resetEmailInvalid'),
+    handle: z.string().min(1, 'resetSessionExpired'),
+    password: passwordField,
+    confirmPassword: passwordField,
+  })
+  .superRefine(passwordPair('resetPasswordMismatch', 'resetPasswordTooWeak'))
+
 export type CreateAccountValues = z.infer<typeof createAccountSchema>
+export type RequestResetValues = z.infer<typeof requestResetSchema>
+export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 export type SignInValues = z.infer<typeof signInSchema>
 export type ResendCodeValues = z.infer<typeof resendCodeSchema>
 export type VerifyCodeValues = z.infer<typeof verifyCodeSchema>

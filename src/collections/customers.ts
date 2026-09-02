@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { composeCustomerName, stampMarketingConsent } from '@/collections/customer-hooks'
 import { isAdmin, publicAccess } from '@/lib/access'
+import { generateResetEmailHTML, generateResetEmailSubject } from '@/lib/auth/reset-email'
 import {
   generateVerificationEmailHTML,
   generateVerificationEmailSubject,
@@ -47,8 +48,19 @@ export const Customers: CollectionConfig = {
       generateEmailSubject: generateVerificationEmailSubject,
     },
 
-    /** Reset is code-based too; same interception, same reason. FR-018. */
-    forgotPassword: {},
+    /**
+     * Reset is code-based too; same interception, same reason. FR-018.
+     *
+     * Wiring this is not only for our own screens. Payload publishes
+     * `POST /api/customers/forgot-password` for every auth collection, and its DEFAULT email links
+     * to `/admin/reset/<token>` — a panel customers have no access to. Left unset, that endpoint
+     * mails a customer a broken URL carrying a live reset credential. Set, every route through
+     * `forgotPassword` produces the same six-digit code email.
+     */
+    forgotPassword: {
+      generateEmailHTML: generateResetEmailHTML,
+      generateEmailSubject: generateResetEmailSubject,
+    },
 
     /** FR-014. Payload owns the counter and the lock; it throws `LockedAuth` when tripped. */
     lockTime: LOGIN_LOCK_MS,

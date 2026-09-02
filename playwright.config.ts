@@ -82,6 +82,16 @@ export default defineConfig({
     {
       command: 'pnpm dev',
       url: BASE_URL,
+      /**
+       * The registration and password-reset specs drive real Payload auth operations, which send
+       * through the configured email adapter. Without this the suite spends a live Resend quota on
+       * every run and starts failing — as "no code was issued" rather than as a rate limit — the
+       * day it runs out. See `src/lib/email/log-adapter.ts`.
+       *
+       * `reuseExistingServer` means a dev server already running WITHOUT this variable is used as
+       * it is, so a local run may still send. CI always starts its own.
+       */
+      env: { ...process.env, EMAIL_TRANSPORT: 'log' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

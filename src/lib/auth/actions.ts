@@ -7,16 +7,22 @@ import { revalidatePath } from 'next/cache'
 
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
 import { authenticateCustomer } from '@/lib/auth/login'
+import { completePasswordReset } from '@/lib/auth/reset'
+import { mintResetHandle } from '@/lib/auth/reset-handle'
 import { clearSession, establishSession } from '@/lib/auth/session'
 import {
   createAccountSchema,
+  requestResetSchema,
   resendCodeSchema,
+  resetPasswordSchema,
   safeNextPath,
   schemaFailure,
   signInSchema,
   verifyCodeSchema,
   type CreateAccountValues,
+  type RequestResetValues,
   type ResendCodeValues,
+  type ResetPasswordValues,
   type SignInValues,
   type VerifyCodeValues,
 } from '@/lib/auth/schemas'
@@ -209,6 +215,14 @@ export async function resendCode(input: ResendCodeValues): Promise<ActionResult>
   if (!parsed.success) return fail(schemaFailure(parsed.error).message)
 
   const { email, purpose } = parsed.data
+
+  if (purpose === 'reset-password') {
+    // Identical to asking on the forgot-password screen, deliberately: one path, one behaviour,
+    // one throttle. `issueResetFor` swallows both an unknown address and a refused throttle.
+    await issueResetFor(email)
+    return ok()
+  }
+
   const payload = await client()
   const found = await payload.find({
     collection: 'customers',
@@ -219,7 +233,7 @@ export async function resendCode(input: ResendCodeValues): Promise<ActionResult>
 
   const customer = found.docs[0]
 
-  if (customer && purpose === 'verify-email') {
+  if (customer) {
     // The throttle still applies — it just is not announced. See below.
     await resendVerificationFor(customer.id)
   }
@@ -279,4 +293,128 @@ export async function verifyEmailCode(input: VerifyCodeValues): Promise<ActionRe
    * SC-001's 90-second budget — measure it before deciding this needs solving properly.
    */
   return ok()
+}
+
+/**
+ * Ask for a reset code (FR-017).
+ *
+ * **Success, always, and this is the requirement rather than a simplification.** The forgot-password
+ * form is the easiest place in any application to enumerate registered addresses: submit a list,
+ * read which ones came back "sent". So there is nothing here to read — an unknown address, a
+ * registered one, and one whose code was refused by the throttle all produce this exact object.
+ */
+export async function requestPasswordReset(input: RequestResetValues): Promise<ActionResult> {
+  const parsed = requestResetSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  await issueResetFor(parsed.data.email)
+  return ok()
+}
+
+/**
+ * Mint and send a reset code, or quietly do neither.
+ *
+ * **`disableEmail` is deliberately not set.** Payload sends this one itself, which means
+ * `forgotPassword.generateEmailHTML` runs — and that hook mints the code inside the same
+ * transaction that rotates `resetPasswordToken` (see `./reset-email.ts`). Minting it out here
+ * instead would put the two writes on separate connections, and a throttled second request would
+ * then rotate the token while refusing to send: the code from the FIRST email would silently stop
+ * working, with no message able to explain why.
+ *
+ * Two things are swallowed, both on purpose. `payload.forgotPassword` returns `null` for an address
+ * with no account — its own comment says it "prefer[s] to fail silently" — and the hook throws when
+ * the throttle refuses, which rolls the whole transaction back. Neither may reach the customer.
+ */
+async function issueResetFor(email: string): Promise<void> {
+  const payload = await client()
+
+  try {
+    await payload.forgotPassword({ collection: 'customers', data: { email } })
+  } catch (error) {
+    // Logged, never returned. The caller's response must not vary.
+    payload.logger.warn({ err: error, msg: 'Reset code not sent' })
+  }
+}
+
+/** What step two hands to step three. Opaque to the browser — see `./reset-handle.ts`. */
+export interface ResetHandleOutcome {
+  handle: string
+}
+
+/**
+ * Step two: the code is right, so issue a handle for the screen that sets the password (FR-018).
+ *
+ * **Two actions rather than one, because the design is two screens** — and the handle is what makes
+ * that safe. Payload's reset token is resolved here and stays here; what crosses to the browser is
+ * a signed reference to the code row, good for ten minutes. A hidden field holding the real token
+ * would work identically and would put a live password-reset credential in the DOM.
+ *
+ * The code is spent by `consumeCode` before the handle exists, so the six digits cannot be replayed
+ * — and `payload.resetPassword` retires the token as it uses it, so neither can the handle.
+ */
+export async function verifyResetCode(
+  input: VerifyCodeValues,
+): Promise<ActionResult<ResetHandleOutcome>> {
+  const parsed = verifyCodeSchema.safeParse(input)
+  if (!parsed.success) return fail(schemaFailure(parsed.error).message)
+
+  const { code, email } = parsed.data
+  const result = await consumeCode(email, 'reset-password', code)
+  if (!result.ok) return fail(CODE_FAILURE_KEYS[result.failure])
+
+  return ok({ handle: mintResetHandle(result.recordId) })
+}
+
+/** Where a completed reset sends the customer, already signed in. */
+export interface ResetOutcome {
+  next: string
+}
+
+/**
+ * Step three: set the new password (FR-018, FR-021).
+ *
+ * Schema, session, revalidation and routing. Everything that decides whether the password actually
+ * changes is in `completePasswordReset` — see that module for why the two are separated.
+ *
+ * **The customer ends up signed in.** `payload.resetPassword` mints a session and hands back a
+ * token, so unlike the verification flow — which has no password to hand and therefore no way to
+ * mint one (see `verifyEmailCode`) — there is nothing to reconstruct here. Someone who has just
+ * proved they read the code and chosen a password has done strictly more than signing in requires.
+ */
+export async function resetPassword(
+  input: ResetPasswordValues,
+): Promise<ActionResult<ResetOutcome>> {
+  const parsed = resetPasswordSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const { handle, password } = parsed.data
+  const outcome = await completePasswordReset({ handle, password })
+
+  if (!outcome.ok) {
+    if (outcome.reason === 'weak') {
+      return fail('resetPasswordTooWeak', { password: 'resetPasswordTooWeak' })
+    }
+    return fail('resetSessionExpired')
+  }
+
+  if (outcome.token) await establishSession(outcome.token)
+  revalidatePath('/', 'layout')
+
+  /**
+   * An unverified customer can reach this: `forgotPassword` does not check `_verified`, and the DAL
+   * refuses the profile to anyone who is not. So they are sent to finish what they started rather
+   * than to a page that would bounce them straight back to sign-in.
+   */
+  if (!outcome.verified) {
+    await resendVerificationFor(outcome.customerId)
+    return ok({ next: `/verify-email?email=${encodeURIComponent(outcome.email)}` })
+  }
+
+  return ok({ next: '/account' })
 }

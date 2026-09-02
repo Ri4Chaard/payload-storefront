@@ -74,3 +74,13 @@ export const CODE_LENGTH = 6
  * database, and "must contain a symbol" mostly produces `Password1!` and a sticky note.
  */
 export const PASSWORD_MIN_LENGTH = 8
+
+/**
+ * How long the opaque handle issued by `verifyResetCode` stays good, in milliseconds.
+ *
+ * It stands between the two halves of the reset flow — the customer has proved they read the code,
+ * and has not yet chosen a password. Ten minutes is enough to think of one and not so long that a
+ * handle left in a closed tab is still live tomorrow. Payload's own `resetPasswordExpiration`
+ * (one hour by default) is the outer bound; this is the tighter one, and it is the one that governs.
+ */
+export const RESET_HANDLE_TTL_MS = 10 * 60 * 1000

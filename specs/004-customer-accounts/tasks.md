@@ -278,26 +278,33 @@ session survives, sign out, confirm the profile is unreachable.
 **Independent Test**: From a seeded account, run the three screens end to end; the new password signs
 in and the old one does not.
 
-- [ ] T485 [P] [US3] Integration test in `tests/integration/us3-reset.test.ts` — including the
+- [X] T485 [P] [US3] Integration test in `tests/integration/us3-reset.test.ts` — including the
       **unregistered address producing an identical response** (FR-017), and other sessions ending on
       success (FR-021)
-- [ ] T486 [US3] Wire `forgotPassword.generateEmailHTML` in `src/collections/customers.ts`, same pattern as T451
-- [ ] T487 [US3] Implement `requestPasswordReset` in `src/lib/auth/actions.ts` — `payload.forgotPassword({ disableEmail: true })`
+- [X] T486 [US3] Wire `forgotPassword.generateEmailHTML` in `src/collections/customers.ts`, same pattern as T451
+- [X] T487 [US3] Implement `requestPasswordReset` in `src/lib/auth/actions.ts` — ~~`payload.forgotPassword({ disableEmail: true })`~~
+      **Built the other way round, and T486 is why.** With `disableEmail` set, Payload never calls
+      `generateEmailHTML`, so the two tasks below are mutually exclusive and one of them would be
+      dead code. Letting Payload send means the code is minted inside the same transaction that
+      rotates `resetPasswordToken` — which matters: minting outside it, a throttled second request
+      rotates the token while refusing to send, and the code from the FIRST email silently stops
+      working with no message able to explain why. The throttle now refuses by throwing, so the
+      rotation rolls back with it. Original wording kept below.
       to get the token, mint a code against it, send. **Always returns success**: the
       forgot-password form is the easiest place in any application to enumerate registered addresses,
       and the only defence is a response that does not vary
-- [ ] T488 [US3] Implement `verifyResetCode` and `resetPassword` in `src/lib/auth/actions.ts` — two actions because the design is
+- [X] T488 [US3] Implement `verifyResetCode` and `resetPassword` in `src/lib/auth/actions.ts` — two actions because the design is
       two screens. The first returns a short-lived opaque **handle**, so Payload's raw token never
       travels to the browser and back
-- [ ] T489 [US3] Build `/forgot-password` in `src/app/(frontend)/(account)/forgot-password/page.tsx` — nodes
+- [X] T489 [US3] Build `/forgot-password` in `src/app/(frontend)/(account)/forgot-password/page.tsx` — nodes
       `429:12087` / `614:13323`
-- [ ] T490 [US3] Build the reset code step in `src/components/account/reset-code-step/` — nodes `429:12348`
+- [X] T490 [US3] Build the reset code step in `src/components/account/reset-code-step/` — nodes `429:12348`
       and `429:12615`, reusing `OtpInput`
       with the invalid-code message wired through `aria-describedby` so it is announced (FR-046)
-- [ ] T491 [US3] Build `/reset-password` in `src/app/(frontend)/(account)/reset-password/page.tsx` — node
+- [X] T491 [US3] Build `/reset-password` in `src/app/(frontend)/(account)/reset-password/page.tsx` — node
       `429:12884`, rendering T490's step first and the new-password step once a handle is issued. Note the drawn Russian placeholders and
       button are replaced by `resetCopy`'s English (FR-047)
-- [ ] T492 [P] [US3] E2E in `tests/e2e/password-reset.spec.ts`
+- [X] T492 [P] [US3] E2E in `tests/e2e/password-reset.spec.ts`
 
 **Checkpoint**: US1–US3 work independently.
 

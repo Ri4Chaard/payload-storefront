@@ -31,7 +31,9 @@ export type CodePurpose = 'reset-password' | 'verify-email'
 export type CodeFailure =
   'consumed' | 'expired' | 'mismatch' | 'not-found' | 'superseded' | 'too-many-attempts'
 
-export type ConsumeResult = { ok: true; token: string } | { failure: CodeFailure; ok: false }
+export type ConsumeResult =
+  | { failure: CodeFailure; ok: false }
+  | { ok: true; recordId: number; token: string }
 
 export type IssueResult =
   { code: string; ok: true } | { ok: false; retryAfterMs: number; throttled: 'cooldown' | 'hourly' }
@@ -256,5 +258,33 @@ export async function consumeCode(
     overrideAccess: true,
   })
 
-  return { ok: true, token: record.token }
+  return { ok: true, recordId: record.id, token: record.token }
+}
+
+/**
+ * Read back the Payload token a spent code stood for.
+ *
+ * The reset flow is two screens, so the token has to survive the gap between them — and it must not
+ * do so by travelling to the browser. `verifyResetCode` hands out a signed reference to the row
+ * instead (see `./reset-handle.ts`), and this is what turns that reference back into the token.
+ *
+ * **`purpose` is checked here rather than trusted from the handle.** A reference is only a row id
+ * and a signature; without this line a handle minted from a *verification* code would resolve to a
+ * verification token, and the two are interchangeable as far as `payload.resetPassword` can tell.
+ * That is contract C6 — a verification code can never complete a password reset — and this is the
+ * line that holds it.
+ *
+ * Deliberately does NOT re-check `consumedAt`: by the time a handle exists the code has been spent,
+ * which is the point. What bounds the window is the handle's own signed expiry, and after that
+ * Payload's `resetPasswordExpiration`.
+ */
+export async function tokenForCode(recordId: number, purpose: CodePurpose): Promise<null | string> {
+  const payload = await client()
+
+  const record = await payload
+    .findByID({ collection: 'verification-codes', id: recordId, overrideAccess: true })
+    .catch(() => null)
+
+  if (!record || record.purpose !== purpose) return null
+  return record.token
 }

@@ -35,6 +35,12 @@ const ROUTES = [
   // icon-only button whose accessible name has to change with its state, and getting that wrong
   // leaves a screen-reader user unable to tell whether their password is on screen.
   '/sign-in',
+  // The reset flow (004/T492). `/reset-password` renders its code step, which is the second place
+  // in the feature where six inputs have to present themselves as one labelled control — FR-046
+  // asks for the invalid-code message to be announced, and a group that is not named has nothing to
+  // announce it against.
+  '/forgot-password',
+  '/reset-password?email=a11y%40aurum-testing.dev',
 ]
 
 const WIDTHS = [
