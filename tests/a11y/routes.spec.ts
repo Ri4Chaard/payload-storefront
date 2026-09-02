@@ -197,6 +197,13 @@ for (const { name, width } of WIDTHS) {
     await page.getByPlaceholder('Password', { exact: true }).fill('a-long-enough-password')
     await page.getByRole('button', { name: 'Log in' }).click()
     await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible({ timeout: 15_000 })
+    /**
+     * The heading arrives before the title does — `metadata` is applied by the client router a beat
+     * after the segment paints, and a sweep that starts in that gap reports a document with no
+     * `<title>`. Real under load, invisible when this file runs alone, and a failure about the wrong
+     * thing either way.
+     */
+    await expect(page).toHaveTitle(/My account/)
 
     const card = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -228,6 +235,20 @@ for (const { name, width } of WIDTHS) {
       .analyze()
 
     expect(password.violations, JSON.stringify(password.violations, null, 2)).toEqual([])
+
+    // …and the Add address modal (004/T523), the largest form on the site behind a dialog: seven
+    // controls with no visible labels, a listbox of every country, and a checkbox that is disabled
+    // and checked at once — the combination most likely to leave something unnamed.
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+    await page.getByRole('button', { name: 'Add address' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    const address = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(address.violations, JSON.stringify(address.violations, null, 2)).toEqual([])
 
     await payload.delete({
       collection: 'customers',

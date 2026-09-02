@@ -1,0 +1,270 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field } from '@/components/ui/field'
+import { Modal } from '@/components/ui/modal'
+import { Select } from '@/components/ui/select'
+import { TextInput } from '@/components/ui/text-input'
+import type { CustomerAddress } from '@/lib/addresses/types'
+import { saveAddress } from '@/lib/auth/actions'
+import { applyActionErrors, errorText } from '@/lib/auth/form-errors'
+import { addressSchema, type AddressValues } from '@/lib/auth/schemas'
+import type { CountryCode, CountryOption } from '@/lib/countries'
+
+/**
+ * Add address — node `583:12968`, its error state `525:12889` (spec 004, US5, FR-027 – FR-031).
+ *
+ * **Controlled, unlike `NameModal`.** That component owns its own trigger, and says why: keeping
+ * the two together means `triggerRef` never leaves the file. It cannot work here — a customer with
+ * four addresses has five triggers (a pencil each, and the `+`) and one modal between them, so
+ * `AddressList` owns the open state and hands back the element focus should return to. Rendering
+ * one modal per address instead would put four dialogs in the tree to open at most one.
+ *
+ * **Labels are hidden and the placeholders carry the wording**, as the frame draws it and as the
+ * rest of the account forms do. The Change password modal is the exception in the other direction
+ * and explains itself there: three password boxes that differ only by placeholder is a form people
+ * fill in the wrong order. Six boxes that say `City`, `Postcode` and `Apartment, suite, etc` are
+ * not that.
+ *
+ * **Save is disabled until the four required fields have something in them** (FR-030), which is a
+ * courtesy on top of the schema rather than instead of it — `saveAddress` re-validates, because a
+ * disabled button is not a check.
+ */
+const ERRORS: Record<string, string> = {
+  addressCityRequired: 'Enter a city.',
+  addressCountryRequired: 'Choose a country.',
+  addressLine1Required: 'Enter the street address.',
+  addressNotFound: 'That address is no longer saved to your account.',
+  addressPostcodeRequired: 'Enter a postcode.',
+  addressTooLong: 'That is longer than this field can hold.',
+}
+
+export interface AddressModalProps {
+  /** The row being edited, or `null` to create a new one. */
+  address: CustomerAddress | null
+  /** How many the customer already has — the first one is always the default (FR-031). */
+  addressCount: number
+  countries: CountryOption[]
+  /** Pre-selected on a new address, from Account settings (FR-030). */
+  defaultCountry: CountryCode
+  onClose: () => void
+  open: boolean
+  /** Focus returns to whichever control opened this. */
+  triggerRef: React.RefObject<HTMLElement | null>
+}
+
+export function AddressModal({
+  address,
+  addressCount,
+  countries,
+  defaultCountry,
+  onClose,
+  open,
+  triggerRef,
+}: AddressModalProps) {
+  const router = useRouter()
+  const fieldId = React.useId()
+
+  const editing = address !== null
+
+  /**
+   * The default box is checked and disabled in the two cases where the answer is not the
+   * customer's to give: their first address becomes the default whatever they tick, and the
+   * current default cannot be un-ticked — only handed to another address. `keepOneDefault` in
+   * `src/fields/address-hooks.ts` is what actually enforces both; this is the modal declining to
+   * offer a click that would be reverted.
+   */
+  const lockedDefault = editing ? address.isDefault : addressCount === 0
+  const lockNote = editing
+    ? 'Mark another address as the default to move it.'
+    : 'Your first address is always the default.'
+
+  const emptyValues = React.useCallback(
+    (): AddressValues => ({
+      addressLine1: '',
+      addressLine2: '',
+      apartment: '',
+      city: '',
+      country: defaultCountry,
+      isDefault: addressCount === 0,
+      postalCode: '',
+    }),
+    [addressCount, defaultCountry],
+  )
+
+  const form = useForm<AddressValues>({
+    resolver: zodResolver(addressSchema),
+    defaultValues: emptyValues(),
+    mode: 'onTouched',
+  })
+
+  const { errors, isSubmitting } = form.formState
+  const resolve = (key: string | undefined) => errorText(ERRORS, key)
+
+  /**
+   * Reload the form from props every time the modal opens — the same rule `NameModal` follows, and
+   * for the same reason: a customer who typed into the Add form, cancelled, then opened an existing
+   * address must see what is stored, not the draft they abandoned. It runs on `open` rather than on
+   * mount because one instance serves every row.
+   */
+  React.useEffect(() => {
+    if (!open) return
+
+    form.reset(
+      address
+        ? {
+            addressLine1: address.addressLine1,
+            addressLine2: address.addressLine2 ?? '',
+            apartment: address.apartment ?? '',
+            city: address.city,
+            country: address.country,
+            isDefault: address.isDefault,
+            postalCode: address.postalCode,
+          }
+        : emptyValues(),
+    )
+  }, [address, emptyValues, form, open])
+
+  const values = form.watch()
+  const incomplete =
+    !values.country ||
+    values.addressLine1.trim() === '' ||
+    values.city.trim() === '' ||
+    values.postalCode.trim() === ''
+
+  const onSubmit = form.handleSubmit(async (submitted) => {
+    const result = await saveAddress(
+      address ? { ...submitted, id: address.id } : { ...submitted },
+    )
+
+    if (result.status === 'success') {
+      onClose()
+      // The action revalidated `/account` on the server; this is what asks for the new tree.
+      router.refresh()
+      return
+    }
+
+    applyActionErrors(form, result)
+  })
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      // The design draws one frame, for adding. A modal that says ADD ADDRESS over an address that
+      // already exists is worse than a title the frame does not have.
+      title={editing ? 'EDIT ADDRESS' : 'ADD ADDRESS'}
+      closeLabel={editing ? 'Close edit address' : 'Close add address'}
+      triggerRef={triggerRef}
+      footer={
+        <>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          {/* Outside the `<form>` and wired by `form=`, as every modal in this feature is: the
+              design puts the actions in the footer and the fields in the body. */}
+          <Button
+            type="submit"
+            form="address-form"
+            variant="primary"
+            disabled={incomplete || isSubmitting}
+          >
+            Save
+          </Button>
+        </>
+      }
+    >
+      <form id="address-form" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+        <Field
+          id={`${fieldId}-country`}
+          label="Country"
+          hideLabel
+          error={resolve(errors.country?.message)}
+        >
+          <Select
+            id={`${fieldId}-country`}
+            options={countries}
+            value={values.country}
+            onChange={(value) =>
+              form.setValue('country', value as CountryCode, { shouldValidate: true })
+            }
+            placeholder="Country"
+            invalid={Boolean(errors.country)}
+          />
+        </Field>
+
+        <TextInput
+          {...form.register('addressLine1')}
+          label="Address line 1"
+          placeholder="Address line 1"
+          hideLabel
+          autoComplete="address-line1"
+          error={resolve(errors.addressLine1?.message)}
+        />
+
+        <TextInput
+          {...form.register('addressLine2')}
+          label="Address line 2"
+          placeholder="Address line 2 (optional)"
+          hideLabel
+          autoComplete="address-line2"
+          error={resolve(errors.addressLine2?.message)}
+        />
+
+        <TextInput
+          {...form.register('apartment')}
+          label="Apartment, suite, etc"
+          placeholder="Apartment, suite, etc (optional)"
+          hideLabel
+          // No `autoComplete` token fits: `address-line3` is not one, and the browser's own
+          // apartment data lives inside line 2. An empty box is better than a wrong autofill.
+          error={resolve(errors.apartment?.message)}
+        />
+
+        <div className="flex flex-col gap-5 sm:flex-row">
+          <TextInput
+            {...form.register('city')}
+            label="City"
+            placeholder="City"
+            hideLabel
+            autoComplete="address-level2"
+            error={resolve(errors.city?.message)}
+            className="flex-1"
+          />
+          <TextInput
+            {...form.register('postalCode')}
+            label="Postcode"
+            placeholder="Postcode"
+            hideLabel
+            autoComplete="postal-code"
+            error={resolve(errors.postalCode?.message)}
+            className="flex-1"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Checkbox
+            {...form.register('isDefault')}
+            label="This is my default address"
+            disabled={lockedDefault}
+          />
+          {lockedDefault ? (
+            <p className="text-body-small text-neutral-secondary">{lockNote}</p>
+          ) : null}
+        </div>
+
+        {errors.root ? (
+          <p role="alert" className="text-body-small text-status-error-text">
+            {resolve(errors.root.message)}
+          </p>
+        ) : null}
+      </form>
+    </Modal>
+  )
+}

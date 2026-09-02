@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { CODE_LENGTH } from '@/lib/auth/config'
 import { checkPassword } from '@/lib/auth/password'
+import { COUNTRY_CODES } from '@/lib/countries'
 
 /**
  * The shape of every account form, defined once and checked twice (spec 004).
@@ -164,13 +165,64 @@ export const changePasswordSchema = z
     }
   })
 
+/**
+ * The Add address modal — node `583:12968` (FR-027, FR-028, FR-030).
+ *
+ * **The four required fields are required in three places, and that is deliberate.** The modal
+ * keeps Save disabled while any of them is empty, this schema refuses the submission, and
+ * `src/fields/address-fields.ts` marks the same three columns `required` on the collection (the
+ * plugin already requires `country`). The disabled button is a courtesy to the customer, this is
+ * the check, and the column constraint is what keeps both of them honest when a later writer —
+ * checkout, an import, the admin panel — arrives.
+ *
+ * **`addressLine2` and `apartment` are optional and still `string`.** The form renders both boxes
+ * always, and an untouched box submits `''`, never `undefined` — a schema that expected the latter
+ * would reject every address anybody actually typed. `saveAddress` is what turns `''` back into a
+ * stored null, so the database does not collect empty strings that then have to be checked for.
+ *
+ * **The country is checked against the whole ISO list, not the shop's narrowed one.** Narrowing
+ * `shippingCountries` changes what the form OFFERS; making it a validation rule would mean an
+ * address already saved in a country the owner later removed could not be re-saved — the row would
+ * become uneditable rather than merely unusual. `src/globals/account-settings.ts` says the same
+ * thing from the other end.
+ */
+export const addressSchema = z.object({
+  country: z.enum(COUNTRY_CODES, 'addressCountryRequired'),
+  addressLine1: z.string().trim().min(1, 'addressLine1Required').max(200, 'addressTooLong'),
+  addressLine2: z.string().trim().max(200, 'addressTooLong'),
+  apartment: z.string().trim().max(200, 'addressTooLong'),
+  city: z.string().trim().min(1, 'addressCityRequired').max(120, 'addressTooLong'),
+  postalCode: z.string().trim().min(1, 'addressPostcodeRequired').max(32, 'addressTooLong'),
+  isDefault: z.boolean(),
+})
+
+/**
+ * The same fields plus the row being edited — absent when creating (FR-029).
+ *
+ * **Separate from `addressSchema` because the form has no id field.** The modal knows which address
+ * it was opened on; folding that into the resolver's value type would mean a hidden input whose
+ * only purpose is to be tampered with. The id is validated here, on the server, where it arrives —
+ * and `saveAddress` re-reads the row it names before writing anything to it (FR-032).
+ */
+export const saveAddressSchema = addressSchema.extend({
+  id: z.number().int().positive().optional(),
+})
+
+/** Deletion needs the id and nothing else. Confirmation is the modal's job, not the schema's. */
+export const deleteAddressSchema = z.object({
+  id: z.number().int().positive(),
+})
+
+export type AddressValues = z.infer<typeof addressSchema>
 export type ChangePasswordValues = z.infer<typeof changePasswordSchema>
 export type CreateAccountValues = z.infer<typeof createAccountSchema>
+export type DeleteAddressValues = z.infer<typeof deleteAddressSchema>
 export type NameValues = z.infer<typeof nameSchema>
 export type RequestResetValues = z.infer<typeof requestResetSchema>
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 export type SignInValues = z.infer<typeof signInSchema>
 export type ResendCodeValues = z.infer<typeof resendCodeSchema>
+export type SaveAddressValues = z.infer<typeof saveAddressSchema>
 export type VerifyCodeValues = z.infer<typeof verifyCodeSchema>
 
 /**

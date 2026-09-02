@@ -21,7 +21,8 @@ import type {
  *
  * **On recursion**: clearing the other addresses issues updates that fire this same `afterChange`.
  * They terminate because every one of those documents is being set to `isDefault: false`, and the
- * hook returns immediately for anything that is not becoming the default.
+ * hook returns immediately for anything that is not becoming the default. `keepOneDefault` is
+ * written to preserve that argument rather than to break it — see the condition it turns on.
  */
 
 /** The `customer` value can arrive as an id or as a populated document, depending on depth. */
@@ -62,6 +63,60 @@ export const assignFirstAddressAsDefault: CollectionBeforeChangeHook = async ({
   }
 
   return data
+}
+
+/**
+ * A customer is never left with no default at all.
+ *
+ * FR-031 says exactly one address is the default **at any time**, and every other hook here moves
+ * the role from one row to another. This is the one transition that would destroy it instead:
+ * clearing the box on the current default, from the modal or from the admin panel, leaves a
+ * customer with three addresses and no default — a state nothing downstream can do anything
+ * sensible with.
+ *
+ * **It refuses only when nobody else holds the role**, and that condition is doing more work than
+ * it looks. `clearOtherDefaults` un-ticks the previous default by writing to it, which lands right
+ * here: a hook that put the value back unconditionally would fight that write, be re-cleared, and
+ * ping-pong between the two rows forever — the termination argument at the top of this file assumes
+ * a row set to `false` stays `false`. Asking whether another default already exists distinguishes
+ * the two cases exactly. During the hand-off, one does; when a customer simply un-ticks, none does.
+ *
+ * Refusing beats the alternatives. Promoting a replacement would silently pick an address the
+ * customer did not choose, and throwing would turn an ordinary edit — fixing a typo in the city,
+ * with the box left alone — into an error. So the value is put back, and the Add address modal
+ * draws that box checked and disabled when it is editing the current default, so nobody is offered
+ * a click that would be reverted.
+ */
+export const keepOneDefault: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+  originalDoc,
+  req,
+}) => {
+  if (operation !== 'update') return data
+  if (originalDoc?.isDefault !== true) return data
+  if (data.isDefault !== false) return data
+
+  const owner = customerId(originalDoc.customer)
+  if (!owner) return data
+
+  const others = await req.payload.count({
+    collection: 'addresses',
+    overrideAccess: true,
+    req,
+    where: {
+      and: [
+        { customer: { equals: owner } },
+        { id: { not_equals: originalDoc.id } },
+        { isDefault: { equals: true } },
+      ],
+    },
+  })
+
+  // Somebody else already holds it — this write is the hand-off, not a customer emptying the role.
+  if (others.totalDocs > 0) return data
+
+  return { ...data, isDefault: true }
 }
 
 /** Setting a default clears the previous one. */

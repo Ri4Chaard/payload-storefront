@@ -349,30 +349,51 @@ persisted.
 **Independent Test**: From an account with no addresses, add one, reload, edit it, add a second,
 switch the default, delete one.
 
-- [ ] T515 [P] [US5] Integration test in `tests/integration/us5-addresses.test.ts` — the ownership
+- [X] T515 [P] [US5] Integration test in `tests/integration/us5-addresses.test.ts` — the ownership
       case first: customer B requesting customer A's address by id gets nothing (FR-032, SC-007)
-- [ ] T516 [P] [US5] Unit test in `tests/unit/address-default.test.ts` for the invariant's four
+- [X] T516 [P] [US5] Unit test in `tests/unit/address-default.test.ts` for the invariant's four
       transitions
-- [ ] T517 [US5] Implement `saveAddress` and `deleteAddress` in `src/lib/auth/actions.ts` — create when `id` is absent, update
+- [X] T517 [US5] Implement `saveAddress` and `deleteAddress` in `src/lib/auth/actions.ts` — create when `id` is absent, update
       when present. **Both re-read the row and confirm ownership before writing**, even though the
       plugin's access already refuses another customer's row. Two checks on a client-supplied
       identifier is the right number
-- [ ] T518 [US5] Build `AddressList` in `src/components/account/address-list/` — the filled row and
+- [X] T518 [US5] Build `AddressList` in `src/components/account/address-list/` — the filled row and
       the `No addresses added` empty state with `+`
-- [ ] T519 [US5] Build `AddressModal` in `src/components/account/address-modal/` on `Modal` — node
+- [X] T519 [US5] Build `AddressModal` in `src/components/account/address-modal/` on `Modal` — node
       `583:12968`. Country `Select` from T411, address line 1, optional line 2, optional apartment,
       city and postcode on one row, the `This is my default address` `Checkbox`
-- [ ] T520 [US5] Implement the validation state in `src/components/account/address-modal/` — node `525:12889`: required fields marked
+- [X] T520 [US5] Implement the validation state in `src/components/account/address-modal/` — node `525:12889`: required fields marked
       individually, Save **disabled** while any is empty (FR-030). `apartment` is **not** required,
       whatever the error frame draws
 - [X] T521 [US5] Implement the default-address hooks in `src/fields/address-hooks.ts`, wired through the
-      `addressesCollectionOverride` seam from T413 — first address becomes default; setting a default clears the previous; deleting the
-      default promotes another (FR-031). **In a hook, not the form**: two tabs, the admin panel and a
+      `addressesCollectionOverride` seam from T413 — first address becomes default; setting a default clears the previous;
+      deleting the default promotes another (FR-031). **In a hook, not the form**: two tabs, the admin panel and a
       future checkout are all writers, and an invariant enforced in one form holds until the second
       writer appears
-- [ ] T522 [US5] Add delete with confirmation to `src/components/account/address-list/`, using `Modal` (FR-029)
-- [ ] T523 [P] [US5] E2E in `tests/e2e/addresses.spec.ts` — **choose Kazakhstan**, which the plugin's
+- [X] T522 [US5] Add delete with confirmation to `src/components/account/address-list/`, using `Modal` (FR-029)
+- [X] T523 [P] [US5] E2E in `tests/e2e/addresses.spec.ts` — **choose Kazakhstan**, which the plugin's
       default country list would not have allowed. That assertion is the regression test for R6
+
+### Decisions taken during Phase 7
+
+- **A fourth hook, `keepOneDefault`, was added to T521.** The three listed cover creating, marking
+  and deleting; none covers a customer clearing the box on their current default, which leaves an
+  account with addresses and no default at all — a state FR-031's "at any time" forbids. It refuses
+  only when nobody else holds the role, and that condition is load-bearing: an unconditional version
+  fought `clearOtherDefaults` during a hand-off and looped forever, which is how the integration
+  suite found it (seven tests hung at thirty seconds each).
+- **The row-level pencil became a `+`, and the pencil moved onto each address.** The design draws
+  one address and one pencil at the right edge of the box; that control means nothing beside a list
+  of three. The `+` the empty state already draws is the affordance that survives the list growing.
+- **The modal is controlled by `AddressList`**, unlike `NameModal`, which owns its own trigger. With
+  one modal and n+1 triggers there is no other place for the open state to live.
+- **`EDIT ADDRESS` is a title the frames do not draw.** Reusing `ADD ADDRESS` over an address that
+  already exists was the alternative.
+- **`src/lib/addresses/` is split types/queries**, following `src/lib/catalog/`. A single file
+  exporting both put `@payload-config` into the client bundle through `AddressList` — which fails
+  with an error naming `file-type`, not anything in this repository.
+
+**Checkpoint**: US1–US5 work independently.
 
 **Checkpoint**: US1–US5 work independently.
 

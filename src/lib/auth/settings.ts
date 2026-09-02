@@ -2,7 +2,13 @@ import config from '@payload-config'
 import { cache } from 'react'
 import { getPayload } from 'payload'
 
-import { DEFAULT_COUNTRY, isCountryCode, type CountryCode } from '@/lib/countries'
+import {
+  DEFAULT_COUNTRY,
+  countryOptions,
+  isCountryCode,
+  type CountryCode,
+  type CountryOption,
+} from '@/lib/countries'
 
 /**
  * The `account-settings` global — how the accounts feature behaves (spec 004, R11).
@@ -51,6 +57,25 @@ export function resolveAccountSettings(doc: RawSettings): AccountSettings {
         ? [defaultCountry, ...offered]
         : offered,
   }
+}
+
+/**
+ * The countries the address form may offer (FR-028, FR-030).
+ *
+ * An empty `shippingCountries` means every country rather than none — the global's own description
+ * says so, and a shop that has never opened the settings page must still be able to take an
+ * address. `resolveAccountSettings` has already guaranteed the default is a member of a narrowed
+ * list, so the pre-selection is always one of these.
+ *
+ * Pure, and separate from the form, because the form is a client component: this runs on the
+ * server and hands down the finished list.
+ */
+export function offeredCountries(settings: AccountSettings): CountryOption[] {
+  const options = countryOptions()
+  if (settings.shippingCountries.length === 0) return options
+
+  const offered = new Set<string>(settings.shippingCountries)
+  return options.filter((option) => offered.has(option.value))
 }
 
 /**

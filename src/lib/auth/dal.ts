@@ -2,7 +2,7 @@ import config from '@payload-config'
 import { headers as nextHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-import { getPayload } from 'payload'
+import { getPayload, type Payload } from 'payload'
 
 /**
  * Where "is this customer signed in?" is actually decided (spec 004, research R9).
@@ -34,10 +34,29 @@ export interface CustomerSession {
 }
 
 /**
- * Memoized for the render pass with React's `cache`, so a page that asks three times — the header,
- * the profile card, an action — verifies once.
+ * Derived from `payload.auth` rather than restated from `payload-types`.
+ *
+ * The same move `src/fields/address-fields.ts` makes for the plugin's own field override: the
+ * authenticated user is a union across every auth-enabled collection, discriminated by
+ * `collection`, and narrowing that union is both shorter than `Customer & { collection }` and
+ * correct on the day a third auth collection appears. It also keeps this file out of
+ * `payload-types`, which the catalogue boundary reserves for the Payload-side tiers.
  */
-export const getCustomer = cache(async (): Promise<CustomerSession | null> => {
+type AuthenticatedUser = NonNullable<Awaited<ReturnType<Payload['auth']>>['user']>
+
+export type CustomerUser = Extract<AuthenticatedUser, { collection: 'customers' }>
+
+/**
+ * The authenticated Payload user, unabridged.
+ *
+ * **Server-only, and narrower in audience than {@link getCustomer} rather than wider in trust.**
+ * Nothing that renders may call this — that is what the DTO above is for. It exists because a
+ * handful of server actions must act *as* the customer instead of merely knowing who they are:
+ * Payload's local API runs collection access control only when it is handed a `user`, and the
+ * addresses collection's `isDocumentOwner` rule is a check we want to keep running in production
+ * rather than route around with `overrideAccess` (spec 004, FR-032).
+ */
+const authenticate = cache(async (): Promise<CustomerUser | null> => {
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers: await nextHeaders() })
 
@@ -48,6 +67,18 @@ export const getCustomer = cache(async (): Promise<CustomerSession | null> => {
   // Unverified is not signed in (FR-008). Payload's login already refuses these, but a session
   // could predate verification being switched on, and the profile is not reachable without it.
   if (user._verified !== true) return null
+
+  return user
+})
+
+/**
+ * Memoized for the render pass with React's `cache`, so a page that asks three times — the header,
+ * the profile card, an action — verifies once. `authenticate` carries the same `cache`, so routing
+ * both accessors through it keeps that to one `payload.auth` call rather than two.
+ */
+export const getCustomer = cache(async (): Promise<CustomerSession | null> => {
+  const user = await authenticate()
+  if (!user) return null
 
   return {
     email: user.email,
@@ -68,6 +99,22 @@ export const getCustomer = cache(async (): Promise<CustomerSession | null> => {
 export async function requireCustomer(next?: string): Promise<CustomerSession> {
   const customer = await getCustomer()
   if (customer) return customer
+
+  const target = next ? `/sign-in?next=${encodeURIComponent(next)}` : '/sign-in'
+  redirect(target)
+}
+
+/**
+ * {@link requireCustomer}, for the actions that have to pass a `user` to Payload.
+ *
+ * Same guard, same redirect, a different return: the whole document rather than the five fields a
+ * component may see. Kept as a separate function instead of a flag on `requireCustomer`, so that
+ * every caller of the full record is greppable — there should never be many, and the day one of
+ * them appears in a component is the day this stops being safe.
+ */
+export async function requireCustomerUser(next?: string): Promise<CustomerUser> {
+  const user = await authenticate()
+  if (user) return user
 
   const target = next ? `/sign-in?next=${encodeURIComponent(next)}` : '/sign-in'
   redirect(target)

@@ -6,7 +6,7 @@ import { getPayload } from 'payload'
 import { revalidatePath } from 'next/cache'
 
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
-import { requireCustomer } from '@/lib/auth/dal'
+import { requireCustomer, requireCustomerUser, type CustomerUser } from '@/lib/auth/dal'
 import { authenticateCustomer } from '@/lib/auth/login'
 import { changeCustomerPassword, completePasswordReset } from '@/lib/auth/reset'
 import { mintResetHandle } from '@/lib/auth/reset-handle'
@@ -14,11 +14,13 @@ import { clearSession, establishSession } from '@/lib/auth/session'
 import {
   changePasswordSchema,
   createAccountSchema,
+  deleteAddressSchema,
   nameSchema,
   requestResetSchema,
   resendCodeSchema,
   resetPasswordSchema,
   safeNextPath,
+  saveAddressSchema,
   schemaFailure,
   signInSchema,
   verifyCodeSchema,
@@ -26,8 +28,10 @@ import {
   type CreateAccountValues,
   type NameValues,
   type RequestResetValues,
+  type DeleteAddressValues,
   type ResendCodeValues,
   type ResetPasswordValues,
+  type SaveAddressValues,
   type SignInValues,
   type VerifyCodeValues,
 } from '@/lib/auth/schemas'
@@ -501,6 +505,122 @@ export async function changePassword(input: ChangePasswordValues): Promise<Actio
   }
 
   if (outcome.token) await establishSession(outcome.token)
+  revalidatePath('/account')
+
+  return ok()
+}
+
+/**
+ * The customer's own addresses, and the two checks that keep them theirs (FR-032, SC-007).
+ *
+ * Every write below carries a client-supplied id, which is the whole reason this reads the way it
+ * does. Two things stand between that id and another customer's row:
+ *
+ *  1. **This module re-reads it**, scoped to the signed-in customer, and refuses anything the query
+ *     does not return. That is the check you can see.
+ *  2. **The write runs as the customer**, `overrideAccess: false` with their own user, so the
+ *     addresses collection's `isDocumentOwner` rule runs too. That is the check that keeps working
+ *     when somebody edits this file, adds a second caller, or forgets the first one.
+ *
+ * Either alone would pass a test. Both is the right number for an identifier that arrives over the
+ * wire, and it costs one query.
+ */
+async function ownedAddress(user: CustomerUser, id: number): Promise<null | { id: number }> {
+  const payload = await client()
+
+  const { docs } = await payload.find({
+    collection: 'addresses',
+    depth: 0,
+    limit: 1,
+    overrideAccess: false,
+    user,
+    where: { id: { equals: id } },
+  })
+
+  return docs[0] ? { id: docs[0].id } : null
+}
+
+/**
+ * Blank optional fields are stored as null, not as `''` (FR-027).
+ *
+ * The form always renders both optional boxes, so an untouched one submits an empty string. Letting
+ * that through would fill the column with values that are neither absent nor present, and every
+ * reader downstream would then need `?? ''` alongside its `?? null` — the same bug the DTO in
+ * `src/lib/addresses.ts` exists to prevent.
+ */
+const blankToNull = (value: string): null | string => (value === '' ? null : value)
+
+/**
+ * Create or update one address (FR-027 – FR-031).
+ *
+ * **`isDefault` is passed through and then overruled by the collection.** `src/fields/address-hooks.ts`
+ * owns FR-031, because a form is only one of the writers — the admin panel and a future checkout
+ * are two more, and an invariant enforced in a form holds until the second writer appears. The
+ * customer's first address becomes the default whether or not they ticked the box, and ticking it
+ * on a second address clears the first.
+ *
+ * **`customer` is not set here.** The plugin's own `beforeChange` assigns ownership from
+ * `req.user`, which is exactly why the create runs as the customer rather than with
+ * `overrideAccess`. Sending a `customer` of our own would be a second answer to a question that
+ * already has one.
+ */
+export async function saveAddress(input: SaveAddressValues): Promise<ActionResult> {
+  const user = await requireCustomerUser()
+
+  const parsed = saveAddressSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const { id, ...values } = parsed.data
+  const data = {
+    ...values,
+    addressLine2: blankToNull(values.addressLine2),
+    apartment: blankToNull(values.apartment),
+  }
+
+  const payload = await client()
+
+  if (id === undefined) {
+    await payload.create({ collection: 'addresses', data, overrideAccess: false, user })
+  } else {
+    const owned = await ownedAddress(user, id)
+    if (!owned) return fail('addressNotFound')
+
+    await payload.update({ collection: 'addresses', data, id, overrideAccess: false, user })
+  }
+
+  revalidatePath('/account')
+
+  return ok()
+}
+
+/**
+ * Remove one address (FR-029, FR-031).
+ *
+ * The confirmation the requirement asks for is the modal's, not this function's. An action that
+ * demanded a second "yes, really" parameter would be a confirmation an attacker sends twice, and it
+ * would put a question about the interface into the part of the system that cannot see one.
+ *
+ * If the deleted address was the default, `promoteDefaultAfterDelete` gives the role to another —
+ * again in the collection, so it also holds for a deletion made from the admin panel.
+ */
+export async function deleteAddress(input: DeleteAddressValues): Promise<ActionResult> {
+  const user = await requireCustomerUser()
+
+  const parsed = deleteAddressSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const owned = await ownedAddress(user, parsed.data.id)
+  if (!owned) return fail('addressNotFound')
+
+  const payload = await client()
+  await payload.delete({ collection: 'addresses', id: owned.id, overrideAccess: false, user })
+
   revalidatePath('/account')
 
   return ok()

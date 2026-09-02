@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { AddressList } from '@/components/account/address-list'
 import { ChangePasswordModal } from '@/components/account/change-password-modal'
 import { NameModal } from '@/components/account/name-modal'
 import { ProfileRow } from '@/components/account/profile-row'
@@ -8,7 +9,9 @@ import { SignOutButton } from '@/components/account/sign-out-button'
 import { Container } from '@/components/ui/container'
 import { Icon } from '@/components/ui/icon'
 import { Switch } from '@/components/ui/switch'
+import { getCustomerAddresses } from '@/lib/addresses/queries'
 import { requireCustomer } from '@/lib/auth/dal'
+import { getAccountSettings, offeredCountries } from '@/lib/auth/settings'
 
 /**
  * The profile — node `261:4066`, card `266:5096` (spec 004, US4).
@@ -28,9 +31,9 @@ import { requireCustomer } from '@/lib/auth/dal'
  * Security row as `safety` and omits the Full name row entirely from the empty state, so it is not
  * authoritative on structure. Recorded as an addition, like the registration form's consent box.
  *
- * **Two rows are drawn but not yet operable, and each says so below.** Addresses is US5 and the
- * marketing switch is US6. They are here now because FR-022 fixes the order and a card that grows a
- * row in the middle later is a card that gets re-reviewed three times.
+ * **One row is drawn but not yet operable, and says so below**: the marketing switch is US6. It is
+ * here now because FR-022 fixes the order and a card that grows a row in the middle later is a card
+ * that gets re-reviewed three times.
  */
 export const metadata: Metadata = {
   title: 'My account',
@@ -40,6 +43,15 @@ export const metadata: Metadata = {
 export default async function AccountPage() {
   const customer = await requireCustomer('/account')
   const fullName = [customer.firstName, customer.lastName].filter(Boolean).join(' ')
+
+  /**
+   * The address form's two settings, resolved on the server (FR-028, FR-030).
+   *
+   * `offeredCountries` turns the shop's list into the options the modal renders, so the client
+   * never sees the narrowing rule — only its result. `getAccountSettings` and
+   * `getCustomerAddresses` are both `cache`d, so asking here costs one query each.
+   */
+  const settings = await getAccountSettings()
 
   return (
     <Container>
@@ -63,12 +75,11 @@ export default async function AccountPage() {
               {fullName}
             </ProfileRow>
 
-            {/*
-              **Always the empty state, for now.** Saved addresses and the `+` that creates one are
-              US5; until that lands there is no way to create one, so there is none to show. The row
-              is here because FR-022 fixes its position.
-            */}
-            <ProfileRow label="Addresses" empty="No addresses added" />
+            <AddressList
+              addresses={await getCustomerAddresses()}
+              countries={offeredCountries(settings)}
+              defaultCountry={settings.defaultCountry}
+            />
 
             <ProfileRow
               label="Marketing preferences"

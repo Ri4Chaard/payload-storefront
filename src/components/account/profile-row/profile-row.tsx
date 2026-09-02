@@ -34,10 +34,25 @@ export interface ProfileRowProps {
    * and a prop that tried to cover all three would be a worse version of `children`.
    */
   action?: React.ReactNode
+  /**
+   * Where the action sits against a value taller than one line.
+   *
+   * Five of the six rows hold a single line and centre is right for all of them. Addresses is a
+   * stack that grows, and a `+` floating at the middle of a list of four reads as belonging to the
+   * item it happens to be beside.
+   */
+  align?: 'center' | 'start'
   className?: string
 }
 
-export function ProfileRow({ label, children, empty, action, className }: ProfileRowProps) {
+export function ProfileRow({
+  label,
+  children,
+  empty,
+  action,
+  align = 'center',
+  className,
+}: ProfileRowProps) {
   const filled = children !== undefined && children !== null && children !== ''
 
   return (
@@ -45,8 +60,8 @@ export function ProfileRow({ label, children, empty, action, className }: Profil
       <dt className="text-body-small text-neutral-primary">{label}</dt>
       <dd
         className={cn(
-          'flex min-h-12 items-center gap-3 border border-black/10 bg-neutral-white',
-          'px-4 py-2.5',
+          'flex min-h-12 gap-3 border border-black/10 bg-neutral-white px-4 py-2.5',
+          align === 'start' ? 'items-start' : 'items-center',
         )}
       >
         <div

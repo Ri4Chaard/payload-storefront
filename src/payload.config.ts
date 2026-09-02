@@ -25,6 +25,7 @@ import { addressFields } from './fields/address-fields'
 import {
   assignFirstAddressAsDefault,
   clearOtherDefaults,
+  keepOneDefault,
   promoteDefaultAfterDelete,
 } from './fields/address-hooks'
 import { AccountSettings } from './globals/account-settings'
@@ -158,6 +159,7 @@ export default buildConfig({
               beforeChange: [
                 ...(defaultCollection.hooks?.beforeChange ?? []),
                 assignFirstAddressAsDefault,
+                keepOneDefault,
               ],
             },
           }),
