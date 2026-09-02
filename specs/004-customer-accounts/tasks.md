@@ -407,17 +407,17 @@ switch the default, delete one.
 
 **Independent Test**: Change the password; the new one signs in and the old one does not.
 
-- [ ] T545 [P] [US7] Integration test in `tests/integration/us7-change-password.test.ts` — wrong
+- [X] T545 [P] [US7] Integration test in `tests/integration/us7-change-password.test.ts` — wrong
       current password refused; other sessions ended on success (FR-021)
-- [ ] T546 [US7] Implement `changePassword` in `src/lib/auth/actions.ts` — verify the current password by attempting a login
+- [X] T546 [US7] Implement `changePassword` in `src/lib/auth/actions.ts` — verify the current password by attempting a login
       before writing anything, then end other sessions
-- [ ] T547 [US7] Build `ChangePasswordModal` in `src/components/account/change-password-modal/` on
+- [X] T547 [US7] Build `ChangePasswordModal` in `src/components/account/change-password-modal/` on
       `Modal` — node `426:11616`. Three labelled fields; the current-password field carries the reset
       link via `TextInput`'s `trailing`, spelled **`Forgot password?`**
-- [ ] T548 [US7] Wire the Security row's `change password` link in `src/app/(frontend)/account/page.tsx` —
+- [X] T548 [US7] Wire the Security row's `change password` link in `src/app/(frontend)/account/page.tsx` —
       node row `I266:5096;419:14494`,
       using the single label from T419, not the design's two
-- [ ] T549 [P] [US7] E2E in `tests/e2e/change-password.spec.ts`
+- [X] T549 [P] [US7] E2E in `tests/e2e/change-password.spec.ts`
 
 **Checkpoint**: all seven stories are independently functional.
 

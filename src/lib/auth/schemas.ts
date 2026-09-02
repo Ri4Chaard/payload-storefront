@@ -135,6 +135,36 @@ export const nameSchema = z.object({
   lastName: z.string().trim().max(100, 'nameTooLong'),
 })
 
+/**
+ * The Change password modal — node `426:11616` (FR-020).
+ *
+ * **Its refinement is written out rather than sharing `passwordPair`.** Two reasons, and the first
+ * alone would be enough: the fields are named `newPassword`/`confirmPassword`, not
+ * `password`/`confirmPassword`, so the shared helper does not fit without being parameterised into
+ * something harder to read than the four lines below. The second is that this form has no email on
+ * it — the customer is signed in, so the address is not asked for — and the weak-password check
+ * that needs it therefore has to happen on the server, against the account being changed.
+ */
+export const changePasswordSchema = z
+  .object({
+    currentPassword: passwordField,
+    newPassword: passwordField,
+    confirmPassword: passwordField,
+  })
+  .superRefine((values, ctx) => {
+    if (values.newPassword !== values.confirmPassword) {
+      ctx.addIssue({ code: 'custom', message: 'changePasswordMismatch', path: ['confirmPassword'] })
+      return
+    }
+
+    // Length and the common-password list only. `changePassword` re-runs the same check with the
+    // customer's own address, which is the one that can refuse a password that IS the address.
+    if (!checkPassword(values.newPassword).ok) {
+      ctx.addIssue({ code: 'custom', message: 'changePasswordTooWeak', path: ['newPassword'] })
+    }
+  })
+
+export type ChangePasswordValues = z.infer<typeof changePasswordSchema>
 export type CreateAccountValues = z.infer<typeof createAccountSchema>
 export type NameValues = z.infer<typeof nameSchema>
 export type RequestResetValues = z.infer<typeof requestResetSchema>

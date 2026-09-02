@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { ChangePasswordModal } from '@/components/account/change-password-modal'
 import { NameModal } from '@/components/account/name-modal'
 import { ProfileRow } from '@/components/account/profile-row'
 import { SignOutButton } from '@/components/account/sign-out-button'
 import { Container } from '@/components/ui/container'
 import { Icon } from '@/components/ui/icon'
-import { Link } from '@/components/ui/link'
 import { Switch } from '@/components/ui/switch'
 import { requireCustomer } from '@/lib/auth/dal'
 
@@ -97,7 +97,7 @@ export default async function AccountPage() {
             {/* FR-049 — `Security`, once, everywhere. The composed frames say `safety`; the card
                 itself says `Security`, and one label site-wide is the requirement. */}
             <ProfileRow label="Security">
-              <Link href="/forgot-password">change password</Link>
+              <ChangePasswordModal />
             </ProfileRow>
           </dl>
 

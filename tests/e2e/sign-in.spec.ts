@@ -187,3 +187,64 @@ test('an anonymous visitor asking for the profile is sent to sign in, and back a
   // `next` was carried through the proxy and honoured by the action, which validated it first.
   await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible({ timeout: 15_000 })
 })
+
+
+/**
+ * A signed-in customer has no business on the authentication screens, and until this was added they
+ * were offered them: `/sign-in` would take a second set of credentials and mint a second session
+ * beside the live one, and `/create-account` would offer to create an account for someone who has
+ * one.
+ */
+test('a signed-in customer is sent away from sign-in and create-account', async ({ page }) => {
+  await verifiedCustomer().then(async (email) => {
+    await page.goto('/sign-in')
+    await page.getByPlaceholder('Email Address').fill(email)
+    await page.getByPlaceholder('Password', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Log in' }).click()
+    await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible({ timeout: 15_000 })
+  })
+
+  await page.goto('/sign-in')
+  await expect(page).toHaveURL(/\/account$/)
+  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible()
+
+  await page.goto('/create-account')
+  await expect(page).toHaveURL(/\/account$/)
+
+  // `next` is honoured rather than ignored, and through the same whitelist the action uses.
+  await page.goto('/sign-in?next=%2Faccount%3Ffrom%3Dtest')
+  await expect(page).toHaveURL(/\/account\?from=test$/)
+
+  // …and a `next` that leaves this origin is refused here exactly as it is in the action.
+  await page.goto('/sign-in?next=https%3A%2F%2Fevil.example')
+  await expect(page).toHaveURL(/\/account$/)
+})
+
+/**
+ * The admin panel, reached with a CUSTOMER session (spec 004).
+ *
+ * Payload names its cookie from the config's `cookiePrefix`, so both collections share
+ * `payload-token`. A customer opening `/admin` therefore arrives authenticated as the wrong kind of
+ * user and gets Payload's Unauthorized view — whose Log out button cannot work, because the admin's
+ * auth provider sees no user of its own to log out and merely bounces to `/admin/login`, which
+ * bounces back. The customer is stuck on a page with one button that does nothing.
+ */
+test('a signed-in customer asking for the admin panel is sent to their account', async ({
+  page,
+}) => {
+  const email = await verifiedCustomer()
+
+  await page.goto('/sign-in')
+  await page.getByPlaceholder('Email Address').fill(email)
+  await page.getByPlaceholder('Password', { exact: true }).fill(PASSWORD)
+  await page.getByRole('button', { name: 'Log in' }).click()
+  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible({ timeout: 15_000 })
+
+  await page.goto('/admin')
+  await expect(page).toHaveURL(/\/account$/, { timeout: 20_000 })
+  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible()
+
+  // The login screen too, which is the other way into the same dead end.
+  await page.goto('/admin/login')
+  await expect(page).toHaveURL(/\/account$/, { timeout: 20_000 })
+})

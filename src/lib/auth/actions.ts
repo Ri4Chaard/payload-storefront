@@ -8,10 +8,11 @@ import { revalidatePath } from 'next/cache'
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
 import { requireCustomer } from '@/lib/auth/dal'
 import { authenticateCustomer } from '@/lib/auth/login'
-import { completePasswordReset } from '@/lib/auth/reset'
+import { changeCustomerPassword, completePasswordReset } from '@/lib/auth/reset'
 import { mintResetHandle } from '@/lib/auth/reset-handle'
 import { clearSession, establishSession } from '@/lib/auth/session'
 import {
+  changePasswordSchema,
   createAccountSchema,
   nameSchema,
   requestResetSchema,
@@ -21,6 +22,7 @@ import {
   schemaFailure,
   signInSchema,
   verifyCodeSchema,
+  type ChangePasswordValues,
   type CreateAccountValues,
   type NameValues,
   type RequestResetValues,
@@ -457,6 +459,48 @@ export async function updateName(input: NameValues): Promise<ActionResult> {
    * This invalidates it; the modal's own `router.refresh()` is what asks for the new one. Both
    * halves are needed — revalidating alone leaves the client showing the tree it already has.
    */
+  revalidatePath('/account')
+
+  return ok()
+}
+
+/**
+ * Change the password while signed in (FR-020, FR-021).
+ *
+ * Schema, session and revalidation; everything that decides whether the password changes is in
+ * `changeCustomerPassword`, for the same reason the reset flow is split that way.
+ *
+ * **The customer stays signed in on THIS device and nowhere else.** The action replaces their
+ * cookie with the session minted against the new password, and the core has already discarded every
+ * other one — so a change made because somebody else had the old password ends that person's access
+ * in the same breath, which is the whole point of FR-021.
+ */
+export async function changePassword(input: ChangePasswordValues): Promise<ActionResult> {
+  const customer = await requireCustomer()
+
+  const parsed = changePasswordSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const outcome = await changeCustomerPassword({
+    currentPassword: parsed.data.currentPassword,
+    customerId: customer.id,
+    newPassword: parsed.data.newPassword,
+  })
+
+  if (!outcome.ok) {
+    if (outcome.reason === 'locked') return fail('signInLocked')
+    if (outcome.reason === 'weak') {
+      return fail('changePasswordTooWeak', { newPassword: 'changePasswordTooWeak' })
+    }
+    // Against the field it concerns, so the customer is not left hunting for which of three boxes
+    // the complaint is about.
+    return fail('changePasswordWrong', { currentPassword: 'changePasswordWrong' })
+  }
+
+  if (outcome.token) await establishSession(outcome.token)
   revalidatePath('/account')
 
   return ok()

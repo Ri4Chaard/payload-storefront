@@ -215,6 +215,20 @@ for (const { name, width } of WIDTHS) {
 
     expect(modal.violations, JSON.stringify(modal.violations, null, 2)).toEqual([])
 
+    // …and the Change password modal, which is the denser of the two: three password fields whose
+    // placeholders are nearly identical, a link living inside one of them, and a reveal toggle
+    // beside it whose name has to change with its state.
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+    await page.getByRole('button', { name: 'change password' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    const password = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(password.violations, JSON.stringify(password.violations, null, 2)).toEqual([])
+
     await payload.delete({
       collection: 'customers',
       overrideAccess: true,

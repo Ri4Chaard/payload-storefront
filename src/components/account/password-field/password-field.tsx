@@ -35,6 +35,15 @@ import { TextInput, type TextInputProps } from '@/components/ui/text-input'
  */
 export type PasswordFieldProps = Omit<TextInputProps, 'iconEnd' | 'trailing' | 'type'> & {
   /**
+   * Rendered inside the field, BEFORE the toggle.
+   *
+   * `trailing` is not available to callers — this component owns that slot — but the change-password
+   * modal draws `Forgot password?` inside the current-password box, and a field that could show
+   * either the toggle or the link but not both would be a worse component than one that composes
+   * them. Before the toggle, so the reading order matches the drawn one.
+   */
+  adornment?: React.ReactNode
+  /**
    * The accessible name of the toggle while the password is hidden, and while it is shown.
    *
    * Named `reveal`/`conceal` rather than `show`/`hide` because `TextInput` already has a
@@ -46,6 +55,7 @@ export type PasswordFieldProps = Omit<TextInputProps, 'iconEnd' | 'trailing' | '
 }
 
 export function PasswordField({
+  adornment,
   concealLabel = 'Hide password',
   revealLabel = 'Show password',
   ...props
@@ -57,22 +67,25 @@ export function PasswordField({
       {...props}
       type={visible ? 'text' : 'password'}
       trailing={
-        <button
-          type="button"
-          // Without this the button submits the form it sits in — the browser's default for a
-          // button inside a form, and a particularly confusing one here because the customer's
-          // intent was to look at what they typed.
-          onClick={() => setVisible((shown) => !shown)}
-          aria-pressed={visible}
-          aria-label={visible ? concealLabel : revealLabel}
-          className={[
-            'text-neutral-secondary hover:text-neutral-primary -mr-1 flex size-8 items-center',
-            'justify-center transition-colors',
-            'focus-visible:outline-primary-default focus-visible:outline-2 focus-visible:outline-offset-2',
-          ].join(' ')}
-        >
-          <Icon name={visible ? 'eye-off' : 'eye'} className="size-5" />
-        </button>
+        <>
+          {adornment}
+          <button
+            type="button"
+            // Without this the button submits the form it sits in — the browser's default for a
+            // button inside a form, and a particularly confusing one here because the customer's
+            // intent was to look at what they typed.
+            onClick={() => setVisible((shown) => !shown)}
+            aria-pressed={visible}
+            aria-label={visible ? concealLabel : revealLabel}
+            className={[
+              'text-neutral-secondary hover:text-neutral-primary -mr-1 flex size-8 items-center',
+              'justify-center transition-colors',
+              'focus-visible:outline-primary-default focus-visible:outline-2 focus-visible:outline-offset-2',
+            ].join(' ')}
+          >
+            <Icon name={visible ? 'eye-off' : 'eye'} className="size-5" />
+          </button>
+        </>
       }
     />
   )

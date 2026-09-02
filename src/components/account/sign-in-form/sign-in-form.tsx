@@ -16,9 +16,11 @@ import { signInSchema, type SignInValues } from '@/lib/auth/schemas'
 /**
  * Node `408:7412` — address, password, the forgot link, and one button.
  *
- * **The forgot-password link lives inside the password box**, which is what `TextInput`'s
- * `trailing` prop was added for in spec 001 and what the design draws. It is placed before the
- * reveal toggle so the reading order matches the visual one.
+ * **The forgot-password link sits beneath the password box, not inside it.** The change-password
+ * modal draws its equivalent inside the field, and this screen could too — `PasswordField` takes an
+ * `adornment` for exactly that. It does not, because this box is narrower than the modal's and the
+ * link would crowd the reveal toggle on a phone. A right-aligned line under the field is the same
+ * reading order with room to breathe.
  *
  * **Every failure lands in one place, and says one thing.** A wrong password and an address with no
  * account are the same message by requirement (FR-011); it is rendered as a form-level error rather

@@ -2,12 +2,14 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 
 import { tokenForCode } from '@/lib/auth/codes'
+import { authenticateCustomer } from '@/lib/auth/login'
 import { checkPassword } from '@/lib/auth/password'
 import { openResetHandle } from '@/lib/auth/reset-handle'
 import { sendPasswordChangedNotice } from '@/lib/email/transactional'
 
 /**
- * Completing a password reset, with no reference to cookies or to Next (spec 004, US3).
+ * Setting a customer's password — by reset, or by changing it while signed in — with no reference
+ * to cookies or to Next (spec 004, US3 and US7).
  *
  * **Deliberately not inside `'use server'`**, exactly as `./login.ts` is not. Two reasons, and the
  * second is the load-bearing one. Every export of a `'use server'` module is a public RPC endpoint,
@@ -158,4 +160,74 @@ function sessionIdFrom(token: string): string | undefined {
   } catch {
     return undefined
   }
+}
+
+
+export type ChangeResult =
+  | { customerId: number; ok: true; token: string | undefined }
+  | { ok: false; reason: 'locked' | 'weak' | 'wrong-password' }
+
+/**
+ * Change the password of a customer who is already signed in (FR-020, FR-021).
+ *
+ * **The current password is proved by signing in with it**, because Payload offers no "is this the
+ * password?" call and hand-rolling one would mean reaching past its export map for the hashing
+ * strategy. `login` is the supported way to ask, so it is the way this asks — and it brings the
+ * lockout counter with it, which is the right behaviour anyway: somebody sitting at a borrowed
+ * screen guessing at this form should hit the same wall they would hit at the sign-in screen.
+ *
+ * **It signs in twice, and the second one is the point.** `payload.login` mints a session each
+ * time, so verifying leaves a spare one behind; logging in again with the NEW password produces the
+ * token this device will carry, and `endOtherSessions` then keeps that one and discards everything
+ * else — the spare, the old sessions on other devices, and whoever prompted the change in the first
+ * place. Two password verifications for an operation a customer performs once in a year is not a
+ * cost worth optimising against the alternative, which is reading the current session's `sid` out
+ * of a cookie this module deliberately cannot see.
+ */
+export async function changeCustomerPassword({
+  currentPassword,
+  customerId,
+  newPassword,
+}: {
+  currentPassword: string
+  customerId: number
+  newPassword: string
+}): Promise<ChangeResult> {
+  const payload = await client()
+
+  const customer = await payload.findByID({
+    collection: 'customers',
+    id: customerId,
+    overrideAccess: true,
+  })
+
+  const proof = await authenticateCustomer({ email: customer.email, password: currentPassword })
+
+  if (!proof.ok) {
+    // `unverified` cannot reach here — the caller required a verified session to get this far — and
+    // if it somehow did, refusing as a wrong password is the safe reading.
+    return { ok: false, reason: proof.reason === 'locked' ? 'locked' : 'wrong-password' }
+  }
+
+  // The authoritative check. The form has no email on it, so this is the only place the rule that
+  // a password may not BE the customer's address can be applied.
+  if (!checkPassword(newPassword, customer.email).ok) return { ok: false, reason: 'weak' }
+
+  await payload.update({
+    collection: 'customers',
+    data: { password: newPassword },
+    id: customerId,
+    overrideAccess: true,
+  })
+
+  const renewed = await authenticateCustomer({ email: customer.email, password: newPassword })
+  const token = renewed.ok ? renewed.token : undefined
+
+  // FR-021 — everything else signed in as this customer stops being signed in, including the
+  // session the verification above minted.
+  await endOtherSessions(customerId, token)
+
+  await sendPasswordChangedNotice(customer.email)
+
+  return { customerId, ok: true, token }
 }
