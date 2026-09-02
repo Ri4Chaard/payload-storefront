@@ -3,8 +3,16 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
-import { consumeCode, issueCode, type CodeFailure, type CodePurpose } from '@/lib/auth/codes'
-import { checkPassword } from '@/lib/auth/password'
+import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
+import {
+  createAccountSchema,
+  resendCodeSchema,
+  schemaFailure,
+  verifyCodeSchema,
+  type CreateAccountValues,
+  type ResendCodeValues,
+  type VerifyCodeValues,
+} from '@/lib/auth/schemas'
 import { sendVerificationCode } from '@/lib/email/transactional'
 
 /**
@@ -13,6 +21,12 @@ import { sendVerificationCode } from '@/lib/email/transactional'
  * Every message below is a KEY into `src/lib/auth/copy.ts`, never a sentence. That keeps each string
  * defined once, and it keeps these functions assertable: the integration tests compare two responses
  * to each other, and `toBe('codeExpired')` does not break the day somebody rewords the sentence.
+ *
+ * **Each action re-validates its input with the same schema the form used** (`./schemas.ts`). The
+ * browser's check is a courtesy to the customer; these functions are a public HTTP endpoint that
+ * anything can call with anything, so the shape is proved again here. Passing typed values rather
+ * than `FormData` is what lets one schema serve both sides — and what lets the tests below read as
+ * `registerCustomer({ email, password })`.
  */
 
 export type ActionResult<T = undefined> =
@@ -27,13 +41,6 @@ const fail = (message: string, fieldErrors?: Record<string, string>): ActionResu
 })
 
 const client = () => getPayload({ config })
-
-/** Good enough to catch a typo, and not an attempt to out-parse RFC 5322. */
-const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function normalize(value: FormDataEntryValue | null): string {
-  return typeof value === 'string' ? value.trim() : ''
-}
 
 /** Each way a code can be dead maps to its own message. See `consumeCode` for why that matters. */
 const CODE_FAILURE_KEYS: Record<CodeFailure, string> = {
@@ -54,28 +61,14 @@ const CODE_FAILURE_KEYS: Record<CodeFailure, string> = {
  * account gets a fresh code, so the legitimate owner of an abandoned registration can still finish
  * it; a verified one gets nothing at all. From outside, the three cases are indistinguishable.
  */
-export async function registerCustomer(
-  _previous: ActionResult | null,
-  formData: FormData,
-): Promise<ActionResult> {
-  const email = normalize(formData.get('email')).toLowerCase()
-  const password = normalize(formData.get('password'))
-  const confirmPassword = normalize(formData.get('confirmPassword'))
-  const marketingEmail = formData.get('marketingConsent') !== null
-
-  if (!EMAIL_SHAPE.test(email)) {
-    return fail('createEmailInvalid', { email: 'createEmailInvalid' })
+export async function registerCustomer(input: CreateAccountValues): Promise<ActionResult> {
+  const parsed = createAccountSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
   }
 
-  if (password !== confirmPassword) {
-    return fail('createPasswordMismatch', { confirmPassword: 'createPasswordMismatch' })
-  }
-
-  const strength = checkPassword(password, email)
-  if (!strength.ok) {
-    return fail('createPasswordTooWeak', { password: 'createPasswordTooWeak' })
-  }
-
+  const { email, marketingConsent: marketingEmail, password } = parsed.data
   const payload = await client()
 
   const existing = await payload.find({
@@ -135,15 +128,11 @@ async function resendVerificationFor(customerId: number): Promise<'ok' | 'thrott
  *
  * Returns success for an unknown address as well, for the same reason registration does.
  */
-export async function resendCode(
-  _previous: ActionResult | null,
-  formData: FormData,
-): Promise<ActionResult> {
-  const email = normalize(formData.get('email')).toLowerCase()
-  const purpose = normalize(formData.get('purpose')) as CodePurpose
+export async function resendCode(input: ResendCodeValues): Promise<ActionResult> {
+  const parsed = resendCodeSchema.safeParse(input)
+  if (!parsed.success) return fail(schemaFailure(parsed.error).message)
 
-  if (!EMAIL_SHAPE.test(email)) return fail('codeInvalid')
-
+  const { email, purpose } = parsed.data
   const payload = await client()
   const found = await payload.find({
     collection: 'customers',
@@ -182,15 +171,11 @@ export async function resendCode(
  * split is the whole of research R3 — Payload keeps the token and the state transition, and we own
  * six digits that stand for the token.
  */
-export async function verifyEmailCode(
-  _previous: ActionResult | null,
-  formData: FormData,
-): Promise<ActionResult> {
-  const email = normalize(formData.get('email')).toLowerCase()
-  const code = normalize(formData.get('code'))
+export async function verifyEmailCode(input: VerifyCodeValues): Promise<ActionResult> {
+  const parsed = verifyCodeSchema.safeParse(input)
+  if (!parsed.success) return fail(schemaFailure(parsed.error).message)
 
-  if (!EMAIL_SHAPE.test(email) || code.length === 0) return fail('codeInvalid')
-
+  const { code, email } = parsed.data
   const result = await consumeCode(email, 'verify-email', code)
   if (!result.ok) return fail(CODE_FAILURE_KEYS[result.failure])
 

@@ -127,6 +127,12 @@ arrives blocks every story in this feature.
       the same change. Then **test the `down` with a Kazakhstan address saved** — the rollback
       narrows `addresses.country`'s enum, and a row outside the plugin's 40 values is exactly what
       breaks it ([data-model.md](./data-model.md))
+- [X] T422 Add `react-hook-form`, `zod` and `@hookform/resolvers`, and create
+      `src/lib/auth/schemas.ts` — one schema per form, imported by both the browser and the action
+      it posts to (R16). Actions take typed values and **re-parse**: the client check is a courtesy,
+      not a boundary. Messages stay copy keys, so the tests keep asserting
+      `toBe('createPasswordMismatch')`. Costs no-JS submission on these forms — see the plan's
+      Complexity Tracking
 
 ### Server tier
 

@@ -267,16 +267,21 @@ Action, even if the form is only rendered on an authenticated page"
 
 ---
 
-## R10 — Forms are Server Actions with `useActionState`
+## R10 — Forms are Server Actions
 
 **Decision**: Every form in this feature — sign in, create account, verify, forgot, reset, and the
-four profile modals — is a `<form action={...}>` bound to a Server Action, with `useActionState` for
-the pending and error states.
+four profile modals — submits to a Server Action. Validation is authoritative in the action, where
+FR-002/FR-003 need it to be.
 
-**Rationale**: It is the pattern the bundled forms guide documents for this version, it keeps
-validation server-side where FR-002/FR-003 need it to be authoritative, and it means the forms
-submit without JavaScript. The client components stay small: the OTP group, the password show/hide
-toggle, the modals, and the marketing switch.
+> **Superseded in part by R16.** This originally specified `<form action={...}>` with
+> `useActionState`, partly because it submits without JavaScript. The forms now submit through
+> `react-hook-form`, and the actions take typed values rather than `FormData` so one zod schema can
+> validate both sides. The server half of this decision is unchanged — the action is still the
+> authority, and it re-parses everything. What changed is the no-JS property, recorded in the plan's
+> Complexity Tracking.
+
+The client components stay small: the OTP group, the password show/hide toggle, the modals, and the
+marketing switch.
 
 **Session persistence**: `auth.tokenExpiration` is set to 30 days (FR-012). Payload's default is
 7200 seconds, which would sign a customer out roughly every two hours and fail the spec outright.
@@ -414,6 +419,31 @@ that has no reason to be reachable from outside.
 
 ---
 
+## R16 — One schema per form, checked on both sides
+
+**Decision**: `react-hook-form` with `zod`, sharing one schema per form between the browser and the
+server action it posts to (`src/lib/auth/schemas.ts`). The actions take typed values rather than
+`FormData` and re-parse with the same schema.
+
+**Rationale**: this feature ships nine forms. Written by hand, each needs a validator in the browser
+for the customer and a second one in the action for everything else — and two copies of "what counts
+as valid" drift. The half that drifts silently is always the server's, because the browser's is the
+one anybody looks at. A schema imported by both cannot disagree with itself.
+
+**The client-side check is a courtesy, never a boundary.** A server action is a public HTTP
+endpoint; anything can call `registerCustomer` with anything. Every action re-parses. The browser's
+copy exists so a mistyped confirmation costs no round trip.
+
+**Messages stay copy keys**, so the schema slots into the contract the actions already had — and the
+integration tests still assert `toBe('createPasswordMismatch')` rather than matching English.
+
+**The cost is no-JS submission on these forms**, recorded in the plan's Complexity Tracking. Spec
+003 holds the opposite line for catalogue filtering (FR-029) and it stays true there; the account
+forms are `noindex` and half of this flow already required JavaScript, because `OtpInput` is a JS
+control and the paste-the-code journey has no non-JS equivalent.
+
+---
+
 ## Resolved unknowns
 
 Every "NEEDS CLARIFICATION" the Technical Context would otherwise carry is closed above.
@@ -435,3 +465,4 @@ Every "NEEDS CLARIFICATION" the Technical Context would otherwise carry is close
 | OTP paste behaviour | R13 |
 | New configuration | R14 |
 | Scheduled purge | R15 |
+| Form validation, and where it runs | R16 |

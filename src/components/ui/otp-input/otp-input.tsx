@@ -36,6 +36,14 @@ export interface OtpInputProps {
   length?: number
   value?: string
   onChange?: (value: string) => void
+  /**
+   * Fired when focus leaves the GROUP, not when it moves between boxes.
+   *
+   * Six boxes are one control, so six blurs as a customer types would mark the field touched — and
+   * with it, invalid — while they are still filling it in. Form libraries drive their touched state
+   * from this, which is why the distinction matters here and not merely in principle.
+   */
+  onBlur?: () => void
   /** Fired when the last empty box is filled, including by a paste. */
   onComplete?: (value: string) => void
   error?: React.ReactNode
@@ -56,6 +64,7 @@ export function OtpInput({
   length = 6,
   value,
   onChange,
+  onBlur,
   onComplete,
   error,
   disabled,
@@ -185,6 +194,12 @@ export function OtpInput({
         aria-labelledby={labelId}
         aria-describedby={error ? errorId : undefined}
         className="flex items-center justify-center gap-2.5"
+        onBlur={(event) => {
+          // `relatedTarget` is whatever is receiving focus. If it is one of our own boxes the
+          // customer has not left the control, they have moved along it.
+          if (event.currentTarget.contains(event.relatedTarget)) return
+          onBlur?.()
+        }}
         onPaste={(event) => {
           // At the GROUP. The target box is irrelevant — see the note above.
           event.preventDefault()

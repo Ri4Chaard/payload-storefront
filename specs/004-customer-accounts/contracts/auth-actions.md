@@ -43,7 +43,12 @@ receives fields it has no business rendering, and one of them eventually gets re
 
 ## Action result
 
-Every action returns the same discriminated shape, which is what `useActionState` renders.
+Every action returns the same discriminated shape.
+
+**Actions take typed values, not `FormData`** (R16). Each one re-parses its input with the schema in
+`src/lib/auth/schemas.ts` — the same schema the form used in the browser — because an action is a
+public endpoint and the browser's check protects nobody. `registerCustomer({ email, password, … })`
+is also what the integration tests call.
 
 ```ts
 type ActionResult<T = void> =

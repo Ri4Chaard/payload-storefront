@@ -50,11 +50,19 @@ optimistic cookie-presence redirect. See R9.
 **Language/Version**: TypeScript 5.9 (strict; `any` requires an inline justification comment)
 
 **Primary Dependencies**: Payload 3.88.0, Next.js 16.3.3, React 19, Tailwind 4.3.3 — all unchanged.
-**One new runtime dependency**: `@payloadcms/email-resend@3.88.0`, the version matching every other
-`@payloadcms/*` package already installed. Justified against Principle II in R1: Payload's auth
-operations send through the configured adapter, so without one, `forgotPassword` and `verify` cannot
-send at all. Server-only; never in a client bundle. No dependency is added for the OTP input, the
-modal, or the country list.
+No dependency is added for the OTP input, the modal, or the country list.
+
+**Four new runtime dependencies**, each justified against Principle II as Constitution requires:
+
+| Package | Why it earns its place |
+| --- | --- |
+| `@payloadcms/email-resend@3.88.0` | The version matching every other `@payloadcms/*` package installed. Payload's auth operations send through the configured adapter, so without one `forgotPassword` and `verify` cannot send at all (R1). Server-only; never in a client bundle. |
+| `zod@4` | This feature ships **nine** forms. The alternative is a hand-written validator per form, duplicated between the browser and the action it posts to — and the copy that drifts silently is always the server's. One schema per form, imported by both, is the only arrangement where "what counts as valid" cannot disagree with itself (R16). |
+| `react-hook-form@7` | Nine forms again, four of them inside modals. Uncontrolled by default, so typing does not re-render the form — which matters most for the address modal, the largest control set in the feature. |
+| `@hookform/resolvers@5` | The three-line adapter binding the two together. Writing it by hand to avoid a dependency would be the version of Principle II that costs more than it saves. |
+
+`react-hook-form` and `zod` are the only two that reach the browser. Their combined cost is measured
+against Constitution V's 200KB budget in T568.
 
 **Storage**: PostgreSQL via `@payloadcms/db-postgres`. One generated, committed migration with a
 tested `down`. Five columns on `customers`, two on `addresses`, one new `verification_codes` table,
@@ -219,6 +227,7 @@ reasons rather than gaps someone finds later.
 | Deferred | Why now | Consequence until closed |
 | --- | --- | --- |
 | **Inbound Resend webhook for unsubscribes** (R2) | Needs a signed-webhook endpoint and a replay story of its own, and no marketing campaign exists to send yet. The one-way Payload → Resend sync ships. | An unsubscribe performed from the email client's List-Unsubscribe header is honoured by Resend but not reflected on the profile page. The profile can therefore show marketing as on when Resend will not send. |
+| **No-JS submission on the account forms** (R16) | Adopting `react-hook-form` means the form submits through `handleSubmit`, not through a server action bound to `<form action>`. Spec 003 holds the opposite line for catalogue filtering (FR-029) and it stays true there. | The account forms need JavaScript. Half this flow already did — `OtpInput` is a JS control, and the design's paste-the-code journey has no non-JS equivalent — and every account route is `noindex`, so no crawler is affected. Spec 004 states no no-JS requirement. Reversible: the actions still take plain values and would bind to a `<form action>` unchanged. |
 | **Per-origin (IP) rate limiting** (R8) | Doing it properly needs a shared counter store, which R4 declined to add for better reasons. Belongs at the reverse proxy in front of the deployment. | Per-address throttling — the axis that actually defends against code brute-forcing and address enumeration — is enforced in the database. Per-origin limits are an operational configuration, not application code, and FR-014's mention of them is met at the edge. |
 
 Both are cheap to add later and neither is load-bearing for any acceptance scenario.
