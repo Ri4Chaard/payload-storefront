@@ -5,7 +5,7 @@ import React from 'react'
 import { AuthCard } from '@/components/account/auth-card'
 import { RegistrationSuccess } from '@/components/account/registration-success'
 import { VerifyEmailForm } from '@/components/account/verify-email-form'
-import type { AccountCopy } from '@/lib/auth/account-copy'
+import { verifyCopy } from '@/lib/auth/copy'
 
 /**
  * Verification and its success state are one screen with two faces (nodes `428:11869`, `432:13049`).
@@ -15,36 +15,15 @@ import type { AccountCopy } from '@/lib/auth/account-copy'
  * redirect would work and would also throw away the fact that they just succeeded, which is the
  * only moment this feature has to say well done.
  */
-export type VerifyScreenCopy = Pick<
-  AccountCopy,
-  | 'codeAlreadyUsed'
-  | 'codeExpired'
-  | 'codeInvalid'
-  | 'codeSuperseded'
-  | 'codeTooManyAttempts'
-  | 'successAction'
-  | 'successBody'
-  | 'successTitle'
-  | 'verifyCodeLabel'
-  | 'verifyResendPrompt'
-  | 'verifyResendSent'
-  | 'verifySubmit'
-  | 'verifySubtitle'
-  | 'verifyTitle'
->
-
-export function VerifyEmailScreen({ copy, email }: { copy: VerifyScreenCopy; email: string }) {
+export function VerifyEmailScreen({ email }: { email: string }) {
   const [verified, setVerified] = React.useState(false)
   const onVerified = React.useCallback(() => setVerified(true), [])
 
-  if (verified) return <RegistrationSuccess copy={copy} />
+  if (verified) return <RegistrationSuccess />
 
   return (
-    <AuthCard
-      title={copy.verifyTitle ?? 'VERIFY YOUR EMAIL'}
-      subtitle={copy.verifySubtitle ?? undefined}
-    >
-      <VerifyEmailForm copy={copy} email={email} onVerified={onVerified} />
+    <AuthCard title={verifyCopy.verifyTitle} subtitle={verifyCopy.verifySubtitle}>
+      <VerifyEmailForm email={email} onVerified={onVerified} />
     </AuthCard>
   )
 }

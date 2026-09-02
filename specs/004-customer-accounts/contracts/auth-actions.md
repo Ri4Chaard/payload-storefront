@@ -51,8 +51,9 @@ type ActionResult<T = void> =
   | { status: 'error'; message: string; fieldErrors?: Record<string, string> }
 ```
 
-**`message` is a key into the `account` global, not a sentence** (R11, FR-047). No user-visible
-English is produced by an action.
+**`message` is a key into the copy constants, not a sentence** (R11, FR-047). No user-visible
+English is produced by an action — which is also what lets the integration tests assert
+`toBe('codeExpired')` instead of matching prose.
 
 `fieldErrors` is keyed by form field name so the error lands on the control that caused it —
 FR-002's mismatch must appear against the confirmation field, not at the top of the form.
@@ -215,8 +216,8 @@ syncMarketingContact(email: string, subscribed: boolean): Promise<void>
 a conditional somebody has to remember — which is the same argument that keeps `admins` and
 `customers` in separate collections.
 
-**Guarantee E2**: all copy comes from the `account` global (R11). These functions take a locale and
-render an editor-owned template.
+**Guarantee E2**: all copy comes from `emailCopy` in `src/lib/auth/copy.ts` (R11). Server-side only
+— the three templates never reach a browser bundle.
 
 **Guarantee E3**: a `syncMarketingContact` failure is logged and swallowed. A consent change is
 recorded in Payload whether or not Resend was reachable; the sync is reconciled, never rolled back.

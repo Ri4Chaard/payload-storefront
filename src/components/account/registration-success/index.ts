@@ -1,1 +1,1 @@
-export { RegistrationSuccess, type RegistrationSuccessProps } from './registration-success'
+export { RegistrationSuccess } from './registration-success'

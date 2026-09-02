@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { OtpInput } from '@/components/ui/otp-input'
 import { resendCode, verifyEmailCode } from '@/lib/auth/actions'
 import { CODE_RESEND_COOLDOWN_MS } from '@/lib/auth/config'
-import { message, type AccountCopy } from '@/lib/auth/account-copy'
+import { message, verifyCopy as copy } from '@/lib/auth/copy'
 
 /**
  * Nodes `428:11869` and `429:12615` — the six boxes, the submit, and the resend prompt.
@@ -15,28 +15,12 @@ import { message, type AccountCopy } from '@/lib/auth/account-copy'
  * what `OtpInput` handles at the group; `onComplete` then submits without them having to find the
  * button (contracts/ui-kit-additions.md O3).
  */
-/** Only what the six boxes, the button and the code errors need. See CreateAccountCopy for why. */
-export type VerifyEmailCopy = Pick<
-  AccountCopy,
-  | 'codeAlreadyUsed'
-  | 'codeExpired'
-  | 'codeInvalid'
-  | 'codeSuperseded'
-  | 'codeTooManyAttempts'
-  | 'verifyCodeLabel'
-  | 'verifyResendPrompt'
-  | 'verifyResendSent'
-  | 'verifySubmit'
->
-
 export interface VerifyEmailFormProps {
-  copy: VerifyEmailCopy
   email: string
   onVerified: () => void
 }
 
-export function VerifyEmailForm({ copy, email, onVerified }: VerifyEmailFormProps) {
-  const resolve = (key: string | undefined) => message(copy, key)
+export function VerifyEmailForm({ email, onVerified }: VerifyEmailFormProps) {
   const formRef = React.useRef<HTMLFormElement>(null)
   const [code, setCode] = React.useState('')
   const [state, action, pending] = React.useActionState(verifyEmailCode, null)
@@ -65,7 +49,7 @@ export function VerifyEmailForm({ copy, email, onVerified }: VerifyEmailFormProp
     if (state?.status === 'success') onVerified()
   }, [state, onVerified])
 
-  const error = state?.status === 'error' ? resolve(state.message) : undefined
+  const error = state?.status === 'error' ? message(copy, state.message) : undefined
 
   return (
     <div className="flex flex-col gap-7.5">
@@ -73,7 +57,7 @@ export function VerifyEmailForm({ copy, email, onVerified }: VerifyEmailFormProp
         <input type="hidden" name="email" value={email} />
 
         <OtpInput
-          label={copy.verifyCodeLabel ?? 'Verification code'}
+          label={copy.verifyCodeLabel}
           name="code"
           value={code}
           onChange={setCode}
@@ -85,18 +69,16 @@ export function VerifyEmailForm({ copy, email, onVerified }: VerifyEmailFormProp
         />
 
         <Button type="submit" variant="primary" disabled={pending} className="w-full">
-          {copy.verifySubmit ?? 'Verify'}
+          {copy.verifySubmit}
         </Button>
       </form>
 
       <form action={resendAction} className="text-center">
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="purpose" value="verify-email" />
-        <p className="text-body-base text-neutral-primary">
-          {copy.verifyResendPrompt ?? 'Didn’t receive the code? Resend'}
-        </p>
+        <p className="text-body-base text-neutral-primary">{copy.verifyResendPrompt}</p>
         <Button type="submit" variant="outline" disabled={cooldown > 0} className="mt-3.5">
-          {cooldown > 0 ? `${cooldown}s` : (copy.verifyResendSent ?? 'Resend')}
+          {cooldown > 0 ? `${cooldown}s` : copy.verifyResendSent}
         </Button>
       </form>
     </div>

@@ -493,9 +493,17 @@ and the old one does not.
   may leave the customer without feedback while it is in flight.
 - **FR-046**: All auth and profile flows MUST be completable by keyboard alone and with a screen
   reader, with errors announced and focus moved into and returned from every modal.
-- **FR-047**: All customer-visible copy MUST come from Payload rather than being hardcoded, and MUST
-  be supplied in the site's supported languages — resolving the untranslated Russian strings and the
-  `Fargot password?` typo recorded in the Design Inventory rather than reproducing them.
+- **FR-047**: All customer-visible copy MUST resolve the defects recorded in the Design Inventory
+  rather than reproducing them — the untranslated Russian strings, the `Fargot password?` typo, and
+  the `Security` / `safety` drift — and MUST be defined in exactly one place per string.
+
+  > **Amended during implementation.** This originally required the copy to come from Payload. It
+  > does not: authentication and profile copy now lives in `src/lib/auth/copy.ts`. These screens are
+  > functional UI rather than shop content, and three of their strings are load-bearing for security
+  > — `signInFailed` and `forgotSent` are shown identically whether or not the address is registered,
+  > and an edit that sharpened either into something more helpful would turn the form into a way to
+  > enumerate customers. Wording that carries a security property belongs where it gets code review.
+  > Shop content is unaffected and stays in Payload (Constitution I). See research R11.
 - **FR-048**: The registration and password-reset code screens MUST be one control, not two — the
   two sizes drawn in Figma are a drafting artefact.
 - **FR-049**: The Security row MUST use one label site-wide, resolving the `Security` / `safety`

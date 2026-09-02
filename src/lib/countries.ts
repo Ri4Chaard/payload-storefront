@@ -315,3 +315,24 @@ export function countryOptions(locale = 'en'): CountryOption[] {
     collator.compare(a.label, b.label),
   )
 }
+
+/**
+ * The fallback pre-selection for the address form (spec 004, FR-030).
+ *
+ * The design draws “United Kingdom”, which is placeholder content. The owner
+ * can change it in **Account settings**; this is what the form uses before anyone has, and it lives
+ * here because it has to be a member of the list above.
+ */
+export const DEFAULT_COUNTRY: CountryCode = 'AE'
+
+/**
+ * Narrow an unknown value to a country code.
+ *
+ * Needed because a `select` field's stored value is `string | null` as far as the generated types
+ * are concerned — Payload cannot promise the database still agrees with the options list after an
+ * enum is narrowed. Anything that no longer resolves is dropped rather than rendered as a country
+ * nobody can name.
+ */
+export function isCountryCode(value: unknown): value is CountryCode {
+  return typeof value === 'string' && (COUNTRY_CODES as readonly string[]).includes(value)
+}

@@ -26,7 +26,7 @@ import {
   clearOtherDefaults,
   promoteDefaultAfterDelete,
 } from './fields/address-hooks'
-import { Account } from './globals/account'
+import { AccountSettings } from './globals/account-settings'
 import { Shop } from './globals/shop'
 import {
   adminOnlyFieldAccess,
@@ -79,7 +79,7 @@ export default buildConfig({
     VerificationCodes,
   ],
 
-  globals: [Shop, Account],
+  globals: [Shop, AccountSettings],
 
   plugins: [
     withPrunedEcommerceTypes(

@@ -10,9 +10,9 @@ import { sendVerificationCode } from '@/lib/email/transactional'
 /**
  * The server actions behind the account forms (spec 004, contracts/auth-actions.md).
  *
- * Every message below is a KEY into the `account` global, never a sentence. Constitution I keeps
- * customer-visible words in Payload, and an action that returns English has hardcoded copy in the
- * place it is hardest to notice.
+ * Every message below is a KEY into `src/lib/auth/copy.ts`, never a sentence. That keeps each string
+ * defined once, and it keeps these functions assertable: the integration tests compare two responses
+ * to each other, and `toBe('codeExpired')` does not break the day somebody rewords the sentence.
  */
 
 export type ActionResult<T = undefined> =

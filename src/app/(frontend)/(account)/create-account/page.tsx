@@ -4,7 +4,8 @@ import React from 'react'
 import { AuthCard } from '@/components/account/auth-card'
 import { CreateAccountForm } from '@/components/account/create-account-form'
 import { Link } from '@/components/ui/link'
-import { getAccountCopy } from '@/lib/auth/copy'
+import { createAccountCopy as copy } from '@/lib/auth/copy'
+import { getAccountSettings } from '@/lib/auth/settings'
 
 /**
  * Node `428:11594` (spec 004, US1).
@@ -18,31 +19,19 @@ export const metadata: Metadata = {
 }
 
 export default async function CreateAccountPage() {
-  const copy = await getAccountCopy()
+  const settings = await getAccountSettings()
 
   return (
     <AuthCard
-      title={copy.createTitle ?? 'CREATE ACCOUNT'}
-      subtitle={copy.createSubtitle ?? undefined}
+      title={copy.createTitle}
+      subtitle={copy.createSubtitle}
       footer={
         <>
-          {copy.createSignInPrompt ?? 'Already have an account?'}{' '}
-          <Link href="/sign-in">{copy.createSignInLink ?? 'Log in'}</Link>
+          {copy.createSignInPrompt} <Link href="/sign-in">{copy.createSignInLink}</Link>
         </>
       }
     >
-      <CreateAccountForm
-        copy={{
-          createConfirmLabel: copy.createConfirmLabel,
-          createEmailInvalid: copy.createEmailInvalid,
-          createMarketingConsent: copy.createMarketingConsent,
-          createPasswordMismatch: copy.createPasswordMismatch,
-          createPasswordTooWeak: copy.createPasswordTooWeak,
-          createSubmit: copy.createSubmit,
-          signInEmailLabel: copy.signInEmailLabel,
-          signInPasswordLabel: copy.signInPasswordLabel,
-        }}
-      />
+      <CreateAccountForm marketingEnabled={settings.marketingEnabled} />
     </AuthCard>
   )
 }

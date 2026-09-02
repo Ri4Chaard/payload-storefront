@@ -191,7 +191,9 @@ already localized into every language the site might add. A country-list package
 copy of the names in one language.
 
 **The design's `United Kingdom` default is placeholder content.** The actual default comes from the
-Account global (R11), so the owner can point it at the market they actually sell into.
+`account-settings` global (R11), so the owner can point it at the market they actually sell into.
+`DEFAULT_COUNTRY` in `src/lib/countries.ts` is the fallback used before anyone has saved it, and it
+lives there because it has to be a member of the list.
 
 ---
 
@@ -281,21 +283,42 @@ toggle, the modals, and the marketing switch.
 
 ---
 
-## R11 — Account copy comes from a new `Account` global
+## R11 — Account copy lives in source, not in Payload
 
-**Decision**: A new `Account` global holds every customer-visible string in this feature — the
-headings and helper text on all nine auth screens, the profile row labels, the modal titles, the
-email subjects and bodies, and the default country for the address form.
+**Decision**: Every customer-visible string in this feature is a constant in `src/lib/auth/copy.ts`,
+grouped by screen — the headings and helper text on all nine auth screens, the profile row labels,
+the modal titles, and the email subjects and bodies. The default country moved to
+`src/lib/countries.ts`, where it has to be a member of the list anyway.
 
-**Rationale**: Principle I. Hardcoding "Please fill in the information below:" in a component makes
-changing it a deployment. A new global rather than more fields on `Shop` because `Shop` is labelled
-"Shop settings" and models product-page copy — a different editor concern, and Constitution's
-structure rule asks for one concern per file.
+**This reverses the original decision**, which put all of it in a new `Account` global on Principle
+I. That shipped, and was removed in `20260902_081353_drop_account_copy_global`.
 
-**This is also where the design's defects get fixed** (FR-047, FR-049). The untranslated Russian
-strings, the `Fargot password?` typo, and the `Security` / `safety` drift are not reproduced in
-component code and then corrected later; they never enter the codebase, because the strings are
-editor-owned defaults and the defaults are the corrected English.
+**Rationale**: Principle I is about content editors owning content. Authentication is not content —
+it is functional UI whose wording is coupled to component behaviour, and nobody is going to A/B test
+"Confirm Password". The global cost a table, a `findGlobal` on every auth render, two migrations and
+a `Pick` of the copy threaded through every screen to keep four kilobytes of email templates out of
+the client bundle.
+
+It was also actively unsafe in three places. `signInFailed` is shown both for a wrong password and
+for an unknown address and must not distinguish them (FR-011); `forgotSent` is shown whether or not
+the address is registered (FR-018); and the resend prompt must not reveal a cooldown. Each is a
+sentence whose *sameness* is the security property, sitting in an edit box where making it more
+helpful makes it an account-enumeration oracle. Constants get code review; global fields do not.
+
+**What survives in Payload is a much smaller global**: `account-settings`, holding how the feature
+BEHAVES rather than what it says — the address form's default country and the countries it offers
+(FR-030), and whether the shop asks for marketing consent at all. The test for whether a value
+belongs there is whether an owner could get it wrong and only inconvenience themselves. Timings and
+limits fail that test and stay in `src/lib/auth/config.ts`, which already argued the point: an
+editor who shortens the code lifetime to thirty seconds has not made an editorial decision, they
+have broken registration for anyone whose mail is slow.
+
+Shop content is untouched — `Shop` keeps the product-page copy, and Constitution I keeps applying
+there.
+
+**This is still where the design's defects get fixed** (FR-047, FR-049). The untranslated Russian
+strings, the `Fargot password?` typo and the `Security` / `safety` drift are not reproduced and then
+corrected later; the constants are simply right.
 
 ---
 
@@ -407,7 +430,7 @@ Every "NEEDS CLARIFICATION" the Technical Context would otherwise carry is close
 | Rate limiting and lockout | R8 |
 | Route protection under Next 16 | R9 |
 | Form and session mechanics | R10 |
-| Where copy lives | R11 |
+| Where copy lives (reversed — see R11) | R11 |
 | Modal, and the rest of the reuse audit | R12 |
 | OTP paste behaviour | R13 |
 | New configuration | R14 |

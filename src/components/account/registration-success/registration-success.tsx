@@ -3,7 +3,7 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { Icon } from '@/components/ui/icon'
-import type { AccountCopy } from '@/lib/auth/account-copy'
+import { successCopy as copy } from '@/lib/auth/copy'
 
 /**
  * Node `432:13049` — the check emblem, the heading, the body, and one onward action.
@@ -13,11 +13,7 @@ import type { AccountCopy } from '@/lib/auth/account-copy'
  * the reasoning is at `verifyEmailCode`. So the single action the design draws does the one thing
  * still outstanding.
  */
-export interface RegistrationSuccessProps {
-  copy: Pick<AccountCopy, 'successAction' | 'successBody' | 'successTitle'>
-}
-
-export function RegistrationSuccess({ copy }: RegistrationSuccessProps) {
+export function RegistrationSuccess() {
   return (
     <Container>
       <div className="mx-auto flex w-full max-w-160 flex-col items-center gap-10 py-12 text-center md:py-20">
@@ -31,14 +27,12 @@ export function RegistrationSuccess({ copy }: RegistrationSuccessProps) {
         </span>
 
         <div className="flex flex-col gap-3.5">
-          <h1 className="text-heading-1 text-neutral-primary">
-            {copy.successTitle ?? 'Successful registration'}
-          </h1>
-          <p className="text-body-base text-neutral-primary">{copy.successBody ?? ''}</p>
+          <h1 className="text-heading-1 text-neutral-primary">{copy.successTitle}</h1>
+          <p className="text-body-base text-neutral-primary">{copy.successBody}</p>
         </div>
 
         <Button href="/sign-in" variant="primary" className="w-full max-w-120">
-          {copy.successAction ?? 'Start shopping'}
+          {copy.successAction}
         </Button>
       </div>
     </Container>

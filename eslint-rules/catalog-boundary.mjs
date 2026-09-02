@@ -76,11 +76,6 @@ const MOCK_READERS = [
  */
 const DOCUMENT_TYPE_READERS = [
   /^src\/lib\/catalog\//,
-  // Spec 004. `src/lib/auth/` is the same tier as `src/lib/catalog/` — the one that READS content
-  // and hands components a view model. `copy.ts` reads the `account` global and re-exports
-  // `AccountCopy`; the forms and screens import that, never `@/payload-types` directly, so the rule
-  // keeps doing its job one level further out.
-  /^src\/lib\/auth\//,
   /^src\/mocks\//,
   /^src\/collections\//,
   /^src\/fields\//,

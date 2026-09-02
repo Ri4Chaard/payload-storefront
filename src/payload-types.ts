@@ -121,11 +121,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     shop: Shop;
-    account: Account;
+    'account-settings': AccountSetting;
   };
   globalsSelect: {
     shop: ShopSelect<false> | ShopSelect<true>;
-    account: AccountSelect<false> | AccountSelect<true>;
+    'account-settings': AccountSettingsSelect<false> | AccountSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1564,144 +1564,523 @@ export interface Shop {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "account".
+ * via the `definition` "account-settings".
  */
-export interface Account {
+export interface AccountSetting {
   id: number;
-  signInTitle?: string | null;
-  signInSubtitle?: string | null;
-  signInEmailLabel?: string | null;
-  signInPasswordLabel?: string | null;
   /**
-   * The design reads “Fargot password?”. That is a typo, and this is the correction.
+   * Pre-selected when a customer adds an address (FR-030). The design draws “United Kingdom”, which is placeholder content. Consumed by the address form in US5.
    */
-  signInForgotLink?: string | null;
-  signInSubmit?: string | null;
+  defaultCountry:
+    | 'AF'
+    | 'AX'
+    | 'AL'
+    | 'DZ'
+    | 'AS'
+    | 'AD'
+    | 'AO'
+    | 'AI'
+    | 'AQ'
+    | 'AG'
+    | 'AR'
+    | 'AM'
+    | 'AW'
+    | 'AU'
+    | 'AT'
+    | 'AZ'
+    | 'BS'
+    | 'BH'
+    | 'BD'
+    | 'BB'
+    | 'BY'
+    | 'BE'
+    | 'BZ'
+    | 'BJ'
+    | 'BM'
+    | 'BT'
+    | 'BO'
+    | 'BA'
+    | 'BW'
+    | 'BV'
+    | 'BR'
+    | 'IO'
+    | 'VG'
+    | 'BN'
+    | 'BG'
+    | 'BF'
+    | 'BI'
+    | 'KH'
+    | 'CM'
+    | 'CA'
+    | 'CV'
+    | 'BQ'
+    | 'KY'
+    | 'CF'
+    | 'TD'
+    | 'CL'
+    | 'CN'
+    | 'CX'
+    | 'CC'
+    | 'CO'
+    | 'KM'
+    | 'CG'
+    | 'CD'
+    | 'CK'
+    | 'CR'
+    | 'CI'
+    | 'HR'
+    | 'CU'
+    | 'CW'
+    | 'CY'
+    | 'CZ'
+    | 'DK'
+    | 'DJ'
+    | 'DM'
+    | 'DO'
+    | 'EC'
+    | 'EG'
+    | 'SV'
+    | 'GQ'
+    | 'ER'
+    | 'EE'
+    | 'SZ'
+    | 'ET'
+    | 'FK'
+    | 'FO'
+    | 'FJ'
+    | 'FI'
+    | 'FR'
+    | 'GF'
+    | 'PF'
+    | 'TF'
+    | 'GA'
+    | 'GM'
+    | 'GE'
+    | 'DE'
+    | 'GH'
+    | 'GI'
+    | 'GR'
+    | 'GL'
+    | 'GD'
+    | 'GP'
+    | 'GU'
+    | 'GT'
+    | 'GG'
+    | 'GN'
+    | 'GW'
+    | 'GY'
+    | 'HT'
+    | 'HM'
+    | 'HN'
+    | 'HK'
+    | 'HU'
+    | 'IS'
+    | 'IN'
+    | 'ID'
+    | 'IR'
+    | 'IQ'
+    | 'IE'
+    | 'IM'
+    | 'IL'
+    | 'IT'
+    | 'JM'
+    | 'JP'
+    | 'JE'
+    | 'JO'
+    | 'KZ'
+    | 'KE'
+    | 'KI'
+    | 'KW'
+    | 'KG'
+    | 'LA'
+    | 'LV'
+    | 'LB'
+    | 'LS'
+    | 'LR'
+    | 'LY'
+    | 'LI'
+    | 'LT'
+    | 'LU'
+    | 'MO'
+    | 'MG'
+    | 'MW'
+    | 'MY'
+    | 'MV'
+    | 'ML'
+    | 'MT'
+    | 'MH'
+    | 'MQ'
+    | 'MR'
+    | 'MU'
+    | 'YT'
+    | 'MX'
+    | 'FM'
+    | 'MD'
+    | 'MC'
+    | 'MN'
+    | 'ME'
+    | 'MS'
+    | 'MA'
+    | 'MZ'
+    | 'MM'
+    | 'NA'
+    | 'NR'
+    | 'NP'
+    | 'NL'
+    | 'NC'
+    | 'NZ'
+    | 'NI'
+    | 'NE'
+    | 'NG'
+    | 'NU'
+    | 'NF'
+    | 'KP'
+    | 'MK'
+    | 'MP'
+    | 'NO'
+    | 'OM'
+    | 'PK'
+    | 'PW'
+    | 'PS'
+    | 'PA'
+    | 'PG'
+    | 'PY'
+    | 'PE'
+    | 'PH'
+    | 'PN'
+    | 'PL'
+    | 'PT'
+    | 'PR'
+    | 'QA'
+    | 'RE'
+    | 'RO'
+    | 'RU'
+    | 'RW'
+    | 'WS'
+    | 'SM'
+    | 'ST'
+    | 'SA'
+    | 'SN'
+    | 'RS'
+    | 'SC'
+    | 'SL'
+    | 'SG'
+    | 'SX'
+    | 'SK'
+    | 'SI'
+    | 'SB'
+    | 'SO'
+    | 'ZA'
+    | 'GS'
+    | 'KR'
+    | 'SS'
+    | 'ES'
+    | 'LK'
+    | 'BL'
+    | 'SH'
+    | 'KN'
+    | 'LC'
+    | 'MF'
+    | 'PM'
+    | 'VC'
+    | 'SD'
+    | 'SR'
+    | 'SJ'
+    | 'SE'
+    | 'CH'
+    | 'SY'
+    | 'TW'
+    | 'TJ'
+    | 'TZ'
+    | 'TH'
+    | 'TL'
+    | 'TG'
+    | 'TK'
+    | 'TO'
+    | 'TT'
+    | 'TN'
+    | 'TR'
+    | 'TM'
+    | 'TC'
+    | 'TV'
+    | 'UM'
+    | 'VI'
+    | 'UG'
+    | 'UA'
+    | 'AE'
+    | 'GB'
+    | 'US'
+    | 'UY'
+    | 'UZ'
+    | 'VU'
+    | 'VA'
+    | 'VE'
+    | 'VN'
+    | 'WF'
+    | 'EH'
+    | 'YE'
+    | 'ZM'
+    | 'ZW';
   /**
-   * The lead-in only. The underlined half is the next field — the design links “Create one”, not the whole sentence.
+   * Leave empty to offer every country. Narrowing this changes only what the form OFFERS — the column still accepts any ISO code, so an address already saved in a country you later remove stays valid rather than becoming unsaveable. Consumed by the address form in US5.
    */
-  signInCreatePrompt?: string | null;
-  signInCreateLink?: string | null;
+  shippingCountries?:
+    | (
+        | 'AF'
+        | 'AX'
+        | 'AL'
+        | 'DZ'
+        | 'AS'
+        | 'AD'
+        | 'AO'
+        | 'AI'
+        | 'AQ'
+        | 'AG'
+        | 'AR'
+        | 'AM'
+        | 'AW'
+        | 'AU'
+        | 'AT'
+        | 'AZ'
+        | 'BS'
+        | 'BH'
+        | 'BD'
+        | 'BB'
+        | 'BY'
+        | 'BE'
+        | 'BZ'
+        | 'BJ'
+        | 'BM'
+        | 'BT'
+        | 'BO'
+        | 'BA'
+        | 'BW'
+        | 'BV'
+        | 'BR'
+        | 'IO'
+        | 'VG'
+        | 'BN'
+        | 'BG'
+        | 'BF'
+        | 'BI'
+        | 'KH'
+        | 'CM'
+        | 'CA'
+        | 'CV'
+        | 'BQ'
+        | 'KY'
+        | 'CF'
+        | 'TD'
+        | 'CL'
+        | 'CN'
+        | 'CX'
+        | 'CC'
+        | 'CO'
+        | 'KM'
+        | 'CG'
+        | 'CD'
+        | 'CK'
+        | 'CR'
+        | 'CI'
+        | 'HR'
+        | 'CU'
+        | 'CW'
+        | 'CY'
+        | 'CZ'
+        | 'DK'
+        | 'DJ'
+        | 'DM'
+        | 'DO'
+        | 'EC'
+        | 'EG'
+        | 'SV'
+        | 'GQ'
+        | 'ER'
+        | 'EE'
+        | 'SZ'
+        | 'ET'
+        | 'FK'
+        | 'FO'
+        | 'FJ'
+        | 'FI'
+        | 'FR'
+        | 'GF'
+        | 'PF'
+        | 'TF'
+        | 'GA'
+        | 'GM'
+        | 'GE'
+        | 'DE'
+        | 'GH'
+        | 'GI'
+        | 'GR'
+        | 'GL'
+        | 'GD'
+        | 'GP'
+        | 'GU'
+        | 'GT'
+        | 'GG'
+        | 'GN'
+        | 'GW'
+        | 'GY'
+        | 'HT'
+        | 'HM'
+        | 'HN'
+        | 'HK'
+        | 'HU'
+        | 'IS'
+        | 'IN'
+        | 'ID'
+        | 'IR'
+        | 'IQ'
+        | 'IE'
+        | 'IM'
+        | 'IL'
+        | 'IT'
+        | 'JM'
+        | 'JP'
+        | 'JE'
+        | 'JO'
+        | 'KZ'
+        | 'KE'
+        | 'KI'
+        | 'KW'
+        | 'KG'
+        | 'LA'
+        | 'LV'
+        | 'LB'
+        | 'LS'
+        | 'LR'
+        | 'LY'
+        | 'LI'
+        | 'LT'
+        | 'LU'
+        | 'MO'
+        | 'MG'
+        | 'MW'
+        | 'MY'
+        | 'MV'
+        | 'ML'
+        | 'MT'
+        | 'MH'
+        | 'MQ'
+        | 'MR'
+        | 'MU'
+        | 'YT'
+        | 'MX'
+        | 'FM'
+        | 'MD'
+        | 'MC'
+        | 'MN'
+        | 'ME'
+        | 'MS'
+        | 'MA'
+        | 'MZ'
+        | 'MM'
+        | 'NA'
+        | 'NR'
+        | 'NP'
+        | 'NL'
+        | 'NC'
+        | 'NZ'
+        | 'NI'
+        | 'NE'
+        | 'NG'
+        | 'NU'
+        | 'NF'
+        | 'KP'
+        | 'MK'
+        | 'MP'
+        | 'NO'
+        | 'OM'
+        | 'PK'
+        | 'PW'
+        | 'PS'
+        | 'PA'
+        | 'PG'
+        | 'PY'
+        | 'PE'
+        | 'PH'
+        | 'PN'
+        | 'PL'
+        | 'PT'
+        | 'PR'
+        | 'QA'
+        | 'RE'
+        | 'RO'
+        | 'RU'
+        | 'RW'
+        | 'WS'
+        | 'SM'
+        | 'ST'
+        | 'SA'
+        | 'SN'
+        | 'RS'
+        | 'SC'
+        | 'SL'
+        | 'SG'
+        | 'SX'
+        | 'SK'
+        | 'SI'
+        | 'SB'
+        | 'SO'
+        | 'ZA'
+        | 'GS'
+        | 'KR'
+        | 'SS'
+        | 'ES'
+        | 'LK'
+        | 'BL'
+        | 'SH'
+        | 'KN'
+        | 'LC'
+        | 'MF'
+        | 'PM'
+        | 'VC'
+        | 'SD'
+        | 'SR'
+        | 'SJ'
+        | 'SE'
+        | 'CH'
+        | 'SY'
+        | 'TW'
+        | 'TJ'
+        | 'TZ'
+        | 'TH'
+        | 'TL'
+        | 'TG'
+        | 'TK'
+        | 'TO'
+        | 'TT'
+        | 'TN'
+        | 'TR'
+        | 'TM'
+        | 'TC'
+        | 'TV'
+        | 'UM'
+        | 'VI'
+        | 'UG'
+        | 'UA'
+        | 'AE'
+        | 'GB'
+        | 'US'
+        | 'UY'
+        | 'UZ'
+        | 'VU'
+        | 'VA'
+        | 'VE'
+        | 'VN'
+        | 'WF'
+        | 'EH'
+        | 'YE'
+        | 'ZM'
+        | 'ZW'
+      )[]
+    | null;
   /**
-   * Shown for a wrong password AND for an address with no account. It must not distinguish between them — saying “no such account” tells an attacker which addresses are registered.
+   * When off, the consent checkbox is not drawn on the registration form and nothing is synced to Resend. Turn it off until an audience exists — an unticked box that leads nowhere is worse than no box. It never affects transactional mail: verification codes and password-changed notices are sent regardless (FR-035).
    */
-  signInFailed?: string | null;
-  signInLocked?: string | null;
-  createTitle?: string | null;
-  createSubtitle?: string | null;
-  createConfirmLabel?: string | null;
-  createSubmit?: string | null;
-  /**
-   * The lead-in only; the link text is the next field.
-   */
-  createSignInPrompt?: string | null;
-  createSignInLink?: string | null;
-  /**
-   * The design draws no such control. It is here because marketing email is opt-in, so consent has to be asked for rather than assumed — and it is never a condition of registering.
-   */
-  createMarketingConsent?: string | null;
-  createEmailInvalid?: string | null;
-  createPasswordMismatch?: string | null;
-  createPasswordTooWeak?: string | null;
-  verifyTitle?: string | null;
-  verifySubtitle?: string | null;
-  /**
-   * The accessible name for the six boxes, read as one control.
-   */
-  verifyCodeLabel?: string | null;
-  verifySubmit?: string | null;
-  verifyResendPrompt?: string | null;
-  verifyResendSent?: string | null;
-  verifyResendTooSoon?: string | null;
-  codeInvalid?: string | null;
-  /**
-   * Distinct from “invalid” on purpose. Telling someone their code is wrong when it has simply timed out is how they get stuck retyping it.
-   */
-  codeExpired?: string | null;
-  codeAlreadyUsed?: string | null;
-  codeSuperseded?: string | null;
-  codeTooManyAttempts?: string | null;
-  forgotTitle?: string | null;
-  forgotSubtitle?: string | null;
-  forgotSubmit?: string | null;
-  /**
-   * The design reads “Вернуться к авторизации”. The rest of the design is English; this is the translation.
-   */
-  forgotBackLink?: string | null;
-  /**
-   * Shown whether or not the address is registered, and it must stay that way. A message that differs turns this form into a way to discover who has an account.
-   */
-  forgotSent?: string | null;
-  resetCodeTitle?: string | null;
-  resetCodeSubtitle?: string | null;
-  resetTitle?: string | null;
-  resetSubtitle?: string | null;
-  /**
-   * The design reads “Новый пароль”.
-   */
-  resetNewLabel?: string | null;
-  /**
-   * The design reads “Повторите пароль”.
-   */
-  resetConfirmLabel?: string | null;
-  /**
-   * The design reads “СОХРАНИТЬ”.
-   */
-  resetSubmit?: string | null;
-  resetDone?: string | null;
-  successTitle?: string | null;
-  successBody?: string | null;
-  successAction?: string | null;
-  profileTitle?: string | null;
-  profileEmailLabel?: string | null;
-  profileNameLabel?: string | null;
-  profileNameEmpty?: string | null;
-  profileAddressesLabel?: string | null;
-  profileAddressesEmpty?: string | null;
-  profileMarketingLabel?: string | null;
-  profileMarketingEmailToggle?: string | null;
-  /**
-   * One label, used everywhere. The design says “Security” in one frame and “safety” in three others; this settles it.
-   */
-  profileSecurityLabel?: string | null;
-  profileChangePassword?: string | null;
-  profileSignOut?: string | null;
-  profileSaveFailed?: string | null;
-  nameModalTitle?: string | null;
-  nameModalFirst?: string | null;
-  nameModalLast?: string | null;
-  addressModalTitle?: string | null;
-  addressModalEditTitle?: string | null;
-  addressCountryLabel?: string | null;
-  addressLine1Label?: string | null;
-  addressLine2Label?: string | null;
-  addressApartmentLabel?: string | null;
-  addressCityLabel?: string | null;
-  addressPostcodeLabel?: string | null;
-  addressDefaultLabel?: string | null;
-  addressDeleteConfirm?: string | null;
-  changePasswordTitle?: string | null;
-  changePasswordCurrent?: string | null;
-  changePasswordWrong?: string | null;
-  modalCancel?: string | null;
-  modalSave?: string | null;
-  modalClose?: string | null;
-  verifyEmailSubject?: string | null;
-  /**
-   * The code is inserted beneath this text.
-   */
-  verifyEmailBody?: string | null;
-  resetEmailSubject?: string | null;
-  resetEmailBody?: string | null;
-  passwordChangedSubject?: string | null;
-  /**
-   * Transactional, and sent regardless of marketing preferences — it is how someone finds out their account was taken.
-   */
-  passwordChangedBody?: string | null;
-  /**
-   * Pre-selected in the address form. The design draws “United Kingdom”, which is placeholder content. Two letters, ISO 3166-1 alpha-2.
-   */
-  defaultCountry?: string | null;
+  marketingEnabled?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1722,95 +2101,12 @@ export interface ShopSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "account_select".
+ * via the `definition` "account-settings_select".
  */
-export interface AccountSelect<T extends boolean = true> {
-  signInTitle?: T;
-  signInSubtitle?: T;
-  signInEmailLabel?: T;
-  signInPasswordLabel?: T;
-  signInForgotLink?: T;
-  signInSubmit?: T;
-  signInCreatePrompt?: T;
-  signInCreateLink?: T;
-  signInFailed?: T;
-  signInLocked?: T;
-  createTitle?: T;
-  createSubtitle?: T;
-  createConfirmLabel?: T;
-  createSubmit?: T;
-  createSignInPrompt?: T;
-  createSignInLink?: T;
-  createMarketingConsent?: T;
-  createEmailInvalid?: T;
-  createPasswordMismatch?: T;
-  createPasswordTooWeak?: T;
-  verifyTitle?: T;
-  verifySubtitle?: T;
-  verifyCodeLabel?: T;
-  verifySubmit?: T;
-  verifyResendPrompt?: T;
-  verifyResendSent?: T;
-  verifyResendTooSoon?: T;
-  codeInvalid?: T;
-  codeExpired?: T;
-  codeAlreadyUsed?: T;
-  codeSuperseded?: T;
-  codeTooManyAttempts?: T;
-  forgotTitle?: T;
-  forgotSubtitle?: T;
-  forgotSubmit?: T;
-  forgotBackLink?: T;
-  forgotSent?: T;
-  resetCodeTitle?: T;
-  resetCodeSubtitle?: T;
-  resetTitle?: T;
-  resetSubtitle?: T;
-  resetNewLabel?: T;
-  resetConfirmLabel?: T;
-  resetSubmit?: T;
-  resetDone?: T;
-  successTitle?: T;
-  successBody?: T;
-  successAction?: T;
-  profileTitle?: T;
-  profileEmailLabel?: T;
-  profileNameLabel?: T;
-  profileNameEmpty?: T;
-  profileAddressesLabel?: T;
-  profileAddressesEmpty?: T;
-  profileMarketingLabel?: T;
-  profileMarketingEmailToggle?: T;
-  profileSecurityLabel?: T;
-  profileChangePassword?: T;
-  profileSignOut?: T;
-  profileSaveFailed?: T;
-  nameModalTitle?: T;
-  nameModalFirst?: T;
-  nameModalLast?: T;
-  addressModalTitle?: T;
-  addressModalEditTitle?: T;
-  addressCountryLabel?: T;
-  addressLine1Label?: T;
-  addressLine2Label?: T;
-  addressApartmentLabel?: T;
-  addressCityLabel?: T;
-  addressPostcodeLabel?: T;
-  addressDefaultLabel?: T;
-  addressDeleteConfirm?: T;
-  changePasswordTitle?: T;
-  changePasswordCurrent?: T;
-  changePasswordWrong?: T;
-  modalCancel?: T;
-  modalSave?: T;
-  modalClose?: T;
-  verifyEmailSubject?: T;
-  verifyEmailBody?: T;
-  resetEmailSubject?: T;
-  resetEmailBody?: T;
-  passwordChangedSubject?: T;
-  passwordChangedBody?: T;
+export interface AccountSettingsSelect<T extends boolean = true> {
   defaultCountry?: T;
+  shippingCountries?: T;
+  marketingEnabled?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

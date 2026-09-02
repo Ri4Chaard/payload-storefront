@@ -43,7 +43,7 @@ export interface ModalProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   triggerRef?: React.RefObject<HTMLElement | null>
   /** Where focus lands on open. Defaults to the first focusable control in the panel. */
   initialFocusRef?: React.RefObject<HTMLElement | null>
-  /** The accessible name of the close control. Comes from the `account` global at the call site. */
+  /** The accessible name of the close control. Comes from `modalCopy` at the call site. */
   closeLabel?: string
 }
 

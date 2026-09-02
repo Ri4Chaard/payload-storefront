@@ -46,7 +46,7 @@ Read before starting.
 | Marketing consent is **opt-in, off by default**, with a control the design does not draw | The spec's one resolved clarification (FR-036, FR-036a) | T417, T452 |
 | Transactional and marketing mail are **different mechanisms** and cannot reach each other | R2. This is what makes FR-035 structural rather than a conditional | T430, T431, T537 |
 | `src/lib/ecommerce-schema.ts` says "delete this when spec 004 enables orders and transactions" | **That is not this spec.** Orders belong to requests-and-handoff. Leave the workaround in place | — |
-| Untranslated Russian, `Fargot password?`, `Security`/`safety` drift | Design defects. Fixed as corrected editor-owned defaults, never entered into code (FR-047, FR-049) | T419 |
+| Untranslated Russian, `Fargot password?`, `Security`/`safety` drift | Design defects. Fixed in the copy constants, never entered into code as drawn (FR-047, FR-049) | T419 |
 | Two OTP box sizes drawn (60px, 56px) | A drafting artefact. One component, one size (FR-048) | T444 |
 | Per-origin rate limiting | **Deferred to the reverse proxy**, recorded in plan Complexity Tracking. Per-address throttling is in the database | T432 |
 | Inbound Resend unsubscribe webhook | **Deferred**, recorded in plan Complexity Tracking | T431 |
@@ -115,12 +115,14 @@ arrives blocks every story in this feature.
       `firstName`/`lastName` so `useAsTitle` and `defaultColumns` keep working, and stamp
       `marketingEmailUpdatedAt`/`marketingEmailSource` only when `marketingEmail` actually changes
       value (FR-034)
-- [X] T419 [P] Create `src/globals/account.ts` — every customer-visible string, grouped by screen
-      (`signIn`, `createAccount`, `verifyEmail`, `forgotPassword`, `resetPassword`,
-      `registrationSuccess`, `profile`, `modals`, `emails`, `defaults`). **Defaults are the corrected
-      English**: the Russian strings translated, `Forgot password?` spelled correctly, and one label
-      for the Security row (FR-047, FR-049)
-- [X] T420 Register `VerificationCodes` and the `Account` global in `src/payload.config.ts`
+- [X] T419 [P] Create `src/lib/auth/copy.ts` — every customer-visible string, grouped by screen
+      (`signInCopy`, `createAccountCopy`, `verifyCopy`, `resetCopy`, `successCopy`, `profileCopy`,
+      `modalCopy`, `emailCopy`). **The strings are the corrected English**: the Russian strings
+      translated, `Forgot password?` spelled correctly, and one label for the Security row (FR-047,
+      FR-049). *Originally an `Account` global; reversed — see R11.*
+- [X] T420 Register `VerificationCodes` and the `AccountSettings` global in `src/payload.config.ts`.
+      `account-settings` holds the configurable half — default country, countries offered, whether
+      marketing consent is asked for — read through `resolveAccountSettings` (R11)
 - [X] T421 Generate ONE migration covering T412–T420, run `pnpm generate:types`, and commit both in
       the same change. Then **test the `down` with a Kazakhstan address saved** — the rollback
       narrows `addresses.country`'s enum, and a row outside the plugin's 40 values is exactly what
@@ -129,7 +131,7 @@ arrives blocks every story in this feature.
 ### Server tier
 
 - [X] T430 Create `src/lib/email/transactional.ts` — `sendVerificationCode`, `sendResetCode`,
-      `sendPasswordChangedNotice`, rendering copy from the `account` global. **This module has no
+      `sendPasswordChangedNotice`, rendering copy from `emailCopy`. **This module has no
       access to `marketingEmail`**, which is what makes FR-035 hold by construction (R2)
 - [X] T431 [P] Create `src/lib/email/marketing.ts` — `syncMarketingContact` against the Resend
       audience. **It cannot send a message.** A failure is logged and swallowed: a consent change is
@@ -284,7 +286,7 @@ in and the old one does not.
       with the invalid-code message wired through `aria-describedby` so it is announced (FR-046)
 - [ ] T491 [US3] Build `/reset-password` in `src/app/(frontend)/(account)/reset-password/page.tsx` — node
       `429:12884`, rendering T490's step first and the new-password step once a handle is issued. Note the drawn Russian placeholders and
-      button are replaced by the `account` global's English defaults (FR-047)
+      button are replaced by `resetCopy`'s English (FR-047)
 - [ ] T492 [P] [US3] E2E in `tests/e2e/password-reset.spec.ts`
 
 **Checkpoint**: US1–US3 work independently.
@@ -419,13 +421,14 @@ switch the default, delete one.
 - [ ] T565 [P] Full state set audit on every new interactive element: default, hover, focus-visible,
       active, disabled, loading (Constitution III)
 - [ ] T566 [P] Run `pnpm test:a11y` across the new routes and all four modals; fix to WCAG 2.2 AA
-- [ ] T567 [P] Confirm every customer-visible string resolves from the `account` global — grep the
-      new components for string literals. Constitution I is the principle most easily lost in the
-      last mile
+- [ ] T567 [P] Confirm every customer-visible string resolves from `src/lib/auth/copy.ts` — grep
+      the new components for string literals. One definition per string is the property that
+      survived the move out of Payload, and it is the one most easily lost in the last mile
 - [ ] T568 Verify the JS budget: every new route under 200KB gzipped initial JS (Constitution V)
-- [ ] T570 Editorial verification in the Payload admin, per Constitution: change a heading in
-      **Account** and confirm the site renders it with no deploy; confirm `verification-codes` is
-      absent from the navigation and refuses a direct URL; confirm the customer row shows the name
+- [ ] T570 Editorial verification in the Payload admin, per Constitution: change the default country
+      in **Account settings** and confirm the address form opens on it with no deploy; confirm there
+      is no **Account** copy global (R11); confirm `verification-codes`
+      is absent from the navigation and refuses a direct URL; confirm the customer row shows the name
       and marketing fields with the consent timestamp read-only
 - [ ] T571 [P] Update `README.md` with the two new environment variables and the local
       `onboarding@resend.dev` note

@@ -58,7 +58,7 @@ modal, or the country list.
 
 **Storage**: PostgreSQL via `@payloadcms/db-postgres`. One generated, committed migration with a
 tested `down`. Five columns on `customers`, two on `addresses`, one new `verification_codes` table,
-and the `account` global — plus a **widening** alteration of `addresses.country`'s enum whose
+plus a **widening** alteration of `addresses.country`'s enum whose
 rollback is narrowing and therefore the one thing in this migration worth rehearsing
 ([quickstart.md](./quickstart.md)).
 
@@ -99,7 +99,7 @@ _GATE: evaluated before Phase 0 and re-evaluated after Phase 1 design._
 
 | Principle | Gate | Pre | Post | Notes |
 | --- | --- | --- | --- | --- |
-| **I. Payload Is the Single Source of Truth** | No hardcoded user-visible content; generated types canonical; Local API | ✅ Pass | ✅ Pass | Every string in nine screens, four modals and three emails comes from the new `account` global (R11). This is also where the design's untranslated Russian, its `Fargot password?` typo and its `Security`/`safety` drift are resolved — as corrected editor-owned defaults, so the defects never enter the codebase. |
+| **I. Payload Is the Single Source of Truth** | No hardcoded user-visible content; generated types canonical; Local API | ✅ Pass | ⚠️ Deviation, accepted | Shop content stays in Payload, and so does the feature's *configuration* — the `account-settings` global (R11). Auth and profile **copy** does not: it is a constant module, `src/lib/auth/copy.ts`. These screens are functional UI, and three of their strings — `signInFailed`, `forgotSent`, the resend prompt — carry a security property that depends on them *not* being edited. The design's untranslated Russian, its `Fargot password?` typo and its `Security`/`safety` drift are still resolved in the constants, so the defects never enter the codebase. |
 | **II. Reuse Before Creation** | No duplicate components; new dependency justified | ✅ Pass | ✅ Pass | The audit (R12) found most of the design already built — `TextInput` even carries a `trailing` prop documented for this exact "Forgot password?" link. Two genuinely new primitives, both entering the kit. **The addresses collection is reused, not rewritten** (R5). One dependency, justified in R1. |
 | **III. Design Tokens Over Magic Values** | Tokens only; full state set | ✅ Pass | ✅ Pass | No new tokens expected. `OtpInput` and `Modal` ship default, hover, focus-visible, active, disabled and error. The design's two OTP box sizes collapse to one (FR-048). |
 | **IV. Content Modeling & Schema Evolution** | Modelled before implementation; explicit access; labels; migration with rollback | ✅ Pass | ✅ Pass | [data-model.md](./data-model.md) is the record. `verification-codes` states its access as "nobody" deliberately. **R7 closes a live omission**: the plugin's addresses `create` currently falls through to a default because `isAuthenticated` was never passed. |
@@ -142,7 +142,7 @@ src/
 │   └── verification-codes.ts            # NEW — the only genuinely new collection
 ├── globals/
 │   ├── shop.ts                          # unchanged
-│   └── account.ts                       # NEW — every customer-visible string (R11)
+│   └── account-settings.ts              # NEW — how accounts BEHAVE, not what they say (R11)
 ├── fields/
 │   └── address-fields.ts                # NEW — apartment + isDefault, passed to the plugin
 ├── lib/
@@ -199,7 +199,7 @@ enforced by `pnpm check:naming` rather than by review.
 The order matters, because three of the four surprises are upstream of the screens.
 
 1. **Configuration and schema** — email adapter, auth config, `isAuthenticated`, address fields,
-   country list, `verification-codes`, the `account` global, one migration, regenerated types.
+   country list, `verification-codes`, the `account-settings` global, migrations, regenerated types.
 2. **The server tier** — `codes.ts`, `password.ts`, the two email modules, the DAL, `proxy.ts`.
    Unit-testable without a single screen, and where the security-critical logic lives.
 3. **The kit** — `Modal` and `OtpInput` with their stories. Both are consumed by everything after.

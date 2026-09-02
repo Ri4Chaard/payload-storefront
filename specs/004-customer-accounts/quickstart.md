@@ -180,8 +180,9 @@ the exercise; discovering it during an incident is not.
 
 Before merge, in the Payload admin:
 
-1. Open **Account** and change a heading — for instance the sign-in title. Confirm the site renders
-   the new words with no deploy (Principle I, FR-047).
+1. Open **Account settings** under Shop. Change the default country and confirm the address form
+   opens on it with no deploy (FR-030). Confirm there is **no** Account *copy* global — auth and
+   profile wording is source, not content (R11).
 2. Confirm `verification-codes` is **not** in the navigation, and that a direct URL to it is refused.
 3. Confirm a customer row shows `firstName`, `lastName`, the composed `name`, and the marketing
    fields, with the consent timestamp read-only.

@@ -2,6 +2,8 @@ import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import { emailCopy } from '@/lib/auth/copy'
+
 /**
  * Mail a customer must receive regardless of what they think of our marketing (spec 004, R2).
  *
@@ -12,8 +14,7 @@ import { getPayload } from 'payload'
  * never reset their password. Two modules with no reference to each other cannot fail that way:
  * this one has no access to the flag, and `./marketing.ts` cannot send a message.
  *
- * Copy comes from the `account` global, so an editor can rewrite any of it without a deploy
- * (Constitution I).
+ * Copy lives in `src/lib/auth/copy.ts` — see the note there on why these strings are code.
  *
  * **Colours are resolved from the design tokens, not written as hex.** Email is the one place that
  * cannot use a CSS custom property or a utility class — every serious mail client strips both, so
@@ -53,9 +54,10 @@ function renderNoticeEmail(body: string): string {
 }
 
 /**
- * The strings are editor-authored, so they arrive as text and must not be able to become markup.
- * An editor typing an ampersand should not produce a broken entity, and an editor pasting a `<` is
- * not authoring HTML.
+ * Kept even though every string interpolated below is now a literal in this repository.
+ *
+ * It guards the one value that is not: the code. And the day somebody interpolates a customer's
+ * name into a subject line, the escaping is already here rather than being the thing they forgot.
  */
 function escapeHtml(value: string): string {
   return value
@@ -63,11 +65,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-}
-
-async function copy() {
-  const payload = await client()
-  return payload.findGlobal({ slug: 'account', overrideAccess: true })
 }
 
 export interface BuiltEmail {
@@ -81,20 +78,22 @@ export interface BuiltEmail {
  * At registration, Payload sends the verification mail itself — `verify.generateEmailHTML` hands it
  * HTML and it does the rest. On a resend there is no Payload operation to hook, so we send it. Both
  * paths must produce the same message, which they do by sharing this.
+ *
+ * Still `async`. The copy no longer needs fetching, but both call sites await these and one of them
+ * is Payload's own `generateEmailHTML` hook, whose contract is a promise — narrowing the signature
+ * would buy nothing and churn every caller.
  */
 export async function buildVerificationEmail(code: string): Promise<BuiltEmail> {
-  const text = await copy()
   return {
-    html: renderCodeEmail(text.verifyEmailBody ?? '', code),
-    subject: text.verifyEmailSubject ?? 'Your verification code',
+    html: renderCodeEmail(emailCopy.verifyEmailBody, code),
+    subject: emailCopy.verifyEmailSubject,
   }
 }
 
 export async function buildResetEmail(code: string): Promise<BuiltEmail> {
-  const text = await copy()
   return {
-    html: renderCodeEmail(text.resetEmailBody ?? '', code),
-    subject: text.resetEmailSubject ?? 'Your password reset code',
+    html: renderCodeEmail(emailCopy.resetEmailBody, code),
+    subject: emailCopy.resetEmailSubject,
   }
 }
 
@@ -122,10 +121,9 @@ export async function sendPasswordChangedNotice(to: string): Promise<void> {
   const payload = await client()
 
   try {
-    const text = await copy()
     await payload.sendEmail({
-      html: renderNoticeEmail(text.passwordChangedBody ?? ''),
-      subject: text.passwordChangedSubject ?? 'Your password was changed',
+      html: renderNoticeEmail(emailCopy.passwordChangedBody),
+      subject: emailCopy.passwordChangedSubject,
       to,
     })
   } catch (error) {
