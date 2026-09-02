@@ -32,3 +32,21 @@ export function applyActionErrors<T extends FieldValues>(
     form.setError(field as Path<T>, { message: key })
   }
 }
+
+/**
+ * Turn a message key from an action into the sentence a screen shows.
+ *
+ * The dictionary is passed in rather than imported, because the sentences live in the component
+ * that renders them — there is no shared copy module, and there should not be one: these strings
+ * are part of the screen, not content somebody edits.
+ *
+ * The fallback is deliberately the key itself. A key with no sentence should look wrong in review
+ * rather than render as an empty space nobody notices.
+ */
+export function errorText(
+  dictionary: Record<string, string>,
+  key: string | undefined,
+): string | undefined {
+  if (!key) return undefined
+  return dictionary[key] ?? key
+}

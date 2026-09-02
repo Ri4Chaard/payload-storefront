@@ -4,7 +4,6 @@ import React from 'react'
 import { AuthCard } from '@/components/account/auth-card'
 import { CreateAccountForm } from '@/components/account/create-account-form'
 import { Link } from '@/components/ui/link'
-import { createAccountCopy as copy } from '@/lib/auth/copy'
 import { getAccountSettings } from '@/lib/auth/settings'
 
 /**
@@ -23,11 +22,11 @@ export default async function CreateAccountPage() {
 
   return (
     <AuthCard
-      title={copy.createTitle}
-      subtitle={copy.createSubtitle}
+      title="CREATE ACCOUNT"
+      subtitle="Please fill in the information below:"
       footer={
         <>
-          {copy.createSignInPrompt} <Link href="/sign-in">{copy.createSignInLink}</Link>
+          Already have an account? <Link href="/sign-in">Log in</Link>
         </>
       }
     >

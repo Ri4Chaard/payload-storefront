@@ -498,7 +498,7 @@ and the old one does not.
   the `Security` / `safety` drift — and MUST be defined in exactly one place per string.
 
   > **Amended during implementation.** This originally required the copy to come from Payload. It
-  > does not: authentication and profile copy now lives in `src/lib/auth/copy.ts`. These screens are
+  > does not: authentication and profile copy lives in the components that render it. These screens are
   > functional UI rather than shop content, and three of their strings are load-bearing for security
   > — `signInFailed` and `forgotSent` are shown identically whether or not the address is registered,
   > and an edit that sharpened either into something more helpful would turn the form into a way to

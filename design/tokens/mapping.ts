@@ -117,6 +117,24 @@ export const colors: ColorToken[] = [
     reason: 'Owner decision to keep colors.json.',
   },
   {
+    name: 'status-error-text',
+    // The error red at a lightness that can carry words.
+    //
+    // `status-error-default` #f75959 is 3.01:1 on our light surfaces — correct for a border or an
+    // icon, and an AA failure for body-size text. Error MESSAGES used to render in
+    // `neutral-primary` for that reason, which was accessible and read as though nothing had gone
+    // wrong: the words that explain the problem looked exactly like the words that do not.
+    //
+    // Same hue, same family, dropped to 44% lightness: 5.66:1 on `background-bg` and 6.06:1 on
+    // `background-container`. The pair is deliberate — the control's border stays #f75959 so the
+    // field still reads as wrong at a glance, and the sentence beneath it is legible.
+    value: '#bf2222',
+    provenance: 'derived',
+    reason:
+      'Derived from status-error-default so error text can be red and still meet AA (4.5:1) at body size.',
+    surfaces: ['background-bg', 'background-container'],
+  },
+  {
     name: 'status-success-default',
     value: raw['status-success-default'],
     provenance: 'supplied',
@@ -421,7 +439,7 @@ export const permittedPairings: Pairing[] = [
     foreground: 'status-error-default',
     background: 'background-bg',
     minimum: 3,
-    note: 'Icons, borders, and large text only — 3.01:1 fails AA for body text. Error message text renders in neutral-primary.',
+    note: 'Icons, borders, and large text only — 3.01:1 fails AA for body text. Error message text uses status-error-text.',
   },
   {
     foreground: 'status-error-default',
@@ -429,6 +447,10 @@ export const permittedPairings: Pairing[] = [
     minimum: 3,
     note: 'Icons, borders, and large text only.',
   },
+
+  // The text-safe sibling. Full AA, because these carry sentences rather than outlines.
+  { foreground: 'status-error-text', background: 'background-bg', minimum: 4.5 },
+  { foreground: 'status-error-text', background: 'background-container', minimum: 4.5 },
 ]
 
 /**

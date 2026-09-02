@@ -7,8 +7,8 @@ import { DEFAULT_COUNTRY, isCountryCode, type CountryCode } from '@/lib/countrie
 /**
  * The `account-settings` global — how the accounts feature behaves (spec 004, R11).
  *
- * The copy that used to sit beside these values is gone; see `src/lib/auth/copy.ts` for why. What
- * remains is the handful of decisions that belong to the shop owner rather than to the code.
+ * The copy that used to sit beside these values is gone — it lives in the screens that render it.
+ * What remains is the handful of decisions that belong to the shop owner rather than to the code.
  *
  * **Returns a view model, not the document.** Every field on the generated type is nullable —
  * Payload cannot promise a global row exists before anyone has saved it — so consuming the document

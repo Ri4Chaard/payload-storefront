@@ -115,11 +115,11 @@ arrives blocks every story in this feature.
       `firstName`/`lastName` so `useAsTitle` and `defaultColumns` keep working, and stamp
       `marketingEmailUpdatedAt`/`marketingEmailSource` only when `marketingEmail` actually changes
       value (FR-034)
-- [X] T419 [P] Create `src/lib/auth/copy.ts` — every customer-visible string, grouped by screen
-      (`signInCopy`, `createAccountCopy`, `verifyCopy`, `resetCopy`, `successCopy`, `profileCopy`,
-      `modalCopy`, `emailCopy`). **The strings are the corrected English**: the Russian strings
-      translated, `Forgot password?` spelled correctly, and one label for the Security row (FR-047,
-      FR-049). *Originally an `Account` global; reversed — see R11.*
+- [X] T419 [P] Every customer-visible string is written in the component that renders it, and the
+      three email bodies in `src/lib/email/transactional.ts`. **The strings are the corrected
+      English**: the Russian strings translated, `Forgot password?` spelled correctly, and one label
+      for the Security row (FR-047, FR-049). *Originally an `Account` global, then a shared
+      `copy.ts`; both reversed — see R11.*
 - [X] T420 Register `VerificationCodes` and the `AccountSettings` global in `src/payload.config.ts`.
       `account-settings` holds the configurable half — default country, countries offered, whether
       marketing consent is asked for — read through `resolveAccountSettings` (R11)
@@ -431,9 +431,9 @@ switch the default, delete one.
 - [ ] T565 [P] Full state set audit on every new interactive element: default, hover, focus-visible,
       active, disabled, loading (Constitution III)
 - [ ] T566 [P] Run `pnpm test:a11y` across the new routes and all four modals; fix to WCAG 2.2 AA
-- [ ] T567 [P] Confirm every customer-visible string resolves from `src/lib/auth/copy.ts` — grep
-      the new components for string literals. One definition per string is the property that
-      survived the move out of Payload, and it is the one most easily lost in the last mile
+- [ ] T567 [P] Confirm no customer-visible string is duplicated across two components, and that
+      every message key an action can return has a sentence in the screen that renders it — a key
+      with no entry falls back to showing the key, which is loud in review and invisible in passing
 - [ ] T568 Verify the JS budget: every new route under 200KB gzipped initial JS (Constitution V)
 - [ ] T570 Editorial verification in the Payload admin, per Constitution: change the default country
       in **Account settings** and confirm the address form opens on it with no deploy; confirm there

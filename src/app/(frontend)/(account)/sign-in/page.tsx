@@ -4,7 +4,6 @@ import React from 'react'
 import { AuthCard } from '@/components/account/auth-card'
 import { SignInForm } from '@/components/account/sign-in-form'
 import { Link } from '@/components/ui/link'
-import { signInCopy as copy } from '@/lib/auth/copy'
 
 /** Node `408:7412` (spec 004, US2). `noindex` like every account route. */
 export const metadata: Metadata = {
@@ -21,11 +20,11 @@ export default async function SignInPage({
 
   return (
     <AuthCard
-      title={copy.signInTitle}
-      subtitle={copy.signInSubtitle}
+      title="WELCOME BACK"
+      subtitle="Please fill in the information below:"
       footer={
         <>
-          {copy.signInCreatePrompt} <Link href="/create-account">{copy.signInCreateLink}</Link>
+          Don’t have an account? <Link href="/create-account">Create one</Link>
         </>
       }
     >

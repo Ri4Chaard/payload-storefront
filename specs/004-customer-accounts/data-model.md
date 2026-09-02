@@ -203,10 +203,9 @@ collection point.
 ## ~~`account` — new global~~ (removed)
 
 **This global shipped and was then removed** (R11). Every customer-visible string in this feature is
-now a constant in `src/lib/auth/copy.ts`, grouped by screen. The table below records the shape it
-had, because the constants keep it — the groups are the same, they are just exports rather than
-tabs. Dropped by `20260902_081353_drop_account_copy_global`, whose `down` restores the table so the
-previous release still boots.
+now written in the component that renders it. The table below records the shape the global had, for
+the record only. Dropped by `20260902_081353_drop_account_copy_global`, whose `down` restores the
+table so the previous release still boots.
 
 | Group | Holds |
 | --- | --- |

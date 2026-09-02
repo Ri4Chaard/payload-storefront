@@ -3,7 +3,6 @@ import React from 'react'
 
 import { SignOutButton } from '@/components/account/sign-out-button'
 import { Container } from '@/components/ui/container'
-import { profileCopy as copy } from '@/lib/auth/copy'
 import { requireCustomer } from '@/lib/auth/dal'
 
 /**
@@ -31,10 +30,10 @@ export default async function AccountPage() {
   return (
     <Container>
       <div className="mx-auto flex w-full max-w-160 flex-col gap-7.5 py-12 md:py-20">
-        <h1 className="text-heading-1 text-neutral-primary">{copy.profileTitle}</h1>
+        <h1 className="text-heading-1 text-neutral-primary">My account</h1>
 
         <dl className="flex flex-col gap-1.5">
-          <dt className="text-body-small text-neutral-secondary">{copy.profileEmailLabel}</dt>
+          <dt className="text-body-small text-neutral-secondary">Email</dt>
           <dd className="text-body-base text-neutral-primary">{customer.email}</dd>
         </dl>
 

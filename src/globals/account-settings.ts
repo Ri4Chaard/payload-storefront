@@ -8,7 +8,8 @@ import { DEFAULT_COUNTRY, countryOptions } from '@/lib/countries'
  *
  * The distinction is the whole point of this file. An `Account` global holding every heading and
  * button label shipped once and was removed: authentication copy is functional UI whose wording is
- * load-bearing for security, and it belongs in `src/lib/auth/copy.ts` where it gets code review.
+ * load-bearing for security, and it belongs in the components that render it, where it gets code
+ * review.
  * What was genuinely missing afterwards is this — the handful of values that are decisions about
  * the shop rather than sentences about the screen, and that a shop owner should be able to change
  * without a deployment.

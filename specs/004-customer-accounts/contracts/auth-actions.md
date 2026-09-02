@@ -221,8 +221,8 @@ syncMarketingContact(email: string, subscribed: boolean): Promise<void>
 a conditional somebody has to remember — which is the same argument that keeps `admins` and
 `customers` in separate collections.
 
-**Guarantee E2**: all copy comes from `emailCopy` in `src/lib/auth/copy.ts` (R11). Server-side only
-— the three templates never reach a browser bundle.
+**Guarantee E2**: the three messages are written in `src/lib/email/transactional.ts` itself (R11).
+Server-side only — they never reach a browser bundle.
 
 **Guarantee E3**: a `syncMarketingContact` failure is logged and swallowed. A consent change is
 recorded in Payload whether or not Resend was reachable; the sync is reconciled, never rolled back.

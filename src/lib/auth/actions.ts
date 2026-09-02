@@ -25,9 +25,9 @@ import { sendVerificationCode } from '@/lib/email/transactional'
 /**
  * The server actions behind the account forms (spec 004, contracts/auth-actions.md).
  *
- * Every message below is a KEY into `src/lib/auth/copy.ts`, never a sentence. That keeps each string
- * defined once, and it keeps these functions assertable: the integration tests compare two responses
- * to each other, and `toBe('codeExpired')` does not break the day somebody rewords the sentence.
+ * Every message below is a KEY, never a sentence — the words live in the component that renders
+ * them. That keeps these functions assertable: the integration tests compare two responses to each
+ * other, and `toBe('codeExpired')` does not break the day somebody rewords the sentence.
  *
  * **Each action re-validates its input with the same schema the form used** (`./schemas.ts`). The
  * browser's check is a courtesy to the customer; these functions are a public HTTP endpoint that

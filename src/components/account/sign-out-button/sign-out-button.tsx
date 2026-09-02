@@ -5,7 +5,6 @@ import React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { signOutCustomer } from '@/lib/auth/actions'
-import { profileCopy as copy } from '@/lib/auth/copy'
 
 /**
  * Ends the session (FR-013).
@@ -36,7 +35,7 @@ export function SignOutButton() {
         })
       }}
     >
-      {copy.profileSignOut}
+      Sign out
     </Button>
   )
 }

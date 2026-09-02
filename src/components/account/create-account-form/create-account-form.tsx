@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TextInput } from '@/components/ui/text-input'
 import { registerCustomer } from '@/lib/auth/actions'
-import { createAccountCopy as copy, message } from '@/lib/auth/copy'
-import { applyActionErrors } from '@/lib/auth/form-errors'
+import { applyActionErrors, errorText } from '@/lib/auth/form-errors'
 import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schemas'
 
 /**
@@ -33,6 +32,13 @@ import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schema
  * assertions that matter most here are the ones comparing two of its responses to each other.
  * Keeping the action pure is what makes those possible.
  */
+/** The action and the schema both return keys; these are the sentences. */
+const ERRORS: Record<string, string> = {
+  createEmailInvalid: 'That does not look like an email address.',
+  createPasswordMismatch: 'The two passwords do not match.',
+  createPasswordTooWeak: 'Use at least 8 characters, and avoid a password you use elsewhere.',
+}
+
 export interface CreateAccountFormProps {
   /** From `getAccountSettings()`. When false the consent checkbox is not rendered. */
   marketingEnabled: boolean
@@ -50,7 +56,7 @@ export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) 
   })
 
   const { errors, isSubmitting } = form.formState
-  const resolve = (key: string | undefined) => message(copy, key)
+  const resolve = (key: string | undefined) => errorText(ERRORS, key)
 
   const onSubmit = form.handleSubmit(async (values) => {
     const result = await registerCustomer(values)
@@ -67,8 +73,8 @@ export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) 
     <form onSubmit={onSubmit} className="flex flex-col gap-7.5" noValidate>
       <TextInput
         {...form.register('email')}
-        label={copy.signInEmailLabel}
-        placeholder={copy.signInEmailLabel}
+        label="Email Address"
+        placeholder="Email Address"
         hideLabel
         type="email"
         autoComplete="email"
@@ -78,8 +84,8 @@ export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) 
 
       <TextInput
         {...form.register('password')}
-        label={copy.signInPasswordLabel}
-        placeholder={copy.signInPasswordLabel}
+        label="Password"
+        placeholder="Password"
         hideLabel
         type="password"
         autoComplete="new-password"
@@ -89,8 +95,8 @@ export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) 
 
       <TextInput
         {...form.register('confirmPassword')}
-        label={copy.createConfirmLabel}
-        placeholder={copy.createConfirmLabel}
+        label="Confirm Password"
+        placeholder="Confirm Password"
         hideLabel
         type="password"
         autoComplete="new-password"
@@ -99,18 +105,21 @@ export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) 
       />
 
       {marketingEnabled ? (
-        <Checkbox {...form.register('marketingConsent')} label={copy.createMarketingConsent} />
+        <Checkbox
+          {...form.register('marketingConsent')}
+          label="Email me occasional news and offers."
+        />
       ) : null}
 
       {/* Only failures that belong to no single field, so nothing is said twice. */}
       {errors.root ? (
-        <p role="alert" className="text-body-small text-neutral-primary">
+        <p role="alert" className="text-body-small text-status-error-text">
           {resolve(errors.root.message)}
         </p>
       ) : null}
 
       <Button type="submit" variant="primary" disabled={isSubmitting} className="w-full">
-        {copy.createSubmit}
+        Create Account
       </Button>
     </form>
   )

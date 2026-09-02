@@ -3,7 +3,6 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { Icon } from '@/components/ui/icon'
-import { successCopy as copy } from '@/lib/auth/copy'
 
 /**
  * Node `432:13049` — the check emblem, the heading, the body, and one onward action.
@@ -27,12 +26,14 @@ export function RegistrationSuccess() {
         </span>
 
         <div className="flex flex-col gap-3.5">
-          <h1 className="text-heading-1 text-neutral-primary">{copy.successTitle}</h1>
-          <p className="text-body-base text-neutral-primary">{copy.successBody}</p>
+          <h1 className="text-heading-1 text-neutral-primary">Successful registration</h1>
+          <p className="text-body-base text-neutral-primary">
+            Your account has been successfully created. Welcome to AURUM!
+          </p>
         </div>
 
         <Button href="/sign-in" variant="primary" className="w-full max-w-120">
-          {copy.successAction}
+          Start shopping
         </Button>
       </div>
     </Container>

@@ -2,8 +2,6 @@ import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
-import { emailCopy } from '@/lib/auth/copy'
-
 /**
  * Mail a customer must receive regardless of what they think of our marketing (spec 004, R2).
  *
@@ -14,7 +12,9 @@ import { emailCopy } from '@/lib/auth/copy'
  * never reset their password. Two modules with no reference to each other cannot fail that way:
  * this one has no access to the flag, and `./marketing.ts` cannot send a message.
  *
- * Copy lives in `src/lib/auth/copy.ts` — see the note there on why these strings are code.
+ * The three messages are written below rather than fetched. They are part of the mechanism, not
+ * content: each one exists because a specific operation happened, and two of them carry a code that
+ * only means anything for ten minutes.
  *
  * **Colours are resolved from the design tokens, not written as hex.** Email is the one place that
  * cannot use a CSS custom property or a utility class — every serious mail client strips both, so
@@ -67,6 +67,29 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
+/**
+ * The code never appears in a subject line. Subjects show on lock screens and in notification
+ * previews, which is a wider audience than the person holding the phone.
+ */
+const VERIFICATION = {
+  subject: 'Your Aurum verification code',
+  body: 'Use this code to confirm your email address. It expires in 10 minutes. If you didn’t create an Aurum account, you can ignore this message.',
+}
+
+const RESET = {
+  subject: 'Your Aurum password reset code',
+  body: 'Use this code to set a new password. It expires in 10 minutes. If you didn’t ask to reset your password, you can ignore this message — nothing has changed.',
+}
+
+/**
+ * Sent regardless of marketing preferences — it is how someone finds out their account was taken
+ * (FR-035).
+ */
+const PASSWORD_CHANGED = {
+  subject: 'Your Aurum password was changed',
+  body: 'The password on your Aurum account has just been changed, and you have been signed out everywhere else. If this wasn’t you, reset your password immediately and contact us.',
+}
+
 export interface BuiltEmail {
   html: string
   subject: string
@@ -85,15 +108,15 @@ export interface BuiltEmail {
  */
 export async function buildVerificationEmail(code: string): Promise<BuiltEmail> {
   return {
-    html: renderCodeEmail(emailCopy.verifyEmailBody, code),
-    subject: emailCopy.verifyEmailSubject,
+    html: renderCodeEmail(VERIFICATION.body, code),
+    subject: VERIFICATION.subject,
   }
 }
 
 export async function buildResetEmail(code: string): Promise<BuiltEmail> {
   return {
-    html: renderCodeEmail(emailCopy.resetEmailBody, code),
-    subject: emailCopy.resetEmailSubject,
+    html: renderCodeEmail(RESET.body, code),
+    subject: RESET.subject,
   }
 }
 
@@ -122,8 +145,8 @@ export async function sendPasswordChangedNotice(to: string): Promise<void> {
 
   try {
     await payload.sendEmail({
-      html: renderNoticeEmail(emailCopy.passwordChangedBody),
-      subject: emailCopy.passwordChangedSubject,
+      html: renderNoticeEmail(PASSWORD_CHANGED.body),
+      subject: PASSWORD_CHANGED.subject,
       to,
     })
   } catch (error) {

@@ -247,12 +247,13 @@ export function OtpInput({
       <input type="hidden" name={name} value={current} />
 
       {/*
-        Message text is `neutral-primary`, not the error red. `status-error-default` on this surface
-        is 3.01:1 — fine for the box borders above and for an icon, and a AA failure for body text.
-        The token mapping states that split outright, and `Field` already follows it.
+        `status-error-text`, not `status-error-default`. The boxes above are outlined in the latter,
+        which is 3.01:1 on this surface — correct for a border, an AA failure for body text. The
+        message gets the text-safe sibling at 5.66:1, which is the same red a shade darker. The
+        token mapping states that split outright, and `Field` follows it too.
       */}
       {error ? (
-        <p id={errorId} role="alert" className="text-body-small text-neutral-primary text-center">
+        <p id={errorId} role="alert" className="text-body-small text-status-error-text text-center">
           {error}
         </p>
       ) : null}

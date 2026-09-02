@@ -127,3 +127,35 @@ test('the verification screen cannot be entered without an address', async ({ pa
   await page.goto('/verify-email')
   await expect(page).toHaveURL(/\/create-account/)
 })
+
+/**
+ * The resend control, node `428:11921`.
+ *
+ * Deliberately driven with an address that has NO account: `resendCode` does nothing for an unknown
+ * address, so this exercises the whole control without putting a real Resend send in the suite — and
+ * the fact that it behaves identically either way is the requirement, not a convenience. A countdown
+ * that appeared only for registered addresses would say which ones those are (FR-009).
+ */
+test('the resend control counts down once it has been used', async ({ page }) => {
+  await page.goto(`/verify-email?email=${encodeURIComponent(fresh())}`)
+
+  const resend = page.getByRole('button', { name: 'Resend' })
+  await expect(resend, 'no countdown before anything has been asked for').toBeVisible()
+
+  await resend.click()
+
+  // The label becomes the wait. The control keeps its place — and its focus — rather than being
+  // swapped for text, which is why it is `aria-disabled` rather than `disabled`.
+  const waiting = page.getByRole('button', { name: /^Resend in \d+s$/ })
+  await expect(waiting).toBeVisible({ timeout: 15_000 })
+  await expect(waiting).toHaveAttribute('aria-disabled', 'true')
+  await expect(waiting).toBeFocused()
+
+  // …and it is actually counting, not merely showing a number.
+  const first = await waiting.textContent()
+  await expect
+    .poll(async () => page.getByRole('button', { name: /^Resend in \d+s$/ }).textContent(), {
+      timeout: 15_000,
+    })
+    .not.toBe(first)
+})

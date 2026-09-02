@@ -290,10 +290,15 @@ marketing switch.
 
 ## R11 — Account copy lives in source, not in Payload
 
-**Decision**: Every customer-visible string in this feature is a constant in `src/lib/auth/copy.ts`,
-grouped by screen — the headings and helper text on all nine auth screens, the profile row labels,
-the modal titles, and the email subjects and bodies. The default country moved to
-`src/lib/countries.ts`, where it has to be a member of the list anyway.
+**Decision**: Every customer-visible string in this feature is written in the component that
+renders it. The default country moved to `src/lib/countries.ts`, where it has to be a member of the
+list anyway; the three email bodies live in `src/lib/email/transactional.ts`, which sends them.
+
+A shared `src/lib/auth/copy.ts` was the first step away from the global and is also gone. A module
+that only holds other files' strings is a second place to look for a sentence and a second thing to
+keep in step with the screen — the words belong beside the markup they appear in. Actions still
+return message KEYS, and each screen holds the small dictionary that turns its own keys into
+sentences.
 
 **This reverses the original decision**, which put all of it in a new `Account` global on Principle
 I. That shipped, and was removed in `20260902_081353_drop_account_copy_global`.

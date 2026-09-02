@@ -10,10 +10,12 @@ import { cn } from '@/lib/cn'
  * anyway), and passing them in keeps the relationship visible in the calling component instead of
  * hidden behind context — which is what makes a broken `aria-describedby` findable.
  *
- * **Error text is `neutral-primary`, not red.** `status-error-default` #f75959 measures 3.01:1 on
- * our light surfaces: compliant for a border or an icon, NOT for body-size text. The design draws
- * this message in red (node 530:12217); reproducing that would fail the accessibility gate, so the
- * red is carried by the control's border instead and the words stay readable.
+ * **Error text is red, and it is a different red from the border.** The design draws this message
+ * in red (node 530:12217) and it should be red — an error nobody can see the colour of is doing
+ * half its job. But `status-error-default` #f75959 measures 3.01:1 on our light surfaces:
+ * compliant for a border or an icon, an AA failure for body-size text. So the message uses
+ * `status-error-text` #bf2222, the same hue at 5.66:1, while the control's border keeps #f75959.
+ * Two tokens because the two jobs have different thresholds, not because the palette drifted.
  *
  * The design pairs that red text with no icon, and the icon set currently has no warning glyph, so
  * the "red on the icon" half of the contract has nothing to attach to yet.
@@ -98,7 +100,9 @@ export function Field({
           role="alert"
           className={cn(
             'text-body-small',
-            tone === 'inverse' ? 'text-neutral-white' : 'text-neutral-primary',
+            // `inverse` is the dark footer surface, where a dark red is unreadable — white is what
+            // carries there, and the control's border still says which field it is.
+            tone === 'inverse' ? 'text-neutral-white' : 'text-status-error-text',
           )}
         >
           {error}
