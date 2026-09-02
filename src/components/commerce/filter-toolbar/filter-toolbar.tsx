@@ -95,8 +95,8 @@ const SHAPE_ICONS: Record<DiamondShape, IconName> = {
  */
 const TRIGGER = [
   'text-caption font-medium text-neutral-primary inline-flex h-9 items-center justify-center',
-  'rounded-md border border-black/10 px-4 uppercase',
-  'xl:text-body-medium xl:h-13 xl:rounded-none xl:px-5',
+  'border border-black/10 px-4 uppercase',
+  'xl:text-body-medium xl:h-13 xl:px-5',
   'ease-standard transition-colors duration-[var(--duration-fast)]',
   'hover:border-neutral-primary',
 ].join(' ')
