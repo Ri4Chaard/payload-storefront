@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
+import { getCustomer } from '@/lib/auth/dal'
+
 import { ResetPasswordScreen } from './reset-password-screen'
 
 /** Nodes `429:12348`, `429:12615` and `429:12884` (spec 004, US3). */
@@ -22,5 +24,7 @@ export default async function ResetPasswordPage({
   // one. Send them to the screen that collects it, exactly as `/verify-email` does.
   if (!address) redirect('/forgot-password')
 
-  return <ResetPasswordScreen email={address} />
+  // Read here rather than in the screen: the screen is a client component, and the session is not
+  // something a client component can be trusted to know about itself.
+  return <ResetPasswordScreen email={address} signedIn={Boolean(await getCustomer())} />
 }

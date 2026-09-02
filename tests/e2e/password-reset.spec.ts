@@ -202,3 +202,22 @@ test('the reset screen cannot be entered without an address', async ({ page }) =
   await page.goto('/reset-password')
   await expect(page).toHaveURL(/\/forgot-password/)
 })
+
+/** The onward line on the new-password step, for the visitor the screen was drawn for. */
+test('an anonymous visitor is offered the sign-in form on the way out', async ({ page }) => {
+  const email = await verifiedCustomer()
+
+  await page.goto('/forgot-password')
+  await page.getByPlaceholder('Email Address').fill(email)
+  await page.getByRole('button', { name: 'Send Code' }).click()
+  await expect(page.getByRole('heading', { name: 'ENTER THE CODE' })).toBeVisible({
+    timeout: 15_000,
+  })
+
+  await page.getByRole('textbox').first().click()
+  await page.keyboard.type(await resetCodeFor(email))
+  await expect(page.getByRole('heading', { name: 'NEW PASSWORD' })).toBeVisible({ timeout: 15_000 })
+
+  await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Back to my account' })).toHaveCount(0)
+})

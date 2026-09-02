@@ -140,6 +140,27 @@ test('the modal offers a way to the reset flow', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'FORGOT PASSWORD' })).toBeVisible({
     timeout: 15_000,
   })
+
+  /**
+   * …and the way back out is the one that is true for THIS visitor.
+   *
+   * The screen's drawn footer says "Back to sign in", which is right for someone locked out and
+   * wrong for the customer who arrived here from the modal — they are signed in, so it is both a
+   * false statement and a worse destination than the page they came from.
+   */
+  await expect(page.getByRole('link', { name: 'Back to my account' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Back to sign in' })).toHaveCount(0)
+
+  await page.getByRole('link', { name: 'Back to my account' }).click()
+  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible({ timeout: 15_000 })
+})
+
+/** The same line, for the visitor the screen was drawn for. */
+test('an anonymous visitor is still offered the sign-in form', async ({ page }) => {
+  await page.goto('/forgot-password')
+
+  await expect(page.getByRole('link', { name: 'Back to sign in' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Back to my account' })).toHaveCount(0)
 })
 
 /** Cancel discards the three passwords rather than leaving them for whoever opens it next. */

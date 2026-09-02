@@ -22,7 +22,19 @@ import { Link } from '@/components/ui/link'
  * spent, so they ask for another. The alternative is persisting a live reset credential somewhere
  * to save one click.
  */
-export function ResetPasswordScreen({ email }: { email: string }) {
+export interface ResetPasswordScreenProps {
+  email: string
+  /**
+   * Whether the visitor already has a session — read on the server, passed down.
+   *
+   * The onward line is the only thing it changes, and it changes it because the line would
+   * otherwise be wrong: a customer who reached this flow from the Change password modal is signed
+   * in, and offering them "Already have an account? Log in" is both untrue and a dead end.
+   */
+  signedIn: boolean
+}
+
+export function ResetPasswordScreen({ email, signedIn }: ResetPasswordScreenProps) {
   const [handle, setHandle] = React.useState<null | string>(null)
   const onVerified = React.useCallback((issued: string) => setHandle(issued), [])
 
@@ -32,9 +44,13 @@ export function ResetPasswordScreen({ email }: { email: string }) {
         title="NEW PASSWORD"
         subtitle="Create a new password for your account."
         footer={
-          <>
-            Already have an account? <Link href="/sign-in">Log in</Link>
-          </>
+          signedIn ? (
+            <Link href="/account">Back to my account</Link>
+          ) : (
+            <>
+              Already have an account? <Link href="/sign-in">Log in</Link>
+            </>
+          )
         }
       >
         <NewPasswordForm email={email} handle={handle} />
