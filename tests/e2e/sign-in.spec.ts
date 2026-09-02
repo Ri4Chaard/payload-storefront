@@ -13,15 +13,30 @@ import { getPayload } from 'payload'
 const PASSWORD = 'a-long-enough-password'
 
 /**
- * **Its own subdomain, and that is load-bearing.** Every spec's `afterAll` deletes the customers it
- * made with a `like` match, and Playwright runs spec FILES in parallel — so a shared
- * `@aurum-testing.dev` means `registration.spec.ts` finishing early deletes the account this file
- * is in the middle of signing into. The symptom is this spec failing only in a full run, which is
- * the most expensive kind of flake to chase. A per-spec namespace makes the cleanups disjoint:
- * `%@aurum-testing.dev%` does not match `…@signin.aurum-testing.dev`.
+ * **Its own subdomain, which was the first half of a fix and not the whole of it.** Cleanups used to
+ * delete by `like`, and Playwright runs spec FILES in parallel — so a shared `@aurum-testing.dev`
+ * meant `registration.spec.ts` finishing early deleted the account this file was signing into. The
+ * namespace made the file-level cleanups disjoint. It did not help WITHIN a file, which is where
+ * the rest of the flakiness lived; see the note on `created` below. The namespaces stay, because
+ * they still cost nothing and still keep one file's debris out of another's.
  */
-const fresh = () =>
-  `e2e-signin-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@signin.aurum-testing.dev`
+/**
+ * **Every address this worker made, so the cleanup can delete those and only those.**
+ *
+ * `test.afterAll` runs once PER WORKER, not once per file, and `fullyParallel` spreads a file's
+ * tests across workers. A cleanup matching `%@signin.aurum-testing.dev%` therefore fires while other workers are
+ * still mid-test and takes their customers with it — and the session goes with the row, so the next
+ * request redirects to sign-in and the failure appears somewhere else entirely, as an assertion
+ * about a heading rather than about a deleted account. This module is instantiated per worker, so
+ * the list holds exactly what this worker is responsible for.
+ */
+const created: string[] = []
+
+const fresh = () => {
+  const email = `e2e-signin-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@signin.aurum-testing.dev`
+  created.push(email)
+  return email
+}
 
 /**
  * Creates a verified customer through the Local API rather than through `registerCustomer`.
@@ -55,16 +70,18 @@ async function verifiedCustomer(): Promise<string> {
 }
 
 test.afterAll(async () => {
+  if (created.length === 0) return
+
   const payload = await getPayload({ config })
   await payload.delete({
     collection: 'verification-codes',
     overrideAccess: true,
-    where: { email: { like: '@signin.aurum-testing.dev' } },
+    where: { email: { in: created } },
   })
   await payload.delete({
     collection: 'customers',
     overrideAccess: true,
-    where: { email: { like: '@signin.aurum-testing.dev' } },
+    where: { email: { in: created } },
   })
 })
 

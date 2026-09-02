@@ -14,8 +14,23 @@ import { issueCode } from '@/lib/auth/codes'
  */
 const password = 'a-long-enough-password'
 
-const fresh = () =>
-  `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@aurum-testing.dev`
+/**
+ * **Every address this worker made, so the cleanup can delete those and only those.**
+ *
+ * `test.afterAll` runs once PER WORKER, not once per file, and `fullyParallel` spreads a file's
+ * tests across workers. A cleanup matching `%@aurum-testing.dev%` therefore fires while other workers are
+ * still mid-test and takes their customers with it — and the session goes with the row, so the next
+ * request redirects to sign-in and the failure appears somewhere else entirely, as an assertion
+ * about a heading rather than about a deleted account. This module is instantiated per worker, so
+ * the list holds exactly what this worker is responsible for.
+ */
+const created: string[] = []
+
+const fresh = () => {
+  const email = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@aurum-testing.dev`
+  created.push(email)
+  return email
+}
 
 async function codeFor(email: string): Promise<string> {
   const payload = await getPayload({ config })
@@ -36,16 +51,18 @@ async function codeFor(email: string): Promise<string> {
 }
 
 test.afterAll(async () => {
+  if (created.length === 0) return
+
   const payload = await getPayload({ config })
   await payload.delete({
     collection: 'verification-codes',
     overrideAccess: true,
-    where: { email: { like: '@aurum-testing.dev' } },
+    where: { email: { in: created } },
   })
   await payload.delete({
     collection: 'customers',
     overrideAccess: true,
-    where: { email: { like: '@aurum-testing.dev' } },
+    where: { email: { in: created } },
   })
 })
 
