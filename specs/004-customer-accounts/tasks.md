@@ -413,6 +413,14 @@ switch the default, delete one.
   action already returns the payload the router applies — and every extra application of the server
   tree is another chance to hit the defect above.
 
+- **The admin panel could not see a customer's addresses at all**, and that was an omission rather
+  than a decision — spec 004 scoped the storefront profile and never asked what staff should see.
+  The plugin creates `addresses` with `admin.hidden: true`, and nothing linked a customer to their
+  rows, so the one place a seller needs an address was the one place it did not appear. A `join`
+  field on `customers` fixes it: virtual, no migration, default address first.
+  `tests/e2e/admin-customer.spec.ts` is the only test in the suite that opens `/admin`, because
+  nothing else would notice if that field were dropped.
+
 **Checkpoint**: US1–US5 work independently.
 
 **Checkpoint**: US1–US5 work independently.

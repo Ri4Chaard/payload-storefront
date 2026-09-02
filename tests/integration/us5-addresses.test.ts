@@ -212,6 +212,49 @@ describe('exactly one default (FR-031)', () => {
   })
 })
 
+describe('the admin panel’s view of a customer', () => {
+  /**
+   * The `join` field on `customers`. It is the only route into the addresses collection from the
+   * panel — the plugin creates that collection `hidden`, so without this a seller fulfilling an
+   * order over WhatsApp could not see the address the customer had already given them.
+   *
+   * Asserted through the Local API rather than the UI because that is where the field either
+   * resolves or does not: a wrong `on` path yields an empty join, which looks exactly like a
+   * customer who has saved nothing.
+   */
+  it('reads the customer’s addresses back from the other side of the relationship', async () => {
+    const first = await addAddress(alice)
+    const second = await addAddress(alice, { addressLine1: 'Sheikh Zayed Rd 1', city: 'Dubai' })
+
+    const customer = await payload.findByID({
+      collection: 'customers',
+      id: alice.id,
+      overrideAccess: true,
+    })
+
+    const joined = customer.addresses?.docs ?? []
+    const ids = joined.map((doc) => (typeof doc === 'number' ? doc : doc.id))
+
+    expect(ids).toHaveLength(2)
+    expect(ids).toContain(first.id)
+    expect(ids).toContain(second.id)
+
+    // Default first (FR-031), so the address that will actually be used is the one at the top.
+    expect(ids[0]).toBe(first.id)
+    await clear(alice.id)
+  })
+
+  it('shows nothing for a customer who has saved none', async () => {
+    const customer = await payload.findByID({
+      collection: 'customers',
+      id: bob.id,
+      overrideAccess: true,
+    })
+
+    expect(customer.addresses?.docs ?? []).toHaveLength(0)
+  })
+})
+
 describe('the columns the form insists on (FR-030)', () => {
   it('refuses a row with no city, whoever is writing', async () => {
     await expect(addAddress(alice, { city: undefined })).rejects.toThrow()

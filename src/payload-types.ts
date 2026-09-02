@@ -88,6 +88,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    customers: {
+      addresses: 'addresses';
+    };
     variantTypes: {
       options: 'variantOptions';
     };
@@ -235,6 +238,14 @@ export interface Customer {
    */
   name?: string | null;
   /**
+   * Saved by the customer on their profile. Exactly one is the default; marking another moves it.
+   */
+  addresses?: {
+    docs?: (number | Address)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
    * Opt-in, and off unless the customer said otherwise. Turning this off must never stop a verification code or a password-change notice — those are transactional and travel a different path entirely.
    */
   marketingEmail?: boolean | null;
@@ -266,254 +277,6 @@ export interface Customer {
     | null;
   password?: string | null;
   collection: 'customers';
-}
-/**
- * Images and files. Alternative text is required — an image without it is a defect.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Describes the image for screen readers and when the image fails to load. For a purely decorative image, enter a single space.
-   */
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    sm?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    md?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    lg?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xl?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    full?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  /**
-   * The heading on the category listing, e.g. "Diamond Rings".
-   */
-  title: string;
-  /**
-   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
-   */
-  slug: string;
-  /**
-   * The sentence beneath the heading, e.g. "Timeless brilliance, made for every moment".
-   */
-  subtitle?: string | null;
-  /**
-   * Used by the home page’s category band.
-   */
-  image?: (number | null) | Media;
-  /**
-   * Lowest first, in navigation and in the filter drawer.
-   */
-  order?: number | null;
-  /**
-   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
-   */
-  seo?: {
-    /**
-     * Shown in search results and the browser tab. Around 60 characters.
-     */
-    title?: string | null;
-    /**
-     * The sentence beneath the title in search results. Around 155 characters.
-     */
-    description?: string | null;
-    /**
-     * Used when the page is shared. Falls back to the first photograph.
-     */
-    image?: (number | null) | Media;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections".
- */
-export interface Collection {
-  id: number;
-  /**
-   * The collection’s name, e.g. "Molten".
-   */
-  title: string;
-  /**
-   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
-   */
-  slug: string;
-  /**
-   * Optional. Not shown on the listing today.
-   */
-  description?: string | null;
-  /**
-   * Lowest first in the filter drawer.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sizes".
- */
-export interface Size {
-  id: number;
-  /**
-   * What the customer reads in the selector, e.g. "2.25" or "45 cm".
-   */
-  label: string;
-  /**
-   * What appears in the address bar when this size is filtered on. Keep it unique within a category — "2.25", "45cm".
-   */
-  value: string;
-  /**
-   * Which kind of piece this size applies to. Leave empty if it applies to all.
-   */
-  category?: (number | null) | Category;
-  /**
-   * Lowest first in the selector and the drawer.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Descriptive properties shown in a product’s details. Not filters.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "attributes".
- */
-export interface Attribute {
-  id: number;
-  /**
-   * What the customer reads, e.g. "Chain length".
-   */
-  label: string;
-  /**
-   * A short machine-readable key, e.g. "chain-length". Renaming it is safe; deleting it is not.
-   */
-  name: string;
-  /**
-   * How the value is entered on a product.
-   */
-  type: 'text' | 'number' | 'select';
-  /**
-   * The values a product may choose from.
-   */
-  options?:
-    | {
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Lowest first within the product details.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "verification-codes".
- */
-export interface VerificationCode {
-  id: number;
-  /**
-   * The address the code was issued to. Every lookup and every throttle is keyed on this rather than on the customer, so a code can still be refused after the account it belonged to is purged.
-   */
-  email: string;
-  /**
-   * Convenience for support. Never the lookup key — see the email field.
-   */
-  customer?: (number | null) | Customer;
-  /**
-   * Part of every lookup. A code minted to verify an address must never be able to complete a password reset.
-   */
-  purpose: 'verify-email' | 'reset-password';
-  /**
-   * The hash of the six digits. The digits themselves are never stored.
-   */
-  codeHash: string;
-  /**
-   * The verification or reset token Payload minted. This is what the code is an alias for.
-   */
-  token: string;
-  expiresAt: string;
-  /**
-   * The code is burned once this reaches the configured limit.
-   */
-  attempts: number;
-  /**
-   * Set on success. A code is single-use.
-   */
-  consumedAt?: string | null;
-  /**
-   * Set when a newer code is issued for the same address and purpose.
-   */
-  supersededAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -793,6 +556,254 @@ export interface Address {
    * The address used first at checkout. Exactly one of a customer’s addresses is the default; ticking this one clears the previous.
    */
   isDefault?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Images and files. Alternative text is required — an image without it is a defect.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Describes the image for screen readers and when the image fails to load. For a purely decorative image, enter a single space.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sm?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    md?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    lg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xl?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    full?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  /**
+   * The heading on the category listing, e.g. "Diamond Rings".
+   */
+  title: string;
+  /**
+   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
+   */
+  slug: string;
+  /**
+   * The sentence beneath the heading, e.g. "Timeless brilliance, made for every moment".
+   */
+  subtitle?: string | null;
+  /**
+   * Used by the home page’s category band.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Lowest first, in navigation and in the filter drawer.
+   */
+  order?: number | null;
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections".
+ */
+export interface Collection {
+  id: number;
+  /**
+   * The collection’s name, e.g. "Molten".
+   */
+  title: string;
+  /**
+   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
+   */
+  slug: string;
+  /**
+   * Optional. Not shown on the listing today.
+   */
+  description?: string | null;
+  /**
+   * Lowest first in the filter drawer.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizes".
+ */
+export interface Size {
+  id: number;
+  /**
+   * What the customer reads in the selector, e.g. "2.25" or "45 cm".
+   */
+  label: string;
+  /**
+   * What appears in the address bar when this size is filtered on. Keep it unique within a category — "2.25", "45cm".
+   */
+  value: string;
+  /**
+   * Which kind of piece this size applies to. Leave empty if it applies to all.
+   */
+  category?: (number | null) | Category;
+  /**
+   * Lowest first in the selector and the drawer.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Descriptive properties shown in a product’s details. Not filters.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attributes".
+ */
+export interface Attribute {
+  id: number;
+  /**
+   * What the customer reads, e.g. "Chain length".
+   */
+  label: string;
+  /**
+   * A short machine-readable key, e.g. "chain-length". Renaming it is safe; deleting it is not.
+   */
+  name: string;
+  /**
+   * How the value is entered on a product.
+   */
+  type: 'text' | 'number' | 'select';
+  /**
+   * The values a product may choose from.
+   */
+  options?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lowest first within the product details.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verification-codes".
+ */
+export interface VerificationCode {
+  id: number;
+  /**
+   * The address the code was issued to. Every lookup and every throttle is keyed on this rather than on the customer, so a code can still be refused after the account it belonged to is purged.
+   */
+  email: string;
+  /**
+   * Convenience for support. Never the lookup key — see the email field.
+   */
+  customer?: (number | null) | Customer;
+  /**
+   * Part of every lookup. A code minted to verify an address must never be able to complete a password reset.
+   */
+  purpose: 'verify-email' | 'reset-password';
+  /**
+   * The hash of the six digits. The digits themselves are never stored.
+   */
+  codeHash: string;
+  /**
+   * The verification or reset token Payload minted. This is what the code is an alias for.
+   */
+  token: string;
+  expiresAt: string;
+  /**
+   * The code is burned once this reaches the configured limit.
+   */
+  attempts: number;
+  /**
+   * Set on success. A code is single-use.
+   */
+  consumedAt?: string | null;
+  /**
+   * Set when a newer code is issued for the same address and purpose.
+   */
+  supersededAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1150,6 +1161,7 @@ export interface CustomersSelect<T extends boolean = true> {
   firstName?: T;
   lastName?: T;
   name?: T;
+  addresses?: T;
   marketingEmail?: T;
   marketingEmailUpdatedAt?: T;
   marketingEmailSource?: T;

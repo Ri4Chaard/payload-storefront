@@ -122,6 +122,43 @@ export const Customers: CollectionConfig = {
           'Composed from the first and last name by a hook. Kept because the admin list, the title and the seller’s view of a customer were all built on it.',
       },
     },
+    /**
+     * The customer's saved delivery addresses, read from the other side of the relationship.
+     *
+     * **Not stored here.** A `join` is a virtual field: the rows live in `addresses`, which the
+     * e-commerce plugin creates with `admin.hidden: true` because an address on its own is not a
+     * thing anybody browses — it is a fact about a customer. Hidden kept it out of the navigation
+     * and, until this field existed, out of the panel altogether: nothing linked a customer to
+     * their addresses, so the one place a seller needs them was the one place they could not be
+     * seen. That was an omission rather than a decision — spec 004 scoped the storefront profile
+     * and never asked what the admin side should look like.
+     *
+     * It matters because of how this shop actually works: an order is a conversation on WhatsApp or
+     * Telegram, and the seller fulfilling it needs the address the customer already typed. Asking
+     * them for it again is the thing saved addresses exist to prevent (FR-027).
+     *
+     * **Default first**, then oldest, so the address that will be used at checkout is the one at
+     * the top and the rest keep a stable order (FR-031). `createdAt` is the tiebreak because two
+     * non-default addresses would otherwise come back in whatever order the database chose.
+     *
+     * `allowCreate` is left on. A seller taking a new address down mid-conversation should be able
+     * to save it against the account, and the collection's own hooks hold FR-031 for that write
+     * exactly as they do for the customer's own — which is the reason those hooks are in the
+     * collection and not in the form.
+     */
+    {
+      name: 'addresses',
+      type: 'join',
+      collection: 'addresses',
+      on: 'customer',
+      label: 'Delivery addresses',
+      defaultSort: ['-isDefault', 'createdAt'],
+      admin: {
+        defaultColumns: ['country', 'city', 'addressLine1', 'postalCode', 'isDefault'],
+        description:
+          'Saved by the customer on their profile. Exactly one is the default; marking another moves it.',
+      },
+    },
     {
       name: 'marketingEmail',
       type: 'checkbox',
