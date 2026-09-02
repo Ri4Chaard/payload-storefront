@@ -6,12 +6,14 @@ import { getPayload } from 'payload'
 import { revalidatePath } from 'next/cache'
 
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
+import { requireCustomer } from '@/lib/auth/dal'
 import { authenticateCustomer } from '@/lib/auth/login'
 import { completePasswordReset } from '@/lib/auth/reset'
 import { mintResetHandle } from '@/lib/auth/reset-handle'
 import { clearSession, establishSession } from '@/lib/auth/session'
 import {
   createAccountSchema,
+  nameSchema,
   requestResetSchema,
   resendCodeSchema,
   resetPasswordSchema,
@@ -20,6 +22,7 @@ import {
   signInSchema,
   verifyCodeSchema,
   type CreateAccountValues,
+  type NameValues,
   type RequestResetValues,
   type ResendCodeValues,
   type ResetPasswordValues,
@@ -417,4 +420,44 @@ export async function resetPassword(
   }
 
   return ok({ next: '/account' })
+}
+
+/**
+ * Set the customer's first and last name (FR-024, FR-026).
+ *
+ * **It begins with `requireCustomer()`, and every mutating action after it does the same.** Not a
+ * convention for its own sake: this is a public RPC endpoint, so "who is this?" cannot come from
+ * the form. Nothing in the input names a customer — the id comes from the session and nowhere else,
+ * which is what makes it impossible to write a version of this that edits somebody else's profile.
+ *
+ * `name` is not written here. A `beforeChange` hook recomposes it from the two halves so that
+ * everything already built on the single field keeps working — see `composeCustomerName`.
+ */
+export async function updateName(input: NameValues): Promise<ActionResult> {
+  const customer = await requireCustomer()
+
+  const parsed = nameSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const payload = await client()
+  await payload.update({
+    collection: 'customers',
+    data: { firstName: parsed.data.firstName, lastName: parsed.data.lastName },
+    id: customer.id,
+    overrideAccess: true,
+  })
+
+  /**
+   * FR-024 — the row updates without a page reload.
+   *
+   * The profile is a Server Component, so the new name only exists once its segment is re-rendered.
+   * This invalidates it; the modal's own `router.refresh()` is what asks for the new one. Both
+   * halves are needed — revalidating alone leaves the client showing the tree it already has.
+   */
+  revalidatePath('/account')
+
+  return ok()
 }

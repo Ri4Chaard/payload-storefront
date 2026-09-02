@@ -25,7 +25,7 @@ export function SignOutButton() {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="primary"
       disabled={pending}
       onClick={() => {
         startTransition(async () => {

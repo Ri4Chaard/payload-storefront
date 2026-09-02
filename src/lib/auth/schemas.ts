@@ -121,7 +121,22 @@ export const resetPasswordSchema = z
   })
   .superRefine(passwordPair('resetPasswordMismatch', 'resetPasswordTooWeak'))
 
+/**
+ * The profile's Full name modal (FR-024).
+ *
+ * **Both halves are optional, and that is the requirement rather than laxity.** A customer who has
+ * only ever given one name should be able to save it, and one who wants to remove what they typed
+ * should be able to clear the field — a `min(1)` here would turn "I would rather you did not store
+ * my surname" into a validation error. The bound is at the top, not the bottom: the column is text,
+ * and a hundred characters is past any real name and short of a paste of a novel.
+ */
+export const nameSchema = z.object({
+  firstName: z.string().trim().max(100, 'nameTooLong'),
+  lastName: z.string().trim().max(100, 'nameTooLong'),
+})
+
 export type CreateAccountValues = z.infer<typeof createAccountSchema>
+export type NameValues = z.infer<typeof nameSchema>
 export type RequestResetValues = z.infer<typeof requestResetSchema>
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 export type SignInValues = z.infer<typeof signInSchema>

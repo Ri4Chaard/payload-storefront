@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
+import config from '@payload-config'
 import { expect, test } from '@playwright/test'
+import { getPayload } from 'payload'
 
 /**
  * Automated accessibility over the storefront routes (FR-044). Storybook's a11y addon covers
@@ -155,5 +157,68 @@ for (const { name, width, height } of [
       .analyze()
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([])
+  })
+}
+
+
+/**
+ * The profile, and the modal over it (004/T507).
+ *
+ * **It cannot go in `ROUTES` above**, because `/account` is the one page on the site that requires a
+ * session: an anonymous sweep would audit the sign-in redirect and report a clean profile it never
+ * saw. So this signs in first.
+ *
+ * The card is six labelled rows and the one dialog this feature opens, which makes it the densest
+ * concentration of naming obligations in the storefront — a pencil whose accessible name is "Edit"
+ * three times over, a switch reporting a state nobody can hear, a dialog that does not say what it
+ * is. None of those is visible in a screenshot.
+ */
+for (const { name, width } of WIDTHS) {
+  test(`/account has no accessibility violations at ${name} width`, async ({ page }) => {
+    const payload = await getPayload({ config })
+    const email = `a11y-${Date.now()}-${name}@a11y.aurum-testing.dev`
+
+    await payload.create({
+      collection: 'customers',
+      data: { email, firstName: 'Ada', lastName: 'Lovelace', password: 'a-long-enough-password' },
+      disableVerificationEmail: true,
+      overrideAccess: true,
+    })
+    await payload.update({
+      collection: 'customers',
+      data: { _verified: true },
+      overrideAccess: true,
+      where: { email: { equals: email } },
+    })
+
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/sign-in')
+    await page.getByPlaceholder('Email Address').fill(email)
+    await page.getByPlaceholder('Password', { exact: true }).fill('a-long-enough-password')
+    await page.getByRole('button', { name: 'Log in' }).click()
+    await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible({ timeout: 15_000 })
+
+    const card = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(card.violations, JSON.stringify(card.violations, null, 2)).toEqual([])
+
+    // …and again with the Full name modal open, which is a different document: a dialog covering
+    // the page inherits every obligation the page had, and adds the trap.
+    await page.getByRole('button', { name: 'Edit full name' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    const modal = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(modal.violations, JSON.stringify(modal.violations, null, 2)).toEqual([])
+
+    await payload.delete({
+      collection: 'customers',
+      overrideAccess: true,
+      where: { email: { equals: email } },
+    })
   })
 }

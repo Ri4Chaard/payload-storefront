@@ -317,25 +317,25 @@ in and the old one does not.
 **Independent Test**: Sign in, open the profile, set a first and last name, reload, confirm both
 persisted.
 
-- [ ] T500 [P] [US4] Integration test in `tests/integration/us4-profile.test.ts` — a customer reads
+- [X] T500 [P] [US4] Integration test in `tests/integration/us4-profile.test.ts` — a customer reads
       only their own profile (FR-026)
-- [ ] T501 [US4] Build `ProfileRow` in `src/components/account/profile-row/` — the labelled
+- [X] T501 [US4] Build `ProfileRow` in `src/components/account/profile-row/` — the labelled
       read-with-edit row: value, optional pencil or `+`, optional empty state. Six instances on one
       page. **If a second feature grows a row like it, promote it to the kit rather than copy it**
-- [ ] T502 [US4] Build `/account` in `src/app/(frontend)/account/page.tsx` — node `261:4066`,
+- [X] T502 [US4] Build `/account` in `src/app/(frontend)/account/page.tsx` — node `261:4066`,
       card `266:5096`. Six rows in the FR-022 order, guarded by `requireCustomer()` from the DAL, not
       by a layout check (R9)
-- [ ] T503 [US4] In `src/app/(frontend)/account/page.tsx`, render the Email row **read-only with no edit
+- [X] T503 [US4] In `src/app/(frontend)/account/page.tsx`, render the Email row **read-only with no edit
       affordance** — the design gives it no
       pencil, and FR-023 scopes email changes out
-- [ ] T504 [US4] Implement `updateName` in `src/lib/auth/actions.ts`, starting with
+- [X] T504 [US4] Implement `updateName` in `src/lib/auth/actions.ts`, starting with
       `requireCustomer()` as every mutating action does
-- [ ] T505 [US4] Build `NameModal` in `src/components/account/name-modal/` on `Modal` — node
+- [X] T505 [US4] Build `NameModal` in `src/components/account/name-modal/` on `Modal` — node
       `525:13319` (which Figma misnames "Add address"). First name and last name side by side;
       Cancel discards
-- [ ] T506 [US4] Wire `revalidatePath('/account')` into the actions in `src/lib/auth/actions.ts` so the server-rendered row updates without a
+- [X] T506 [US4] Wire `revalidatePath('/account')` into the actions in `src/lib/auth/actions.ts` so the server-rendered row updates without a
       reload (FR-024)
-- [ ] T507 [P] [US4] E2E in `tests/e2e/profile.spec.ts`, and add `/account` plus the modals to
+- [X] T507 [P] [US4] E2E in `tests/e2e/profile.spec.ts`, and add `/account` plus the modals to
       `tests/a11y/routes.spec.ts`
 
 **Checkpoint**: the profile page exists and its name row works.

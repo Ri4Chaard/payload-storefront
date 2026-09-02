@@ -88,8 +88,15 @@ export default defineConfig({
        * every run and starts failing — as "no code was issued" rather than as a rate limit — the
        * day it runs out. See `src/lib/email/log-adapter.ts`.
        *
-       * `reuseExistingServer` means a dev server already running WITHOUT this variable is used as
-       * it is, so a local run may still send. CI always starts its own.
+       * **`reuseExistingServer` means a dev server already running WITHOUT this variable is used as
+       * it is**, and Next 16 refuses to start a second dev server for the same project, so there is
+       * no way for this to override one that is already up. A local run against an ordinary
+       * `pnpm dev` therefore still sends — and once the daily quota is spent, registration itself
+       * starts failing, because Payload sends the verification email inside the create transaction.
+       * The failures then read as "no code was issued".
+       *
+       * Before a local suite run, either stop the dev server and let this start its own, or start
+       * it as `EMAIL_TRANSPORT=log pnpm dev`. CI always starts its own.
        */
       env: { ...process.env, EMAIL_TRANSPORT: 'log' },
       reuseExistingServer: !process.env.CI,

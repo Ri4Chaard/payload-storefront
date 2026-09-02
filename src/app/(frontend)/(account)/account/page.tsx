@@ -1,23 +1,36 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { NameModal } from '@/components/account/name-modal'
+import { ProfileRow } from '@/components/account/profile-row'
 import { SignOutButton } from '@/components/account/sign-out-button'
 import { Container } from '@/components/ui/container'
+import { Icon } from '@/components/ui/icon'
+import { Link } from '@/components/ui/link'
+import { Switch } from '@/components/ui/switch'
 import { requireCustomer } from '@/lib/auth/dal'
 
 /**
- * The profile page, in the form US2 needs it (spec 004, FR-015).
+ * The profile — node `261:4066`, card `266:5096` (spec 004, US4).
  *
- * **This is not the design yet.** Node `266:4382` draws rows for the name, addresses, marketing
- * preferences and security, and those land with US4–US7. What is here is the smallest page that
- * makes US2 a real user story rather than a half of one: a signed-in customer needs somewhere that
- * proves they are signed in and somewhere to sign out from, and "the profile is unreachable after
- * signing out" cannot be tested against a route that does not exist.
+ * Six rows in the order FR-022 fixes: email, full name, addresses, marketing preference, security,
+ * and the sign-out control. The order is a requirement rather than a layout choice, so the rows are
+ * written out here rather than mapped from an array that could be reordered without anyone noticing.
  *
  * **`requireCustomer` is the guard, and it is here rather than in a layout.** `src/lib/auth/dal.ts`
  * explains why at length; the short version is that a layout does not decide whether its children
- * render. `src/proxy.ts` sends anonymous visitors here away before this runs, but that is a
- * courtesy — a forged cookie passes the proxy and is refused on this line (FR-015).
+ * render. `src/proxy.ts` sends anonymous visitors away before this runs, but that is a courtesy — a
+ * forged cookie passes the proxy and is refused on this line (FR-015).
+ *
+ * **The page keeps a visible heading the design does not draw.** `261:4066` starts straight in on
+ * the Email row, which leaves the one page reached from the header's account icon with no title at
+ * all — and no `h1` for the document to be named by. The same frame set mislabels this card's
+ * Security row as `safety` and omits the Full name row entirely from the empty state, so it is not
+ * authoritative on structure. Recorded as an addition, like the registration form's consent box.
+ *
+ * **Two rows are drawn but not yet operable, and each says so below.** Addresses is US5 and the
+ * marketing switch is US6. They are here now because FR-022 fixes the order and a card that grows a
+ * row in the middle later is a card that gets re-reviewed three times.
  */
 export const metadata: Metadata = {
   title: 'My account',
@@ -26,19 +39,71 @@ export const metadata: Metadata = {
 
 export default async function AccountPage() {
   const customer = await requireCustomer('/account')
+  const fullName = [customer.firstName, customer.lastName].filter(Boolean).join(' ')
 
   return (
     <Container>
-      <div className="mx-auto flex w-full max-w-160 flex-col gap-7.5 py-12 md:py-20">
-        <h1 className="text-heading-1 text-neutral-primary">My account</h1>
+      <div className="py-12 md:py-20">
+        <h1 className="text-heading-1 text-neutral-primary mb-7.5">My account</h1>
 
-        <dl className="flex flex-col gap-1.5">
-          <dt className="text-body-small text-neutral-secondary">Email</dt>
-          <dd className="text-body-base text-neutral-primary">{customer.email}</dd>
-        </dl>
+        <div className="bg-neutral-white p-6 md:p-12">
+          <dl className="flex flex-col gap-6">
+            {/* FR-023 — read-only, and deliberately without an affordance. Changing the address a
+                customer signs in with is out of scope, and a pencil that opens nothing is worse
+                than no pencil. */}
+            <ProfileRow label="Email">{customer.email}</ProfileRow>
 
-        <div>
-          <SignOutButton />
+            <ProfileRow
+              label="Full name"
+              // FR-025. A customer who has not given a name sees that they have not, rather than a
+              // box that looks like it failed to load.
+              empty="No name added"
+              action={<NameModal firstName={customer.firstName} lastName={customer.lastName} />}
+            >
+              {fullName}
+            </ProfileRow>
+
+            {/*
+              **Always the empty state, for now.** Saved addresses and the `+` that creates one are
+              US5; until that lands there is no way to create one, so there is none to show. The row
+              is here because FR-022 fixes its position.
+            */}
+            <ProfileRow label="Addresses" empty="No addresses added" />
+
+            <ProfileRow
+              label="Marketing preferences"
+              action={
+                /*
+                  **Disabled on purpose until US6.** The row must show the customer's current
+                  preference (FR-022) and the action that changes it does not exist yet — so the
+                  switch reports and does not pretend to accept. A live-looking control that
+                  silently discards a click is the one outcome worse than a dull one.
+                */
+                <Switch
+                  label="Email me occasional news and offers"
+                  hideLabel
+                  checked={customer.marketingEmail}
+                  disabled
+                  readOnly
+                />
+              }
+            >
+              <span className="flex items-center gap-2.5">
+                <Icon name="mail" className="text-neutral-secondary size-5" />
+                Email
+              </span>
+            </ProfileRow>
+
+            {/* FR-049 — `Security`, once, everywhere. The composed frames say `safety`; the card
+                itself says `Security`, and one label site-wide is the requirement. */}
+            <ProfileRow label="Security">
+              <Link href="/forgot-password">change password</Link>
+            </ProfileRow>
+          </dl>
+
+          <div className="mt-7.5">
+            <SignOutButton />
+          </div>
         </div>
       </div>
     </Container>
