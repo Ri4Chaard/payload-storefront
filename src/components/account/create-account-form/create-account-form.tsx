@@ -19,9 +19,10 @@ import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schema
  * consent has to be asked for rather than assumed; the box is unticked and registration succeeds
  * whether or not it is touched (FR-036, FR-036a). Recorded as design defect 5 in the spec.
  *
- * **The consent control is drawn only when the shop does marketing at all.** `marketingEnabled`
- * in Account settings turns it off, and the form then submits an unticked value — which is what an
- * untouched box submits, so the action needs no matching branch (FR-036a).
+ * **It is always drawn.** An Account settings switch used to hide it, and it is gone: the only
+ * correct setting of that switch was on. Turning it off cost the shop nothing visible and quietly
+ * stopped asking a question that cannot be asked again later for that registration — and an
+ * unticked box is already harmless, which is what FR-036a is for.
  *
  * **Validation is `createAccountSchema`, and the server runs the same one.** The browser's copy
  * exists so a mistyped confirmation is caught without a round trip; it is not a security boundary,
@@ -39,12 +40,7 @@ const ERRORS: Record<string, string> = {
   createPasswordTooWeak: 'Use at least 8 characters, and avoid a password you use elsewhere.',
 }
 
-export interface CreateAccountFormProps {
-  /** From `getAccountSettings()`. When false the consent checkbox is not rendered. */
-  marketingEnabled: boolean
-}
-
-export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) {
+export function CreateAccountForm() {
   const router = useRouter()
 
   const form = useForm<CreateAccountValues>({
@@ -104,12 +100,10 @@ export function CreateAccountForm({ marketingEnabled }: CreateAccountFormProps) 
         error={resolve(errors.confirmPassword?.message)}
       />
 
-      {marketingEnabled ? (
-        <Checkbox
-          {...form.register('marketingConsent')}
-          label="Email me occasional news and offers."
-        />
-      ) : null}
+      <Checkbox
+        {...form.register('marketingConsent')}
+        label="Email me occasional news and offers."
+      />
 
       {/* Only failures that belong to no single field, so nothing is said twice. */}
       {errors.root ? (

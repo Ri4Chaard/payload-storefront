@@ -21,14 +21,6 @@ describe('resolveAccountSettings', () => {
     expect(settings.shippingCountries).toEqual([])
   })
 
-  it('reads an unsaved global as asking for consent, not as declining to', () => {
-    // The field's default is on. Absent must not be read as off, or turning marketing on would
-    // require an admin to visit a page they have no reason to know exists.
-    expect(resolveAccountSettings({}).marketingEnabled).toBe(true)
-    expect(resolveAccountSettings({ marketingEnabled: null }).marketingEnabled).toBe(true)
-    expect(resolveAccountSettings({ marketingEnabled: false }).marketingEnabled).toBe(false)
-  })
-
   it('keeps a saved country and a saved list', () => {
     const settings = resolveAccountSettings({
       defaultCountry: 'KZ',

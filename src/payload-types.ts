@@ -2077,10 +2077,6 @@ export interface AccountSetting {
         | 'ZW'
       )[]
     | null;
-  /**
-   * When off, the consent checkbox is not drawn on the registration form and nothing is synced to Resend. Turn it off until an audience exists — an unticked box that leads nowhere is worse than no box. It never affects transactional mail: verification codes and password-changed notices are sent regardless (FR-035).
-   */
-  marketingEnabled?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2106,7 +2102,6 @@ export interface ShopSelect<T extends boolean = true> {
 export interface AccountSettingsSelect<T extends boolean = true> {
   defaultCountry?: T;
   shippingCountries?: T;
-  marketingEnabled?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

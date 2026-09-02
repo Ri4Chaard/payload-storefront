@@ -232,19 +232,25 @@ later; the constants are simply right.
 What the copy global should have been. Three values, all of them decisions about the shop rather
 than sentences about a screen, grouped into two tabs under **Shop** beside **Shop settings**.
 
-| Tab | Field | Holds |
-| --- | --- | --- |
-| Addresses | `defaultCountry` | Pre-selected when a customer adds an address (FR-030, R6). `NOT NULL`, defaults to `AE` |
-| Addresses | `shippingCountries` | Which countries the form offers. Empty means all |
-| Marketing | `marketingEnabled` | Whether the registration form asks for consent at all |
+| Field | Holds |
+| --- | --- |
+| `defaultCountry` | Pre-selected when a customer adds an address (FR-030, R6). `NOT NULL`, defaults to `AE` |
+| `shippingCountries` | Which countries the form offers. Empty means all |
+
+**`marketingEnabled` was here and has been dropped** (migration
+`20260902_112639_drop_marketing_enabled`). It decided whether the registration form drew a consent
+checkbox at all, and only one of its settings was ever right: consent is always asked for, always
+unticked, never a condition of registering. Turning it off looked free and instead stopped asking a
+question that cannot be put to that customer again for that registration. The tabs went with it —
+one group does not need them.
 
 **Narrowing `shippingCountries` cannot invalidate stored data.** It changes what the form *offers*;
 the column keeps the full ISO enum, so an address already saved in a country later removed from the
 list stays valid rather than becoming unsaveable. Same widening argument as `addresses.country`,
 applied in the one direction that is safe.
 
-**`marketingEnabled` never touches transactional mail.** Verification codes and password-changed
-notices are sent regardless — FR-035 is a property of the module split (R2), not of this flag.
+**Marketing preferences never touch transactional mail.** Verification codes and password-changed
+notices are sent regardless — FR-035 is a property of the module split (R2), not of any flag.
 
 **Read through `resolveAccountSettings`**, never directly: every field on the generated type is
 nullable, because Payload cannot promise the row exists before anyone saves it. The fallbacks are

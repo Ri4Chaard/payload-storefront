@@ -1,1 +1,1 @@
-export { CreateAccountForm, type CreateAccountFormProps } from './create-account-form'
+export { CreateAccountForm } from './create-account-form'

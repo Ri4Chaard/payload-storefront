@@ -18,8 +18,6 @@ import { DEFAULT_COUNTRY, isCountryCode, type CountryCode } from '@/lib/countrie
 export interface AccountSettings {
   /** Pre-selected in the address form. Falls back to the code default when unset (FR-030). */
   defaultCountry: CountryCode
-  /** Whether the registration form asks for marketing consent at all. */
-  marketingEnabled: boolean
   /** Empty means every country. Never excludes the default, which would be unofferable. */
   shippingCountries: CountryCode[]
 }
@@ -27,7 +25,6 @@ export interface AccountSettings {
 /** The shape this needs out of the global, kept structural so the generated type is not imported. */
 interface RawSettings {
   defaultCountry?: null | string
-  marketingEnabled?: boolean | null
   shippingCountries?: null | string[]
 }
 
@@ -44,9 +41,6 @@ export function resolveAccountSettings(doc: RawSettings): AccountSettings {
 
   return {
     defaultCountry,
-    // Absent rather than false is the state of a global nobody has saved yet, and the field's
-    // default is on — so an unsaved global must read as on, not as off.
-    marketingEnabled: doc.marketingEnabled !== false,
     /**
      * A narrowed list that somehow omits the default would render a form whose pre-selected value
      * is not among its options — a control invalid the moment it appears. Cheaper to make that

@@ -4,7 +4,6 @@ import React from 'react'
 import { AuthCard } from '@/components/account/auth-card'
 import { CreateAccountForm } from '@/components/account/create-account-form'
 import { Link } from '@/components/ui/link'
-import { getAccountSettings } from '@/lib/auth/settings'
 
 /**
  * Node `428:11594` (spec 004, US1).
@@ -17,9 +16,7 @@ export const metadata: Metadata = {
   robots: { follow: false, index: false },
 }
 
-export default async function CreateAccountPage() {
-  const settings = await getAccountSettings()
-
+export default function CreateAccountPage() {
   return (
     <AuthCard
       title="CREATE ACCOUNT"
@@ -30,7 +27,7 @@ export default async function CreateAccountPage() {
         </>
       }
     >
-      <CreateAccountForm marketingEnabled={settings.marketingEnabled} />
+      <CreateAccountForm />
     </AuthCard>
   )
 }
