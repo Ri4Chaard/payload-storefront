@@ -26,7 +26,7 @@ An online jewelry store with an integrated content platform, built on Payload CM
 ```bash
 pnpm install
 docker compose --profile local up -d   # Postgres on 127.0.0.1:5432
-cp .env.example .env                   # then fill in PAYLOAD_SECRET
+cp .env.example .env                   # then fill in PAYLOAD_SECRET and RESEND_API_KEY
 pnpm payload migrate
 pnpm build:tokens
 pnpm seed                              # a development catalogue — see below
@@ -39,6 +39,28 @@ pnpm dev
 
 Create the first admin user at `/admin` on the first visit; Payload asks for one when the collection
 is empty.
+
+### Email
+
+Customer accounts do not work without a mail transport — registration cannot finish if the
+verification code never arrives — so `RESEND_API_KEY` and `EMAIL_FROM_ADDRESS` are **required** and
+the app refuses to start naming whichever is missing.
+
+Locally you can leave `EMAIL_FROM_ADDRESS=onboarding@resend.dev`, which Resend accepts without a
+verified domain. It only delivers to the address that owns the API key — enough to run every flow on
+your own machine, and **not** enough for a shared environment, where every tester would receive
+nobody's codes.
+
+Three optional variables, all documented in `.env.example`:
+
+| Variable | What it does |
+| --- | --- |
+| `EMAIL_FROM_NAME` | The name beside the address in the inbox. Defaults to `Aurum`. Set it to `Aurum (staging)` on staging so a stray message is obvious. |
+| `EMAIL_OVERRIDE_RECIPIENT` | Redirects every message to one address. **Must be unset in production.** Set it on any environment whose database may hold real customer addresses — a restored production dump on staging is the usual way a test run mails real people. |
+| `RESEND_AUDIENCE_ID` | The Resend audience that marketing consent is mirrored into. Unset is supported: consent is still recorded and shown, Payload remains the source of truth, and there is simply nowhere to mirror it to. Point each environment at its **own** audience — the override variable above does not protect marketing sends, because those are composed and sent from Resend and never pass through this application. |
+
+`EMAIL_TRANSPORT=log` swaps the transport for one that writes recipients and subjects to the log and
+sends nothing. The test runners set it themselves; do not set it anywhere expected to mail anybody.
 
 ## The storefront
 
@@ -113,7 +135,8 @@ that is provisioned separately.
 
 ```bash
 # on the VPS, in a clone of this repository
-cp .env.example .env          # DATABASE_URI, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL
+cp .env.example .env          # DATABASE_URI, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL,
+                              # RESEND_API_KEY, EMAIL_FROM_ADDRESS
 docker compose --profile dev up -d --build
 ```
 
@@ -130,6 +153,9 @@ Three things to know:
   compose file maps it to the host gateway.
 - The app publishes `${APP_PORT:-3000}` for a reverse proxy (nginx, Caddy) to terminate TLS in
   front of. Uploads live in the `aurum-media` volume.
+- The nightly cleanup of unverified accounts and spent codes runs **inside this container**, on
+  Payload's own job queue — there is no cron service to install. It stops running on a serverless
+  host, silently, because a function that only exists during a request cannot hold a timer.
 
 ## Commands
 

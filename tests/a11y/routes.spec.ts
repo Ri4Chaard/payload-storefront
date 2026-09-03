@@ -178,7 +178,7 @@ for (const { name, width } of WIDTHS) {
     const payload = await getPayload({ config })
     const email = `a11y-${Date.now()}-${name}@a11y.aurum-testing.dev`
 
-    await payload.create({
+    const customer = await payload.create({
       collection: 'customers',
       data: { email, firstName: 'Ada', lastName: 'Lovelace', password: 'a-long-enough-password' },
       disableVerificationEmail: true,
@@ -249,6 +249,43 @@ for (const { name, width } of WIDTHS) {
       .analyze()
 
     expect(address.violations, JSON.stringify(address.violations, null, 2)).toEqual([])
+
+    /**
+     * …and the fourth modal, the delete confirmation (004/T566).
+     *
+     * It is the smallest of the four and was the one missing from this sweep, which is the usual
+     * shape of the gap: a dialog with two buttons and one sentence looks like it cannot be got
+     * wrong. It can — it is the only one that names a row's contents in its prose, so it is the one
+     * whose accessible name is assembled rather than written.
+     *
+     * The address has to exist before the row can offer a delete, so it is created here rather than
+     * through the form — this is an accessibility sweep, not a test of saving.
+     */
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+
+    await payload.create({
+      collection: 'addresses',
+      data: {
+        addressLine1: 'Mangilik el 22',
+        city: 'Astana',
+        country: 'KZ',
+        customer: customer.id,
+        postalCode: '010042',
+      },
+      overrideAccess: true,
+    })
+
+    await page.reload()
+    await expect(page).toHaveTitle(/My account/)
+    await page.getByRole('button', { name: /^Delete address:/ }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    const remove = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(remove.violations, JSON.stringify(remove.violations, null, 2)).toEqual([])
 
     await payload.delete({
       collection: 'customers',

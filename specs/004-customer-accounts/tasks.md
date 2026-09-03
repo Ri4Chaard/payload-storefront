@@ -486,35 +486,84 @@ switch the default, delete one.
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T560 Implement the scheduled purge in `src/jobs/purge-unverified.ts` — unverified accounts past
+- [X] T560 Implement the scheduled purge in `src/jobs/purge-accounts.ts` — unverified accounts past
       the age in T404, and terminal code rows older than 24 hours (FR-041, FR-040). Payload's own job
-      queue with a `schedule`; no new service (R15)
-- [ ] T561 [P] Register the job and its cron in `src/payload.config.ts`
-- [ ] T562 [P] Confirm no password, code or session token reaches a log, an analytics event or an
-      error report — inspect a full journey's output (FR-038, SC-014)
-- [ ] T563 [P] Responsive pass at 1024, 768, 390 and 320 for all six routes and all four modals. The
-      design has **no frames below 1920**, so this is derivation from the existing breakpoints, not
-      transcription (FR-042)
-- [ ] T564 [P] Reduced-motion pass — every transition suppressed, including the modal entrance
-- [ ] T565 [P] Full state set audit on every new interactive element: default, hover, focus-visible,
-      active, disabled, loading (Constitution III)
-- [ ] T566 [P] Run `pnpm test:a11y` across the new routes and all four modals; fix to WCAG 2.2 AA
-- [ ] T567 [P] Confirm no customer-visible string is duplicated across two components, and that
-      every message key an action can return has a sentence in the screen that renders it — a key
-      with no entry falls back to showing the key, which is loud in review and invisible in passing
-- [ ] T568 Verify the JS budget: every new route under 200KB gzipped initial JS (Constitution V)
-- [ ] T570 Editorial verification in the Payload admin, per Constitution: change the default country
-      in **Account settings** and confirm the address form opens on it with no deploy; confirm there
-      is no **Account** copy global (R11); confirm `verification-codes`
-      is absent from the navigation and refuses a direct URL; confirm the customer row shows the name
-      and marketing fields with the consent timestamp read-only
-- [ ] T571 [P] Update `README.md` with the two new environment variables and the local
-      `onboarding@resend.dev` note
-- [ ] T572 [P] Delete the "deliberately absent" paragraph from `src/collections/customers.ts` if T416
-      left it, and confirm the doc comment describes what the collection now is
-- [ ] T575 Run the whole of [quickstart.md](./quickstart.md), including the **rollback rehearsal with
-      a Kazakhstan address saved**, and the full gate set: `pnpm lint`, `typecheck`, `check:naming`,
-      `check:tokens`, `check:stories`, `test`, `test:integration`, `test:e2e`, `test:a11y`
+      queue with a `schedule`; no new service (R15). *Named `purge-accounts` rather than
+      `purge-unverified` — it does two deletions, and the second one is not about verification.*
+      Covered by `tests/integration/purge-accounts.test.ts`, which puts a row that must SURVIVE
+      beside every row that must not: this is the only job that deletes customers, and a `where` one
+      operator too broad here fails silently
+- [X] T561 [P] Register the job and its cron in `src/payload.config.ts`. Two clocks: the task's own
+      `schedule` decides when a purge is enqueued (nightly 03:15), `autoRun` drains the `nightly`
+      queue every 15 minutes. Adds `payload_jobs*` tables — migration `20260903_074224_jobs_queue`
+- [X] T562 [P] Log-safety audit (FR-038, SC-014). Static: every `logger`/`console` call in `src/`
+      reviewed — all log a count, a status or an `err`, never a body. Dynamic: a full integration
+      journey and the running dev server's own log (`.next/dev/logs/next-development.log`, covering
+      the browser journeys) both grepped for six-digit codes, the test password, JWT-shaped strings,
+      32+ hex runs and the field names. **Zero hits in both**
+- [X] T563 [P] Responsive pass at 1024, 768, 390 and 320 (FR-042). **Found a real defect**: six 56px
+      OTP boxes and five 10px gaps need 386px, so both code screens overflowed a 320px viewport.
+      Fixed in `otp-input.tsx` — 40px boxes below `sm`, still clear of the 24px WCAG 2.2 target size.
+      Kept as `tests/e2e/responsive.spec.ts` rather than a one-off pass: a derivation from
+      breakpoints is right when written and wrong three commits later, and FR-042 had no other gate
+- [X] T564 [P] Reduced-motion pass — verified by computed style in the same spec, including the modal
+      entrance. The global rule in `styles.css` covers everything; the check is that it REACHES the
+      new components. *Note for whoever writes the next one: `test.use({ reducedMotion })` did not
+      apply, `page.emulateMedia` does, and the difference looks exactly like a broken global rule*
+- [X] T565 [P] Full state set audit (Constitution III). `focus-visible` is global
+      (`styles.css:44`), so the per-component classes are overrides rather than the only source —
+      that resolved the apparent gap on `Modal`'s close button. Three real omissions fixed:
+      `active:` on `ProfileRow`'s activate button and on the address-list icon buttons, and
+      `enabled:hover:` on the OTP boxes, matching `TextInput`'s border convention
+- [X] T566 [P] `pnpm test:a11y` across the new routes and **all four** modals — the delete
+      confirmation was missing from the sweep and is now in it. 47/47 in `routes.spec.ts`, 116/116
+      overall, zero violations
+- [~] T567 [P] Message keys: **passes**. Every key each action can return has a sentence in the
+      screen that renders it; the two screens that ignore the key entirely (`resend-code`, the
+      delete confirmation) render fixed prose, so `errorText`'s raw-key fallback is unreachable.
+      Duplicate copy: **13 customer-visible strings appear in more than one component** — one email
+      error in 4 screens, two password errors in 3 each, the five code sentences in both code
+      screens, and the lockout sentence in 2. **Left as they are**, because R11 decided exactly this
+      and reversed itself twice getting there: the words live beside the markup, and R11 names cases
+      where *sameness* is a security property rather than duplication to remove. Recorded rather
+      than silently ticked — the five code sentences shared by `verify-email-form` and
+      `reset-code-step` are the pair worth revisiting if a third code screen ever appears
+- [ ] T568 **FAILS, measured rather than estimated.** Budget is 200KB gzipped initial JS; the account
+      routes serve **265KB** (`/sign-in` 265.3, `/create-account` 265.9, `/verify-email` 267.0,
+      `/reset-password` 267.6, `/account` 265.3). Identical at `load` and at `networkidle`, stable
+      across three passes, so it is initial JS and not prefetch.
+      **The cause is not mainly this spec.** A 404 page carrying no application code already serves
+      **181KB** — the Next 16 + React 19 baseline is 90% of the budget before anything is written —
+      and the catalogue routes sit at 193KB, inside it only just. This spec adds ~84KB on top,
+      dominated by one 97.6KB gzipped chunk that is almost entirely **zod** (585 occurrences of the
+      name; `react-hook-form` is not in it). That is R16's shared-schema decision arriving on the
+      client, which is what makes the browser half of validation possible.
+      Not fixed here, because every route to it is larger than a polish task: `zod/mini` means
+      rewriting eleven schemas and `schemaFailure`; dropping client validation reverses R16; lazy
+      modals would rescue `/account` alone and leave the five auth routes over. **Needs a decision,
+      and the budget itself may be the thing that is wrong** — it has been at 96% since spec 003
+      without anyone noticing
+- [X] T570 Editorial verification, automated in `tests/e2e/admin-customer.spec.ts` rather than
+      recorded as an afternoon in the panel: `verification-codes` absent from the navigation AND its
+      API refusing with 403; no `account` copy global (404); the customer row showing first/last
+      name, the composed read-only `name`, the marketing checkbox and a disabled consent timestamp;
+      and the **Account settings** default country reaching the address modal with no deploy. The
+      last one mutates a shared global and restores it in a `finally` — safe only because nothing
+      else in `tests/` reads it, which the test says out loud
+- [X] T571 [P] `README.md` — a new **Email** section covering both required variables, the
+      `onboarding@resend.dev` limitation, and a table of the three optional ones. It records that
+      `EMAIL_OVERRIDE_RECIPIENT` does **not** protect marketing sends, because those are composed and
+      sent from Resend and never pass through this application, and that the nightly purge runs in
+      the app container and stops running on a serverless host
+- [X] T572 [P] Confirmed: `src/collections/customers.ts` no longer claims registration is
+      "deliberately absent". T416 rewrote it, and what remains absent — `phone`, a messenger handle —
+      is listed with the reason
+- [X] T575 Gate set green: `lint`, `typecheck`, `check:naming`, `check:stories`, `check:tokens`,
+      `check:contrast`, `check:styles`, `test`, `test:integration`, `test:e2e`, `test:a11y`.
+      **Rollback rehearsal done on a scratch database, not the dev one**: with a Kazakhstan address
+      saved, `migrate:down` refuses with the intended message and hint, rolls its own transaction
+      back, and repeats identically — it does not half-apply. Re-country the address and the same
+      rollback runs clean. The guard in `20260901_160441_customer_accounts` works as written
 
 ---
 

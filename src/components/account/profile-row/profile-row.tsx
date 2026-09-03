@@ -118,7 +118,7 @@ export function ProfileRow({
             aria-label={activateLabel}
             className={cn(
               'ease-standard flex w-full cursor-pointer gap-3 px-4 py-2.5 text-left',
-              'transition-colors duration-[var(--duration-fast)] hover:bg-black/5',
+              'transition-colors duration-[var(--duration-fast)] hover:bg-black/5 active:bg-black/10',
               'focus-visible:outline-primary-default focus-visible:outline-2 focus-visible:-outline-offset-2',
               items,
             )}

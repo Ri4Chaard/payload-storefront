@@ -30,6 +30,7 @@ import {
 } from './fields/address-hooks'
 import { AccountSettings } from './globals/account-settings'
 import { Shop } from './globals/shop'
+import { purgeAccountsTask } from './jobs/purge-accounts'
 import {
   adminOnlyFieldAccess,
   adminOrPublishedStatus,
@@ -205,6 +206,33 @@ export default buildConfig({
           // cannot mail those customers. See src/env.ts.
           ...(emailOverrideRecipient ? { overrideRecipientAddress: emailOverrideRecipient } : {}),
         }),
+
+  /**
+   * The nightly cleanup (spec 004, FR-040, FR-041, research R15).
+   *
+   * **`autoRun` makes this process the scheduler**, which is the whole reason no cron container is
+   * needed — and the reason the `@remark` on `autoRun` in Payload's own types matters here: it says
+   * not to use it on serverless platforms, because a function that only exists during a request
+   * cannot hold a timer. This deploys as a long-running container (`docker-compose.yml`), so it
+   * can. Moving to a serverless host means moving this to an external scheduler hitting the jobs
+   * endpoint, and it will fail silently rather than loudly if that is forgotten — the jobs simply
+   * never run.
+   *
+   * The cron here is the RUNNER — it drains the queue every fifteen minutes. What decides when a
+   * purge is enqueued is the `schedule` on the task itself. Two different clocks on purpose: the
+   * task wants to run nightly, and the runner wants to be frequent enough that a job queued by
+   * anything else is not left sitting until tomorrow.
+   *
+   * Scoped to the `nightly` queue rather than `allQueues`, so this stays the schedule for cleanup
+   * work and does not silently become the runner for every job a later feature adds.
+   */
+  jobs: {
+    tasks: [purgeAccountsTask],
+    autoRun: [{ cron: '0 0/15 * * * *', queue: 'nightly' }],
+    // Nothing reads a completed purge back. Keeping every run forever would make the jobs table the
+    // one thing in this system that grows without bound, which is a poor look on a cleanup job.
+    deleteJobOnComplete: true,
+  },
 
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

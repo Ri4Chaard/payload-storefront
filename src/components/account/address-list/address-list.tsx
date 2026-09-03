@@ -177,7 +177,7 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
           type="button"
           onClick={(event) => openForm(null, event)}
           aria-label="Add address"
-          className={cn(ICON_BUTTON, 'text-neutral-secondary hover:text-neutral-primary')}
+          className={cn(ICON_BUTTON, 'text-neutral-secondary hover:text-neutral-primary active:text-primary-default')}
         >
           <Icon name="plus" className="size-5" />
         </button>
@@ -223,7 +223,7 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
                 type="button"
                 onClick={(event) => openConfirm(address, event)}
                 aria-label={`Delete address: ${summary}`}
-                className={cn(ICON_BUTTON, 'text-neutral-secondary hover:text-status-error-text')}
+                className={cn(ICON_BUTTON, 'text-neutral-secondary hover:text-status-error-text active:text-status-error-default')}
               >
                 <Icon name="trash" className="size-5" />
               </button>

@@ -193,7 +193,7 @@ export function OtpInput({
         role="group"
         aria-labelledby={labelId}
         aria-describedby={error ? errorId : undefined}
-        className="flex items-center justify-center gap-2.5"
+        className="flex items-center justify-center gap-1.5 sm:gap-2.5"
         onBlur={(event) => {
           // `relatedTarget` is whatever is receiving focus. If it is one of our own boxes the
           // customer has not left the control, they have moved along it.
@@ -233,11 +233,22 @@ export function OtpInput({
             onKeyDown={handleKeyDown(index)}
             onFocus={(event) => event.target.select()}
             className={cn(
-              'text-heading-2 text-neutral-primary size-14 text-center',
+              // FR-042. Six 56px boxes and five 10px gaps need 386px of a 320px screen, so the
+              // narrowest phones got a row that ran off the side — the design has no frame below
+              // 1920 and this is the width where that shows. Shrunk rather than wrapped: two rows
+              // of three stops reading as one code. 40px still clears the 24px minimum target size
+              // WCAG 2.2 AA asks for, and the drawn size returns at `sm`. This is a width
+              // adaptation, not a second variant — FR-048 is about there being one box, and there
+              // still is.
+              'text-heading-3 sm:text-heading-2 text-neutral-primary size-10 sm:size-14 text-center',
               'bg-background-container border transition-colors',
               'focus-visible:border-primary-default focus-visible:ring-primary-default/30 focus-visible:ring-2 focus-visible:outline-none',
               'disabled:text-neutral-secondary disabled:bg-background-bg disabled:cursor-not-allowed',
-              error ? 'border-status-error-default' : 'border-black/10',
+              // `enabled:` so a disabled box does not offer a border change it will not honour.
+              // Same convention as `TextInput`, which is the control these six are pretending to be.
+              error
+                ? 'border-status-error-default'
+                : 'enabled:hover:border-neutral-primary border-black/10',
             )}
           />
         ))}
