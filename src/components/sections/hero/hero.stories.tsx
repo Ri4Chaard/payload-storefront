@@ -5,8 +5,12 @@ import { homeContent } from '@/mocks'
 import { Hero } from './hero'
 
 /**
- * Nodes 138:309, 440:12503, 440:13458. One component, three drawn heights — resize rather than
- * looking for three components.
+ * Nodes 138:309, 440:12503, 440:13458. One component that is as tall as the screen it is on, so
+ * resize the canvas rather than looking for three components.
+ *
+ * The band subtracts the banner and header above it (`--site-chrome`), and neither is on the
+ * Storybook canvas — so every story here sits that much short of the frame. The proportion to judge
+ * is the one in the app.
  */
 const meta = {
   title: 'Sections/Hero',
@@ -18,13 +22,13 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Node 138:309 — 950px tall, text against the lower edge. */
+/** Node 138:309 — the desktop proportion, text against the lower edge. */
 export const Desktop: Story = {}
 
-/** Node 440:12503 — the tall 1226px frame. */
+/** Node 440:12503 — the 1024-wide frame, drawn 1226px tall and now as tall as the viewport. */
 export const Tablet: Story = { globals: { viewport: { value: 'lg' } } }
 
-/** Node 440:13458 — 754px, with the sentence a step smaller. */
+/** Node 440:13458 — the phone, with the sentence a step smaller. */
 export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 
 /**
@@ -34,7 +38,10 @@ export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
  */
 export const WithoutScrim: Story = { args: { scrim: false } }
 
-/** A headline and a sentence longer than the drawing's, to prove the band grows rather than clips. */
+/**
+ * A headline and a sentence longer than the drawing's. The band is a *minimum* height, so this is
+ * what proves it grows past the screen rather than clipping — resize the canvas short to see it.
+ */
 export const WithLongerCopy: Story = {
   args: {
     headline: 'The beauty of lab-grown diamonds, cut and certified in the Emirates',

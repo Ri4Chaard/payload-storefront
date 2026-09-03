@@ -48,6 +48,35 @@
 }
 
 /*
+ * How much of the viewport is spent before `<main>` starts: the contact banner, which is hidden
+ * below `md`, plus the header. A band that means to fill the first screen — the home hero — sizes
+ * itself against `100svh` less this, so the two numbers are read from the components that set them
+ * (`ContactBanner`, `Header`) once, here, rather than copied into every such band.
+ *
+ * A custom property rather than three arbitrary values inside the band, because it is a fact about
+ * the page chrome and not about any one section: change the header's height and every band that
+ * fills a screen follows.
+ */
+:root {
+  /* Header only — the banner is `hidden` below md. */
+  --site-chrome: 3.75rem;
+}
+
+@media (width >= theme(--breakpoint-md)) {
+  :root {
+    /* Banner 60px + header 70px. */
+    --site-chrome: 8.125rem;
+  }
+}
+
+@media (width >= theme(--breakpoint-xl)) {
+  :root {
+    /* Banner 70px + header 70px. */
+    --site-chrome: 8.75rem;
+  }
+}
+
+/*
  * The brand scrollbar (Figma node 301:5934), applied to the native scrollbar rather than a
  * JavaScript reimplementation — see src/components/ui/scroll-area/scroll-area.tsx for why.
  *

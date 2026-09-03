@@ -12,11 +12,18 @@ import { cn } from '@/lib/cn'
  * cheaper to export the drawn frame as one picture — the design reads as a poster — and it would
  * have cost the page its `h1`, its translations, its selectable text and its search result.
  *
- * **Heights are drawn, and the tablet one is drawn tall.** 754px, then 1226px, then 950px. The
- * 1226 arrives at `lg` rather than `md` on purpose: it comes from the 1024-wide frame, where it is
- * about 90% of an iPad's height, and applying it from 768px instead would put a hero and a fifth of
- * a screen more between a visitor and everything below it. Between 768 and 1023 the phone height
- * holds, which is the drawn proportion for the width.
+ * **The band is the first screen, not a drawn number.** The frames give three heights — 754px,
+ * 1226px, 950px — and those are three guesses at a viewport rather than three facts about the
+ * design: the tablet one is about 90% of an iPad's height, and on any shorter screen it put a hero
+ * and a fifth of another between a visitor and everything below it. What all three are reaching for
+ * is "this band is the screen", so that is what it says — `100svh` less the banner and the header
+ * standing above `<main>` (`--site-chrome`, set in the storefront sheet). The whole hero is visible
+ * on arrival and the next band is one scroll away at every width, including the ones nobody drew.
+ *
+ * `svh` and not `dvh`: on a phone `dvh` re-measures as the browser's chrome retracts, so the band
+ * would resize under the reader's thumb mid-scroll. The small viewport is the one that is always
+ * true. And it is a *minimum* — a headline longer than the drawn one makes the band taller rather
+ * than being clipped by the `overflow-hidden` that keeps the photograph in bounds.
  *
  * **The scrim defaults on.** White text over a photograph is a contrast question no automated check
  * can answer, because contrast cannot be measured against an image — the same reasoning already
@@ -41,7 +48,7 @@ export function Hero({ headline, lede, cta, image, scrim = true, className, ...p
     <section
       className={cn(
         'relative isolate flex flex-col items-center justify-end overflow-hidden',
-        'h-188.5 lg:h-306.5 xl:h-237.5',
+        'min-h-[calc(100svh-var(--site-chrome,0px))]',
         'gap-5 px-4 pb-7.5 md:gap-7.5 md:px-6 md:pb-12.5',
         className,
       )}
