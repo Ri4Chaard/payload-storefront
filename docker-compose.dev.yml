@@ -25,10 +25,25 @@ services:
     restart: unless-stopped
     ports:
       - '127.0.0.1:3000:3000'
+    # This block is an allowlist, not a pass-through: compose reads the VPS's .env to interpolate
+    # `${...}` here, and a variable this file never names reaches no container. It must list
+    # everything src/env.ts marks REQUIRED, or the container throws on the first import — which is
+    # how spec 004's two mail variables failed `payload migrate` on dev while being set in .env.
     environment:
       DATABASE_URI: postgres://${POSTGRES_USER:-aurum}:${POSTGRES_PASSWORD:-aurum}@db:5432/${POSTGRES_DB:-aurum}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+      # Transactional mail (spec 004) — registration cannot complete without a verification code.
+      # Guarded, so a missing one stops `docker compose up` by name and the deploy job fails there
+      # (script_stop: true) rather than leaving a container restart-looping on a thrown import.
+      RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY in the VPS .env — a Resend sending key}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?set EMAIL_FROM_ADDRESS in the VPS .env — must be on a domain verified in Resend}
+      # Optional; empty is read as unset by the code, so `:-` rather than a guard. On dev,
+      # EMAIL_OVERRIDE_RECIPIENT is worth setting: it sends every message to one address instead of
+      # to whatever customer rows this database happens to hold.
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
+      EMAIL_OVERRIDE_RECIPIENT: ${EMAIL_OVERRIDE_RECIPIENT:-}
+      RESEND_AUDIENCE_ID: ${RESEND_AUDIENCE_ID:-}
     volumes:
       - aurum-dev-media:/app/media
     depends_on:
