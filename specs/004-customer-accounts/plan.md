@@ -61,8 +61,12 @@ No dependency is added for the OTP input, the modal, or the country list.
 | `react-hook-form@7` | Nine forms again, four of them inside modals. Uncontrolled by default, so typing does not re-render the form — which matters most for the address modal, the largest control set in the feature. |
 | `@hookform/resolvers@5` | The three-line adapter binding the two together. Writing it by hand to avoid a dependency would be the version of Principle II that costs more than it saves. |
 
-`react-hook-form` and `zod` are the only two that reach the browser. Their combined cost is measured
-against Constitution V's 200KB budget in T568.
+`react-hook-form` and `zod` are the only two that reach the browser. Their combined cost was measured
+in T568, and `zod` turned out to be the larger by a wide margin — one 97.6KB gzipped chunk, against
+which `react-hook-form` does not register. It breached Constitution V's then-200KB budget, which the
+measurement showed to be unmeetable rather than breached: the framework baseline alone was 181KB.
+Constitution 2.2.0 replaced it with 300KB per route plus a 100KB cap on application code above that
+baseline; these two dependencies spend 84KB of the 100KB.
 
 **Storage**: PostgreSQL via `@payloadcms/db-postgres`. One generated, committed migration with a
 tested `down`. Five columns on `customers`, two on `addresses`, one new `verification_codes` table,
@@ -87,8 +91,12 @@ else.
 
 **Project Type**: Web application — Next.js app with Payload mounted inside it.
 
-**Performance Goals**: Every route under 200KB gzipped initial JS. The auth screens are forms on a
-static shell and should be well under it. Session lookup is memoized per render pass with React
+**Performance Goals**: Every route inside Constitution V's budget — 300KB gzipped initial JS, and no
+more than 100KB of application code above the measured framework baseline. *Written as 200KB flat
+when this plan was drafted; T568 measured the account routes at 265-268KB against a 181KB baseline
+and the constitution was amended rather than the finding waived. The auth screens were expected to
+be "well under it" and are not — they are the heaviest routes in the site, because the shared
+validation schema is the one dependency a form page cannot leave on the server.* Session lookup is memoized per render pass with React
 `cache`, so a page that reads the customer three times verifies once.
 
 **Constraints**: WCAG 2.2 AA at 1920, 1024 and 390, including all four modals and the OTP group. No

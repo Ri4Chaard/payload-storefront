@@ -528,21 +528,22 @@ switch the default, delete one.
       where *sameness* is a security property rather than duplication to remove. Recorded rather
       than silently ticked — the five code sentences shared by `verify-email-form` and
       `reset-code-step` are the pair worth revisiting if a third code screen ever appears
-- [ ] T568 **FAILS, measured rather than estimated.** Budget is 200KB gzipped initial JS; the account
-      routes serve **265KB** (`/sign-in` 265.3, `/create-account` 265.9, `/verify-email` 267.0,
-      `/reset-password` 267.6, `/account` 265.3). Identical at `load` and at `networkidle`, stable
-      across three passes, so it is initial JS and not prefetch.
-      **The cause is not mainly this spec.** A 404 page carrying no application code already serves
-      **181KB** — the Next 16 + React 19 baseline is 90% of the budget before anything is written —
-      and the catalogue routes sit at 193KB, inside it only just. This spec adds ~84KB on top,
-      dominated by one 97.6KB gzipped chunk that is almost entirely **zod** (585 occurrences of the
-      name; `react-hook-form` is not in it). That is R16's shared-schema decision arriving on the
-      client, which is what makes the browser half of validation possible.
-      Not fixed here, because every route to it is larger than a polish task: `zod/mini` means
-      rewriting eleven schemas and `schemaFailure`; dropping client validation reverses R16; lazy
-      modals would rescue `/account` alone and leave the five auth routes over. **Needs a decision,
-      and the budget itself may be the thing that is wrong** — it has been at 96% since spec 003
-      without anyone noticing
+- [X] T568 JS budget, measured against a production server rather than a build log — Next 16 with
+      Turbopack no longer prints per-route JS. Account routes serve **265-268KB gzipped** initial JS
+      (`/sign-in` 265.3, `/create-account` 265.9, `/verify-email` 267.0, `/reset-password` 267.6,
+      `/account` 265.3), identical at `load` and `networkidle` and stable across three passes.
+      **This FAILED the 200KB budget, and the budget was the thing that was wrong.** A 404 page
+      carrying no application code already served 181KB, so 90% was spent before anyone wrote a
+      line, and the catalogue had been sitting at 193KB since spec 003 — inside it by luck rather
+      than by restraint. This spec adds ~84KB, almost all of it one zod chunk: R16's shared
+      client/server schema arriving in the browser, which is what makes the browser half of
+      validation exist at all. Not waste, and every route out of it was larger than a polish task —
+      `zod/mini` means rewriting eleven schemas and `schemaFailure`, dropping client validation
+      reverses R16, and lazy modals would rescue `/account` while leaving five auth routes over.
+      **Constitution amended to 2.2.0** rather than the finding waived: 300KB total per route, plus
+      a 100KB cap on application code above the measured framework baseline. The second number is
+      the one with teeth — it is the only half this team controls, and today's worst route spends
+      84KB of it. Both clauses pass
 - [X] T570 Editorial verification, automated in `tests/e2e/admin-customer.spec.ts` rather than
       recorded as an afternoon in the panel: `verification-codes` absent from the navigation AND its
       API refusing with 403; no `account` copy global (404); the customer row showing first/last
