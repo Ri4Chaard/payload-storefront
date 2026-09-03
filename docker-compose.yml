@@ -13,8 +13,15 @@
 # that has left a laptop, and it runs the production build.
 #
 # Variables come from .env, which docker compose reads from this directory. `local` needs nothing
-# in it; `dev` requires DATABASE_URI, PAYLOAD_SECRET and NEXT_PUBLIC_SERVER_URL, and refuses to
-# start without them.
+# in it; `dev` requires everything `src/env.ts` lists as REQUIRED, and refuses to start without
+# them.
+#
+# **`environment:` below is an allowlist, not a pass-through.** Compose reads .env to interpolate
+# `${...}` *in this file*; a variable this file never names is read by nobody and reaches no
+# container. That is how spec 004's two mail variables came to be set in a deployment's .env and
+# still missing inside the container, which failed the deploy at `payload migrate` — src/env.ts
+# throws on the missing name, and there is no .env in the image for Payload's loader to fall back
+# to (.dockerignore, deliberately). A variable added to src/env.ts needs a line here too.
 
 services:
   db:
@@ -60,6 +67,20 @@ services:
       DATABASE_URI: '${DATABASE_URI:?set DATABASE_URI in .env — the deployment database}'
       PAYLOAD_SECRET: '${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env — generate one with openssl rand -base64 32}'
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+      # Transactional mail (spec 004). Required, because registration cannot complete without a
+      # verification code and a verification code cannot be sent without these. Guarded like the two
+      # above so that a deployment missing one is refused by `docker compose up`, by name, instead of
+      # by the container after an image has been built and a migration half-attempted.
+      RESEND_API_KEY: '${RESEND_API_KEY:?set RESEND_API_KEY in .env — a Resend sending key}'
+      EMAIL_FROM_ADDRESS: '${EMAIL_FROM_ADDRESS:?set EMAIL_FROM_ADDRESS in .env — must be on a domain verified in Resend, or sends are rejected}'
+      # Optional, and unset is a supported state for all three: the code reads them with `?.trim()`
+      # and treats empty as absent, so `:-` passes an empty string rather than failing the deploy.
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
+      EMAIL_OVERRIDE_RECIPIENT: ${EMAIL_OVERRIDE_RECIPIENT:-}
+      RESEND_AUDIENCE_ID: ${RESEND_AUDIENCE_ID:-}
+      # EMAIL_TRANSPORT is deliberately NOT forwarded. It belongs to the test runners, and `log`
+      # silently stops every message — a stray copy in a deployment's .env would turn a shop that
+      # cannot send verification codes into a shop that looks like it is working.
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     ports:
