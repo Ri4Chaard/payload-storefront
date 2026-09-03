@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { composeCustomerName, stampMarketingConsent } from '@/collections/customer-hooks'
+import {
+  composeCustomerName,
+  stampMarketingConsent,
+  syncMarketingChoice,
+} from '@/collections/customer-hooks'
 import { isAdmin, publicAccess } from '@/lib/access'
 import { generateResetEmailHTML, generateResetEmailSubject } from '@/lib/auth/reset-email'
 import {
@@ -98,6 +102,12 @@ export const Customers: CollectionConfig = {
   },
   hooks: {
     beforeChange: [composeCustomerName, stampMarketingConsent],
+    /**
+     * `afterChange`, so the mirror only ever reflects a write that actually landed. Running it
+     * before would announce a consent change to Resend that a later validation error could still
+     * roll back.
+     */
+    afterChange: [syncMarketingChoice],
   },
   fields: [
     {

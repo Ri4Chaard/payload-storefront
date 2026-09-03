@@ -433,18 +433,30 @@ switch the default, delete one.
 
 **Independent Test**: Toggle, reload, confirm persistence; toggle back.
 
-- [ ] T535 [P] [US6] Integration test in `tests/integration/us6-marketing.test.ts` — the consent
+- [X] T534 [US6] Honour `EMAIL_TRANSPORT=log` in `src/lib/email/marketing.ts`. **Added during this
+      phase, and it blocks T537.** The variable swaps Payload's email ADAPTER, which is why it covers
+      every transactional send; this module is a bare `fetch` to Resend carrying the live API key, so
+      the adapter never sees it. Wiring the sync to a hook without this makes every test that
+      registers a customer write a throwaway address into whatever audience `RESEND_AUDIENCE_ID`
+      names — harmless only while that variable is unset, which is one `.env` line from a marketing
+      list full of test rows
+- [X] T535 [P] [US6] Integration test in `tests/integration/us6-marketing.test.ts` — the consent
       timestamp is stamped by the hook and **cannot** be set from a form post; a customer with
       marketing off still receives a reset code (FR-035)
-- [ ] T536 [US6] Implement `setMarketingEmail` in `src/lib/auth/actions.ts` — the action writes only `marketingEmail`; the
+- [X] T536 [US6] Implement `setMarketingEmail` in `src/lib/auth/actions.ts` — the action writes only `marketingEmail`; the
       timestamp and source are the hook's from T418
-- [ ] T537 [US6] Call `syncMarketingContact` from an `afterChange` hook in `src/collections/customers.ts` on a consent
-      change and on first verification. **A sync failure is logged and swallowed** — a consent change
-      must not be lost because a third party was down
-- [ ] T538 [US6] Build `MarketingToggle` in `src/components/account/marketing-toggle/` using the
+- [X] T537 [US6] Call `syncMarketingContact` on a consent change and on first verification. **A sync
+      failure is logged and swallowed** — a consent change must not be lost because a third party was
+      down. *Split across two call sites, against the task as written*: the consent change is
+      `syncMarketingChoice`, an `afterChange` hook in `src/collections/customers.ts`, so the admin
+      panel gets it too; first verification is `enrolIfConsented` in the action, because
+      `payload.verifyEmail` writes `_verified` through `req.payload.db.updateOne` and runs NO
+      collection hooks (`payload/dist/auth/operations/verifyEmail.js`). A hook branch for it would
+      look correct and never fire
+- [X] T538 [US6] Build `MarketingToggle` in `src/components/account/marketing-toggle/` using the
       existing `Switch` — node row `I266:5096;266:4954`. Optimistic, **reverting on failure with the
       error stated** rather than silently swallowed (US6 scenario 3)
-- [ ] T539 [P] [US6] E2E in `tests/e2e/marketing-preference.spec.ts`
+- [X] T539 [P] [US6] E2E in `tests/e2e/marketing-preference.spec.ts`
 
 **Checkpoint**: US1–US6 work independently.
 

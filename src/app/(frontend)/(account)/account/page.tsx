@@ -3,12 +3,11 @@ import React from 'react'
 
 import { AddressList } from '@/components/account/address-list'
 import { ChangePasswordModal } from '@/components/account/change-password-modal'
+import { MarketingToggle } from '@/components/account/marketing-toggle'
 import { NameRow } from '@/components/account/name-row'
 import { ProfileRow } from '@/components/account/profile-row'
 import { SignOutButton } from '@/components/account/sign-out-button'
 import { Container } from '@/components/ui/container'
-import { Icon } from '@/components/ui/icon'
-import { Switch } from '@/components/ui/switch'
 import { getCustomerAddresses } from '@/lib/addresses/queries'
 import { requireCustomer } from '@/lib/auth/dal'
 import { getAccountSettings, offeredCountries } from '@/lib/auth/settings'
@@ -31,9 +30,9 @@ import { getAccountSettings, offeredCountries } from '@/lib/auth/settings'
  * Security row as `safety` and omits the Full name row entirely from the empty state, so it is not
  * authoritative on structure. Recorded as an addition, like the registration form's consent box.
  *
- * **One row is drawn but not yet operable, and says so below**: the marketing switch is US6. It is
- * here now because FR-022 fixes the order and a card that grows a row in the middle later is a card
- * that gets re-reviewed three times.
+ * **Every row is operable as of US6.** The marketing switch was drawn here and disabled from the
+ * day the card was built, because FR-022 fixes the order and a card that grows a row in the middle
+ * later is a card that gets re-reviewed three times. It accepts a click now.
  */
 export const metadata: Metadata = {
   title: 'My account',
@@ -74,29 +73,10 @@ export default async function AccountPage() {
               defaultCountry={settings.defaultCountry}
             />
 
-            <ProfileRow
-              label="Marketing preferences"
-              action={
-                /*
-                  **Disabled on purpose until US6.** The row must show the customer's current
-                  preference (FR-022) and the action that changes it does not exist yet — so the
-                  switch reports and does not pretend to accept. A live-looking control that
-                  silently discards a click is the one outcome worse than a dull one.
-                */
-                <Switch
-                  label="Email me occasional news and offers"
-                  hideLabel
-                  checked={customer.marketingEmail}
-                  disabled
-                  readOnly
-                />
-              }
-            >
-              <span className="flex items-center gap-2.5">
-                <Icon name="mail" className="text-neutral-secondary size-5" />
-                Email
-              </span>
-            </ProfileRow>
+            {/* US6. The switch was drawn here and disabled from the day the card was built; it
+                accepts a click as of this phase. Like the two rows above it, the row travels with
+                the state — see `MarketingToggle`. */}
+            <MarketingToggle subscribed={customer.marketingEmail} />
 
             {/* FR-049 — `Security`, once, everywhere. The composed frames say `safety`; the card
                 itself says `Security`, and one label site-wide is the requirement. */}

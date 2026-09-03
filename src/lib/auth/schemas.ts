@@ -213,10 +213,28 @@ export const deleteAddressSchema = z.object({
   id: z.number().int().positive(),
 })
 
+/**
+ * The marketing switch (FR-033, FR-034).
+ *
+ * One boolean, and a schema for it anyway. `z.boolean()` is not decoration here: a server action is
+ * a public endpoint reached by a POST that can carry `"false"`, `0`, `null` or nothing at all, and
+ * every one of those is truthy-or-falsy in a way that would quietly write the wrong consent. This
+ * refuses them instead, so the action never has to decide what a string meant.
+ *
+ * **The timestamp and the source are absent on purpose.** They are the evidence, and they are
+ * written by `stampMarketingConsent` from the change actually being made — a consent record whose
+ * date arrived in the same request as the consent is a record of nothing. There is deliberately no
+ * field here for a caller to supply one.
+ */
+export const marketingEmailSchema = z.object({
+  subscribed: z.boolean(),
+})
+
 export type AddressValues = z.infer<typeof addressSchema>
 export type ChangePasswordValues = z.infer<typeof changePasswordSchema>
 export type CreateAccountValues = z.infer<typeof createAccountSchema>
 export type DeleteAddressValues = z.infer<typeof deleteAddressSchema>
+export type MarketingEmailValues = z.infer<typeof marketingEmailSchema>
 export type NameValues = z.infer<typeof nameSchema>
 export type RequestResetValues = z.infer<typeof requestResetSchema>
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>

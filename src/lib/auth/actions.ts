@@ -15,6 +15,7 @@ import {
   changePasswordSchema,
   createAccountSchema,
   deleteAddressSchema,
+  marketingEmailSchema,
   nameSchema,
   requestResetSchema,
   resendCodeSchema,
@@ -26,6 +27,7 @@ import {
   verifyCodeSchema,
   type ChangePasswordValues,
   type CreateAccountValues,
+  type MarketingEmailValues,
   type NameValues,
   type RequestResetValues,
   type DeleteAddressValues,
@@ -35,6 +37,7 @@ import {
   type SignInValues,
   type VerifyCodeValues,
 } from '@/lib/auth/schemas'
+import { syncMarketingContact } from '@/lib/email/marketing'
 import { sendVerificationCode } from '@/lib/email/transactional'
 
 /**
@@ -264,6 +267,51 @@ export async function resendCode(input: ResendCodeValues): Promise<ActionResult>
 }
 
 /**
+ * A newly verified customer who ticked the consent box reaches the Resend audience here.
+ *
+ * **This is not where a mirror belongs, and it is here because the hook cannot reach it.**
+ * `syncMarketingChoice` covers every consent change through the collection, which is the right
+ * place for it — but the one moment it cannot see is verification, because `payload.verifyEmail`
+ * writes `_verified` with `req.payload.db.updateOne` and runs no collection hooks
+ * (`payload/dist/auth/operations/verifyEmail.js`). Without this call, a customer who consented at
+ * registration would be recorded as consenting in Payload and never appear in the audience at all,
+ * until the day they toggled the switch off and on again.
+ *
+ * **Only when they said yes.** Enrolling someone who declined — even flagged `unsubscribed` — puts
+ * an address into a marketing platform on the strength of a decision to stay out of it. If they
+ * later opt in, the hook syncs them then, which is the first moment there is consent to mirror.
+ *
+ * Failures are logged and swallowed for the same reason they are in the hook, with one addition:
+ * the account is verified by this point, and refusing the customer their success screen because a
+ * third party was slow would be a strange way to report that everything worked.
+ */
+async function enrolIfConsented(email: string): Promise<void> {
+  const payload = await client()
+
+  try {
+    const { docs } = await payload.find({
+      collection: 'customers',
+      depth: 0,
+      limit: 1,
+      overrideAccess: true,
+      where: { email: { equals: email } },
+    })
+
+    const customer = docs[0]
+    if (!customer?.marketingEmail) return
+
+    await syncMarketingContact({
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      subscribed: true,
+    })
+  } catch (error) {
+    payload.logger.error({ err: error, msg: 'Marketing enrolment failed after verification' })
+  }
+}
+
+/**
  * Enter the code, become verified, and be signed in (FR-007).
  *
  * `payload.verifyEmail` is what flips `_verified`; the code only decides whether we call it. That
@@ -280,6 +328,8 @@ export async function verifyEmailCode(input: VerifyCodeValues): Promise<ActionRe
 
   const payload = await client()
   await payload.verifyEmail({ collection: 'customers', token: result.token })
+
+  await enrolIfConsented(email)
 
   /**
    * **The customer is verified here, and is NOT signed in. That is a deviation from FR-007.**
@@ -627,6 +677,44 @@ export async function deleteAddress(input: DeleteAddressValues): Promise<ActionR
   const payload = await client()
   await payload.delete({ collection: 'addresses', id: owned.id, overrideAccess: false, user })
 
+  revalidatePath('/account')
+
+  return ok()
+}
+
+/**
+ * Turn marketing email on or off (FR-033, FR-034, FR-036).
+ *
+ * **It writes one field, and that is the whole of the action.** The timestamp and the source are
+ * `stampMarketingConsent`'s, computed from the change actually being made; the mirror into Resend is
+ * `syncMarketingChoice`'s. Both are collection hooks rather than lines in this function, so the
+ * admin panel gets the same behaviour without this code being reachable from it.
+ *
+ * **`overrideAccess: true` with the id from the session, like every other profile action here.** The
+ * collection's own `update` rule already narrows a customer to `{ id: { equals: req.user.id } }`, so
+ * either route reaches one row; taking the id from `requireCustomer()` and nowhere near the input is
+ * what makes a version of this that edits somebody else's preference unwriteable rather than merely
+ * refused.
+ */
+export async function setMarketingEmail(input: MarketingEmailValues): Promise<ActionResult> {
+  const customer = await requireCustomer()
+
+  const parsed = marketingEmailSchema.safeParse(input)
+  if (!parsed.success) {
+    const { fieldErrors, message } = schemaFailure(parsed.error)
+    return fail(message, fieldErrors)
+  }
+
+  const payload = await client()
+  await payload.update({
+    collection: 'customers',
+    data: { marketingEmail: parsed.data.subscribed },
+    id: customer.id,
+    overrideAccess: true,
+  })
+
+  // The row is server-rendered from `getCustomer()`, so the switch's stored position comes back
+  // with this response. See the note in `updateName` for why there is no `router.refresh()`.
   revalidatePath('/account')
 
   return ok()

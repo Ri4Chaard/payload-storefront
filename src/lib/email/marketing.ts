@@ -28,6 +28,25 @@ import { env } from '@/env'
 
 const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID?.trim()
 
+/**
+ * The same switch the transactional adapter honours, for the same reason — and it has to be
+ * repeated here because this module does not go through that adapter.
+ *
+ * `EMAIL_TRANSPORT=log` swaps Payload's email adapter (`src/payload.config.ts`), which covers every
+ * verification code and reset notice, because those are all sent by Payload. This is a bare `fetch`
+ * to a third party carrying the live API key, so the adapter has no opportunity to intercept it.
+ * Without this line, the moment the sync is wired to a hook, every test that registers a customer —
+ * and both suites register many — writes a throwaway `@aurum-testing.dev` address into whatever
+ * audience `RESEND_AUDIENCE_ID` names. That is only harmless while the variable is unset, which is
+ * not a property to depend on: it is one `.env` line away from a marketing list full of test rows,
+ * and unlike a wasted quota that is not self-repairing.
+ *
+ * Read at call time rather than at module load. The runners set it in their config files before any
+ * test module is imported, so a constant would work today, but a guard whose correctness depends on
+ * import order is a guard that fails silently the day the order changes.
+ */
+const suppressed = () => process.env.EMAIL_TRANSPORT === 'log'
+
 interface SyncArgs {
   email: string
   firstName?: null | string
@@ -42,6 +61,14 @@ export async function syncMarketingContact({
   subscribed,
 }: SyncArgs): Promise<void> {
   const payload = await getPayload({ config })
+
+  if (suppressed()) {
+    payload.logger.info({
+      msg: 'Marketing contact not synced (EMAIL_TRANSPORT=log)',
+      subscribed,
+    })
+    return
+  }
 
   if (!AUDIENCE_ID) {
     // Not an error. An installation that has not created an audience yet still has working
