@@ -71,7 +71,22 @@ test('a customer changes their password and stays signed in', async ({ page }) =
   await modal.getByPlaceholder('Confirm new password').fill(NEXT)
   await modal.getByRole('button', { name: 'Save' }).click()
 
-  await expect(modal).toBeHidden({ timeout: 15_000 })
+  /**
+   * FR-045 — the dialog becomes the confirmation rather than vanishing.
+   *
+   * This used to assert the modal was HIDDEN, which it was, and the success only existed in an
+   * `sr-only` live region. That passed while a sighted customer got no feedback at all until the
+   * confirmation email turned up. The assertion now names what is on screen.
+   */
+  await expect(modal.getByText('Your password has been updated.')).toBeVisible({ timeout: 15_000 })
+  await expect(modal.getByRole('heading', { name: 'PASSWORD CHANGED' })).toBeVisible()
+  // The sign-out and the email are stated here so neither arrives as a surprise.
+  await expect(modal.getByText(/Any other device has been signed out/)).toBeVisible()
+  // The form is gone with the passwords in it, not merely covered.
+  await expect(modal.getByPlaceholder('Enter current password')).toBeHidden()
+
+  await modal.getByRole('button', { name: 'Done' }).click()
+  await expect(modal).toBeHidden()
 
   // Still signed in on THIS device — the action replaces the cookie rather than dropping it, which
   // is the half of FR-021 that breaks while the other half is being written.

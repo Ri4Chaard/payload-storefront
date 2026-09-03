@@ -236,11 +236,30 @@ for (const { name, width } of WIDTHS) {
 
     expect(password.violations, JSON.stringify(password.violations, null, 2)).toEqual([])
 
+    /*
+      …and that modal's SECOND state, the confirmation it becomes on save (004/T566, FR-045). A
+      dialog that swaps its own contents while open is the shape most likely to strand focus and
+      leave the change unannounced, so it is scanned as its own document rather than assumed to
+      inherit the pass above.
+    */
+    await page.getByPlaceholder('Enter current password').fill('a-long-enough-password')
+    await page.getByPlaceholder('Enter new password').fill('an-even-longer-password')
+    await page.getByPlaceholder('Confirm new password').fill('an-even-longer-password')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByText('Your password has been updated.')).toBeVisible({ timeout: 15_000 })
+
+    const changed = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze()
+
+    expect(changed.violations, JSON.stringify(changed.violations, null, 2)).toEqual([])
+
+    await page.getByRole('button', { name: 'Done' }).click()
+    await expect(page.getByRole('dialog')).toBeHidden()
+
     // …and the Add address modal (004/T523), the largest form on the site behind a dialog: seven
     // controls with no visible labels, a listbox of every country, and a checkbox that is disabled
     // and checked at once — the combination most likely to leave something unnamed.
-    await page.keyboard.press('Escape')
-    await expect(page.getByRole('dialog')).toBeHidden()
     await page.getByRole('button', { name: 'Add address' }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
 
