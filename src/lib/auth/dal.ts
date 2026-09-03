@@ -57,8 +57,16 @@ export type CustomerUser = Extract<AuthenticatedUser, { collection: 'customers' 
  * rather than route around with `overrideAccess` (spec 004, FR-032).
  */
 const authenticate = cache(async (): Promise<CustomerUser | null> => {
+  // **These two lines are in this order on purpose, and swapping them breaks the container build.**
+  // Reading the headers is what tells Next this route cannot be prerendered; `getPayload` opens a
+  // Postgres connection. Called the other way round, the connection is attempted first and throws
+  // before the bailout can happen — and the image is built with no database at all (see
+  // src/lib/catalog/prerender.ts), so `next build` fails on every page that asks who is signed in
+  // rather than marking them dynamic. Reading first costs nothing at runtime and means no route
+  // that consumes this DAL has to remember `export const dynamic`.
+  const headers = await nextHeaders()
   const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers: await nextHeaders() })
+  const { user } = await payload.auth({ headers })
 
   // An admin session is not a customer session. The two collections are separate on purpose, and
   // this is the storefront side of that boundary.
