@@ -132,13 +132,22 @@ idempotency would otherwise have guarded: the risk is not two rows, it is two me
 two reads of a cart whose price changed in between, so the customer sees one total and the seller
 receives another.
 
-**Length** (FR-028): Telegram trims to its own maximum, and a very long `wa.me` URL can be rejected
-by the browser. A message over the safe budget is truncated at a **line boundary** and gains a final
-line naming how many pieces were not listed — never a mid-word cut that silently loses the last
-piece. A truncated message is still a complete, readable request.
+**Length** (FR-028, FR-028a): the budget is **2,000 characters for the finished link, measured after
+percent-encoding** — the practical ceiling a URL can be relied on to survive, and the binding
+constraint here since Telegram also trims to its own message maximum. A message over budget is
+truncated at a **line boundary** and gains a final line naming how many pieces were not listed —
+never a mid-word cut that silently loses the last piece. A truncated message is still a complete,
+readable request.
 
-Non-Latin product names pass through `encodeURIComponent` unchanged; a unit test covers Cyrillic,
-since the shop's own market is Kazakhstan and the UAE.
+**Measure the encoded string, not the message.** This is the part that gets written wrong. A Latin
+cart spends roughly one character of budget per character of message; a Cyrillic one spends **six**
+— each character is two UTF-8 bytes, and each byte becomes a three-character `%XX` escape. So the
+same twenty-line cart fits comfortably in English and blows the budget in Russian, and the shop's
+own market is Kazakhstan and the UAE. A `message.length` check would pass every test written in
+English and truncate nothing for the customers who actually need it.
+
+The truncation rule is therefore exercised against a **non-Latin** cart (FR-028a, SC-015), not only
+against an implausibly long Latin one.
 
 ---
 
@@ -170,14 +179,21 @@ is what makes [R11](../research.md)'s footer migration free.
 
 ---
 
-## 5. The fallback (FR-024)
+## 5. The copy affordance (FR-024)
 
-Reached when no messenger is enabled, or when the customer cannot follow a link. The modal presents
-the composed message in a copyable form together with `CONTACT.email` and `CONTACT.phone` from
-`src/lib/contact.ts`.
+**Always present, on every handoff, on every device** — alongside the messenger rows rather than
+instead of them. The modal offers the composed message in a copyable form together with
+`CONTACT.email` and `CONTACT.phone` from `src/lib/contact.ts`.
 
-This is also the Instagram path in part: its row opens the chat *and* puts the message on the
-clipboard, because `carriesMessage` is false.
+This replaces an earlier "shown when no messenger can be opened" rule, which was untestable: a web
+page has no reliable way to know whether tapping `wa.me` will land in WhatsApp or on an error page.
+A fallback that waits to detect failure is a fallback that never appears for the one customer who
+needed it — they have already left. Showing it always costs a line of the modal and removes the
+detection problem entirely.
+
+Where no messenger is configured, the copy affordance is the only thing the modal offers. It is also
+the Instagram path in part: that row opens the chat *and* puts the message on the clipboard, because
+`carriesMessage` is false.
 
 ---
 
@@ -204,6 +220,9 @@ clipboard, because `carriesMessage` is false.
 | The message address includes the postcode `formatAddress` drops | unit | R18 |
 | Cyrillic and a 40-character name survive encoding | unit | FR-028 |
 | An over-length message truncates at a line boundary and says so | unit | FR-028 |
+| The budget is checked on the **encoded** link, not on `message.length` | unit | FR-028 |
+| A 20-line Cyrillic cart truncates; the same cart in Latin does not | unit | FR-028a, SC-015 |
+| The copy affordance is present even when three messengers are configured | e2e | FR-024, SC-017 |
 | A template without `{{items}}` is refused | integration | FR-040 |
 | Reordering rows reorders the modal | e2e | FR-038 |
 | A customer session cannot update the global | integration | FR-041 |

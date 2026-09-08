@@ -187,6 +187,29 @@ checkout ([research R18](./research.md)).
 
 Deleted together when a cart is emptied or merged into an account cart.
 
+**Both are strictly functional and are not gated behind cookie consent** (FR-050). One is the
+credential without which a visitor cannot reopen their own cart; the other is a number. Neither is
+used for analytics, and neither identifies a person to anybody but the cart they own. The
+constitution gates *non-essential* cookies on consent, and a cart the visitor cannot keep is not a
+cart.
+
+## 4a. Retention and erasure (FR-047 – FR-051)
+
+The cart is this feature's only data collection point, and "no payment" does not exempt it.
+
+| Subject | Kept for | Deleted by |
+| --- | --- | --- |
+| Guest cart | **30 days** without activity | The nightly job. The credential cookie expires on the same clock, so past 30 days the row is unreachable by anyone — keeping it would be keeping a secret nobody can spend. |
+| Customer cart | **12 months** without activity | The nightly job. Long enough that a cart is still there when someone returns for it, bounded so the table cannot grow without end. |
+| Any cart belonging to a deleted customer | — | The deletion itself, in the same operation (FR-049) |
+
+Both periods are **configuration, not constants** (FR-051) — a stated retention period that only
+exists in a source file is one nobody outside the repository can read or change.
+
+The nightly runner already exists: `payload.config.ts` drains the `nightly` queue every fifteen
+minutes for spec 004's `purge-accounts` task. Cart expiry is a second task on the same queue, not a
+second scheduler. Erasure hangs off the customer deletion path spec 004 already built.
+
 ---
 
 ## 5. What is deliberately absent

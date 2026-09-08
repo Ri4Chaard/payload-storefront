@@ -107,6 +107,19 @@ carries every piece with its stone, size and quantity plus the total. This is
 5. Return to the site → **the cart still holds everything** (FR-027).
 6. Choose Instagram → the chat opens **empty**, the modal said it would, and the message is on the
    clipboard.
+7. **The copy affordance is there the whole time** — with three messengers configured, not only when
+   none are (FR-024, SC-017). If it only appears when nothing is configured, the implementation is
+   still trying to detect whether a messenger opened, which a web page cannot do.
+
+### Message length (FR-028, FR-028a)
+
+Build a twenty-line cart of pieces with **Cyrillic** names and check out.
+
+**Expected**: the link stays inside 2,000 characters, the message truncates at a line boundary, and
+a final line says how many pieces are not listed. The same cart with Latin names should **not**
+truncate — a Cyrillic character costs six characters of budget once percent-encoded, a Latin one
+costs one. If both truncate, or neither does, the budget is being measured on `message.length`
+instead of on the encoded link.
 
 ### The customer block (FR-043 – FR-046)
 
@@ -165,7 +178,29 @@ footer still says `wa.me/`" defect.
 
 ---
 
-## Scenario 6 — Budgets and access (the gates that fail quietly)
+## Scenario 6 — Retention and erasure (FR-047 – FR-051)
+
+The clock is controlled, never waited on — back-date `updatedAt` rather than sleeping.
+
+```bash
+pnpm test:integration -t "cart retention"
+```
+
+| Set up | Run the nightly queue | Expect |
+| --- | --- | --- |
+| Guest cart, last touched 31 days ago | | Gone |
+| Guest cart, last touched 29 days ago | | Still there |
+| Customer cart, last touched 13 months ago | | Gone |
+| Customer cart, last touched 11 months ago | | Still there |
+| Delete a customer who has a cart | — | Their cart goes with them, in the same operation |
+
+Then confirm the two retention periods are readable and changeable **without editing code**
+(FR-051), and that no cookie-consent banner gates the two cart cookies — they are functional, and a
+cart the visitor cannot keep is not a cart (FR-050).
+
+---
+
+## Scenario 7 — Budgets and access (the gates that fail quietly)
 
 **Bundle** — against a production server, not a build log; Next 16 with Turbopack no longer prints
 per-route JS:

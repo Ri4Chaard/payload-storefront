@@ -372,9 +372,12 @@ both follow within the caching window, with no deployment.
   list, and the wording of the pre-filled message MUST be editable by the owner without a code
   change or a deployment. See *Seller destinations in the admin* below for what that surface is
   required to do.
-- **FR-024**: Where no messenger can be opened — none configured, or the device cannot follow the
-  link — the system MUST present the message text in a copyable form together with the seller's
-  contact details.
+- **FR-024**: The modal MUST **always** present the composed message in a copyable form together
+  with the seller's contact details, alongside whatever messenger rows are offered — not only when
+  none can be opened. A page cannot tell whether a messenger will actually open on the device in
+  front of it, so a fallback that waits to detect failure is a fallback that never appears for the
+  customer who needed it. Where no messenger is configured at all, the copy affordance is the only
+  thing the modal offers.
 - **FR-025**: The flow MUST state plainly that the customer is sending a purchase request, that no
   payment is taken on the site, and that the seller will confirm availability, final price, payment
   and delivery.
@@ -385,7 +388,14 @@ both follow within the caching window, with no deployment.
   messenger, and returning to the site MUST all leave every line exactly as it was. The cart is
   emptied only by the customer removing lines from it.
 - **FR-028**: The composed message MUST survive long carts, long product names and non-Latin
-  characters without losing pieces silently.
+  characters without losing pieces silently. The budget is **2,000 characters for the finished link,
+  measured after percent-encoding** — not a character count of the message as written. A message
+  that would exceed it MUST be truncated at a line boundary and MUST gain a final line stating how
+  many pieces are not listed, so a truncated request still reads as a complete one.
+- **FR-028a**: Because the budget is measured after encoding, a cart written in Cyrillic or Arabic
+  MUST be expected to reach it far sooner than the same cart in Latin script — roughly one line for
+  every six. The truncation rule MUST therefore be exercised against a non-Latin cart, not only
+  against an implausibly long Latin one.
 
 #### What is deliberately not recorded
 
@@ -463,6 +473,34 @@ conversation this feature exists to start.
   prompt, or otherwise interrupt an anonymous visitor at any point (FR-031). Reading who the
   customer is MUST be an optional lookup, never a guard.
 
+#### How long a cart is kept, and how it is erased
+
+A cart is a record of what somebody wants, tied either to their account or to their device. It is a
+data collection point, and it therefore needs a stated life and a working deletion path — the one
+part of this feature that "no payment" does not simplify away.
+
+- **FR-047**: A guest cart MUST be deleted after **30 days without activity**. Its credential cookie
+  expires on the same clock, so after that the cart is unreachable by anyone; keeping it would be
+  keeping a row nobody can ever open.
+- **FR-048**: A signed-in customer's cart MUST be deleted after **12 months without activity**. Long
+  enough that a cart is still there when someone comes back for it; bounded, so the table does not
+  grow without end.
+- **FR-049**: Deleting a customer MUST delete their carts in the same operation. A customer who asks
+  to be erased MUST NOT leave a cart naming what they wanted behind them.
+- **FR-050**: Both cart cookies MUST be strictly functional — the credential needed to open a cart,
+  and a display count. Neither carries anything else, neither is used for analytics or tracking, and
+  the pair therefore MUST NOT be gated behind cookie consent. A cart the visitor cannot keep is not
+  a cart.
+- **FR-051**: The retention periods MUST be stated somewhere a person can read them without reading
+  the code, and MUST be changeable without one.
+
+#### One set of accounts
+
+- **FR-052**: The messenger accounts offered at handoff and those shown in the site's chrome — the
+  contact strip, the footer, and the mobile navigation — MUST be the same records. Changing an
+  account in one place MUST change it everywhere it appears, and no second copy of the shop's
+  WhatsApp, Telegram or Instagram identity may exist in the codebase.
+
 ### Key Entities
 
 - **Cart**: A selection belonging to either a signed-in customer or an anonymous device. Transient —
@@ -517,6 +555,15 @@ There is deliberately no **Request** or **Order** entity. See FR-029 and *Out of
 - **SC-013**: The same cart produces the same message for an anonymous visitor and for a signed-in
   customer who has saved nothing, and differs only by the customer block for one who has — verified
   across all four combinations of name present or absent and address present or absent.
+- **SC-014**: A cart past its retention period is gone, and a deleted customer leaves no cart behind
+  — both verified by test rather than by inspection, against a clock the test controls.
+- **SC-015**: A twenty-line cart written in Cyrillic produces a link inside the 2,000-character
+  budget, still names every piece it lists, and says how many it does not.
+- **SC-016**: Changing one messenger account in the admin changes it in the handoff modal, the
+  contact strip, the footer and the mobile navigation — verified by changing one value and checking
+  all four.
+- **SC-017**: The copy affordance is present on every handoff, on every device, regardless of how
+  many messengers are configured.
 
 ## Assumptions
 
@@ -586,6 +633,16 @@ deliberately does not deliver them. Each is additive later; none is designed aro
   the messenger conversation.
 - **Payment of any kind.** No Stripe, no adapter, no `payments` configuration. Stated so that the
   absence is a recorded decision rather than an oversight.
+- **A checkout kill switch.** The constitution asks that behaviour-changing commerce features ship
+  behind a flag with a documented kill switch; the owner has decided against one for this feature.
+  Recorded as a deliberate exception in the plan's Complexity Tracking rather than left unsaid, and
+  worth knowing the shape of: the thing most likely to need switching off is a wrong messenger
+  destination, and FR-023 already lets the owner fix or disable that from the admin in seconds
+  without a deploy. What is left uncovered is a fault in the cart or the handoff itself, which would
+  need a revert.
+- **Checkout logging and monitoring.** Not addressed by this revision. The constitution requires
+  structured logging with a correlation ID and alerting on checkout conversion and error rate; no
+  requirement or task here provides either. Named so the gap is visible rather than forgotten.
 
 The consequence to hold on to: if a customer builds a cart, opens WhatsApp and then closes it
 without sending, the shop has no trace of them. That is accepted for this feature, and it is the

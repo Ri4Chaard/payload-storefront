@@ -52,4 +52,16 @@
   a spec is required to state what is reused before anything new is built. The *Requirements* and
   *Success Criteria* sections themselves stay behavioural and technology-agnostic.
 
+- **Refinement pass, 2026-09-08**, following `/speckit-analyze`. Re-validated; all items still pass.
+  - Two ambiguities settled with numbers instead of adjectives: FR-024's fallback now triggers
+    *always* rather than on an undetectable condition, and FR-028 now carries a 2,000-character
+    budget measured on the **encoded** link.
+  - Two coverage gaps closed: FR-047 – FR-051 give the cart a retention period and an erasure path;
+    FR-052 makes the chrome-and-handoff single source a requirement rather than a research note, so
+    the three tasks that implement it are traceable.
+  - **Two constitution deviations are recorded, not resolved**, in the plan's Complexity Tracking:
+    no kill switch (the owner's decision, time-boxed to the arrival of a payment provider) and no
+    checkout logging or monitoring (open). The spec's *Out of Scope* names both. A reviewer should
+    read that section as part of the two approvals this feature requires.
+
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

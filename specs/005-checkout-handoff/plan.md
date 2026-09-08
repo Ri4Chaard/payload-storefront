@@ -46,13 +46,18 @@ the cart route.
 baseline. The worst existing route already spends 84KB of that 100KB, so the working margin is
 ~16KB (R15). WCAG 2.2 AA. All money as integer minor units with an explicit currency.
 
-**Scale/Scope**: One new route (`/cart`), one new global, ~10 new components, 4 client trees,
-42 functional requirements. No new collection.
+**Scale/Scope**: One new route (`/cart`), one new global, one new nightly job, **six new components**
+— `cart-lines`, `order-summary`, `cart-empty`, `handoff-modal`, `cart-count`, and the `messenger-row`
+kit primitive — plus one extension to the existing `Modal`. Four client trees (R15).
+53 functional requirements, 17 success criteria. No new collection.
 
 ## Constitution Check
 
-*GATE: passed before Phase 0, re-checked after Phase 1 design. Result: **PASS**, no violations, no
-Complexity Tracking entries.*
+*GATE: passed before research, re-checked after the Phase 1 design, and re-checked again after the
+2026-09-08 refinement. Result: **PASS on all six principles**, with **two recorded deviations from
+the Development Workflow section** — no kill switch and no checkout observability. Both are in
+[Complexity Tracking](#complexity-tracking); neither is a principle violation, and neither may be
+approved without a reviewer reading that section.*
 
 | Principle | Gate | Verdict |
 | --- | --- | --- |
@@ -61,14 +66,20 @@ Complexity Tracking entries.*
 | **III. Design tokens over magic values** | No raw hex, no arbitrary spacing, full state sets | **Pass.** New components use existing tokens; `pnpm check:tokens` and `check:styles` gate it. Every new interactive element ships default/hover/focus-visible/active/disabled/loading. |
 | **IV. Content modelling & schema evolution** | Model before implementing; labels and descriptions; explicit access; tested migration + rollback | **Pass.** [data-model.md](./data-model.md) models the global before any code. Every field carries a label and an admin description (FR-041); access is stated explicitly, never by omission. One migration, generated and committed, with a rollback verified against seeded content. |
 | **V. Performance, accessibility & SEO budgets** | Server components default; budgets; WCAG 2.2 AA | **Pass, and it is the tightest gate.** R1 keeps the cart page server-rendered; R8 keeps the header's count from making every route dynamic and losing the prerendered catalogue; R15 sizes the four client trees against a ~16KB margin and a task measures it against a production server. `/cart` is `noindex` — a per-visitor page has nothing to index. |
-| **VI. Commerce correctness & data protection** | Server-side amounts; integer minor units; no cross-customer reads | **Pass.** R5 computes every displayed amount server-side from published data and never renders the client's number; `formatPrice` already refuses non-integer minor units. R2 keeps the cart bearer secret out of JavaScript's reach — a strict improvement on the `localStorage` the plugin would have used. No payment instrument exists to protect. Idempotency is re-scoped by R14, since FR-029 removed the record it would otherwise have guarded. |
+| **VI. Commerce correctness & data protection** | Server-side amounts; integer minor units; no cross-customer reads; retention and erasure | **Pass.** R5 computes every displayed amount server-side from published data and never renders the client's number; `formatPrice` already refuses non-integer minor units. R2 keeps the cart bearer secret out of JavaScript's reach — a strict improvement on the `localStorage` the plugin would have used. FR-047 – FR-051 give the cart a stated life and a working erasure path, and record why its two cookies are exempt from consent gating. Three clauses of this principle do not trigger, and are named rather than skipped: **idempotency** is re-scoped by R14 because FR-029 removed the record it would have guarded; **inventory reserved before payment capture** has no capture to precede; and **append-only order state with an audit trail** has no order. All three return the day a payment provider does. No payment instrument exists to protect. |
 
-**Two notes rather than violations:**
+**Three notes rather than violations:**
 
 - **R11 touches three files outside this feature's screens** (`contact-banner`, `footer`,
   `mobile-nav`). This is Principle I and II *requiring* the change, not scope creep: shipping the
   global without it means the owner sets a real WhatsApp number and the footer keeps pointing at a
   placeholder. All three components already take `social` as a prop, so it is a wiring change.
+  **FR-052 now states this as a requirement**, so the tasks that do it are traceable to the spec
+  rather than to a research note.
+- **CI gate 3 — "checkout end-to-end suite passes against the payment provider sandbox" — does not
+  apply.** There is no payment provider and no sandbox to run against. The gate is recorded as
+  inapplicable here so a reviewer sees a decision rather than a skipped step; the checkout e2e suite
+  itself still runs (T084, T085), against the messenger handoff instead of a payment.
 - **Checkout changes require two approving reviews** under *Development Workflow*. This feature is
   checkout. Reviewers must check the duplication and hardcoding gates explicitly.
 
@@ -101,6 +112,8 @@ src/
 │       └── page.tsx                    # NEW — the cart route, dynamic, noindex
 ├── collections/
 │   └── carts.ts                        # unchanged — already carries `size` and the matcher
+├── jobs/
+│   └── expire-carts.ts                 # NEW — nightly retention sweep, on the existing queue (FR-047, FR-048)
 ├── globals/
 │   └── contact-settings.ts             # NEW — messenger destinations + message template (R9)
 ├── lib/
@@ -111,6 +124,7 @@ src/
 │   │   ├── loader.ts                   # NEW — read + revalidate + compute totals (R5, R6)
 │   │   ├── merge.ts                    # NEW — guest → account at sign-in, our matcher (R4)
 │   │   ├── message-customer.ts         # NEW — optional name + default address, never redirects (R18)
+│   │   ├── retention.ts                # NEW — the two retention periods, as configuration (FR-051)
 │   │   └── types.ts                    # NEW — CartView, CartLineView, CartIssue
 │   ├── catalog/
 │   │   └── cart-intent.ts              # CHANGED — the empty `submit` body calls lib/cart (R1)
@@ -155,20 +169,36 @@ primitives. Every path is kebab-case; `pnpm check:naming` enforces it.
 
 Ordered so each phase is independently demonstrable, matching the spec's user-story priorities.
 
-| Phase | Delivers | Spec |
-| --- | --- | --- |
-| **0. Spike** | Confirm a partial `req` carrying `context.cartSecret` satisfies `hasCartSecretAccess` (R3). One integration test. Blocks everything else. | — |
-| **1. Cart plumbing** | Cookie, session resolution, actions, loader, totals. No UI. | FR-001–007, 012–014 |
-| **2. Add to cart** | `ProductPurchase` buttons live, size mapping, header count. | US1, FR-016 |
-| **3. The cart page** | Route, rows, summary, remove confirmation, empty state, responsive. | US2, FR-008–018 |
-| **4. Seller settings** | The global, normalisation, link building, migration, admin verification. | US5, FR-033–042 |
-| **5. Handoff** | Modal, message composition incl. the customer block, CHECKOUT and BUY NOW wiring, fallback. | US3, US4, FR-019–028, FR-043–046 |
-| **6. Chrome + budgets** | `SOCIAL_LINKS` removal (R11), bundle measurement, a11y scan, e2e. | R11, SC-008, SC-009 |
+**These numbers are the same numbers `tasks.md` uses.** An earlier draft of this table ran 0–6 while
+the task list ran 1–8, which meant "phase 4" named two different things depending on which file you
+were holding. One scheme, and the spike is shown where it actually lives — as the gate at the top of
+Phase 2 rather than as a phase of its own.
 
-Phase 4 precedes phase 5 deliberately: the modal cannot be built against destinations that do not
-exist yet without hardcoding the placeholders it is meant to remove.
+| Phase | Delivers | Spec | Tasks |
+| --- | --- | --- | --- |
+| **1. Setup** | Directory skeleton, seed shapes, empty suites. | — | T001–T003 |
+| **2. Cart plumbing** | **Opens with the blocking spike** (R3). Then cookie, session resolution, actions, loader, totals. No UI. | FR-001–007, 012–014 | T004–T015 |
+| **3. Add to cart** | `ProductPurchase` buttons live, size mapping, guest-cart merge, header count. | US1, FR-005, FR-016 | T016–T026 |
+| **4. The cart page** | Route, rows, summary, remove confirmation, empty state, responsive. | US2, FR-008–018 | T027–T041 |
+| **5. Seller settings** | The global, normalisation, link building, migration, admin verification. | US5, FR-033–042 | T042–T053 |
+| **6. Handoff** | Modal, message composition incl. the customer block, CHECKOUT wiring, the copy affordance. | US3, FR-019–028a, FR-043–046 | T054–T070 |
+| **7. Buy now** | The single-piece path that never touches the cart. | US4, FR-019, FR-020 | T071–T075 |
+| **8. Chrome, retention + budgets** | `SOCIAL_LINKS` removal, cart retention and erasure, bundle measurement, a11y scan, e2e. | FR-047–052, SC-008, SC-009, SC-014, SC-016, SC-017 | T076–T092 |
+
+Phase 5 precedes phase 6 deliberately: the modal cannot be built against destinations that do not
+exist yet without hardcoding the placeholders it is meant to remove. That is a dependency, not a
+re-prioritisation of US5 above US3.
 
 ## Complexity Tracking
 
-No entries. The Constitution Check passes on every principle, no new dependency is introduced, and
-no exception is requested.
+Two recorded exceptions. Neither is a simplification for its own sake; both are deviations from a
+constitution clause, recorded here because *Governance* requires deviations to be documented rather
+than argued away.
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+| --- | --- | --- |
+| **No kill switch** — *Releases*: "Behaviour-changing commerce features ship behind a flag with a documented kill switch." | Owner's decision, taken with the gap stated. The failure this clause guards against is mostly already covered from a different direction: the most likely thing to need switching off is a wrong messenger destination, and FR-023 lets the owner correct or disable that in the admin in seconds, with no deploy. The site takes no money, so a fault cannot cost a customer anything irreversible. | A flag was proposed and declined. What remains uncovered is a defect in the cart or the handoff itself, which would need a revert rather than a toggle — accepted deliberately. **Time-boxed**: revisit before any payment provider is added, at which point the clause's original reasoning applies in full. |
+| **No checkout logging or monitoring** — *Observability*: structured logging with a correlation ID is "mandatory", and checkout conversion and error rate "MUST be monitored and alerted on." | Not addressed in this revision. Recorded as an open gap rather than closed silently. | No alternative was evaluated. This is the one item in the analysis that remains genuinely unhandled; it should be closed before the feature is announced, since a handoff that silently fails for a subset of devices is exactly the failure that only telemetry finds. |
+
+Everything else passes: no new dependency, no new service, no new data store beyond the single
+global the feature is specified to need.
