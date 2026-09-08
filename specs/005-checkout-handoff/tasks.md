@@ -55,23 +55,23 @@ the `carts` table.
 
 ### The blocking spike
 
-- [ ] T004 Spike in `tests/integration/cart-access.test.ts`: assert that a Payload Local API read passing only `req: { context: { cartSecret } }` and `overrideAccess: false` returns a guest cart, per research R3. **If this fails, stop** — adopt the documented `payload.find({ overrideAccess: true, where: { and: [{ id }, { secret }] } })` fallback and record the change in research.md before continuing
+- [X] T004 Spike in `tests/integration/cart-access.test.ts`: assert that a Payload Local API read passing only `req: { context: { cartSecret } }` and `overrideAccess: false` returns a guest cart, per research R3. **If this fails, stop** — adopt the documented `payload.find({ overrideAccess: true, where: { and: [{ id }, { secret }] } })` fallback and record the change in research.md before continuing
 
 ### Implementation
 
-- [ ] T005 [P] Define `CartView`, `CartLineView` and `CartIssue` in `src/lib/cart/types.ts` per [data-model.md §2](./data-model.md), keeping `unitMinor` the only raw amount and documenting why
-- [ ] T006 [P] Implement the httpOnly `aurum-cart` cookie (id + secret) and the readable `aurum-cart-count` cookie in `src/lib/cart/cookie.ts`, with `sameSite: 'lax'` and the reason recorded — `strict` drops the cookie on the return from WhatsApp — and the note that both are strictly functional and therefore not gated behind cookie consent (FR-050)
-- [ ] T007 Implement `CartOwner` resolution in `src/lib/cart/session.ts` (customer session wins over cookie; builds the `req` each Payload call needs) per [cart-actions.md §2](./contracts/cart-actions.md) — depends on T006
-- [ ] T008 Implement `getCart()` and `getCartCount()` in `src/lib/cart/loader.ts`: read, re-read products from the published catalogue, classify issues, compute totals from integers, format once — depends on T005, T007
-- [ ] T009 Implement `addToCart`, `setLineQuantity` and `removeLine` in `src/lib/cart/actions.ts` as `'use server'`, each re-deriving ownership and passing our `cartItemMatcher` explicitly (FR-001) — depends on T007
-- [ ] T010 Add `refresh()` from `next/cache` to every mutating action in `src/lib/cart/actions.ts`, with the comment recording why `revalidatePath` is wrong for per-visitor state (research R7) — depends on T009
-- [ ] T011 Replace the empty `submit` body in `src/lib/catalog/cart-intent.ts` with a call into `src/lib/cart/actions.ts`, keeping both exported signatures byte-identical so nothing above the seam changes — depends on T009
+- [X] T005 [P] Define `CartView`, `CartLineView` and `CartIssue` in `src/lib/cart/types.ts` per [data-model.md §2](./data-model.md), keeping `unitMinor` the only raw amount and documenting why
+- [X] T006 [P] Implement the httpOnly `aurum-cart` cookie (id + secret) and the readable `aurum-cart-count` cookie in `src/lib/cart/cookie.ts`, with `sameSite: 'lax'` and the reason recorded — `strict` drops the cookie on the return from WhatsApp — and the note that both are strictly functional and therefore not gated behind cookie consent (FR-050)
+- [X] T007 Implement `CartOwner` resolution in `src/lib/cart/session.ts` (customer session wins over cookie; builds the `req` each Payload call needs) per [cart-actions.md §2](./contracts/cart-actions.md) — depends on T006
+- [X] T008 Implement `getCart()` and `getCartCount()` in `src/lib/cart/loader.ts`: read, re-read products from the published catalogue, classify issues, compute totals from integers, format once — depends on T005, T007
+- [X] T009 Implement `addToCart`, `setLineQuantity` and `removeLine` in `src/lib/cart/actions.ts` as `'use server'`, each re-deriving ownership and passing our `cartItemMatcher` explicitly (FR-001) — depends on T007
+- [X] T010 Add `refresh()` from `next/cache` to every mutating action in `src/lib/cart/actions.ts`, with the comment recording why `revalidatePath` is wrong for per-visitor state (research R7) — depends on T009
+- [X] T011 Replace the empty `submit` body in `src/lib/catalog/cart-intent.ts` with a call into `src/lib/cart/actions.ts`, keeping both exported signatures byte-identical so nothing above the seam changes — depends on T009
 
 ### Tests
 
-- [ ] T012 [P] Unit tests in `tests/unit/cart-totals.test.ts`: subtotal summed from integers and formatted once; an unavailable line excluded; an empty cart returns `empty: true` and no summary; `formatPrice` throwing on a fractional minor unit (FR-012, FR-013, FR-015, SC-006)
-- [ ] T013 [P] Integration tests in `tests/integration/cart-operations.test.ts`: same product with a different size makes two lines; identical options sum into one; quantity clamped server-side against current stock; the loader never returns `cart.subtotal` — a negative that stays true only if something asserts it (FR-004, FR-009, research R5)
-- [ ] T014 [P] Integration tests in `tests/integration/cart-access.test.ts`: customer A cannot read or mutate customer B's cart; a guest cookie naming someone else's cart is refused; a signed-in customer's cart is reachable from a second session with no cookie, proving it follows the account rather than the device; no action returns a raw database message (FR-006, FR-007, SC-010)
+- [X] T012 [P] Unit tests in `tests/unit/cart-totals.test.ts`: subtotal summed from integers and formatted once; an unavailable line excluded; an empty cart returns `empty: true` and no summary; `formatPrice` throwing on a fractional minor unit (FR-012, FR-013, FR-015, SC-006)
+- [X] T013 [P] Integration tests in `tests/integration/cart-operations.test.ts`: same product with a different size makes two lines; identical options sum into one; quantity clamped server-side against current stock; the loader never returns `cart.subtotal` — a negative that stays true only if something asserts it (FR-004, FR-009, research R5)
+- [X] T014 [P] Integration tests in `tests/integration/cart-access.test.ts`: customer A cannot read or mutate customer B's cart; a guest cookie naming someone else's cart is refused; a signed-in customer's cart is reachable from a second session with no cookie, proving it follows the account rather than the device; no action returns a raw database message (FR-006, FR-007, SC-010)
 
 **Checkpoint**: A cart can be created, read, mutated and revalidated from the server. Nothing is visible yet.
 

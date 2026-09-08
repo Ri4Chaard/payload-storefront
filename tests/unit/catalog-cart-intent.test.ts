@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  addToCart,
-  buyNow,
   validateIntent,
   type CartIntent,
   type PurchasableProduct,
@@ -118,19 +116,15 @@ describe('the intent that crosses the seam', () => {
     }
   })
 
-  it('resolves ok for a good intent, on both actions', async () => {
-    await expect(addToCart(good, RING)).resolves.toEqual({ ok: true })
-    await expect(buyNow(good, RING)).resolves.toEqual({ ok: true })
-  })
-
-  it('reports the reason for a bad one, on both actions', async () => {
-    await expect(addToCart(withoutSize, RING)).resolves.toEqual({
-      ok: false,
-      reason: 'missing-option',
-    })
-    await expect(buyNow(withoutSize, RING)).resolves.toEqual({
-      ok: false,
-      reason: 'missing-option',
-    })
-  })
+  /**
+   * The two cases that used to sit here — that a good intent resolves and a bad one reports its
+   * reason — moved with the code they were about. Spec 005 T011 removed the placeholder `addToCart`
+   * and `buyNow` wrappers from this module: a cart mutation has to be a Server Action, so the body
+   * they were holding open went to `src/lib/cart/actions.ts`, and forwarding wrappers would have
+   * meant a two-file import cycle for no gain.
+   *
+   * They are now asserted against the real action and a real database, in
+   * `tests/integration/cart-operations.test.ts` — a stronger claim than the one made here, since
+   * the placeholder resolved `{ ok: true }` without a cart existing at all.
+   */
 })

@@ -370,6 +370,38 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
 }
 
 /**
+ * The same read, by id, for a set of pieces at once (spec 005, T008).
+ *
+ * The cart stores product ids, not slugs, and it needs the resolved detail — the stones with their
+ * prices and stock, the sizes with their labels — to say what a line costs and whether it can still
+ * be bought. That is exactly `ProductDetail`, so this is `getProduct` with a different `where` and
+ * a set rather than a single document.
+ *
+ * **`overrideAccess: false` is doing the same work here as everywhere else in this file, and it
+ * matters more.** A piece unpublished after it was added to somebody's cart must come back missing
+ * rather than resolved, because the cart page's whole staleness story (FR-014) is built on the
+ * difference between "this id resolved" and "this id did not". Reading with access overridden would
+ * quietly keep selling a piece the owner had withdrawn.
+ *
+ * Returned as a `Map` because the caller is iterating cart lines and asking "and this one?" — a
+ * list would make every line a linear scan of the catalogue.
+ */
+export async function getProductsByIds(ids: number[]): Promise<Map<number, ProductDetail>> {
+  if (ids.length === 0) return new Map()
+
+  const payload = await client()
+  const { docs } = await payload.find({
+    collection: 'products',
+    depth: 2,
+    limit: 0,
+    where: { id: { in: [...new Set(ids)] } },
+    overrideAccess: false,
+  })
+
+  return new Map(docs.map((product) => [product.id, toProductDetail(product)]))
+}
+
+/**
  * Every published slug, for the product route's `generateStaticParams` (003/T294).
  *
  * **Not `catalogue()`.** That cache holds fully resolved documents because a page draws them;

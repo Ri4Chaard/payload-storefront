@@ -1,10 +1,21 @@
 /**
- * The FR-041 seam (003/T284, contract §6) — where ADD TO CART and BUY NOW go.
+ * What a chosen piece is, and whether it may be bought (003/T284, contract §6).
  *
- * **This spec builds the calling side, the validation and this signature. Spec 004 builds the
- * body.** Wiring the cart is meant to be one file, and this is that file: everything above it —
- * the selectors, the quantity, the two buttons — is finished and does not change when the cart
- * arrives.
+ * **The seam this file opened has been consumed** (spec 005, T011). Spec 003 left `addToCart`,
+ * `buyNow` and an empty `submit` here, holding a shape for the cart to arrive into. The cart has
+ * arrived, and the body went to `src/lib/cart/actions.ts` rather than into those wrappers, for a
+ * reason worth recording:
+ *
+ * - **A cart mutation must be a Server Action**, so it lives in a `'use server'` module. Had these
+ *   wrappers stayed and called into that module, the two files would import each other — a cycle
+ *   between a `'use server'` module and its caller, which is fragile in a way no comment fixes.
+ * - **Forwarding wrappers would have been a second name for one thing**, which Principle II treats
+ *   as the duplication to avoid rather than the seam to keep. Nothing in `src/` ever imported them:
+ *   the product page's buttons were disabled, so there was no caller to protect.
+ *
+ * What stays is the half that was always pure and always right: the intent's shape, and the rule
+ * deciding whether one may be honoured. `src/lib/cart/actions.ts` calls `validateIntent` below
+ * before it touches a cart, on the server, on every request.
  *
  * **The intent carries identifiers and nothing else.** No price, no title, no formatted string.
  * Constitution VI forbids trusting a client-supplied amount, so the seam passes what the server can
@@ -13,9 +24,10 @@
  * a smaller one. `T286` asserts the absence rather than trusting it, because an assertion is the
  * only thing that keeps a negative true.
  *
- * **The validation in front of the body is real.** It is what FR-038 and FR-040 specify, it runs
- * here rather than in a component so that both actions and any later caller share one answer, and
- * it is unit-tested here. Only the last step — actually putting a line in a cart — is deferred.
+ * **The validation is real, and it is not the component's.** It runs on the server, inside the
+ * action, so that ADD TO CART, BUY NOW and any later caller share one answer — and so that a
+ * request arriving without going near the interface is checked exactly as hard as one that did.
+ * It is unit-tested here; the action that calls it is tested against a database.
  */
 
 /** What the customer has chosen, as identifiers the server can resolve. */
@@ -88,39 +100,4 @@ export function validateIntent(
   }
 
   return null
-}
-
-/**
- * The body spec 004 replaces.
- *
- * It resolves `{ ok: true }` and does nothing else. That is deliberate and documented rather than
- * thrown: the validation above it is real, so a caller can already tell a good intent from a bad
- * one, and the only missing step is the line in the cart.
- */
-async function submit(intent: CartIntent, product: PurchasableProduct): Promise<CartIntentResult> {
-  const unmet = validateIntent(intent, product)
-  if (unmet) return { ok: false, reason: unmet.reason }
-
-  // 004 puts the line in the cart here. Until then there is nowhere for it to go, and inventing a
-  // local basket that the real one would have to reconcile is worse than not having one.
-  return { ok: true }
-}
-
-export async function addToCart(
-  intent: CartIntent,
-  product: PurchasableProduct,
-): Promise<CartIntentResult> {
-  return submit(intent, product)
-}
-
-/**
- * Distinct from `addToCart` at the signature even though the bodies agree today, because in 004
- * they diverge: one stays on the page and one leaves for the checkout. A caller written against a
- * single function with a flag would have to be rewritten then; these two do not.
- */
-export async function buyNow(
-  intent: CartIntent,
-  product: PurchasableProduct,
-): Promise<CartIntentResult> {
-  return submit(intent, product)
 }
