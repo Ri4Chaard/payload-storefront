@@ -382,6 +382,32 @@ const productSeeds: ProductSeed[] = [
     inventory: 3,
     attributes: [{ attribute: attributes.metal.id, value: '18k rose gold' }],
   },
+  {
+    /**
+     * A piece titled in Cyrillic (spec 005, FR-028a).
+     *
+     * Not decoration. The messenger message is carried in a URL, and the budget that governs it is
+     * measured AFTER percent-encoding — where one Cyrillic character costs six, because it is two
+     * UTF-8 bytes and each byte becomes a `%XX` escape. A truncation rule tested only against Latin
+     * titles passes while doing nothing for the customers it was written for: the shop sells into
+     * Kazakhstan and the UAE.
+     *
+     * The slug is written out rather than derived. The generator below strips everything outside
+     * `a-z0-9`, so deriving one from this title would produce an empty string.
+     */
+    slug: 'zolotoe-kolco-s-brilliantom',
+    title: 'Золотое кольцо с бриллиантом',
+    category: categories.rings,
+    gallery: [media.ringPackshot.id, media.ringPortrait.id],
+    price: 21500,
+    description: 'Кольцо из белого золота с бриллиантом огранки «принцесса».',
+    collections: [need(collections, 'deia', 'collection').id],
+    sizes: [need(sizes, '2', 'size').id, need(sizes, '2.5', 'size').id],
+    colour: ['clear'],
+    diamondShape: ['princess'],
+    availability: 'made-to-order',
+    attributes: [{ attribute: attributes.metal.id, value: '18k white gold' }],
+  },
 ]
 
 /**

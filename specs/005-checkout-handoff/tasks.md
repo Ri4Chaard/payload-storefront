@@ -39,9 +39,9 @@ Every path is kebab-case — `pnpm check:naming` is a blocking gate.
 **Purpose**: Directory skeleton, the seed shapes later phases assume, and every test file created up
 front so no later task has to invent one.
 
-- [ ] T001 Create `src/lib/cart/` and `src/lib/messengers/` with a placeholder module docstring in each, matching the header style of `src/lib/catalog/queries.ts`
-- [ ] T002 [P] Extend `scripts/seed-catalog.ts` so the seeded catalogue guarantees a piece with both a stone and a size, one with neither, one sold out, and one with a **Cyrillic** title — the four shapes the test tiers below need
-- [ ] T003 [P] Create the empty suites every later task writes into: `tests/unit/cart-totals.test.ts`, `tests/unit/messenger-normalise.test.ts`, `tests/unit/messenger-links.test.ts`, `tests/unit/messenger-message.test.ts`, `tests/integration/cart-access.test.ts`, `tests/integration/cart-operations.test.ts`, `tests/integration/cart-loader.test.ts`, `tests/integration/cart-merge.test.ts`, `tests/integration/cart-handoff.test.ts`, `tests/integration/contact-settings.test.ts`, `tests/integration/cart-retention.test.ts`, `tests/e2e/cart.spec.ts`
+- [X] T001 Create `src/lib/cart/` and `src/lib/messengers/` with a placeholder module docstring in each, matching the header style of `src/lib/catalog/queries.ts`
+- [X] T002 [P] Extend `scripts/seed-catalog.ts` so the seeded catalogue guarantees a piece with both a stone and a size, one with neither, one sold out, and one with a **Cyrillic** title — the four shapes the test tiers below need
+- [X] T003 [P] Create the empty suites every later task writes into: `tests/unit/cart-totals.test.ts`, `tests/unit/messenger-normalise.test.ts`, `tests/unit/messenger-links.test.ts`, `tests/unit/messenger-message.test.ts`, `tests/integration/cart-access.test.ts`, `tests/integration/cart-operations.test.ts`, `tests/integration/cart-loader.test.ts`, `tests/integration/cart-merge.test.ts`, `tests/integration/cart-handoff.test.ts`, `tests/integration/contact-settings.test.ts`, `tests/integration/cart-retention.test.ts`, `tests/e2e/cart.spec.ts`
 
 ---
 
