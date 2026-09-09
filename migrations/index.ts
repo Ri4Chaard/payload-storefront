@@ -7,6 +7,7 @@ import * as migration_20260902_081353_drop_account_copy_global from './20260902_
 import * as migration_20260902_081401_account_settings from './20260902_081401_account_settings';
 import * as migration_20260902_112639_drop_marketing_enabled from './20260902_112639_drop_marketing_enabled';
 import * as migration_20260903_074224_jobs_queue from './20260903_074224_jobs_queue';
+import * as migration_20260909_103616_contact_settings from './20260909_103616_contact_settings';
 
 export const migrations = [
   {
@@ -52,6 +53,11 @@ export const migrations = [
   {
     up: migration_20260903_074224_jobs_queue.up,
     down: migration_20260903_074224_jobs_queue.down,
-    name: '20260903_074224_jobs_queue'
+    name: '20260903_074224_jobs_queue',
+  },
+  {
+    up: migration_20260909_103616_contact_settings.up,
+    down: migration_20260909_103616_contact_settings.down,
+    name: '20260909_103616_contact_settings'
   },
 ];

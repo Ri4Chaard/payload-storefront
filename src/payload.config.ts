@@ -29,6 +29,7 @@ import {
   promoteDefaultAfterDelete,
 } from './fields/address-hooks'
 import { AccountSettings } from './globals/account-settings'
+import { ContactSettings } from './globals/contact-settings'
 import { Shop } from './globals/shop'
 import { purgeAccountsTask } from './jobs/purge-accounts'
 import {
@@ -82,7 +83,7 @@ export default buildConfig({
     VerificationCodes,
   ],
 
-  globals: [Shop, AccountSettings],
+  globals: [Shop, AccountSettings, ContactSettings],
 
   plugins: [
     withPrunedEcommerceTypes(

@@ -146,21 +146,21 @@ the `carts` table.
 
 ### Tests
 
-- [ ] T040 [P] [US5] Unit tests in `tests/unit/messenger-normalise.test.ts`: `+1 (555) 010 20-30` → `15550102030`; leading zeros and international prefixes stripped; `@aurum`, a bare username and a `t.me` URL all normalise identically (FR-035, FR-036, SC-007)
-- [ ] T041 [P] [US5] Unit tests in `tests/unit/messenger-links.test.ts`: built links match the verified `wa.me`, `t.me` and `ig.me` formats exactly, and Instagram reports `carriesMessage: false` (FR-022, research R10)
-- [ ] T042 [P] [US5] Integration tests in `tests/integration/contact-settings.test.ts`: an enabled row with an empty or malformed destination cannot be saved; a *disabled* row with a broken one can; changing `handle` leaves `destination` untouched and the reverse; a template without `{{items}}` is refused; a customer session cannot update the global (FR-034, FR-037, FR-039, FR-040, FR-041, SC-012)
+- [X] T040 [P] [US5] Unit tests in `tests/unit/messenger-normalise.test.ts`: `+1 (555) 010 20-30` → `15550102030`; leading zeros and international prefixes stripped; `@aurum`, a bare username and a `t.me` URL all normalise identically (FR-035, FR-036, SC-007)
+- [X] T041 [P] [US5] Unit tests in `tests/unit/messenger-links.test.ts`: built links match the verified `wa.me`, `t.me` and `ig.me` formats exactly, and Instagram reports `carriesMessage: false` (FR-022, research R10)
+- [X] T042 [P] [US5] Integration tests in `tests/integration/contact-settings.test.ts`: an enabled row with an empty or malformed destination cannot be saved; a *disabled* row with a broken one can; changing `handle` leaves `destination` untouched and the reverse; a template without `{{items}}` is refused; a customer session cannot update the global (FR-034, FR-037, FR-039, FR-040, FR-041, SC-012)
 
 ### Implementation
 
-- [ ] T043 [P] [US5] Implement `normaliseDestination` in `src/lib/messengers/normalise.ts` per [messenger-handoff.md §1](./contracts/messenger-handoff.md), with refusal messages that name the field and show the shape rather than a regex
-- [ ] T044 [P] [US5] Implement `buildLink` and the `MessengerLink` type in `src/lib/messengers/links.ts`, citing the Telegram and WhatsApp sources in the module docstring
-- [ ] T045 [US5] Model the `contact-settings` global in `src/globals/contact-settings.ts` per [data-model.md §1.1](./data-model.md) — array of messenger rows plus the message template, every field with a label and an admin description, `read` public and `update` `isAdmin` stated explicitly (FR-023, FR-033, FR-034) — depends on T043
-- [ ] T046 [US5] Attach `revalidateGlobalOnChange` to the global's `afterChange` in `src/globals/contact-settings.ts` so a saved change reaches cached pages without a deployment (FR-042) — depends on T045
-- [ ] T047 [US5] Register the global in `src/payload.config.ts` beside `Shop` and `AccountSettings` — depends on T045
-- [ ] T048 [US5] Generate and commit the migration for `contact-settings`, then regenerate `src/payload-types.ts` in the same commit — depends on T047
-- [ ] T049 [US5] Verify the rollback of the new migration in `migrations/` against a seeded, production-sized content set and record the result — depends on T048
-- [ ] T050 [US5] Implement the cached server-only reader (`getMessengers`, `getMessageTemplate`) in `src/lib/messengers/settings.ts`, returning enabled rows in array order — depends on T047
-- [ ] T051 [US5] Editorial verification of `src/globals/contact-settings.ts`: create and reorder rows in the Payload admin, confirm the drag handles work and every description reads sensibly to someone who did not write it (FR-038, FR-041) — depends on T048
+- [X] T043 [P] [US5] Implement `normaliseDestination` in `src/lib/messengers/normalise.ts` per [messenger-handoff.md §1](./contracts/messenger-handoff.md), with refusal messages that name the field and show the shape rather than a regex
+- [X] T044 [P] [US5] Implement `buildLink` and the `MessengerLink` type in `src/lib/messengers/links.ts`, citing the Telegram and WhatsApp sources in the module docstring
+- [X] T045 [US5] Model the `contact-settings` global in `src/globals/contact-settings.ts` per [data-model.md §1.1](./data-model.md) — array of messenger rows plus the message template, every field with a label and an admin description, `read` public and `update` `isAdmin` stated explicitly (FR-023, FR-033, FR-034) — depends on T043
+- [X] T046 [US5] Attach `revalidateGlobalOnChange` to the global's `afterChange` in `src/globals/contact-settings.ts` so a saved change reaches cached pages without a deployment (FR-042) — depends on T045
+- [X] T047 [US5] Register the global in `src/payload.config.ts` beside `Shop` and `AccountSettings` — depends on T045
+- [X] T048 [US5] Generate and commit the migration for `contact-settings`, then regenerate `src/payload-types.ts` in the same commit — depends on T047
+- [X] T049 [US5] Verify the rollback of the new migration in `migrations/` against a seeded, production-sized content set and record the result — depends on T048
+- [X] T050 [US5] Implement the cached server-only reader (`getMessengers`, `getMessageTemplate`) in `src/lib/messengers/settings.ts`, returning enabled rows in array order — depends on T047
+- [X] T051 [US5] Editorial verification of `src/globals/contact-settings.ts`: create and reorder rows in the Payload admin, confirm the drag handles work and every description reads sensibly to someone who did not write it (FR-038, FR-041) — depends on T048
 
 **Checkpoint**: The shop's real messenger accounts are configurable, validated, and readable by the storefront.
 

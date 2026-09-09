@@ -127,11 +127,13 @@ export interface Config {
   globals: {
     shop: Shop;
     'account-settings': AccountSetting;
+    'contact-settings': ContactSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     shop: ShopSelect<false> | ShopSelect<true>;
     'account-settings': AccountSettingsSelect<false> | AccountSettingsSelect<true>;
+    'contact-settings': ContactSettingsSelect<false> | ContactSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -2236,6 +2238,45 @@ export interface AccountSetting {
   createdAt?: string | null;
 }
 /**
+ * Where customers are sent when they finish an order, and what their message says. Changes appear on the storefront immediately — no deployment.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-settings".
+ */
+export interface ContactSetting {
+  id: number;
+  /**
+   * The platforms offered when a customer completes their order. Drag to reorder — customers see them in this order.
+   */
+  messengers?:
+    | {
+        /**
+         * Which service this row opens.
+         */
+        platform: 'instagram' | 'telegram' | 'whatsapp';
+        /**
+         * WhatsApp: the phone number, written however you like — “+1 (555) 010 20-30” is fine. Telegram and Instagram: the username, with or without the @.
+         */
+        destination: string;
+        /**
+         * What customers see beneath the platform name, e.g. “@aurum”. This is a label — it does not have to match the account above.
+         */
+        handle: string;
+        /**
+         * Untick to hide the row from customers without losing the account details.
+         */
+        enabled?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The message customers arrive with. {{items}} is replaced by their selection, {{total}} by the total, and {{customer}} by their name and delivery address when they are signed in and have saved them — it disappears when they have not. Leave {{items}} in, or the seller receives an empty request.
+   */
+  messageTemplate?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -2275,6 +2316,25 @@ export interface ShopSelect<T extends boolean = true> {
 export interface AccountSettingsSelect<T extends boolean = true> {
   defaultCountry?: T;
   shippingCountries?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-settings_select".
+ */
+export interface ContactSettingsSelect<T extends boolean = true> {
+  messengers?:
+    | T
+    | {
+        platform?: T;
+        destination?: T;
+        handle?: T;
+        enabled?: T;
+        id?: T;
+      };
+  messageTemplate?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
