@@ -37,8 +37,20 @@ export interface ModalProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   title: string
   /** Right-aligned actions. The design is always Cancel followed by a primary. */
   footer?: React.ReactNode
-  /** `md` is the drawn 800px. `sm` is for a confirmation with one sentence in it. */
-  size?: 'md' | 'sm'
+  /**
+   * `md` is the drawn 800px (spec 004's address and password modals). `lg` is the 500px both of
+   * spec 005's dialogs are drawn at — the removal confirmation and the messenger handoff. `sm` is
+   * 450px, for a confirmation with one sentence in it.
+   */
+  size?: 'lg' | 'md' | 'sm'
+  /**
+   * Where the heading sits.
+   *
+   * `start` is spec 004's arrangement: heading left, close control right, on one line. `center`
+   * is what spec 005 draws — a centred heading with the close mark floated over the corner, which
+   * only works because these dialogs have no left-aligned form beneath them to align with.
+   */
+  align?: 'center' | 'start'
   /** Focus returns here on close. Defaults to whatever held it when the modal opened. */
   triggerRef?: React.RefObject<HTMLElement | null>
   /** Where focus lands on open. Defaults to the first focusable control in the panel. */
@@ -53,6 +65,7 @@ export function Modal({
   title,
   footer,
   size = 'md',
+  align = 'start',
   triggerRef,
   initialFocusRef,
   closeLabel = 'Close',
@@ -97,9 +110,8 @@ export function Modal({
           // Full-bleed on a phone, a centred box from `sm` up.
           'inset-x-0 top-auto bottom-0 max-h-[90dvh] w-full',
           'sm:inset-auto sm:top-1/2 sm:left-1/2 sm:max-h-[85dvh] sm:-translate-x-1/2 sm:-translate-y-1/2',
-          size === 'md'
-            ? 'sm:w-200 sm:max-w-[calc(100vw-2.5rem)]'
-            : 'sm:w-112.5 sm:max-w-[calc(100vw-2.5rem)]',
+          'sm:max-w-[calc(100vw-2.5rem)]',
+          size === 'md' ? 'sm:w-200' : size === 'lg' ? 'sm:w-125' : 'sm:w-112.5',
           // Translate only — the panel never fades. `Drawer` makes the same choice, and the reason
           // is not stylistic: a surface at partial opacity genuinely has the contrast of the blend
           // beneath it, so a fading panel spends its entrance below AA. Measured at 0.28 opacity
@@ -114,7 +126,14 @@ export function Modal({
         )}
         {...props}
       >
-        <div className="flex items-start justify-between gap-5 px-7.5 pt-7.5 pb-5">
+        <div
+          className={cn(
+            'gap-5 px-7.5 pt-7.5 pb-5',
+            // Centred: the close mark leaves the flow and floats over the corner, so the heading is
+            // centred against the panel rather than against whatever is left after the button.
+            align === 'center' ? 'relative text-center' : 'flex items-start justify-between',
+          )}
+        >
           <h2 id={titleId} className="text-heading-1 text-neutral-primary">
             {title}
           </h2>
@@ -124,7 +143,10 @@ export function Modal({
             label={closeLabel}
             type="button"
             onClick={onClose}
-            className="text-neutral-primary hover:text-primary-default mt-1 shrink-0 [&_svg]:size-5"
+            className={cn(
+              'text-neutral-primary hover:text-primary-default shrink-0 [&_svg]:size-5',
+              align === 'center' ? 'absolute top-7.5 right-7.5' : 'mt-1',
+            )}
           />
         </div>
 

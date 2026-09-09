@@ -7,12 +7,15 @@
  * could change a price in the admin and watch the old one stay on the page until the next
  * deployment.
  *
- * **Three routes are deliberately absent from this file, for the same reason: they are not cached.**
+ * **Four routes are deliberately absent from this file, for the same reason: they are not cached.**
  * `/[category]` and `/all-jewelry` read `searchParams` — a filtered grid is a function of the query
  * string — and `/` is `force-dynamic` because a home page prerendered from a database the container
- * build cannot reach would bake empty and stay empty. If any of them is ever made cacheable, its
- * path belongs in `invalidate()` below, and this paragraph is where to look for why it is not there
- * already.
+ * build cannot reach would bake empty and stay empty. `/cart` (spec 005) is the fourth: it reads
+ * the session and the cart cookie, so it is per-visitor by construction and there is no shared
+ * entry to invalidate. A cart mutation settles with `refresh()` instead, which refreshes the one
+ * client that asked — `revalidatePath` there would evict catalogue pages for everybody because
+ * somebody changed a quantity. If any of these is ever made cacheable, its path belongs in
+ * `invalidate()` below, and this paragraph is where to look for why it is not there already.
  *
  * **There is no time-based revalidation anywhere.** An interval is a guess in both directions: too
  * long and a publish is late, too short and pages are rebuilt for nobody. Every write that can

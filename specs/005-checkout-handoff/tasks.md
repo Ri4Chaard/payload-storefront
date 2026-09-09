@@ -113,22 +113,22 @@ the `carts` table.
 
 ### Tests
 
-- [ ] T027 [P] [US2] Integration tests in `tests/integration/cart-loader.test.ts` for the four issue kinds in [cart-loader.md §4](./contracts/cart-loader.md) — unpublished, unavailable, price-changed, quantity-reduced — each still rendering its line and each excluded from the total as specified; plus a deleted product yielding a named line with `href: null` rather than throwing (FR-014)
+- [X] T027 [P] [US2] Integration tests in `tests/integration/cart-loader.test.ts` for the four issue kinds in [cart-loader.md §4](./contracts/cart-loader.md) — unpublished, unavailable, price-changed, quantity-reduced — each still rendering its line and each excluded from the total as specified; plus a deleted product yielding a named line with `href: null` rather than throwing (FR-014)
 
 ### Implementation
 
-- [ ] T028 [P] [US2] Add the 500px panel size and a centred-heading option to `src/components/ui/modal/modal.tsx` as props, extending rather than copying (research R13, Principle II)
-- [ ] T029 [P] [US2] Build `src/components/commerce/cart-lines/` — the card wrapping the existing `CartItem` rows as a `<ul>`, with the chosen stone and size shown on each line (FR-008)
-- [ ] T030 [US2] Add the REMOVE ITEM confirmation to `src/components/commerce/cart-lines/`, using `Modal` with the centred heading, dismissible by close mark, backdrop and Escape, removing nothing until confirmed (FR-010) — depends on T028
-- [ ] T031 [P] [US2] Build `src/components/commerce/order-summary/` — item count, shipping, subtotal, the CHECKOUT button and the unticked terms agreement linking to both policies (FR-011, FR-018)
-- [ ] T032 [US2] Refuse CHECKOUT until the agreement is ticked in `src/components/commerce/order-summary/`, naming the agreement as the reason (FR-018) — depends on T031
-- [ ] T033 [P] [US2] Build `src/components/commerce/cart-empty/` following the existing `listing-empty` pattern, with a route back into the catalogue and no summary card (FR-015)
-- [ ] T034 [US2] Build the route `src/app/(frontend)/(shop)/cart/page.tsx` — server component, `noindex`, composing the three components above from `getCart()` — depends on T008, T029, T031, T033
-- [ ] T035 [US2] Surface issue lines in `src/app/(frontend)/(shop)/cart/page.tsx` with the reason in **text**, and block CHECKOUT until they are acknowledged (FR-014) — depends on T034
-- [ ] T036 [US2] Wire the quantity stepper and bin in `src/components/commerce/cart-lines/` to `setLineQuantity` and `removeLine`, with per-row pending states (FR-009) — depends on T009, T030
-- [ ] T037 [US2] Add the note to `src/lib/revalidate.ts` recording `/cart` as a fourth deliberately-uncached route, beside the three already documented there (research R12)
-- [ ] T038 [P] [US2] Stories in `src/components/commerce/{cart-lines,order-summary,cart-empty}/*.stories.tsx` covering filled, single-line, stale-line and empty states
-- [ ] T039 [US2] Verify `src/app/(frontend)/(shop)/cart/page.tsx` against nodes `255:3635`, `425:11164` and `425:11269` at 1920, 768 and 390 — no horizontal scroll at any width (FR-017) — depends on T034
+- [X] T028 [P] [US2] Add the 500px panel size and a centred-heading option to `src/components/ui/modal/modal.tsx` as props, extending rather than copying (research R13, Principle II)
+- [X] T029 [P] [US2] Build `src/components/commerce/cart-lines/` — the card wrapping the existing `CartItem` rows as a `<ul>`, with the chosen stone and size shown on each line (FR-008)
+- [X] T030 [US2] Add the REMOVE ITEM confirmation to `src/components/commerce/cart-lines/`, using `Modal` with the centred heading, dismissible by close mark, backdrop and Escape, removing nothing until confirmed (FR-010) — depends on T028
+- [X] T031 [P] [US2] Build `src/components/commerce/order-summary/` — item count, shipping, subtotal, the CHECKOUT button and the unticked terms agreement linking to both policies (FR-011, FR-018)
+- [X] T032 [US2] Refuse CHECKOUT until the agreement is ticked in `src/components/commerce/order-summary/`, naming the agreement as the reason (FR-018) — depends on T031
+- [X] T033 [P] [US2] Build `src/components/commerce/cart-empty/` following the existing `listing-empty` pattern, with a route back into the catalogue and no summary card (FR-015)
+- [X] T034 [US2] Build the route `src/app/(frontend)/(shop)/cart/page.tsx` — server component, `noindex`, composing the three components above from `getCart()` — depends on T008, T029, T031, T033
+- [X] T035 [US2] Surface issue lines in `src/app/(frontend)/(shop)/cart/page.tsx` with the reason in **text**, and block CHECKOUT until they are acknowledged (FR-014) — depends on T034
+- [X] T036 [US2] Wire the quantity stepper and bin in `src/components/commerce/cart-lines/` to `setLineQuantity` and `removeLine`, with per-row pending states (FR-009) — depends on T009, T030
+- [X] T037 [US2] Add the note to `src/lib/revalidate.ts` recording `/cart` as a fourth deliberately-uncached route, beside the three already documented there (research R12)
+- [X] T038 [P] [US2] Stories in `src/components/commerce/{cart-lines,order-summary,cart-empty}/*.stories.tsx` covering filled, single-line, stale-line and empty states
+- [X] T039 [US2] Verify `src/app/(frontend)/(shop)/cart/page.tsx` against nodes `255:3635`, `425:11164` and `425:11269` at 1920, 768 and 390 — no horizontal scroll at any width (FR-017) — depends on T034
 
 **Checkpoint**: US1 and US2 both work independently. A customer can assemble and correct a selection.
 
