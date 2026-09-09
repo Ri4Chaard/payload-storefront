@@ -6,6 +6,7 @@ import { getProductsByIds } from '@/lib/catalog/queries'
 import type { ProductDetail } from '@/lib/catalog/types'
 
 import { ownerLocalReq, ownerRequest, payloadClient, type CartOwner } from './session'
+import type { CartOpResult } from './types'
 
 /**
  * Everything a cart mutation does, *given* an owner and a cart (spec 005, T009).
@@ -20,12 +21,6 @@ import { ownerLocalReq, ownerRequest, payloadClient, type CartOwner } from './se
  * Nothing here touches `next/headers`, and nothing here decides *who* the caller is. That is
  * `./session.ts`, and it is re-derived per call by `./actions.ts` before any of this runs.
  */
-
-export type CartOpFailure = 'error' | 'missing-option' | 'not-found' | 'unavailable'
-
-export type CartOpField = 'diamond' | 'product' | 'quantity' | 'size'
-
-export type CartOpResult = { ok: true } | { field?: CartOpField; ok: false; reason: CartOpFailure }
 
 /** What `validateIntent` needs, taken from the published catalogue and never from the caller. */
 function purchasable(product: ProductDetail): PurchasableProduct {

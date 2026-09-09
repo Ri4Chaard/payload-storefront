@@ -85,21 +85,21 @@ the `carts` table.
 
 ### Tests
 
-- [ ] T015 [P] [US1] Unit test in `tests/unit/catalog-cart-intent.test.ts` extending the existing suite: a size chosen by *value* maps to the right numeric `sizeId` (research R16)
-- [ ] T016 [P] [US1] Integration tests in `tests/integration/cart-merge.test.ts`: merging a guest cart keeps both sizes of one ring, sums only true matches, drops nothing from either side, and deletes the guest cart afterwards (FR-005)
-- [ ] T017 [P] [US1] Integration tests in `tests/integration/cart-operations.test.ts`: adding an unpublished or sold-out product, or one with an unmade required choice, is refused with the field named (FR-002, FR-003)
+- [X] T015 [P] [US1] Unit test in `tests/unit/catalog-cart-intent.test.ts` extending the existing suite: a size chosen by *value* maps to the right numeric `sizeId` (research R16)
+- [X] T016 [P] [US1] Integration tests in `tests/integration/cart-merge.test.ts`: merging a guest cart keeps both sizes of one ring, sums only true matches, drops nothing from either side, and deletes the guest cart afterwards (FR-005)
+- [X] T017 [P] [US1] Integration tests in `tests/integration/cart-operations.test.ts`: adding an unpublished or sold-out product, or one with an unmade required choice, is refused with the field named (FR-002, FR-003)
 
 ### Implementation
 
-- [ ] T018 [US1] Implement `mergeGuestCart` in `src/lib/cart/merge.ts` using `cartItemMatcher` from `src/collections/carts.ts`, deleting the guest cart and clearing both cookies in that order — the plugin's own merge collapses sizes (research R4)
-- [ ] T019 [US1] Call `mergeGuestCart` from the sign-in action in `src/lib/auth/actions.ts`, logging and swallowing failure so a merge can never block a sign-in — depends on T018
-- [ ] T020 [US1] Map the chosen size's `value` back to its `SizeOption.id` in `src/components/commerce/product-purchase/product-purchase.tsx`, with a comment naming the trap: the stone select uses ids, the size select uses values (research R16)
-- [ ] T021 [US1] Enable ADD TO CART in `src/components/commerce/product-purchase/product-purchase.tsx` — wire it to `addToCart`, add pending and success states, and remove the "deliberately and temporarily disabled" note from the module docstring — depends on T011, T020
-- [ ] T022 [US1] Render the refusal message beside the action in `src/components/commerce/product-purchase/product-purchase.tsx`, naming the unmade or unavailable choice in words rather than colour, via `role="status"` — depends on T021
-- [ ] T023 [P] [US1] Build the client cart-count provider in `src/components/layout/cart-count/`, seeded from the readable cookie and updated from each action's returned `itemCount` (research R8)
-- [ ] T024 [US1] Give the cart `IconButton` in `src/components/layout/header/header.tsx` `href="/cart"` — `IconButton` already supports `href`, and the button currently has none, so the header counts the cart but cannot reach it (FR-016)
-- [ ] T025 [US1] Mount the provider in `src/app/(frontend)/layout.tsx` and feed `cartCount` to the existing `Header` prop — **without** calling `cookies()` in the layout, which would make every route dynamic and cost the prerendered catalogue — depends on T023
-- [ ] T026 [P] [US1] Update `src/components/commerce/product-purchase/product-purchase.stories.tsx` with live-action stories: pending, refused-for-missing-size, refused-for-sold-out
+- [X] T018 [US1] Implement `mergeGuestCart` in `src/lib/cart/merge.ts` using `cartItemMatcher` from `src/collections/carts.ts`, deleting the guest cart and clearing both cookies in that order — the plugin's own merge collapses sizes (research R4)
+- [X] T019 [US1] Call `mergeGuestCart` from the sign-in action in `src/lib/auth/actions.ts`, logging and swallowing failure so a merge can never block a sign-in — depends on T018
+- [X] T020 [US1] Map the chosen size's `value` back to its `SizeOption.id` in `src/components/commerce/product-purchase/product-purchase.tsx`, with a comment naming the trap: the stone select uses ids, the size select uses values (research R16)
+- [X] T021 [US1] Enable ADD TO CART in `src/components/commerce/product-purchase/product-purchase.tsx` — wire it to `addToCart`, add pending and success states, and remove the "deliberately and temporarily disabled" note from the module docstring — depends on T011, T020
+- [X] T022 [US1] Render the refusal message beside the action in `src/components/commerce/product-purchase/product-purchase.tsx`, naming the unmade or unavailable choice in words rather than colour, via `role="status"` — depends on T021
+- [X] T023 [P] [US1] Build the client cart-count provider in `src/components/layout/cart-count/`, seeded from the readable cookie and updated from each action's returned `itemCount` (research R8)
+- [X] T024 [US1] Give the cart `IconButton` in `src/components/layout/header/header.tsx` `href="/cart"` — `IconButton` already supports `href`, and the button currently has none, so the header counts the cart but cannot reach it (FR-016)
+- [X] T025 [US1] Mount the provider in `src/app/(frontend)/layout.tsx` and feed `cartCount` to the existing `Header` prop — **without** calling `cookies()` in the layout, which would make every route dynamic and cost the prerendered catalogue — depends on T023
+- [X] T026 [P] [US1] Update `src/components/commerce/product-purchase/product-purchase.stories.tsx` with live-action stories: pending, refused-for-missing-size, refused-for-sold-out
 
 **Checkpoint**: US1 is independently demonstrable — a visitor can fill a cart, watch the badge, and click through to a page that does not exist yet.
 

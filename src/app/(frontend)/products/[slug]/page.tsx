@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/commerce'
+import { addToCart } from '@/lib/cart/actions'
 import { JewelryCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
 import { minorUnitDigits } from '@/lib/catalog/price'
@@ -142,6 +143,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               visitor on a phone is the one least able to go and find it elsewhere.
             */}
             <ProductPurchase
+              productId={product.id}
               price={product.price}
               fromPrice={product.fromPrice}
               description={product.description}
@@ -149,6 +151,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               sizes={product.sizes}
               available={product.available}
               maxQuantity={product.maxQuantity}
+              onAddToCart={addToCart}
             />
 
             <ProductDetails

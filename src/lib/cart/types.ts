@@ -104,3 +104,38 @@ export function emptyCart(): CartView {
     empty: true,
   }
 }
+
+/**
+ * What a cart mutation answers with.
+ *
+ * **Here, in the pure module, rather than beside the Server Action that produces it.** A client
+ * component needs this type to describe the action it is handed, and importing it from
+ * `./actions.ts` — even as a type — puts a `'use server'` module on a `'use client'` file's import
+ * graph. `src/lib/addresses/types.ts` records what that costs: the whole Payload config follows it
+ * into the browser bundle, where it fails on Node built-ins. It was proven again here, by a
+ * Storybook build that died inside prettier.
+ */
+export type CartActionFailure = 'error' | 'missing-option' | 'not-found' | 'unavailable'
+
+/** Which control the customer has to go and fix. The sentence belongs to whoever renders it. */
+export type CartActionField = 'diamond' | 'product' | 'quantity' | 'size'
+
+export type CartActionResult =
+  | { itemCount: number; ok: true }
+  | { field?: CartActionField; ok: false; reason: CartActionFailure }
+
+/** The same answer before the badge count is attached — what `./operations.ts` returns. */
+export type CartOpResult =
+  | { ok: true }
+  | { field?: CartActionField; ok: false; reason: CartActionFailure }
+
+/**
+ * The two cookie names.
+ *
+ * **Here rather than in `./cookie.ts`, because the client provider needs one of them.** That module
+ * imports `next/headers`, which is server-only — a `'use client'` file importing it fails the
+ * production build outright, which is how this was found. The names are shared data, not behaviour,
+ * so they live in the module both sides may see. Reading and writing stays in `./cookie.ts`.
+ */
+export const CART_COOKIE = 'aurum-cart'
+export const CART_COUNT_COOKIE = 'aurum-cart-count'

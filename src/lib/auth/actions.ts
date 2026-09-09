@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
 import { requireCustomer, requireCustomerUser, type CustomerUser } from '@/lib/auth/dal'
 import { authenticateCustomer } from '@/lib/auth/login'
+import { mergeCartOnSignIn } from '@/lib/cart/actions'
 import { changeCustomerPassword, completePasswordReset } from '@/lib/auth/reset'
 import { mintResetHandle } from '@/lib/auth/reset-handle'
 import { clearSession, establishSession } from '@/lib/auth/session'
@@ -194,6 +195,11 @@ export async function signIn(
   }
 
   await establishSession(outcome.token)
+
+  // Their guest cart follows them into the account (spec 005, FR-005). Before the redirect, so the
+  // page they land on already shows the merged cart — and swallowing its own failures, so a merge
+  // can never be the reason a sign-in does not work.
+  await mergeCartOnSignIn(outcome.customerId)
 
   // The header and any cached shell were rendered for an anonymous visitor. Without this the
   // customer is signed in and the page still says otherwise until something else forces a refresh.

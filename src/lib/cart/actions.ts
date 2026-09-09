@@ -2,20 +2,15 @@
 
 import { refresh } from 'next/cache'
 
+import type { CustomerUser } from '@/lib/auth/dal'
 import type { CartIntent } from '@/lib/catalog/cart-intent'
 
-import { clearCartCookies, writeCartCookie, writeCartCount } from './cookie'
+import { clearCartCookies, readCartCookie, writeCartCookie, writeCartCount } from './cookie'
 import { getCartCount } from './loader'
-import {
-  addLine,
-  changeQuantity,
-  checkIntent,
-  createCartFor,
-  dropLine,
-  type CartOpField,
-  type CartOpFailure,
-} from './operations'
-import { findCartId, resolveCartOwner, type CartOwner } from './session'
+import { mergeGuestCart } from './merge'
+import { addLine, changeQuantity, checkIntent, createCartFor, dropLine } from './operations'
+import { findCartId, payloadClient, resolveCartOwner, type CartOwner } from './session'
+import type { CartActionResult } from './types'
 
 /**
  * The whole mutation surface of the cart (spec 005, T009, T010,
@@ -43,12 +38,6 @@ import { findCartId, resolveCartOwner, type CartOwner } from './session'
  * because one person changed a quantity. `refresh()` refreshes the calling client's router and
  * nothing else, and may only be called from a Server Action — which is why all of these are one.
  */
-
-export type CartActionFailure = CartOpFailure
-
-export type CartActionResult =
-  | { itemCount: number; ok: true }
-  | { field?: CartOpField; ok: false; reason: CartActionFailure }
 
 /**
  * The owner's cart, creating one if they have none.
@@ -151,8 +140,47 @@ export async function removeLine(lineId: string): Promise<CartActionResult> {
 }
 
 /**
- * Forget a guest cart entirely — used by the sign-in merge (spec 005 US1) once its lines have been
- * carried across. Here so that clearing the credential and clearing the count stay one operation.
+ * Carry a guest cart into the account being signed into (FR-005, T019).
+ *
+ * Called by `src/lib/auth/actions.ts` immediately after the session is established. It cannot use
+ * `resolveCartOwner`: that reads the *incoming* request's headers, which do not carry the cookie
+ * that was just written, so it would still answer "guest". The customer is therefore loaded by the
+ * id the authentication returned.
+ *
+ * **Failure is swallowed on purpose.** A merge that throws must never stop somebody signing in —
+ * the worst case is a cart that stays where it was, which the customer can rebuild, against a
+ * sign-in that failed for reasons they cannot see or fix.
+ */
+export async function mergeCartOnSignIn(customerId: number): Promise<void> {
+  try {
+    const cookie = await readCartCookie()
+    if (!cookie) return
+
+    const payload = await payloadClient()
+    const user = await payload.findByID({
+      collection: 'customers',
+      id: customerId,
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    await mergeGuestCart(
+      { kind: 'customer', user: { ...user, collection: 'customers' } as CustomerUser },
+      { cartId: cookie.id, secret: cookie.secret },
+    )
+  } catch {
+    // Deliberately silent. See above.
+  } finally {
+    // The guest credential is spent either way: the cart it named has been merged, was never
+    // reachable, or belongs to somebody else. Leaving it would let a later request write to a cart
+    // this customer does not own.
+    await clearCartCookies()
+  }
+}
+
+/**
+ * Forget a guest cart entirely. Here so that clearing the credential and clearing the count stay
+ * one operation with one caller.
  */
 export async function forgetGuestCart(): Promise<void> {
   await clearCartCookies()

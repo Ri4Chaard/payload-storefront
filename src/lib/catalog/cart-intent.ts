@@ -101,3 +101,34 @@ export function validateIntent(
 
   return null
 }
+
+/**
+ * What the product page holds, turned into an intent (spec 005, T020, research R16).
+ *
+ * **A function rather than three lines in the component, because of one specific trap.** The two
+ * selects beside each other on that page use opposite conventions: the stone's options are built as
+ * `value: String(option.id)` and its handler does `Number(value)`, while the size's are built as
+ * `value: option.value` — so the component holds `"6.5"`, a label, where the database wants a
+ * numeric id. `Number("6.5")` is `6.5`, which is not an id, does not throw, and would be stored as
+ * a broken relationship. Written here it is covered by a test; written inline it is covered by
+ * nobody.
+ *
+ * An unmatched size yields `undefined` rather than a guess, so `validateIntent` refuses it as a
+ * missing choice — which is the correct outcome for a value that names no size of this piece.
+ */
+export function intentFrom(args: {
+  diamondId: null | number
+  productId: number
+  quantity: number
+  sizeValue: null | string
+  sizes: { id: number; value: string }[]
+}): CartIntent {
+  const size = args.sizeValue === null ? undefined : args.sizes.find((option) => option.value === args.sizeValue)
+
+  return {
+    productId: args.productId,
+    quantity: args.quantity,
+    ...(args.diamondId === null ? {} : { variantId: args.diamondId }),
+    ...(size === undefined ? {} : { sizeId: size.id }),
+  }
+}

@@ -160,6 +160,22 @@ describe('what may be added (FR-002, FR-003)', () => {
     expect(withoutSize).toEqual({ ok: false, reason: 'missing-option', field: 'size' })
   })
 
+  /**
+   * The seeded ear climbers are stock-tracked at zero — visible in the listing, unbuyable on their
+   * page. FR-002 wants the refusal to name the piece rather than send the visitor to fix a stone.
+   */
+  it('refuses a piece that is stock tracked and sold out, naming the piece', async () => {
+    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-ear-climbers')
+    expect(soldOut, 'the seed keeps one sold-out piece so this rule is exercised').not.toBeNull()
+    expect(soldOut!.available).toBe(false)
+
+    expect(await checkIntent({ productId: soldOut!.id, quantity: 1 })).toEqual({
+      ok: false,
+      reason: 'unavailable',
+      field: 'product',
+    })
+  })
+
   it('accepts a piece that offers no choices at all', async () => {
     const checked = await checkIntent({ productId: pendant.id, quantity: 1 })
     expect(checked.ok).toBe(true)

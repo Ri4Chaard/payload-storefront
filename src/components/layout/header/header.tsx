@@ -7,6 +7,7 @@ import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/breadcrumbs'
 import { Container } from '@/components/ui/container'
 import { IconButton } from '@/components/ui/icon-button'
 import { NavLink } from '@/components/ui/nav-link'
+import { useCartCount } from '@/components/layout/cart-count'
 import { LanguageSelector, type Locale } from '@/components/layout/language-selector'
 import { Logo } from '@/components/layout/logo'
 import { MobileNav } from '@/components/layout/mobile-nav'
@@ -43,6 +44,10 @@ export interface HeaderProps {
   reveal?: boolean
   /** Renders the trail bar beneath the header. Omit or empty for the plain header. */
   breadcrumbs?: BreadcrumbItem[]
+  /**
+   * Overrides the live count. Stories and the odd fixed rendering want a number they control;
+   * everything else leaves it alone and takes what `CartCountProvider` knows (spec 005, T025).
+   */
   cartCount?: number
   locales?: Locale[]
   className?: string
@@ -76,11 +81,17 @@ function cartLabel(count: number): string {
 export function Header({
   navItems = DEFAULT_NAV,
   breadcrumbs,
-  cartCount = 0,
+  cartCount,
   locales = DEFAULT_LOCALES,
   reveal = true,
   className,
 }: HeaderProps) {
+  // The prop wins where one is given — stories and fixed renderings — otherwise the live count
+  // from `CartCountProvider`. Reading it here rather than in the layout is what keeps `cookies()`
+  // out of the root layout and the catalogue prerendered (spec 005, research R8).
+  const liveCount = useCartCount()
+  const count = cartCount ?? liveCount
+
   const pathname = usePathname()
 
   // Locale is local state because nothing routes on it yet. When i18n lands this becomes controlled
@@ -176,11 +187,17 @@ export function Header({
             onChange={setLocale}
             className="hidden md:block"
           />
+          {/*
+            The badge counted the cart and nothing opened it (spec 005, T024, FR-016). `IconButton`
+            has always taken an `href` — the account control beside this one uses it — so this is
+            the one line that was missing, not a new capability.
+          */}
           <IconButton
             variant="bare"
             icon="cart"
-            label={cartLabel(cartCount)}
-            badge={cartCount > 0 ? cartCount : undefined}
+            href="/cart"
+            label={cartLabel(count)}
+            badge={count > 0 ? count : undefined}
             className={iconChrome}
           />
           {/*

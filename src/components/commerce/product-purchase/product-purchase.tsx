@@ -5,6 +5,9 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { QuantityStepper } from '@/components/ui/quantity-stepper'
+import { announceCartCount } from '@/components/layout/cart-count'
+import type { CartActionResult } from '@/lib/cart/types'
+import { intentFrom, type CartIntent } from '@/lib/catalog/cart-intent'
 import type { DiamondOption, SizeOption } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
@@ -27,12 +30,24 @@ import { ProductOptions } from '../product-options'
  * label says so; after one is picked it has a price, and continuing to say "from" would be quoting
  * a range the visitor has already resolved.
  *
- * **Both actions are disabled**, deliberately and temporarily. The seam they hand to is FR-041 and
- * belongs to spec 004; until it exists, a live button would either do nothing or lie about what it
- * did. The controls above them are fully working, because choosing a stone changes the price and
- * that is worth having on its own.
+ * **ADD TO CART is live** (spec 005, T021). It builds a `CartIntent` — identifiers only, never a
+ * price — and hands it to the action, which re-reads the piece from the published catalogue and
+ * validates the choice again before writing anything. Nothing here is trusted: this component's
+ * only job is to say what was chosen and to render whatever comes back.
+ *
+ * **The action arrives as a prop rather than as an import**, and that is not a style preference.
+ * `src/lib/cart/actions.ts` is a `'use server'` module; importing it here would put the whole
+ * Payload config on this file's graph, and a `'use client'` file that reaches Payload drags Node
+ * built-ins into the browser bundle. `src/lib/addresses/types.ts` records the same lesson from spec
+ * 004; here it was proven again by a Storybook build that died inside prettier. Passing the action
+ * down from the route — a Server Component — costs one prop and keeps this component renderable in
+ * a browser, which is what its stories depend on.
+ *
+ * BUY NOW is still disabled: it opens the handoff modal, which is spec 005 US3.
  */
 export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
+  /** Which piece this is. The one identifier the intent cannot be built without. */
+  productId: number
   /** The piece's own price, formatted — what shows before a stone narrows it. */
   price: string
   /** Set only where the stones differ, in which case the label reads "From …". */
@@ -44,9 +59,15 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
   available: boolean
   /** The ceiling for a piece with no stones. With stones, each stone carries its own. */
   maxQuantity?: number
+  /**
+   * The Server Action, handed down by the route. Omitted in a story, where there is no server —
+   * the button then does nothing rather than pretending to.
+   */
+  onAddToCart?: (intent: CartIntent) => Promise<CartActionResult>
 }
 
 export function ProductPurchase({
+  productId,
   price,
   fromPrice,
   description,
@@ -54,12 +75,17 @@ export function ProductPurchase({
   sizes,
   available,
   maxQuantity,
+  onAddToCart,
   className,
   ...props
 }: ProductPurchaseProps) {
   const [diamond, setDiamond] = React.useState<number | null>(null)
   const [size, setSize] = React.useState<string | null>(null)
   const [wanted, setWanted] = React.useState(1)
+  const [pending, startTransition] = React.useTransition()
+  const [status, setStatus] = React.useState<null | { kind: 'added' | 'refused'; message: string }>(
+    null,
+  )
 
   const chosen = diamonds.find((option) => option.id === diamond) ?? null
   const shown = chosen ? chosen.price : fromPrice ? `From ${fromPrice}` : price
@@ -80,6 +106,43 @@ export function ProductPurchase({
    * back rather than being silently left at two.
    */
   const quantity = ceiling === undefined ? wanted : Math.min(wanted, ceiling)
+
+  /**
+   * What to say when the action refuses (FR-002, FR-003).
+   *
+   * The action returns the FIELD, never a sentence — the words belong here, where they can be
+   * reworded and one day translated. Each names the control the visitor has to go and fix, which is
+   * what FR-003 means by naming the unmade choice.
+   */
+  const refusal = (field: string | undefined, reason: string): string => {
+    if (field === 'diamond') {
+      return reason === 'missing-option'
+        ? 'Choose a diamond before adding this piece to your cart.'
+        : 'That diamond is no longer available. Choose another.'
+    }
+    if (field === 'size') return 'Choose a size before adding this piece to your cart.'
+    if (field === 'product') return 'This piece is not available to order at the moment.'
+    if (field === 'quantity') return 'Choose how many you would like.'
+    return 'That could not be added to your cart. Please try again.'
+  }
+
+  function submit() {
+    if (!onAddToCart) return
+    setStatus(null)
+    startTransition(async () => {
+      const result = await onAddToCart(
+        intentFrom({ productId, quantity, diamondId: diamond, sizeValue: size, sizes }),
+      )
+
+      if (result.ok) announceCartCount()
+
+      setStatus(
+        result.ok
+          ? { kind: 'added', message: 'Added to your cart.' }
+          : { kind: 'refused', message: refusal(result.field, result.reason) },
+      )
+    })
+  }
 
   return (
     <div className={cn('flex flex-col', className)} {...props}>
@@ -140,7 +203,9 @@ export function ProductPurchase({
           type="button"
           variant="secondary"
           fullWidth
-          disabled
+          onClick={submit}
+          disabled={!available || !onAddToCart}
+          loading={pending}
           iconStart={<Icon name="cart" size="sm" />}
           className="min-w-0 flex-1 uppercase"
         >
@@ -160,12 +225,30 @@ export function ProductPurchase({
 
       {/*
         The reason in TEXT, never in colour alone (FR-040). Only for a piece that genuinely cannot
-        be bought — the actions being disabled while the checkout is still being built is a fact
-        about this deployment, not about the piece, and saying so on the page would be noise.
+        be bought — BUY NOW being disabled while the handoff is still being built is a fact about
+        this deployment, not about the piece, and saying so on the page would be noise.
       */}
       {!available ? (
         <p role="status" className="text-body-small text-neutral-primary mt-3">
           This piece is not available to order at the moment.
+        </p>
+      ) : null}
+
+      {/*
+        One live region for both outcomes (FR-002, FR-003, T022).
+        `role="status"` rather than `alert`: this is the consequence of something the visitor just
+        did, announced politely, in the same way the price above announces itself when a stone
+        changes. A refusal names the control to go and fix rather than saying the action failed.
+      */}
+      {status && available ? (
+        <p
+          role="status"
+          className={cn(
+            'text-body-small mt-3',
+            status.kind === 'refused' ? 'text-primary-default' : 'text-neutral-primary',
+          )}
+        >
+          {status.message}
         </p>
       ) : null}
     </div>

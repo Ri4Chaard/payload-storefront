@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers'
 
+import { CART_COOKIE, CART_COUNT_COOKIE } from './types'
+
 /**
  * Where a guest's claim on their cart is kept (spec 005, T006, research R2).
  *
@@ -31,8 +33,7 @@ import { cookies } from 'next/headers'
  * read-only loader from creating carts as a side effect of somebody looking at a page.
  */
 
-export const CART_COOKIE = 'aurum-cart'
-export const CART_COUNT_COOKIE = 'aurum-cart-count'
+export { CART_COOKIE, CART_COUNT_COOKIE }
 
 /** Thirty days, matching the guest-cart retention period exactly (FR-047). */
 export const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
