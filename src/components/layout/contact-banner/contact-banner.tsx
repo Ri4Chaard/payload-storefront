@@ -5,7 +5,6 @@ import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { cn } from '@/lib/cn'
-import { CONTACT } from '@/lib/contact'
 import { type IconName } from '@/lib/icon-registry'
 
 /**
@@ -37,10 +36,17 @@ import { type IconName } from '@/lib/icon-registry'
  * l; it is corrected there, once.
  */
 export interface ContactBannerProps {
-  email?: string
+  /**
+   * The shop's own details, from the `contact-settings` global via the layout.
+   *
+   * Required rather than defaulted: the hardcoded fallback that used to live here made an
+   * unconfigured shop look configured, and the number it showed was somebody's guess. The layout
+   * always has these, and a story that renders this component has to say what they are.
+   */
+  email: string
   /** Display form of the number; `phoneHref` is what actually dials. */
-  phone?: string
-  phoneHref?: string
+  phone: string
+  phoneHref: string
   /**
    * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
    *
@@ -61,15 +67,12 @@ const CONTACT_LINK = 'inline-flex items-center gap-2.5 text-body-medium text-neu
 const CONTACT_ICON = 'size-6 xl:size-8'
 
 export function ContactBanner({
-  email = CONTACT.email,
-  phone = CONTACT.phone,
+  email,
+  phone,
   phoneHref,
   social = [],
   className,
 }: ContactBannerProps) {
-  // `tel:` will not accept the spaces and brackets the number is displayed with.
-  const dial = phoneHref ?? `tel:${phone.replace(/[^+\d]/g, '')}`
-
   return (
     <Container
       className={cn(
@@ -89,7 +92,7 @@ export function ContactBanner({
           link dials rather than opening WhatsApp, because the number is written as a phone number.
           Pass `phoneHref` to point it at wa.me if that is what it is meant to be.
         */}
-        <Link href={dial} variant="inverse" className={CONTACT_LINK}>
+        <Link href={phoneHref} variant="inverse" className={CONTACT_LINK}>
           <Icon name="whatsapp" className={CONTACT_ICON} />
           {phone}
         </Link>

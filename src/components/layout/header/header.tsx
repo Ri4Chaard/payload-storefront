@@ -52,6 +52,10 @@ export interface HeaderProps {
   cartCount?: number
   /** The shop's accounts, from `contact-settings`. Passed through to the mobile navigation. */
   social?: { href: string; icon: IconName; label: string }[]
+  /** The shop's own details, from the `contact-settings` global via the layout. */
+  email: string
+  phone: string
+  phoneHref: string
   locales?: Locale[]
   className?: string
 }
@@ -86,6 +90,9 @@ export function Header({
   breadcrumbs,
   cartCount,
   social,
+  email,
+  phone,
+  phoneHref,
   locales = DEFAULT_LOCALES,
   reveal = true,
   className,
@@ -163,6 +170,9 @@ export function Header({
     >
       <Container className="relative flex h-15 items-center justify-between md:h-17.5">
         <MobileNav
+          email={email}
+          phone={phone}
+          phoneHref={phoneHref}
           {...(social ? { social } : {})}
           items={navItems}
           locales={locales}

@@ -3,6 +3,7 @@ import { cache } from 'react'
 import { getPayload } from 'payload'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
+import { DEFAULT_CONTACT, telHref } from '@/lib/contact'
 import type { IconName } from '@/lib/icon-registry'
 
 import { profileHref } from './links'
@@ -106,4 +107,31 @@ export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
       label: PLATFORM_LABELS[row.platform],
       href: profileHref(row.platform, row.destination),
     }))
+})
+
+/**
+ * The shop's email and phone, as the chrome draws them.
+ *
+ * **`phoneHref` is derived, never a third field.** `tel:` accepts digits and a leading `+`, so the
+ * punctuation an owner types has to come out somewhere; doing it here means there is one number to
+ * edit and no second value that can quietly disagree with it.
+ *
+ * An empty field falls back to what shipped rather than rendering a blank line or a dead `mailto:`.
+ * A footer with no way to reach the shop is worse than one showing the details it came with, and an
+ * owner who genuinely wants no phone published is better served by a field that says so than by an
+ * empty one that renders `tel:`.
+ */
+export interface ContactDetails {
+  email: string
+  phone: string
+  phoneHref: string
+}
+
+export const getContactDetails = cache(async (): Promise<ContactDetails> => {
+  const doc = await settings()
+
+  const email = typeof doc.email === 'string' && doc.email.trim() !== '' ? doc.email : DEFAULT_CONTACT.email
+  const phone = typeof doc.phone === 'string' && doc.phone.trim() !== '' ? doc.phone : DEFAULT_CONTACT.phone
+
+  return { email, phone, phoneHref: telHref(phone) }
 })

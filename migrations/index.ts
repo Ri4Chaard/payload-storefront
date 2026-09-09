@@ -9,6 +9,7 @@ import * as migration_20260902_112639_drop_marketing_enabled from './20260902_11
 import * as migration_20260903_074224_jobs_queue from './20260903_074224_jobs_queue';
 import * as migration_20260909_103616_contact_settings from './20260909_103616_contact_settings';
 import * as migration_20260909_112455_expire_carts_task from './20260909_112455_expire_carts_task';
+import * as migration_20260909_114622_contact_details from './20260909_114622_contact_details';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20260909_112455_expire_carts_task.up,
     down: migration_20260909_112455_expire_carts_task.down,
-    name: '20260909_112455_expire_carts_task'
+    name: '20260909_112455_expire_carts_task',
+  },
+  {
+    up: migration_20260909_114622_contact_details.up,
+    down: migration_20260909_114622_contact_details.down,
+    name: '20260909_114622_contact_details'
   },
 ];

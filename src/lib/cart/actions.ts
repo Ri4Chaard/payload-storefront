@@ -9,7 +9,7 @@ import type { ProductDetail } from '@/lib/catalog/types'
 
 import { messengerLink } from '@/lib/messengers/links'
 import { composeMessage } from '@/lib/messengers/message'
-import { getMessageTemplate, getMessengers } from '@/lib/messengers/settings'
+import { getContactDetails, getMessageTemplate, getMessengers } from '@/lib/messengers/settings'
 
 import { clearCartCookies, readCartCookie, writeCartCookie, writeCartCount } from './cookie'
 import { getCart, getCartCount } from './loader'
@@ -172,17 +172,19 @@ export async function beginCheckout(): Promise<CheckoutResult> {
     if (cart.empty) return { ok: false, reason: 'empty' }
     if (cart.issues.length > 0) return { ok: false, reason: 'issues' }
 
-    const [template, messengers, customer] = await Promise.all([
+    const [template, messengers, customer, contact] = await Promise.all([
       getMessageTemplate(),
       getMessengers(),
       // Optional by construction: `null` for an anonymous visitor, and never a redirect (FR-046).
       getMessageCustomer(),
+      getContactDetails(),
     ])
 
     const message = composeMessage(cart, template, customer)
 
     return {
       ok: true,
+      contact,
       message,
       messengers: messengers.map((messenger) => messengerLink(messenger, message)),
     }
@@ -212,16 +214,18 @@ export async function buyNow(intent: CartIntent): Promise<CheckoutResult> {
       return { ok: false, reason: 'error' }
     }
 
-    const [template, messengers, customer] = await Promise.all([
+    const [template, messengers, customer, contact] = await Promise.all([
       getMessageTemplate(),
       getMessengers(),
       getMessageCustomer(),
+      getContactDetails(),
     ])
 
     const message = composeMessage(singleLineCart(checked.product, intent), template, customer)
 
     return {
       ok: true,
+      contact,
       message,
       messengers: messengers.map((messenger) => messengerLink(messenger, message)),
     }

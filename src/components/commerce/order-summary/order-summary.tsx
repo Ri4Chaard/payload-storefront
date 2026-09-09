@@ -189,6 +189,7 @@ export function OrderSummary({
           onClose={() => setHandoff(null)}
           message={handoff.message}
           messengers={handoff.messengers}
+          contact={handoff.contact}
           triggerRef={checkoutRef}
         />
       ) : null}

@@ -6,7 +6,7 @@ import { CartCountProvider } from '@/components/layout/cart-count'
 import { ContactBanner } from '@/components/layout/contact-banner'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
-import { getSocialLinks } from '@/lib/messengers/settings'
+import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -37,7 +37,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
     which the build output confirms. `revalidateGlobalOnChange` on the global is what makes a saved
     change reach those cached pages (FR-042).
   */
-  const social = await getSocialLinks()
+  const [social, contact] = await Promise.all([getSocialLinks(), getContactDetails()])
 
   return (
     <html lang="en" className={fontVariables}>
@@ -49,15 +49,15 @@ export default async function FrontendLayout({ children }: { children: React.Rea
           prerendered. A number in a badge is not worth the prerendered catalogue.
         */}
         <CartCountProvider>
-          <ContactBanner social={social} />
-          <Header social={social} />
+          <ContactBanner social={social} {...contact} />
+          <Header social={social} {...contact} />
         {/*
           `<main>` is the landmark the skip link (T072) will target. The skip link is still its own
           task; header and footer are wired up here so they are exercised by a real page rather than
           only by Storybook.
         */}
           <main id="main">{children}</main>
-          <Footer social={social} />
+          <Footer social={social} {...contact} />
         </CartCountProvider>
       </body>
     </html>

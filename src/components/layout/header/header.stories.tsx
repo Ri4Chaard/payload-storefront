@@ -19,6 +19,13 @@ const BREADCRUMBS = [
  * supplies them. The component no longer falls back to a hardcoded list: the one it used to fall
  * back to pointed at a bare `wa.me/` on every page of the site, which looks like a working link.
  */
+/** The shop's own details. The components no longer carry a hardcoded pair — see their props. */
+const CONTACT = {
+  email: 'hello@aurum.example',
+  phone: '+1 (555) 010 20-30',
+  phoneHref: 'tel:+15550102030',
+}
+
 const SOCIAL = [
   { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
   { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
@@ -29,7 +36,7 @@ const meta = {
   title: 'Layout/Header',
   component: Header,
   parameters: { layout: 'fullscreen' },
-  args: { social: SOCIAL },
+  args: { social: SOCIAL, ...CONTACT },
 } satisfies Meta<typeof Header>
 
 export default meta

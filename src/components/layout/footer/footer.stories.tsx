@@ -13,6 +13,13 @@ import { Footer } from './footer'
  * supplies them rather than the component defaulting to a hardcoded list. The list it used to
  * default to pointed at bare `wa.me/` and `instagram.com/` roots on every page of the site.
  */
+/** The shop's own details. The components no longer carry a hardcoded pair — see their props. */
+const CONTACT = {
+  email: 'hello@aurum.example',
+  phone: '+1 (555) 010 20-30',
+  phoneHref: 'tel:+15550102030',
+}
+
 const SOCIAL = [
   { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
   { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
@@ -24,7 +31,8 @@ const meta = {
   component: Footer,
   parameters: { layout: 'fullscreen' },
   args: {
-    social: SOCIAL, year: 2026 },
+    social: SOCIAL,
+    ...CONTACT, year: 2026 },
 } satisfies Meta<typeof Footer>
 
 export default meta

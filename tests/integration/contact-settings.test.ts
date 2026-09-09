@@ -3,6 +3,8 @@ import { getPayload } from 'payload'
 import { afterAll, afterEach, describe, expect, it } from 'vitest'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
+import { DEFAULT_CONTACT } from '@/lib/contact'
+import { getContactDetails } from '@/lib/messengers/settings'
 import { getMessageTemplate, getMessengers } from '@/lib/messengers/settings'
 import { skipRevalidation } from '@/lib/revalidate'
 
@@ -65,7 +67,12 @@ const save = (data: Record<string, unknown>) =>
 afterEach(async () => {
   await payload.updateGlobal({
     slug: 'contact-settings',
-    data: { messengers: GOOD, messageTemplate: DEFAULT_MESSAGE_TEMPLATE },
+    data: {
+      messengers: GOOD,
+      messageTemplate: DEFAULT_MESSAGE_TEMPLATE,
+      email: DEFAULT_CONTACT.email,
+      phone: DEFAULT_CONTACT.phone,
+    },
     overrideAccess: true,
     context: skipRevalidation,
   })
@@ -239,5 +246,55 @@ describe('who may change them (FR-041)', () => {
     await expect(
       payload.findGlobal({ slug: 'contact-settings', overrideAccess: false }),
     ).resolves.toBeTruthy()
+  })
+})
+
+/**
+ * The shop's own email and phone.
+ *
+ * They were three hardcoded strings in `src/lib/contact.ts` — and the number was written two
+ * different ways in two components, which is what a second copy of one fact does even inside a
+ * single repository.
+ */
+describe('contact details', () => {
+  it('are editable, and reach the chrome', async () => {
+    await save({
+      messengers: GOOD,
+      email: 'hello@aurum.example',
+      phone: '+7 (700) 111 22-33',
+    })
+
+    const details = await getContactDetails()
+    expect(details.email).toBe('hello@aurum.example')
+    expect(details.phone).toBe('+7 (700) 111 22-33')
+  })
+
+  /**
+   * `tel:` accepts digits and a leading `+` and nothing else, so the punctuation somebody types has
+   * to come out somewhere. Deriving it means there is one number to edit and no second value that
+   * can quietly disagree — a wrong `tel:` is only discovered by dialling it.
+   */
+  it('derive the dialling link from the number as written', async () => {
+    await save({ messengers: GOOD, phone: '+7 (700) 111 22-33' })
+    expect((await getContactDetails()).phoneHref).toBe('tel:+77001112233')
+  })
+
+  it('refuse a number nobody could dial', async () => {
+    await expect(save({ messengers: GOOD, phone: 'call the shop' })).rejects.toThrow()
+    await expect(save({ messengers: GOOD, phone: '12345' })).rejects.toThrow()
+  })
+
+  it('refuse an address that is not one', async () => {
+    await expect(save({ messengers: GOOD, email: 'not-an-email' })).rejects.toThrow()
+  })
+
+  /** An empty field is "we do not publish this", not "render a blank line and a dead mailto:". */
+  it('fall back to what shipped when a field is emptied', async () => {
+    await save({ messengers: GOOD, email: '', phone: '' })
+
+    const details = await getContactDetails()
+    expect(details.email).toBe(DEFAULT_CONTACT.email)
+    expect(details.phone).toBe(DEFAULT_CONTACT.phone)
+    expect(details.phoneHref).toBe('tel:+15550102030')
   })
 })

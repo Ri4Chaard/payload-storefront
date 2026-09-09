@@ -2239,13 +2239,21 @@ export interface AccountSetting {
   createdAt?: string | null;
 }
 /**
- * Where customers are sent when they finish an order, and what their message says. Changes appear on the storefront immediately — no deployment.
+ * How customers reach the shop: the email and phone shown across the site, the messengers offered when they finish an order, and what their message says. Changes appear on the storefront immediately — no deployment.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact-settings".
  */
 export interface ContactSetting {
   id: number;
+  /**
+   * Shown in the contact strip, the footer and the mobile menu, and offered in the checkout modal when a customer would rather write.
+   */
+  email?: string | null;
+  /**
+   * Written however you like — “+1 (555) 010 20-30” is fine. The tap-to-call link is built from it, so there is nothing else to keep in step.
+   */
+  phone?: string | null;
   /**
    * The platforms offered when a customer completes their order. Drag to reorder — customers see them in this order.
    */
@@ -2326,6 +2334,8 @@ export interface AccountSettingsSelect<T extends boolean = true> {
  * via the `definition` "contact-settings_select".
  */
 export interface ContactSettingsSelect<T extends boolean = true> {
+  email?: T;
+  phone?: T;
   messengers?:
     | T
     | {

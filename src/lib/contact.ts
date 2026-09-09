@@ -13,12 +13,32 @@
  * copy, they appear in chrome on every route, and components read them directly. When Payload owns
  * a settings global, this becomes the loader's job and the components keep their props.
  */
-export const CONTACT = {
+/**
+ * What the shop's contact details are **before an owner has set any**.
+ *
+ * No longer the source of truth: the email and the phone are fields on the `contact-settings`
+ * global, and `src/lib/messengers/settings.ts` is where the chrome reads them. This is the fallback
+ * a fresh installation gets, and what is used if somebody empties both fields — a footer with no
+ * way to reach the shop is worse than one showing the details it shipped with.
+ */
+export const DEFAULT_CONTACT = {
   email: 'hello@aurum.example',
   /** As displayed. `tel:` will not accept the spaces and brackets. */
   phone: '+1 (555) 010 20-30',
-  phoneHref: 'tel:+15550102030',
 } as const
+
+/**
+ * `+1 (555) 010 20-30` → `tel:+15550102030`.
+ *
+ * **Derived, never stored beside the display form.** Two fields for one number is two things to
+ * keep in step, and the one nobody looks at is the `tel:` — a visitor only finds out it is wrong by
+ * dialling it. `tel:` accepts digits and a leading `+` and nothing else, so the punctuation a
+ * person writes has to come out somewhere; here is the only place it does.
+ */
+export function telHref(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  return digits === '' ? '' : `tel:+${digits}`
+}
 
 /**
  * **`SOCIAL_LINKS` lived here and has been removed** (spec 005, T071, FR-052).

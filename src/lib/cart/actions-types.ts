@@ -8,6 +8,13 @@ import type { MessengerLink } from '@/lib/messengers/links'
  * `'use server'` module — even as a type — puts the whole Payload config on a `'use client'` file's
  * import graph. `src/lib/messengers/links.ts` is pure, so `MessengerLink` may travel with it.
  */
+/** The shop's own details, for the modal's copy-it-yourself path (FR-024). */
+export interface CheckoutContact {
+  email: string
+  phone: string
+  phoneHref: string
+}
+
 export type CheckoutResult =
-  | { message: string; messengers: MessengerLink[]; ok: true }
+  | { contact: CheckoutContact; message: string; messengers: MessengerLink[]; ok: true }
   | { ok: false; reason: 'empty' | 'error' | 'issues' }

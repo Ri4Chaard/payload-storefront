@@ -4,7 +4,6 @@ import { Container } from '@/components/ui/container'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { type IconName } from '@/lib/icon-registry'
-import { CONTACT } from '@/lib/contact'
 import { cn } from '@/lib/cn'
 
 import { NewsletterForm } from './newsletter-form'
@@ -54,6 +53,17 @@ export interface FooterProps {
    * of the site. Nothing is drawn when there is nothing configured.
    */
   social?: { icon: IconName; label: string; href: string }[]
+  /**
+   * The shop's own details, from the `contact-settings` global via the layout.
+   *
+   * Required for the same reason the contact strip's are: the hardcoded pair that used to sit here
+   * made an unconfigured shop look configured. The number was also written a THIRD way here —
+   * `+1 555 010 2030` against the strip's `+1 (555) 010 20-30` — which is what two copies of one
+   * fact does even inside a single repository.
+   */
+  email: string
+  phone: string
+  phoneHref: string
   /** Defaults to the build year. Wire to the CMS when contact details become editable. */
   year?: number
   className?: string
@@ -138,6 +148,9 @@ export function Footer({
   groups = DEFAULT_GROUPS,
   legalLinks = DEFAULT_LEGAL,
   social = [],
+  email,
+  phone,
+  phoneHref,
   year = new Date().getFullYear(),
   className,
 }: FooterProps) {
@@ -185,11 +198,11 @@ export function Footer({
                   visitor cannot tap, on a shop's mobile site, is a lost enquiry. `inverse` keeps
                   them looking exactly as drawn — no underline until hover.
                 */}
-                <Link href="tel:+15550102030" variant="inverse">
-                  Call us: +1 555 010 2030
+                <Link href={phoneHref} variant="inverse">
+                  Call us: {phone}
                 </Link>
-                <Link href={`mailto:${CONTACT.email}`} variant="inverse">
-                  Email us: {CONTACT.email}
+                <Link href={`mailto:${email}`} variant="inverse">
+                  Email us: {email}
                 </Link>
               </div>
             </div>

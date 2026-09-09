@@ -320,3 +320,32 @@ test('the cart and its dialogs are operable by keyboard alone', async ({ page })
   await expect(page.getByRole('dialog')).toBeHidden()
   await expect(checkout).toBeFocused()
 })
+
+/**
+ * The shop's own email and phone are editable too.
+ *
+ * They were hardcoded in `src/lib/contact.ts`, and the number was written two different ways in two
+ * components — `+1 (555) 010 20-30` in the contact strip and `+1 555 010 2030` in the footer, with
+ * a third form hardcoded into the footer's `tel:`. One record now, and the dialling link derived
+ * from it, so there is nothing left to keep in step.
+ */
+test('the chrome shows the configured email and phone, and the tel link matches', async ({
+  page,
+  request,
+}) => {
+  const settings = await request.get('/api/globals/contact-settings')
+  const { email, phone } = await settings.json()
+  const digits = String(phone).replace(/\D/g, '')
+
+  await page.goto('/')
+
+  // The contact strip and the footer both draw them, and both link them.
+  await expect(page.locator(`a[href="mailto:${email}"]`).first()).toBeVisible()
+  await expect(page.locator(`a[href="tel:+${digits}"]`).first()).toBeVisible()
+
+  // No copy of the old hardcoded dialling link survives anywhere on the page.
+  const stale = await page.locator('a[href^="tel:"]').evaluateAll((links) =>
+    links.map((link) => (link as HTMLAnchorElement).getAttribute('href')),
+  )
+  expect(new Set(stale)).toEqual(new Set([`tel:+${digits}`]))
+})

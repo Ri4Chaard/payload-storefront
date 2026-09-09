@@ -41,11 +41,18 @@ const ALL: MessengerLink[] = [
   link('whatsapp', 'WhatsApp'),
 ]
 
+/** The shop's own details, which the modal offers to whoever would rather write or call. */
+const CONTACT = {
+  email: 'hello@aurum.example',
+  phone: '+1 (555) 010 20-30',
+  phoneHref: 'tel:+15550102030',
+}
+
 const meta = {
   title: 'Commerce/HandoffModal',
   component: HandoffModal,
   parameters: { layout: 'fullscreen' },
-  args: { open: true, onClose: () => {}, message: MESSAGE, messengers: ALL },
+  args: { open: true, onClose: () => {}, message: MESSAGE, messengers: ALL, contact: CONTACT },
   /** The modal is fixed, so a story needs something behind it to look like a page. */
   render: function Render(args) {
     const [open, setOpen] = React.useState(args.open)

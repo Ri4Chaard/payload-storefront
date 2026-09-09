@@ -10,7 +10,6 @@ import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { useOverlay } from '@/components/ui/overlay'
 import { cn } from '@/lib/cn'
-import { CONTACT } from '@/lib/contact'
 import { type IconName } from '@/lib/icon-registry'
 
 /**
@@ -77,9 +76,17 @@ export interface MobileNavProps {
   locales?: Locale[]
   locale?: string
   onLocaleChange?: (code: string) => void
-  email?: string
-  phone?: string
-  phoneHref?: string
+  /**
+   * The shop's own details, from the `contact-settings` global via the layout.
+   *
+   * Required rather than defaulted: the hardcoded fallback that used to live here made an
+   * unconfigured shop look configured, and the number it showed was somebody's guess. The layout
+   * always has these, and a story that renders this component has to say what they are.
+   */
+  email: string
+  /** Display form of the number; `phoneHref` is what actually dials. */
+  phone: string
+  phoneHref: string
   /**
    * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
    *
@@ -101,9 +108,9 @@ export function MobileNav({
   locales,
   locale,
   onLocaleChange,
-  email = CONTACT.email,
-  phone = CONTACT.phone,
-  phoneHref = CONTACT.phoneHref,
+  email,
+  phone,
+  phoneHref,
   social = [],
   className,
 }: MobileNavProps) {

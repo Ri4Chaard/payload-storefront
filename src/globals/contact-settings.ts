@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { isAdmin } from '@/lib/access'
+import { DEFAULT_CONTACT } from '@/lib/contact'
 import { normaliseDestination, PLATFORM_LABELS, PLATFORMS, type Platform } from '@/lib/messengers/normalise'
 import { revalidateGlobalOnChange } from '@/lib/revalidate'
 
@@ -25,6 +26,12 @@ import { revalidateGlobalOnChange } from '@/lib/revalidate'
  * phone number they say out loud and `src/lib/messengers/normalise.ts` reduces it to what `wa.me`
  * accepts. Storing a URL instead would move the formatting rules out of tested code and into a
  * text field somebody has to get right, which is the failure FR-039 exists to make impossible.
+ *
+ * **The shop's own email and phone live here too.** They were three hardcoded strings in
+ * `src/lib/contact.ts`, and the number was written two different ways in two components — the
+ * contact strip said `+1 (555) 010 20-30` and the footer said `+1 555 010 2030`, over a third form
+ * hardcoded into the footer's `tel:`. One record now, with the dialling link derived from it, so
+ * there is nothing left that can quietly disagree.
  */
 
 const platformOptions = PLATFORMS.map((platform) => ({
@@ -52,7 +59,7 @@ export const ContactSettings: GlobalConfig = {
   admin: {
     group: 'Shop',
     description:
-      'Where customers are sent when they finish an order, and what their message says. Changes appear on the storefront immediately — no deployment.',
+      'How customers reach the shop: the email and phone shown across the site, the messengers offered when they finish an order, and what their message says. Changes appear on the storefront immediately — no deployment.',
   },
   /**
    * Stated explicitly, never left to the default (Constitution IV).
@@ -71,6 +78,46 @@ export const ContactSettings: GlobalConfig = {
     afterChange: [revalidateGlobalOnChange],
   },
   fields: [
+    /**
+     * The email and the phone the chrome draws (the contact strip, the footer, the mobile menu).
+     *
+     * Here rather than in `src/lib/contact.ts`, where they were three hardcoded strings, for the
+     * same reason the messenger destinations moved: a shop's own phone number is not a code change.
+     * They sit above the messengers because they are the two an owner is most likely to edit.
+     */
+    {
+      name: 'email',
+      type: 'email',
+      defaultValue: DEFAULT_CONTACT.email,
+      label: 'Email address',
+      admin: {
+        description:
+          'Shown in the contact strip, the footer and the mobile menu, and offered in the checkout modal when a customer would rather write.',
+      },
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      defaultValue: DEFAULT_CONTACT.phone,
+      label: 'Phone number',
+      admin: {
+        description:
+          'Written however you like — “+1 (555) 010 20-30” is fine. The tap-to-call link is built from it, so there is nothing else to keep in step.',
+      },
+      /**
+       * A number nobody can dial is worse than no number: it looks like a way to reach the shop.
+       * Eight digits is the shortest national number with a country code; fifteen is E.164's own
+       * ceiling. An empty field is allowed — that is "we do not publish a number", and the reader
+       * falls back rather than rendering a dead link.
+       */
+      validate: (value: unknown) => {
+        if (typeof value !== 'string' || value.trim() === '') return true
+        const digits = value.replace(/\D/g, '')
+        return digits.length >= 8 && digits.length <= 15
+          ? true
+          : 'That does not look like a phone number with a country code. Write it as you would say it — “+1 (555) 010 20-30”.'
+      },
+    },
     {
       name: 'messengers',
       type: 'array',

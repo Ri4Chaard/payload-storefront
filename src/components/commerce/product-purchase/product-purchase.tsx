@@ -300,6 +300,7 @@ export function ProductPurchase({
           onClose={() => setHandoff(null)}
           message={handoff.message}
           messengers={handoff.messengers}
+          contact={handoff.contact}
           triggerRef={buyNowRef}
         />
       ) : null}

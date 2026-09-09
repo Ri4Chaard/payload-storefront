@@ -5,8 +5,8 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { MessengerRow } from '@/components/ui/messenger-row'
 import { Modal } from '@/components/ui/modal'
-import { CONTACT } from '@/lib/contact'
 import type { IconName } from '@/lib/icon-registry'
+import type { CheckoutContact } from '@/lib/cart/actions-types'
 import type { MessengerLink } from '@/lib/messengers/links'
 import { cn } from '@/lib/cn'
 
@@ -44,6 +44,8 @@ export interface HandoffModalProps {
   message: string
   /** Enabled messengers, in the order the owner arranged them. May be empty. */
   messengers: MessengerLink[]
+  /** The shop's own details, for the customer who would rather write or call. */
+  contact: CheckoutContact
   /** Focus returns here on close. */
   triggerRef?: React.RefObject<HTMLElement | null>
 }
@@ -53,6 +55,7 @@ export function HandoffModal({
   onClose,
   message,
   messengers,
+  contact,
   triggerRef,
 }: HandoffModalProps) {
   const [copied, setCopied] = React.useState(false)
@@ -158,12 +161,12 @@ export function HandoffModal({
 
         <p className="text-body-small text-neutral-secondary mt-4">
           Or reach us at{' '}
-          <a href={`mailto:${CONTACT.email}`} className="underline">
-            {CONTACT.email}
+          <a href={`mailto:${contact.email}`} className="underline">
+            {contact.email}
           </a>{' '}
           ·{' '}
-          <a href={CONTACT.phoneHref} className="underline">
-            {CONTACT.phone}
+          <a href={contact.phoneHref} className="underline">
+            {contact.phone}
           </a>
         </p>
       </div>

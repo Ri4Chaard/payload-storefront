@@ -15,6 +15,13 @@ import { ContactBanner } from './contact-banner'
  * supplies them rather than the component defaulting to a hardcoded list. The list it used to
  * default to pointed at bare `wa.me/` and `instagram.com/` roots on every page of the site.
  */
+/** The shop's own details. The components no longer carry a hardcoded pair — see their props. */
+const CONTACT = {
+  email: 'hello@aurum.example',
+  phone: '+1 (555) 010 20-30',
+  phoneHref: 'tel:+15550102030',
+}
+
 const SOCIAL = [
   { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
   { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
@@ -22,7 +29,7 @@ const SOCIAL = [
 ]
 
 const meta = {
-  args: { social: SOCIAL },
+  args: { social: SOCIAL, ...CONTACT },
   title: 'Layout/ContactBanner',
   component: ContactBanner,
   parameters: { layout: 'fullscreen' },
@@ -48,7 +55,7 @@ export const AboveTheHeader: Story = {
   render: (args) => (
     <div>
       <ContactBanner {...args} />
-      <Header cartCount={2} />
+      <Header cartCount={2} social={SOCIAL} {...CONTACT} />
     </div>
   ),
 }
