@@ -3,6 +3,7 @@ import { cache } from 'react'
 import { getPayload } from 'payload'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
+import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 import { DEFAULT_CONTACT, mapsHref, telHref } from '@/lib/contact'
 import type { IconName } from '@/lib/icon-registry'
 
@@ -34,15 +35,46 @@ export interface SellerMessenger {
 
 const client = cache(async () => getPayload({ config }))
 
+/**
+ * **Tolerates a build with no database**, which is not an edge case here — it is how the production
+ * image is made. `docker compose` runs `next build` inside the container, then the migrations, then
+ * the server: on a first deploy the tables do not exist yet, and the database is unreachable
+ * throughout the build. `src/lib/catalog/prerender.ts` records the whole chicken-and-egg.
+ *
+ * That file already handles it for `generateStaticParams`. It was enough until spec 005 put a
+ * Payload read in the ROOT LAYOUT — which is every page — and the container build started failing
+ * on `/forgot-password`, a page that has nothing to do with contact settings and simply happens to
+ * be prerendered. This is that hole closed.
+ *
+ * Returning `null` rather than throwing means the callers fall back to what shipped. The chrome of
+ * a freshly built image therefore shows the shop's default details until the first request reads
+ * the real ones — which is the correct trade against an image that cannot be built at all.
+ */
+/*
+ * The return type is inferred rather than annotated: naming it would mean importing the generated
+ * document type, and `catalog/no-document-types` forbids that here for the reason the rule states —
+ * a module holding a document can render a draft or decide availability for itself. Inference gives
+ * the same type without the import.
+ */
 const settings = cache(async () => {
-  const payload = await client()
-  return payload.findGlobal({ slug: 'contact-settings', depth: 0, overrideAccess: false })
+  try {
+    const payload = await client()
+    return await payload.findGlobal({ slug: 'contact-settings', depth: 0, overrideAccess: false })
+  } catch (error) {
+    if (!isDatabaseUnreachable(error)) throw error
+
+    console.warn(
+      '  ⚠ No database at build time — the chrome renders the shipped contact details. This is ' +
+        'expected when building the container image; the first request reads the real ones.',
+    )
+    return null
+  }
 })
 
 export const getMessengers = cache(async (): Promise<SellerMessenger[]> => {
   const doc = await settings()
 
-  return (doc.messengers ?? [])
+  return (doc?.messengers ?? [])
     .filter((row) => row.enabled !== false)
     // A row can only be half-filled while it is unticked — the field validation refuses an enabled
     // one with no destination (FR-039). This is the belt to that braces: a row that somehow arrives
@@ -59,7 +91,7 @@ export const getMessengers = cache(async (): Promise<SellerMessenger[]> => {
 
 export const getMessageTemplate = cache(async (): Promise<string> => {
   const doc = await settings()
-  const template = doc.messageTemplate
+  const template = doc?.messageTemplate
 
   // An empty template is treated as absent rather than as an instruction to send nothing. The
   // field's own validation only refuses one that is present and missing `{{items}}`.
@@ -98,7 +130,7 @@ export interface SocialLink {
 export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
   const doc = await settings()
 
-  return (doc.messengers ?? [])
+  return (doc?.messengers ?? [])
     .filter((row): row is typeof row & { destination: string; platform: Platform } =>
       Boolean(row.platform && row.destination),
     )
@@ -137,16 +169,16 @@ export const getContactDetails = cache(async (): Promise<ContactDetails> => {
   const filled = (value: unknown, fallback: string): string =>
     typeof value === 'string' && value.trim() !== '' ? value : fallback
 
-  const phone = filled(doc.phone, DEFAULT_CONTACT.phone)
-  const address = filled(doc.address, DEFAULT_CONTACT.address)
-  const pinned = typeof doc.mapsUrl === 'string' ? doc.mapsUrl.trim() : ''
+  const phone = filled(doc?.phone, DEFAULT_CONTACT.phone)
+  const address = filled(doc?.address, DEFAULT_CONTACT.address)
+  const pinned = typeof doc?.mapsUrl === 'string' ? doc.mapsUrl.trim() : ''
 
   return {
-    email: filled(doc.email, DEFAULT_CONTACT.email),
+    email: filled(doc?.email, DEFAULT_CONTACT.email),
     phone,
     phoneHref: telHref(phone),
     address,
-    openingHours: filled(doc.openingHours, DEFAULT_CONTACT.openingHours),
+    openingHours: filled(doc?.openingHours, DEFAULT_CONTACT.openingHours),
     // The pin wins where the owner set one; otherwise a search for the address they typed.
     mapsHref: pinned === '' ? mapsHref(address) : pinned,
   }

@@ -26,8 +26,12 @@
  *
  * Payload marks it on the error object; the message is checked too, because that flag is not part
  * of any documented contract and a rename would silently turn this into a bare `catch`.
+ *
+ * Exported because `generateStaticParams` is no longer the only thing that reads Payload during a
+ * build: since spec 005 the root layout reads the contact settings, so every page Next renders at
+ * build time needs the same tolerance. See `src/lib/messengers/settings.ts`.
  */
-function isDatabaseUnreachable(error: unknown): boolean {
+export function isDatabaseUnreachable(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) return false
   if ((error as { payloadInitError?: unknown }).payloadInitError === true) return true
   const message = error instanceof Error ? error.message : ''
