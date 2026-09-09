@@ -99,7 +99,7 @@ export function CartLines({
             name={line.title}
             price={line.unitPrice}
             lineTotal={line.lineTotal}
-            image={line.image ? { src: line.image.src, alt: line.image.alt } : { src: '', alt: '' }}
+            image={line.image ? { src: line.image.src, alt: line.image.alt } : null}
             quantity={line.quantity}
             max={line.maxQuantity}
             busy={busyId === line.id}

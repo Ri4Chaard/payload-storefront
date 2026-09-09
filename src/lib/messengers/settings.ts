@@ -3,8 +3,10 @@ import { cache } from 'react'
 import { getPayload } from 'payload'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
+import type { IconName } from '@/lib/icon-registry'
 
-import type { Platform } from './normalise'
+import { profileHref } from './links'
+import { PLATFORM_LABELS, type Platform } from './normalise'
 
 /**
  * Reading the seller's destinations (spec 005, T050, FR-023, FR-038).
@@ -71,3 +73,37 @@ export const getMessageTemplate = cache(async (): Promise<string> => {
  * its `{{customer}}` placeholder while the first keeps it.
  */
 const FALLBACK_TEMPLATE = DEFAULT_MESSAGE_TEMPLATE
+
+/**
+ * The shop's accounts as the chrome draws them (spec 005, T072, FR-052).
+ *
+ * **This is the whole of "one set of accounts".** Before it, `src/lib/contact.ts` carried a second
+ * copy — three links whose own comment admitted "these need the real accounts before launch" — and
+ * an owner who set their real WhatsApp number in the admin would have watched the footer keep
+ * pointing at a bare `wa.me/` on every page. Two records of one fact is two chances for one of
+ * them to be wrong, and it is always the one nobody is looking at.
+ *
+ * Includes messengers that are unticked for handoff on purpose: "do not offer this for orders" and
+ * "do not show this in the footer" are different decisions, and an owner who hides WhatsApp from
+ * checkout has not asked to be un-followable. What it does need is a destination, which the field
+ * validation only guarantees for enabled rows — so an incomplete one is dropped here.
+ */
+export interface SocialLink {
+  icon: IconName
+  label: string
+  href: string
+}
+
+export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
+  const doc = await settings()
+
+  return (doc.messengers ?? [])
+    .filter((row): row is typeof row & { destination: string; platform: Platform } =>
+      Boolean(row.platform && row.destination),
+    )
+    .map((row) => ({
+      icon: row.platform as IconName,
+      label: PLATFORM_LABELS[row.platform],
+      href: profileHref(row.platform, row.destination),
+    }))
+})

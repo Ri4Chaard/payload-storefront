@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/container'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { type IconName } from '@/lib/icon-registry'
-import { CONTACT, SOCIAL_LINKS } from '@/lib/contact'
+import { CONTACT } from '@/lib/contact'
 import { cn } from '@/lib/cn'
 
 import { NewsletterForm } from './newsletter-form'
@@ -46,6 +46,13 @@ export interface FooterLinkGroup {
 export interface FooterProps {
   groups?: FooterLinkGroup[]
   legalLinks?: { label: string; href: string }[]
+  /**
+   * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
+   *
+   * Empty by default rather than falling back to a hardcoded list: a placeholder that renders
+   * looks like a working link, and the one this replaced pointed at a bare `wa.me/` on every page
+   * of the site. Nothing is drawn when there is nothing configured.
+   */
   social?: { icon: IconName; label: string; href: string }[]
   /** Defaults to the build year. Wire to the CMS when contact details become editable. */
   year?: number
@@ -130,7 +137,7 @@ function Certifications() {
 export function Footer({
   groups = DEFAULT_GROUPS,
   legalLinks = DEFAULT_LEGAL,
-  social = SOCIAL_LINKS,
+  social = [],
   year = new Date().getFullYear(),
   className,
 }: FooterProps) {

@@ -82,3 +82,23 @@ export function messengerLink(
     carriesMessage,
   }
 }
+
+/**
+ * The same account, as a plain profile link (spec 005, T072, FR-052).
+ *
+ * **Not `buildLink`.** The chrome's social marks are an invitation to follow the shop, not a
+ * handoff: a footer icon that opened WhatsApp with somebody's cart pre-typed would be startling.
+ * Same accounts, different intent — which is the whole of FR-052, since both now read one record.
+ *
+ * Instagram points at the profile rather than `ig.me/m/`, because that is what a social mark means.
+ */
+export function profileHref(platform: Platform, destination: string): string {
+  switch (platform) {
+    case 'whatsapp':
+      return `https://wa.me/${destination}`
+    case 'telegram':
+      return `https://t.me/${destination}`
+    case 'instagram':
+      return `https://instagram.com/${destination}`
+  }
+}

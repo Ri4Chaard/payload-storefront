@@ -8,11 +8,23 @@ import { Footer } from './footer'
  * The year is pinned so the story does not change on New Year's Day; in the app it comes from the
  * build.
  */
+/**
+ * The shop's accounts now come from the `contact-settings` global (spec 005, FR-052), so a story
+ * supplies them rather than the component defaulting to a hardcoded list. The list it used to
+ * default to pointed at bare `wa.me/` and `instagram.com/` roots on every page of the site.
+ */
+const SOCIAL = [
+  { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
+  { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
+  { icon: 'telegram' as const, label: 'Telegram', href: 'https://t.me/aurum' },
+]
+
 const meta = {
   title: 'Layout/Footer',
   component: Footer,
   parameters: { layout: 'fullscreen' },
-  args: { year: 2026 },
+  args: {
+    social: SOCIAL, year: 2026 },
 } satisfies Meta<typeof Footer>
 
 export default meta

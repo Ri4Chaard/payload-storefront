@@ -5,7 +5,7 @@ import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
 import { Link } from '@/components/ui/link'
 import { cn } from '@/lib/cn'
-import { CONTACT, SOCIAL_LINKS } from '@/lib/contact'
+import { CONTACT } from '@/lib/contact'
 import { type IconName } from '@/lib/icon-registry'
 
 /**
@@ -41,6 +41,13 @@ export interface ContactBannerProps {
   /** Display form of the number; `phoneHref` is what actually dials. */
   phone?: string
   phoneHref?: string
+  /**
+   * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
+   *
+   * Empty by default rather than falling back to a hardcoded list: a placeholder that renders
+   * looks like a working link, and the one this replaced pointed at a bare `wa.me/` on every page
+   * of the site. Nothing is drawn when there is nothing configured.
+   */
   social?: { icon: IconName; label: string; href: string }[]
   className?: string
 }
@@ -57,7 +64,7 @@ export function ContactBanner({
   email = CONTACT.email,
   phone = CONTACT.phone,
   phoneHref,
-  social = SOCIAL_LINKS,
+  social = [],
   className,
 }: ContactBannerProps) {
   // `tel:` will not accept the spaces and brackets the number is displayed with.

@@ -14,10 +14,22 @@ const BREADCRUMBS = [
   { label: 'Solitaire in 18ct gold' },
 ]
 
+/**
+ * The shop's accounts come from the `contact-settings` global (spec 005, FR-052), so the story
+ * supplies them. The component no longer falls back to a hardcoded list: the one it used to fall
+ * back to pointed at a bare `wa.me/` on every page of the site, which looks like a working link.
+ */
+const SOCIAL = [
+  { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
+  { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
+  { icon: 'telegram' as const, label: 'Telegram', href: 'https://t.me/aurum' },
+]
+
 const meta = {
   title: 'Layout/Header',
   component: Header,
   parameters: { layout: 'fullscreen' },
+  args: { social: SOCIAL },
 } satisfies Meta<typeof Header>
 
 export default meta

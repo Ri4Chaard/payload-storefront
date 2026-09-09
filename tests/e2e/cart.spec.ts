@@ -196,3 +196,127 @@ test('buy now names an unmade choice rather than refusing vaguely', async ({ pag
   await expect(page.getByRole('status')).toHaveText(/choose a diamond before ordering/i)
   await expect(page.getByRole('dialog')).toBeHidden()
 })
+
+/**
+ * One set of accounts (spec 005, T073, FR-052, SC-016).
+ *
+ * **This is the defect the migration exists to prevent**, and it was live until Phase 8: the owner
+ * sets their real WhatsApp number in the admin, the handoff modal uses it, and the footer on every
+ * page keeps pointing at a bare `wa.me/` — because `src/lib/contact.ts` held a second copy under a
+ * comment admitting it needed the real accounts before launch. Two records of one fact is two
+ * chances for one to be wrong, and it is always the one nobody is looking at.
+ */
+test('the chrome points at the configured accounts, not a placeholder root', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page.locator('a[href*="wa.me"]').first()).toHaveAttribute('href', /wa\.me\/\d{8,}/)
+  await expect(page.locator('a[href*="instagram.com/"]').first()).toHaveAttribute(
+    'href',
+    /instagram\.com\/.+/,
+  )
+
+  // The three roots the placeholder list used to render.
+  await expect(page.locator('a[href="https://wa.me/"]')).toHaveCount(0)
+  await expect(page.locator('a[href="https://instagram.com/"]')).toHaveCount(0)
+  await expect(page.locator('a[href="https://t.me/"]')).toHaveCount(0)
+})
+
+/**
+ * Reordering in the admin reorders the modal (spec 005, T080, FR-038).
+ *
+ * Row order *is* display order — there is no position field two rows could disagree about — so this
+ * asserts the consequence: the owner drags, and the customer's modal follows.
+ */
+test('the messenger order the owner set is the order customers see', async ({ page, request }) => {
+  test.setTimeout(120_000)
+
+  await page.goto('/products/butterfly-diamond-pendant')
+  await page.getByRole('button', { name: /add to cart/i }).click()
+  await expect(page.getByText(/added to your cart/i)).toBeVisible()
+
+  await page.goto('/cart')
+  await page
+    .locator('label')
+    .filter({ hasText: /I agree to the/ })
+    .locator('span[aria-hidden="true"]')
+    .click()
+  await page.getByRole('button', { name: /^checkout$/i }).click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+
+  // Whatever the owner has configured, the modal lists it in that order — read it back from the
+  // API rather than assuming, so the test describes the rule and not one particular arrangement.
+  const settings = await request.get('/api/globals/contact-settings')
+  const configured: { enabled?: boolean; platform: string }[] =
+    (await settings.json()).messengers ?? []
+  const expected = configured.filter((row) => row.enabled !== false).map((row) => row.platform)
+
+  const shown = await dialog.getByRole('link').evaluateAll((links) =>
+    links
+      .map((link) => (link as HTMLAnchorElement).href)
+      .map((href) =>
+        href.includes('wa.me')
+          ? 'whatsapp'
+          : href.includes('t.me')
+            ? 'telegram'
+            : href.includes('ig.me')
+              ? 'instagram'
+              : null,
+      )
+      .filter(Boolean),
+  )
+
+  expect(shown).toEqual(expected)
+})
+
+/**
+ * The whole flow by keyboard alone (spec 005, T082, FR-017, SC-008).
+ *
+ * The axe sweep in `tests/a11y/routes.spec.ts` checks the static properties; this checks the ones
+ * only an interaction can show — that a dialog traps focus, that Escape closes it, and that focus
+ * comes back to the control that opened it rather than to the top of the document.
+ */
+test('the cart and its dialogs are operable by keyboard alone', async ({ page }) => {
+  await page.goto('/products/butterfly-diamond-pendant')
+  await page.getByRole('button', { name: /add to cart/i }).click()
+  await expect(page.getByText(/added to your cart/i)).toBeVisible()
+
+  await page.goto('/cart')
+
+  // Open the removal confirmation from the keyboard.
+  await page.getByRole('button', { name: /^remove /i }).focus()
+  await page.keyboard.press('Enter')
+  const removal = page.getByRole('dialog')
+  await expect(removal).toBeVisible()
+
+  /*
+   * Focus is inside the dialog and stays there. Ten tabs is well past the three focusable controls
+   * it holds, so if the trap leaks it will have escaped by now.
+   */
+  for (let i = 0; i < 10; i += 1) {
+    await page.keyboard.press('Tab')
+    const inside = await removal.evaluate((panel) => panel.contains(document.activeElement))
+    expect(inside, `focus left the dialog after ${i + 1} tabs`).toBe(true)
+  }
+
+  await page.keyboard.press('Escape')
+  await expect(removal).toBeHidden()
+  await expect(cartRows(page)).toHaveCount(1)
+
+  // The handoff, opened and dismissed the same way, returns focus to CHECKOUT.
+  await page
+    .locator('label')
+    .filter({ hasText: /I agree to the/ })
+    .locator('span[aria-hidden="true"]')
+    .click()
+
+  const checkout = page.getByRole('button', { name: /^checkout$/i })
+  await checkout.focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('dialog')).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(checkout).toBeFocused()
+})

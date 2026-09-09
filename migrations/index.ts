@@ -8,6 +8,7 @@ import * as migration_20260902_081401_account_settings from './20260902_081401_a
 import * as migration_20260902_112639_drop_marketing_enabled from './20260902_112639_drop_marketing_enabled';
 import * as migration_20260903_074224_jobs_queue from './20260903_074224_jobs_queue';
 import * as migration_20260909_103616_contact_settings from './20260909_103616_contact_settings';
+import * as migration_20260909_112455_expire_carts_task from './20260909_112455_expire_carts_task';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20260909_103616_contact_settings.up,
     down: migration_20260909_103616_contact_settings.down,
-    name: '20260909_103616_contact_settings'
+    name: '20260909_103616_contact_settings',
+  },
+  {
+    up: migration_20260909_112455_expire_carts_task.up,
+    down: migration_20260909_112455_expire_carts_task.down,
+    name: '20260909_112455_expire_carts_task'
   },
 ];

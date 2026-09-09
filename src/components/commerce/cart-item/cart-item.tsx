@@ -41,7 +41,12 @@ export interface CartItemProps extends Omit<React.ComponentProps<'li'>, 'onChang
   name: string
   /** Formatted for display; currency and grouping belong to the caller's locale. */
   price: string
-  image: { src: string; alt?: string }
+  /**
+   * `null` where the product is gone and there is no photograph to show — a withdrawn piece keeps
+   * its row (FR-014) and the row still needs a box where the picture was. Passing `{ src: '' }`
+   * instead makes `next/image` request the current page as an image; the story sweep caught it.
+   */
+  image: { src: string; alt?: string } | null
   quantity: number
   onQuantityChange: (quantity: number) => void
   onRemove: () => void
@@ -104,14 +109,16 @@ export function CartItem({
         `scrollWidth` assertion rather than noticed by eye, which is why the e2e walk checks it at
         every width.
       */}
-      <div className="bg-background-container relative size-25 shrink-0 sm:size-37.5">
-        <Image
-          src={image.src}
-          alt={image.alt ?? ''}
-          fill
-          sizes="(min-width: 640px) 150px, 100px"
-          className="object-cover"
-        />
+      <div className="bg-background-bg relative size-25 shrink-0 sm:size-37.5">
+        {image ? (
+          <Image
+            src={image.src}
+            alt={image.alt ?? ''}
+            fill
+            sizes="(min-width: 640px) 150px, 100px"
+            className="object-cover"
+          />
+        ) : null}
       </div>
 
       {/*

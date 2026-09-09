@@ -23,6 +23,25 @@ from, so that four independent specs do not make four independent decisions abou
 | `002-product-catalog` | Products, attributes, categories, diamond and size options, availability | User Stories 1–2 |
 | `003-customer-accounts` | Verification-code sign-in, profiles | User Story 3 |
 | `004-requests-and-handoff` | Cart, request submission, WhatsApp/Telegram handoff, admin queue | User Stories 4–5 |
+
+> **Shipped as `005-checkout-handoff`** (renumbered — `004` went to customer accounts), and
+> deliberately narrower than this row. Delivered: the cart, the cart page, "Buy now", and the
+> messenger handoff with an owner-configurable set of destinations.
+>
+> **Not delivered, and named rather than dropped**: this brief's FR-041 (a contact-details step and
+> a customer note), FR-042 and FR-045 to FR-052 (a persisted request record with a reference and a
+> line snapshot, the acknowledgement email, and the admin request queue — User Story 5). Those
+> numbers are this brief's; spec 005 reuses the same range for different requirements.
+>
+> The decision was taken deliberately: none of the five Figma frames draws a reference, a
+> confirmation screen or a note field, and the owner chose the smallest shape that matches them.
+> The consequence to hold on to is that a customer who builds a cart, opens WhatsApp and closes it
+> without sending leaves no trace at all. That is the strongest argument for landing request
+> records in a follow-up spec.
+>
+> Two constitution deviations are recorded in `specs/005-checkout-handoff/plan.md` under Complexity
+> Tracking: no checkout kill switch (the owner's decision, time-boxed to the arrival of a payment
+> provider) and no checkout logging or monitoring (open).
 | `005-editorial-blog` | Posts, categories, product cross-linking | User Story 6 |
 
 Requirement numbers below (FR-nnn) are brief-local. Each feature spec renumbers its own.

@@ -224,33 +224,33 @@ the cart, and the gates that fail quietly if nobody looks.
 
 ### One set of accounts (FR-052)
 
-- [ ] T071 [P] Delete `SOCIAL_LINKS` from `src/lib/contact.ts` and update its module docstring — the global is now the source of truth (research R11)
-- [ ] T072 Pass the messengers from `getMessengers()` into `ContactBanner`, `Footer` and `MobileNav` from `src/app/(frontend)/layout.tsx` via their existing `social` props — depends on T050, T071
-- [ ] T073 Change one messenger account in the `contact-settings` global (`src/globals/contact-settings.ts`) via the admin and verify it changes in the handoff modal, the contact strip, the footer **and** the mobile navigation — the "owner sets the real number, footer still says `wa.me/`" defect this section exists to prevent (FR-052, SC-016) — depends on T072
+- [X] T071 [P] Delete `SOCIAL_LINKS` from `src/lib/contact.ts` and update its module docstring — the global is now the source of truth (research R11)
+- [X] T072 Pass the messengers from `getMessengers()` into `ContactBanner`, `Footer` and `MobileNav` from `src/app/(frontend)/layout.tsx` via their existing `social` props — depends on T050, T071
+- [X] T073 Change one messenger account in the `contact-settings` global (`src/globals/contact-settings.ts`) via the admin and verify it changes in the handoff modal, the contact strip, the footer **and** the mobile navigation — the "owner sets the real number, footer still says `wa.me/`" defect this section exists to prevent (FR-052, SC-016) — depends on T072
 
 ### Retention and erasure (FR-047 – FR-051)
 
-- [ ] T074 [P] Define the two retention periods as configuration in `src/lib/cart/retention.ts` — 30 days for a guest cart, 12 months for a customer's — recording that a retention period living only in a source file is one nobody outside the repository can read or change (FR-047, FR-048, FR-051)
-- [ ] T075 Implement `expireCartsTask` in `src/jobs/expire-carts.ts` and register it on the existing `nightly` queue in `src/payload.config.ts` beside `purgeAccountsTask` — a second task on one scheduler, not a second scheduler — depends on T074
-- [ ] T076 Delete a customer's carts in the same operation that deletes the customer, in `src/collections/customer-hooks.ts`, extending the path spec 004 already built, so an erasure request leaves no cart naming what they wanted (FR-049)
-- [ ] T077 [P] Integration tests in `tests/integration/cart-retention.test.ts`: a guest cart past 30 days and a customer cart past 12 months are both gone; carts inside their windows survive; deleting a customer removes their carts (SC-014) — the clock is controlled by back-dating `updatedAt`, never by waiting
+- [X] T074 [P] Define the two retention periods as configuration in `src/lib/cart/retention.ts` — 30 days for a guest cart, 12 months for a customer's — recording that a retention period living only in a source file is one nobody outside the repository can read or change (FR-047, FR-048, FR-051)
+- [X] T075 Implement `expireCartsTask` in `src/jobs/expire-carts.ts` and register it on the existing `nightly` queue in `src/payload.config.ts` beside `purgeAccountsTask` — a second task on one scheduler, not a second scheduler — depends on T074
+- [X] T076 Delete a customer's carts in the same operation that deletes the customer, in `src/collections/customer-hooks.ts`, extending the path spec 004 already built, so an erasure request leaves no cart naming what they wanted (FR-049)
+- [X] T077 [P] Integration tests in `tests/integration/cart-retention.test.ts`: a guest cart past 30 days and a customer cart past 12 months are both gone; carts inside their windows survive; deleting a customer removes their carts (SC-014) — the clock is controlled by back-dating `updatedAt`, never by waiting
 
 ### The recorded absences (FR-029, FR-030)
 
-- [ ] T078 [P] Integration test in `tests/integration/cart-handoff.test.ts`: `orders` and `transactions` remain disabled and a completed handoff writes no row anywhere — the negative FR-029 asserts, which stays true only while something checks it
+- [X] T078 [P] Integration test in `tests/integration/cart-handoff.test.ts`: `orders` and `transactions` remain disabled and a completed handoff writes no row anywhere — the negative FR-029 asserts, which stays true only while something checks it
 
 ### Verification and gates
 
-- [ ] T079 [P] E2E in `tests/e2e/cart.spec.ts`: the full flow — add, adjust, remove with confirmation, checkout, choose a messenger — at 390, 768 and 1920, signed out throughout and never once shown a sign-in prompt (FR-031, SC-011), asserting the copy affordance is present even with three messengers configured (SC-017)
-- [ ] T080 E2E in `tests/e2e/cart.spec.ts`: signing in **while the handoff modal is open** neither discards it nor loses the cart (FR-032); and reordering messengers in the admin reorders the modal (FR-038) — same file as T079, so not `[P]` with it
-- [ ] T081 [P] A11y scan in `tests/a11y/routes.spec.ts` extended to `/cart` and both dialogs (SC-008)
-- [ ] T082 Complete the entire flow by keyboard alone and with a screen reader; confirm both modals trap focus, close on Escape, and return focus to what opened them (FR-017, SC-008) — depends on T079
-- [ ] T083 Time a first-time visitor from the product page to an open messenger and confirm it is under 60 seconds, choices included (SC-001) — depends on T079
-- [ ] T084 Measure `/cart` initial JS against a **production server** (`pnpm build && pnpm start`, devtools Network, gzipped transfer before load) and record it against the 300KB total and 100KB-above-baseline budgets — the margin is ~16KB (SC-009) — depends on T034
-- [ ] T085 [P] Add the story-test entries for every new component to `tests/stories/ui-kit.spec.ts`
-- [ ] T086 Run `pnpm lint && pnpm typecheck && pnpm check:naming && pnpm check:tokens && pnpm check:styles && pnpm check:stories` and fix anything they report
-- [ ] T087 Run every scenario in [quickstart.md](./quickstart.md) end to end, including the "What you should *not* find" list — no order record, no reference, no sign-in prompt, no cart cleared by the site, no payment
-- [ ] T088 Update `docs/mvp-brief.md` to record that `004-requests-and-handoff` shipped as `005-checkout-handoff`, with **the brief's own** FR-041, FR-042, FR-045 to FR-052 deferred, and why — noting those numbers are the brief's, not this spec's, which reuses the same range for different requirements
+- [X] T079 [P] E2E in `tests/e2e/cart.spec.ts`: the full flow — add, adjust, remove with confirmation, checkout, choose a messenger — at 390, 768 and 1920, signed out throughout and never once shown a sign-in prompt (FR-031, SC-011), asserting the copy affordance is present even with three messengers configured (SC-017)
+- [X] T080 E2E in `tests/e2e/cart.spec.ts`: signing in **while the handoff modal is open** neither discards it nor loses the cart (FR-032); and reordering messengers in the admin reorders the modal (FR-038) — same file as T079, so not `[P]` with it
+- [X] T081 [P] A11y scan in `tests/a11y/routes.spec.ts` extended to `/cart` and both dialogs (SC-008)
+- [X] T082 Complete the entire flow by keyboard alone and with a screen reader; confirm both modals trap focus, close on Escape, and return focus to what opened them (FR-017, SC-008) — depends on T079
+- [X] T083 Time a first-time visitor from the product page to an open messenger and confirm it is under 60 seconds, choices included (SC-001) — depends on T079
+- [X] T084 Measure `/cart` initial JS against a **production server** (`pnpm build && pnpm start`, devtools Network, gzipped transfer before load) and record it against the 300KB total and 100KB-above-baseline budgets — the margin is ~16KB (SC-009) — depends on T034
+- [X] T085 [P] Add the story-test entries for every new component to `tests/stories/ui-kit.spec.ts`
+- [X] T086 Run `pnpm lint && pnpm typecheck && pnpm check:naming && pnpm check:tokens && pnpm check:styles && pnpm check:stories` and fix anything they report
+- [X] T087 Run every scenario in [quickstart.md](./quickstart.md) end to end, including the "What you should *not* find" list — no order record, no reference, no sign-in prompt, no cart cleared by the site, no payment
+- [X] T088 Update `docs/mvp-brief.md` to record that `004-requests-and-handoff` shipped as `005-checkout-handoff`, with **the brief's own** FR-041, FR-042, FR-045 to FR-052 deferred, and why — noting those numbers are the brief's, not this spec's, which reuses the same range for different requirements
 
 ---
 

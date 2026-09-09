@@ -132,9 +132,17 @@ export function OrderSummary({
           value={cart.subtotal}
         />
         <Row term="Shipping" value={cart.shipping} />
-        <div className="mt-1.5 border-t border-black/10 pt-3.5">
-          <Row term="Subtotal" value={cart.subtotal} strong />
-        </div>
+        {/*
+          The rule goes ON the row, not on a wrapper around it. A `<dl>` may hold `<dt>`, `<dd>` and
+          a single `<div>` grouping them — nesting a second `<div>` for the border broke that
+          content model, and axe caught it (`only-dlitems`, `dlitem`) where review had not.
+        */}
+        <Row
+          term="Subtotal"
+          value={cart.subtotal}
+          strong
+          className="mt-1.5 border-t border-black/10 pt-3.5"
+        />
       </dl>
 
       <Button
@@ -188,9 +196,19 @@ export function OrderSummary({
   )
 }
 
-function Row({ term, value, strong = false }: { term: string; value: string; strong?: boolean }) {
+function Row({
+  term,
+  value,
+  strong = false,
+  className,
+}: {
+  term: string
+  value: string
+  strong?: boolean
+  className?: string
+}) {
   return (
-    <div className="flex items-baseline justify-between gap-5">
+    <div className={cn('flex items-baseline justify-between gap-5', className)}>
       <dt className={cn('text-neutral-primary', strong ? 'text-body-strong' : 'text-body-medium')}>
         {term}
       </dt>

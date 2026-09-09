@@ -184,13 +184,17 @@ test('cart count reaches assistive tech, not just the badge', async ({ page }) =
     waitUntil: 'load',
   })
 
-  // The badge itself is aria-hidden, so the count has to be in the button's name or it is lost.
-  await expect(page.getByRole('button', { name: 'Cart, 2 items' })).toBeVisible()
+  /*
+   * A LINK since spec 005 T024: FR-016 says the header must open the cart, not only count it, and
+   * `IconButton` renders an `<a>` once it has an href. The badge itself stays `aria-hidden`, so the
+   * count still has to be in the control's accessible name or it is lost.
+   */
+  await expect(page.getByRole('link', { name: 'Cart, 2 items' })).toBeVisible()
 
   await page.goto(`${STORYBOOK}/iframe.html?id=layout-header--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
-  await expect(page.getByRole('button', { name: 'Cart, empty' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Cart, empty' })).toBeVisible()
 })
 
 /** SC-007 — 320px is the narrowest viewport we support, and the header is the first thing to break. */

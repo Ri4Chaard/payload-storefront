@@ -313,3 +313,64 @@ for (const { name, width } of WIDTHS) {
     })
   })
 }
+
+/**
+ * The cart and its two dialogs (spec 005, T081, SC-008).
+ *
+ * **Not in `ROUTES` above**, because an empty `/cart` is a heading and a link — the page worth
+ * sweeping is one with rows in it, a removal confirmation over it, and a handoff modal over that.
+ * Each has to be built before it can be measured.
+ *
+ * A dialog inherits every document-level obligation the page had, so all three run with the
+ * complete rule set, at the three drawn widths.
+ */
+for (const { name, width, height } of [
+  { name: 'desktop', width: 1920, height: 1200 },
+  { name: 'tablet', width: 1024, height: 1366 },
+  { name: 'mobile', width: 390, height: 844 },
+]) {
+  test(`the cart and its dialogs have no accessibility violations at ${name} width`, async ({
+    page,
+  }) => {
+    test.setTimeout(120_000)
+    await page.setViewportSize({ width, height })
+
+    await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+    await page.getByRole('combobox', { name: /diamond/i }).click()
+    await page.getByRole('option').first().click()
+    await page.getByRole('combobox', { name: /size/i }).click()
+    await page.getByRole('option').first().click()
+    await page.getByRole('button', { name: /add to cart/i }).click()
+    await expect(page.getByText(/added to your cart/i)).toBeVisible()
+
+    await page.goto('/cart')
+    await page.waitForLoadState('networkidle')
+
+    const sweep = () =>
+      new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .analyze()
+
+    const filled = await sweep()
+    expect(filled.violations, JSON.stringify(filled.violations, null, 2)).toEqual([])
+
+    // The removal confirmation.
+    await page.getByRole('button', { name: /^remove /i }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    const removal = await sweep()
+    expect(removal.violations, JSON.stringify(removal.violations, null, 2)).toEqual([])
+    await page.keyboard.press('Escape')
+
+    // The handoff.
+    await page
+      .locator('label')
+      .filter({ hasText: /I agree to the/ })
+      .locator('span[aria-hidden="true"]')
+      .click()
+    await page.getByRole('button', { name: /^checkout$/i }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    const handoff = await sweep()
+    expect(handoff.violations, JSON.stringify(handoff.violations, null, 2)).toEqual([])
+  })
+}

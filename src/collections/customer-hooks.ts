@@ -1,4 +1,9 @@
-import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
+  CollectionBeforeDeleteHook,
+} from 'payload'
 
 import { syncMarketingContact } from '@/lib/email/marketing'
 
@@ -135,4 +140,57 @@ export const syncMarketingChoice: CollectionAfterChangeHook = async ({
   }
 
   return doc
+}
+
+/**
+ * A deleted customer leaves no cart behind (spec 005, T076, FR-049).
+ *
+ * Constitution VI asks every data collection point for a working deletion path, and a cart is one:
+ * it records what somebody wanted, by name, for as long as it exists. An erasure request that left
+ * the cart would leave exactly that.
+ *
+ * **Two hooks, and the reason is a foreign key.** `carts.customer_id` is `ON DELETE SET NULL`, so
+ * by the time `afterDelete` runs the link is already gone — a delete keyed on the customer id finds
+ * nothing, reports success, and leaves the cart behind as an orphan no cookie can ever open. It
+ * would eventually be collected by the guest window thirty days later, and in the meantime it is
+ * precisely the record the erasure was supposed to remove. The first draft here was that
+ * single-hook version; it passed review by eye and failed against a database.
+ *
+ * So the ids are captured in `beforeDelete`, while the relationship still exists, and the deletion
+ * happens in `afterDelete`. That ordering also keeps the original property: a customer deletion
+ * refused by access control or a later hook never reaches `afterDelete`, so their cart survives —
+ * emptying the cart of somebody who is still a customer is the unrecoverable direction.
+ *
+ * `overrideAccess: true` because a deletion runs as whoever asked for it — an admin, or the
+ * customer themselves — and neither carries the cart secret the collection's own rules want. The
+ * captured id list is the whole of what this can touch.
+ */
+const CART_IDS = 'aurum:cartsToDelete'
+
+export const captureCustomerCarts: CollectionBeforeDeleteHook = async ({ id, req }) => {
+  const { docs } = await req.payload.find({
+    collection: 'carts',
+    depth: 0,
+    limit: 100,
+    overrideAccess: true,
+    req,
+    select: {},
+    where: { customer: { equals: id } },
+  })
+
+  req.context[CART_IDS] = docs.map((doc) => doc.id)
+}
+
+export const deleteCustomerCarts: CollectionAfterDeleteHook = async ({ req }) => {
+  const ids = req.context[CART_IDS]
+  if (!Array.isArray(ids) || ids.length === 0) return
+
+  await req.payload.delete({
+    collection: 'carts',
+    overrideAccess: true,
+    req,
+    where: { id: { in: ids } },
+  })
+
+  delete req.context[CART_IDS]
 }

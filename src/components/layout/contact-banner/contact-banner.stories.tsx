@@ -10,7 +10,19 @@ import { ContactBanner } from './contact-banner'
  * stories — below `md` the strip is `display: none`, which the Mobile story shows as an empty
  * canvas. That is the correct result, not a broken story.
  */
+/**
+ * The shop's accounts now come from the `contact-settings` global (spec 005, FR-052), so a story
+ * supplies them rather than the component defaulting to a hardcoded list. The list it used to
+ * default to pointed at bare `wa.me/` and `instagram.com/` roots on every page of the site.
+ */
+const SOCIAL = [
+  { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
+  { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
+  { icon: 'telegram' as const, label: 'Telegram', href: 'https://t.me/aurum' },
+]
+
 const meta = {
+  args: { social: SOCIAL },
   title: 'Layout/ContactBanner',
   component: ContactBanner,
   parameters: { layout: 'fullscreen' },

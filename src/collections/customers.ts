@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  captureCustomerCarts,
   composeCustomerName,
+  deleteCustomerCarts,
   stampMarketingConsent,
   syncMarketingChoice,
 } from '@/collections/customer-hooks'
@@ -108,6 +110,15 @@ export const Customers: CollectionConfig = {
      * roll back.
      */
     afterChange: [syncMarketingChoice],
+    /**
+     * The customer's cart goes with them (spec 005, FR-049).
+     *
+     * Two hooks because `carts.customer_id` is `ON DELETE SET NULL`: the ids have to be captured
+     * while the relationship still exists, and deleted only once the customer actually went. See
+     * the hooks for the version that looked right and did nothing.
+     */
+    beforeDelete: [captureCustomerCarts],
+    afterDelete: [deleteCustomerCarts],
   },
   fields: [
     {

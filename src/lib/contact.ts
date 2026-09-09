@@ -1,5 +1,3 @@
-import { type IconName } from '@/lib/icon-registry'
-
 /**
  * The shop's own contact details, in one place.
  *
@@ -22,9 +20,15 @@ export const CONTACT = {
   phoneHref: 'tel:+15550102030',
 } as const
 
-/** Placeholder destinations — these need the real accounts before launch. */
-export const SOCIAL_LINKS: { icon: IconName; label: string; href: string }[] = [
-  { icon: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/' },
-  { icon: 'instagram', label: 'Instagram', href: 'https://instagram.com/' },
-  { icon: 'telegram', label: 'Telegram', href: 'https://t.me/' },
-]
+/**
+ * **`SOCIAL_LINKS` lived here and has been removed** (spec 005, T071, FR-052).
+ *
+ * It held three placeholder destinations — `https://wa.me/` and friends — under a comment saying
+ * they needed the real accounts before launch. They still did: an owner who set their real WhatsApp
+ * number in the admin would have watched the footer keep pointing at a bare root on every page,
+ * because nothing connected the two. The shop's messenger accounts now live in the
+ * `contact-settings` global, and `src/lib/messengers/settings.ts` is where the chrome reads them.
+ *
+ * What is left below is genuinely the shop's own: an address and a phone number that appear in
+ * three places and had the same duplication problem this module was written to solve.
+ */

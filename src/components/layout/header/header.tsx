@@ -11,6 +11,7 @@ import { useCartCount } from '@/components/layout/cart-count'
 import { LanguageSelector, type Locale } from '@/components/layout/language-selector'
 import { Logo } from '@/components/layout/logo'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 /**
@@ -49,6 +50,8 @@ export interface HeaderProps {
    * everything else leaves it alone and takes what `CartCountProvider` knows (spec 005, T025).
    */
   cartCount?: number
+  /** The shop's accounts, from `contact-settings`. Passed through to the mobile navigation. */
+  social?: { href: string; icon: IconName; label: string }[]
   locales?: Locale[]
   className?: string
 }
@@ -82,6 +85,7 @@ export function Header({
   navItems = DEFAULT_NAV,
   breadcrumbs,
   cartCount,
+  social,
   locales = DEFAULT_LOCALES,
   reveal = true,
   className,
@@ -159,6 +163,7 @@ export function Header({
     >
       <Container className="relative flex h-15 items-center justify-between md:h-17.5">
         <MobileNav
+          {...(social ? { social } : {})}
           items={navItems}
           locales={locales}
           locale={locale}

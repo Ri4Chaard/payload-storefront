@@ -211,9 +211,23 @@ pnpm build && pnpm start
 # and sum the gzipped transfer size of everything fetched before load.
 ```
 
-**Expected**: ≤ 300KB total **and** ≤ 100KB above the 181KB framework baseline. The margin is
-genuinely thin — the worst existing route already spends 84KB of the 100KB delta
-([research R15](./research.md)).
+**Expected**: ≤ 300KB total **and** ≤ 100KB above the 181KB framework baseline.
+
+**Measured on 2026-09-09**, against `pnpm build && pnpm start`:
+
+| Route | Total | Above baseline |
+| --- | --- | --- |
+| framework baseline (404, no application code) | 181.3 KB | — |
+| `/cart` | 196.3 KB | **14.9 KB** |
+| `/products/[slug]` | 196.3 KB | 14.9 KB |
+
+Both budgets pass with room. The baseline reproducing the constitution's own 181KB figure is what
+says the measurement is sound.
+
+**Measure against a production server, and check you are actually on one.** The first attempt here
+reported a 888KB baseline, because Playwright's `webServer` had left a `next dev` server holding
+port 3000 and `pnpm start` had quietly failed to bind. Dev bundles are several times larger and
+unminified; a number that far from the recorded baseline means the server, not the code.
 
 **Accessibility**: complete the entire flow — add, adjust, remove, confirm, checkout, choose a
 messenger — **by keyboard alone**, then again with a screen reader. Both modals must trap focus,
