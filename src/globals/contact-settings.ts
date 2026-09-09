@@ -119,6 +119,42 @@ export const ContactSettings: GlobalConfig = {
       },
     },
     {
+      name: 'address',
+      type: 'textarea',
+      defaultValue: DEFAULT_CONTACT.address,
+      label: 'Address',
+      admin: {
+        description: 'Shown in the footer, and used for the “Open in Maps” link unless you pin one below.',
+        rows: 3,
+      },
+    },
+    {
+      name: 'openingHours',
+      type: 'text',
+      defaultValue: DEFAULT_CONTACT.openingHours,
+      label: 'Opening hours',
+      admin: { description: 'One line, as it should read in the footer — e.g. “Daily · 10:00 AM–9:00 PM”.' },
+    },
+    {
+      name: 'mapsUrl',
+      type: 'text',
+      label: 'Map link',
+      admin: {
+        description:
+          'Optional. Paste the link to your exact pin from Google Maps. Left empty, “Open in Maps” searches for the address above — which is better than the bare maps.google.com the footer shipped with.',
+      },
+      /**
+       * A link that is not a link is worse than none: "Open in Maps" that goes nowhere still looks
+       * like a working affordance. Empty is fine — that is "search for my address instead".
+       */
+      validate: (value: unknown) => {
+        if (typeof value !== 'string' || value.trim() === '') return true
+        return /^https?:\/\/\S+$/i.test(value.trim())
+          ? true
+          : 'Paste the whole link, starting with https://'
+      },
+    },
+    {
       name: 'messengers',
       type: 'array',
       label: 'Messengers',

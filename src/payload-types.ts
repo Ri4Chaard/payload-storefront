@@ -2255,6 +2255,18 @@ export interface ContactSetting {
    */
   phone?: string | null;
   /**
+   * Shown in the footer, and used for the “Open in Maps” link unless you pin one below.
+   */
+  address?: string | null;
+  /**
+   * One line, as it should read in the footer — e.g. “Daily · 10:00 AM–9:00 PM”.
+   */
+  openingHours?: string | null;
+  /**
+   * Optional. Paste the link to your exact pin from Google Maps. Left empty, “Open in Maps” searches for the address above — which is better than the bare maps.google.com the footer shipped with.
+   */
+  mapsUrl?: string | null;
+  /**
    * The platforms offered when a customer completes their order. Drag to reorder — customers see them in this order.
    */
   messengers?:
@@ -2336,6 +2348,9 @@ export interface AccountSettingsSelect<T extends boolean = true> {
 export interface ContactSettingsSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
+  address?: T;
+  openingHours?: T;
+  mapsUrl?: T;
   messengers?:
     | T
     | {

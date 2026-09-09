@@ -3,7 +3,7 @@ import { cache } from 'react'
 import { getPayload } from 'payload'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
-import { DEFAULT_CONTACT, telHref } from '@/lib/contact'
+import { DEFAULT_CONTACT, mapsHref, telHref } from '@/lib/contact'
 import type { IconName } from '@/lib/icon-registry'
 
 import { profileHref } from './links'
@@ -125,13 +125,29 @@ export interface ContactDetails {
   email: string
   phone: string
   phoneHref: string
+  address: string
+  openingHours: string
+  /** The owner's pinned link where they set one, otherwise a search for the address. */
+  mapsHref: string
 }
 
 export const getContactDetails = cache(async (): Promise<ContactDetails> => {
   const doc = await settings()
 
-  const email = typeof doc.email === 'string' && doc.email.trim() !== '' ? doc.email : DEFAULT_CONTACT.email
-  const phone = typeof doc.phone === 'string' && doc.phone.trim() !== '' ? doc.phone : DEFAULT_CONTACT.phone
+  const filled = (value: unknown, fallback: string): string =>
+    typeof value === 'string' && value.trim() !== '' ? value : fallback
 
-  return { email, phone, phoneHref: telHref(phone) }
+  const phone = filled(doc.phone, DEFAULT_CONTACT.phone)
+  const address = filled(doc.address, DEFAULT_CONTACT.address)
+  const pinned = typeof doc.mapsUrl === 'string' ? doc.mapsUrl.trim() : ''
+
+  return {
+    email: filled(doc.email, DEFAULT_CONTACT.email),
+    phone,
+    phoneHref: telHref(phone),
+    address,
+    openingHours: filled(doc.openingHours, DEFAULT_CONTACT.openingHours),
+    // The pin wins where the owner set one; otherwise a search for the address they typed.
+    mapsHref: pinned === '' ? mapsHref(address) : pinned,
+  }
 })

@@ -343,6 +343,23 @@ test('the chrome shows the configured email and phone, and the tel link matches'
   await expect(page.locator(`a[href="mailto:${email}"]`).first()).toBeVisible()
   await expect(page.locator(`a[href="tel:+${digits}"]`).first()).toBeVisible()
 
+  // The address, the hours and the map link come from the same record.
+  const { address, openingHours } = await settings.json().catch(() => ({}))
+  if (address) await expect(page.getByText(String(address))).toBeVisible()
+  if (openingHours) await expect(page.getByText(String(openingHours))).toBeVisible()
+
+  // The footer shipped with a bare maps.google.com — a link to Google Maps, not to this shop.
+  await expect(page.locator('a[href="https://maps.google.com/"]')).toHaveCount(0)
+  const maps = page.getByRole('link', { name: /open in maps/i })
+  // Either the owner's pinned link, or a search for the address they typed — never the bare root.
+  await expect(maps).toHaveAttribute('href', /(google\.[a-z.]+\/maps\/\S+|maps\.app\.goo\.gl\/\S+)/)
+  if (address) {
+    const href = await maps.getAttribute('href')
+    expect(href!.includes(encodeURIComponent(String(address))) || !href!.includes('search')).toBe(
+      true,
+    )
+  }
+
   // No copy of the old hardcoded dialling link survives anywhere on the page.
   const stale = await page.locator('a[href^="tel:"]').evaluateAll((links) =>
     links.map((link) => (link as HTMLAnchorElement).getAttribute('href')),

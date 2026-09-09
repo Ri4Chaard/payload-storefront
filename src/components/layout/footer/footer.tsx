@@ -64,6 +64,10 @@ export interface FooterProps {
   email: string
   phone: string
   phoneHref: string
+  address: string
+  openingHours: string
+  /** The owner's pinned map link, or a search for the address. Never a bare `maps.google.com`. */
+  mapsHref: string
   /** Defaults to the build year. Wire to the CMS when contact details become editable. */
   year?: number
   className?: string
@@ -151,6 +155,9 @@ export function Footer({
   email,
   phone,
   phoneHref,
+  address,
+  openingHours,
+  mapsHref,
   year = new Date().getFullYear(),
   className,
 }: FooterProps) {
@@ -187,10 +194,10 @@ export function Footer({
           <div className={COLUMN}>
             <h2 className={HEADING}>Contacts</h2>
             <div className="text-body-small text-neutral-white/80 flex flex-col items-center gap-5 text-center md:items-start md:text-left">
-              <p>12 Market Street, Old Town, Example City</p>
-              <p>Daily · 10:00 AM–9:00 PM</p>
+              <p>{address}</p>
+              <p>{openingHours}</p>
               <div className="flex flex-col items-center gap-2.5 md:items-start">
-                <Link href="https://maps.google.com/" variant="inverse-inline">
+                <Link href={mapsHref} variant="inverse-inline">
                   Open in Maps
                 </Link>
                 {/*

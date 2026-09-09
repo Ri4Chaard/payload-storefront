@@ -72,6 +72,9 @@ afterEach(async () => {
       messageTemplate: DEFAULT_MESSAGE_TEMPLATE,
       email: DEFAULT_CONTACT.email,
       phone: DEFAULT_CONTACT.phone,
+      address: DEFAULT_CONTACT.address,
+      openingHours: DEFAULT_CONTACT.openingHours,
+      mapsUrl: '',
     },
     overrideAccess: true,
     context: skipRevalidation,
@@ -296,5 +299,60 @@ describe('contact details', () => {
     expect(details.email).toBe(DEFAULT_CONTACT.email)
     expect(details.phone).toBe(DEFAULT_CONTACT.phone)
     expect(details.phoneHref).toBe('tel:+15550102030')
+  })
+})
+
+/**
+ * Where the shop is, when it is open, and how to find it on a map.
+ *
+ * The footer shipped with all three hardcoded, and the map link pointed at a bare
+ * `https://maps.google.com/` — a link to Google Maps, not to this shop. It survived review for the
+ * same reason the `wa.me/` marks did: a link that opens *something* looks like it works.
+ */
+describe('where the shop is', () => {
+  it('draws the address and hours the owner set', async () => {
+    await save({
+      messengers: GOOD,
+      address: 'Unit 4, Esentai Tower, Almaty, Kazakhstan',
+      openingHours: 'Mon–Sat · 11:00–19:00',
+    })
+
+    const details = await getContactDetails()
+    expect(details.address).toBe('Unit 4, Esentai Tower, Almaty, Kazakhstan')
+    expect(details.openingHours).toBe('Mon–Sat · 11:00–19:00')
+  })
+
+  it('uses the pinned map link when there is one', async () => {
+    await save({ messengers: GOOD, mapsUrl: 'https://maps.app.goo.gl/abc123' })
+    expect((await getContactDetails()).mapsHref).toBe('https://maps.app.goo.gl/abc123')
+  })
+
+  /**
+   * With no pin, a search for the address the owner typed. Not a bare `maps.google.com`, which is
+   * what the footer shipped with and is about nowhere in particular.
+   */
+  it('searches for the address when no pin is set', async () => {
+    await save({
+      messengers: GOOD,
+      address: 'Unit 4, Esentai Tower, Almaty',
+      mapsUrl: '',
+    })
+
+    const { mapsHref } = await getContactDetails()
+    expect(mapsHref).toContain('google.com/maps/search')
+    expect(mapsHref).toContain(encodeURIComponent('Unit 4, Esentai Tower, Almaty'))
+    expect(mapsHref).not.toBe('https://maps.google.com/')
+  })
+
+  it('refuses a map link that is not a link', async () => {
+    await expect(save({ messengers: GOOD, mapsUrl: 'old town, example city' })).rejects.toThrow()
+  })
+
+  it('falls back to what shipped when the address is emptied', async () => {
+    await save({ messengers: GOOD, address: '', openingHours: '' })
+
+    const details = await getContactDetails()
+    expect(details.address).toBe(DEFAULT_CONTACT.address)
+    expect(details.openingHours).toBe(DEFAULT_CONTACT.openingHours)
   })
 })

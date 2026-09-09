@@ -18,6 +18,9 @@ const CONTACT = {
   email: 'hello@aurum.example',
   phone: '+1 (555) 010 20-30',
   phoneHref: 'tel:+15550102030',
+  address: '12 Market Street, Old Town, Example City',
+  openingHours: 'Daily · 10:00 AM–9:00 PM',
+  mapsHref: 'https://www.google.com/maps/search/?api=1&query=Example%20City',
 }
 
 const SOCIAL = [

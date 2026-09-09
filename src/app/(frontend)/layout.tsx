@@ -39,6 +39,10 @@ export default async function FrontendLayout({ children }: { children: React.Rea
   */
   const [social, contact] = await Promise.all([getSocialLinks(), getContactDetails()])
 
+  // Each surface gets what it draws, rather than the whole record spread at it: the strip and the
+  // menu show an email and a number, and only the footer carries the address, the hours and the map.
+  const reach = { email: contact.email, phone: contact.phone, phoneHref: contact.phoneHref }
+
   return (
     <html lang="en" className={fontVariables}>
       <body>
@@ -49,8 +53,8 @@ export default async function FrontendLayout({ children }: { children: React.Rea
           prerendered. A number in a badge is not worth the prerendered catalogue.
         */}
         <CartCountProvider>
-          <ContactBanner social={social} {...contact} />
-          <Header social={social} {...contact} />
+          <ContactBanner social={social} {...reach} />
+          <Header social={social} {...reach} />
         {/*
           `<main>` is the landmark the skip link (T072) will target. The skip link is still its own
           task; header and footer are wired up here so they are exercised by a real page rather than

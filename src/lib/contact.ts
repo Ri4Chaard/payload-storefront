@@ -25,7 +25,22 @@ export const DEFAULT_CONTACT = {
   email: 'hello@aurum.example',
   /** As displayed. `tel:` will not accept the spaces and brackets. */
   phone: '+1 (555) 010 20-30',
+  address: '12 Market Street, Old Town, Example City',
+  openingHours: 'Daily · 10:00 AM–9:00 PM',
 } as const
+
+/**
+ * Where "Open in Maps" goes when the owner has not pinned a specific place.
+ *
+ * **Derived from the address rather than defaulted to a bare root.** The footer shipped with
+ * `https://maps.google.com/`, which is a link to Google Maps and not to this shop — the same defect
+ * as the `wa.me/` social marks, and the same reason it survived: a link that opens *something*
+ * looks like it works. A search for the address is at least about the right place, and an owner who
+ * wants the exact pin can paste one.
+ */
+export function mapsHref(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+}
 
 /**
  * `+1 (555) 010 20-30` → `tel:+15550102030`.
