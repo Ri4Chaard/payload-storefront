@@ -2,9 +2,11 @@
 
 import React from 'react'
 
+import { HandoffModal } from '@/components/commerce/handoff-modal'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Link } from '@/components/ui/link'
+import type { CheckoutResult } from '@/lib/cart/actions-types'
 import type { CartView } from '@/lib/cart/types'
 import { cn } from '@/lib/cn'
 
@@ -31,10 +33,13 @@ import { cn } from '@/lib/cn'
 export interface OrderSummaryProps extends React.ComponentProps<'section'> {
   cart: CartView
   /**
-   * Opens the handoff modal. Spec 005 US3 supplies it; until then the button reports that
-   * checkout is not ready rather than pretending to work.
+   * The Server Action that composes the message and builds a link per messenger.
+   *
+   * A prop rather than an import, for the reason this feature has now proven twice: a `'use client'`
+   * file importing a `'use server'` module drags the whole Payload config into the browser bundle.
+   * Omitted in a story, where the button says checkout is not available rather than pretending.
    */
-  onCheckout?: () => void
+  onCheckout?: () => Promise<CheckoutResult>
   /**
    * Lines have changed underneath the customer since they were added (FR-014).
    *
@@ -57,6 +62,9 @@ export function OrderSummary({
   const [agreed, setAgreed] = React.useState(false)
   const [acknowledged, setAcknowledged] = React.useState(false)
   const [refusal, setRefusal] = React.useState<null | string>(null)
+  const [handoff, setHandoff] = React.useState<null | Extract<CheckoutResult, { ok: true }>>(null)
+  const [pending, startTransition] = React.useTransition()
+  const checkoutRef = React.useRef<HTMLButtonElement>(null)
 
   function checkout() {
     if (blocked && !acknowledged) {
@@ -76,7 +84,31 @@ export function OrderSummary({
     }
 
     setRefusal(null)
-    onCheckout()
+
+    /**
+     * Composed once, and the trigger is blocked while the modal is open (FR-026).
+     *
+     * With no order record to be idempotent about, this is what "no duplicates" means: a
+     * double-click must not produce two messages built from two reads of a cart whose price could
+     * have changed in between, leaving the customer looking at one total and the seller holding
+     * another.
+     */
+    startTransition(async () => {
+      const result = await onCheckout()
+
+      if (!result.ok) {
+        setRefusal(
+          result.reason === 'empty'
+            ? 'Your cart is empty.'
+            : result.reason === 'issues'
+              ? 'Some pieces in your cart have changed — the details are on the rows above.'
+              : 'Something went wrong opening checkout. Please try again.',
+        )
+        return
+      }
+
+      setHandoff(result)
+    })
   }
 
   return (
@@ -106,10 +138,13 @@ export function OrderSummary({
       </dl>
 
       <Button
+        ref={checkoutRef}
         type="button"
         variant="primary"
         fullWidth
         onClick={checkout}
+        loading={pending}
+        disabled={handoff !== null}
         className="mt-7.5 uppercase"
       >
         Checkout
@@ -135,9 +170,19 @@ export function OrderSummary({
         what to go and fix rather than reporting that the action failed.
       */}
       {refusal ? (
-        <p role="status" className="text-body-small text-primary-default mt-3.5">
+        <p role="status" className="text-body-small text-status-error-text mt-3.5">
           {refusal}
         </p>
+      ) : null}
+
+      {handoff ? (
+        <HandoffModal
+          open
+          onClose={() => setHandoff(null)}
+          message={handoff.message}
+          messengers={handoff.messengers}
+          triggerRef={checkoutRef}
+        />
       ) : null}
     </section>
   )

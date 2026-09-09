@@ -38,7 +38,7 @@ const platformOptions = PLATFORMS.map((platform) => ({
  * Written as a request rather than an order, because that is what it is (FR-025): the site takes no
  * money and the seller confirms availability and price in the conversation this message opens.
  */
-const DEFAULT_TEMPLATE = `Hello Aurum, I would like to order:
+export const DEFAULT_MESSAGE_TEMPLATE = `Hello Aurum, I would like to order:
 
 {{items}}
 
@@ -160,7 +160,7 @@ export const ContactSettings: GlobalConfig = {
     {
       name: 'messageTemplate',
       type: 'textarea',
-      defaultValue: DEFAULT_TEMPLATE,
+      defaultValue: DEFAULT_MESSAGE_TEMPLATE,
       label: 'Message wording',
       admin: {
         description:

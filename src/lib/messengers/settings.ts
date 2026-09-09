@@ -2,6 +2,8 @@ import config from '@payload-config'
 import { cache } from 'react'
 import { getPayload } from 'payload'
 
+import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
+
 import type { Platform } from './normalise'
 
 /**
@@ -64,14 +66,8 @@ export const getMessageTemplate = cache(async (): Promise<string> => {
 /**
  * What is sent if the owner has emptied the field entirely.
  *
- * Not a second copy of the default — the global's `defaultValue` is what a new installation gets,
- * and this is what happens when somebody deletes the contents of an existing one. Both contain
- * `{{items}}` because a message without it names nothing the customer wanted.
+ * **The global's own default, imported rather than restated.** An earlier draft wrote the string
+ * out a second time here, and a second copy of a template is a second thing that can quietly lose
+ * its `{{customer}}` placeholder while the first keeps it.
  */
-const FALLBACK_TEMPLATE = `Hello Aurum, I would like to order:
-
-{{items}}
-
-Total: {{total}}
-
-{{customer}}`
+const FALLBACK_TEMPLATE = DEFAULT_MESSAGE_TEMPLATE

@@ -4,7 +4,7 @@ import React from 'react'
 import { CartEmpty, CartLines, OrderSummary } from '@/components/commerce'
 import { SectionHeading } from '@/components/sections'
 import { Container } from '@/components/ui'
-import { removeLine, setLineQuantity } from '@/lib/cart/actions'
+import { beginCheckout, removeLine, setLineQuantity } from '@/lib/cart/actions'
 import { getCart } from '@/lib/cart/loader'
 
 /**
@@ -57,6 +57,7 @@ export default async function CartPage() {
             />
             <OrderSummary
               cart={cart}
+              onCheckout={beginCheckout}
               blocked={cart.issues.length > 0}
               className="w-full xl:w-125 xl:shrink-0"
             />

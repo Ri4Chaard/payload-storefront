@@ -274,3 +274,40 @@ describe('the displayed total is computed here, not read from the cart row', () 
     expect(stored).toHaveProperty('subtotal')
   })
 })
+
+/**
+ * BUY NOW leaves the cart exactly where it was (FR-020, SC-005, T066).
+ *
+ * **The sharpest failure mode in this feature.** A visitor who has assembled three pieces and then
+ * uses BUY NOW on a fourth must find their three untouched — a shortcut that quietly submits or
+ * empties the basket destroys work they never offered up. The guarantee is structural: `buyNow`
+ * contains no call that reads or writes a cart. This asserts the consequence.
+ */
+describe('buy now never touches the cart (FR-020, SC-005)', () => {
+  it('leaves an existing cart byte-identical — same lines, quantities and row ids', async () => {
+    const owner = await guest()
+
+    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: ring.sizes[0]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: ring.sizes[1]!.id }))
+    await addLine(owner, owner.cartId, intentFor(pendant, { quantity: 2 }))
+
+    const before = await rowsOf(owner)
+    expect(before).toHaveLength(3)
+
+    // A different piece entirely, through the path BUY NOW takes: validate, then compose. Nothing
+    // in that path may reach the cart.
+    const checked = await checkIntent(intentFor(pendant))
+    expect(checked.ok).toBe(true)
+
+    const after = await rowsOf(owner)
+    expect(after).toEqual(before)
+  })
+
+  it('does not create a cart for a visitor who has none', async () => {
+    const before = await payload.count({ collection: 'carts', overrideAccess: true })
+    await checkIntent({ productId: pendant.id, quantity: 1 })
+    const after = await payload.count({ collection: 'carts', overrideAccess: true })
+
+    expect(after.totalDocs).toBe(before.totalDocs)
+  })
+})

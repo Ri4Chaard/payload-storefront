@@ -5,7 +5,9 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { QuantityStepper } from '@/components/ui/quantity-stepper'
+import { HandoffModal } from '@/components/commerce/handoff-modal'
 import { announceCartCount } from '@/components/layout/cart-count'
+import type { CheckoutResult } from '@/lib/cart/actions-types'
 import type { CartActionResult } from '@/lib/cart/types'
 import { intentFrom, type CartIntent } from '@/lib/catalog/cart-intent'
 import type { DiamondOption, SizeOption } from '@/lib/catalog/types'
@@ -30,10 +32,16 @@ import { ProductOptions } from '../product-options'
  * label says so; after one is picked it has a price, and continuing to say "from" would be quoting
  * a range the visitor has already resolved.
  *
- * **ADD TO CART is live** (spec 005, T021). It builds a `CartIntent` — identifiers only, never a
- * price — and hands it to the action, which re-reads the piece from the published catalogue and
- * validates the choice again before writing anything. Nothing here is trusted: this component's
- * only job is to say what was chosen and to render whatever comes back.
+ * **Both actions are live** (spec 005, T021, T069). Each builds a `CartIntent` — identifiers only,
+ * never a price — and hands it to a Server Action, which re-reads the piece from the published
+ * catalogue and validates the choice again before doing anything. Nothing here is trusted: this
+ * component's only job is to say what was chosen and to render whatever comes back.
+ *
+ * **They kept separate signatures, and spec 003 was right that they would need to.** That file
+ * predicted the divergence — "one stays on the page and one leaves for the checkout" — at a point
+ * when their bodies were identical. They are not identical now: one writes a cart row and returns a
+ * count, the other writes nothing and returns a composed message and a set of links. A single
+ * function with a flag would have had to be taken apart here.
  *
  * **The action arrives as a prop rather than as an import**, and that is not a style preference.
  * `src/lib/cart/actions.ts` is a `'use server'` module; importing it here would put the whole
@@ -43,7 +51,10 @@ import { ProductOptions } from '../product-options'
  * down from the route — a Server Component — costs one prop and keeps this component renderable in
  * a browser, which is what its stories depend on.
  *
- * BUY NOW is still disabled: it opens the handoff modal, which is spec 005 US3.
+ * **BUY NOW never touches the cart** (FR-020). It validates the same choices and opens the same
+ * handoff modal for this one piece; a customer with a basket already assembled finds it exactly as
+ * they left it. That is a property of the action's code path rather than a check inside it — see
+ * `buyNow` in `src/lib/cart/actions.ts`.
  */
 export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
   /** Which piece this is. The one identifier the intent cannot be built without. */
@@ -64,6 +75,8 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
    * the button then does nothing rather than pretending to.
    */
   onAddToCart?: (intent: CartIntent) => Promise<CartActionResult>
+  /** Opens the handoff for this piece alone, leaving the cart untouched (FR-020). */
+  onBuyNow?: (intent: CartIntent) => Promise<CheckoutResult>
 }
 
 export function ProductPurchase({
@@ -76,6 +89,7 @@ export function ProductPurchase({
   available,
   maxQuantity,
   onAddToCart,
+  onBuyNow,
   className,
   ...props
 }: ProductPurchaseProps) {
@@ -83,6 +97,8 @@ export function ProductPurchase({
   const [size, setSize] = React.useState<string | null>(null)
   const [wanted, setWanted] = React.useState(1)
   const [pending, startTransition] = React.useTransition()
+  const [handoff, setHandoff] = React.useState<null | Extract<CheckoutResult, { ok: true }>>(null)
+  const buyNowRef = React.useRef<HTMLButtonElement>(null)
   const [status, setStatus] = React.useState<null | { kind: 'added' | 'refused'; message: string }>(
     null,
   )
@@ -114,16 +130,27 @@ export function ProductPurchase({
    * reworded and one day translated. Each names the control the visitor has to go and fix, which is
    * what FR-003 means by naming the unmade choice.
    */
-  const refusal = (field: string | undefined, reason: string): string => {
+  const refusal = (
+    field: string | undefined,
+    reason: string,
+    action: 'buy' | 'cart' = 'cart',
+  ): string => {
+    // The two buttons do different things, so an unmade choice is worded for the one that was
+    // pressed. BUY NOW telling somebody to choose a size "before adding this piece to your cart"
+    // describes an action they did not take.
+    const before = action === 'cart' ? 'before adding this piece to your cart' : 'before ordering'
+
     if (field === 'diamond') {
       return reason === 'missing-option'
-        ? 'Choose a diamond before adding this piece to your cart.'
+        ? `Choose a diamond ${before}.`
         : 'That diamond is no longer available. Choose another.'
     }
-    if (field === 'size') return 'Choose a size before adding this piece to your cart.'
+    if (field === 'size') return `Choose a size ${before}.`
     if (field === 'product') return 'This piece is not available to order at the moment.'
     if (field === 'quantity') return 'Choose how many you would like.'
-    return 'That could not be added to your cart. Please try again.'
+    return action === 'cart'
+      ? 'That could not be added to your cart. Please try again.'
+      : 'That could not be sent just now. Please try again.'
   }
 
   function submit() {
@@ -142,6 +169,47 @@ export function ProductPurchase({
           : { kind: 'refused', message: refusal(result.field, result.reason) },
       )
     })
+  }
+
+  /**
+   * The same intent, the same validation, a different destination.
+   *
+   * The refusal wording is shared with ADD TO CART deliberately: the visitor has to fix the same
+   * control either way, and two sets of words for one unmade choice is two things to keep in step.
+   */
+  function buy() {
+    if (!onBuyNow) return
+
+    const unmet = missingChoice()
+    if (unmet) {
+      setStatus({ kind: 'refused', message: unmet })
+      return
+    }
+
+    setStatus(null)
+    startTransition(async () => {
+      const result = await onBuyNow(
+        intentFrom({ productId, quantity, diamondId: diamond, sizeValue: size, sizes }),
+      )
+
+      if (result.ok) {
+        setHandoff(result)
+        return
+      }
+
+      setStatus({ kind: 'refused', message: refusal(undefined, 'error', 'buy') })
+    })
+  }
+
+  /**
+   * What the visitor still has to choose, checked here so BUY NOW can name it without a round trip.
+   *
+   * The server checks it again — this one can be skipped by anybody posting to the action directly.
+   */
+  function missingChoice(): null | string {
+    if (diamonds.length > 0 && diamond === null) return refusal('diamond', 'missing-option', 'buy')
+    if (sizes.length > 0 && size === null) return refusal('size', 'missing-option', 'buy')
+    return null
   }
 
   return (
@@ -214,14 +282,27 @@ export function ProductPurchase({
       </div>
 
       <Button
+        ref={buyNowRef}
         type="button"
         variant="primary"
         fullWidth
-        disabled
+        onClick={buy}
+        loading={pending}
+        disabled={!available || !onBuyNow || handoff !== null}
         className="mt-3 uppercase md:mt-4 xl:mt-5"
       >
         Buy now
       </Button>
+
+      {handoff ? (
+        <HandoffModal
+          open
+          onClose={() => setHandoff(null)}
+          message={handoff.message}
+          messengers={handoff.messengers}
+          triggerRef={buyNowRef}
+        />
+      ) : null}
 
       {/*
         The reason in TEXT, never in colour alone (FR-040). Only for a piece that genuinely cannot
@@ -245,7 +326,7 @@ export function ProductPurchase({
           role="status"
           className={cn(
             'text-body-small mt-3',
-            status.kind === 'refused' ? 'text-primary-default' : 'text-neutral-primary',
+            status.kind === 'refused' ? 'text-status-error-text' : 'text-neutral-primary',
           )}
         >
           {status.message}

@@ -134,7 +134,15 @@ export function Modal({
             align === 'center' ? 'relative text-center' : 'flex items-start justify-between',
           )}
         >
-          <h2 id={titleId} className="text-heading-1 text-neutral-primary">
+          <h2
+            id={titleId}
+            className={cn(
+              'text-heading-1 text-neutral-primary',
+              // Room for the close mark, which is out of the flow when the heading is centred —
+              // without this a title long enough to wrap runs underneath it.
+              align === 'center' && 'px-10',
+            )}
+          >
             {title}
           </h2>
           <IconButton

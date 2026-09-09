@@ -92,3 +92,107 @@ test('checkout is refused until the terms are agreed', async ({ page }) => {
   await page.getByRole('button', { name: /^checkout$/i }).click()
   await expect(page.getByText(/agree to the terms of use/i).last()).toBeVisible()
 })
+
+/**
+ * The handoff (spec 005, US3 — T064). FR-021, FR-024, FR-025, FR-027, SC-017.
+ *
+ * **The assertion that matters is the last one.** FR-027 says the cart survives the handoff, and
+ * that is the requirement most easily broken by a well-meaning "clear the cart on success" — the
+ * site cannot know whether the message was actually sent, and clearing on a guess destroys work
+ * the customer cannot get back.
+ */
+test('checkout hands the cart to the seller and leaves it alone', async ({ page }) => {
+  await page.goto('/products/butterfly-diamond-pendant')
+  await page.getByRole('button', { name: /add to cart/i }).click()
+  await expect(page.getByText(/added to your cart/i)).toBeVisible()
+
+  await page.goto('/cart')
+  /*
+   * Clicked on the drawn box, the way a person does. `Checkbox` renders an `sr-only` input behind
+   * that box, so a pointer aimed at the input is intercepted by it — correct behaviour, not a
+   * defect. The label itself is not the target either: it carries two policy links, and a click in
+   * the middle of it would follow one.
+   */
+  await page
+    .locator('label')
+    .filter({ hasText: /I agree to the/ })
+    .locator('span[aria-hidden="true"]')
+    .click()
+  await expect(page.getByRole('checkbox', { name: /terms of use/i })).toBeChecked()
+  await page.getByRole('button', { name: /^checkout$/i }).click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('heading', { name: /your selection is in the cart/i })).toBeVisible()
+
+  // FR-025 / FR-030: nothing has been ordered, and the modal must not suggest otherwise.
+  await expect(dialog.getByText(/no payment is taken on this site/i)).toBeVisible()
+
+  // FR-024 / SC-017: the copy affordance is here even though messengers are configured.
+  await expect(dialog.getByRole('button', { name: /copy order/i })).toBeVisible()
+  await expect(dialog.getByLabel(/ready to copy/i)).toHaveValue(/Butterfly Diamond Pendant/)
+
+  // The message the seller would receive names the piece and the total.
+  await expect(dialog.getByLabel(/ready to copy/i)).toHaveValue(/Total: \$/)
+
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+
+  // FR-027: byte for byte, the cart the customer had before they pressed anything.
+  await page.reload()
+  await expect(cartRows(page)).toHaveCount(1)
+  await expect(page.getByText(/butterfly diamond pendant/i).first()).toBeVisible()
+})
+
+/**
+ * BUY NOW (spec 005, US4 — T069). FR-019, FR-020, SC-005.
+ *
+ * **The last assertion is the requirement.** A visitor who has assembled a cart and then uses BUY
+ * NOW on a different piece must find that cart exactly as they left it — a shortcut that quietly
+ * submits or empties the basket destroys work they never offered up.
+ */
+test('buy now opens the handoff for one piece and leaves the cart alone', async ({ page }) => {
+  // A cart of two, built first, so there is something to disturb.
+  await page.goto('/products/butterfly-diamond-pendant')
+  await page.getByRole('button', { name: /add to cart/i }).click()
+  await expect(page.getByText(/added to your cart/i)).toBeVisible()
+
+  await page.goto('/products/pave-butterfly-diamond-bracelet')
+  await page.getByRole('combobox', { name: /size/i }).click()
+  await page.getByRole('option').first().click()
+  await page.getByRole('button', { name: /add to cart/i }).click()
+  await expect(page.getByText(/added to your cart/i)).toBeVisible()
+
+  // Now BUY NOW on a third, unrelated piece.
+  await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+  await page.getByRole('combobox', { name: /diamond/i }).click()
+  await page.getByRole('option').first().click()
+  await page.getByRole('combobox', { name: /size/i }).click()
+  await page.getByRole('option').first().click()
+  await page.getByRole('button', { name: /buy now/i }).click()
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+
+  // Exactly one piece, and it is the one they pressed BUY NOW on.
+  const message = await dialog.getByLabel(/ready to copy/i).inputValue()
+  expect(message).toContain('Paragon Emerald Cut Diamond Engagement Ring')
+  expect(message).not.toContain('Butterfly Diamond Pendant')
+  expect(message).not.toContain('Pavé Butterfly Diamond Bracelet')
+
+  await page.keyboard.press('Escape')
+
+  // FR-020: the cart still holds exactly the two pieces it held before.
+  await page.goto('/cart')
+  await expect(cartRows(page)).toHaveCount(2)
+})
+
+/** FR-003 on the BUY NOW path: the refusal names the control the visitor has to go and fix. */
+test('buy now names an unmade choice rather than refusing vaguely', async ({ page }) => {
+  await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+  await page.getByRole('button', { name: /buy now/i }).click()
+
+  // The status region, not the select's own placeholder — which also reads "Choose a diamond".
+  await expect(page.getByRole('status')).toHaveText(/choose a diamond before ordering/i)
+  await expect(page.getByRole('dialog')).toBeHidden()
+})

@@ -39,6 +39,7 @@ export { Lightbox, type LightboxImage, type LightboxProps } from './lightbox'
 export { Link, type LinkProps, type LinkVariant } from './link'
 export { Menu, type MenuProps } from './menu'
 export { MenuOption, type MenuOptionProps } from './menu-option'
+export { MessengerRow, type MessengerRowProps } from './messenger-row'
 export { Modal, type ModalProps } from './modal'
 export { NavLink, type NavLinkProps } from './nav-link'
 // Behaviour rather than markup: `Drawer` and `Lightbox` are built on it, and so is `MobileNav`.

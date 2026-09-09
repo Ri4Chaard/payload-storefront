@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/commerce'
-import { addToCart } from '@/lib/cart/actions'
+import { addToCart, buyNow } from '@/lib/cart/actions'
 import { JewelryCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
 import { minorUnitDigits } from '@/lib/catalog/price'
@@ -152,6 +152,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               available={product.available}
               maxQuantity={product.maxQuantity}
               onAddToCart={addToCart}
+              onBuyNow={buyNow}
             />
 
             <ProductDetails

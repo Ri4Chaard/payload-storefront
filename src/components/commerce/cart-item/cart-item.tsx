@@ -140,7 +140,7 @@ export function CartItem({
           <p className="text-body-strong">{price}</p>
           {options ? <p className="text-body-small text-neutral-secondary">{options}</p> : null}
           {issue ? (
-            <p role="status" className="text-body-small text-primary-default">
+            <p role="status" className="text-body-small text-status-error-text">
               {issue}
             </p>
           ) : null}

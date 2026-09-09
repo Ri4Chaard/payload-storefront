@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { afterAll, afterEach, describe, expect, it } from 'vitest'
 
+import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
 import { getMessageTemplate, getMessengers } from '@/lib/messengers/settings'
 import { skipRevalidation } from '@/lib/revalidate'
 
@@ -51,11 +52,20 @@ const save = (data: Record<string, unknown>) =>
     context: skipRevalidation,
   })
 
-/** Put the shop back after every test, so one failure cannot cascade through the file. */
+/**
+ * Put the shop back after every test, so one failure cannot cascade through the file.
+ *
+ * **Restored to the global's own default, never to a string written out here.** An earlier draft
+ * invented a template for this — one that happened to omit `{{customer}}` — and every run of this
+ * suite quietly stripped the customer block out of the real shop's message. The bug reached a
+ * person's screen: they were signed in, their name and address were saved, and the message carried
+ * neither. A test that writes to shared state must restore the value that was there, not one that
+ * merely looks plausible.
+ */
 afterEach(async () => {
   await payload.updateGlobal({
     slug: 'contact-settings',
-    data: { messengers: GOOD, messageTemplate: 'Order:\n\n{{items}}\n\nTotal: {{total}}' },
+    data: { messengers: GOOD, messageTemplate: DEFAULT_MESSAGE_TEMPLATE },
     overrideAccess: true,
     context: skipRevalidation,
   })

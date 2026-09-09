@@ -43,3 +43,30 @@ export function formatAddress(address: CustomerAddress): string {
     .filter(Boolean)
     .join(', ')
 }
+
+/**
+ * The same address, for somebody who has to post a ring to it (spec 005, T054, research R18).
+ *
+ * **Not `formatAddress`, and the difference is the postcode.** That one drops it deliberately, and
+ * its reasoning is sound for the profile: the postcode distinguishes nothing a customer looks at,
+ * and it is the part of an address most likely to push a line past the width of its box. For a
+ * message to a seller arranging delivery, that reasoning inverts completely — the postcode is the
+ * part the courier needs.
+ *
+ * Two functions rather than a flag on one, because they answer different questions: *"which of my
+ * addresses is this?"* and *"where should this be sent?"*. A boolean that changed what an address
+ * MEANS is the kind of parameter whose two call sites drift, and it would put the profile's careful
+ * reasoning about line width next to a branch that ignores it.
+ */
+export function formatPostalAddress(address: CustomerAddress): string {
+  return [
+    address.addressLine1,
+    address.addressLine2,
+    address.apartment,
+    address.city,
+    address.postalCode,
+    countryName(address.country),
+  ]
+    .filter(Boolean)
+    .join(', ')
+}

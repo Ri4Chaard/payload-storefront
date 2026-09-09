@@ -174,23 +174,23 @@ the `carts` table.
 
 ### Tests
 
-- [ ] T052 [P] [US3] Unit tests in `tests/unit/messenger-message.test.ts` — the whole message suite in one task, since one file: every line, stone, size and quantity present across products with both options, one and neither (SC-002); the customer block for name-only, address-only, both and neither, with an anonymous message equal to a profile-less customer's and `{{customer}}` collapsing without leaving a blank line (FR-045, SC-013); the budget checked on the **encoded link** rather than on `message.length`; a 20-line Cyrillic cart truncating at a line boundary and saying how many pieces are unlisted while the same cart in Latin does not (FR-028, FR-028a, SC-015); one message composed per checkout however many times it is pressed (FR-026, SC-004)
-- [ ] T053 [P] [US3] Integration tests in `tests/integration/cart-handoff.test.ts`: composing for an anonymous visitor never redirects (FR-046); the **default** address is chosen when several are saved (FR-044); the message address carries the postcode `formatAddress` drops (research R18)
+- [X] T052 [P] [US3] Unit tests in `tests/unit/messenger-message.test.ts` — the whole message suite in one task, since one file: every line, stone, size and quantity present across products with both options, one and neither (SC-002); the customer block for name-only, address-only, both and neither, with an anonymous message equal to a profile-less customer's and `{{customer}}` collapsing without leaving a blank line (FR-045, SC-013); the budget checked on the **encoded link** rather than on `message.length`; a 20-line Cyrillic cart truncating at a line boundary and saying how many pieces are unlisted while the same cart in Latin does not (FR-028, FR-028a, SC-015); one message composed per checkout however many times it is pressed (FR-026, SC-004)
+- [X] T053 [P] [US3] Integration tests in `tests/integration/cart-handoff.test.ts`: composing for an anonymous visitor never redirects (FR-046); the **default** address is chosen when several are saved (FR-044); the message address carries the postcode `formatAddress` drops (research R18)
 
 ### Implementation
 
-- [ ] T054 [P] [US3] Add `formatPostalAddress` to `src/lib/addresses/types.ts` — the seller's form of an address, **postcode included** — beside the existing `formatAddress`, which deliberately drops it for the profile row and is left untouched (research R18)
-- [ ] T055 [US3] Implement `getMessageCustomer()` in `src/lib/cart/message-customer.ts`, resolving the session with `getCustomer()` — **never** `requireCustomer` / `requireCustomerUser`, which redirect and would put an accidental sign-in gate in the middle of checkout — and returning the saved name and the `isDefault` address, each independently nullable (FR-043, FR-044, FR-046) — depends on T054
-- [ ] T056 [US3] Implement `composeMessage(cart, template, customer)` in `src/lib/messengers/message.ts` per [messenger-handoff.md §3](./contracts/messenger-handoff.md): substitute `{{items}}`, `{{total}}` and `{{customer}}`, collapse `{{customer}}` and its blank line when absent, degrade per field rather than per auth state, enforce the 2,000-character budget **on the encoded link**, and exclude lines the loader flagged unavailable — depends on T055
-- [ ] T057 [US3] Implement `beginCheckout` in `src/lib/cart/actions.ts` per [cart-actions.md §3](./contracts/cart-actions.md) — re-validate, resolve the optional customer, compose once, build a link per enabled messenger, write nothing, clear nothing — depends on T009, T050, T055, T056
-- [ ] T058 [P] [US3] Build the `src/components/ui/messenger-row/` primitive — circular platform mark, name over handle, chevron — with its full state set
-- [ ] T059 [US3] Build `src/components/commerce/handoff-modal/` from nodes `590:13108`, `590:13775` and `590:13875`, using `Modal` at the 500px size with the centred heading (FR-021) — depends on T028, T058
-- [ ] T060 [US3] Mark the rows that cannot carry a message in `src/components/commerce/handoff-modal/` and put the message on the clipboard for those, so nobody arrives at an empty Instagram chat believing their selection travelled (FR-021) — depends on T059
-- [ ] T061 [US3] Add the copy affordance with `CONTACT.email` and `CONTACT.phone` to `src/components/commerce/handoff-modal/` — shown **always**, alongside whatever messenger rows are offered, never conditionally: a page cannot detect whether a messenger will open, so a fallback that waits for failure never reaches the customer who needed it (FR-024, SC-017) — depends on T059
-- [ ] T062 [US3] State plainly in `src/components/commerce/handoff-modal/` that this is a request, that no payment is taken on the site, and that the seller confirms availability, price and delivery — and say nothing implying anything was received or is awaiting a reply (FR-025, FR-030) — depends on T059
-- [ ] T063 [US3] Wire CHECKOUT in `src/components/commerce/order-summary/` to `beginCheckout`, disabling the trigger while the modal is open so a double-click cannot compose twice (FR-019, FR-026) — depends on T032, T057, T059
-- [ ] T064 [US3] Confirm via `src/app/(frontend)/(shop)/cart/page.tsx` that the cart is byte-identical after opening the modal, choosing a messenger and returning (FR-027) — depends on T063
-- [ ] T065 [P] [US3] Stories in `src/components/commerce/handoff-modal/handoff-modal.stories.tsx`: three messengers, one messenger, none configured, and the Instagram clipboard variant — each showing the copy affordance
+- [X] T054 [P] [US3] Add `formatPostalAddress` to `src/lib/addresses/types.ts` — the seller's form of an address, **postcode included** — beside the existing `formatAddress`, which deliberately drops it for the profile row and is left untouched (research R18)
+- [X] T055 [US3] Implement `getMessageCustomer()` in `src/lib/cart/message-customer.ts`, resolving the session with `getCustomer()` — **never** `requireCustomer` / `requireCustomerUser`, which redirect and would put an accidental sign-in gate in the middle of checkout — and returning the saved name and the `isDefault` address, each independently nullable (FR-043, FR-044, FR-046) — depends on T054
+- [X] T056 [US3] Implement `composeMessage(cart, template, customer)` in `src/lib/messengers/message.ts` per [messenger-handoff.md §3](./contracts/messenger-handoff.md): substitute `{{items}}`, `{{total}}` and `{{customer}}`, collapse `{{customer}}` and its blank line when absent, degrade per field rather than per auth state, enforce the 2,000-character budget **on the encoded link**, and exclude lines the loader flagged unavailable — depends on T055
+- [X] T057 [US3] Implement `beginCheckout` in `src/lib/cart/actions.ts` per [cart-actions.md §3](./contracts/cart-actions.md) — re-validate, resolve the optional customer, compose once, build a link per enabled messenger, write nothing, clear nothing — depends on T009, T050, T055, T056
+- [X] T058 [P] [US3] Build the `src/components/ui/messenger-row/` primitive — circular platform mark, name over handle, chevron — with its full state set
+- [X] T059 [US3] Build `src/components/commerce/handoff-modal/` from nodes `590:13108`, `590:13775` and `590:13875`, using `Modal` at the 500px size with the centred heading (FR-021) — depends on T028, T058
+- [X] T060 [US3] Mark the rows that cannot carry a message in `src/components/commerce/handoff-modal/` and put the message on the clipboard for those, so nobody arrives at an empty Instagram chat believing their selection travelled (FR-021) — depends on T059
+- [X] T061 [US3] Add the copy affordance with `CONTACT.email` and `CONTACT.phone` to `src/components/commerce/handoff-modal/` — shown **always**, alongside whatever messenger rows are offered, never conditionally: a page cannot detect whether a messenger will open, so a fallback that waits for failure never reaches the customer who needed it (FR-024, SC-017) — depends on T059
+- [X] T062 [US3] State plainly in `src/components/commerce/handoff-modal/` that this is a request, that no payment is taken on the site, and that the seller confirms availability, price and delivery — and say nothing implying anything was received or is awaiting a reply (FR-025, FR-030) — depends on T059
+- [X] T063 [US3] Wire CHECKOUT in `src/components/commerce/order-summary/` to `beginCheckout`, disabling the trigger while the modal is open so a double-click cannot compose twice (FR-019, FR-026) — depends on T032, T057, T059
+- [X] T064 [US3] Confirm via `src/app/(frontend)/(shop)/cart/page.tsx` that the cart is byte-identical after opening the modal, choosing a messenger and returning (FR-027) — depends on T063
+- [X] T065 [P] [US3] Stories in `src/components/commerce/handoff-modal/handoff-modal.stories.tsx`: three messengers, one messenger, none configured, and the Instagram clipboard variant — each showing the copy affordance
 
 **Checkpoint**: A cart can reach the seller. US1–US3 and US5 all work.
 
@@ -204,14 +204,14 @@ the `carts` table.
 
 ### Tests
 
-- [ ] T066 [P] [US4] Integration test in `tests/integration/cart-operations.test.ts`: `buyNow` leaves an existing cart byte-identical — same lines, same quantities, same row ids (FR-020, SC-005)
-- [ ] T067 [P] [US4] Unit test in `tests/unit/messenger-message.test.ts`: a BUY NOW message describes exactly one piece with its chosen options
+- [X] T066 [P] [US4] Integration test in `tests/integration/cart-operations.test.ts`: `buyNow` leaves an existing cart byte-identical — same lines, same quantities, same row ids (FR-020, SC-005)
+- [X] T067 [P] [US4] Unit test in `tests/unit/messenger-message.test.ts`: a BUY NOW message describes exactly one piece with its chosen options
 
 ### Implementation
 
-- [ ] T068 [US4] Implement `buyNow` in `src/lib/cart/actions.ts` as a path that never reads or writes the cart — FR-020 as a property of the code path, not a check inside one — depends on T057
-- [ ] T069 [US4] Enable BUY NOW in `src/components/commerce/product-purchase/product-purchase.tsx`, sharing US1's validation and refusal messages and opening the handoff modal — depends on T021, T059, T068
-- [ ] T070 [US4] Update the module docstring in `src/components/commerce/product-purchase/product-purchase.tsx`: both actions are live, and record why `addToCart` and `buyNow` kept separate signatures — the divergence spec 003 predicted has now happened — depends on T069
+- [X] T068 [US4] Implement `buyNow` in `src/lib/cart/actions.ts` as a path that never reads or writes the cart — FR-020 as a property of the code path, not a check inside one — depends on T057
+- [X] T069 [US4] Enable BUY NOW in `src/components/commerce/product-purchase/product-purchase.tsx`, sharing US1's validation and refusal messages and opening the handoff modal — depends on T021, T059, T068
+- [X] T070 [US4] Update the module docstring in `src/components/commerce/product-purchase/product-purchase.tsx`: both actions are live, and record why `addToCart` and `buyNow` kept separate signatures — the divergence spec 003 predicted has now happened — depends on T069
 
 **Checkpoint**: All five user stories are independently functional.
 

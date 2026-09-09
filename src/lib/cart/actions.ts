@@ -4,13 +4,21 @@ import { refresh } from 'next/cache'
 
 import type { CustomerUser } from '@/lib/auth/dal'
 import type { CartIntent } from '@/lib/catalog/cart-intent'
+import { CATALOG_CURRENCY, formatPrice } from '@/lib/catalog/price'
+import type { ProductDetail } from '@/lib/catalog/types'
+
+import { messengerLink } from '@/lib/messengers/links'
+import { composeMessage } from '@/lib/messengers/message'
+import { getMessageTemplate, getMessengers } from '@/lib/messengers/settings'
 
 import { clearCartCookies, readCartCookie, writeCartCookie, writeCartCount } from './cookie'
-import { getCartCount } from './loader'
+import { getCart, getCartCount } from './loader'
+import { getMessageCustomer } from './message-customer'
 import { mergeGuestCart } from './merge'
 import { addLine, changeQuantity, checkIntent, createCartFor, dropLine } from './operations'
 import { findCartId, payloadClient, resolveCartOwner, type CartOwner } from './session'
-import type { CartActionResult } from './types'
+import type { CheckoutResult } from './actions-types'
+import type { CartActionResult, CartView } from './types'
 
 /**
  * The whole mutation surface of the cart (spec 005, T009, T010,
@@ -136,6 +144,129 @@ export async function removeLine(lineId: string): Promise<CartActionResult> {
     return { ok: true, itemCount: await settle() }
   } catch {
     return { ok: false, reason: 'error' }
+  }
+}
+
+/**
+ * Open the handoff (FR-019, FR-021, FR-022, FR-026, FR-027).
+ *
+ * **Reads, composes, and writes nothing.** No order, no reference, no record — FR-029 removed all
+ * three, and the conversation the customer is about to open is the record. The cart is not cleared
+ * either (FR-027): the site cannot know whether the message was actually sent, and clearing on a
+ * guess destroys work that is not recoverable.
+ *
+ * **Composed once, here.** The message is built from one read of the cart and held by the modal for
+ * its lifetime, which is what FR-026 means now that there is no row to be idempotent about: the
+ * risk is not two records, it is two messages built from two reads of a cart whose price changed in
+ * between, so the customer sees one total and the seller receives another.
+ *
+ * **`no-messengers` is not a failure.** An owner who has configured none still leaves the customer a
+ * copyable message and the shop's contact details — the modal always offers that (FR-024), so an
+ * empty messenger list is an ordinary success with an empty array.
+ */
+export async function beginCheckout(): Promise<CheckoutResult> {
+  try {
+    // Re-read rather than trusting whatever the page was rendered with. A cart can go stale between
+    // the render and the press, and the message must describe what is true now.
+    const cart = await getCart()
+    if (cart.empty) return { ok: false, reason: 'empty' }
+    if (cart.issues.length > 0) return { ok: false, reason: 'issues' }
+
+    const [template, messengers, customer] = await Promise.all([
+      getMessageTemplate(),
+      getMessengers(),
+      // Optional by construction: `null` for an anonymous visitor, and never a redirect (FR-046).
+      getMessageCustomer(),
+    ])
+
+    const message = composeMessage(cart, template, customer)
+
+    return {
+      ok: true,
+      message,
+      messengers: messengers.map((messenger) => messengerLink(messenger, message)),
+    }
+  } catch {
+    return { ok: false, reason: 'error' }
+  }
+}
+
+/**
+ * One piece, straight to the seller, without touching the cart (FR-019, FR-020, T068).
+ *
+ * **FR-020 is a property of this code path, not a check inside one.** The cart is never read and
+ * never written here: no `resolveCartOwner`, no `ensureCart`, no `addLine`, no `settle`. That is
+ * the whole guarantee — a customer with three pieces in their basket who presses BUY NOW on a
+ * fourth must find their three exactly as they left them, and the surest way to promise that is to
+ * have no code that could disturb them.
+ *
+ * The piece is validated exactly as ADD TO CART validates it, against the published catalogue, then
+ * described to the composer as a one-line cart. It never becomes a row anywhere.
+ */
+export async function buyNow(intent: CartIntent): Promise<CheckoutResult> {
+  try {
+    const checked = await checkIntent(intent)
+    if (!checked.ok) {
+      // The refusals BUY NOW can raise are the ones ADD TO CART raises; the product page already
+      // has words for them, so this reports the same shape rather than inventing a second set.
+      return { ok: false, reason: 'error' }
+    }
+
+    const [template, messengers, customer] = await Promise.all([
+      getMessageTemplate(),
+      getMessengers(),
+      getMessageCustomer(),
+    ])
+
+    const message = composeMessage(singleLineCart(checked.product, intent), template, customer)
+
+    return {
+      ok: true,
+      message,
+      messengers: messengers.map((messenger) => messengerLink(messenger, message)),
+    }
+  } catch {
+    return { ok: false, reason: 'error' }
+  }
+}
+
+/**
+ * The chosen piece, shaped as the one-line cart the composer takes.
+ *
+ * Built here rather than by adding a row and reading it back, which would be the obvious
+ * implementation and would violate FR-020 on the way. Every amount still comes from the published
+ * catalogue — the intent contributes identifiers and a quantity, nothing else.
+ */
+function singleLineCart(product: ProductDetail, intent: CartIntent): CartView {
+  const chosen = product.diamondOptions.find((option) => option.id === intent.variantId)
+  const size = product.sizes.find((option) => option.id === intent.sizeId)
+
+  const unitMinor = chosen ? chosen.priceMinor : product.priceMinor
+  const total = unitMinor * intent.quantity
+
+  return {
+    lines: [
+      {
+        id: 'buy-now',
+        title: product.title,
+        href: product.href,
+        image: product.images[0] ?? null,
+        diamond: chosen?.label ?? null,
+        size: size?.label ?? null,
+        unitPrice: formatPrice(unitMinor),
+        lineTotal: formatPrice(total),
+        unitMinor,
+        quantity: intent.quantity,
+        maxQuantity: chosen ? chosen.maxQuantity : product.maxQuantity,
+        available: true,
+      },
+    ],
+    itemCount: intent.quantity,
+    subtotal: formatPrice(total),
+    shipping: formatPrice(0),
+    currency: CATALOG_CURRENCY,
+    issues: [],
+    empty: false,
   }
 }
 
