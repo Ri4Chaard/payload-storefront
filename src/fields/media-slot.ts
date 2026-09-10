@@ -42,10 +42,19 @@ type Slot = { kind?: 'photo' | 'video' }
 const isVideo = (siblingData: unknown): boolean => (siblingData as Slot | undefined)?.kind === 'video'
 
 export const mediaSlot = ({
+  name = 'media',
   label = 'Media',
   description = 'A photograph, or a video from the media library.',
-}: { label?: string; description?: string } = {}): Field => ({
-  name: 'media',
+}: { name?: string; label?: string; description?: string } = {}): Field => ({
+  /**
+   * Overridable since 007/T010, where the article's slot is `hero` rather than `media`.
+   *
+   * A block that holds exactly one piece of imagery calls it `media` and always will. A document
+   * that could hold several — an article has a hero today and might have an author portrait
+   * tomorrow — needs the field to say which one it is. Extending the shared config with a parameter
+   * is what Constitution II asks for; a second near-identical field config is what it forbids.
+   */
+  name,
   type: 'group',
   label,
   admin: { description },

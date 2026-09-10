@@ -84,6 +84,8 @@ export interface Config {
     attributes: Attribute;
     'verification-codes': VerificationCode;
     questions: Question;
+    'article-categories': ArticleCategory;
+    articles: Article;
     addresses: Address;
     variants: Variant;
     variantTypes: VariantType;
@@ -117,6 +119,8 @@ export interface Config {
     attributes: AttributesSelect<false> | AttributesSelect<true>;
     'verification-codes': VerificationCodesSelect<false> | VerificationCodesSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    'article-categories': ArticleCategoriesSelect<false> | ArticleCategoriesSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -138,6 +142,7 @@ export interface Config {
     'account-settings': AccountSetting;
     'contact-settings': ContactSetting;
     'story-page': StoryPage;
+    'blog-page': BlogPage;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
@@ -145,6 +150,7 @@ export interface Config {
     'account-settings': AccountSettingsSelect<false> | AccountSettingsSelect<true>;
     'contact-settings': ContactSettingsSelect<false> | ContactSettingsSelect<true>;
     'story-page': StoryPageSelect<false> | StoryPageSelect<true>;
+    'blog-page': BlogPageSelect<false> | BlogPageSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -1086,6 +1092,135 @@ export interface VerificationCode {
   createdAt: string;
 }
 /**
+ * The subjects the blog is organised by. Each becomes a tab on the blog.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "article-categories".
+ */
+export interface ArticleCategory {
+  id: number;
+  /**
+   * The tab label, e.g. “Guides”. Type it normally — the blog draws it in capitals for you.
+   */
+  title: string;
+  /**
+   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
+   */
+  slug: string;
+  /**
+   * Lowest first, in this list and in the tab strip on the blog.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Articles on the blog. Newest first, by the date each was published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  /**
+   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
+   */
+  slug: string;
+  /**
+   * Sorts the blog and appears under the title. This is a date you choose, not a schedule — publishing is the toggle above.
+   */
+  publishedOn: string;
+  /**
+   * The headline. Also the card’s title on the blog.
+   */
+  title: string;
+  /**
+   * The sentence under the title. Also the description used in search results and link previews when the SEO tab is left empty.
+   */
+  standfirst: string;
+  /**
+   * The badge on the card, and the tab this article appears under.
+   */
+  category: number | ArticleCategory;
+  /**
+   * The wide photograph or video under the standfirst. Leave both empty to open on the first chapter.
+   */
+  hero: {
+    /**
+     * Decides what this slot renders, even if both are filled in below.
+     */
+    kind: 'photo' | 'video';
+    photo?: (number | null) | Media;
+    /**
+     * Upload the video to the media library first, then choose it here.
+     */
+    video?: (number | null) | Media;
+    /**
+     * Shown before the video plays, and instead of it for visitors who ask for reduced motion. Required for a video.
+     */
+    poster?: (number | null) | Media;
+  };
+  /**
+   * The article itself. Drag to reorder — this is the reading order and the order of the contents list. The contents list appears from two chapters upward.
+   */
+  chapters?:
+    | {
+        /**
+         * The chapter’s heading, and what the contents list links to. Renaming it changes the link to this chapter.
+         */
+        heading: string;
+        /**
+         * Optional. A shorter version for the contents list, when the heading is too long to sit in the rail.
+         */
+        tocLabel?: string | null;
+        /**
+         * Optional. The chapter’s one summary line, e.g. “What defines a diamond”. Any further emphasis belongs in the body as bold text.
+         */
+        lede?: string | null;
+        /**
+         * Paragraphs, bold, links and lists. Headings are not offered — each chapter already has one above.
+         */
+        body: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        /**
+         * Optional. A line set apart from the surrounding text, with a rule beside it.
+         */
+        pullQuote?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
@@ -1438,6 +1573,14 @@ export interface PayloadLockedDocument {
         value: number | Question;
       } | null)
     | ({
+        relationTo: 'article-categories';
+        value: number | ArticleCategory;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: number | Article;
+      } | null)
+    | ({
         relationTo: 'addresses';
         value: number | Address;
       } | null)
@@ -1736,6 +1879,56 @@ export interface QuestionsSelect<T extends boolean = true> {
   question?: T;
   answer?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "article-categories_select".
+ */
+export interface ArticleCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  slug?: T;
+  publishedOn?: T;
+  title?: T;
+  standfirst?: T;
+  category?: T;
+  hero?:
+    | T
+    | {
+        kind?: T;
+        photo?: T;
+        video?: T;
+        poster?: T;
+      };
+  chapters?:
+    | T
+    | {
+        heading?: T;
+        tocLabel?: T;
+        lede?: T;
+        body?: T;
+        pullQuote?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2612,6 +2805,51 @@ export interface StoryPage {
   createdAt?: string | null;
 }
 /**
+ * The heading above the blog, and what it says when nothing is published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-page".
+ */
+export interface BlogPage {
+  id: number;
+  /**
+   * The small line above the headline, e.g. “OUR BLOG”.
+   */
+  eyebrow?: string | null;
+  /**
+   * The blog’s main statement. Drawn over two lines.
+   */
+  heading: string;
+  /**
+   * Shown in place of the articles when none are published, or none match a tab.
+   */
+  emptyTitle: string;
+  /**
+   * The sentence under the empty heading above.
+   */
+  emptyDescription: string;
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -2685,6 +2923,27 @@ export interface ContactSettingsSelect<T extends boolean = true> {
  */
 export interface StoryPageSelect<T extends boolean = true> {
   body?: T | {};
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-page_select".
+ */
+export interface BlogPageSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  emptyTitle?: T;
+  emptyDescription?: T;
   seo?:
     | T
     | {

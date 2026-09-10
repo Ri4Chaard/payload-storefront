@@ -7,15 +7,19 @@
  * could change a price in the admin and watch the old one stay on the page until the next
  * deployment.
  *
- * **Four routes are deliberately absent from this file, for the same reason: they are not cached.**
- * `/[category]` and `/all-jewelry` read `searchParams` — a filtered grid is a function of the query
- * string — and `/` is `force-dynamic` because a home page prerendered from a database the container
- * build cannot reach would bake empty and stay empty. `/cart` (spec 005) is the fourth: it reads
- * the session and the cart cookie, so it is per-visitor by construction and there is no shared
- * entry to invalidate. A cart mutation settles with `refresh()` instead, which refreshes the one
- * client that asked — `revalidatePath` there would evict catalogue pages for everybody because
- * somebody changed a quantity. If any of these is ever made cacheable, its path belongs in
- * `invalidate()` below, and this paragraph is where to look for why it is not there already.
+ * **Two cached route families, and six routes deliberately absent.** `/products/[slug]` has been
+ * cached since spec 003; `/blog/[slug]` joins it in spec 007, for the same reason — many pages,
+ * each a pure function of one document, changing rarely and read often.
+ *
+ * The absent ones are absent because they are not cached. `/[category]` and `/all-jewelry` read
+ * `searchParams` — a filtered grid is a function of the query string — and `/`, `/about` and
+ * `/blog` are `force-dynamic` because a page prerendered from a database the container build cannot
+ * reach would bake empty and stay empty. `/cart` (spec 005) is the sixth: it reads the session and
+ * the cart cookie, so it is per-visitor by construction and there is no shared entry to invalidate.
+ * A cart mutation settles with `refresh()` instead, which refreshes the one client that asked —
+ * `revalidatePath` there would evict catalogue pages for everybody because somebody changed a
+ * quantity. If any of these is ever made cacheable, its path belongs in `invalidate()` below, and
+ * this paragraph is where to look for why it is not there already.
  *
  * **There is no time-based revalidation anywhere.** An interval is a guess in both directions: too
  * long and a publish is late, too short and pages are rebuilt for nobody. Every write that can
@@ -86,23 +90,77 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
   // A renamed piece leaves a page at an address no query will ever return again. It has to go, or
   // the old URL keeps serving a piece that has moved.
   if (orphanedSlug) revalidatePath(`/products/${orphanedSlug}`)
+
+  /*
+    The blog's pages, for the one write that can reach both families: a photograph.
+
+    `media` carries this hook, and a re-uploaded photograph can be a product's gallery image OR an
+    article's hero — the same document, in two cached route families. Marking only the catalogue
+    would leave an article serving the old picture indefinitely, and there is no way to tell from
+    here which of the two a given upload is used by without a query per article.
+
+    It is cheaper than it reads, for the same reason the product loop is: marking a path stale does
+    not rebuild anything. A blog of forty articles costs one `select: { slug: true }` query here and
+    one render each for the pages somebody actually opens.
+
+    Note this is the SHARED invalidation. An article's own edit does NOT come through here — see
+    `revalidateArticleOnChange` below, which exists precisely so that a typo in a paragraph does not
+    evict the entire product catalogue.
+  */
+  const articles = await payload.find({
+    collection: 'articles',
+    depth: 0,
+    limit: 0,
+    select: { slug: true },
+  })
+  for (const article of articles.docs) revalidatePath(`/blog/${article.slug}`)
 }
 
 /**
- * A product path no query will name any more: the address a renamed piece has just left, or the one
- * a deleted piece used to hold. `undefined` for every other collection — a category and a size have
- * slugs of their own, and neither is a product page.
+ * One article's page, and the address it has just left. Nothing else (spec 007, FR-037, research
+ * R6).
+ *
+ * **Separate from `invalidate()` on purpose, and this is the whole point of the file's design.**
+ * The shared function walks every product slug, because editing one product genuinely does change
+ * its mates' pages, its category's eyebrow, and the row it appears in. None of that is true of an
+ * article: an article's page draws that article and nothing draws it back. Routing a blog edit
+ * through the shared path would evict the entire catalogue because somebody fixed a typo —
+ * `src/collections/questions.ts` records refusing exactly that trade for exactly this reason.
+ *
+ * `/blog` itself is absent because it is `force-dynamic`; there is no cache entry for it to hold a
+ * stale grid.
+ */
+async function invalidateArticle(slug: string, orphanedSlug?: string): Promise<void> {
+  const { revalidatePath } = await import('next/cache')
+
+  revalidatePath(`/blog/${slug}`)
+  if (orphanedSlug && orphanedSlug !== slug) revalidatePath(`/blog/${orphanedSlug}`)
+}
+
+/**
+ * A path no query will name any more: the address a renamed document has just left, or the one a
+ * deleted document used to hold.
+ *
+ * `undefined` for every collection whose documents are not pages — a category and a size have slugs
+ * of their own, and neither is an address anybody can visit. `products` and `articles` are the two
+ * that are, and the caller decides which prefix to put in front of what comes back.
  */
 const renamedFrom = (
   collectionSlug: string,
   doc: unknown,
   previousDoc: unknown,
 ): string | undefined => {
-  if (collectionSlug !== 'products') return undefined
+  if (collectionSlug !== 'products' && collectionSlug !== 'articles') return undefined
 
   const before = (previousDoc as { slug?: unknown } | undefined)?.slug
   const after = (doc as { slug?: unknown } | undefined)?.slug
   return typeof before === 'string' && before !== after ? before : undefined
+}
+
+/** The slug on a document, when it has one. */
+const slugOf = (doc: unknown): string | undefined => {
+  const slug = (doc as { slug?: unknown } | undefined)?.slug
+  return typeof slug === 'string' ? slug : undefined
 }
 
 /**
@@ -142,4 +200,31 @@ export const revalidateGlobalOnChange: GlobalAfterChangeHook = async ({ context,
   if (!context.disableRevalidate) await invalidate(req.payload)
   // A global's `afterChange` is expected to return the document, unlike a collection's.
   return doc
+}
+
+/**
+ * Attach to `afterChange` on `articles` (spec 007, T051/T053).
+ *
+ * Publishing, unpublishing, editing and restoring from trash all arrive here, and all of them
+ * change what `/blog/<slug>` should serve — including unpublishing, which has to make a page that
+ * was cached stop being served at all.
+ */
+export const revalidateArticleOnChange: CollectionAfterChangeHook = async ({
+  collection,
+  context,
+  doc,
+  previousDoc,
+}) => {
+  if (context.disableRevalidate) return
+
+  const slug = slugOf(doc)
+  if (slug) await invalidateArticle(slug, renamedFrom(collection.slug, doc, previousDoc))
+}
+
+/** The same for a deletion, which takes the page away as surely as unpublishing it does. */
+export const revalidateArticleOnDelete: CollectionAfterDeleteHook = async ({ context, doc }) => {
+  if (context.disableRevalidate) return
+
+  const slug = slugOf(doc)
+  if (slug) await invalidateArticle(slug)
 }

@@ -45,7 +45,15 @@ export function BlockRenderer({ blocks }: BlockRendererProps) {
 function renderBlock(block: StoryBlock, first: boolean): React.ReactNode {
   switch (block.type) {
     case 'page-header':
-      return <PageHeaderBlock {...block} />
+      // Named rather than spread: `PageHeaderBlock` is typed by what it draws since 007/T008, so it
+      // does not accept the union's `type` discriminant.
+      return (
+        <PageHeaderBlock
+          eyebrow={block.eyebrow}
+          heading={block.heading}
+          headingLevel={block.headingLevel}
+        />
+      )
     case 'media-plate':
       return <MediaPlateBlock {...block} priority={first} />
     case 'closer-look':

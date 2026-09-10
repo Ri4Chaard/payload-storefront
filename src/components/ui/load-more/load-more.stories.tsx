@@ -8,9 +8,12 @@ import { LoadMore } from './load-more'
  *
  * The control is a link to `?page=N`, not a fetch: the listing already lives in its URL, so the
  * server renders the longer grid and the whole thing works with scripting off.
+ *
+ * Promoted out of `commerce/` by 007/T006 — the blog is its second consumer, and its props never
+ * knew about products in the first place (`noun` is why).
  */
 const meta = {
-  title: 'Commerce/LoadMore',
+  title: 'UI/LoadMore',
   component: LoadMore,
   parameters: { layout: 'padded', nextjs: { appDirectory: true } },
   args: { shown: 12, total: 29, moreHref: '/all-jewelry?page=2' },

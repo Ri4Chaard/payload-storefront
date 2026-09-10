@@ -3,9 +3,9 @@ import React from 'react'
 
 import { ActiveFilters, type RemovableFilter } from '@/components/commerce/active-filters'
 import { FilterToolbar } from '@/components/commerce/filter-toolbar'
-import { ListingEmpty } from '@/components/commerce/listing-empty'
-import { LoadMore } from '@/components/commerce/load-more'
 import { ProductGrid } from '@/components/commerce/product-grid'
+import { EmptyState } from '@/components/ui/empty-state'
+import { LoadMore } from '@/components/ui/load-more'
 import { ListingHeader } from '@/components/sections/listing-header'
 import { Container } from '@/components/ui/container'
 import {
@@ -129,7 +129,7 @@ export async function Listing({
       ) : null}
 
       {result.products.length === 0 ? (
-        <ListingEmpty {...emptyState(categorySlug, basePath, hasActiveFilters(filters))} />
+        <EmptyState {...emptyState(categorySlug, basePath, hasActiveFilters(filters))} />
       ) : (
         <>
           <ProductGrid className="pt-4 xl:pt-5" products={result.products} label={title} />
@@ -159,18 +159,30 @@ export async function Listing({
  * A category with filters on it came up empty BECAUSE of the filters, so the way out is to clear
  * them and stay. A category with nothing in it at all is not the visitor's doing and clearing
  * nothing would change nothing — so that one says so plainly and offers the rest of the shop.
+ *
+ * **Both strings used to be defaults inside the component** and moved here when `ListingEmpty`
+ * became the kit's `EmptyState` (007/T007). That is the right side of the line: the copy is this
+ * page's, and a kit component holding a sentence about jewellery is user-visible copy in a
+ * component, which Constitution I permits only for developer-facing errors.
  */
 function emptyState(categorySlug: string | null, basePath: string, narrowed: boolean) {
   if (categorySlug !== null && !narrowed) {
     return {
-      clearHref: '/all-jewelry',
       title: 'Nothing here yet',
       description: 'This category has no pieces published. There is plenty elsewhere.',
-      clearLabel: 'See all jewelry',
+      action: { href: '/all-jewelry', label: 'See all jewelry' },
     }
   }
 
-  return { clearHref: categorySlug ? basePath : '/all-jewelry' }
+  return {
+    title: 'Nothing matches those filters',
+    description:
+      'Every piece is made in small numbers, so a narrow search can come up empty. Widening it usually helps.',
+    action: {
+      href: categorySlug ? basePath : '/all-jewelry',
+      label: 'Clear all filters',
+    },
+  }
 }
 
 /**

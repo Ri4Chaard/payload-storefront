@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { Container } from '@/components/ui'
-import type { StoryBlock } from '@/lib/story/types'
 import { cn } from '@/lib/cn'
 
 /**
@@ -14,8 +13,19 @@ import { cn } from '@/lib/cn'
  * **The heading level arrives as a prop and is never chosen here.** An editor can drag this band
  * anywhere, delete it, or add a second one, so "am I the page's title?" is a question about the
  * composition. `src/lib/story/mappers.ts` answers it once, for all six block types.
+ *
+ * **Typed by what it draws, not by where its data comes from (007/T008).** These props were
+ * `Extract<StoryBlock, { type: 'page-header' }>` until the blog needed the same band above its
+ * mosaic — at which point rendering it would have pulled one feature's view-model union into
+ * another feature's route, coupling two things that share nothing but a heading. The blog index is
+ * not block-composed (007/research.md R2), so it passes these three fields from its own global.
  */
-export type PageHeaderBlockProps = Extract<StoryBlock, { type: 'page-header' }>
+export interface PageHeaderBlockProps {
+  eyebrow?: string
+  heading: string
+  /** Decided by the composition, never here. `1` when this band owns the page's title. */
+  headingLevel: 1 | 2 | 3
+}
 
 export function PageHeaderBlock({ eyebrow, heading, headingLevel }: PageHeaderBlockProps) {
   const Heading = `h${headingLevel}` as const

@@ -10,6 +10,8 @@ import sharp from 'sharp'
 
 import { blocks } from './blocks'
 import { Admins } from './collections/admins'
+import { ArticleCategories } from './collections/article-categories'
+import { Articles } from './collections/articles'
 import { Attributes } from './collections/attributes'
 import { Categories } from './collections/categories'
 import { cartItemMatcher, cartsCollectionOverride } from './collections/carts'
@@ -31,6 +33,7 @@ import {
   promoteDefaultAfterDelete,
 } from './fields/address-hooks'
 import { AccountSettings } from './globals/account-settings'
+import { BlogPage } from './globals/blog-page'
 import { ContactSettings } from './globals/contact-settings'
 import { Shop } from './globals/shop'
 import { StoryPage } from './globals/story-page'
@@ -86,9 +89,11 @@ export default buildConfig({
     Attributes,
     VerificationCodes,
     Questions,
+    ArticleCategories,
+    Articles,
   ],
 
-  globals: [Shop, AccountSettings, ContactSettings, StoryPage],
+  globals: [Shop, AccountSettings, ContactSettings, StoryPage, BlogPage],
 
   /**
    * Block definitions live on the config rather than inline on the field that uses them (spec 006,
