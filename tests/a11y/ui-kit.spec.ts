@@ -72,6 +72,8 @@ const COMPONENTS = [
   'Commerce/ProductOptions',
   'Commerce/ProductPurchase',
   'Blocks/StoryPage',
+  // The blog's four new components, in one story file for the reason `blog.stories.tsx` records.
+  'Blog/Mosaic',
   'Sections/AboutBand',
   'Sections/CategoryBand',
   'Sections/Hero',
