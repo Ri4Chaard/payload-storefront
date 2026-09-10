@@ -27,10 +27,17 @@ import React from 'react'
  * refuses, a connection that drops: in every case the poster is already rendered underneath, so
  * there is nothing to fall back to because nothing was ever replaced.
  *
- * **The poster is a real `next/image`, not the `poster` attribute.** The attribute takes a raw URL
- * and skips the image pipeline entirely — no AVIF, no responsive sizes, no width and height for the
- * browser to reserve a box from. Layering the optimised image beneath the video keeps Constitution
- * V's image rules intact for the frame a visitor is most likely to actually see.
+ * **The poster is a real `next/image`, and the `poster` ATTRIBUTE is deliberately not set.** The
+ * attribute takes a raw URL and skips the image pipeline entirely — no AVIF, no responsive sizes,
+ * no dimensions for the browser to reserve a box from. Layering the optimised image beneath the
+ * video keeps Constitution V's image rules intact for the frame a visitor is most likely to see.
+ *
+ * Setting BOTH, which an earlier version did, is worse than setting either. Measuring `/about` with
+ * a video in the first plate put LCP at 2.59s against a 2.5s budget, and the LCP element was the
+ * `<video>` painting its `poster` attribute — a second, unoptimised copy of an image already on
+ * screen, arriving late enough to become the largest paint. With all seven slots as photographs the
+ * same page measured 1.44s. The attribute buys nothing here: the video sits transparent over the
+ * image until its first frame decodes, so the optimised poster is what shows in that gap anyway.
  */
 export interface VideoMediaProps {
   src: string
@@ -104,9 +111,6 @@ export function VideoMedia({
           loop
           playsInline
           controls={!background}
-          // The poster attribute as well as the image beneath: it is what the element shows in the
-          // instant between the `src` being set and the first frame decoding.
-          poster={poster.src}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : null}

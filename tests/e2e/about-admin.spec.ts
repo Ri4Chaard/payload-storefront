@@ -56,36 +56,64 @@ async function signIn(page: import('@playwright/test').Page) {
 }
 
 test('the FAQ is its own tab, and the story page is composed of bands', async ({ page }) => {
+  // `next dev` compiles the whole admin panel on first request, and this spec shares a server with
+  // the rest of the suite — so the budget has to cover a cold compile under load, not a warm one.
+  test.setTimeout(240_000)
   await signIn(page)
 
   // 1. The brief's actual request: "we should make faq as separate tab in the admin panel".
   await expect(page.getByRole('link', { name: 'FAQ', exact: true })).toBeVisible({
     timeout: 120_000,
   })
-  await expect(page.getByRole('link', { name: 'Story page', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Story page', exact: true })).toBeVisible({
+    timeout: 120_000,
+  })
 
   await page.goto('/admin/globals/story-page')
 
   // 2. Composed, not fixed: a control for adding a band, and the drawn seven already there.
   await expect(page.getByText('Bands', { exact: true }).first()).toBeVisible({ timeout: 120_000 })
   // "Add Band", not "Add Body": the control an editor presses has to say what it adds.
-  await expect(page.getByRole('button', { name: /add band/i })).toBeVisible()
+  const addBand = page.getByRole('button', { name: /add band/i })
+  await expect(addBand).toBeVisible({ timeout: 120_000 })
+
+  /*
+    The six band types are asserted through the PICKER, not through the rows already on the page.
+
+    A first version read the rows, and it failed whenever `about.spec.ts` happened to be running:
+    `story-page` is a global, so both specs write the one record, and the admin spec would open a
+    composition the other had just replaced. The picker is a property of the schema rather than of
+    the content, which is the thing actually under test here — that an editor can compose all six —
+    and it cannot be raced.
+  */
+  await addBand.click()
 
   for (const band of ['Page header', 'Full-width media', 'Detail band', 'Banner', 'Numbered steps', 'FAQ band']) {
-    await expect(page.getByText(band, { exact: true }).first()).toBeVisible()
+    await expect(page.getByText(band, { exact: true }).first()).toBeVisible({ timeout: 60_000 })
   }
 })
 
 test('a media slot offers a photograph or a video, and nowhere to paste an address', async ({
   page,
 }) => {
+  test.setTimeout(240_000)
   await signIn(page)
   await page.goto('/admin/globals/story-page')
   await expect(page.getByText('Bands', { exact: true }).first()).toBeVisible({ timeout: 120_000 })
 
-  // 3. The kind switch an editor actually sees.
-  await expect(page.getByText('A photograph', { exact: true }).first()).toBeVisible()
-  await expect(page.getByText('A video', { exact: true }).first()).toBeVisible()
+  /*
+    3. The kind switch an editor actually sees.
+
+    Composed here rather than read off whatever is stored, for the reason above: a slot has to exist
+    to be inspected, and the other spec owns the same record.
+  */
+  await page.getByRole('button', { name: /add band/i }).click()
+  await page.getByText('Full-width media', { exact: true }).first().click()
+
+  await expect(page.getByText('A photograph', { exact: true }).first()).toBeVisible({
+    timeout: 120_000,
+  })
+  await expect(page.getByText('A video', { exact: true }).first()).toBeVisible({ timeout: 120_000 })
 
   /*
    * FR-021, structurally. The requester asked for video "from media, not from the links", and the
@@ -95,5 +123,5 @@ test('a media slot offers a photograph or a video, and nowhere to paste an addre
   const slotTextInputs = page.locator(
     '.field-type.group:has-text("Show") input[type="text"], .field-type.group:has-text("Show") input[type="url"]',
   )
-  await expect(slotTextInputs).toHaveCount(0)
+  await expect(slotTextInputs).toHaveCount(0, { timeout: 120_000 })
 })

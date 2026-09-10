@@ -125,6 +125,16 @@ That is a few dozen lines of client JS, mounted only on slots that actually hold
 photograph slot ships none of it. This is the "push `use client` as far down the tree as possible"
 Constitution V requires.
 
+**Amended 2026-09-10, by measuring it.** The first implementation set the `<video>` element's
+`poster` attribute *as well as* rendering the optimised `next/image` beneath it. That is worse than
+either alone: on a throttled mobile profile `/about` measured **LCP 2.59s against a 2.5s budget**,
+and the LCP element was the `<video>` painting its raw `poster` attribute — a second, unoptimised
+copy of an image already on screen, arriving late enough to become the largest paint. The same page
+with all seven slots as photographs measured 1.44s. The attribute is now unset: a `<video>` sits
+transparent over the image until its first frame decodes, so the optimised poster covers that gap
+anyway. Recorded here because the reasoning that produced the bug — "belt and braces, set both" —
+is exactly the reasoning that would reintroduce it.
+
 **Alternatives considered**:
 - *A video library.* Rejected on the JS budget and Constitution II — nothing here needs a player.
 - *Server-rendered `<video autoplay muted loop>` with no client code.* Simplest, and fails FR-024 and
