@@ -30,6 +30,86 @@ import { isAdmin } from '@/lib/access'
  * route is `force-dynamic`, so nothing is cached, and the shared `invalidate()` would evict every
  * product page in the shop over a paragraph edit.
  */
+/**
+ * The page as Figma draws it (006/T039, FR-052).
+ *
+ * **Copy, but no photographs.** A `defaultValue` applies until the global is first saved, which is
+ * exactly what "an untouched install" means — so a fresh database renders the drawn page rather
+ * than a blank one, and every string here is content an editor can change rather than a
+ * developer's placeholder. Uploads cannot be defaulted: a media slot references a document that
+ * has to exist first, so the seven photographs arrive through the seed script and the slots render
+ * empty until then.
+ *
+ * The FAQ band ships with no questions selected, so it does not appear until somebody writes some.
+ * That is FR-034 doing its job, not a gap: a heading over nothing is worse than one band fewer.
+ */
+const DRAWN_PAGE = [
+  {
+    blockType: 'page-header',
+    eyebrow: 'OUR STORY',
+    heading: 'IMMORTALIZING MEMORIES AND EMOTIONS IN EXTRAORDINARY, TIMELESS CREATIONS',
+  },
+  { blockType: 'media-plate', media: { kind: 'photo' } },
+  {
+    blockType: 'closer-look',
+    body: 'Exceptional diamonds begin with exceptional standards. Aurum combines innovation, timeless design, and uncompromising attention to detail',
+    chips: [
+      { label: 'Lab-Grown Diamonds' },
+      { label: 'Fine Jewelry' },
+      { label: 'Exceptional Quality' },
+      { label: 'Timeless Design' },
+      { label: 'Craftsmanship' },
+      { label: 'Certified Diamonds' },
+    ],
+    figures: [
+      { word: 'CERTIFIED', caption: 'selected diamonds' },
+      { word: 'EXCEPTIONAL', caption: 'quality standards' },
+      { word: 'TIMELESS', caption: 'designed to last' },
+    ],
+    media: { kind: 'photo' },
+  },
+  {
+    blockType: 'banner',
+    eyebrow: 'THE AURUM STANDARD',
+    heading: 'SELECTED FOR BRILLIANCE. CRAFTED WITHOUT COMPROMISE.',
+    body: 'Every diamond is carefully considered for its beauty, character, and exceptional quality. Because for us, meeting the standard is only the beginning.',
+    cta: { label: 'EXPLORE THE COLLECTION', href: '/all-jewelry' },
+    media: { kind: 'photo' },
+    textSide: 'left',
+  },
+  {
+    blockType: 'process-steps',
+    heading: 'FROM DIAMOND TO JEWEL',
+    steps: [
+      {
+        title: 'SELECT',
+        caption: 'Exceptional diamonds, carefully chosen',
+        media: { kind: 'photo' },
+      },
+      {
+        title: 'CRAFT',
+        caption: 'Precision and attention in every detail',
+        media: { kind: 'photo' },
+      },
+      { title: 'CREATE', caption: 'Timeless jewelry made to be yours', media: { kind: 'photo' } },
+    ],
+  },
+  {
+    blockType: 'banner',
+    heading: 'CRAFTED TO LAST',
+    body: 'Jewelry made for the moments that become memories.',
+    media: { kind: 'photo' },
+    textSide: 'right',
+  },
+  {
+    blockType: 'faq',
+    heading: 'EVERY DETAIL, ANSWERED',
+    body: 'From choosing the perfect diamond to delivery and jewelry care, we\u2019re here to make every step of your Aurum experience simple and effortless. Have a question you can\u2019t find here? Our team is always ready to help.',
+    cta: { label: 'CONTACT US', href: '/contact' },
+    questions: [],
+  },
+]
+
 export const StoryPage: GlobalConfig = {
   slug: 'story-page',
   label: 'Story page',
@@ -59,6 +139,7 @@ export const StoryPage: GlobalConfig = {
         'faq',
       ],
       blocks: [],
+      defaultValue: DRAWN_PAGE,
       admin: {
         description:
           'The page, top to bottom. Drag to reorder. A band left unfilled does not appear on the page.',

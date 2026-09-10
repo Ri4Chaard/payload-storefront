@@ -44,6 +44,15 @@ demonstrable.
 cannot render before questions exist — and the US1 checkpoint says so rather than pretending
 otherwise.
 
+> **Correction, made during implementation.** That split does not survive contact with the
+> dispatcher. `block-renderer.tsx` ends in an exhaustive `switch` with a `never` check, so a block
+> variant without a renderer is a **compile error** — which is the property T033 was written to
+> have. Leaving `faq` unhandled therefore breaks the build for the whole of Phase 3, and the two
+> tasks cannot be in different phases. **T054–T057 moved into Phase 3** and are ticked there; what
+> remains in Phase 6 is the FAQ band's *behaviour* — access rules, draft visibility, de-duplication
+> and the lifecycle e2e — which genuinely is independent work. The type system caught a
+> decomposition error the plan did not.
+
 ---
 
 ## Phase 1: Setup
@@ -114,24 +123,24 @@ drawn string appears. (The FAQ band arrives with US4 — see the note at the top
 
 ### UI kit
 
-- [ ] T024 [US1] Promote `RichText` and its `PROSE` class list out of `src/components/commerce/product-details/product-details.tsx` into `src/components/ui/rich-text/rich-text.tsx` + `index.ts`, and import it back into `product-details.tsx` — Constitution II, second consumer triggers promotion ([research.md](./research.md) R9)
-- [ ] T025 [P] [US1] Write `src/components/ui/rich-text/rich-text.stories.tsx` — paragraphs, a link, a list, and empty — `pnpm check:stories` is a gate
-- [ ] T026 [US1] Create `src/components/ui/media/media.tsx` — server component, photograph branch only, `next/image` with explicit `width`/`height` and responsive `sizes`, reserving its box before load (FR-024b). The video branch lands in US3
-- [ ] T027 [P] [US1] Write `src/components/ui/media/media.stories.tsx` covering the photograph branch at the drawn aspect ratios
+- [X] T024 [US1] Promote `RichText` and its `PROSE` class list out of `src/components/commerce/product-details/product-details.tsx` into `src/components/ui/rich-text/rich-text.tsx` + `index.ts`, and import it back into `product-details.tsx` — Constitution II, second consumer triggers promotion ([research.md](./research.md) R9)
+- [X] T025 [P] [US1] Write `src/components/ui/rich-text/rich-text.stories.tsx` — paragraphs, a link, a list, and empty — `pnpm check:stories` is a gate
+- [X] T026 [US1] Create `src/components/ui/media/media.tsx` — server component, photograph branch only, `next/image` with explicit `width`/`height` and responsive `sizes`, reserving its box before load (FR-024b). The video branch lands in US3
+- [X] T027 [P] [US1] Write `src/components/ui/media/media.stories.tsx` covering the photograph branch at the drawn aspect ratios
 
 ### Block renderers
 
-- [ ] T028 [P] [US1] Create `src/components/blocks/page-header/` — eyebrow + heading, rendering at the `headingLevel` it is given, never one it chooses
-- [ ] T029 [P] [US1] Create `src/components/blocks/media-plate/` — the full-bleed plate, 530/400/240 as drawn
-- [ ] T030 [P] [US1] Create `src/components/blocks/closer-look/` — paragraph, chip row that **wraps** rather than clips, three figures, side media; reuses `Chip` and `Container`
-- [ ] T031 [P] [US1] Create `src/components/blocks/banner/` — one component with variants for `textSide`, eyebrow presence and CTA presence; drawn heights are minima, not fixed (spec Edge Cases); reuses `Button`
-- [ ] T032 [P] [US1] Create `src/components/blocks/process-steps/` — heading plus steps, three across at desktop and tablet, stacked at mobile; the ordinal comes from position
-- [ ] T033 [US1] Create `src/components/blocks/block-renderer.tsx` — exhaustive `switch` over `block.type` with a `never` check in the default branch, so a union member without a renderer is a compile error ([contracts/blocks.md](./contracts/blocks.md) §3). Depends on T028–T032
-- [ ] T034 [P] [US1] Write stories for the five renderers under `src/components/blocks/*/`, each at the three drawn widths
+- [X] T028 [P] [US1] Create `src/components/blocks/page-header/` — eyebrow + heading, rendering at the `headingLevel` it is given, never one it chooses
+- [X] T029 [P] [US1] Create `src/components/blocks/media-plate/` — the full-bleed plate, 530/400/240 as drawn
+- [X] T030 [P] [US1] Create `src/components/blocks/closer-look/` — paragraph, chip row that **wraps** rather than clips, three figures, side media; reuses `Chip` and `Container`
+- [X] T031 [P] [US1] Create `src/components/blocks/banner/` — one component with variants for `textSide`, eyebrow presence and CTA presence; drawn heights are minima, not fixed (spec Edge Cases); reuses `Button`
+- [X] T032 [P] [US1] Create `src/components/blocks/process-steps/` — heading plus steps, three across at desktop and tablet, stacked at mobile; the ordinal comes from position
+- [X] T033 [US1] Create `src/components/blocks/block-renderer.tsx` — exhaustive `switch` over `block.type` with a `never` check in the default branch, so a union member without a renderer is a compile error ([contracts/blocks.md](./contracts/blocks.md) §3). Depends on T028–T032
+- [X] T034 [P] [US1] Write stories for the five renderers under `src/components/blocks/*/`, each at the three drawn widths
 
 ### The route
 
-- [ ] T035 [US1] Create `src/app/(frontend)/about/page.tsx` — reads `getStoryPage()`, renders `<BlockRenderer>`, `export const dynamic = 'force-dynamic'` with a docblock citing [research.md](./research.md) R6 and the home page's precedent. A `null` page renders chrome and nothing between, never `notFound()` ([contracts/story-loader.md](./contracts/story-loader.md) §6)
+- [X] T035 [US1] Create `src/app/(frontend)/about/page.tsx` — reads `getStoryPage()`, renders `<BlockRenderer>`, `export const dynamic = 'force-dynamic'` with a docblock citing [research.md](./research.md) R6 and the home page's precedent. A `null` page renders chrome and nothing between, never `notFound()` ([contracts/story-loader.md](./contracts/story-loader.md) §6)
 
 ### Tests
 
@@ -153,7 +162,7 @@ design.
 remove it again, publish, reload `/about`, and see every change. Then confirm no string on the
 rendered page is absent from the admin form.
 
-- [ ] T039 [US2] Add the `defaultValue` to the story global's `body` field in `src/globals/story-page.ts` — the seven drawn bands in the drawn order with their drawn copy, media slots empty (FR-052, [research.md](./research.md) R11)
+- [X] T039 [US2] Add the `defaultValue` to the story global's `body` field in `src/globals/story-page.ts` — the seven drawn bands in the drawn order with their drawn copy, media slots empty (FR-052, [research.md](./research.md) R11)
 - [ ] T040 [P] [US2] Audit every field in `src/blocks/*.ts`, `src/collections/questions.ts` and `src/globals/story-page.ts` for an editor-facing label and, where the purpose is not self-evident, an admin description — Constitution IV, "fields no editor can interpret will be filled incorrectly"
 - [ ] T041 [P] [US2] Write the composition half of `tests/e2e/about.spec.ts`: reorder two bands and see the new order; add a second banner block and see it render where placed; remove it and see the bands close up; add an unfilled band and see it absent (FR-004)
 - [ ] T042 [P] [US2] Extend `tests/e2e/about.spec.ts` with the heading invariant under reordering: a banner dragged above the page header, the page header deleted, and two page headers — each must still yield exactly one `<h1>` (FR-051, SC-012)
@@ -197,10 +206,10 @@ reads them with nothing to migrate.
 change on `/about`. Then unpublish the story page and confirm the questions still exist — they are
 not owned by it.
 
-- [ ] T054 [US4] Extend `src/lib/story/mappers.ts` to resolve the FAQ block's question selection — de-duplicate by id keeping first position (FR-032), serialise `answer` to `answerHtml`, and drop the block when no question survives (FR-034)
-- [ ] T055 [US4] Create `src/components/blocks/faq-band/` — heading, intro, optional CTA, and the question list rendered with the existing `Accordion` at `headingLevel={3}` and its default `single: false` so opening one does not close another (FR-035). Answers render through the promoted `RichText`
-- [ ] T056 [US4] Add the `faq` case to `src/components/blocks/block-renderer.tsx` (depends on T055)
-- [ ] T057 [P] [US4] Write `src/components/blocks/faq-band/faq-band.stories.tsx` — several questions, one open, a long answer, and a single question
+- [X] T054 [US4] Extend `src/lib/story/mappers.ts` to resolve the FAQ block's question selection — de-duplicate by id keeping first position (FR-032), serialise `answer` to `answerHtml`, and drop the block when no question survives (FR-034)
+- [X] T055 [US4] Create `src/components/blocks/faq-band/` — heading, intro, optional CTA, and the question list rendered with the existing `Accordion` at `headingLevel={3}` and its default `single: false` so opening one does not close another (FR-035). Answers render through the promoted `RichText`
+- [X] T056 [US4] Add the `faq` case to `src/components/blocks/block-renderer.tsx` (depends on T055)
+- [X] T057 [P] [US4] Write `src/components/blocks/faq-band/faq-band.stories.tsx` — several questions, one open, a long answer, and a single question
 - [ ] T058 [P] [US4] Write `tests/integration/questions-access.test.ts`: an unpublished question is unreachable to an anonymous read (`overrideAccess: false`); a question cannot be saved with an empty question or empty answer (FR-030); admins can write and non-admins cannot (FR-036)
 - [ ] T059 [P] [US4] Extend `tests/e2e/about.spec.ts`: reordering the selection reorders the band; the same question selected twice appears once; unpublishing one removes it with no edit to the story page; unpublishing all removes the whole band; an answer's link and list render
 

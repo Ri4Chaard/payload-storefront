@@ -15,6 +15,15 @@ import type { StoryPage } from '@/payload-types'
 type Body = NonNullable<StoryPage['body']>
 type Block = Body[number]
 
+/**
+ * A media slot's stored shape. It is REQUIRED on every block that has one — `mediaSlot()` is a
+ * group, and a group always exists even when every upload inside it is empty. That is why an empty
+ * slot has to be expressible: `{ kind: 'photo' }` is what an untouched band actually holds.
+ */
+type Slot = Extract<Block, { blockType: 'media-plate' }>['media']
+
+const emptySlot: Slot = { kind: 'photo' }
+
 const pageHeader = (heading = 'OUR STORY, TOLD'): Block => ({
   blockType: 'page-header',
   heading,
@@ -24,10 +33,11 @@ const banner = (heading = 'SELECTED FOR BRILLIANCE'): Block => ({
   blockType: 'banner',
   heading,
   textSide: 'left',
+  media: emptySlot,
 })
 
 /** A resolved upload, as Payload hands it back at depth. */
-const photo = (): Block['media'] =>
+const photo = (): Slot =>
   ({
     kind: 'photo',
     photo: {
@@ -39,12 +49,12 @@ const photo = (): Block['media'] =>
       updatedAt: '',
       createdAt: '',
     },
-  }) as unknown as Extract<Block, { blockType: 'media-plate' }>['media']
+  }) as unknown as Slot
 
 const steps = (): Block => ({
   blockType: 'process-steps',
   heading: 'FROM DIAMOND TO JEWEL',
-  steps: [{ title: 'SELECT', caption: 'Exceptional diamonds', media: { kind: 'photo' } }],
+  steps: [{ title: 'SELECT', caption: 'Exceptional diamonds', media: emptySlot }],
 })
 
 /** The level each surviving block renders its own heading at. */
@@ -92,13 +102,15 @@ describe('heading ownership (FR-006, FR-051)', () => {
 
 describe('empty bands are dropped, not rendered empty (FR-004)', () => {
   it('drops a band whose copy is blank', () => {
-    expect(toStoryBlocks([{ blockType: 'banner', heading: '  ', textSide: 'left' }])).toEqual([])
+    expect(
+      toStoryBlocks([{ blockType: 'banner', heading: '  ', textSide: 'left', media: emptySlot }]),
+    ).toEqual([])
   })
 
   it('drops a full-bleed plate with no picture', () => {
     // There is no copy to fall back on, and FR-024b says an empty frame collapses rather than
     // reserving blank space — so the band is absent rather than 530px of nothing.
-    expect(toStoryBlocks([{ blockType: 'media-plate', media: { kind: 'photo' } }])).toEqual([])
+    expect(toStoryBlocks([{ blockType: 'media-plate', media: emptySlot }])).toEqual([])
   })
 
   it('keeps a full-bleed plate that has one', () => {
@@ -138,7 +150,7 @@ describe('content that outlived its code', () => {
 
 describe('calls to action (FR-011, FR-013)', () => {
   const withCta = (cta: { label?: string; href?: string }): Body => [
-    { blockType: 'banner', heading: 'CRAFTED TO LAST', textSide: 'left', cta },
+    { blockType: 'banner', heading: 'CRAFTED TO LAST', textSide: 'left', media: emptySlot, cta },
   ]
 
   it('renders a button only when it has both a label and a destination', () => {

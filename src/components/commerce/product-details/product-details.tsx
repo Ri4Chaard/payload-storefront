@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Accordion } from '@/components/ui/accordion'
+import { RichText } from '@/components/ui/rich-text'
 import type { ProductAttribute } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
@@ -37,24 +38,6 @@ export interface ProductDetailsProps extends Omit<React.ComponentProps<'div'>, '
   warrantyTitle?: string
   deliveryTitle?: string
   headingLevel?: 2 | 3 | 4
-}
-
-/**
- * Rich text the owner wrote, styled where it lands rather than at the source. The serialiser emits
- * bare `<p>`, `<ul>` and `<strong>`; the reset in `styles.css` strips their margins and list
- * markers, so anything that is not restored here renders as one undifferentiated block.
- */
-const PROSE = cn(
-  '[&_p]:text-body-medium [&_p]:text-neutral-primary/80 [&_p+p]:mt-4',
-  '[&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:pl-5',
-  '[&_li]:text-body-medium [&_li]:text-neutral-primary/80 [&_li]:mt-1',
-  '[&_strong]:font-bold [&_a]:underline [&_a]:underline-offset-2',
-)
-
-function RichText({ html }: { html: string }) {
-  // The source is Payload, written by the shop owner in the admin and serialised by lexical. It is
-  // not visitor input and never reaches this component from a URL or a form.
-  return <div className={PROSE} dangerouslySetInnerHTML={{ __html: html }} />
 }
 
 /** The owner-defined properties, as a description list — which is what a name/value set is. */
