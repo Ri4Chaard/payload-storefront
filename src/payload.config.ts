@@ -20,6 +20,7 @@ import { Customers } from './collections/customers'
 import { Media } from './collections/media'
 import { productsCollectionOverride } from './collections/products'
 import { Sizes } from './collections/sizes'
+import { Enquiries } from './collections/enquiries'
 import { Questions } from './collections/questions'
 import { VerificationCodes } from './collections/verification-codes'
 import { variantsCollectionOverride } from './collections/variants'
@@ -34,7 +35,9 @@ import {
 } from './fields/address-hooks'
 import { AccountSettings } from './globals/account-settings'
 import { BlogPage } from './globals/blog-page'
+import { ContactPage } from './globals/contact-page'
 import { ContactSettings } from './globals/contact-settings'
+import { FaqPage } from './globals/faq-page'
 import { Shop } from './globals/shop'
 import { StoryPage } from './globals/story-page'
 import { expireCartsTask } from './jobs/expire-carts'
@@ -91,9 +94,10 @@ export default buildConfig({
     Questions,
     ArticleCategories,
     Articles,
+    Enquiries,
   ],
 
-  globals: [Shop, AccountSettings, ContactSettings, StoryPage, BlogPage],
+  globals: [Shop, AccountSettings, ContactSettings, StoryPage, BlogPage, ContactPage, FaqPage],
 
   /**
    * Block definitions live on the config rather than inline on the field that uses them (spec 006,

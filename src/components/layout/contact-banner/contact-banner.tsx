@@ -30,7 +30,7 @@ import { type IconName } from '@/lib/icon-registry'
  * Pure white rather than the footer's 80%: this is the topmost element on the page and the drawing
  * sets it at #FFFFFF. The hover affordance is the rule, not a shift in opacity.
  *
- * The address, the number and the three marks come from `@/lib/contact` — the footer and the menu
+ * The address, the number and the three marks come from `@/lib/contact/defaults` — the footer and the menu
  * show the same three facts, and a number updated in two places out of three is worse than one that
  * was never split. The design's address reads `hello@aurum.exampIe`, a capital I where "gmail" has an
  * l; it is corrected there, once.

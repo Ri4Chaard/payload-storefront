@@ -51,6 +51,11 @@ export { OtpInput, type OtpInputProps } from './otp-input'
 export { RichText, type RichTextProps } from './rich-text'
 export { Pagination, type PaginationProps } from './pagination'
 export { QuantityStepper, type QuantityStepperProps } from './quantity-stepper'
+export {
+  QuestionList,
+  type QuestionListItem,
+  type QuestionListProps,
+} from './question-list'
 export { RangeSlider, type RangeSliderProps } from './range-slider'
 export { ScrollArea, type ScrollAreaProps } from './scroll-area'
 export { SearchField, type SearchFieldProps } from './search-field'

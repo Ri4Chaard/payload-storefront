@@ -1,8 +1,6 @@
-import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
 import { toCatalogImage } from '@/lib/catalog/mappers'
-import type { Question, StoryPage as StoryPageDocument } from '@/payload-types'
+import { toQuestions } from '@/lib/questions/mappers'
+import type { StoryPage as StoryPageDocument } from '@/payload-types'
 
 import type {
   Cta,
@@ -13,7 +11,6 @@ import type {
   StoryBlock,
   StoryMedia,
   StoryPage,
-  StoryQuestion,
   StorySeo,
 } from './types'
 
@@ -108,50 +105,14 @@ const media = (slot: SlotDocument | undefined): StoryMedia | undefined => {
   return { ...poster, kind: 'video', videoSrc: video.url }
 }
 
-/** `null` where the answer is empty, matching the catalogue's rich-text convention. */
-const html = (value: Question['answer']): string | null => {
-  if (!value) return null
-
-  // The generated type describes the same document `SerializedEditorState` does, one field at a
-  // time, and the two descriptions are not assignable to each other. The cast is the seam between
-  // Payload's generated shape and lexical's own; it is not hiding an unknown.
-  const output = convertLexicalToHTML({
-    data: value as unknown as SerializedEditorState,
-    disableContainer: true,
-  }).trim()
-
-  return output === '' ? null : output
-}
-
 /**
  * The questions a FAQ band shows.
  *
- * **De-duplicated by id, keeping the first position** (FR-032). Payload will happily let an editor
- * pick the same question twice; the page shows it once, where they first put it.
- *
- * Unpublished questions never arrive here at all — the loader reads with `overrideAccess: false`
- * and `adminOrPublishedStatus` constrains the query, so a draft is absent rather than filtered
- * (FR-033). There is deliberately no status check in this file: the rule lives in the access
- * function, and repeating it here would put it in two places.
+ * **The mapping itself moved to `@/lib/questions/mappers`** (008/T008), where `/contact` and `/faq`
+ * read it too. What was a local helper with a paragraph of reasoning attached is now one shared
+ * function with the same paragraph — see that module for the de-duplication and draft rules.
  */
-const questions = (value: (number | Question)[] | null | undefined): StoryQuestion[] => {
-  const seen = new Set<number>()
-  const output: StoryQuestion[] = []
-
-  for (const entry of value ?? []) {
-    const document = resolved<Question>(entry)
-    if (!document || seen.has(document.id)) continue
-
-    const question = text(document.question)
-    const answerHtml = html(document.answer)
-    if (!question || !answerHtml) continue
-
-    seen.add(document.id)
-    output.push({ id: document.id, question, answerHtml })
-  }
-
-  return output
-}
+const questions = toQuestions
 
 const figures = (value: { word?: string | null; caption?: string | null }[] | null | undefined): Figure[] =>
   (value ?? []).flatMap((entry) => {

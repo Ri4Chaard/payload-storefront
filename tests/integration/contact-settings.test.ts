@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import { afterAll, afterEach, describe, expect, it } from 'vitest'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
-import { DEFAULT_CONTACT } from '@/lib/contact'
+import { DEFAULT_CONTACT } from '@/lib/contact/defaults'
 import { getContactDetails } from '@/lib/messengers/settings'
 import { getMessageTemplate, getMessengers } from '@/lib/messengers/settings'
 import { skipRevalidation } from '@/lib/revalidate'

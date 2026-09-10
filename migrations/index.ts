@@ -13,6 +13,7 @@ import * as migration_20260909_114622_contact_details from './20260909_114622_co
 import * as migration_20260909_115401_contact_location from './20260909_115401_contact_location';
 import * as migration_20260910_093824_story_page_and_faq from './20260910_093824_story_page_and_faq';
 import * as migration_20260910_135959_blog_articles from './20260910_135959_blog_articles';
+import * as migration_20260910_161343_contact_and_faq from './20260910_161343_contact_and_faq';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20260910_135959_blog_articles.up,
     down: migration_20260910_135959_blog_articles.down,
-    name: '20260910_135959_blog_articles'
+    name: '20260910_135959_blog_articles',
+  },
+  {
+    up: migration_20260910_161343_contact_and_faq.up,
+    down: migration_20260910_161343_contact_and_faq.down,
+    name: '20260910_161343_contact_and_faq'
   },
 ];

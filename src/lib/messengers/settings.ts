@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
-import { DEFAULT_CONTACT, mapsHref, telHref } from '@/lib/contact'
+import { DEFAULT_CONTACT, mapsHref, telHref } from '@/lib/contact/defaults'
 import type { IconName } from '@/lib/icon-registry'
 
 import { profileHref } from './links'
@@ -110,7 +110,7 @@ const FALLBACK_TEMPLATE = DEFAULT_MESSAGE_TEMPLATE
 /**
  * The shop's accounts as the chrome draws them (spec 005, T072, FR-052).
  *
- * **This is the whole of "one set of accounts".** Before it, `src/lib/contact.ts` carried a second
+ * **This is the whole of "one set of accounts".** Before it, `src/lib/contact/defaults.ts` carried a second
  * copy — three links whose own comment admitted "these need the real accounts before launch" — and
  * an owner who set their real WhatsApp number in the admin would have watched the footer keep
  * pointing at a bare `wa.me/` on every page. Two records of one fact is two chances for one of

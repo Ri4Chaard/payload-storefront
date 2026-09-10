@@ -32,11 +32,31 @@ import { cn } from '@/lib/cn'
  * They also mix construction: `customer-support` is a 3px stroke where the other three are fills, so
  * at 30px it reads lighter than its neighbours. Reproduced as drawn; worth a designer's eye.
  */
+/**
+ * **Two additions for the contact page's channel cards** (008/T012), both defaulting to what this
+ * card already did, so every existing caller renders byte-identically.
+ *
+ * `href` makes the description a link — the drawing underlines it in `primary/default` where a
+ * service promise is plain `neutral/secondary` text. `uppercaseTitle` exists because the promise
+ * cards shout `FREE SHIPPING` and the channel cards read `WhatsApp`, `Telegram`, `Email Us`: a
+ * brand name is not shouted, and the transform was hardcoded here.
+ *
+ * A new `ContactCard` was the alternative, and it would have been this card with a link —
+ * `ProductCard` / `ProductCardNew` is the named failure Constitution II exists to prevent.
+ *
+ * **The link is the value line, not the whole card.** That is what the drawing underlines, and a
+ * card that is entirely a link makes a screen reader announce the platform name and the handle as
+ * one destination.
+ */
 export interface FeatureCardProps extends Omit<React.ComponentProps<'li'>, 'title'> {
   icon: IconName
   title: string
   description: string
   as?: 'li' | 'div'
+  /** Makes the description a link. Absent, it stays plain text. */
+  href?: string
+  /** The promise cards draw their heading in capitals; the channel cards do not. */
+  uppercaseTitle?: boolean
 }
 
 export function FeatureCard({
@@ -44,6 +64,8 @@ export function FeatureCard({
   title,
   description,
   as = 'li',
+  href,
+  uppercaseTitle = true,
   className,
   ...props
 }: FeatureCardProps) {
@@ -68,8 +90,27 @@ export function FeatureCard({
       <Icon name={icon} className="text-primary-default size-7.5 md:size-12.5" />
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-body-strong text-neutral-primary uppercase">{title}</h3>
-        <p className="text-body-small text-neutral-secondary md:text-body-medium">{description}</p>
+        <h3
+          className={cn('text-body-strong text-neutral-primary', uppercaseTitle && 'uppercase')}
+        >
+          {title}
+        </h3>
+        {href ? (
+          <a
+            href={href}
+            className={cn(
+              'text-body-small text-primary-default underline md:text-body-medium',
+              'hover:no-underline',
+              'focus-visible:outline-primary-default focus-visible:outline-2 focus-visible:outline-offset-2',
+            )}
+          >
+            {description}
+          </a>
+        ) : (
+          <p className="text-body-small text-neutral-secondary md:text-body-medium">
+            {description}
+          </p>
+        )}
       </div>
     </Element>
   )

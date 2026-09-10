@@ -1,5 +1,6 @@
 import type { CatalogImage } from '@/lib/catalog/types'
 import type { StoryPage as StoryPageDocument } from '@/payload-types'
+import type { Question as StoryQuestion } from '@/lib/questions/types'
 
 /**
  * The view models for the story page (spec 006, T020) — what a block renderer is allowed to see.
@@ -56,12 +57,15 @@ export interface Step {
   media?: StoryMedia
 }
 
-/** One question, with its answer already serialised out of lexical. */
-export interface StoryQuestion {
-  id: number
-  question: string
-  answerHtml: string
-}
+/**
+ * One question, with its answer already serialised out of lexical.
+ *
+ * **Re-exported, not defined here** (008/T008). It was `StoryQuestion` until `/contact` and `/faq`
+ * became the second and third pages to draw the same rows; it now lives in `@/lib/questions/types`,
+ * which is the tier three features share. The alias stays so this module's own `StoryBlock` union
+ * reads as it did.
+ */
+export type { StoryQuestion }
 
 /**
  * Which heading level a band's own heading renders at.

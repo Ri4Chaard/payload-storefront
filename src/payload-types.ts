@@ -86,6 +86,7 @@ export interface Config {
     questions: Question;
     'article-categories': ArticleCategory;
     articles: Article;
+    enquiries: Enquiry;
     addresses: Address;
     variants: Variant;
     variantTypes: VariantType;
@@ -121,6 +122,7 @@ export interface Config {
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
     'article-categories': ArticleCategoriesSelect<false> | ArticleCategoriesSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -143,6 +145,8 @@ export interface Config {
     'contact-settings': ContactSetting;
     'story-page': StoryPage;
     'blog-page': BlogPage;
+    'contact-page': ContactPage;
+    'faq-page': FaqPage;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
@@ -151,6 +155,8 @@ export interface Config {
     'contact-settings': ContactSettingsSelect<false> | ContactSettingsSelect<true>;
     'story-page': StoryPageSelect<false> | StoryPageSelect<true>;
     'blog-page': BlogPageSelect<false> | BlogPageSelect<true>;
+    'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
+    'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -233,6 +239,10 @@ export interface PageHeader {
    * The page’s main statement. Drawn over two lines.
    */
   heading: string;
+  /**
+   * Optional. One or two sentences under the headline.
+   */
+  body?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'page-header';
@@ -1221,6 +1231,35 @@ export interface Article {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Messages sent through the contact form. Read-only — what a visitor wrote is kept as they wrote it. Deleted automatically after 365 days, and deleting one here is how a request to be forgotten is answered.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries".
+ */
+export interface Enquiry {
+  id: number;
+  /**
+   * As the visitor typed it.
+   */
+  name: string;
+  /**
+   * Replies to the notification go here. Indexed — the form’s rate limit counts on it.
+   */
+  email: string;
+  message: string;
+  /**
+   * Whether the email telling you about this reached you. “Failed” means the message is safe here but nobody was told — it is worth answering.
+   */
+  notification: 'pending' | 'sent' | 'failed';
+  notificationError?: string | null;
+  /**
+   * Used only to rate-limit the form.
+   */
+  senderHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
@@ -1581,6 +1620,10 @@ export interface PayloadLockedDocument {
         value: number | Article;
       } | null)
     | ({
+        relationTo: 'enquiries';
+        value: number | Enquiry;
+      } | null)
+    | ({
         relationTo: 'addresses';
         value: number | Address;
       } | null)
@@ -1932,6 +1975,20 @@ export interface ArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries_select".
+ */
+export interface EnquiriesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  message?: T;
+  notification?: T;
+  notificationError?: T;
+  senderHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2725,6 +2782,10 @@ export interface ContactSetting {
    */
   email?: string | null;
   /**
+   * Where messages from the contact form arrive. Leave empty and they go to the email address above.
+   */
+  enquiryEmail?: string | null;
+  /**
    * Written however you like — “+1 (555) 010 20-30” is fine. The tap-to-call link is built from it, so there is nothing else to keep in step.
    */
   phone?: string | null;
@@ -2850,6 +2911,125 @@ export interface BlogPage {
   createdAt?: string | null;
 }
 /**
+ * The /contact page. The four ways to reach you come from Shop → Contact settings; everything this page says is below.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page".
+ */
+export interface ContactPage {
+  id: number;
+  /**
+   * The small line above the headline, e.g. “CONTACT US”.
+   */
+  eyebrow?: string | null;
+  /**
+   * The page’s main statement.
+   */
+  heading: string;
+  /**
+   * One line under the headline.
+   */
+  intro?: string | null;
+  /**
+   * The message form: what it says, and the picture beside it.
+   */
+  form: {
+    heading: string;
+    body?: string | null;
+    nameLabel: string;
+    emailLabel: string;
+    messageLabel: string;
+    submitLabel: string;
+    /**
+     * The small line under the button. Drawn only at desktop width.
+     */
+    footnote?: string | null;
+    /**
+     * Shown in place of the form once a message is safely received. Say what happens next.
+     */
+    successMessage: string;
+    /**
+     * Shown when the message could not be received at all. Point them at another way to reach you.
+     */
+    errorMessage: string;
+    /**
+     * Sits beside the form on a desktop and beneath it on a phone. Its alternative text comes from the media library.
+     */
+    photo?: (number | null) | Media;
+  };
+  /**
+   * A few questions at the foot of the page. Write them in Content → FAQ first.
+   */
+  faq: {
+    heading: string;
+    /**
+     * Pick the questions this page shows, in the order you want them. Leave empty and the whole band disappears — a heading over nothing is worse than one band fewer.
+     */
+    questions?: (number | Question)[] | null;
+  };
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The heading above the questions, and what the page says when none are published. The questions themselves live in Content → FAQ.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-page".
+ */
+export interface FaqPage {
+  id: number;
+  /**
+   * The page’s title, drawn centred.
+   */
+  heading: string;
+  /**
+   * Shown in place of the questions when none are published.
+   */
+  emptyTitle: string;
+  /**
+   * The sentence under the empty heading above.
+   */
+  emptyDescription: string;
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -2899,6 +3079,7 @@ export interface AccountSettingsSelect<T extends boolean = true> {
  */
 export interface ContactSettingsSelect<T extends boolean = true> {
   email?: T;
+  enquiryEmail?: T;
   phone?: T;
   address?: T;
   openingHours?: T;
@@ -2941,6 +3122,66 @@ export interface StoryPageSelect<T extends boolean = true> {
  */
 export interface BlogPageSelect<T extends boolean = true> {
   eyebrow?: T;
+  heading?: T;
+  emptyTitle?: T;
+  emptyDescription?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  intro?: T;
+  form?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        nameLabel?: T;
+        emailLabel?: T;
+        messageLabel?: T;
+        submitLabel?: T;
+        footnote?: T;
+        successMessage?: T;
+        errorMessage?: T;
+        photo?: T;
+      };
+  faq?:
+    | T
+    | {
+        heading?: T;
+        questions?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-page_select".
+ */
+export interface FaqPageSelect<T extends boolean = true> {
   heading?: T;
   emptyTitle?: T;
   emptyDescription?: T;

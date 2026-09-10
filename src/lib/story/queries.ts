@@ -15,9 +15,15 @@ import type { StoryPage } from './types'
  * reason a lint rule keeps documents out of components.
  *
  * **One function, deliberately.** There is no `getQuestions()` here. Questions reach the page only
- * through the FAQ band's own selection, and a second entry point would let a future caller show
- * questions the editor did not choose. When `/faq` is built it adds its own function to this file,
- * reading the same collection.
+ * through the FAQ band's own selection, resolved by the `depth` below rather than by a query of
+ * their own — a second entry point would let a future caller show questions the editor did not
+ * choose.
+ *
+ * **`/faq` did not add its function to this file** (008/T009), which is what this comment used to
+ * predict. It reads every published question rather than a chosen subset, so it needs a query this
+ * page must never have; and by then the questions were shared by three pages, so the view model and
+ * its mapper had moved to `@/lib/questions/` and the loader followed them there. The prediction was
+ * right that `/faq` was coming and wrong about where it would live.
  *
  * **`depth: 2` is the number the shape needs, not a guess.** The blocks hold uploads and a
  * questions relationship at depth 1; a question's own fields are plain, so nothing needs a third

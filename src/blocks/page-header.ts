@@ -32,5 +32,21 @@ export const pageHeader: Block = {
       label: 'Headline',
       admin: { description: 'The page’s main statement. Drawn over two lines.' },
     },
+    /**
+     * The intro paragraph beneath the headline (008/FR-007), drawn at `312:7502` on the contact
+     * page — `Questions, custom requests, or styling advice…`.
+     *
+     * **Added to this band rather than given one of its own.** The spec requires it to be an
+     * addition to the page header, not a second band that draws the same thing. Optional, so
+     * `/about` and `/blog` are unchanged by it, and available to both should an editor want it.
+     */
+    {
+      name: 'body',
+      type: 'textarea',
+      label: 'Intro paragraph',
+      admin: {
+        description: 'Optional. One or two sentences under the headline.',
+      },
+    },
   ],
 }

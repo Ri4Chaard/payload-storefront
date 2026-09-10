@@ -63,7 +63,19 @@ function renderBlock(block: StoryBlock, first: boolean): React.ReactNode {
     case 'process-steps':
       return <ProcessStepsBlock {...block} />
     case 'faq':
-      return <FaqBandBlock {...block} />
+      // Named rather than spread, for the reason `page-header` above records: `FaqBandBlock` is
+      // typed by what it draws since 008/T011, so `/contact` can render it without importing this
+      // feature's view models. `variant` is left at its default — `split` is the drawn `/about`
+      // band, and this renderer only ever draws that one.
+      return (
+        <FaqBandBlock
+          heading={block.heading}
+          body={block.body}
+          cta={block.cta}
+          questions={block.questions}
+          headingLevel={block.headingLevel}
+        />
+      )
     default: {
       // A block variant with no renderer. If this line stops compiling, the six-step checklist in
       // contracts/blocks.md §2 was stopped at step 5.

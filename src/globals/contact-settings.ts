@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { isAdmin } from '@/lib/access'
-import { DEFAULT_CONTACT } from '@/lib/contact'
+import { DEFAULT_CONTACT } from '@/lib/contact/defaults'
 import { normaliseDestination, PLATFORM_LABELS, PLATFORMS, type Platform } from '@/lib/messengers/normalise'
 import { revalidateGlobalOnChange } from '@/lib/revalidate'
 
@@ -28,7 +28,7 @@ import { revalidateGlobalOnChange } from '@/lib/revalidate'
  * text field somebody has to get right, which is the failure FR-039 exists to make impossible.
  *
  * **The shop's own email and phone live here too.** They were three hardcoded strings in
- * `src/lib/contact.ts`, and the number was written two different ways in two components — the
+ * `src/lib/contact/defaults.ts`, and the number was written two different ways in two components — the
  * contact strip said `+1 (555) 010 20-30` and the footer said `+1 555 010 2030`, over a third form
  * hardcoded into the footer's `tel:`. One record now, with the dialling link derived from it, so
  * there is nothing left that can quietly disagree.
@@ -81,7 +81,7 @@ export const ContactSettings: GlobalConfig = {
     /**
      * The email and the phone the chrome draws (the contact strip, the footer, the mobile menu).
      *
-     * Here rather than in `src/lib/contact.ts`, where they were three hardcoded strings, for the
+     * Here rather than in `src/lib/contact/defaults.ts`, where they were three hardcoded strings, for the
      * same reason the messenger destinations moved: a shop's own phone number is not a code change.
      * They sit above the messengers because they are the two an owner is most likely to edit.
      */
@@ -93,6 +93,25 @@ export const ContactSettings: GlobalConfig = {
       admin: {
         description:
           'Shown in the contact strip, the footer and the mobile menu, and offered in the checkout modal when a customer would rather write.',
+      },
+    },
+    /**
+     * Where the contact form's messages go (spec 008, FR-024).
+     *
+     * **Here rather than on `contact-page`**, beside the address it falls back to, because it is an
+     * address the shop uses and this global is where the shop's addresses live. Keeping the two
+     * together means the fallback is visible in the admin rather than being a rule stated only in
+     * code — an owner reading this field can see what happens if they leave it empty.
+     *
+     * Optional. Empty means "the address above", which is what most shops want.
+     */
+    {
+      name: 'enquiryEmail',
+      type: 'email',
+      label: 'Send enquiries to',
+      admin: {
+        description:
+          'Where messages from the contact form arrive. Leave empty and they go to the email address above.',
       },
     },
     {

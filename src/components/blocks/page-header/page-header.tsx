@@ -23,11 +23,13 @@ import { cn } from '@/lib/cn'
 export interface PageHeaderBlockProps {
   eyebrow?: string
   heading: string
+  /** The intro paragraph under the headline (008/FR-007). Optional — `/about` and `/blog` set none. */
+  body?: string
   /** Decided by the composition, never here. `1` when this band owns the page's title. */
   headingLevel: 1 | 2 | 3
 }
 
-export function PageHeaderBlock({ eyebrow, heading, headingLevel }: PageHeaderBlockProps) {
+export function PageHeaderBlock({ eyebrow, heading, body, headingLevel }: PageHeaderBlockProps) {
   const Heading = `h${headingLevel}` as const
 
   return (
@@ -46,6 +48,16 @@ export function PageHeaderBlock({ eyebrow, heading, headingLevel }: PageHeaderBl
         >
           {heading}
         </Heading>
+        {/*
+          Capped and centred on the same terms as the headline above it: the contact page draws this
+          at 818 inside a 1720 band, and a paragraph set full-bleed under a capped headline reads as
+          a different column rather than the same one.
+        */}
+        {body ? (
+          <p className="text-body-medium text-neutral-secondary mt-5 md:mx-auto md:max-w-167">
+            {body}
+          </p>
+        ) : null}
       </div>
     </Container>
   )

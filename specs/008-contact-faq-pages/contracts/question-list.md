@@ -23,25 +23,37 @@ the third. The same rule applies to the data tier (R4, R9).
 
 ```ts
 // src/lib/questions/types.ts
-interface Question { id: string; question: string; answerHtml: string }
+interface Question { id: number; question: string; answerHtml: string }
+
+// src/lib/questions/mappers.ts
+toQuestion(document): Question | null                 // one document
+toQuestions(value): Question[]                        // a relationship list, de-duplicated
 
 // src/lib/questions/queries.ts
-getSelectedQuestions(ids: (number | string)[]): Promise<Question[]>  // /about, /contact
-getAllPublishedQuestions(): Promise<Question[]>                      // /faq
-getFaqPage(): Promise<FaqPage | null>                                // /faq's own copy
+getAllPublishedQuestions(): Promise<Question[]>       // /faq only
+getFaqPage(): Promise<FaqPage | null>                 // /faq's own copy
 ```
 
-**Two loaders, and the difference between them is the whole point.**
+**Corrected at T009 — there is no `getSelectedQuestions`, and there must not be.** An earlier draft
+of this contract had one, on the assumption that `/about` loaded its chosen questions through a
+query. It does not: the `faq` block holds a relationship, and `src/lib/story/queries.ts` resolves it
+with `depth: 2` on the single global read. `/contact` reads its global the same way, so its selected
+questions arrive resolved too. A `getSelectedQuestions(ids)` would therefore be a **second round
+trip fetching rows Payload has already returned** — not a promotion of anything, and slower than
+what exists.
 
-| | `getSelectedQuestions` | `getAllPublishedQuestions` |
+So the split is not "two loaders" but **mapper versus loader**:
+
+| | Chosen questions (`/about`, `/contact`) | Every question (`/faq`) |
 | --- | --- | --- |
+| How they arrive | resolved inline by the global's `depth: 2` | `getAllPublishedQuestions()` |
 | Membership | the editor's relationship picks | every published question |
 | Order | the relationship's row order | the collection's `order`, ascending |
-| Consumers | the `faq` block, `/contact` | `/faq` |
+| Shared code | `toQuestions()` | `toQuestion()` per row |
 
 `order`'s admin description already reads "Lowest first, in this list and on the FAQ page. A page
-that picks its own questions uses its own order instead." The two loaders are that sentence made
-executable (FR-031, FR-037).
+that picks its own questions uses its own order instead." That sentence is still exactly the rule
+(FR-031, FR-037) — it is enforced by where the rows come from rather than by two sibling functions.
 
 `getFaqPage()` lives here rather than in a two-field tier of its own because the FAQ page **is** the
 questions; a separate module for a heading and an empty message would be ceremony.
