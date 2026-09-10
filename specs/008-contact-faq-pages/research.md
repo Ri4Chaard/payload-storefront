@@ -71,9 +71,20 @@ Two things genuinely differ, and only one is the card's business:
 - *Making the whole card the link.* Not drawn — the design underlines the value line only. A card
   that is entirely a link also makes the title and the value one announcement for a screen reader.
 
-**To verify during implementation**: the drawn cards read as panels separated by hairlines at
-desktop. `FeatureCard` gets its separation from `bg-background-container` on the page ground plus
-gutters. Confirm against `get_design_context` on `312:8535` before styling.
+**Resolved (T006)**: `get_design_context` on `312:8535` shows **no borders and no hairlines** — four
+`bg-white` panels (the `background/container` token) in a flex row with a 20px gap. The separation
+is gutters, exactly as `FeatureCard` already does it. The drawn measurements line up with the card's
+existing classes almost exactly: 290px tall is `xl:min-h-72.5`, 30px padding is `md:p-7.5`, the 50px
+glyph is `md:size-12.5`, and the 12px title-to-value gap is `gap-3`.
+
+Two differences the extension must carry, and only one of them is the link:
+
+1. **The value line is `primary/default` (#3B171A) and underlined**, where the promise card's
+   description is `neutral/secondary` and plain. That follows from `href` being present.
+2. **The title is not uppercased.** The promise cards shout `FREE SHIPPING`; these read `WhatsApp`,
+   `Telegram`, `Email Us`. A brand name is not shouted, and `FeatureCard` currently hardcodes
+   `uppercase` on its `h3` — so the extension needs an `uppercaseTitle` prop defaulting to `true`,
+   which leaves every existing caller byte-identical.
 
 ---
 
@@ -400,9 +411,7 @@ anything that existed before. The three new tables drop wholesale.
 
 ## Open items carried into implementation
 
-Neither blocks the plan; both are verifications rather than decisions.
-
-1. **Card chrome at desktop** (R2) — confirm the hairline separation between the four cards against
-   `get_design_context` on `312:8535` before styling.
+1. ~~**Card chrome at desktop** (R2)~~ — **resolved at T006**: no borders, gutters only, and the
+   card's existing measurements already match. Two small differences recorded in R2.
 2. **The drawn footnote's typo** — `We'll get back to you ass soon as possible.` ships corrected
-   (FR-046). Worth a note to the designer so the drawing and the site do not disagree.
+   (FR-046). Worth a note to the designer so the drawing and the site do not disagree (T105).

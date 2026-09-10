@@ -85,6 +85,14 @@ const DOCUMENT_TYPE_READERS = [
   // correct code the moment `src/lib/blog/types.ts` is written, and a developer meeting a lint
   // error on a file they just wrote correctly reaches for a disable comment.
   /^src\/lib\/blog\//,
+  // The questions tier (008/T008-T009), promoted out of `lib/story/` on its third consumer:
+  // `/about`, `/contact` and `/faq` all draw the same rows, and a `/faq` page reading its content
+  // out of a module named `story` is the coupling spec 007 had to undo on `PageHeaderBlock`.
+  /^src\/lib\/questions\//,
+  // The contact page's tier (008/T023-T026), and the home of `defaults.ts` — the shop's own
+  // fallback details, which moved here from `src/lib/contact.ts` so the tier and the module do not
+  // share a name. Fifth instance of the same tier; same reason as the four above.
+  /^src\/lib\/contact\//,
   /^src\/mocks\//,
   /^src\/collections\//,
   /^src\/fields\//,

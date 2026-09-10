@@ -33,6 +33,12 @@ const ROUTES = [
   // hydrated yet.
   '/blog',
   '/blog/how-to-choose-the-perfect-diamond',
+  // Contact and FAQ (008). `contact.spec.ts`, `contact-admin.spec.ts` and the a11y sweep all open
+  // `/contact`; `faq.spec.ts` and the a11y sweep both open `/faq`. The contact form is the reason
+  // this matters more here than elsewhere — a submit pressed before the route has hydrated fails as
+  // a missing confirmation, which reads exactly like a broken action.
+  '/contact',
+  '/faq',
 ]
 
 /**
