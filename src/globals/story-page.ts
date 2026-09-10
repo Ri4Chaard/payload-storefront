@@ -139,6 +139,15 @@ export const StoryPage: GlobalConfig = {
       name: 'body',
       type: 'blocks',
       label: 'Bands',
+      /*
+        Without these the admin's add-button reads "Add Body" — Payload falls back to the field's
+        NAME, and `body` is a developer's word for the page's contents. Found by the editorial check
+        in `tests/e2e/about-admin.spec.ts`, which is what that check is for: the field had a label
+        and a description already, and the control an editor actually presses still said the wrong
+        thing. The nested arrays got this right by accident, because they were given labels for
+        their rows.
+      */
+      labels: { singular: 'Band', plural: 'Bands' },
       blockReferences: [
         'page-header',
         'media-plate',

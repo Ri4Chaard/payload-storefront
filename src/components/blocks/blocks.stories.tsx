@@ -159,8 +159,13 @@ export const ReorderedWithoutPageHeader: Story = {
 /** One band. A short page must still look like a page rather than a fragment. */
 export const SingleBand: Story = { args: { blocks: [closerLook] } }
 
-/** Nothing composed at all — chrome and no body (FR-053). Not an error. */
-export const Empty: Story = { args: { blocks: [] } }
+/*
+ * There is deliberately no `Empty` story for the composition either, and for the same reason: it
+ * renders nothing, and the accessibility sweep waits for a visible root element.
+ *
+ * FR-053's empty page is asserted where it can be — `tests/unit/story-mappers.test.ts` covers the
+ * mapper returning an empty list, and `tests/e2e/about.spec.ts` covers what the route serves.
+ */
 
 /**
  * Copy far longer than drawn, and a seventh chip.

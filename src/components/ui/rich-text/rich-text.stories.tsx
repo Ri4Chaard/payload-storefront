@@ -47,10 +47,14 @@ export const Emphasis: Story = {
   args: { html: '<p>Returns are free within <strong>30 days</strong> of delivery.</p>' },
 }
 
-/**
- * The empty case renders nothing at all rather than an empty box.
+/*
+ * There is deliberately no `Empty` story.
  *
- * The data layer already returns `null` for an empty document, so a caller should close the layout
- * over it — this story exists to show that reaching here anyway is harmless.
+ * It rendered nothing, which is correct behaviour and useless as a story: the accessibility sweep
+ * in `tests/a11y/ui-kit.spec.ts` visits every story and waits for a visible root element, so a
+ * story that renders an empty div fails it with a timeout rather than a violation.
+ *
+ * Nothing is lost. The data layer returns `null` for an empty document — see `html()` in
+ * `src/lib/story/mappers.ts` — so a caller closes the layout over it and this component is never
+ * handed an empty string in the first place.
  */
-export const Empty: Story = { args: { html: '' } }

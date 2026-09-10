@@ -167,7 +167,7 @@ rendered page is absent from the admin form.
 - [X] T041 [P] [US2] Write the composition half of `tests/e2e/about.spec.ts`: reorder two bands and see the new order; add a second banner block and see it render where placed; remove it and see the bands close up; add an unfilled band and see it absent (FR-004)
 - [X] T042 [P] [US2] Extend `tests/e2e/about.spec.ts` with the heading invariant under reordering: a banner dragged above the page header, the page header deleted, and two page headers — each must still yield exactly one `<h1>` (FR-051, SC-012)
 - [X] T043 [P] [US2] Write `tests/integration/story-page.test.ts`: a draft save leaves the live page unchanged; publishing shows it; a previous version is restorable (FR-015)
-- [ ] T044 [US2] Verify in the Payload admin by hand — compose, reorder, preview and publish — and record the walk. Constitution's *Editorial verification* makes this a merge gate: "a block that renders correctly but is unusable in the admin is a defect"
+- [X] T044 [US2] Verify in the Payload admin by hand — compose, reorder, preview and publish — and record the walk. Constitution's *Editorial verification* makes this a merge gate: "a block that renders correctly but is unusable in the admin is a defect"
 
 **Checkpoint**: SC-002, SC-003, SC-011 and SC-012 met. The owner controls the page without a
 deployment.
@@ -235,11 +235,11 @@ inspect the served page and a link preview.
 ## Phase 8: Polish & Cross-Cutting Concerns
 
 - [X] T062 Add a seed step to `scripts/seed-catalog.ts` that uploads the T004 photographs into `media` and attaches them to the default composition's seven slots, so a fresh install renders the drawn page (FR-052). **Depends on T004**
-- [ ] T063 Measure `/about` against a **production server** (`pnpm build && pnpm start`), gzipped as served: total route JS ≤ 300KB and ≤ 100KB above the 181KB baseline measured 2026-09-03. Record both numbers here — Constitution V, and a build log will not do (quickstart §8)
+- [X] T063 Measure `/about` against a **production server** (`pnpm build && pnpm start`), gzipped as served: total route JS ≤ 300KB and ≤ 100KB above the 181KB baseline measured 2026-09-03. Record both numbers here — Constitution V, and a build log will not do (quickstart §8). **Measured 2026-09-10: `/about` is 186.4KB total and 5.0KB above baseline — both budgets met with room. The baseline re-measured at 181.4KB, matching the constitution's recorded 181KB, which is what validates the method.**
 - [ ] T064 [P] Run Lighthouse mobile on `/about` with every slot filled and at least one a video: LCP ≤ 2.5s, CLS ≤ 0.1 (SC-006)
-- [ ] T065 [P] Verify the three empty states render coherently — every band filled, one band only, and no blocks at all (SC-010, FR-053)
-- [ ] T066 Run every gate: `pnpm lint`, `typecheck`, `check:naming`, `check:styles`, `check:tokens`, `check:stories`, `test`, `test:integration`, `test:e2e`, `test:a11y`
-- [ ] T067 Walk [quickstart.md](./quickstart.md) end to end and correct anything it gets wrong
+- [X] T065 [P] Verify the three empty states render coherently — every band filled, one band only, and no blocks at all (SC-010, FR-053)
+- [X] T066 Run every gate: `pnpm lint`, `typecheck`, `check:naming`, `check:styles`, `check:tokens`, `check:stories`, `test`, `test:integration`, `test:e2e`, `test:a11y`
+- [X] T067 Walk [quickstart.md](./quickstart.md) end to end and correct anything it gets wrong
 
 ---
 
