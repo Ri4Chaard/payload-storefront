@@ -1,0 +1,88 @@
+import React from 'react'
+
+import { PageHeaderBlock } from '@/components/blocks/page-header'
+import { ChannelGrid, type ChannelGridItem } from '@/components/contact/channel-grid'
+import { getContactPage } from '@/lib/contact/queries'
+import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
+
+/**
+ * The contact page (008/T034), from Figma section `312:7498`.
+ *
+ * **This route closes three of the site's four dead links.** The header's "Contact us", the
+ * footer's "Contact Us" and the CONTACT US button spec 006 shipped at the foot of `/about` have all
+ * pointed here since spec 001, and until now every one of them was a 404 in production.
+ *
+ * **Rendered per request, deliberately — the same trade `/`, `/about` and `/blog` all made.** A
+ * page with no dynamic segment is prerendered at build if Next can, and the production image is
+ * built with no database: `src/lib/catalog/prerender.ts` records the whole chicken-and-egg. A
+ * prerendered `/contact` would bake with no channel cards on a first deploy and stay that way until
+ * somebody happened to edit something in the admin. A contact page that shows no way to make
+ * contact, and never heals, is worse than three small queries.
+ *
+ * It also avoids a staleness bug rather than solving one: `src/lib/revalidate.ts` invalidates by
+ * walking every product slug, so hooking this page into it would evict the entire catalogue because
+ * somebody fixed a typo in the form's footnote. Nothing is cached here, so a publish is visible to
+ * the next visitor with no invalidation at all (FR-044).
+ *
+ * **The three reads are cheaper than they look**, and two are shared with the chrome: the root
+ * layout already calls `getContactDetails()` and `getSocialLinks()`, and both are `cache()`-wrapped,
+ * so the layout, the footer and this page pay for them once between them.
+ */
+export const dynamic = 'force-dynamic'
+
+export default async function ContactPage() {
+  const [page, socials, details] = await Promise.all([
+    getContactPage(),
+    getSocialLinks(),
+    getContactDetails(),
+  ])
+
+  /*
+    `null` means the database was unreachable — a container build, and nothing else. The chrome
+    still renders and this returns nothing between it, which is not a 404: three places on this site
+    link here, and answering a link the site itself publishes with "not found" is worse than a thin
+    page. `/about` reaches the same conclusion for the same reason.
+  */
+  if (!page) return null
+
+  /*
+    The messengers first, in the admin's arrangement, then the email — always last, and always
+    present, because the shop always has an address even when the field is empty (FR-011).
+
+    `getSocialLinks()` has already dropped rows with no usable destination (FR-013) and has already
+    decided that a messenger not offered at checkout still belongs here (FR-012). Neither rule is
+    restated here: both live in that reader, which is where the footer gets them too.
+  */
+  const channels: ChannelGridItem[] = [
+    ...socials.map((social) => ({
+      icon: social.icon,
+      label: social.label,
+      value: social.handle,
+      href: social.href,
+    })),
+    {
+      icon: 'mail' as const,
+      label: 'Email Us',
+      value: details.email,
+      href: `mailto:${details.email}`,
+    },
+  ]
+
+  /*
+    A fragment, NOT a `<main>`. `src/app/(frontend)/layout.tsx` already wraps every route in
+    `<main id="main">` — the landmark the skip link targets — so a second one nests two `main`
+    elements, which is invalid HTML and gives a screen reader two identical landmarks to choose
+    between. Every other route in this app returns a fragment for the same reason.
+  */
+  return (
+    <>
+      <PageHeaderBlock
+        {...(page.eyebrow ? { eyebrow: page.eyebrow } : {})}
+        heading={page.heading}
+        {...(page.intro ? { body: page.intro } : {})}
+        headingLevel={1}
+      />
+      <ChannelGrid items={channels} />
+    </>
+  )
+}

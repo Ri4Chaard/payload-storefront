@@ -125,6 +125,19 @@ export interface SocialLink {
   icon: IconName
   label: string
   href: string
+  /**
+   * What the owner set as the displayed handle — `@aurum`, or a phone number written as they say
+   * it (008/T038).
+   *
+   * **Added rather than fetched separately.** The footer draws these as bare marks and ignores it;
+   * the contact page's channel cards print it under the platform name. A second reader for one
+   * field already in this row would be the duplication this module exists to prevent, and it is the
+   * field `getMessengers()` calls "separate from the destination (FR-037)" — a label, which may
+   * differ from the account it opens.
+   *
+   * Falls back to the destination where an owner has not set one, so a card is never blank.
+   */
+  handle: string
 }
 
 export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
@@ -138,6 +151,7 @@ export const getSocialLinks = cache(async (): Promise<SocialLink[]> => {
       icon: row.platform as IconName,
       label: PLATFORM_LABELS[row.platform],
       href: profileHref(row.platform, row.destination),
+      handle: typeof row.handle === 'string' && row.handle.trim() !== '' ? row.handle : row.destination,
     }))
 })
 

@@ -67,6 +67,10 @@ const ROUTES = [
   '/blog',
   '/blog?category=guides',
   '/blog/how-to-choose-the-perfect-diamond',
+  // Contact (008). The only route on this site carrying a form a visitor can submit without an
+  // account, so it is the one whose error and pending states an automated scan has never seen
+  // before. `/faq` joins it when that route lands.
+  '/contact',
 ]
 
 const WIDTHS = [

@@ -126,20 +126,22 @@ working contact page with no form and no questions.
 
 ### Tests for User Story 1
 
-- [ ] T031 [P] [US1] In `tests/e2e/contact.spec.ts`, assert the page renders one card per saved messenger plus an email card last, in the admin's arrangement, with each value a working link (SC-002)
-- [ ] T032 [P] [US1] In `tests/e2e/contact.spec.ts`, assert a messenger with **Offer this messenger** unticked still appears on `/contact` (FR-012) — the check that catches someone "fixing" this into a filter, since hiding from checkout and refusing contact are different decisions
-- [ ] T033 [P] [US1] In `tests/e2e/contact.spec.ts`, assert a messenger row saved without a usable destination is omitted (FR-013), and that an empty `email` field falls back to the shipped default rather than rendering a dead `mailto:`
+- [X] T031 [P] [US1] In `tests/e2e/contact.spec.ts`, assert the page renders one card per saved messenger plus an email card last, in the admin's arrangement, with each value a working link (SC-002)
+- [X] T032 [P] [US1] In `tests/e2e/contact.spec.ts`, assert a messenger with **Offer this messenger** unticked still appears on `/contact` (FR-012) — the check that catches someone "fixing" this into a filter, since hiding from checkout and refusing contact are different decisions
+- [X] T033 [P] [US1] In `tests/e2e/contact.spec.ts`, assert a messenger row saved without a usable destination is omitted (FR-013), and that an empty `email` field falls back to the shipped default rather than rendering a dead `mailto:`
 
 ### Implementation for User Story 1
 
-- [ ] T034 [US1] Create `src/app/(frontend)/contact/page.tsx` with `export const dynamic = 'force-dynamic'` and a docstring recording both reasons from [research.md](./research.md) R8 — a prerendered page would bake empty in a database-less container build and never heal, and the shared `invalidate()` is too blunt to attach here
-- [ ] T035 [US1] Render the page-header band on `/contact` using `PageHeaderBlock` with `headingLevel={1}` and the `body` prop added in T013, fed from `getContactPage()` — reused as a component exactly as `src/app/(frontend)/blog/page.tsx:112` already does
-- [ ] T036 [US1] Create `src/components/contact/channel-grid/channel-grid.tsx` composing `FeatureCard` with the `href` added in T012, mapping each `SocialLink` to icon, platform name and displayed handle, and appending the email card last (FR-009, FR-011)
-- [ ] T037 [US1] Style the grid's four-across / two-by-two / stacked arrangement in the token breakpoints per T006's finding, with a docstring recording why it is **not** built on `FeatureStrip`: that component is a `ScrollArea` because four 250px cards cannot fit a 390px frame, and these cards are full-width and stacked at that width ([research.md](./research.md) R2)
-- [ ] T038 [US1] Wire the grid into `/contact` reading `getSocialLinks()` and `getContactDetails()` from `src/lib/messengers/settings.ts` unmodified — FR-008 forbids a second place to write the shop's messengers, and reusing these readers is what makes that structural rather than a convention
-- [ ] T039 [P] [US1] Write `src/components/contact/contact.stories.tsx` covering the channel grid at one, three, four and six cards, so the arrangement is proved to hold for any number rather than only the drawn four (FR-014)
-- [ ] T040 [P] [US1] Add `/contact` to `ROUTES` in `tests/a11y/routes.spec.ts`
-- [ ] T041 [US1] Verify the header's **Contact us** and the footer's **Contact Us** now resolve, and that the `/about` FAQ band's **CONTACT US** button does too (SC-001)
+- [X] T034 [US1] Create `src/app/(frontend)/contact/page.tsx` with `export const dynamic = 'force-dynamic'` and a docstring recording both reasons from [research.md](./research.md) R8 — a prerendered page would bake empty in a database-less container build and never heal, and the shared `invalidate()` is too blunt to attach here
+- [X] T035 [US1] Render the page-header band on `/contact` using `PageHeaderBlock` with `headingLevel={1}` and the `body` prop added in T013, fed from `getContactPage()` — reused as a component exactly as `src/app/(frontend)/blog/page.tsx:112` already does
+- [X] T036 [US1] Create `src/components/contact/channel-grid/channel-grid.tsx` composing `FeatureCard` with the `href` added in T012, mapping each `SocialLink` to icon, platform name and displayed handle, and appending the email card last (FR-009, FR-011)
+- [X] T037 [US1] Style the grid's four-across / two-by-two / stacked arrangement in the token breakpoints per T006's finding, with a docstring recording why it is **not** built on `FeatureStrip`: that component is a `ScrollArea` because four 250px cards cannot fit a 390px frame, and these cards are full-width and stacked at that width ([research.md](./research.md) R2)
+- [X] T038 [US1] Wire the grid into `/contact` reading `getSocialLinks()` and `getContactDetails()` from `src/lib/messengers/settings.ts` — **`SocialLink` gained one field, `handle`**, because it returned only icon/label/href and the cards print the displayed handle under the platform name. The existing view model extended rather than a parallel reader added for a field already on the row; the footer ignores it. Otherwise unmodified — FR-008 forbids a second place to write the shop's messengers, and reusing these readers is what makes that structural rather than a convention
+- [X] T039 [P] [US1] Write `src/components/contact/contact.stories.tsx` covering the channel grid at one, three, four and six cards, so the arrangement is proved to hold for any number rather than only the drawn four (FR-014)
+- [X] T040 [P] [US1] Add `/contact` to `ROUTES` in `tests/a11y/routes.spec.ts`
+- [X] T041 [US1] Verify the header's **Contact us** and the footer's **Contact Us** now resolve, and that the `/about` FAQ band's **CONTACT US** button does too (SC-001)
+
+  **Three of four closed.** All three point at `/contact`, which now renders — proved by nine passing e2e tests. The footer's **FAQ → `/faq`** stays a 404 until Phase 5, which is why `/faq` is not yet in the a11y route list.
 
 **Checkpoint**: `/contact` renders and is useful. Three of the site's four dead links are closed. No form yet.
 
