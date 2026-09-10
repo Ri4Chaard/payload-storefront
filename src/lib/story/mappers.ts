@@ -8,6 +8,7 @@ import type {
   Cta,
   Figure,
   HeadingLevel,
+  StoryFallbacks,
   Step,
   StoryBlock,
   StoryMedia,
@@ -309,6 +310,38 @@ const seo = (value: StoryPageDocument['seo']): StorySeo => {
   }
 }
 
+/**
+ * What the page says about itself when the editor has set no metadata (FR-039).
+ *
+ * Read off the MAPPED blocks, so every fallback describes something a visitor can actually see. A
+ * headline the mapper dropped as empty must not become the page's `<title>`, and a photograph in a
+ * band that never rendered must not become its link preview.
+ */
+function fallbacks(blocks: StoryBlock[]): StoryFallbacks {
+  const title = blocks.find(
+    (block): block is Extract<StoryBlock, { headingLevel: HeadingLevel }> =>
+      'headingLevel' in block && block.headingLevel === 1,
+  )
+  const heading = title && 'heading' in title ? title.heading : undefined
+
+  const described = blocks.find(
+    (block): block is Extract<StoryBlock, { body?: string }> =>
+      'body' in block && typeof block.body === 'string',
+  )
+
+  const pictured = blocks.find(
+    (block): block is Extract<StoryBlock, { media?: StoryMedia }> =>
+      'media' in block && block.media !== undefined,
+  )
+
+  return {
+    ...(heading ? { title: heading } : {}),
+    ...(described?.body ? { description: described.body } : {}),
+    ...(pictured?.media ? { image: pictured.media } : {}),
+  }
+}
+
 export function toStoryPage(document: StoryPageDocument): StoryPage {
-  return { blocks: toStoryBlocks(document.body), seo: seo(document.seo) }
+  const blocks = toStoryBlocks(document.body)
+  return { blocks, seo: seo(document.seo), fallbacks: fallbacks(blocks) }
 }

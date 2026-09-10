@@ -63,7 +63,7 @@ file created up front so no later task has to invent one.
 - [X] T001 Create `src/blocks/`, `src/lib/story/`, `src/components/blocks/`, `src/components/ui/media/` and `src/components/ui/rich-text/`, each with a placeholder module docstring matching the header style of `src/lib/catalog/queries.ts`
 - [X] T002 [P] Widen `DOCUMENT_TYPE_READERS` in `eslint-rules/catalog-boundary.mjs` with `/^src\/blocks\//` and `/^src\/lib\/story\//`, extending the existing docblock to say why each is a modelling tier — per [research.md](./research.md) R4, the rule fires on correct code without this
 - [X] T003 [P] Create the empty suites every later task writes into: `tests/unit/story-mappers.test.ts`, `tests/integration/story-page.test.ts`, `tests/integration/questions-access.test.ts`, `tests/e2e/about.spec.ts`
-- [ ] T004 [P] Export the seven drawn photographs from Figma section `220:699` into `media/`, named for the band each fills — the external dependency [plan.md](./plan.md) Phase 6 names. **Blocks T062, nothing else**; every other task works with empty media slots
+- [X] T004 [P] Export the seven drawn photographs from Figma section `220:699` into `media/`, named for the band each fills — the external dependency [plan.md](./plan.md) Phase 6 names. **Blocks T062, nothing else**; every other task works with empty media slots
 
 ---
 
@@ -190,8 +190,8 @@ fetched until the band scrolls into view, and never under reduced motion.
 - [X] T049 [US3] Add the video branch to `src/components/ui/media/media.tsx`, mounting `VideoMedia` only for a video slot so a photograph slot ships no client code
 - [X] T050 [P] [US3] Extend `src/components/ui/media/media.stories.tsx` with the video branch, including the poster-only state
 - [X] T051 [P] [US3] Extend `tests/integration/story-page.test.ts`: a slot with `kind: 'video'` and no poster cannot be published, and the error names the slot (FR-022, FR-027)
-- [ ] T052 [P] [US3] Extend `tests/e2e/about.spec.ts`: the video file is not requested until its band is scrolled into view (FR-024a); under an emulated `prefers-reduced-motion: reduce` it is never requested and the poster shows (FR-024)
-- [ ] T053 [P] [US3] Verify in the admin that a media slot exposes no field into which an external address could be pasted (FR-021), and that a video already uploaded can be selected into a second slot without re-uploading (FR-021a)
+- [X] T052 [P] [US3] Extend `tests/e2e/about.spec.ts`: the video file is not requested until its band is scrolled into view (FR-024a); under an emulated `prefers-reduced-motion: reduce` it is never requested and the poster shows (FR-024)
+- [X] T053 [P] [US3] Verify in the admin that a media slot exposes no field into which an external address could be pasted (FR-021), and that a video already uploaded can be selected into a second slot without re-uploading (FR-021a)
 
 **Checkpoint**: SC-004 and SC-004a met.
 
@@ -225,8 +225,8 @@ of scope, by decision.
 **Independent Test**: Set a meta title, description and social image in the admin, publish, and
 inspect the served page and a link preview.
 
-- [ ] T060 [US5] Add `generateMetadata` to `src/app/(frontend)/about/page.tsx` — emits the editor's title, description, canonical URL and social image, falling back to the page's own headline, first paragraph and first photograph when unset (FR-039, FR-040). It calls `getStoryPage()` a second time and pays nothing, because the loader is `cache()`-wrapped
-- [ ] T061 [P] [US5] Extend `tests/e2e/about.spec.ts`: metadata is emitted from the admin values, the fallbacks apply when they are empty, and a canonical URL is present
+- [X] T060 [US5] Add `generateMetadata` to `src/app/(frontend)/about/page.tsx` — emits the editor's title, description, canonical URL and social image, falling back to the page's own headline, first paragraph and first photograph when unset (FR-039, FR-040). It calls `getStoryPage()` a second time and pays nothing, because the loader is `cache()`-wrapped
+- [X] T061 [P] [US5] Extend `tests/e2e/about.spec.ts`: metadata is emitted from the admin values, the fallbacks apply when they are empty, and a canonical URL is present
 
 **Checkpoint**: All five user stories independently functional.
 
@@ -234,7 +234,7 @@ inspect the served page and a link preview.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T062 Add a seed step to `scripts/seed-catalog.ts` that uploads the T004 photographs into `media` and attaches them to the default composition's seven slots, so a fresh install renders the drawn page (FR-052). **Depends on T004**
+- [X] T062 Add a seed step to `scripts/seed-catalog.ts` that uploads the T004 photographs into `media` and attaches them to the default composition's seven slots, so a fresh install renders the drawn page (FR-052). **Depends on T004**
 - [ ] T063 Measure `/about` against a **production server** (`pnpm build && pnpm start`), gzipped as served: total route JS ≤ 300KB and ≤ 100KB above the 181KB baseline measured 2026-09-03. Record both numbers here — Constitution V, and a build log will not do (quickstart §8)
 - [ ] T064 [P] Run Lighthouse mobile on `/about` with every slot filled and at least one a video: LCP ≤ 2.5s, CLS ≤ 0.1 (SC-006)
 - [ ] T065 [P] Verify the three empty states render coherently — every band filled, one band only, and no blocks at all (SC-010, FR-053)

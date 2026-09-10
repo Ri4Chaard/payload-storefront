@@ -1,6 +1,10 @@
+import { resolve } from 'node:path'
+
 import config from '@payload-config'
 import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
+
+import { skipRevalidation } from '@/lib/revalidate'
 
 /**
  * The story page, end to end (006/T038, T041, T042, T052, T059).
@@ -339,5 +343,173 @@ test.describe('the questions band (US4)', () => {
     await page.goto('/about')
     // A heading over nothing is worse than one band fewer.
     await expect(page.getByRole('heading', { name: 'EVERY DETAIL, ANSWERED' })).toHaveCount(0)
+  })
+})
+
+test.describe('how the page presents itself (US5)', () => {
+  test('falls back to what the page says when the editor sets no metadata', async ({ page }) => {
+    await compose([PAGE_HEADER, BANNER])
+    await page.goto('/about')
+
+    // The title comes from whichever band owns the h1, so it follows a reorder rather than naming
+    // a band that may have moved.
+    await expect(page).toHaveTitle(/OUR STORY, TOLD/)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/about$/)
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      'content',
+      'OUR STORY, TOLD',
+    )
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      /Every diamond is carefully considered/,
+    )
+  })
+
+  test('prefers what the editor set over the fallbacks', async ({ page }) => {
+    await payload.updateGlobal({
+      slug: 'story-page',
+      data: {
+        body: [PAGE_HEADER, BANNER],
+        seo: { title: 'The Aurum Story', description: 'How we make what we make.' },
+        _status: 'published',
+      } as Body,
+      overrideAccess: true,
+    })
+
+    await page.goto('/about')
+    await expect(page).toHaveTitle(/The Aurum Story/)
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      'How we make what we make.',
+    )
+
+    await payload.updateGlobal({
+      slug: 'story-page',
+      data: { seo: { title: null, description: null } } as Body,
+      overrideAccess: true,
+    })
+  })
+})
+
+test.describe('a video where a photograph was drawn (US3)', () => {
+  const FIXTURES = resolve(import.meta.dirname, '../fixtures')
+  const uploaded: number[] = []
+
+  /** Upload once, reuse across the tests below — and prove FR-021a on the way. */
+  let videoId: number
+  let posterId: number
+
+  test.beforeAll(async () => {
+    /*
+      `skipRevalidation`, for the reason `src/lib/revalidate.ts` documents: a media write fires
+      `revalidateOnChange`, which imports `next/cache`, and this process is Playwright rather than a
+      Next server — there is no static generation store for it to reach. The seed script passes the
+      same context for the same reason.
+    */
+    const video = await payload.create({
+      collection: 'media',
+      data: { alt: 'A slow pan across a polished stone' },
+      filePath: resolve(FIXTURES, 'slot.mp4'),
+      context: skipRevalidation,
+      overrideAccess: true,
+    })
+    const poster = await payload.create({
+      collection: 'media',
+      data: { alt: 'A polished stone on dark silk' },
+      filePath: resolve(FIXTURES, 'poster.png'),
+      context: skipRevalidation,
+      overrideAccess: true,
+    })
+    videoId = video.id
+    posterId = poster.id
+    uploaded.push(video.id, poster.id)
+  })
+
+  test.afterAll(async () => {
+    for (const id of uploaded) {
+      await payload
+        .delete({ collection: 'media', id, context: skipRevalidation, overrideAccess: true })
+        .catch(() => undefined)
+    }
+  })
+
+  const withVideo = () => ({
+    blockType: 'media-plate',
+    media: { kind: 'video', video: videoId, poster: posterId },
+  })
+
+  test('a video document stores no image sizes, and the page copes', async () => {
+    const doc = await payload.findByID({ collection: 'media', id: videoId, overrideAccess: true })
+
+    // Payload gates resizing on mimetype, so a video has no `sizes`. Anything reaching for
+    // `sizes.md.url` would break here — which is why exactly one place branches on this.
+    expect(doc.mimeType).toBe('video/mp4')
+    expect(doc.sizes?.md?.url ?? null).toBeNull()
+  })
+
+  test('renders the poster, and does not fetch the video until its band is in view', async ({
+    page,
+  }) => {
+    await compose([
+      PAGE_HEADER,
+      BANNER,
+      STEPS,
+      { ...BANNER, heading: 'A LONG WAY DOWN' },
+      withVideo(),
+    ])
+
+    const requested: string[] = []
+    page.on('request', (request) => {
+      if (/\.mp4/.test(request.url())) requested.push(request.url())
+    })
+
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await page.goto('/about')
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+
+    // FR-024a: the plate is the last band, well below the fold.
+    expect(requested).toHaveLength(0)
+
+    await page.locator('video, img').last().scrollIntoViewIfNeeded()
+    await expect.poll(() => requested.length, { timeout: 10_000 }).toBeGreaterThan(0)
+  })
+
+  test('never fetches the video, and never plays it, under reduced motion (FR-024)', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' })
+    const page = await context.newPage()
+
+    const requested: string[] = []
+    page.on('request', (request) => {
+      if (/\.mp4/.test(request.url())) requested.push(request.url())
+    })
+
+    await compose([PAGE_HEADER, withVideo()])
+    await page.goto('/about')
+    await page.locator('img').last().scrollIntoViewIfNeeded()
+    await page.waitForTimeout(1500)
+
+    // The poster is not a fallback here — it is the whole rendering, permanently, for this visitor.
+    await expect(page.locator('main video')).toHaveCount(0)
+    expect(requested).toHaveLength(0)
+
+    await context.close()
+  })
+
+  test('keeps the band the same size whether it holds a photograph or a video', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 })
+
+    await compose([PAGE_HEADER, { blockType: 'media-plate', media: { kind: 'photo', photo: posterId } }])
+    await page.goto('/about')
+    const asPhoto = await page.locator('main img').last().boundingBox()
+
+    await compose([PAGE_HEADER, withVideo()])
+    await page.goto('/about')
+    const asVideo = await page.locator('main img').last().boundingBox()
+
+    // A band changes what fills it, never how big it is (FR-019, SC-004).
+    expect(asVideo?.width).toBe(asPhoto?.width)
+    expect(asVideo?.height).toBe(asPhoto?.height)
   })
 })

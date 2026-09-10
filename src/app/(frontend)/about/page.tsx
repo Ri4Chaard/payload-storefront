@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import React from 'react'
 
 import { BlockRenderer } from '@/components/blocks'
@@ -28,8 +29,54 @@ import { getStoryPage } from '@/lib/story/queries'
  */
 export const dynamic = 'force-dynamic'
 
-export async function generateMetadata() {
-  return { title: 'Our Story' }
+/** The address this page is canonically at. One constant, used by the tag and the preview alike. */
+const HREF = '/about'
+
+/**
+ * Editor-controlled metadata, falling back to what the page itself says (FR-039, FR-040).
+ *
+ * Constitution V requires the owner rather than a developer to decide how this appears in a search
+ * result, and requires a canonical URL. Every SEO field is optional, so the fallbacks are what an
+ * owner who fills in nothing still gets — and they are computed from the composed page, which means
+ * they follow a reorder instead of naming a band that has moved or gone.
+ *
+ * This calls `getStoryPage()` a second time and pays nothing for it: the loader is `cache()`-wrapped,
+ * so the render and the metadata share one read.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getStoryPage()
+
+  // No database — a container build. Emit the bare title rather than nothing; the first real
+  // request replaces it.
+  if (!page) return { title: 'Our Story' }
+
+  const title = page.seo.title ?? page.fallbacks.title ?? 'Our Story'
+  const description = page.seo.description ?? page.fallbacks.description
+  const image = page.seo.image ?? page.fallbacks.image
+
+  return {
+    title,
+    ...(description ? { description } : {}),
+    alternates: { canonical: HREF },
+    openGraph: {
+      type: 'website',
+      title,
+      ...(description ? { description } : {}),
+      url: HREF,
+      ...(image
+        ? {
+            images: [
+              {
+                url: image.src,
+                width: image.width,
+                height: image.height,
+                ...(image.alt ? { alt: image.alt } : {}),
+              },
+            ],
+          }
+        : {}),
+    },
+  }
 }
 
 export default async function AboutPage() {

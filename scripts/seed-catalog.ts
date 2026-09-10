@@ -633,5 +633,156 @@ await payload.updateGlobal({
   context: skipRevalidation,
 })
 
+
+console.log('› the FAQ')
+/**
+ * The questions drawn at the bottom of the story page.
+ *
+ * They live in their own collection rather than on the page (FR-031), so this seeds them first and
+ * the story page below refers to them. That indirection is the whole point of the model: the
+ * standalone `/faq` page will read these same rows with nothing to migrate.
+ */
+const SEED_QUESTIONS: [string, string[]][] = [
+  ['Do you ship internationally?', ['Yes, we ship all over the world. Shipping costs apply and are added at checkout.']],
+  ['How long will my order take?', ['Ready-to-wear pieces are dispatched within two business days. Made-to-order pieces take three to four weeks.']],
+  ['Are your diamonds certified?', ['Every stone is independently graded and arrives with its certificate.']],
+  ['What are lab-grown diamonds?', ['They are chemically, physically and optically identical to mined diamonds, grown rather than extracted.']],
+  ['Can I return or exchange my order?', ['Returns are free within thirty days, in original condition and with the paperwork it arrived with.']],
+  ['How should I care for my jewelry?', ['Warm water, a drop of mild soap and a soft brush. We are happy to clean and check any piece for you.']],
+]
+
+const questionIds: number[] = []
+for (const [index, [question, paragraphs]] of SEED_QUESTIONS.entries()) {
+  const existing = await payload.find({
+    collection: 'questions',
+    where: { question: { equals: question } },
+    limit: 1,
+    context: skipRevalidation,
+  })
+
+  const doc =
+    existing.docs[0] ??
+    (await payload.create({
+      collection: 'questions',
+      data: {
+        question,
+        answer: richText(paragraphs),
+        order: index,
+        _status: 'published',
+      } as never,
+      context: skipRevalidation,
+    }))
+
+  questionIds.push(doc.id)
+}
+
+console.log('› the story page')
+/**
+ * The seven photographs the Our Story page is drawn with (006/T062, FR-052).
+ *
+ * **The copy ships as the blocks field's `defaultValue`; the pictures cannot.** A media slot holds a
+ * relationship to a document, and a default cannot conjure one — so an install that never runs this
+ * script renders the drawn page with its media slots collapsed, which is correct under FR-024b but
+ * is not the drawn page. This closes that gap.
+ *
+ * **It writes the whole composition rather than patching the slots**, because there is no stable
+ * handle on an individual block: block rows have generated ids, and matching by position would
+ * quietly attach the crafted-to-last plate to whatever band an editor had dragged into fourth
+ * place. Seeding is a fresh-install operation, so replacing the body is the honest thing to do —
+ * and `upsertMedia` keeps a re-run from uploading eight more copies of the same photographs.
+ */
+const storyMedia = {
+  opening: await upsertMedia('story-opening-plate.webp', 'A solitaire ring resting on red silk'),
+  closerLook: await upsertMedia('story-closer-look.webp', 'A diamond and ruby collar necklace'),
+  standard: await upsertMedia('story-standard-banner.webp', 'A brilliant-cut diamond held in tweezers'),
+  craftedToLast: await upsertMedia('story-crafted-to-last.webp', 'A pendant and ring worn together'),
+  select: await upsertMedia('story-step-1-select.webp', 'Loose diamonds sorted with tweezers'),
+  craft: await upsertMedia('story-step-2-craft.webp', 'A jeweller setting a stone by hand'),
+  create: await upsertMedia('story-step-3-create.webp', 'A finished halo ring on red silk'),
+}
+
+const photo = (id: number) => ({ kind: 'photo', photo: id })
+
+await payload.updateGlobal({
+  slug: 'story-page',
+  data: {
+    body: [
+      {
+        blockType: 'page-header',
+        eyebrow: 'OUR STORY',
+        heading: 'IMMORTALIZING MEMORIES AND EMOTIONS IN EXTRAORDINARY, TIMELESS CREATIONS',
+      },
+      { blockType: 'media-plate', media: photo(storyMedia.opening.id) },
+      {
+        blockType: 'closer-look',
+        body: 'Exceptional diamonds begin with exceptional standards. Aurum combines innovation, timeless design, and uncompromising attention to detail',
+        chips: [
+          { label: 'Lab-Grown Diamonds' },
+          { label: 'Fine Jewelry' },
+          { label: 'Exceptional Quality' },
+          { label: 'Timeless Design' },
+          { label: 'Craftsmanship' },
+          { label: 'Certified Diamonds' },
+        ],
+        figures: [
+          { word: 'CERTIFIED', caption: 'selected diamonds' },
+          { word: 'EXCEPTIONAL', caption: 'quality standards' },
+          { word: 'TIMELESS', caption: 'designed to last' },
+        ],
+        media: photo(storyMedia.closerLook.id),
+      },
+      {
+        blockType: 'banner',
+        eyebrow: 'THE AURUM STANDARD',
+        heading: 'SELECTED FOR BRILLIANCE. CRAFTED WITHOUT COMPROMISE.',
+        body: 'Every diamond is carefully considered for its beauty, character, and exceptional quality. Because for us, meeting the standard is only the beginning.',
+        cta: { label: 'EXPLORE THE COLLECTION', href: '/all-jewelry' },
+        media: photo(storyMedia.standard.id),
+        textSide: 'left',
+      },
+      {
+        blockType: 'process-steps',
+        heading: 'FROM DIAMOND TO JEWEL',
+        steps: [
+          {
+            title: 'SELECT',
+            caption: 'Exceptional diamonds, carefully chosen',
+            media: photo(storyMedia.select.id),
+          },
+          {
+            title: 'CRAFT',
+            caption: 'Precision and attention in every detail',
+            media: photo(storyMedia.craft.id),
+          },
+          {
+            title: 'CREATE',
+            caption: 'Timeless jewelry made to be yours',
+            media: photo(storyMedia.create.id),
+          },
+        ],
+      },
+      {
+        blockType: 'banner',
+        heading: 'CRAFTED TO LAST',
+        body: 'Jewelry made for the moments that become memories.',
+        media: photo(storyMedia.craftedToLast.id),
+        textSide: 'right',
+      },
+      {
+        blockType: 'faq',
+        heading: 'EVERY DETAIL, ANSWERED',
+        body: 'From choosing the perfect diamond to delivery and jewelry care, we\u2019re here to make every step of your Aurum experience simple and effortless. Have a question you can\u2019t find here? Our team is always ready to help.',
+        cta: { label: 'CONTACT US', href: '/contact' },
+        questions: questionIds,
+      },
+    ],
+    _status: 'published',
+  } as never,
+  context: skipRevalidation,
+})
+
+console.log(`      seven bands, seven photographs, ${questionIds.length} questions`)
+
 console.log('\nSeeded.')
 process.exit(0)
+

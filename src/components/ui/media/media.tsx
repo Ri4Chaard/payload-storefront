@@ -46,6 +46,13 @@ export interface MediaProps extends Omit<React.ComponentProps<'div'>, 'children'
    * this" switch on a band that always does would be a setting with one correct value.
    */
   background?: boolean
+  /**
+   * Which edge the text column is against, so the scrim fades away from it.
+   *
+   * Only consulted above `lg`. Below it the text spans the full width and a directional fade would
+   * leave half of it unprotected — see the note on the scrim below.
+   */
+  scrimFrom?: 'left' | 'right'
 }
 
 export function Media({
@@ -53,6 +60,7 @@ export function Media({
   sizes = '100vw',
   priority = false,
   background = false,
+  scrimFrom = 'left',
   className,
   ...props
 }: MediaProps) {
@@ -85,11 +93,22 @@ export function Media({
         `CategoryCard` made this call for the same reason: neither a designer nor a build step can
         measure contrast against a photograph nobody has uploaded yet, and a gradient costs nothing
         on a dark plate while rescuing a light one.
+
+        **Flat below `lg`, directional above it — and that split came from looking at the page.** A
+        single left-to-right fade is right at desktop, where the text occupies one half of the band
+        and the photograph's subject the other. On a phone the text spans the full width, so its
+        last lines sat over the transparent end of the gradient and, on the Standard banner, over a
+        brilliant-cut diamond. Legible in the design's own mobile frame, unreadable with a real
+        photograph behind it.
       */}
       {background ? (
         <div
           aria-hidden
-          className="from-neutral-primary/60 absolute inset-0 bg-linear-to-r to-transparent"
+          className={cn(
+            'bg-neutral-primary/55 absolute inset-0',
+            'lg:bg-transparent lg:from-neutral-primary/70 lg:to-transparent',
+            scrimFrom === 'right' ? 'lg:bg-linear-to-l' : 'lg:bg-linear-to-r',
+          )}
         />
       ) : null}
     </div>

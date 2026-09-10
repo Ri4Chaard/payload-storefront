@@ -38,7 +38,12 @@ export function BannerBlock({
   return (
     <section className="relative isolate min-h-95 md:min-h-90 xl:min-h-132.5">
       {media ? (
-        <Media media={media} background className="absolute inset-0 -z-10 h-full w-full" />
+        <Media
+          media={media}
+          background
+          scrimFrom={textSide}
+          className="absolute inset-0 -z-10 h-full w-full"
+        />
       ) : (
         // No plate yet. The band keeps its drawn height and its copy stays legible on the page's
         // own ground, rather than collapsing to a strip the first time an editor saves early.

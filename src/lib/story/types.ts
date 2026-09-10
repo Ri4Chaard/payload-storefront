@@ -112,7 +112,22 @@ export interface StorySeo {
   image?: CatalogImage
 }
 
+/**
+ * What the page would say about itself if the editor set no metadata (FR-039).
+ *
+ * Derived from the composition rather than guessed at by the route: the title is whichever block
+ * ended up owning the top heading, the description is the first paragraph on the page, and the
+ * image is the first picture. All three therefore follow a reorder, which a hardcoded fallback
+ * could not.
+ */
+export interface StoryFallbacks {
+  title?: string
+  description?: string
+  image?: CatalogImage
+}
+
 export interface StoryPage {
   blocks: StoryBlock[]
   seo: StorySeo
+  fallbacks: StoryFallbacks
 }
