@@ -50,6 +50,23 @@ const ROUTES = [
    * band also puts several expandable regions on one page for the first time outside a product.
    */
   '/about',
+  /**
+   * The blog (007/T036, T049, T069). Three addresses, because each puts something on the page the
+   * others do not:
+   *
+   *   `/blog`                   the mosaic and the tab strip — a set of links where exactly one is
+   *                             current, which is the pattern most often got wrong by marking the
+   *                             current one with colour alone.
+   *   `/blog?category=guides`   the same page narrowed, so the `aria-current` claim is checked in
+   *                             the state where it means something.
+   *   an article                a document whose heading outline is a property of editor-entered
+   *                             content, plus the contents rail — the one region on this site that
+   *                             follows the reader, and the only place `aria-current="true"` is set
+   *                             by script.
+   */
+  '/blog',
+  '/blog?category=guides',
+  '/blog/how-to-choose-the-perfect-diamond',
 ]
 
 const WIDTHS = [

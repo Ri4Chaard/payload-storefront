@@ -31,6 +31,21 @@
    */
   html {
     -webkit-text-size-adjust: 100%;
+
+    /*
+     * Fragment links glide rather than jump (007/T031).
+     *
+     * Added for the article's contents rail, where a jump across two thousand pixels with no
+     * transition leaves a reader with no idea whether the page moved or was replaced. It applies to
+     * every in-page anchor on the site, which is the right scope — there is no reason this one rail
+     * should scroll differently from any other.
+     *
+     * **The reduced-motion case is already handled**, by the block above rather than here: it sets
+     * `scroll-behavior: auto !important` on everything, so a visitor who has asked for less motion
+     * gets the instant jump without this declaration needing to know about them. That is the whole
+     * point of doing it globally — a component author cannot forget it, and neither can this rule.
+     */
+    scroll-behavior: smooth;
   }
 
   body {

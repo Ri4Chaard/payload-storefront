@@ -40,8 +40,12 @@ export interface ContainerProps extends Omit<React.ComponentProps<'div'>, 'ref'>
    * The gutter is a property of the band, and bands are `<section>`, `<header>`, `<footer>` as
    * often as they are `<div>`. Constrained to a union rather than `ElementType` so that the props
    * this spreads stay checkable.
+   *
+   * `article` joined the union in 007/T032. A blog post is the one thing on this site that is
+   * genuinely a self-contained composition — the element exists for exactly it — and widening a
+   * union by one word is what Constitution II means by extending rather than copying.
    */
-  as?: 'div' | 'section' | 'header' | 'footer' | 'main' | 'nav' | 'aside'
+  as?: 'div' | 'section' | 'header' | 'footer' | 'main' | 'nav' | 'aside' | 'article'
   /**
    * Widened from `HTMLDivElement`, which is the one place the tags in that union genuinely differ.
    * A band typed `ComponentProps<'section'>` spreading its own props through here would otherwise
