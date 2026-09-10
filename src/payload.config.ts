@@ -260,5 +260,16 @@ export default buildConfig({
     migrationDir: path.resolve(dirname, '../migrations'),
   }),
 
+  /**
+   * The ceiling on an upload (spec 006, FR-021b).
+   *
+   * Videos made this necessary. A photograph that is too large is a slow page; a 200MB video master
+   * is a page nobody can load at all, and there is no transcoding step here to rescue it — a video
+   * is served exactly as the owner uploaded it. 50MB is generous for the few seconds of muted
+   * background footage these slots are for, and small enough that the refusal lands in the upload
+   * dialog rather than on the live page.
+   */
+  upload: { limits: { fileSize: 50 * 1024 * 1024 } },
+
   sharp,
 })

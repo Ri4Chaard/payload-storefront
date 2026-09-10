@@ -76,9 +76,10 @@ const cta = (value: { label?: string | null; href?: string | null } | undefined)
  * a frame with nothing to put in it, and FR-024b says such a frame collapses rather than reserving
  * blank space — so it is dropped here and the renderer never has to ask.
  *
- * The video branch lands with the rest of the video work; until then a video slot has no still to
- * render and falls through to `null`, which is the correct behaviour for a slot whose file the
- * media library does not yet accept.
+ * **A video with no poster, or a poster with no video, is dropped.** The field config requires both
+ * (see `src/fields/media-slot.ts`), so reaching this state means the document predates that rule or
+ * an asset was deleted from the library underneath it. Rendering a video with nothing to hold its
+ * box would reintroduce exactly the layout shift the poster exists to prevent.
  */
 const media = (slot: SlotDocument | undefined): StoryMedia | undefined => {
   if (!slot) return undefined
@@ -88,7 +89,22 @@ const media = (slot: SlotDocument | undefined): StoryMedia | undefined => {
     return image ? { ...image, kind: 'photo' } : undefined
   }
 
-  return undefined
+  /*
+    A video's still is its poster, and the poster is what decides whether the slot exists.
+
+    `toCatalogImage` does the work for both branches because a poster IS an image — same url
+    normalisation, same "a single space means decorative" convention. What it cannot supply is the
+    file to play, and that is the only thing added here.
+
+    A video document has no `sizes` (Payload skips resizing for non-image mimetypes), so its `url`
+    is read directly rather than through the image helper. This is the one place in the codebase
+    that needs to know that.
+  */
+  const poster = toCatalogImage(slot.poster)
+  const video = resolved<{ url?: string | null }>(slot.video)
+  if (!poster || !video?.url) return undefined
+
+  return { ...poster, kind: 'video', videoSrc: video.url }
 }
 
 /** `null` where the answer is empty, matching the catalogue's rich-text convention. */

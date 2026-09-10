@@ -3,8 +3,10 @@ import React from 'react'
 
 import { cn } from '@/lib/cn'
 
+import { VideoMedia } from './video-media'
+
 /**
- * A photograph or a video, in one frame (006/T026).
+ * A photograph or a video, in one frame (006/T026, T049).
  *
  * Every band that shows imagery renders through this, so the seven slots the design draws behave
  * identically: the same crop, the same box reserved before anything loads, the same fallback.
@@ -17,6 +19,9 @@ import { cn } from '@/lib/cn'
  * **The box is the caller's, and the fill is this component's.** Bands are drawn at fixed heights
  * per breakpoint — 240 / 400 / 530 for a full-bleed plate — which is a property of the band, not of
  * the picture in it. So the caller sizes the frame with `className` and this crops to it.
+ *
+ * **This component picks the branch, rather than the caller picking a component.** A photograph slot
+ * then mounts no client JavaScript at all, and the cost of video is paid per slot that holds one.
  *
  * The props are structural rather than an imported view model, matching `CategoryCard` and
  * `ProductCard`: the kit describes what it needs and the data layer's `StoryMedia` satisfies it.
@@ -32,7 +37,7 @@ export interface MediaProps extends Omit<React.ComponentProps<'div'>, 'children'
     /** Present only for a video. The file to play, once it is allowed to load. */
     videoSrc?: string
   }
-  /** Responsive hint for the photograph branch. Defaults to full viewport width. */
+  /** Responsive hint for the still image. Defaults to full viewport width. */
   sizes?: string
   /** Set on the one image above the fold. Everything else stays lazy. */
   priority?: boolean
@@ -53,21 +58,39 @@ export function Media({
 }: MediaProps) {
   return (
     <div className={cn('relative overflow-hidden', className)} {...props}>
-      <Image
-        src={media.src}
-        alt={media.alt ?? ''}
-        fill
-        sizes={sizes}
-        priority={priority}
-        className="object-cover"
-      />
+      {media.kind === 'video' && media.videoSrc ? (
+        <VideoMedia
+          src={media.videoSrc}
+          poster={{ src: media.src, width: media.width, height: media.height, alt: media.alt }}
+          sizes={sizes}
+          priority={priority}
+          background={background}
+        />
+      ) : (
+        <Image
+          src={media.src}
+          alt={media.alt ?? ''}
+          fill
+          sizes={sizes}
+          priority={priority}
+          className="object-cover"
+        />
+      )}
+
       {/*
-        A scrim only where text sits on top. `CategoryCard` made the same call for the same reason:
-        neither a designer nor a build step can measure contrast against a photograph nobody has
-        uploaded yet, and a gradient costs nothing on a dark plate while rescuing a light one.
+        A scrim only where text sits on top, and OUTSIDE the branch above so it covers both kinds.
+        It sat inside the photograph branch first, which left a banner backed by video showing white
+        display type over an unknown frame — the exact failure the scrim exists to prevent.
+
+        `CategoryCard` made this call for the same reason: neither a designer nor a build step can
+        measure contrast against a photograph nobody has uploaded yet, and a gradient costs nothing
+        on a dark plate while rescuing a light one.
       */}
       {background ? (
-        <div aria-hidden className="from-neutral-primary/60 absolute inset-0 bg-linear-to-r to-transparent" />
+        <div
+          aria-hidden
+          className="from-neutral-primary/60 absolute inset-0 bg-linear-to-r to-transparent"
+        />
       ) : null}
     </div>
   )

@@ -41,5 +41,11 @@ export default async function AboutPage() {
     between (FR-053), and neither is a 404: three places on this site link here, and answering a
     link the site itself publishes with "not found" is worse than a thin page.
   */
-  return <main>{page ? <BlockRenderer blocks={page.blocks} /> : null}</main>
+  /*
+    A fragment, NOT a `<main>`. `src/app/(frontend)/layout.tsx` already wraps every route in
+    `<main id="main">` — the landmark the skip link targets — so a second one here nests two `main`
+    elements, which is invalid HTML and gives the page two identical landmarks for a screen reader
+    to choose between. Every other route in this app returns a fragment for the same reason.
+  */
+  return <>{page ? <BlockRenderer blocks={page.blocks} /> : null}</>
 }

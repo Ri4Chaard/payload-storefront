@@ -43,6 +43,13 @@ const ROUTES = [
   // announce it against.
   '/forgot-password',
   '/reset-password?email=a11y%40aurum-testing.dev',
+  /**
+   * The story page (006/T036). Composed of blocks an editor arranged, which is what makes it worth
+   * scanning here rather than only in Storybook: the heading outline is a property of the whole
+   * page and of the ORDER somebody put the bands in, and no component sweep can see it. The FAQ
+   * band also puts several expandable regions on one page for the first time outside a product.
+   */
+  '/about',
 ]
 
 const WIDTHS = [

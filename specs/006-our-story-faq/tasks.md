@@ -144,9 +144,9 @@ drawn string appears. (The FAQ band arrives with US4 — see the note at the top
 
 ### Tests
 
-- [ ] T036 [P] [US1] Add `/about` to `tests/a11y/routes.spec.ts` — zero axe violations at Level AA at all three widths
-- [ ] T037 [P] [US1] Add `/about` to `tests/e2e/responsive.spec.ts` — no horizontal scrolling at 1920, 768 or 390
-- [ ] T038 [US1] Write the render half of `tests/e2e/about.spec.ts`: the header, footer and home-page links all resolve to `/about`; the page emits exactly one `<h1>`; keyboard tab order reaches every link and button with a visible focus ring
+- [X] T036 [P] [US1] Add `/about` to `tests/a11y/routes.spec.ts` — zero axe violations at Level AA at all three widths
+- [X] T037 [P] [US1] Add `/about` to `tests/e2e/responsive.spec.ts` — no horizontal scrolling at 1920, 768 or 390
+- [X] T038 [US1] Write the render half of `tests/e2e/about.spec.ts`: the header, footer and home-page links all resolve to `/about`; the page emits exactly one `<h1>`; keyboard tab order reaches every link and button with a visible focus ring
 
 **Checkpoint**: SC-001 met — the three dead links are alive. The page renders six bands; the FAQ band
 is absent because no questions exist yet, which is FR-034's required behaviour, not a gap.
@@ -163,10 +163,10 @@ remove it again, publish, reload `/about`, and see every change. Then confirm no
 rendered page is absent from the admin form.
 
 - [X] T039 [US2] Add the `defaultValue` to the story global's `body` field in `src/globals/story-page.ts` — the seven drawn bands in the drawn order with their drawn copy, media slots empty (FR-052, [research.md](./research.md) R11)
-- [ ] T040 [P] [US2] Audit every field in `src/blocks/*.ts`, `src/collections/questions.ts` and `src/globals/story-page.ts` for an editor-facing label and, where the purpose is not self-evident, an admin description — Constitution IV, "fields no editor can interpret will be filled incorrectly"
-- [ ] T041 [P] [US2] Write the composition half of `tests/e2e/about.spec.ts`: reorder two bands and see the new order; add a second banner block and see it render where placed; remove it and see the bands close up; add an unfilled band and see it absent (FR-004)
-- [ ] T042 [P] [US2] Extend `tests/e2e/about.spec.ts` with the heading invariant under reordering: a banner dragged above the page header, the page header deleted, and two page headers — each must still yield exactly one `<h1>` (FR-051, SC-012)
-- [ ] T043 [P] [US2] Write `tests/integration/story-page.test.ts`: a draft save leaves the live page unchanged; publishing shows it; a previous version is restorable (FR-015)
+- [X] T040 [P] [US2] Audit every field in `src/blocks/*.ts`, `src/collections/questions.ts` and `src/globals/story-page.ts` for an editor-facing label and, where the purpose is not self-evident, an admin description — Constitution IV, "fields no editor can interpret will be filled incorrectly"
+- [X] T041 [P] [US2] Write the composition half of `tests/e2e/about.spec.ts`: reorder two bands and see the new order; add a second banner block and see it render where placed; remove it and see the bands close up; add an unfilled band and see it absent (FR-004)
+- [X] T042 [P] [US2] Extend `tests/e2e/about.spec.ts` with the heading invariant under reordering: a banner dragged above the page header, the page header deleted, and two page headers — each must still yield exactly one `<h1>` (FR-051, SC-012)
+- [X] T043 [P] [US2] Write `tests/integration/story-page.test.ts`: a draft save leaves the live page unchanged; publishing shows it; a previous version is restorable (FR-015)
 - [ ] T044 [US2] Verify in the Payload admin by hand — compose, reorder, preview and publish — and record the walk. Constitution's *Editorial verification* makes this a merge gate: "a block that renders correctly but is unusable in the admin is a defect"
 
 **Checkpoint**: SC-002, SC-003, SC-011 and SC-012 met. The owner controls the page without a
@@ -183,13 +183,13 @@ layout shift, no third-party player, and no bytes spent on a band the visitor ne
 renders it in the frame the photograph occupied at all three widths — then confirm the file is not
 fetched until the band scrolls into view, and never under reduced motion.
 
-- [ ] T045 [US3] Widen `mimeTypes` in `src/collections/media.ts` to `['image/*', 'video/*']`, recording in the docblock that Payload gates resizing on mimetype (`generateFileData.js`), so a video stores no `sizes` — [research.md](./research.md) R3. Config only, no migration
-- [ ] T046 [US3] Add `upload.limits.fileSize` to `src/payload.config.ts` with the accepted-format set stated, so an oversized or unplayable upload is refused at upload time (FR-021b)
-- [ ] T047 [US3] Extend `src/lib/story/mappers.ts` with the video branch — `src`/`width`/`height` come from the **poster**, `videoSrc` from the video, and a slot with no still is dropped ([contracts/media-slot.md](./contracts/media-slot.md) §2). This is the one place that branches on mimetype
-- [ ] T048 [US3] Create `src/components/ui/media/video-media.tsx` — `'use client'`, the only client code this feature adds. Withholds `src` until the slot intersects the viewport **and** `matchMedia('(prefers-reduced-motion: reduce)')` does not match; renders `muted`, `loop`, `playsInline`, no `controls` when `background` ([contracts/media-slot.md](./contracts/media-slot.md) §3)
-- [ ] T049 [US3] Add the video branch to `src/components/ui/media/media.tsx`, mounting `VideoMedia` only for a video slot so a photograph slot ships no client code
-- [ ] T050 [P] [US3] Extend `src/components/ui/media/media.stories.tsx` with the video branch, including the poster-only state
-- [ ] T051 [P] [US3] Extend `tests/integration/story-page.test.ts`: a slot with `kind: 'video'` and no poster cannot be published, and the error names the slot (FR-022, FR-027)
+- [X] T045 [US3] Widen `mimeTypes` in `src/collections/media.ts` to `['image/*', 'video/*']`, recording in the docblock that Payload gates resizing on mimetype (`generateFileData.js`), so a video stores no `sizes` — [research.md](./research.md) R3. Config only, no migration
+- [X] T046 [US3] Add `upload.limits.fileSize` to `src/payload.config.ts` with the accepted-format set stated, so an oversized or unplayable upload is refused at upload time (FR-021b)
+- [X] T047 [US3] Extend `src/lib/story/mappers.ts` with the video branch — `src`/`width`/`height` come from the **poster**, `videoSrc` from the video, and a slot with no still is dropped ([contracts/media-slot.md](./contracts/media-slot.md) §2). This is the one place that branches on mimetype
+- [X] T048 [US3] Create `src/components/ui/media/video-media.tsx` — `'use client'`, the only client code this feature adds. Withholds `src` until the slot intersects the viewport **and** `matchMedia('(prefers-reduced-motion: reduce)')` does not match; renders `muted`, `loop`, `playsInline`, no `controls` when `background` ([contracts/media-slot.md](./contracts/media-slot.md) §3)
+- [X] T049 [US3] Add the video branch to `src/components/ui/media/media.tsx`, mounting `VideoMedia` only for a video slot so a photograph slot ships no client code
+- [X] T050 [P] [US3] Extend `src/components/ui/media/media.stories.tsx` with the video branch, including the poster-only state
+- [X] T051 [P] [US3] Extend `tests/integration/story-page.test.ts`: a slot with `kind: 'video'` and no poster cannot be published, and the error names the slot (FR-022, FR-027)
 - [ ] T052 [P] [US3] Extend `tests/e2e/about.spec.ts`: the video file is not requested until its band is scrolled into view (FR-024a); under an emulated `prefers-reduced-motion: reduce` it is never requested and the poster shows (FR-024)
 - [ ] T053 [P] [US3] Verify in the admin that a media slot exposes no field into which an external address could be pasted (FR-021), and that a video already uploaded can be selected into a second slot without re-uploading (FR-021a)
 
@@ -210,8 +210,8 @@ not owned by it.
 - [X] T055 [US4] Create `src/components/blocks/faq-band/` — heading, intro, optional CTA, and the question list rendered with the existing `Accordion` at `headingLevel={3}` and its default `single: false` so opening one does not close another (FR-035). Answers render through the promoted `RichText`
 - [X] T056 [US4] Add the `faq` case to `src/components/blocks/block-renderer.tsx` (depends on T055)
 - [X] T057 [P] [US4] Write `src/components/blocks/faq-band/faq-band.stories.tsx` — several questions, one open, a long answer, and a single question
-- [ ] T058 [P] [US4] Write `tests/integration/questions-access.test.ts`: an unpublished question is unreachable to an anonymous read (`overrideAccess: false`); a question cannot be saved with an empty question or empty answer (FR-030); admins can write and non-admins cannot (FR-036)
-- [ ] T059 [P] [US4] Extend `tests/e2e/about.spec.ts`: reordering the selection reorders the band; the same question selected twice appears once; unpublishing one removes it with no edit to the story page; unpublishing all removes the whole band; an answer's link and list render
+- [X] T058 [P] [US4] Write `tests/integration/questions-access.test.ts`: an unpublished question is unreachable to an anonymous read (`overrideAccess: false`); a question cannot be saved with an empty question or empty answer (FR-030); admins can write and non-admins cannot (FR-036)
+- [X] T059 [P] [US4] Extend `tests/e2e/about.spec.ts`: reordering the selection reorders the band; the same question selected twice appears once; unpublishing one removes it with no edit to the story page; unpublishing all removes the whole band; an answer's link and list render
 
 **Checkpoint**: SC-009 met, and the seventh drawn band is in place. `/faq` remains a dead link — out
 of scope, by decision.

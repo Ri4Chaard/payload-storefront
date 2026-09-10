@@ -64,3 +64,31 @@ export const Decorative: Story = {
     className: 'h-50 w-full rounded-md',
   },
 }
+
+/**
+ * A video slot. Nothing plays in Storybook until the frame scrolls into view, and nothing plays at
+ * all with reduced motion on — which is the point, and is easiest to check here.
+ *
+ * The poster is what the story shows first, and it is a real `next/image` rather than the `poster`
+ * attribute, so the optimised frame is the one a visitor is most likely to actually see.
+ */
+export const Video: Story = {
+  args: {
+    media: { ...photo, kind: 'video', videoSrc: '/media/sample.mp4' },
+    className: 'h-60 w-full md:h-100 xl:h-132.5',
+  },
+}
+
+/**
+ * A video used as a backdrop: muted, looping, no controls, and under the scrim.
+ *
+ * Compare with `Background` above — the two must be indistinguishable in layout, because a band
+ * changes what fills it and never how big it is.
+ */
+export const VideoBackground: Story = {
+  args: {
+    media: { ...photo, kind: 'video', videoSrc: '/media/sample.mp4' },
+    background: true,
+    className: 'h-95 w-full md:h-90 xl:h-132.5',
+  },
+}

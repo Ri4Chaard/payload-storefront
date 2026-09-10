@@ -42,6 +42,15 @@ import { isAdmin } from '@/lib/access'
  *
  * The FAQ band ships with no questions selected, so it does not appear until somebody writes some.
  * That is FR-034 doing its job, not a gap: a heading over nothing is worse than one band fewer.
+ *
+ * **One consequence, found by testing it: the page cannot be emptied.** Payload treats an empty
+ * blocks array as no value and re-applies this default, so an editor who deletes every band and
+ * saves gets the drawn page back. That is a real limitation and it is the right side of the trade —
+ * `/about` is linked from the header, the footer and the home page, so a page that cannot go blank
+ * is worth more than the ability to blank it. An editor who wants less simply keeps fewer bands.
+ *
+ * The empty composition is still a rendering path the code handles (FR-053) — it is reached by a
+ * global that has never been saved, and it is covered in `tests/unit/story-mappers.test.ts`.
  */
 const DRAWN_PAGE = [
   {

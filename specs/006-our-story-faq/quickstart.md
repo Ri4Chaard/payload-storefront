@@ -121,7 +121,13 @@ Three states, none of which may break:
 |-------|-----|--------|
 | Every band filled | the seeded default | the drawn page |
 | One band only | delete the rest | a coherent short page |
-| No blocks at all | empty the `body` field | chrome, metadata, nothing between — not an error (FR-053) |
+| No blocks at all | not reachable from the admin — see below | chrome, metadata, nothing between — not an error (FR-053) |
+
+**The page cannot be emptied, deliberately.** Payload treats an empty blocks array as no value and
+re-applies the field's `defaultValue`, so deleting every band and saving restores the drawn seven.
+`/about` is linked from the header, the footer and the home page, and a page that cannot go blank is
+worth more than the ability to blank it. The genuinely-empty rendering path is reached by a global
+that has never been saved, and is covered in `tests/unit/story-mappers.test.ts`.
 
 Also: add a block and leave it unfilled. It must be **absent**, not an empty frame (FR-004).
 

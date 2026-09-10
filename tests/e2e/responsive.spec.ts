@@ -26,6 +26,9 @@ const WIDTHS = [1024, 768, 390, 320]
 
 /** Every route this feature added. The catalogue's own widths are spec 003's problem. */
 const ROUTES = [
+  // 006/T037. Bands drawn only at 1920, 768 and 390, so 1024 and 320 are both derivations — which
+  // is precisely the case this file exists for.
+  '/about',
   '/sign-in',
   '/create-account',
   '/forgot-password',

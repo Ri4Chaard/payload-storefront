@@ -26,7 +26,24 @@ export const Media: CollectionConfig = {
     delete: ({ req }) => Boolean(req.user),
   },
   upload: {
-    mimeTypes: ['image/*'],
+    /**
+     * Photographs and video, in one library (spec 006, FR-021).
+     *
+     * **Video was added without a second collection, and the reason is in Payload's own upload
+     * code.** `generateFileData.js` gates resizing on `fileSupportsResize || isImage(mimetype)`, so
+     * a video upload skips `imageSizes` entirely and simply stores no `sizes`. Nothing below had to
+     * change to accommodate it, and an owner has one library rather than two — which is what "paste
+     * videos from media" asked for.
+     *
+     * **The two video types are named rather than `video/*`, deliberately.** A wildcard accepts
+     * `.mov` and `.avi`, which the CMS would take happily and no browser would play: the refusal
+     * would move from the upload dialog to the live page, where the editor is not looking. MP4 and
+     * WebM are what `<video>` plays everywhere, so they are what the picker offers (FR-021b).
+     *
+     * A video document has no `sizes`, so anything reaching for `sizes.md.url` must branch on
+     * mimetype first. That branch lives in `src/lib/story/mappers.ts`, once.
+     */
+    mimeTypes: ['image/*', 'video/mp4', 'video/webm'],
     focalPoint: true,
     imageSizes: [
       { name: 'thumbnail', width: 320, withoutEnlargement: true },
