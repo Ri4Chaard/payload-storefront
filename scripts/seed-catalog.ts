@@ -61,7 +61,9 @@ const need = <T>(map: Record<string, T>, key: string, what: string): T => {
 const payload = await getPayload({ config })
 
 /** Find-or-create by a unique field, then keep the document in step with the seed. */
-async function upsert<T extends 'categories' | 'collections' | 'sizes' | 'attributes'>(
+async function upsert<
+  T extends 'categories' | 'collections' | 'sizes' | 'attributes' | 'article-categories' | 'articles',
+>(
   collection: T,
   field: string,
   value: string,
@@ -782,6 +784,194 @@ await payload.updateGlobal({
 })
 
 console.log(`      seven bands, seven photographs, ${questionIds.length} questions`)
+
+console.log('\n› the blog')
+/**
+ * The blog, as Figma section `312:7335` draws it (007/T060).
+ *
+ * **Seven articles, because seven is one complete mosaic cycle.** The drawn index shows exactly one
+ * — wide, narrow / narrow, narrow, narrow / narrow, wide — and seeding six or eight would leave a
+ * developer looking at a rhythm the design never draws and wondering which of the two is wrong.
+ *
+ * **The drawn titles repeat and these do not.** The mock shows "Lab-Grown Diamonds: Beauty
+ * Reimagined" three times, which is placeholder behaviour rather than editorial intent; seven cards
+ * carrying four titles makes the index look broken and makes every card's link indistinguishable
+ * from its neighbours in a test. The four drawn titles are kept and three more written to match
+ * their categories.
+ *
+ * **Only the first article has chapters.** It is the one the design draws a full page for
+ * (`312:8140`), and it is the one every test opens. The other six exist to fill the mosaic; giving
+ * them bodies would be inventing six articles nobody has written, and an article with one chapter
+ * correctly renders no contents rail — which is a state worth having in the seed anyway.
+ */
+const blogMedia = {
+  ringsOnLinen: await upsertMedia('blog-rings-on-linen.webp', 'Five diamond rings arranged on linen'),
+  ringsOnBlocks: await upsertMedia('blog-rings-on-blocks.webp', 'Three diamond rings on pale blue and pink blocks'),
+  underGlass: await upsertMedia('blog-diamond-under-glass.webp', 'A diamond held under a magnifying glass'),
+  haloInHand: await upsertMedia('blog-halo-ring-in-hand.webp', 'A halo diamond ring held between fingertips'),
+  gemstones: await upsertMedia('blog-coloured-gemstones.webp', 'Coloured gemstones scattered on a grey ground'),
+  braceletWorn: await upsertMedia('blog-bracelet-worn.webp', 'A diamond bracelet worn on a raised wrist'),
+  ringAtDusk: await upsertMedia('blog-ring-at-dusk.webp', 'A solitaire ring on a desk against a city skyline at dusk'),
+  tweezers: await upsertMedia('blog-diamond-in-tweezers.webp', 'An oval diamond held in tweezers over red velvet'),
+}
+
+const BLOG_CATEGORIES: [string, string][] = [
+  ['Diamonds', 'diamonds'],
+  ['Jewelry', 'jewelry'],
+  ['Guides', 'guides'],
+  ['Stories', 'stories'],
+]
+
+const blogCategories: Record<string, number> = {}
+for (const [index, [title, slug]] of BLOG_CATEGORIES.entries()) {
+  const doc = await upsert('article-categories', 'slug', slug, { title, slug, order: index })
+  blogCategories[slug] = doc.id
+}
+
+await payload.updateGlobal({
+  slug: 'blog-page',
+  data: {
+    eyebrow: 'OUR BLOG',
+    heading: 'Stories of diamonds, craftsmanship, and timeless beauty',
+    emptyTitle: 'Nothing published yet',
+    emptyDescription: 'The first stories are being written. Check back soon.',
+    _status: 'published',
+  } as never,
+  context: skipRevalidation,
+})
+
+/**
+ * The article the design draws a full page for (`312:8140`), chapter by chapter.
+ *
+ * The pull quote and the lede are separate fields rather than markup inside the body — see
+ * `src/collections/articles.ts` for where that line is drawn.
+ */
+const FEATURE_CHAPTERS = [
+  {
+    heading: 'Understanding the 4Cs',
+    tocLabel: 'Understanding the 4Cs',
+    lede: 'What defines a diamond',
+    body: richText([
+      'Every diamond is unique, but four characteristics help define its quality: Cut, Color, Clarity and Carat Weight. Understanding how they work together makes choosing the right diamond much easier.',
+      'Cut — brilliance and light performance. Color — absence or presence of color. Clarity — natural characteristics of the stone. Carat — diamond weight.',
+    ]),
+  },
+  {
+    heading: 'Cut: Where Brilliance Begins',
+    tocLabel: 'Diamond Cut & Brilliance',
+    lede: 'The most important detail isn\u2019t always size.',
+    body: richText([
+      'A beautifully cut diamond captures light, reflects it through its facets and returns it as brilliance and fire. Even a large diamond can appear less impressive when its proportions are poorly balanced.',
+    ]),
+    pullQuote: 'A great diamond doesn\u2019t simply reflect light. It comes alive in it.',
+  },
+  {
+    heading: 'Color: Finding the Right Balance',
+    tocLabel: 'Color: What to Look For',
+    body: richText([
+      'Diamonds are graded from D to Z, from colorless to increasingly noticeable warm tones.',
+      'D\u2013F Colorless. G\u2013J Near Colorless. K\u2013M Faint Color.',
+    ]),
+  },
+  {
+    heading: 'Clarity: Beauty Beyond Perfection',
+    tocLabel: 'Understanding Diamond Clarity',
+    body: richText([
+      'Clarity describes the tiny natural characteristics found within a diamond. Many are invisible to the naked eye and have little impact on its beauty.',
+      'FL / IF — Flawless. VVS — Very, Very Slightly Included. VS — Very Slightly Included. SI — Slightly Included.',
+      'Our approach: choose a diamond that looks beautifully clean to the eye rather than paying only for a higher grade on paper.',
+    ]),
+  },
+]
+
+interface SeedArticle {
+  title: string
+  slug: string
+  standfirst: string
+  category: string
+  publishedOn: string
+  hero: number
+  chapters?: typeof FEATURE_CHAPTERS
+}
+
+const SEED_ARTICLES: SeedArticle[] = [
+  {
+    title: 'How to Choose the Perfect Diamond: A Guide to Cut, Clarity, Color & Carat',
+    slug: 'how-to-choose-the-perfect-diamond',
+    standfirst:
+      'Discover what defines an exceptional diamond and learn how to choose a stone that balances beauty, brilliance, and individuality.',
+    category: 'diamonds',
+    publishedOn: '2026-08-13T00:00:00.000Z',
+    hero: blogMedia.tweezers.id,
+    chapters: FEATURE_CHAPTERS,
+  },
+  {
+    title: 'Lab-Grown Diamonds: Beauty Reimagined',
+    slug: 'lab-grown-diamonds-beauty-reimagined',
+    standfirst:
+      'Grown rather than extracted, and identical in every way that matters. What a lab-grown stone is, and what it is not.',
+    category: 'diamonds',
+    publishedOn: '2026-08-12T00:00:00.000Z',
+    hero: blogMedia.ringsOnLinen.id,
+  },
+  {
+    title: 'The Art of Choosing the Perfect Diamond',
+    slug: 'the-art-of-choosing-the-perfect-diamond',
+    standfirst: 'Proportion, symmetry and light. Why two stones of the same weight can look nothing alike.',
+    category: 'jewelry',
+    publishedOn: '2026-08-11T00:00:00.000Z',
+    hero: blogMedia.ringsOnBlocks.id,
+  },
+  {
+    title: 'A Guide to Diamond Shapes',
+    slug: 'a-guide-to-diamond-shapes',
+    standfirst: 'Round, oval, emerald, pear. What each shape does with light, and who each one suits.',
+    category: 'guides',
+    publishedOn: '2026-08-08T00:00:00.000Z',
+    hero: blogMedia.underGlass.id,
+  },
+  {
+    title: 'Reading a Diamond Certificate',
+    slug: 'reading-a-diamond-certificate',
+    standfirst: 'Every stone arrives with paperwork. Here is what each line of it actually tells you.',
+    category: 'guides',
+    publishedOn: '2026-08-06T00:00:00.000Z',
+    hero: blogMedia.gemstones.id,
+  },
+  {
+    title: 'Behind the Craftsmanship: Hand-Set Pave',
+    slug: 'behind-the-craftsmanship-hand-set-pave',
+    standfirst: 'Sixty stones, one setter, and a week of work. Inside the slowest part of making a ring.',
+    category: 'stories',
+    publishedOn: '2026-08-04T00:00:00.000Z',
+    hero: blogMedia.haloInHand.id,
+  },
+  {
+    title: 'The Pieces That Mark a Moment',
+    slug: 'the-pieces-that-mark-a-moment',
+    standfirst: 'Engagements, anniversaries, and the quieter occasions. What people actually buy, and why.',
+    category: 'stories',
+    publishedOn: '2026-08-01T00:00:00.000Z',
+    hero: blogMedia.braceletWorn.id,
+  },
+]
+
+for (const article of SEED_ARTICLES) {
+  await upsert('articles', 'slug', article.slug, {
+    title: article.title,
+    slug: article.slug,
+    standfirst: article.standfirst,
+    category: need(blogCategories, article.category, 'blog category'),
+    publishedOn: article.publishedOn,
+    hero: { kind: 'photo', photo: article.hero },
+    ...(article.chapters ? { chapters: article.chapters } : {}),
+    _status: 'published',
+  } as never)
+}
+
+console.log(
+  `      ${BLOG_CATEGORIES.length} categories, ${SEED_ARTICLES.length} articles, ${FEATURE_CHAPTERS.length} chapters on the feature`,
+)
 
 console.log('\nSeeded.')
 process.exit(0)
