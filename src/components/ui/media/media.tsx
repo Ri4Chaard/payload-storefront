@@ -51,8 +51,12 @@ export interface MediaProps extends Omit<React.ComponentProps<'div'>, 'children'
    */
   fit?: 'cover' | 'contain'
   /**
-   * The band lays text over this. Decided by the block, never by the editor — a "put text over
-   * this" switch on a band that always does would be a setting with one correct value.
+   * The band lays text over this, so the media gets a scrim behind the copy.
+   *
+   * Decided by the block, never by the editor — a "put text over this" switch on a band that always
+   * does would be a setting with one correct value. It no longer reaches `VideoMedia`: a video is
+   * imagery in every slot on this page, so there is nothing left for the distinction to change
+   * there.
    */
   background?: boolean
   /**
@@ -82,7 +86,6 @@ export function Media({
           poster={{ src: media.src, width: media.width, height: media.height, alt: media.alt }}
           sizes={sizes}
           priority={priority}
-          background={background}
           fit={fit}
         />
       ) : (

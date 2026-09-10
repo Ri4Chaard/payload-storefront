@@ -40,14 +40,27 @@ import { cn } from '@/lib/cn'
  * screen, arriving late enough to become the largest paint. With all seven slots as photographs the
  * same page measured 1.44s. The attribute buys nothing here: the video sits transparent over the
  * image until its first frame decodes, so the optimised poster is what shows in that gap anyway.
+ *
+ * **No `controls`, anywhere.** Every media slot on this page is imagery — a full-bleed plate, a
+ * detail panel, a banner backdrop, a step tile — and a video in one of them is a moving photograph
+ * rather than something a visitor operates. An earlier version showed controls on any slot that was
+ * not a backdrop, which put a scrub bar and a play button across the process-steps tiles: player
+ * chrome on a picture, and nothing in the design draws it. FR-023 permits controls on a subject
+ * video (`MAY`) rather than requiring them, and no block here is that.
+ *
+ * **The consequence, stated rather than hidden: WCAG 2.2 SC 2.2.2 (Pause, Stop, Hide) asks for an
+ * in-page mechanism to stop moving content that starts automatically, lasts over five seconds and
+ * sits alongside other content.** The `controls` attribute was that mechanism by accident. What is
+ * left is the reduced-motion path above, which is a real accommodation and is not what 2.2.2 asks
+ * for. Closing it properly means a pause affordance that is not player chrome — the whole frame as
+ * a labelled button, say, invisible until focused. That is a deliberate product decision rather
+ * than a detail to slip in here, so it is written down instead of assumed.
  */
 export interface VideoMediaProps {
   src: string
   poster: { src: string; width: number; height: number; alt?: string }
   sizes?: string
   priority?: boolean
-  /** No controls, and no sound. A backdrop is imagery, not media a visitor operates. */
-  background?: boolean
   /** Matches `Media`'s, so a slot looks the same whichever kind it holds. */
   fit?: 'cover' | 'contain'
 }
@@ -57,7 +70,6 @@ export function VideoMedia({
   poster,
   sizes = '100vw',
   priority = false,
-  background = false,
   fit = 'cover',
 }: VideoMediaProps) {
   const ref = React.useRef<HTMLDivElement>(null)
@@ -115,7 +127,6 @@ export function VideoMedia({
           muted
           loop
           playsInline
-          controls={!background}
           className={cn(
             'absolute inset-0 h-full w-full',
             fit === 'contain' ? 'object-contain' : 'object-cover',

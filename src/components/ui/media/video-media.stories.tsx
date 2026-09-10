@@ -34,21 +34,30 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * A backdrop: muted, looping, no controls.
+ * Muted, looping, inline — and with no controls, which is every slot on the page.
  *
  * **Scroll it out of view and reload to see the rule that matters.** The file is not requested
  * until the frame intersects the viewport, so a band a visitor never reaches costs them nothing
  * (FR-024a). The network panel is where this story is actually read.
  */
-export const Background: Story = { args: { background: true } }
+export const Default: Story = {}
 
 /**
- * A video that is the subject of a band rather than its backdrop, so it offers controls.
+ * The same component behind a step tile, which is where controls looked worst: a scrub bar and a
+ * play button laid across a photograph of a jeweller's bench.
  *
- * No block in the drawn composition sets this today. It exists because FR-023 permits it, and
- * because the alternative — controls appearing on a backdrop — is the failure worth guarding.
+ * There is no `controls` story to compare it against any more, because there is no longer a slot
+ * that would use one — see the component's note on FR-023 and on what removing them costs.
  */
-export const WithControls: Story = { args: { background: false } }
+export const StepTile: Story = {
+  decorators: [
+    (Story) => (
+      <div className="relative h-35 w-full overflow-hidden rounded-md md:h-40 xl:h-75">
+        <Story />
+      </div>
+    ),
+  ],
+}
 
 /**
  * With `prefers-reduced-motion: reduce`, nothing plays and the file is never fetched (FR-024).
@@ -57,7 +66,6 @@ export const WithControls: Story = { args: { background: false } }
  * Toggle the OS setting and reload; the `<video>` element never enters the DOM.
  */
 export const ReducedMotion: Story = {
-  args: { background: true },
   parameters: {
     docs: {
       description: {
@@ -73,5 +81,5 @@ export const ReducedMotion: Story = {
  * A poster that is decoration beside copy naming the same subject carries no alt text.
  */
 export const DecorativePoster: Story = {
-  args: { background: true, poster: { ...poster, alt: undefined } },
+  args: { poster: { ...poster, alt: undefined } },
 }

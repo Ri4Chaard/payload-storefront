@@ -566,6 +566,43 @@ test.describe('a video where a photograph was drawn (US3)', () => {
     await context.close()
   })
 
+  test('never shows player chrome, in a step tile or anywhere else', async ({ page }) => {
+    /*
+      A step tile is where controls looked worst — a scrub bar and a play button across a
+      photograph of a jeweller's bench — but the rule is not about that band. Every slot on this
+      page is imagery, so no video in any of them is something a visitor operates.
+    */
+    await compose([
+      PAGE_HEADER,
+      withVideo(),
+      {
+        blockType: 'process-steps',
+        heading: 'FROM DIAMOND TO JEWEL',
+        steps: [
+          { title: 'SELECT', caption: 'Carefully chosen', media: { kind: 'video', video: videoId, poster: posterId } },
+        ],
+      },
+    ])
+
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await page.goto('/about')
+
+    const videos = page.locator('main video')
+    await expect(videos.first()).toBeAttached({ timeout: 15_000 })
+
+    const withControls = await videos.evaluateAll((els) =>
+      els.filter((el) => (el as HTMLVideoElement).controls).length,
+    )
+    expect(withControls, 'no slot may render native player controls').toBe(0)
+
+    // And it is still a muted, looping, inline clip — a moving photograph.
+    const flags = await videos.first().evaluate((el) => {
+      const v = el as HTMLVideoElement
+      return { muted: v.muted, loop: v.loop, inline: v.playsInline }
+    })
+    expect(flags).toEqual({ muted: true, loop: true, inline: true })
+  })
+
   test('keeps the band the same size whether it holds a photograph or a video', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 })
 

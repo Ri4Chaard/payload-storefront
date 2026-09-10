@@ -60,9 +60,20 @@ pattern. No `<img>`.
 
 ### Video branch
 
-Rendered as `<video>` with `poster`, `muted`, `loop`, `playsInline` and **no `controls`** when
-`background` is set. `controls` is permitted only on a slot that is the subject of a band rather than
-its backdrop (FR-023) — no block in the drawn composition sets that today.
+Rendered as `<video>` with `muted`, `loop`, `playsInline` and **no `controls`, in any slot**.
+
+An earlier version showed controls on any slot that was not a backdrop, which put a scrub bar and a
+play button across the process-steps tiles — player chrome on a photograph, which nothing in the
+design draws. FR-023 *permits* controls on a subject video rather than requiring them, and no block
+here is one: every slot on this page is imagery, and a video in one is a moving photograph.
+
+**What that costs, recorded rather than assumed.** WCAG 2.2 SC 2.2.2 (Pause, Stop, Hide) asks for an
+in-page mechanism to stop content that moves automatically, runs past five seconds and sits
+alongside other content. The `controls` attribute was serving as that mechanism by accident. The
+reduced-motion path below is a real accommodation but is not what 2.2.2 asks for. Closing it means a
+pause affordance that is not player chrome — the frame itself as a labelled button, invisible until
+focused, is the usual shape — and that is a product decision rather than something to slip into the
+renderer.
 
 The client leaf exists for two rules that cannot be expressed declaratively:
 
