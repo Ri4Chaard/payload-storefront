@@ -2,6 +2,7 @@ import React from 'react'
 
 import { PageHeaderBlock } from '@/components/blocks/page-header'
 import { ChannelGrid, type ChannelGridItem } from '@/components/contact/channel-grid'
+import { MessageBand } from '@/components/contact/message-band'
 import { getContactPage } from '@/lib/contact/queries'
 import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 
@@ -83,6 +84,11 @@ export default async function ContactPage() {
         headingLevel={1}
       />
       <ChannelGrid items={channels} />
+      <MessageBand
+        heading={page.form.heading}
+        {...(page.form.body ? { body: page.form.body } : {})}
+        form={page.form}
+      />
     </>
   )
 }

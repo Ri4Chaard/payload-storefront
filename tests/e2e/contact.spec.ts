@@ -190,3 +190,149 @@ test('the page header comes from the admin', async ({ page }) => {
   // Exactly one top-level heading (FR-004).
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
 })
+
+/**
+ * The message form (008/T047 – T049).
+ *
+ * Enquiries are cleaned up after each test rather than before, so a failure leaves the row it wrote
+ * behind for inspection.
+ */
+test.describe('the message form', () => {
+  test.afterEach(async () => {
+    await payload.delete({
+      collection: 'enquiries',
+      where: { email: { contains: 'aurum-testing.dev' } },
+      overrideAccess: true,
+      context: skipRevalidation,
+    })
+  })
+
+  const fill = async (page: import('@playwright/test').Page, email: string) => {
+    await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
+    await page.getByPlaceholder('E-mail', { exact: true }).fill(email)
+    await page.getByPlaceholder('Message', { exact: true }).fill('Do you have this in a 1.5ct emerald cut?')
+  }
+
+  test('a completed form is confirmed, and the enquiry is recorded', async ({ page }) => {
+    const email = `e2e-${Date.now()}@aurum-testing.dev`
+
+    await page.goto('/contact')
+    await fill(page, email)
+    await page.getByRole('button', { name: /send message/i }).click()
+
+    // The confirmation replaces the form (FR-021), and it is the editor's wording.
+    await expect(page.getByRole('status')).toContainText(/your message has reached us/i)
+    await expect(page.getByRole('button', { name: /send message/i })).toBeHidden()
+
+    const found = await payload.count({
+      collection: 'enquiries',
+      where: { email: { equals: email } },
+      overrideAccess: true,
+    })
+    expect(found.totalDocs).toBe(1)
+  })
+
+  /**
+   * FR-019. The fields at fault are named, focus moves to the first, and — the part that is easy to
+   * ship broken — what the visitor typed is still there.
+   */
+  test('a validation failure names the fields and keeps what was typed', async ({ page }) => {
+    await page.goto('/contact')
+
+    await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
+    await page.getByPlaceholder('E-mail', { exact: true }).fill('not-an-email')
+    await page.getByPlaceholder('Message', { exact: true }).fill('Keep this text.')
+    await page.getByRole('button', { name: /send message/i }).click()
+
+    await expect(page.getByText(/check this email address/i)).toBeVisible()
+    await expect(page.getByPlaceholder('E-mail', { exact: true })).toBeFocused()
+
+    await expect(page.getByPlaceholder('Name', { exact: true })).toHaveValue('Yara')
+    await expect(page.getByPlaceholder('Message', { exact: true })).toHaveValue('Keep this text.')
+  })
+
+  test('an empty form names every required field', async ({ page }) => {
+    await page.goto('/contact')
+    await page.getByRole('button', { name: /send message/i }).click()
+
+    await expect(page.getByText(/name is required/i)).toBeVisible()
+    await expect(page.getByText(/e-mail is required/i)).toBeVisible()
+    await expect(page.getByText(/message is required/i)).toBeVisible()
+  })
+})
+
+/**
+ * **The form without JavaScript** (008/T049, FR-018).
+ *
+ * The requirement most likely to regress silently: with JavaScript on, React preserves the DOM
+ * across a failed submit, so the re-population bug this catches is invisible. `javaScriptEnabled`
+ * is a context option, so these run in their own context rather than the shared one.
+ */
+test.describe('with JavaScript disabled', () => {
+  test.use({ javaScriptEnabled: false })
+
+  test.afterEach(async () => {
+    await payload.delete({
+      collection: 'enquiries',
+      where: { email: { contains: 'aurum-testing.dev' } },
+      overrideAccess: true,
+      context: skipRevalidation,
+    })
+  })
+
+  test('a completed form is still received and confirmed', async ({ page }) => {
+    const email = `nojs-${Date.now()}@aurum-testing.dev`
+
+    await page.goto('/contact')
+    await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
+    await page.getByPlaceholder('E-mail', { exact: true }).fill(email)
+    await page.getByPlaceholder('Message', { exact: true }).fill('Sent without JavaScript.')
+
+    await Promise.all([
+      page.waitForNavigation(),
+      page
+        .getByTestId('contact-form')
+        .evaluate((form: HTMLFormElement) => form.requestSubmit()),
+    ])
+
+    await expect(page.getByText(/your message has reached us/i)).toBeVisible()
+
+    const found = await payload.count({
+      collection: 'enquiries',
+      where: { email: { equals: email } },
+      overrideAccess: true,
+    })
+    expect(found.totalDocs).toBe(1)
+  })
+
+  /*
+    The whole reason `EnquiryState.values` exists. Without JavaScript the page is rendered from
+    scratch, so the inputs are only re-populated because the action hands back what was submitted.
+
+    **Submitted via `requestSubmit()` rather than a click**, and that is not a shortcut. With no
+    JavaScript the submit is a real form POST that replaces the document, so Playwright's click
+    auto-waiting races it: the button it is stabilising is detached by the navigation mid-retry,
+    which is what the first version of this test kept timing out on. Waiting for the navigation
+    explicitly and asking the form to submit itself removes the race without weakening the
+    assertion — the browser still runs the same POST, and everything the test checks is about what
+    comes back.
+  */
+  test('a validation failure re-populates the form', async ({ page }) => {
+    await page.goto('/contact')
+
+    await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
+    await page.getByPlaceholder('E-mail', { exact: true }).fill('not-an-email')
+    await page.getByPlaceholder('Message', { exact: true }).fill('Keep this text.')
+
+    await Promise.all([
+      page.waitForNavigation(),
+      page
+        .getByTestId('contact-form')
+        .evaluate((form: HTMLFormElement) => form.requestSubmit()),
+    ])
+
+    await expect(page.getByText(/check this email address/i)).toBeVisible()
+    await expect(page.getByPlaceholder('Name', { exact: true })).toHaveValue('Yara')
+    await expect(page.getByPlaceholder('Message', { exact: true })).toHaveValue('Keep this text.')
+  })
+})
