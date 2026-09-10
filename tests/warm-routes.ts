@@ -27,6 +27,12 @@ const ROUTES = [
   '/verify-email?email=warm%40aurum-testing.dev',
   '/forgot-password',
   '/reset-password?email=warm%40aurum-testing.dev',
+  // The blog (007). `blog.spec.ts` and the a11y sweep both open the index, and `blog.spec.ts` and
+  // `blog-admin.spec.ts` both open an article — so without these, whichever worker arrived first
+  // was paying the route compilation inside an assertion about a contents rail that had not been
+  // hydrated yet.
+  '/blog',
+  '/blog/how-to-choose-the-perfect-diamond',
 ]
 
 /**

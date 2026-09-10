@@ -79,6 +79,12 @@ const DOCUMENT_TYPE_READERS = [
   // The story page's data tier (006/T020-T022). Same job as `lib/catalog/` for a different
   // subject: it is where documents become view models, so it is where documents are allowed.
   /^src\/lib\/story\//,
+  // The blog's data tier (007/T017-T025). The third instance of the same tier, and listed here for
+  // the same reason as the other two: it is where an `Article` document becomes an `ArticleCard`,
+  // so it is the last file in the feature that may name one. Without this entry the rule fires on
+  // correct code the moment `src/lib/blog/types.ts` is written, and a developer meeting a lint
+  // error on a file they just wrote correctly reaches for a disable comment.
+  /^src\/lib\/blog\//,
   /^src\/mocks\//,
   /^src\/collections\//,
   /^src\/fields\//,
