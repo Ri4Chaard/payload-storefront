@@ -18,6 +18,11 @@ import type { StoryBlock } from '@/lib/story/types'
  *
  * **The chip row wraps and has no cap.** The drawing shows six at desktop and four on mobile, which
  * is the narrower frame running out of room rather than a rule about how many exist.
+ *
+ * **The side panel is `contain`, not `cover`** — the one media slot on the page that is a subject
+ * rather than a backdrop. It shows a single piece photographed on its own ground, and cropping it
+ * to fill the frame takes the ends off the necklace. Every other slot covers, because filling the
+ * width is the whole job of a full-bleed plate.
  */
 export type CloserLookBlockProps = Extract<StoryBlock, { type: 'closer-look' }>
 
@@ -58,6 +63,7 @@ export function CloserLookBlock({ body, chips, figures, media }: CloserLookBlock
         {media ? (
           <Media
             media={media}
+            fit="contain"
             sizes="(min-width: 1280px) 45vw, 100vw"
             className="h-50 w-full rounded-md md:h-75 xl:h-123.75 xl:flex-1"
           />

@@ -18,6 +18,11 @@ import type { StoryBlock } from '@/lib/story/types'
  * than letting the accordion guess is what keeps the outline intact when an editor drags this band
  * to the top of the page and the mapper promotes its heading to `h1`.
  *
+ * **`icon={null}` — no leading glyph.** `Accordion` defaults to the dash it was drawn with on the
+ * product page, where three rows share a column with spec tables and the mark helps them read as a
+ * list. Here the questions are the only thing in their column and each one is a sentence, so a dash
+ * in front of every row is decoration that has to be skipped over rather than a cue.
+ *
  * The answers are owner-written rich text, rendered through the kit's `RichText` — the component
  * this feature promoted out of the product page rather than copying.
  */
@@ -43,6 +48,7 @@ export function FaqBandBlock({ heading, body, cta, questions, headingLevel }: Fa
 
         <div className="xl:flex-1">
           <Accordion
+            icon={null}
             headingLevel={headingLevel === 1 ? 2 : 3}
             items={questions.map((question) => ({
               id: String(question.id),

@@ -3,6 +3,8 @@
 import Image from 'next/image'
 import React from 'react'
 
+import { cn } from '@/lib/cn'
+
 /**
  * A video that behaves (006/T048) — the only client component this feature adds.
  *
@@ -46,6 +48,8 @@ export interface VideoMediaProps {
   priority?: boolean
   /** No controls, and no sound. A backdrop is imagery, not media a visitor operates. */
   background?: boolean
+  /** Matches `Media`'s, so a slot looks the same whichever kind it holds. */
+  fit?: 'cover' | 'contain'
 }
 
 export function VideoMedia({
@@ -54,6 +58,7 @@ export function VideoMedia({
   sizes = '100vw',
   priority = false,
   background = false,
+  fit = 'cover',
 }: VideoMediaProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const [play, setPlay] = React.useState(false)
@@ -100,7 +105,7 @@ export function VideoMedia({
         fill
         sizes={sizes}
         priority={priority}
-        className="object-cover"
+        className={fit === 'contain' ? 'object-contain' : 'object-cover'}
       />
 
       {play ? (
@@ -111,7 +116,10 @@ export function VideoMedia({
           loop
           playsInline
           controls={!background}
-          className="absolute inset-0 h-full w-full object-cover"
+          className={cn(
+            'absolute inset-0 h-full w-full',
+            fit === 'contain' ? 'object-contain' : 'object-cover',
+          )}
         />
       ) : null}
     </div>

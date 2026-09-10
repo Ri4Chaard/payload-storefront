@@ -35,6 +35,10 @@ import './accordion.css'
  * cannot be transitioned from `auto`, and the alternatives — measuring in an effect, or a fixed
  * max-height — either need JavaScript to be correct or clip long copy.
  *
+ * **The header's padding animates with it.** The row is 10px shorter below the header when open,
+ * and applying that in one frame made every toggle start with a jerk before the panel had moved at
+ * all. `accordion-header` in the stylesheet puts both on the same clock.
+ *
  * **The closed copy is hidden with `visibility`, not with the `hidden` attribute.** Both keep it
  * out of the accessibility tree and out of tab order, and only one of them can wait: `hidden`
  * applies the instant `open` flips, so the panel vanished on the first frame and the row expanded
@@ -117,7 +121,9 @@ export function AccordionItem({
             // (node 242:2381), so the header's own bottom padding is 20px once there is something
             // under it and 30px when there is not.
             isOpen ? 'pt-7.5 pb-5' : 'py-7.5',
-            'ease-standard transition-colors duration-[var(--duration-fast)]',
+            // `accordion-header` carries the transition — see accordion.css for why the padding has
+            // to move on the panel's clock rather than in one frame.
+            'accordion-header',
             // The label does NOT change colour on hover: Variant3 keeps it at `neutral-primary`
             // and moves only the rule.
             'disabled:text-neutral-secondary disabled:cursor-not-allowed',

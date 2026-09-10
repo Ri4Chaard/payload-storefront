@@ -32,3 +32,25 @@
     visibility: visible;
   }
 }
+
+/*
+ * The row's own padding is part of the collapse, not a step change (006).
+ *
+ * The header is `pt-30 pb-20` open and `py-30` closed — the drawn 30px row with a 20px gap above
+ * the description. That 10px was applied INSTANTLY while the panel animated over
+ * `--duration-base`, so every toggle began with the description and everything below it jerking
+ * 10px in one frame and then sliding the rest of the way. Cheapest to see on a stack of questions,
+ * where the rows below visibly hop.
+ *
+ * Transitioning `padding-block-end` on the same clock as the panel makes the two halves of the row
+ * move together. Colour stays on `--duration-fast`, because hover feedback should be immediate and
+ * the row's height should not be.
+ *
+ * Unlayered like the rule above, so it beats Tailwind's `transition-*` utilities without
+ * `!important` — which is also why the button no longer carries one.
+ */
+.accordion-header {
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    padding-block-end var(--duration-base) var(--ease-standard);
+}

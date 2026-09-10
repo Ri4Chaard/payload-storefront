@@ -42,6 +42,15 @@ export interface MediaProps extends Omit<React.ComponentProps<'div'>, 'children'
   /** Set on the one image above the fold. Everything else stays lazy. */
   priority?: boolean
   /**
+   * How the media fills its frame.
+   *
+   * `cover` is right for a plate whose job is to fill the width — cropping a full-bleed photograph
+   * is what makes it full-bleed. `contain` is right when the subject IS the picture and must not be
+   * cut: the detail band's side panel shows one necklace on its own ground, and covering it crops
+   * the ends off.
+   */
+  fit?: 'cover' | 'contain'
+  /**
    * The band lays text over this. Decided by the block, never by the editor — a "put text over
    * this" switch on a band that always does would be a setting with one correct value.
    */
@@ -61,6 +70,7 @@ export function Media({
   priority = false,
   background = false,
   scrimFrom = 'left',
+  fit = 'cover',
   className,
   ...props
 }: MediaProps) {
@@ -73,6 +83,7 @@ export function Media({
           sizes={sizes}
           priority={priority}
           background={background}
+          fit={fit}
         />
       ) : (
         <Image
@@ -81,7 +92,7 @@ export function Media({
           fill
           sizes={sizes}
           priority={priority}
-          className="object-cover"
+          className={fit === 'contain' ? 'object-contain' : 'object-cover'}
         />
       )}
 

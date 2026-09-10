@@ -134,6 +134,39 @@ test.describe('the page a visitor reads (US1)', () => {
     ])
   })
 
+  test('shows the detail band’s picture whole rather than cropping it', async ({ page }) => {
+    // A real upload, because the assertion is about how an image is fitted — an empty slot is
+    // dropped by the mapper and there would be nothing to measure.
+    const { docs } = await payload.find({
+      collection: 'media',
+      where: { mimeType: { contains: 'image' } },
+      limit: 1,
+      overrideAccess: true,
+    })
+    const photo = docs[0]?.id
+    expect(photo, 'the seed must have run — this test needs one image in the library').toBeTruthy()
+
+    await compose([
+      PAGE_HEADER,
+      {
+        blockType: 'closer-look',
+        body: 'Exceptional diamonds begin with exceptional standards.',
+        chips: [{ label: 'Lab-Grown Diamonds' }],
+        figures: [{ word: 'CERTIFIED', caption: 'selected diamonds' }],
+        media: { kind: 'photo', photo },
+      },
+    ])
+    await page.goto('/about')
+
+    // The one slot on the page whose media is a subject rather than a backdrop: covering it takes
+    // the ends off the necklace.
+    const fit = await page
+      .locator('main img')
+      .last()
+      .evaluate((el) => getComputedStyle(el).objectFit)
+    expect(fit).toBe('contain')
+  })
+
   test('numbers the steps by position rather than by a stored field', async ({ page }) => {
     await compose([PAGE_HEADER, STEPS])
     await page.goto('/about')
@@ -305,6 +338,42 @@ test.describe('the questions band (US4)', () => {
     await buttons.nth(1).click()
     await expect(buttons.nth(0)).toHaveAttribute('aria-expanded', 'true')
     await expect(buttons.nth(1)).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  test('carries no leading glyph, and its rows do not jump when they collapse', async ({ page }) => {
+    const id = await question('Does this row jump?', 'It must not.')
+    await compose([PAGE_HEADER, band([id])])
+    await page.goto('/about')
+
+    const header = page.locator('main h3 button').first()
+
+    /*
+      One icon, the trailing plus/minus. `Accordion` defaults to a leading dash it was drawn with on
+      the product page; the questions band drops it with `icon={null}`.
+    */
+    await expect(header.locator('svg')).toHaveCount(1)
+
+    /*
+      The row is 10px shorter below its header when open, and that 10px used to be applied in a
+      single frame while the panel animated — so every toggle began with the copy below jerking and
+      then sliding the rest of the way. Asserting the transition rather than sampling mid-animation:
+      the property list is the thing that regressed, and it is stable to check.
+    */
+    const transition = await header.evaluate((el) => {
+      const style = getComputedStyle(el)
+      const index = style.transitionProperty.split(', ').indexOf('padding-block-end')
+      return { index, duration: style.transitionDuration.split(', ')[index] ?? null }
+    })
+
+    /*
+      Asserted on the declaration rather than by sampling mid-animation. A first version read the
+      padding 40ms into the collapse and expected a value between the two ends — which is the more
+      direct evidence and is a race: under three parallel workers the sample can land after the
+      transition has already finished, and the test fails without anything being wrong. The
+      property being present with a non-zero duration is the thing that actually regressed.
+    */
+    expect(transition.index).toBeGreaterThanOrEqual(0)
+    expect(transition.duration).not.toBe('0s')
   })
 
   test('shows a question picked twice only once', async ({ page }) => {

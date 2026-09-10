@@ -89,7 +89,7 @@ export function BannerBlock({
           ) : null}
 
           {cta ? (
-            <Button href={cta.href} className="mt-7.5">
+            <Button variant="inverse" href={cta.href} className="mt-7.5">
               {cta.label}
             </Button>
           ) : null}
