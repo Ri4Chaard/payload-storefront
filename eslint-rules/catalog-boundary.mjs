@@ -76,10 +76,16 @@ const MOCK_READERS = [
  */
 const DOCUMENT_TYPE_READERS = [
   /^src\/lib\/catalog\//,
+  // The story page's data tier (006/T020-T022). Same job as `lib/catalog/` for a different
+  // subject: it is where documents become view models, so it is where documents are allowed.
+  /^src\/lib\/story\//,
   /^src\/mocks\//,
   /^src\/collections\//,
   /^src\/fields\//,
   /^src\/globals\//,
+  // Block definitions (006/T008-T014) are modelling code, exactly like `collections/` and
+  // `globals/` above — they describe documents rather than rendering them.
+  /^src\/blocks\//,
   /^src\/hooks\//,
   /^src\/app\/\(payload\)\//,
   'src/payload.config.ts',

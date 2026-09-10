@@ -51,9 +51,9 @@ otherwise.
 **Purpose**: The directory skeleton, the lint allowance the whole feature depends on, and every test
 file created up front so no later task has to invent one.
 
-- [ ] T001 Create `src/blocks/`, `src/lib/story/`, `src/components/blocks/`, `src/components/ui/media/` and `src/components/ui/rich-text/`, each with a placeholder module docstring matching the header style of `src/lib/catalog/queries.ts`
-- [ ] T002 [P] Widen `DOCUMENT_TYPE_READERS` in `eslint-rules/catalog-boundary.mjs` with `/^src\/blocks\//` and `/^src\/lib\/story\//`, extending the existing docblock to say why each is a modelling tier — per [research.md](./research.md) R4, the rule fires on correct code without this
-- [ ] T003 [P] Create the empty suites every later task writes into: `tests/unit/story-mappers.test.ts`, `tests/integration/story-page.test.ts`, `tests/integration/questions-access.test.ts`, `tests/e2e/about.spec.ts`
+- [X] T001 Create `src/blocks/`, `src/lib/story/`, `src/components/blocks/`, `src/components/ui/media/` and `src/components/ui/rich-text/`, each with a placeholder module docstring matching the header style of `src/lib/catalog/queries.ts`
+- [X] T002 [P] Widen `DOCUMENT_TYPE_READERS` in `eslint-rules/catalog-boundary.mjs` with `/^src\/blocks\//` and `/^src\/lib\/story\//`, extending the existing docblock to say why each is a modelling tier — per [research.md](./research.md) R4, the rule fires on correct code without this
+- [X] T003 [P] Create the empty suites every later task writes into: `tests/unit/story-mappers.test.ts`, `tests/integration/story-page.test.ts`, `tests/integration/questions-access.test.ts`, `tests/e2e/about.spec.ts`
 - [ ] T004 [P] Export the seven drawn photographs from Figma section `220:699` into `media/`, named for the band each fills — the external dependency [plan.md](./plan.md) Phase 6 names. **Blocks T062, nothing else**; every other task works with empty media slots
 
 ---
@@ -66,37 +66,37 @@ file created up front so no later task has to invent one.
 
 ### Reusable field configs
 
-- [ ] T005 Create `src/fields/cta.ts` exporting `ctaField()` — optional `label` and `href`, both empty meaning no button, per [data-model.md](./data-model.md) §1.2
-- [ ] T006 Create `src/fields/media-slot.ts` exporting `mediaSlot()` — `kind` radio (`photo`/`video`), conditional `photo`, `video` and `poster` uploads to `media`, and `background`, per [data-model.md](./data-model.md) §1.1. `poster` is `required` when `kind === 'video'` (FR-022); no field anywhere accepts a pasted address (FR-021)
+- [X] T005 Create `src/fields/cta.ts` exporting `ctaField()` — optional `label` and `href`, both empty meaning no button, per [data-model.md](./data-model.md) §1.2
+- [X] T006 Create `src/fields/media-slot.ts` exporting `mediaSlot()` — `kind` radio (`photo`/`video`), conditional `photo`, `video` and `poster` uploads to `media`, and `background`, per [data-model.md](./data-model.md) §1.1. `poster` is `required` when `kind === 'video'` (FR-022); no field anywhere accepts a pasted address (FR-021)
 
 ### The FAQ collection
 
-- [ ] T007 Create `src/collections/questions.ts` — `question` (text, required), `answer` (richText, required), `order` (number, sidebar); `labels: { singular: 'Question', plural: 'FAQ' }`; `admin.group: 'Content'`; `versions: { drafts: true }`; access `read: adminOrPublishedStatus`, `create/update/delete: isAdmin`. **No revalidation hook** — see [research.md](./research.md) R6 for why attaching one would evict every product page
+- [X] T007 Create `src/collections/questions.ts` — `question` (text, required), `answer` (richText, required), `order` (number, sidebar); `labels: { singular: 'Question', plural: 'FAQ' }`; `admin.group: 'Content'`; `versions: { drafts: true }`; access `read: adminOrPublishedStatus`, `create/update/delete: isAdmin`. **No revalidation hook** — see [research.md](./research.md) R6 for why attaching one would evict every product page
 
 ### The six block definitions
 
-- [ ] T008 [P] Create `src/blocks/page-header.ts` — `eyebrow`, `heading`
-- [ ] T009 [P] Create `src/blocks/media-plate.ts` — one `mediaSlot()`
-- [ ] T010 [P] Create `src/blocks/closer-look.ts` — `body`, `chips` array, `figures` array (`word` + `caption`), `mediaSlot()`
-- [ ] T011 [P] Create `src/blocks/banner.ts` — `eyebrow`, `heading`, `body`, `ctaField()`, `mediaSlot()`, `textSide` select. **One block, two uses** (FR-048); record in its docblock that `textSide` applies above `lg` only, because both narrow frames put text left
-- [ ] T012 [P] Create `src/blocks/process-steps.ts` — `heading` and a reorderable `steps` array of `mediaSlot()` + `title` + `caption`. **No ordinal field** — the `01`/`02`/`03` is the row's position (FR-012)
-- [ ] T013 [P] Create `src/blocks/faq.ts` — `heading`, `body`, `ctaField()`, and `questions` as `relationship` → `questions` with `hasMany: true`, whose array order is display order (FR-032)
-- [ ] T014 Create `src/blocks/index.ts` exporting all six as one `blocks: Block[]` array (depends on T008–T013)
+- [X] T008 [P] Create `src/blocks/page-header.ts` — `eyebrow`, `heading`
+- [X] T009 [P] Create `src/blocks/media-plate.ts` — one `mediaSlot()`
+- [X] T010 [P] Create `src/blocks/closer-look.ts` — `body`, `chips` array, `figures` array (`word` + `caption`), `mediaSlot()`
+- [X] T011 [P] Create `src/blocks/banner.ts` — `eyebrow`, `heading`, `body`, `ctaField()`, `mediaSlot()`, `textSide` select. **One block, two uses** (FR-048); record in its docblock that `textSide` applies above `lg` only, because both narrow frames put text left
+- [X] T012 [P] Create `src/blocks/process-steps.ts` — `heading` and a reorderable `steps` array of `mediaSlot()` + `title` + `caption`. **No ordinal field** — the `01`/`02`/`03` is the row's position (FR-012)
+- [X] T013 [P] Create `src/blocks/faq.ts` — `heading`, `body`, `ctaField()`, and `questions` as `relationship` → `questions` with `hasMany: true`, whose array order is display order (FR-032)
+- [X] T014 Create `src/blocks/index.ts` exporting all six as one `blocks: Block[]` array (depends on T008–T013)
 
 ### The global, the config, the migration
 
-- [ ] T015 Create `src/globals/story-page.ts` — `body` as `{ type: 'blocks', blockReferences: [...six slugs], blocks: [] }` plus `seoField()`; `admin.group: 'Content'`; `versions: { drafts: true }`; access `read: () => true`, `update: isAdmin`. **`blocks: []` is required alongside `blockReferences`** — see [contracts/blocks.md](./contracts/blocks.md) §1
-- [ ] T016 Register in `src/payload.config.ts`: `blocks` from `src/blocks/index.ts`, `Questions` in `collections`, `StoryPage` in `globals`
-- [ ] T017 Generate the migration with `pnpm payload migrate:create`, covering the `questions` table, the `story_page` global table and the block tables, into `migrations/`
-- [ ] T018 Verify `pnpm payload migrate:down` against a database with seeded content, and confirm the blast radius is `questions`, `story_page` and the block tables only — the catalogue, cart and account pages must still work (quickstart §11)
-- [ ] T019 Run `pnpm generate:types` and commit `src/payload-types.ts` in the same commit as T017 (Constitution — Technology Stack)
+- [X] T015 Create `src/globals/story-page.ts` — `body` as `{ type: 'blocks', blockReferences: [...six slugs], blocks: [] }` plus `seoField()`; `admin.group: 'Content'`; `versions: { drafts: true }`; access `read: () => true`, `update: isAdmin`. **`blocks: []` is required alongside `blockReferences`** — see [contracts/blocks.md](./contracts/blocks.md) §1
+- [X] T016 Register in `src/payload.config.ts`: `blocks` from `src/blocks/index.ts`, `Questions` in `collections`, `StoryPage` in `globals`
+- [X] T017 Generate the migration with `pnpm payload migrate:create`, covering the `questions` table, the `story_page` global table and the block tables, into `migrations/`
+- [X] T018 Verify `pnpm payload migrate:down` against a database with seeded content, and confirm the blast radius is `questions`, `story_page` and the block tables only — the catalogue, cart and account pages must still work (quickstart §11)
+- [X] T019 Run `pnpm generate:types` and commit `src/payload-types.ts` in the same commit as T017 (Constitution — Technology Stack)
 
 ### The data tier
 
-- [ ] T020 Create `src/lib/story/types.ts` — `StoryMedia`, `Cta`, the `StoryBlock` discriminated union, `StoryQuestion`, `StoryPage`, per [data-model.md](./data-model.md) §6. Derive from the generated types rather than restating them, as `src/lib/catalog/types.ts` does
-- [ ] T021 Create `src/lib/story/mappers.ts` — documents → view models for the photograph branch, dropping empty blocks (FR-004) and unknown block types ([contracts/blocks.md](./contracts/blocks.md) §4), and assigning `headingLevel` per [research.md](./research.md) R7. Reuse the `convertLexicalToHTML` shape from `src/lib/catalog/mappers.ts`
-- [ ] T022 Create `src/lib/story/queries.ts` exporting `getStoryPage()` — `cache()`-wrapped, `overrideAccess: false`, returning `null` on `isDatabaseUnreachable()` with a loud warning, per [contracts/story-loader.md](./contracts/story-loader.md) §§1–5
-- [ ] T023 Write mapper unit tests in `tests/unit/story-mappers.test.ts`: exactly one top heading level with a page-header, with none, and with two; every other band `h2` and nested headings `h3`; empty blocks dropped; unknown block types dropped
+- [X] T020 Create `src/lib/story/types.ts` — `StoryMedia`, `Cta`, the `StoryBlock` discriminated union, `StoryQuestion`, `StoryPage`, per [data-model.md](./data-model.md) §6. Derive from the generated types rather than restating them, as `src/lib/catalog/types.ts` does
+- [X] T021 Create `src/lib/story/mappers.ts` — documents → view models for the photograph branch, dropping empty blocks (FR-004) and unknown block types ([contracts/blocks.md](./contracts/blocks.md) §4), and assigning `headingLevel` per [research.md](./research.md) R7. Reuse the `convertLexicalToHTML` shape from `src/lib/catalog/mappers.ts`
+- [X] T022 Create `src/lib/story/queries.ts` exporting `getStoryPage()` — `cache()`-wrapped, `overrideAccess: false`, returning `null` on `isDatabaseUnreachable()` with a loud warning, per [contracts/story-loader.md](./contracts/story-loader.md) §§1–5
+- [X] T023 Write mapper unit tests in `tests/unit/story-mappers.test.ts`: exactly one top heading level with a page-header, with none, and with two; every other band `h2` and nested headings `h3`; empty blocks dropped; unknown block types dropped
 
 **Checkpoint**: An admin can compose and save the page in the panel; `pnpm lint`, `pnpm typecheck`
 and `pnpm test` are green. Nothing renders on the storefront yet.

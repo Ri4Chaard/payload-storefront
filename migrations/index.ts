@@ -11,6 +11,7 @@ import * as migration_20260909_103616_contact_settings from './20260909_103616_c
 import * as migration_20260909_112455_expire_carts_task from './20260909_112455_expire_carts_task';
 import * as migration_20260909_114622_contact_details from './20260909_114622_contact_details';
 import * as migration_20260909_115401_contact_location from './20260909_115401_contact_location';
+import * as migration_20260910_093824_story_page_and_faq from './20260910_093824_story_page_and_faq';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20260909_115401_contact_location.up,
     down: migration_20260909_115401_contact_location.down,
-    name: '20260909_115401_contact_location'
+    name: '20260909_115401_contact_location',
+  },
+  {
+    up: migration_20260910_093824_story_page_and_faq.up,
+    down: migration_20260910_093824_story_page_and_faq.down,
+    name: '20260910_093824_story_page_and_faq'
   },
 ];

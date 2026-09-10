@@ -66,7 +66,14 @@ export interface Config {
     admins: AdminAuthOperations;
     customers: CustomerAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'page-header': PageHeader;
+    'media-plate': MediaPlate;
+    'closer-look': CloserLook;
+    banner: Banner;
+    'process-steps': ProcessSteps;
+    faq: Faq;
+  };
   collections: {
     admins: Admin;
     customers: Customer;
@@ -76,6 +83,7 @@ export interface Config {
     sizes: Size;
     attributes: Attribute;
     'verification-codes': VerificationCode;
+    questions: Question;
     addresses: Address;
     variants: Variant;
     variantTypes: VariantType;
@@ -108,6 +116,7 @@ export interface Config {
     sizes: SizesSelect<false> | SizesSelect<true>;
     attributes: AttributesSelect<false> | AttributesSelect<true>;
     'verification-codes': VerificationCodesSelect<false> | VerificationCodesSelect<true>;
+    questions: QuestionsSelect<false> | QuestionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -128,12 +137,14 @@ export interface Config {
     shop: Shop;
     'account-settings': AccountSetting;
     'contact-settings': ContactSetting;
+    'story-page': StoryPage;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     shop: ShopSelect<false> | ShopSelect<true>;
     'account-settings': AccountSettingsSelect<false> | AccountSettingsSelect<true>;
     'contact-settings': ContactSettingsSelect<false> | ContactSettingsSelect<true>;
+    'story-page': StoryPageSelect<false> | StoryPageSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -202,6 +213,334 @@ export interface CustomerAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-header".
+ */
+export interface PageHeader {
+  /**
+   * The small line above the headline, e.g. “OUR STORY”.
+   */
+  eyebrow?: string | null;
+  /**
+   * The page’s main statement. Drawn over two lines.
+   */
+  heading: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'page-header';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-plate".
+ */
+export interface MediaPlate {
+  /**
+   * Fills the full width of the page.
+   */
+  media: {
+    /**
+     * Decides what this slot renders, even if both are filled in below.
+     */
+    kind: 'photo' | 'video';
+    photo?: (number | null) | Media;
+    /**
+     * Upload the video to the media library first, then choose it here.
+     */
+    video?: (number | null) | Media;
+    /**
+     * Shown before the video plays, and instead of it for visitors who ask for reduced motion. Required for a video.
+     */
+    poster?: (number | null) | Media;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'media-plate';
+}
+/**
+ * Images and files. Alternative text is required — an image without it is a defect.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Describes the image for screen readers and when the image fails to load. For a purely decorative image, enter a single space.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sm?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    md?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    lg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xl?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    full?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "closer-look".
+ */
+export interface CloserLook {
+  /**
+   * The band’s main copy.
+   */
+  body?: string | null;
+  /**
+   * Small pills beneath the paragraph. Any number, or none — the row wraps.
+   */
+  chips?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * A word over a caption, e.g. “CERTIFIED” / “selected diamonds”.
+   */
+  figures?:
+    | {
+        word: string;
+        caption: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sits beside the copy at desktop, below it on a phone.
+   */
+  media: {
+    /**
+     * Decides what this slot renders, even if both are filled in below.
+     */
+    kind: 'photo' | 'video';
+    photo?: (number | null) | Media;
+    /**
+     * Upload the video to the media library first, then choose it here.
+     */
+    video?: (number | null) | Media;
+    /**
+     * Shown before the video plays, and instead of it for visitors who ask for reduced motion. Required for a video.
+     */
+    poster?: (number | null) | Media;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'closer-look';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banner".
+ */
+export interface Banner {
+  /**
+   * The small line above the headline. Leave empty to omit it.
+   */
+  eyebrow?: string | null;
+  heading: string;
+  body?: string | null;
+  /**
+   * Leave both fields empty for a band with no button.
+   */
+  cta?: {
+    /**
+     * e.g. “EXPLORE THE COLLECTION”. Empty means no button.
+     */
+    label?: string | null;
+    /**
+     * Where the button goes, e.g. /all-jewelry.
+     */
+    href?: string | null;
+  };
+  /**
+   * The plate behind the text. Keep the subject clear of the text column.
+   */
+  media: {
+    /**
+     * Decides what this slot renders, even if both are filled in below.
+     */
+    kind: 'photo' | 'video';
+    photo?: (number | null) | Media;
+    /**
+     * Upload the video to the media library first, then choose it here.
+     */
+    video?: (number | null) | Media;
+    /**
+     * Shown before the video plays, and instead of it for visitors who ask for reduced motion. Required for a video.
+     */
+    poster?: (number | null) | Media;
+  };
+  /**
+   * Applies on wide screens only. Narrower screens always put the text on the left.
+   */
+  textSide: 'left' | 'right';
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'banner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "process-steps".
+ */
+export interface ProcessSteps {
+  /**
+   * Centred above the steps, e.g. “FROM DIAMOND TO JEWEL”.
+   */
+  heading: string;
+  /**
+   * Numbered in the order they appear here — drag to renumber them.
+   */
+  steps?:
+    | {
+        /**
+         * The tile above the step’s title.
+         */
+        media: {
+          /**
+           * Decides what this slot renders, even if both are filled in below.
+           */
+          kind: 'photo' | 'video';
+          photo?: (number | null) | Media;
+          /**
+           * Upload the video to the media library first, then choose it here.
+           */
+          video?: (number | null) | Media;
+          /**
+           * Shown before the video plays, and instead of it for visitors who ask for reduced motion. Required for a video.
+           */
+          poster?: (number | null) | Media;
+        };
+        title: string;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'process-steps';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq".
+ */
+export interface Faq {
+  /**
+   * e.g. “EVERY DETAIL, ANSWERED”.
+   */
+  heading: string;
+  body?: string | null;
+  /**
+   * Leave both fields empty for a band with no button.
+   */
+  cta?: {
+    /**
+     * e.g. “EXPLORE THE COLLECTION”. Empty means no button.
+     */
+    label?: string | null;
+    /**
+     * Where the button goes, e.g. /all-jewelry.
+     */
+    href?: string | null;
+  };
+  /**
+   * Pick the questions this band shows, in the order you want them. Write them in the FAQ tab first.
+   */
+  questions?: (number | Question)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
+}
+/**
+ * Questions and answers. Shown wherever a page asks for them.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions".
+ */
+export interface Question {
+  id: number;
+  /**
+   * As a visitor would ask it, e.g. “Do you ship internationally?”.
+   */
+  question: string;
+  /**
+   * Links and lists are supported.
+   */
+  answer: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Lowest first, in this list and on the FAQ page. A page that picks its own questions uses its own order instead.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -571,80 +910,6 @@ export interface Address {
   isDefault?: boolean | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * Images and files. Alternative text is required — an image without it is a defect.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Describes the image for screen readers and when the image fails to load. For a purely decorative image, enter a single space.
-   */
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    sm?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    md?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    lg?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xl?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    full?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1169,6 +1434,10 @@ export interface PayloadLockedDocument {
         value: number | VerificationCode;
       } | null)
     | ({
+        relationTo: 'questions';
+        value: number | Question;
+      } | null)
+    | ({
         relationTo: 'addresses';
         value: number | Address;
       } | null)
@@ -1458,6 +1727,18 @@ export interface VerificationCodesSelect<T extends boolean = true> {
   supersededAt?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions_select".
+ */
+export interface QuestionsSelect<T extends boolean = true> {
+  question?: T;
+  answer?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2298,6 +2579,39 @@ export interface ContactSetting {
   createdAt?: string | null;
 }
 /**
+ * The /about page. Add, remove and reorder the bands below.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "story-page".
+ */
+export interface StoryPage {
+  id: number;
+  /**
+   * The page, top to bottom. Drag to reorder. A band left unfilled does not appear on the page.
+   */
+  body?: (PageHeader | MediaPlate | CloserLook | Banner | ProcessSteps | Faq)[] | null;
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -2361,6 +2675,24 @@ export interface ContactSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   messageTemplate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "story-page_select".
+ */
+export interface StoryPageSelect<T extends boolean = true> {
+  body?: T | {};
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -8,6 +8,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { blocks } from './blocks'
 import { Admins } from './collections/admins'
 import { Attributes } from './collections/attributes'
 import { Categories } from './collections/categories'
@@ -17,6 +18,7 @@ import { Customers } from './collections/customers'
 import { Media } from './collections/media'
 import { productsCollectionOverride } from './collections/products'
 import { Sizes } from './collections/sizes'
+import { Questions } from './collections/questions'
 import { VerificationCodes } from './collections/verification-codes'
 import { variantsCollectionOverride } from './collections/variants'
 import { emailFromName, emailOverrideRecipient, env } from './env'
@@ -31,6 +33,7 @@ import {
 import { AccountSettings } from './globals/account-settings'
 import { ContactSettings } from './globals/contact-settings'
 import { Shop } from './globals/shop'
+import { StoryPage } from './globals/story-page'
 import { expireCartsTask } from './jobs/expire-carts'
 import { purgeAccountsTask } from './jobs/purge-accounts'
 import {
@@ -82,9 +85,18 @@ export default buildConfig({
     Sizes,
     Attributes,
     VerificationCodes,
+    Questions,
   ],
 
-  globals: [Shop, AccountSettings, ContactSettings],
+  globals: [Shop, AccountSettings, ContactSettings, StoryPage],
+
+  /**
+   * Block definitions live on the config rather than inline on the field that uses them (spec 006,
+   * FR-050). A block defined inline is scoped to that one field; a block here is referenced by slug
+   * from anywhere, which is what lets the `/faq` page and the blog compose the same bands without a
+   * second copy to drift.
+   */
+  blocks,
 
   plugins: [
     withPrunedEcommerceTypes(
