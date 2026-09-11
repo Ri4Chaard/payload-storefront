@@ -1,6 +1,6 @@
 'use client'
 
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/breadcrumbs'
@@ -89,11 +89,11 @@ const DEFAULT_LOCALES: Locale[] = LOCALES.map((locale) => LOCALE_LABELS[locale])
 /**
  * The count belongs in the accessible name, not only in the badge — the badge is `aria-hidden`
  * because "Cart 2" read as two unrelated things tells nobody what the two counts.
+ *
+ * **The plural is the message file's job now (spec 010, FR-036).** `count === 1 ? 'item' : 'items'`
+ * is correct English and wrong Russian and Ukrainian, which have three plural categories: 1 товар,
+ * 2 товара, 5 товаров. ICU knows the rules; a ternary cannot.
  */
-function cartLabel(count: number): string {
-  if (count <= 0) return 'Cart, empty'
-  return `Cart, ${count} ${count === 1 ? 'item' : 'items'}`
-}
 
 export function Header({
   navItems = DEFAULT_NAV,
@@ -122,6 +122,7 @@ export function Header({
     is what lets `current={pathname === item.href}` below keep working on a Russian page, where
     `next/navigation` would have reported `/ru/about` against an href of `/about`.
   */
+  const t = useTranslations('header')
   const activeLocale = useLocale()
   const locale = activeLocale.toUpperCase()
   const setLocale = (code: string) => {
@@ -204,7 +205,7 @@ export function Header({
 
         <Logo className="absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0" />
 
-        <nav aria-label="Primary" className="hidden xl:block">
+        <nav aria-label={t('primaryNav')} className="hidden xl:block">
           <ul className="flex items-center gap-7.5">
             {navItems.map((item) => (
               <li key={item.href}>
@@ -232,7 +233,7 @@ export function Header({
             variant="bare"
             icon="cart"
             href="/cart"
-            label={cartLabel(count)}
+            label={count > 0 ? t('cart', { count }) : t('cartEmpty')}
             badge={count > 0 ? count : undefined}
             className={iconChrome}
           />

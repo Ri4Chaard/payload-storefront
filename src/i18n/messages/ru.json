@@ -1,1 +1,92 @@
-{}
+{
+  "common": {
+    "close": "Закрыть",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "loading": "Загрузка",
+    "retry": "Повторить"
+  },
+  "header": {
+    "primaryNav": "Основная навигация",
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть меню",
+    "language": "Язык: {code}",
+    "cartEmpty": "Корзина пуста",
+    "cart": "Корзина, {count, plural, one {# товар} few {# товара} many {# товаров} other {# товара}}",
+    "account": "Личный кабинет",
+    "search": "Поиск"
+  },
+  "nav": {
+    "allJewelry": "Все украшения",
+    "rings": "Кольца",
+    "bracelets": "Браслеты",
+    "earrings": "Серьги",
+    "necklaces": "Колье",
+    "about": "О нас",
+    "contact": "Контакты"
+  },
+  "cart": {
+    "title": "Корзина",
+    "empty": "Ваша корзина пуста",
+    "remove": "Удалить",
+    "quantity": "Количество",
+    "subtotal": "Итого",
+    "checkout": "Оформить",
+    "itemCount": "{count, plural, one {# товар} few {# товара} many {# товаров} other {# товара}}"
+  },
+  "catalog": {
+    "filters": "Фильтры",
+    "appliedFilters": "Выбранные фильтры",
+    "clearAll": "Сбросить всё",
+    "sortBy": "Сортировка",
+    "loadMore": "Показать ещё",
+    "noResults": "По этим фильтрам ничего не найдено",
+    "resultCount": "{count, plural, one {# украшение} few {# украшения} many {# украшений} other {# украшения}}"
+  },
+  "product": {
+    "chooseSize": "Выберите размер",
+    "addToCart": "В корзину",
+    "buyNow": "Купить сейчас",
+    "addedToCart": "Добавлено в корзину.",
+    "outOfStock": "Нет в наличии",
+    "price": "Цена"
+  },
+  "account": {
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "createAccount": "Создать аккаунт",
+    "addAddress": "Добавить адрес",
+    "resend": "Отправить снова",
+    "codeSent": "Новый код уже в пути."
+  },
+  "forms": {
+    "name": "Имя",
+    "email": "Эл. почта",
+    "message": "Сообщение",
+    "send": "Отправить",
+    "required": "Обязательное поле"
+  },
+  "errors": {
+    "generic": "Что-то пошло не так. Попробуйте ещё раз.",
+    "emailInvalid": "Введите корректный адрес эл. почты.",
+    "emailRequired": "Введите адрес эл. почты.",
+    "nameRequired": "Введите имя.",
+    "messageRequired": "Напишите сообщение.",
+    "throttled": "Вы уже отправили несколько сообщений. Попробуйте позже."
+  },
+  "email": {
+    "verifySubject": "Ваш код подтверждения Aurum",
+    "verifyBody": "Ваш код: {code}. Он действует {minutes} минут.",
+    "resetSubject": "Сброс пароля Aurum",
+    "resetBody": "Используйте этот код, чтобы задать новый пароль: {code}",
+    "enquirySubject": "Мы получили ваше сообщение",
+    "enquiryBody": "Спасибо, что написали в Aurum. Мы скоро ответим."
+  },
+  "legal": {
+    "lastUpdated": "Обновлено: {date}"
+  },
+  "blog": {
+    "readMore": "Читать далее",
+    "allArticles": "Все статьи"
+  }
+}

@@ -1,1 +1,92 @@
-{}
+{
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "loading": "Loading",
+    "retry": "Try again"
+  },
+  "header": {
+    "primaryNav": "Primary",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "language": "Language: {code}",
+    "cartEmpty": "Cart, empty",
+    "cart": "Cart, {count, plural, one {# item} other {# items}}",
+    "account": "Account",
+    "search": "Search"
+  },
+  "nav": {
+    "allJewelry": "All jewelry",
+    "rings": "Rings",
+    "bracelets": "Bracelets",
+    "earrings": "Earrings",
+    "necklaces": "Necklaces",
+    "about": "About us",
+    "contact": "Contact us"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
+    "itemCount": "{count, plural, one {# item} other {# items}}"
+  },
+  "catalog": {
+    "filters": "Filters",
+    "appliedFilters": "Applied filters",
+    "clearAll": "Clear all",
+    "sortBy": "Sort by",
+    "loadMore": "Load more",
+    "noResults": "Nothing matches those filters",
+    "resultCount": "{count, plural, one {# piece} other {# pieces}}"
+  },
+  "product": {
+    "chooseSize": "Choose a size",
+    "addToCart": "Add to cart",
+    "buyNow": "Buy now",
+    "addedToCart": "Added to your cart.",
+    "outOfStock": "Out of stock",
+    "price": "Price"
+  },
+  "account": {
+    "signIn": "Log in",
+    "signOut": "Sign out",
+    "createAccount": "Create one",
+    "addAddress": "Add address",
+    "resend": "Resend",
+    "codeSent": "A new code is on its way."
+  },
+  "forms": {
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "required": "Required"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "emailInvalid": "Enter a valid email address.",
+    "emailRequired": "Enter your email address.",
+    "nameRequired": "Enter your name.",
+    "messageRequired": "Write a message.",
+    "throttled": "You have sent several messages already. Please try again later."
+  },
+  "email": {
+    "verifySubject": "Your Aurum verification code",
+    "verifyBody": "Your code is {code}. It expires in {minutes} minutes.",
+    "resetSubject": "Reset your Aurum password",
+    "resetBody": "Use this code to set a new password: {code}",
+    "enquirySubject": "We received your message",
+    "enquiryBody": "Thank you for writing to Aurum. We will reply shortly."
+  },
+  "legal": {
+    "lastUpdated": "Last Updated: {date}"
+  },
+  "blog": {
+    "readMore": "Read more",
+    "allArticles": "All articles"
+  }
+}

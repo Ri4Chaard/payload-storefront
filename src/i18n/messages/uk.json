@@ -1,1 +1,92 @@
-{}
+{
+  "common": {
+    "close": "Закрити",
+    "cancel": "Скасувати",
+    "save": "Зберегти",
+    "loading": "Завантаження",
+    "retry": "Спробувати ще раз"
+  },
+  "header": {
+    "primaryNav": "Основна навігація",
+    "openMenu": "Відкрити меню",
+    "closeMenu": "Закрити меню",
+    "language": "Мова: {code}",
+    "cartEmpty": "Кошик порожній",
+    "cart": "Кошик, {count, plural, one {# товар} few {# товари} many {# товарів} other {# товару}}",
+    "account": "Особистий кабінет",
+    "search": "Пошук"
+  },
+  "nav": {
+    "allJewelry": "Усі прикраси",
+    "rings": "Каблучки",
+    "bracelets": "Браслети",
+    "earrings": "Сережки",
+    "necklaces": "Намиста",
+    "about": "Про нас",
+    "contact": "Контакти"
+  },
+  "cart": {
+    "title": "Кошик",
+    "empty": "Ваш кошик порожній",
+    "remove": "Видалити",
+    "quantity": "Кількість",
+    "subtotal": "Разом",
+    "checkout": "Оформити",
+    "itemCount": "{count, plural, one {# товар} few {# товари} many {# товарів} other {# товару}}"
+  },
+  "catalog": {
+    "filters": "Фільтри",
+    "appliedFilters": "Обрані фільтри",
+    "clearAll": "Скинути все",
+    "sortBy": "Сортування",
+    "loadMore": "Показати ще",
+    "noResults": "За цими фільтрами нічого не знайдено",
+    "resultCount": "{count, plural, one {# прикраса} few {# прикраси} many {# прикрас} other {# прикраси}}"
+  },
+  "product": {
+    "chooseSize": "Оберіть розмір",
+    "addToCart": "До кошика",
+    "buyNow": "Купити зараз",
+    "addedToCart": "Додано до кошика.",
+    "outOfStock": "Немає в наявності",
+    "price": "Ціна"
+  },
+  "account": {
+    "signIn": "Увійти",
+    "signOut": "Вийти",
+    "createAccount": "Створити акаунт",
+    "addAddress": "Додати адресу",
+    "resend": "Надіслати ще раз",
+    "codeSent": "Новий код уже надіслано."
+  },
+  "forms": {
+    "name": "Ім’я",
+    "email": "Ел. пошта",
+    "message": "Повідомлення",
+    "send": "Надіслати",
+    "required": "Обов’язкове поле"
+  },
+  "errors": {
+    "generic": "Щось пішло не так. Спробуйте ще раз.",
+    "emailInvalid": "Введіть коректну адресу ел. пошти.",
+    "emailRequired": "Введіть адресу ел. пошти.",
+    "nameRequired": "Введіть ім’я.",
+    "messageRequired": "Напишіть повідомлення.",
+    "throttled": "Ви вже надіслали кілька повідомлень. Спробуйте пізніше."
+  },
+  "email": {
+    "verifySubject": "Ваш код підтвердження Aurum",
+    "verifyBody": "Ваш код: {code}. Він дійсний {minutes} хвилин.",
+    "resetSubject": "Скидання пароля Aurum",
+    "resetBody": "Використайте цей код, щоб задати новий пароль: {code}",
+    "enquirySubject": "Ми отримали ваше повідомлення",
+    "enquiryBody": "Дякуємо, що написали в Aurum. Ми невдовзі відповімо."
+  },
+  "legal": {
+    "lastUpdated": "Оновлено: {date}"
+  },
+  "blog": {
+    "readMore": "Читати далі",
+    "allArticles": "Усі статті"
+  }
+}
