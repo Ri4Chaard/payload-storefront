@@ -5,6 +5,8 @@ import { getArticleSlugs } from '@/lib/blog/queries'
 import { ALL_JEWELRY } from '@/lib/catalog/listing-url'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 import { getCategories, getProductSlugs } from '@/lib/catalog/queries'
+import { policyHref } from '@/lib/policies/policy-url'
+import { getPolicySlugs } from '@/lib/policies/queries'
 import { env } from '@/env'
 
 /**
@@ -65,10 +67,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   try {
-    const [categories, products, articles] = await Promise.all([
+    const [categories, products, articles, policies] = await Promise.all([
       getCategories(),
       getProductSlugs(),
       getArticleSlugs(),
+      /*
+        Policy pages (009/T058). Built from content rather than listed in `STATIC_ROUTES` above,
+        unlike `/contact` and `/faq`: those two exist whether or not anything is published, and a
+        policy address does not. Unpublishing one removes it from here, which is the same rule the
+        footer follows.
+      */
+      getPolicySlugs(),
     ])
 
     return [
@@ -90,6 +99,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified,
         changeFrequency: 'monthly' as const,
         priority: 0.6,
+      })),
+      ...policies.map((slug) => ({
+        url: absolute(policyHref(slug)),
+        lastModified,
+        // Policies change rarely and matter less to a crawler than a product — but they ARE a
+        // genuine search destination: somebody comparing shops looks up returns terms.
+        changeFrequency: 'yearly' as const,
+        priority: 0.3,
       })),
     ]
   } catch (error) {

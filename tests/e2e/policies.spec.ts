@@ -203,6 +203,75 @@ test.describe('the catalogue is untouched by this feature', () => {
   })
 })
 
+test.describe('found and shared (US6)', () => {
+  test('each page emits an owner-controllable title, a canonical and social tags', async ({ page }) => {
+    await page.goto('/legal/privacy')
+
+    await expect(page).toHaveTitle(/Privacy Policy/)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      /\/legal\/privacy$/,
+    )
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /\/legal\/privacy$/)
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website')
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      'content',
+      'Privacy Policy',
+    )
+  })
+
+  test('an SEO title set in the admin overrides the page title', async ({ page }) => {
+    const slug = `e2e-seo-${Date.now()}`
+    await make({
+      slug,
+      title: 'Plain Title',
+      body: body('Something.'),
+      seo: { title: 'A Better Title For Search', description: 'A description for search.' },
+    })
+
+    await page.goto(`/legal/${slug}`)
+
+    await expect(page).toHaveTitle(/A Better Title For Search/)
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      'A description for search.',
+    )
+    // The heading is still the page's own title — SEO overrides what search engines read, not what
+    // a visitor reads.
+    await expect(page.getByRole('heading', { level: 1, name: 'Plain Title' })).toBeVisible()
+  })
+
+  test('published policies appear in the sitemap, and unpublished ones do not', async ({ page }) => {
+    const slug = `e2e-sitemap-${Date.now()}`
+    const document = await make({ slug, title: 'Sitemap Check', body: body('Listed.') })
+
+    const listed = await (await page.request.get('/sitemap.xml')).text()
+    expect(listed).toContain(`/legal/${slug}`)
+    for (const seeded of ['privacy', 'terms', 'cookies', 'shipping']) {
+      expect(listed).toContain(`/legal/${seeded}`)
+    }
+
+    await payload.update({
+      collection: 'policies',
+      id: document.id,
+      data: { _status: 'draft' } as never,
+      context: skipRevalidation,
+      overrideAccess: true,
+    })
+
+    const after = await (await page.request.get('/sitemap.xml')).text()
+    expect(after).not.toContain(`/legal/${slug}`)
+  })
+
+  test('no structured data is claimed for a policy page', async ({ page }) => {
+    // `/faq` emits FAQPage because the page is nothing but an FAQ. There is no schema.org type that
+    // describes a privacy policy honestly, and marking one up as something it is not is a claim to a
+    // crawler the page does not support.
+    await page.goto('/legal/privacy')
+    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0)
+  })
+})
+
 test.describe('at 390px', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 

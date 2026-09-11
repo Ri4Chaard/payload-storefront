@@ -1,46 +1,77 @@
 /**
- * Gzipped initial JS per route, measured against a running production server.
+ * Gzipped initial JavaScript per route, measured from a real browser.
  *
- * Constitution V requires the figure be measured this way rather than read from a build log:
- * Next 16 with Turbopack no longer prints per-route JS, and what matters is what the browser
- * fetches before the load event, gzipped as served.
+ * Constitution V requires this figure be measured against a running production server rather than
+ * read from a build log: Next 16 with Turbopack no longer prints per-route JS, and what matters is
+ * what the browser fetches before the load event, gzipped as served.
  *
- * Usage: pnpm measure:js http://localhost:3000 / /all-jewelry /faq
+ * **It drives a browser rather than scraping the HTML, and that correction matters.** An earlier
+ * version of this script collected every `/_next/static/**.js` URL it could find in the server
+ * markup. That silently undercounts: a client component reached through the RSC flight payload is
+ * requested by the client runtime through a manifest, and its chunk URL never appears in the
+ * document at all. Measured that way, the cookie banner looked like it cost nothing on every route
+ * — which was flattering and wrong.
+ *
+ * Usage:
+ *   pnpm measure:js http://localhost:3000 / /all-jewelry /legal/privacy
  */
+
 import { gzipSync } from 'node:zlib'
+import { chromium } from '@playwright/test'
 
 const [base, ...routes] = process.argv.slice(2)
 
-/** Every /_next/static/**.js the document references — script tags and the flight payload alike. */
-function scriptUrls(html: string): string[] {
-  const found = new Set<string>()
-  for (const m of html.matchAll(/\/_next\/static\/[^"'\\\s)]+?\.js/g)) found.add(m[0])
-  return [...found]
+if (!base || routes.length === 0) {
+  console.error('Usage: pnpm measure:js <origin> <route> [route...]')
+  process.exit(1)
 }
 
-const sizes = new Map<string, number>()
+const browser = await chromium.launch()
+const rows: { route: string; requests: number; kb: string }[] = []
 
-async function gzippedSize(url: string): Promise<number> {
-  const cached = sizes.get(url)
-  if (cached !== undefined) return cached
-  const res = await fetch(base + url)
-  if (!res.ok) return 0
-  const body = Buffer.from(await res.arrayBuffer())
-  // Gzip locally at default level rather than trusting the dev server's content-encoding, so the
-  // number is comparable across runs and does not depend on how this server was configured.
-  const size = gzipSync(body).length
-  sizes.set(url, size)
-  return size
-}
-
-const rows: { route: string; status: number; chunks: number; kb: string }[] = []
 for (const route of routes) {
-  const res = await fetch(base + route)
-  const html = await res.text()
-  const urls = scriptUrls(html)
-  let total = 0
-  for (const url of urls) total += await gzippedSize(url)
-  rows.push({ route, status: res.status, chunks: urls.length, kb: (total / 1024).toFixed(1) })
+  // A fresh context per route: a warm HTTP cache would report the second route as nearly free.
+  const context = await browser.newContext()
+  const page = await context.newPage()
+
+  const seen = new Map<string, number>()
+  /*
+    The response handler is async, so its work has to be tracked and awaited — otherwise the totals
+    are read while bodies are still being fetched. The symptom is distinctive and worth recognising:
+    every route reports an identical figure, because only the handful of handlers that happened to
+    finish first got counted.
+  */
+  const pending: Promise<void>[] = []
+
+  page.on('response', (response) => {
+    const url = response.url()
+    if (!url.includes('/_next/static/') || !url.endsWith('.js')) return
+    if (seen.has(url)) return
+
+    pending.push(
+      response
+        .body()
+        // Gzipped locally at the default level so the number is comparable across runs and does not
+        // depend on how this particular server was configured to compress.
+        .then((body) => void seen.set(url, gzipSync(body).length))
+        // A response whose body is gone by the time it is asked for. Rare, and skipping one is
+        // better than failing the whole measurement.
+        .catch(() => undefined),
+    )
+  })
+
+  await page.goto(base + route, { waitUntil: 'load' })
+  // The flight payload resolves client components after load; give the runtime a moment to request
+  // their chunks, or they are missed exactly the way the old HTML-scraping version missed them.
+  await page.waitForLoadState('networkidle')
+
+  await Promise.all(pending)
+
+  const total = [...seen.values()].reduce((sum, size) => sum + size, 0)
+  rows.push({ route, requests: seen.size, kb: (total / 1024).toFixed(1) })
+
+  await context.close()
 }
 
+await browser.close()
 console.table(rows)

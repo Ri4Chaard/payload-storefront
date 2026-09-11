@@ -168,14 +168,14 @@ it on the next view, and an unpublished draft does not.
 
 ### Tests for User Story 3
 
-- [ ] T041 [P] [US3] Write `tests/e2e/policies-admin.spec.ts` following `tests/e2e/blog-admin.spec.ts` — edit and save as draft (visitor sees the old text), publish (visitor sees the new text), restore a previous version, and create a fifth policy that appears at its own `/legal/` address and in the footer.
+- [X] T041 [P] [US3] Write `tests/e2e/policies-admin.spec.ts` following `tests/e2e/blog-admin.spec.ts` — edit and save as draft (visitor sees the old text), publish (visitor sees the new text), restore a previous version, and create a fifth policy that appears at its own `/legal/` address and in the footer.
 
 ### Implementation for User Story 3
 
-- [ ] T042 [US3] Write the admin labels and descriptions on every field in `src/collections/policies.ts` for the owner rather than for an engineer — in particular, `subtitle` must say it is free text (three pages use it for a date, Shipping & Returns for a sentence) and `slug` must warn that changing it breaks existing links.
-- [ ] T043 [US3] Verify in `src/collections/policies.ts` that `effectiveDate` is never written by a hook and never auto-touched on save — FR-008: a typo fix must not move the date a policy claims to be effective from.
-- [ ] T044 [US3] Confirm the `body` toolbar configured in `src/collections/policies.ts` offers headings, paragraphs, bullet and numbered lists, bold, italic and links, and that each renders correctly through `RichText` at `/legal/privacy` (FR-003).
-- [ ] T045 [US3] Editorial verification of `src/collections/policies.ts` in the Payload admin at `/admin` — actually create a policy from scratch, preview it, and publish it. A content model that renders correctly but is unusable in the admin is a defect regardless of how well it renders.
+- [X] T042 [US3] Write the admin labels and descriptions on every field in `src/collections/policies.ts` for the owner rather than for an engineer — in particular, `subtitle` must say it is free text (three pages use it for a date, Shipping & Returns for a sentence) and `slug` must warn that changing it breaks existing links.
+- [X] T043 [US3] Verify in `src/collections/policies.ts` that `effectiveDate` is never written by a hook and never auto-touched on save — FR-008: a typo fix must not move the date a policy claims to be effective from.
+- [X] T044 [US3] Confirm the `body` toolbar configured in `src/collections/policies.ts` offers headings, paragraphs, bullet and numbered lists, bold, italic and links, and that each renders correctly through `RichText` at `/legal/privacy` (FR-003).
+- [X] T045 [US3] Editorial verification of `src/collections/policies.ts` in the Payload admin at `/admin` — actually create a policy from scratch, preview it, and publish it. A content model that renders correctly but is unusable in the admin is a defect regardless of how well it renders.
 
 **Checkpoint**: The owner owns every word on four pages, and can add a fifth.
 
@@ -192,13 +192,13 @@ appearing. Neither needs a deploy.
 
 ### Tests for User Story 4
 
-- [ ] T046 [P] [US4] Extend `tests/e2e/consent.spec.ts` — a version bump re-asks a decided visitor with previous answers pre-filled; not answering means the old decision does not count for the new version; `enabled: false` shows no banner and grants nothing; turning it back on leaves an existing decision standing rather than re-asking.
+- [X] T046 [P] [US4] Extend `tests/e2e/consent.spec.ts` — a version bump re-asks a decided visitor with previous answers pre-filled; not answering means the old decision does not count for the new version; `enabled: false` shows no banner and grants nothing; turning it back on leaves an existing decision standing rather than re-asking.
 
 ### Implementation for User Story 4
 
-- [ ] T047 [US4] Wire `consentVersion` through from the global to the read-state comparison in `src/lib/consent/record.ts`, so a lower stored `v` yields *ask-with-previous* rather than *ask*.
-- [ ] T048 [US4] Pre-fill `src/components/ui/cookie-preferences/cookie-preferences.tsx` from the stored `a` when the state is *ask-with-previous*, and start from nothing when it is *ask* — a corrupt record has no trustworthy answers to pre-fill from, a superseded one does (contract §4).
-- [ ] T049 [US4] Write the admin descriptions on `enabled` and `consentVersion` in `src/globals/cookie-settings.ts` — spell out that advancing the version re-asks every visitor and should follow a material policy change, not a typo. Add a note to the form that the banner's wording is fixed and where to raise a change to it (US4 scenario 5).
+- [X] T047 [US4] Wire `consentVersion` through from the global to the read-state comparison in `src/lib/consent/record.ts`, so a lower stored `v` yields *ask-with-previous* rather than *ask*.
+- [X] T048 [US4] Pre-fill `src/components/ui/cookie-preferences/cookie-preferences.tsx` from the stored `a` when the state is *ask-with-previous*, and start from nothing when it is *ask* — a corrupt record has no trustworthy answers to pre-fill from, a superseded one does (contract §4).
+- [X] T049 [US4] Write the admin descriptions on `enabled` and `consentVersion` in `src/globals/cookie-settings.ts` — spell out that advancing the version re-asks every visitor and should follow a material policy change, not a typo. Add a note to the form that the banner's wording is fixed and where to raise a change to it (US4 scenario 5).
 
 **Checkpoint**: The owner controls when consent is requested, without touching code.
 
@@ -213,15 +213,15 @@ wording immediately, with no deployment.
 
 ### Tests for User Story 5
 
-- [ ] T050 [P] [US5] Extend `tests/unit/consent-record.spec.ts` — adding a category to the configured set makes a prior *Agree* read as *ask-with-previous*, and the new key is **not** in the accepted set. This is the FR-027a guard on the owner's "always three buttons" decision, and it is the single most important assertion in this feature.
-- [ ] T051 [P] [US5] Extend `tests/e2e/policies-admin.spec.ts` — add an optional category, confirm a decided visitor is re-asked and the new category arrives switched off; remove it and confirm it vanishes from the chooser with stored decisions about it ignored without error.
+- [X] T050 [P] [US5] Extend `tests/unit/consent-record.spec.ts` — adding a category to the configured set makes a prior *Agree* read as *ask-with-previous*, and the new key is **not** in the accepted set. This is the FR-027a guard on the owner's "always three buttons" decision, and it is the single most important assertion in this feature.
+- [X] T051 [P] [US5] Extend `tests/e2e/policies-admin.spec.ts` — add an optional category, confirm a decided visitor is re-asked and the new category arrives switched off; remove it and confirm it vanishes from the chooser with stored decisions about it ignored without error.
 
 ### Implementation for User Story 5
 
-- [ ] T052 [US5] Render the one-category case in `src/components/ui/cookie-preferences/cookie-preferences.tsx` — the necessary category explained, plus a plain statement that no optional cookies are in use. This is what a visitor sees on day one, not an edge case.
-- [ ] T053 [US5] Cross-reference the admin screens in `src/globals/cookie-settings.ts` and `src/collections/policies.ts` — the `cookie-settings` description names the Cookie Policy document as where the policy wording lives, and the Cookie Policy's own admin description points back at the categories (FR-050, research R6).
-- [ ] T054 [US5] Audit `src/globals/cookie-settings.ts` and `src/collections/policies.ts` for any field accepting a script, snippet, or measurement ID and confirm there is none (FR-048). If one exists, remove it — the gate is deliberately unbuilt.
-- [ ] T055 [US5] Read the Cookie Policy body seeded by `scripts/seed-policies.ts` against the chooser's category list and confirm they describe the same set, with nothing described that is not offered and nothing offered that is not described (SC-012).
+- [X] T052 [US5] Render the one-category case in `src/components/ui/cookie-preferences/cookie-preferences.tsx` — the necessary category explained, plus a plain statement that no optional cookies are in use. This is what a visitor sees on day one, not an edge case.
+- [X] T053 [US5] Cross-reference the admin screens in `src/globals/cookie-settings.ts` and `src/collections/policies.ts` — the `cookie-settings` description names the Cookie Policy document as where the policy wording lives, and the Cookie Policy's own admin description points back at the categories (FR-050, research R6).
+- [X] T054 [US5] Audit `src/globals/cookie-settings.ts` and `src/collections/policies.ts` for any field accepting a script, snippet, or measurement ID and confirm there is none (FR-048). If one exists, remove it — the gate is deliberately unbuilt.
+- [X] T055 [US5] Read the Cookie Policy body seeded by `scripts/seed-policies.ts` against the chooser's category list and confirm they describe the same set, with nothing described that is not offered and nothing offered that is not described (SC-012).
 
 **Checkpoint**: What the site says about its cookies and what it asks consent for cannot drift apart.
 
@@ -237,13 +237,13 @@ confirm all four appear in the site's machine-readable list of addresses.
 
 ### Tests for User Story 6
 
-- [ ] T056 [P] [US6] Extend `tests/e2e/policies.spec.ts` — each page emits a title, description, `rel="canonical"` matching the footer's href, and Open Graph tags; an SEO title set in the admin overrides the fallback; an unpublished policy leaves the sitemap.
+- [X] T056 [P] [US6] Extend `tests/e2e/policies.spec.ts` — each page emits a title, description, `rel="canonical"` matching the footer's href, and Open Graph tags; an SEO title set in the admin overrides the fallback; an unpublished policy leaves the sitemap.
 
 ### Implementation for User Story 6
 
-- [ ] T057 [US6] Complete `generateMetadata` in `src/app/(frontend)/legal/[slug]/page.tsx` per `contracts/policy-route.md` §4 — `seo.title` falling back to `title`, `seo.description` when set, `alternates.canonical` of `/legal/${slug}`, and Open Graph including `seo.image`. Mirror `/faq`'s no-database tolerance: return a bare title rather than throwing.
-- [ ] T058 [US6] Add published policy addresses to `src/app/sitemap.ts` — queried via `getPolicySlugs()` inside the existing `try` that already tolerates an unreachable database, placed with the content-derived rows rather than in `STATIC_ROUTES`, since a policy address is not guaranteed to exist.
-- [ ] T059 [US6] Confirm no structured data is emitted for policy pages — there is no schema.org type that describes a policy document honestly, unlike `/faq`'s `FAQPage`.
+- [X] T057 [US6] Complete `generateMetadata` in `src/app/(frontend)/legal/[slug]/page.tsx` per `contracts/policy-route.md` §4 — `seo.title` falling back to `title`, `seo.description` when set, `alternates.canonical` of `/legal/${slug}`, and Open Graph including `seo.image`. Mirror `/faq`'s no-database tolerance: return a bare title rather than throwing.
+- [X] T058 [US6] Add published policy addresses to `src/app/sitemap.ts` — queried via `getPolicySlugs()` inside the existing `try` that already tolerates an unreachable database, placed with the content-derived rows rather than in `STATIC_ROUTES`, since a policy address is not guaranteed to exist.
+- [X] T059 [US6] Confirm no structured data is emitted for policy pages — there is no schema.org type that describes a policy document honestly, unlike `/faq`'s `FAQPage`.
 
 **Checkpoint**: All six stories complete.
 

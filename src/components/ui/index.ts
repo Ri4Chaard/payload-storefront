@@ -23,7 +23,18 @@ export {
   CookieSettingsButton,
   type CookieBannerProps,
 } from './cookie-banner'
-export { CookiePreferences, type CookiePreferencesProps } from './cookie-preferences'
+/*
+  `CookiePreferences` is deliberately NOT re-exported here, and this note is load-bearing.
+
+  It is the banner's lazily-imported half (Constitution V — the banner is charged to every route on
+  the site, and most visitors never open the chooser). A static re-export from this barrel undoes
+  that completely: anything importing `CookieBanner` from `@/components/ui` pulls the barrel's whole
+  module graph, so the chooser lands back in the initial chunk and `React.lazy` splits nothing. That
+  was measured, not guessed — both components shared one chunk and it was referenced by every page.
+
+  It has no direct consumer in application code, so there is nothing for the barrel to serve. Import
+  it from `@/components/ui/cookie-preferences` if that ever changes, and re-measure.
+*/
 export { Container, type ContainerProps } from './container'
 export { Drawer, type DrawerProps } from './drawer'
 export { EmptyState, type EmptyStateProps } from './empty-state'
