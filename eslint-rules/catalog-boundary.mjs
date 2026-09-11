@@ -93,6 +93,11 @@ const DOCUMENT_TYPE_READERS = [
   // fallback details, which moved here from `src/lib/contact.ts` so the tier and the module do not
   // share a name. Fifth instance of the same tier; same reason as the four above.
   /^src\/lib\/contact\//,
+  // The policies tier (009/T010-T013). Sixth instance of the same tier, listed for the same reason
+  // as the five above: it is where a `Policy` document becomes the view model a route draws, so it
+  // is the last file in the feature that may name one. `src/lib/consent/` is deliberately NOT here
+  // — it handles a browser cookie and touches no document at all.
+  /^src\/lib\/policies\//,
   /^src\/mocks\//,
   /^src\/collections\//,
   /^src\/fields\//,

@@ -44,7 +44,19 @@ export interface FooterLinkGroup {
 
 export interface FooterProps {
   groups?: FooterLinkGroup[]
+  /**
+   * The bottom rail, from published policies (spec 009, FR-015b).
+   *
+   * **Empty by default rather than falling back to a hardcoded trio.** An unconfigured site showing
+   * three legal links that go nowhere is worse than a site showing none — the same reasoning
+   * `social` records below. A container build with no database renders this empty and the first
+   * real request fills it.
+   */
   legalLinks?: { label: string; href: string }[]
+  /** Policies the owner filed under Customer Care — *Shipping & Returns* by default (FR-015b). */
+  customerCareLinks?: { label: string; href: string }[]
+  /** Opens the cookie chooser (spec 009, FR-032). Rendered in the legal row when supplied. */
+  cookieSettings?: React.ReactNode
   /**
    * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
    *
@@ -73,13 +85,19 @@ export interface FooterProps {
   className?: string
 }
 
-/** Placeholder content (T075). Later specs replace this with Payload-managed navigation. */
+/**
+ * The groups' own links (T075). Still code, and deliberately so — spec 009 put the footer's
+ * navigation out of scope and moved only the POLICY links into content.
+ *
+ * *Shipping & Returns* used to be hardcoded here beside these. It is gone: it is a policy now, and
+ * it arrives through `customerCareLinks` below. That is not tidying — a hardcoded link to a policy
+ * the owner can unpublish is a link to a 404 (spec 009, FR-015c).
+ */
 const DEFAULT_GROUPS: FooterLinkGroup[] = [
   {
     title: 'Customer care',
     links: [
       { label: 'Contact Us', href: '/contact' },
-      { label: 'Shipping & Returns', href: '/shipping' },
       { label: 'FAQ', href: '/faq' },
     ],
   },
@@ -92,13 +110,14 @@ const DEFAULT_GROUPS: FooterLinkGroup[] = [
   },
 ]
 
-const DEFAULT_LEGAL = [
-  { label: 'Privacy Policy', href: '/privacy' },
-  { label: 'Terms & Conditions', href: '/terms' },
-  { label: 'Cookie Policy', href: '/cookies' },
-]
-
-/** Placeholder destinations — these need the real accounts before launch. */
+/*
+ * `DEFAULT_LEGAL` used to sit here — Privacy Policy, Terms & Conditions and Cookie Policy, written
+ * as three constants pointing at three addresses that were 404s in production for eight specs.
+ *
+ * It is deleted rather than updated. The legal row is built from published policies now (spec 009,
+ * FR-015b), which is what makes publishing one add its link, unpublishing one remove it, and
+ * renaming one rename it — with nothing here to keep in step.
+ */
 
 
 const COLUMN = 'flex flex-col items-center gap-2.5 md:items-start md:gap-5'
@@ -150,7 +169,9 @@ function Certifications() {
 
 export function Footer({
   groups = DEFAULT_GROUPS,
-  legalLinks = DEFAULT_LEGAL,
+  legalLinks = [],
+  customerCareLinks = [],
+  cookieSettings,
   social = [],
   email,
   phone,
@@ -176,7 +197,7 @@ export function Footer({
             <Certifications />
           </div>
 
-          {groups.map((group) => (
+          {groups.map((group, index) => (
             <div key={group.title} className={COLUMN}>
               <h2 className={HEADING}>{group.title}</h2>
               <ul className={LIST}>
@@ -187,6 +208,21 @@ export function Footer({
                     </Link>
                   </li>
                 ))}
+                {/*
+                  Policies the owner filed under Customer Care land at the end of the first group.
+                  Appended rather than interleaved: the group's own links are a fixed navigation and
+                  the policies are an editable list, so a shared ordering would need a position field
+                  on links that do not have one.
+                */}
+                {index === 0
+                  ? customerCareLinks.map((link) => (
+                      <li key={link.href}>
+                        <Link href={link.href} variant="inverse">
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))
+                  : null}
               </ul>
             </div>
           ))}
@@ -246,6 +282,13 @@ export function Footer({
               {link.label}
             </Link>
           ))}
+          {/*
+            The way back to the cookie chooser (spec 009, FR-032). Withdrawal has to be as available
+            as consent was, and the design draws no re-entry point anywhere — so it goes here, beside
+            the policy it relates to. A node rather than a link: what it opens is a client dialog,
+            and the footer stays a server component.
+          */}
+          {cookieSettings}
         </nav>
       </Container>
     </footer>

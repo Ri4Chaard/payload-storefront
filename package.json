@@ -32,7 +32,9 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "seed": "payload run scripts/seed-catalog.ts",
+    "seed:policies": "payload run scripts/seed-policies.ts",
     "check:styles": "tsx scripts/check-styles.ts",
+    "measure:js": "tsx scripts/measure-js.ts",
     "test:stories": "playwright test --project=stories"
   },
   "dependencies": {

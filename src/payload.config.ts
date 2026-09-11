@@ -18,6 +18,7 @@ import { cartItemMatcher, cartsCollectionOverride } from './collections/carts'
 import { Collections } from './collections/collections'
 import { Customers } from './collections/customers'
 import { Media } from './collections/media'
+import { Policies } from './collections/policies'
 import { productsCollectionOverride } from './collections/products'
 import { Sizes } from './collections/sizes'
 import { Enquiries } from './collections/enquiries'
@@ -37,6 +38,7 @@ import { AccountSettings } from './globals/account-settings'
 import { BlogPage } from './globals/blog-page'
 import { ContactPage } from './globals/contact-page'
 import { ContactSettings } from './globals/contact-settings'
+import { CookieSettings } from './globals/cookie-settings'
 import { FaqPage } from './globals/faq-page'
 import { Shop } from './globals/shop'
 import { StoryPage } from './globals/story-page'
@@ -96,9 +98,19 @@ export default buildConfig({
     ArticleCategories,
     Articles,
     Enquiries,
+    Policies,
   ],
 
-  globals: [Shop, AccountSettings, ContactSettings, StoryPage, BlogPage, ContactPage, FaqPage],
+  globals: [
+    Shop,
+    AccountSettings,
+    ContactSettings,
+    StoryPage,
+    BlogPage,
+    ContactPage,
+    FaqPage,
+    CookieSettings,
+  ],
 
   /**
    * Block definitions live on the config rather than inline on the field that uses them (spec 006,

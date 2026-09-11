@@ -87,6 +87,7 @@ export interface Config {
     'article-categories': ArticleCategory;
     articles: Article;
     enquiries: Enquiry;
+    policies: Policy;
     addresses: Address;
     variants: Variant;
     variantTypes: VariantType;
@@ -123,6 +124,7 @@ export interface Config {
     'article-categories': ArticleCategoriesSelect<false> | ArticleCategoriesSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
+    policies: PoliciesSelect<false> | PoliciesSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
@@ -147,6 +149,7 @@ export interface Config {
     'blog-page': BlogPage;
     'contact-page': ContactPage;
     'faq-page': FaqPage;
+    'cookie-settings': CookieSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
@@ -157,6 +160,7 @@ export interface Config {
     'blog-page': BlogPageSelect<false> | BlogPageSelect<true>;
     'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
     'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
+    'cookie-settings': CookieSettingsSelect<false> | CookieSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -1261,6 +1265,77 @@ export interface Enquiry {
   createdAt: string;
 }
 /**
+ * Privacy, terms, cookies, shipping — and anything else you need a page for. Each one appears at /legal/ plus its slug. The cookie categories these pages describe live in Cookies → Cookie banner.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies".
+ */
+export interface Policy {
+  id: number;
+  /**
+   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
+   */
+  slug: string;
+  /**
+   * When this version of the policy takes effect. Yours to set — correcting a typo does not change it. Not drawn on the page; the line under the title is the “Subtitle” field.
+   */
+  effectiveDate?: string | null;
+  /**
+   * Where the link to this page appears. Unpublishing a policy removes its link wherever it was.
+   */
+  footerPlacement: 'legal' | 'customer-care' | 'hidden';
+  /**
+   * Lowest first, within whichever footer group you chose above.
+   */
+  footerOrder: number;
+  /**
+   * The heading on the page, and the wording of the link in the footer. Drawn in capitals — type it normally.
+   */
+  title: string;
+  /**
+   * The small line under the title. Free text — “Last Updated: August 2026”, or a sentence, or nothing.
+   */
+  subtitle?: string | null;
+  /**
+   * The policy itself. Headings, paragraphs, bullet and numbered lists, bold, italic and links.
+   */
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "variants".
  */
@@ -1623,6 +1698,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'enquiries';
         value: number | Enquiry;
+      } | null)
+    | ({
+        relationTo: 'policies';
+        value: number | Policy;
       } | null)
     | ({
         relationTo: 'addresses';
@@ -1990,6 +2069,29 @@ export interface EnquiriesSelect<T extends boolean = true> {
   senderHash?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies_select".
+ */
+export interface PoliciesSelect<T extends boolean = true> {
+  slug?: T;
+  effectiveDate?: T;
+  footerPlacement?: T;
+  footerOrder?: T;
+  title?: T;
+  subtitle?: T;
+  body?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3031,6 +3133,52 @@ export interface FaqPage {
   createdAt?: string | null;
 }
 /**
+ * Whether the banner is shown, and when to ask everyone again. The wording of the Cookie Policy itself lives in Content → Policies. The banner’s own wording is fixed and changing it needs a developer.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cookie-settings".
+ */
+export interface CookieSetting {
+  id: number;
+  /**
+   * Turn this off and no banner appears. Nothing optional is treated as agreed to while it is off, and decisions people have already made are kept — turning it back on does not ask them again.
+   */
+  enabled: boolean;
+  /**
+   * Raise this by one to ask EVERY visitor again — do that when the Cookie Policy changes materially, not for a typo. Their previous answers are filled in for them.
+   */
+  consentVersion: number;
+  /**
+   * Where the banner’s “Cookie Policy” link goes. If this is empty, the banner still works — it just has no link.
+   */
+  policy?: (number | null) | Policy;
+  /**
+   * What the chooser lists. Keep these saying the same thing as the Cookie Policy page. Today there is one, because this site only sets cookies it cannot work without.
+   */
+  categories: {
+    /**
+     * A short code, never shown to visitors. This is stored in each visitor’s saved choice, so NEVER re-use one for a different purpose — people’s past answers would be read as agreement to the new thing.
+     */
+    key: string;
+    /**
+     * What the chooser calls it, e.g. “Strictly necessary”.
+     */
+    name: string;
+    /**
+     * Plain language, written for a visitor rather than for a developer. One or two sentences.
+     */
+    purpose: string;
+    /**
+     * Ticked: always on, and the chooser explains why it cannot be switched off. Unticked: off until the visitor turns it on.
+     */
+    necessary: boolean;
+    id?: string | null;
+  }[];
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -3192,6 +3340,28 @@ export interface FaqPageSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cookie-settings_select".
+ */
+export interface CookieSettingsSelect<T extends boolean = true> {
+  enabled?: T;
+  consentVersion?: T;
+  policy?: T;
+  categories?:
+    | T
+    | {
+        key?: T;
+        name?: T;
+        purpose?: T;
+        necessary?: T;
+        id?: T;
       };
   _status?: T;
   updatedAt?: T;

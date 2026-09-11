@@ -213,7 +213,29 @@ per-route JS, and what matters is what the browser fetches before load, gzipped 
 
 ```bash
 pnpm build && pnpm start
+pnpm measure:js http://localhost:3000 / /all-jewelry /products/<slug> /legal/privacy
 ```
+
+### Baseline, measured 2026-09-11 before any code in this feature landed (T001)
+
+Every `/_next/static/**.js` the route's HTML references, gzipped locally at default level so the
+figure does not depend on how the server was configured.
+
+| Route | Chunks | Gzipped initial JS |
+| --- | --- | --- |
+| `/` | 15 | **235.1 KB** |
+| `/all-jewelry` | 13 | **220.3 KB** |
+| `/products/zolotoe-kolco-s-brilliantom` | 15 | **235.1 KB** |
+| `/faq` | 14 | **225.2 KB** |
+
+`/faq` is the closest existing analogue to a policy page — content, no catalogue interactivity — so
+it is the row `/legal/privacy` should be compared against rather than `/`.
+
+> **Not directly comparable to the constitution's 181KB framework baseline.** That figure was
+> measured on 2026-09-03 against a 404 page carrying no application code; this one counts every
+> chunk the route's HTML references. What SC-011 is accountable for is the **delta** between this
+> table and the same measurement after the banner lands. Re-measure with the identical script and
+> method or the comparison is worthless.
 
 Record gzipped initial JS for `/`, `/all-jewelry`, `/products/<slug>`, and `/legal/privacy`. Every route
 must be ≤ 300KB total **and** ≤ 100KB above the 181KB framework baseline. This feature adds a client

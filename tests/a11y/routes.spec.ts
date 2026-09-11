@@ -72,6 +72,20 @@ const ROUTES = [
   // has never seen before. `/faq` is a column of expandable rows and nothing else.
   '/contact',
   '/faq',
+  /**
+   * The policy pages (009/T016). Four addresses would be three too many for a scan — they are the
+   * same layout with different prose — so two are listed, chosen for what differs:
+   *
+   *   `/legal/privacy`    the longest body, and the one whose heading outline is entirely
+   *                       editor-entered. An `h1` from the page header followed by `h2`s from a
+   *                       rich-text field is an outline no component sweep can see, because neither
+   *                       half knows about the other.
+   *   `/legal/shipping`   the same layout with a SENTENCE in the subtitle rather than a date, and
+   *                       filed under Customer Care in the footer rather than the legal row — so it
+   *                       is the one that proves the footer's two content-driven slots both render.
+   */
+  '/legal/privacy',
+  '/legal/shipping',
 ]
 
 const WIDTHS = [

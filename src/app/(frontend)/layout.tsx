@@ -7,6 +7,7 @@ import { ContactBanner } from '@/components/layout/contact-banner'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
+import { getFooterPolicies } from '@/lib/policies/queries'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -37,7 +38,16 @@ export default async function FrontendLayout({ children }: { children: React.Rea
     which the build output confirms. `revalidateGlobalOnChange` on the global is what makes a saved
     change reach those cached pages (FR-042).
   */
-  const [social, contact] = await Promise.all([getSocialLinks(), getContactDetails()])
+  const [social, contact, policies] = await Promise.all([
+    getSocialLinks(),
+    getContactDetails(),
+    /*
+      The footer's policy links (spec 009, FR-015b). A third read on the same terms as the two
+      beside it: a Local API read is not a request-time API, so this does not opt any route into
+      dynamic rendering, and it tolerates the database being absent during a container build.
+    */
+    getFooterPolicies(),
+  ])
 
   // Each surface gets what it draws, rather than the whole record spread at it: the strip and the
   // menu show an email and a number, and only the footer carries the address, the hours and the map.
@@ -61,7 +71,12 @@ export default async function FrontendLayout({ children }: { children: React.Rea
           only by Storybook.
         */}
           <main id="main">{children}</main>
-          <Footer social={social} {...contact} />
+          <Footer
+            social={social}
+            legalLinks={policies.legal}
+            customerCareLinks={policies.customerCare}
+            {...contact}
+          />
         </CartCountProvider>
       </body>
     </html>

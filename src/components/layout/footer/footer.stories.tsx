@@ -23,6 +23,22 @@ const CONTACT = {
   mapsHref: 'https://www.google.com/maps/search/?api=1&query=Example%20City',
 }
 
+/**
+ * Policy links, as the layout now supplies them from published content (spec 009, FR-015b).
+ *
+ * A story rather than a component default, for the same reason `SOCIAL` is: a default that renders
+ * plausible-looking links is what made an unconfigured site look configured. The component ships
+ * with an empty legal row, and `WithoutPolicies` below is what that looks like.
+ */
+const LEGAL = [
+  { label: 'Privacy Policy', href: '/legal/privacy' },
+  { label: 'Terms & Conditions', href: '/legal/terms' },
+  { label: 'Cookie Policy', href: '/legal/cookies' },
+]
+
+/** Policies the owner filed under Customer Care rather than in the legal row. */
+const CUSTOMER_CARE = [{ label: 'Shipping & Returns', href: '/legal/shipping' }]
+
 const SOCIAL = [
   { icon: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/15550102030' },
   { icon: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/aurum' },
@@ -35,7 +51,11 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   args: {
     social: SOCIAL,
-    ...CONTACT, year: 2026 },
+    legalLinks: LEGAL,
+    customerCareLinks: CUSTOMER_CARE,
+    ...CONTACT,
+    year: 2026,
+  },
 } satisfies Meta<typeof Footer>
 
 export default meta
@@ -49,6 +69,15 @@ export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 
 /** Hover SUBSCRIBE for the reveal, and the column links for the rule that grows. */
 export const WithoutSocialLinks: Story = { args: { social: [] } }
+
+/**
+ * Nothing published yet — a fresh site, or a container build that could not reach the database.
+ *
+ * The legal row disappears entirely rather than falling back to three links that go nowhere, and
+ * CUSTOMER CARE closes over the missing *Shipping & Returns* instead of leaving a gap. Worth a
+ * story because it is the state a first deploy is actually in.
+ */
+export const WithoutPolicies: Story = { args: { legalLinks: [], customerCareLinks: [] } }
 
 /** A short group list, to show the grid does not collapse when a column is missing. */
 export const FewerGroups: Story = {

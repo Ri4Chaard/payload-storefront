@@ -14,6 +14,7 @@ import * as migration_20260909_115401_contact_location from './20260909_115401_c
 import * as migration_20260910_093824_story_page_and_faq from './20260910_093824_story_page_and_faq';
 import * as migration_20260910_135959_blog_articles from './20260910_135959_blog_articles';
 import * as migration_20260910_161343_contact_and_faq from './20260910_161343_contact_and_faq';
+import * as migration_20260911_101714_policies_and_cookie_settings from './20260911_101714_policies_and_cookie_settings';
 
 export const migrations = [
   {
@@ -94,6 +95,11 @@ export const migrations = [
   {
     up: migration_20260910_161343_contact_and_faq.up,
     down: migration_20260910_161343_contact_and_faq.down,
-    name: '20260910_161343_contact_and_faq'
+    name: '20260910_161343_contact_and_faq',
+  },
+  {
+    up: migration_20260911_101714_policies_and_cookie_settings.up,
+    down: migration_20260911_101714_policies_and_cookie_settings.down,
+    name: '20260911_101714_policies_and_cookie_settings'
   },
 ];
