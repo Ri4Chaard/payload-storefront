@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 
-import { DEFAULT_LOCALE } from '@/i18n/routing'
+import { localeHref } from '@/i18n/prefix'
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
+import { getEnabledLocales } from '@/lib/i18n/enabled'
 import { BLOG_ROOT, articleHref } from '@/lib/blog/blog-url'
 import { getArticleSlugs } from '@/lib/blog/queries'
 import { ALL_JEWELRY } from '@/lib/catalog/listing-url'
@@ -41,6 +43,32 @@ export const dynamic = 'force-dynamic'
 /** Absolute, as the sitemap protocol requires. Root-relative addresses are `blog-url.ts`'s job. */
 const absolute = (path: string): string => new URL(path, env.NEXT_PUBLIC_SERVER_URL).toString()
 
+/**
+ * One address becomes one entry per language it is offered in (spec 010, FR-017, research R12).
+ *
+ * **`alternates.languages` on every entry, which is the half a crawler actually reads.** A sitemap
+ * that lists three unrelated URLs says three pages exist; one that lists three URLs each naming the
+ * other two says the same page exists in three languages, which is what stops them competing with
+ * each other in search results.
+ *
+ * **Filtered by the enabled set**, so a language the owner has switched off disappears from here as
+ * well as from the site (FR-027). And iterated explicitly rather than resolved: `sitemap.ts` is a
+ * special Route Handler, and `next/root-params` does not reach one.
+ */
+function localisedEntries(
+  path: string,
+  enabled: readonly Locale[],
+  rest: Omit<MetadataRoute.Sitemap[number], 'url' | 'alternates'>,
+): MetadataRoute.Sitemap {
+  const languages = Object.fromEntries(enabled.map((code) => [code, absolute(localeHref(code, path))]))
+
+  return enabled.map((code) => ({
+    url: absolute(localeHref(code, path)),
+    ...rest,
+    alternates: { languages },
+  }))
+}
+
 /** Every address that exists whether or not anything has been published. */
 const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }[] =
   [
@@ -60,12 +88,15 @@ const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[numb
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date()
 
-  const base: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
-    url: absolute(route.path),
-    lastModified,
-    changeFrequency: route.changeFrequency,
-    priority: route.priority,
-  }))
+  const enabled = await getEnabledLocales()
+
+  const base: MetadataRoute.Sitemap = STATIC_ROUTES.flatMap((route) =>
+    localisedEntries(route.path, enabled, {
+      lastModified,
+      changeFrequency: route.changeFrequency,
+      priority: route.priority,
+    }),
+  )
 
   try {
     const [categories, products, articles, policies] = await Promise.all([
@@ -89,32 +120,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [
       ...base,
-      ...categories.map((category) => ({
-        url: absolute(category.href),
-        lastModified,
-        changeFrequency: 'daily' as const,
-        priority: 0.8,
-      })),
-      ...products.map((slug) => ({
-        url: absolute(`/products/${slug}`),
-        lastModified,
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      })),
-      ...articles.map((slug) => ({
-        url: absolute(articleHref(slug)),
-        lastModified,
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
-      })),
-      ...policies.map((slug) => ({
-        url: absolute(policyHref(slug)),
-        lastModified,
-        // Policies change rarely and matter less to a crawler than a product — but they ARE a
-        // genuine search destination: somebody comparing shops looks up returns terms.
-        changeFrequency: 'yearly' as const,
-        priority: 0.3,
-      })),
+      ...categories.flatMap((category) =>
+        localisedEntries(category.href, enabled, {
+          lastModified,
+          changeFrequency: 'daily' as const,
+          priority: 0.8,
+        }),
+      ),
+      ...products.flatMap((slug) =>
+        localisedEntries(`/products/${slug}`, enabled, {
+          lastModified,
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        }),
+      ),
+      ...articles.flatMap((slug) =>
+        localisedEntries(articleHref(slug), enabled, {
+          lastModified,
+          changeFrequency: 'monthly' as const,
+          priority: 0.6,
+        }),
+      ),
+      ...policies.flatMap((slug) =>
+        localisedEntries(policyHref(slug), enabled, {
+          lastModified,
+          // Policies change rarely and matter less to a crawler than a product — but they ARE a
+          // genuine search destination: somebody comparing shops looks up returns terms.
+          changeFrequency: 'yearly' as const,
+          priority: 0.3,
+        }),
+      ),
     ]
   } catch (error) {
     if (!isDatabaseUnreachable(error)) throw error

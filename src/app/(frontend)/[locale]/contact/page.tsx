@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { localeAlternates } from '@/lib/i18n/alternates'
 import { currentLocale } from '@/i18n/locale'
 import { PageHeaderBlock } from '@/components/blocks/page-header'
 import { FaqBandBlock } from '@/components/blocks/faq-band'
@@ -63,7 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     ...(description ? { description } : {}),
-    alternates: { canonical: HREF },
+    // Canonical plus every language this page exists in, filtered to what is on offer.
+    alternates: await localeAlternates(HREF, locale),
     openGraph: {
       type: 'website',
       title,

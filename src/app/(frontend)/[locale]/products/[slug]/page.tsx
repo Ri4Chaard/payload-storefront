@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { localeAlternates } from '@/lib/i18n/alternates'
 import { currentLocale } from '@/i18n/locale'
 import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/commerce'
 import { addToCart, buyNow } from '@/lib/cart/actions'
@@ -70,7 +71,8 @@ export async function generateMetadata({
   return {
     title,
     ...(description ? { description } : {}),
-    alternates: { canonical: product.href },
+    // Canonical plus every language this page exists in, filtered to what is on offer.
+    alternates: await localeAlternates(product.href, locale),
     openGraph: {
       type: 'website',
       title,

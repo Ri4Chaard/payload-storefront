@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import type { Locale } from '@/i18n/routing'
+import { localeAlternates } from '@/lib/i18n/alternates'
 import { currentLocale } from '@/i18n/locale'
 import { ActiveFilters, type RemovableFilter } from '@/components/commerce/active-filters'
 import { FilterToolbar } from '@/components/commerce/filter-toolbar'
@@ -200,19 +202,23 @@ function emptyState(categorySlug: string | null, basePath: string, narrowed: boo
  * still walks the whole catalogue by following it; it simply reports one address for the listing
  * it walked.
  */
-export function listingMetadata({
-  title,
-  subtitle,
+export async function listingMetadata({
   basePath,
+  locale,
+  subtitle,
+  title,
 }: {
-  title: string
-  subtitle: string | null
   basePath: string
-}): Metadata {
+  /* Passed in rather than resolved here: this is called from two routes, and both already have it. */
+  locale: Locale
+  subtitle: string | null
+  title: string
+}): Promise<Metadata> {
   return {
     title,
     ...(subtitle ? { description: subtitle } : {}),
-    alternates: { canonical: basePath },
+    // Canonical plus every language this page exists in, filtered to what is on offer.
+    alternates: await localeAlternates(basePath, locale),
   }
 }
 

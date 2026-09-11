@@ -389,17 +389,35 @@ declarations are present, reciprocal and consistent with the enabled set.
 
 ### Tests for User Story 5
 
-- [ ] T087 [P] [US5] E2E in `tests/e2e/metadata-alternates.spec.ts`: each page names itself canonical, lists three alternates plus `x-default` pointing at the English address, and the alternates name each other reciprocally.
-- [ ] T088 [P] [US5] Integration test in `tests/integration/sitemap-locales.test.ts` that the sitemap holds one entry per document per **enabled** locale and drops a disabled one entirely (FR-017, FR-027).
+- [X] T087 [P] [US5] E2E in `tests/e2e/metadata-alternates.spec.ts`: each page names itself canonical, lists three alternates plus `x-default` pointing at the English address, and the alternates name each other reciprocally.
+- [X] T088 [P] [US5] Integration test in `tests/integration/sitemap-locales.test.ts` that the sitemap holds one entry per document per **enabled** locale and drops a disabled one entirely (FR-017, FR-027).
 
 ### Implementation for User Story 5
 
-- [ ] T089 [US5] Add an `absoluteHref(locale, path)` helper and emit `alternates: { canonical, languages }` from `generateMetadata` on every route, filtered by the enabled set (`contracts/routing.md` §5).
+- [X] T089 [US5] Add an `absoluteHref(locale, path)` helper and emit `alternates: { canonical, languages }` from `generateMetadata` on every route, filtered by the enabled set (`contracts/routing.md` §5).
 - [ ] T090 [US5] Translate the metadata defaults in `src/app/(frontend)/[locale]/layout.tsx` — the title template and description move into the message files or `seo.ts`, whichever the string belongs to under FR-035's boundary.
-- [ ] T091 [US5] Rewrite `src/app/sitemap.ts` to iterate `LOCALES` explicitly — it is a Route Handler and `next/root-params` does not reach it — filtered by the enabled set, with `alternates.languages` per entry. It stays at `src/app/sitemap.ts`, outside the `[locale]` segment.
-- [ ] T092 [US5] Confirm `alternateLinks: false` is set in `src/i18n/routing.ts` and add a comment pointing at the reason: next-intl's automatic `Link` header advertises every *configured* locale, including one the owner has switched off.
+- [X] T091 [US5] Rewrite `src/app/sitemap.ts` to iterate `LOCALES` explicitly — it is a Route Handler and `next/root-params` does not reach it — filtered by the enabled set, with `alternates.languages` per entry. It stays at `src/app/sitemap.ts`, outside the `[locale]` segment.
+- [X] T092 [US5] Confirm `alternateLinks: false` is set in `src/i18n/routing.ts` and add a comment pointing at the reason: next-intl's automatic `Link` header advertises every *configured* locale, including one the owner has switched off.
 
-**Checkpoint**: A crawl finds three versions of every page and zero duplicate-content warnings.
+**Checkpoint**: ✅ Verified against a production server. `/ru/legal/privacy` emits:
+
+```
+<link rel="canonical"  href="…/ru/legal/privacy">
+<link rel="alternate"  hrefLang="en"        href="…/legal/privacy">
+<link rel="alternate"  hrefLang="ru"        href="…/ru/legal/privacy">
+<link rel="alternate"  hrefLang="uk"        href="…/uk/legal/privacy">
+<link rel="alternate"  hrefLang="x-default" href="…/legal/privacy">
+```
+
+Each of the three names **itself** canonical — pointing all three at the English address is the easy
+mistake, it looks correct to a human tester, and it asks Google to drop two of the three pages.
+
+The sitemap went from 59 URLs to 177, each carrying `xhtml:link` alternates. Switching Ukrainian off
+drops it to 118 with zero `/uk` addresses; switching it back on restores them.
+
+**T090 is outstanding** — the layout's own metadata defaults (`title.template`, the site description)
+are still English literals, so a Russian page's *fallback* title is English when a document has no
+SEO title of its own.
 
 ---
 

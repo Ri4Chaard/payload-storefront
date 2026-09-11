@@ -52,6 +52,7 @@ export async function generateMetadata({
   const shop = await getShopContent(locale)
 
   return listingMetadata({
+    locale,
     title: category.title,
     subtitle: category.subtitle ?? shop.listingSubtitle,
     basePath: category.href,

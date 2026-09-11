@@ -24,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const shop = await getShopContent(locale)
 
   return listingMetadata({
+    locale,
     title: TITLE,
     subtitle: shop.listingSubtitle,
     basePath: BASE,

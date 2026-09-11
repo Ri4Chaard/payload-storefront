@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { localeAlternates } from '@/lib/i18n/alternates'
 import { currentLocale } from '@/i18n/locale'
 import { ArticleMosaic } from '@/components/blog/article-mosaic'
 import { CategoryTabs } from '@/components/blog/category-tabs'
@@ -58,7 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     ...(description ? { description } : {}),
-    alternates: { canonical: BLOG_ROOT },
+    // Canonical plus every language this page exists in, filtered to what is on offer.
+    alternates: await localeAlternates(BLOG_ROOT, locale),
     openGraph: {
       type: 'website',
       title,
