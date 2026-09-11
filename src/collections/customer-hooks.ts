@@ -131,6 +131,7 @@ export const syncMarketingChoice: CollectionAfterChangeHook = async ({
   try {
     await syncMarketingContact({
       email: doc.email,
+      locale: doc.locale ?? undefined,
       firstName: doc.firstName,
       lastName: doc.lastName,
       subscribed: next,

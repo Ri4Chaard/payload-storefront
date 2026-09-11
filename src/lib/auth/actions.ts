@@ -5,6 +5,8 @@ import { getPayload } from 'payload'
 
 import { revalidatePath } from 'next/cache'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
+import { localeContext } from '@/lib/email/transactional'
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
 import { requireCustomer, requireCustomerUser, type CustomerUser } from '@/lib/auth/dal'
 import { authenticateCustomer } from '@/lib/auth/login'
@@ -87,7 +89,19 @@ const CODE_FAILURE_KEYS: Record<CodeFailure, string> = {
  * account gets a fresh code, so the legitimate owner of an abandoned registration can still finish
  * it; a verified one gets nothing at all. From outside, the three cases are indistinguishable.
  */
-export async function registerCustomer(input: CreateAccountValues): Promise<ActionResult> {
+/*
+  The language the request was made in (spec 010, FR-042).
+
+  A second argument rather than a field on the value type: the value types are shared with the zod
+  schemas the forms validate against, and a language is not something a customer types. It cannot be
+  read from the environment either — `next/root-params` does not resolve inside a Server Action, and
+  the `NEXT_LOCALE` cookie is absent for somebody who arrived on `/ru/create-account` from a link and
+  never touched the switcher. So the page tells the action, and the action tells the mail.
+*/
+export async function registerCustomer(
+  input: CreateAccountValues,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<ActionResult> {
   const parsed = createAccountSchema.safeParse(input)
   if (!parsed.success) {
     const { fieldErrors, message } = schemaFailure(parsed.error)
@@ -115,7 +129,10 @@ export async function registerCustomer(input: CreateAccountValues): Promise<Acti
 
   await payload.create({
     collection: 'customers',
-    data: { email, marketingEmail, password },
+    // The language reaches Payload's own verification mail on the request context — see
+    // `localeContext` for why it cannot simply be read from a cookie inside the hook.
+    context: localeContext(locale),
+    data: { email, locale, marketingEmail, password },
     overrideAccess: true,
   })
 
@@ -129,7 +146,10 @@ export async function registerCustomer(input: CreateAccountValues): Promise<Acti
  * than forcing a new one — the token is not what the customer sees, the code is, and rotating it
  * would invalidate nothing that matters while costing a write.
  */
-async function resendVerificationFor(customerId: number): Promise<'ok' | 'throttled'> {
+async function resendVerificationFor(
+  customerId: number,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<'ok' | 'throttled'> {
   const payload = await client()
 
   const customer = await payload.findByID({
@@ -145,7 +165,7 @@ async function resendVerificationFor(customerId: number): Promise<'ok' | 'thrott
   const issued = await issueCode(customer.email, 'verify-email', token, { customerId })
   if (!issued.ok) return 'throttled'
 
-  await sendVerificationCode(customer.email, issued.code)
+  await sendVerificationCode(customer.email, issued.code, locale)
   return 'ok'
 }
 
@@ -228,7 +248,10 @@ export async function signOutCustomer(): Promise<ActionResult> {
  *
  * Returns success for an unknown address as well, for the same reason registration does.
  */
-export async function resendCode(input: ResendCodeValues): Promise<ActionResult> {
+export async function resendCode(
+  input: ResendCodeValues,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<ActionResult> {
   const parsed = resendCodeSchema.safeParse(input)
   if (!parsed.success) return fail(schemaFailure(parsed.error).message)
 
@@ -237,7 +260,7 @@ export async function resendCode(input: ResendCodeValues): Promise<ActionResult>
   if (purpose === 'reset-password') {
     // Identical to asking on the forgot-password screen, deliberately: one path, one behaviour,
     // one throttle. `issueResetFor` swallows both an unknown address and a refused throttle.
-    await issueResetFor(email)
+    await issueResetFor(email, locale)
     return ok()
   }
 
@@ -308,6 +331,7 @@ async function enrolIfConsented(email: string): Promise<void> {
 
     await syncMarketingContact({
       email: customer.email,
+      locale: customer.locale ?? undefined,
       firstName: customer.firstName,
       lastName: customer.lastName,
       subscribed: true,
@@ -368,14 +392,17 @@ export async function verifyEmailCode(input: VerifyCodeValues): Promise<ActionRe
  * read which ones came back "sent". So there is nothing here to read — an unknown address, a
  * registered one, and one whose code was refused by the throttle all produce this exact object.
  */
-export async function requestPasswordReset(input: RequestResetValues): Promise<ActionResult> {
+export async function requestPasswordReset(
+  input: RequestResetValues,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<ActionResult> {
   const parsed = requestResetSchema.safeParse(input)
   if (!parsed.success) {
     const { fieldErrors, message } = schemaFailure(parsed.error)
     return fail(message, fieldErrors)
   }
 
-  await issueResetFor(parsed.data.email)
+  await issueResetFor(parsed.data.email, locale)
   return ok()
 }
 
@@ -393,11 +420,15 @@ export async function requestPasswordReset(input: RequestResetValues): Promise<A
  * with no account — its own comment says it "prefer[s] to fail silently" — and the hook throws when
  * the throttle refuses, which rolls the whole transaction back. Neither may reach the customer.
  */
-async function issueResetFor(email: string): Promise<void> {
+async function issueResetFor(email: string, locale: Locale = DEFAULT_LOCALE): Promise<void> {
   const payload = await client()
 
   try {
-    await payload.forgotPassword({ collection: 'customers', data: { email } })
+    await payload.forgotPassword({
+      collection: 'customers',
+      context: localeContext(locale),
+      data: { email },
+    })
   } catch (error) {
     // Logged, never returned. The caller's response must not vary.
     payload.logger.warn({ err: error, msg: 'Reset code not sent' })

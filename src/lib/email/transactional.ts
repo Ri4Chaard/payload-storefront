@@ -1,3 +1,10 @@
+import { createTranslator } from 'next-intl'
+
+import type { RequestContext } from 'payload'
+
+import { loadMessages } from '@/i18n/messages'
+
+import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/routing'
 import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
@@ -68,26 +75,61 @@ function escapeHtml(value: string): string {
 }
 
 /**
+ * The words, in the language the request was made in (spec 010, FR-042).
+ *
+ * **The locale is an ARGUMENT, never inferred here.** `getTranslations({ locale })` is the one
+ * place in this codebase that passes next-intl an explicit locale, and it is passed because this
+ * code runs inside a Server Action, where `next/root-params` does not resolve — and where reading
+ * `NEXT_LOCALE` would be wrong anyway, because a visitor who arrived on `/ru/create-account` from a
+ * link has no cookie (research R13, contracts/i18n-modules.md §5).
+ *
+ * **FR-045: a missing translation may never stop a code being delivered.** It cannot, and not by
+ * accident: `src/i18n/request.ts` merges English underneath every locale, so an untranslated key
+ * resolves to the English sentence rather than throwing or rendering a key. Deleting a line from
+ * `ru.json` costs a Russian sentence, never the mail.
+ *
  * The code never appears in a subject line. Subjects show on lock screens and in notification
  * previews, which is a wider audience than the person holding the phone.
  */
-const VERIFICATION = {
-  subject: 'Your Aurum verification code',
-  body: 'Use this code to confirm your email address. It expires in 10 minutes. If you didn’t create an Aurum account, you can ignore this message.',
-}
+/*
+  **Built with `createTranslator` over `loadMessages`, not with `getTranslations`.**
 
-const RESET = {
-  subject: 'Your Aurum password reset code',
-  body: 'Use this code to set a new password. It expires in 10 minutes. If you didn’t ask to reset your password, you can ignore this message — nothing has changed.',
+  `getTranslations` reads next-intl's per-request configuration, which needs the `react-server`
+  condition and a request scope. Neither is guaranteed here: this code runs inside Payload's
+  `generateEmailHTML` hook, which is also reached from the admin panel and from scripts, and it is
+  the one place in the codebase where the locale is already known explicitly. Asking a request-scoped
+  API for something we were handed is a dependency with nothing to buy.
+
+  It also makes this testable without a Next server around it — `getTranslations` throws
+  "`getTranslations` is not supported in Client Components" under vitest, which is how this was
+  found.
+*/
+function copy(locale: Locale): (key: string) => string {
+  const messages = loadMessages(locale) as Record<string, Record<string, string>>
+  const t = createTranslator({ locale, messages, namespace: 'email' })
+  return (key: string) => t(key as Parameters<typeof t>[0])
 }
 
 /**
- * Sent regardless of marketing preferences — it is how someone finds out their account was taken
- * (FR-035).
+ * Getting the language into mail that PAYLOAD sends (spec 010, FR-042).
+ *
+ * Registration and password reset are the two messages this codebase does not send itself: Payload
+ * sends them, through `verify.generateEmailHTML` and `forgotPassword.generateEmailHTML`. Those hooks
+ * receive a `req` and nothing of the action's own scope, so the locale travels the way anything else
+ * reaches a Payload hook — on `req.context`, the same mechanism `skipRevalidation` uses.
+ *
+ * Reading the `NEXT_LOCALE` cookie off `req` instead would be wrong for the same reason it is wrong
+ * everywhere else in this feature: a visitor who arrived on `/ru/create-account` from a link has no
+ * cookie, and their verification code would arrive in English.
  */
-const PASSWORD_CHANGED = {
-  subject: 'Your Aurum password was changed',
-  body: 'The password on your Aurum account has just been changed, and you have been signed out everywhere else. If this wasn’t you, reset your password immediately and contact us.',
+export const localeContext = (locale: Locale): RequestContext => ({ locale })
+
+/** Read it back inside a hook, falling back to English rather than throwing. */
+export const localeFromContext = (context: RequestContext | undefined): Locale => {
+  const value = context?.locale
+  return typeof value === 'string' && (LOCALES as readonly string[]).includes(value)
+    ? (value as Locale)
+    : DEFAULT_LOCALE
 }
 
 export interface BuiltEmail {
@@ -106,29 +148,45 @@ export interface BuiltEmail {
  * is Payload's own `generateEmailHTML` hook, whose contract is a promise — narrowing the signature
  * would buy nothing and churn every caller.
  */
-export async function buildVerificationEmail(code: string): Promise<BuiltEmail> {
+export async function buildVerificationEmail(
+  code: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<BuiltEmail> {
+  const t = copy(locale)
   return {
-    html: renderCodeEmail(VERIFICATION.body, code),
-    subject: VERIFICATION.subject,
+    html: renderCodeEmail(t('verifyBody'), code),
+    subject: t('verifySubject'),
   }
 }
 
-export async function buildResetEmail(code: string): Promise<BuiltEmail> {
+export async function buildResetEmail(
+  code: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<BuiltEmail> {
+  const t = copy(locale)
   return {
-    html: renderCodeEmail(RESET.body, code),
-    subject: RESET.subject,
+    html: renderCodeEmail(t('resetBody'), code),
+    subject: t('resetSubject'),
   }
 }
 
-export async function sendVerificationCode(to: string, code: string): Promise<void> {
+export async function sendVerificationCode(
+  to: string,
+  code: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<void> {
   const payload = await client()
-  const { html, subject } = await buildVerificationEmail(code)
+  const { html, subject } = await buildVerificationEmail(code, locale)
   await payload.sendEmail({ html, subject, to })
 }
 
-export async function sendResetCode(to: string, code: string): Promise<void> {
+export async function sendResetCode(
+  to: string,
+  code: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<void> {
   const payload = await client()
-  const { html, subject } = await buildResetEmail(code)
+  const { html, subject } = await buildResetEmail(code, locale)
   await payload.sendEmail({ html, subject, to })
 }
 
@@ -140,13 +198,17 @@ export async function sendResetCode(to: string, code: string): Promise<void> {
  * thrown: the password HAS changed by this point, and reporting failure to the customer who just
  * changed it would be a lie.
  */
-export async function sendPasswordChangedNotice(to: string): Promise<void> {
+export async function sendPasswordChangedNotice(
+  to: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<void> {
   const payload = await client()
 
   try {
+    const t = copy(locale)
     await payload.sendEmail({
-      html: renderNoticeEmail(PASSWORD_CHANGED.body),
-      subject: PASSWORD_CHANGED.subject,
+      html: renderNoticeEmail(t('passwordChangedBody')),
+      subject: t('passwordChangedSubject'),
       to,
     })
   } catch (error) {

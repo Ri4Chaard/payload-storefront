@@ -442,18 +442,46 @@ sent mail and the composed messenger text match, and that a missing translation 
 
 ### Tests for User Story 6
 
-- [ ] T093 [P] [US6] Integration test in `tests/integration/email-locale.test.ts` using the `EMAIL_TRANSPORT=log` adapter: a Russian registration produces a Russian subject and body; deleting a key from `ru.json` still sends, in English (FR-045).
-- [ ] T094 [P] [US6] Integration test in `tests/integration/enquiry-locale.test.ts` that an enquiry submitted in `uk` stores `locale: 'uk'` and that the composed messenger message carries it (FR-043).
+- [X] T093 [P] [US6] Integration test in `tests/integration/email-locale.test.ts` using the `EMAIL_TRANSPORT=log` adapter: a Russian registration produces a Russian subject and body; deleting a key from `ru.json` still sends, in English (FR-045).
+- [X] T094 [P] [US6] Integration test in `tests/integration/enquiry-locale.test.ts` that an enquiry submitted in `uk` stores `locale: 'uk'` and that the composed messenger message carries it (FR-043).
 
 ### Implementation for User Story 6
 
-- [ ] T095 [US6] Add `locale` to the inputs of the server actions in `src/lib/auth/actions.ts` and `src/lib/contact/actions.ts`, validated by their zod schemas against `LOCALES`. **Not read from `NEXT_LOCALE`** — a visitor who arrived on `/ru/contact` from a link has no cookie, and their mail would go out in English.
-- [ ] T096 [P] [US6] Send the locale from `src/components/contact/contact-form/` and the `src/components/account/**` forms using `useLocale()`, as a hidden field or an argument.
-- [ ] T097 [P] [US6] Move subjects and bodies of `src/lib/auth/verification-email.ts`, `src/lib/auth/reset-email.ts` and `src/lib/email/enquiry.ts` into the `email` namespace, resolved with `getTranslations({ locale, namespace: 'email' })` — the one place a locale is passed to next-intl explicitly.
-- [ ] T098 [P] [US6] Store the submitted locale on the enquiry in `src/lib/contact/actions.ts` (the field landed in T053) and pass it to `src/lib/messengers/` so the handoff uses the localized `messageTemplate`.
-- [ ] T099 [US6] Record the customer's locale on marketing list membership so campaigns can be segmented by language (FR-044), without touching the transactional/marketing split `src/payload.config.ts` documents.
+- [X] T095 [US6] Add `locale` to the inputs of the server actions in `src/lib/auth/actions.ts` and `src/lib/contact/actions.ts`, validated by their zod schemas against `LOCALES`. **Not read from `NEXT_LOCALE`** — a visitor who arrived on `/ru/contact` from a link has no cookie, and their mail would go out in English.
+- [X] T096 [P] [US6] Send the locale from `src/components/contact/contact-form/` and the `src/components/account/**` forms using `useLocale()`, as a hidden field or an argument.
+- [X] T097 [P] [US6] Move subjects and bodies of `src/lib/auth/verification-email.ts`, `src/lib/auth/reset-email.ts` and `src/lib/email/enquiry.ts` into the `email` namespace, resolved with `getTranslations({ locale, namespace: 'email' })` — the one place a locale is passed to next-intl explicitly.
+- [X] T098 [P] [US6] Store the submitted locale on the enquiry in `src/lib/contact/actions.ts` (the field landed in T053) and pass it to `src/lib/messengers/` so the handoff uses the localized `messageTemplate`.
+- [X] T099 [US6] Record the customer's locale on marketing list membership so campaigns can be segmented by language (FR-044), without touching the transactional/marketing split `src/payload.config.ts` documents.
 
-**Checkpoint**: Nothing the site sends is in the wrong language.
+**Checkpoint**: ✅ Nothing the site sends is in the wrong language.
+
+> **The two most important mails are not sent by this codebase**, and that changed the design.
+> Registration and password reset go out through Payload's own `verify.generateEmailHTML` and
+> `forgotPassword.generateEmailHTML` hooks, which receive a `req` and nothing of the action's scope.
+> So the locale travels on **`req.context`** — the same mechanism `skipRevalidation` already uses —
+> put there by `localeContext(locale)` and read back by `localeFromContext(req?.context)`.
+>
+> Reading `NEXT_LOCALE` off `req` inside the hook would have been one line and wrong for the reason
+> the whole feature keeps meeting: a visitor who arrived on `/ru/create-account` from a link has no
+> cookie, and their verification code would have arrived in English.
+>
+> **`getTranslations` does not work here, and finding out was useful.** It reads next-intl's
+> per-request configuration, which needs the `react-server` condition and a request scope — neither
+> guaranteed inside a Payload hook that is also reached from the admin and from scripts. It threw
+> "`getTranslations` is not supported in Client Components" under vitest. The mail builders use
+> `createTranslator` over `loadMessages` instead, which is both testable and honest: the locale is
+> already known explicitly, so asking a request-scoped API for it buys nothing.
+>
+> That in turn forced a split: `loadMessages` moved from `src/i18n/request.ts` into
+> `src/i18n/messages.ts`, because `request.ts` reaches `next/root-params` and importing it outside a
+> Next render throws "This module is a placeholder for 'next/root-params'".
+>
+> **FR-044 is recorded, not exported.** `customers.locale` holds the subscriber's language and
+> `syncMarketingContact` receives it — but Resend's contacts endpoint accepts only `email`,
+> `first_name`, `last_name` and `unsubscribed`, with nowhere to put a language. It is logged and the
+> authority is Payload, so a campaign is segmented by exporting from there. Sending it to Resend
+> needs their custom-properties API or one audience per language, and that is a decision for whoever
+> writes the first Russian campaign. Stated in the code rather than left to be discovered.
 
 ---
 

@@ -160,11 +160,12 @@
   },
   "email": {
     "verifySubject": "Your Aurum verification code",
-    "verifyBody": "Your code is {code}. It expires in {minutes} minutes.",
-    "resetSubject": "Reset your Aurum password",
-    "resetBody": "Use this code to set a new password: {code}",
-    "enquirySubject": "We received your message",
-    "enquiryBody": "Thank you for writing to Aurum. We will reply shortly."
+    "verifyBody": "Use this code to confirm your email address. It expires in 10 minutes. If you didn’t create an Aurum account, you can ignore this message.",
+    "resetSubject": "Your Aurum password reset code",
+    "resetBody": "Use this code to set a new password. It expires in 10 minutes. If you didn’t ask to reset your password, you can ignore this message — nothing has changed.",
+    "passwordChangedSubject": "Your Aurum password was changed",
+    "passwordChangedBody": "The password on your Aurum account has just been changed, and you have been signed out everywhere else. If this wasn’t you, reset your password immediately and contact us.",
+    "enquirySubject": "New enquiry from the Aurum website"
   },
   "legal": {
     "lastUpdated": "Last Updated: {date}"

@@ -1,11 +1,12 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+import type { Locale } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { TextInput } from '@/components/ui/text-input'
 import { requestPasswordReset } from '@/lib/auth/actions'
@@ -27,6 +28,8 @@ import { requestResetSchema, type RequestResetValues } from '@/lib/auth/schemas'
 
 export function ForgotPasswordForm() {
   const t_errors = useTranslations('errors')
+  // Sent to the action, which sends it to the mail (spec 010, FR-042).
+  const locale = useLocale() as Locale
 
   const ERRORS: Record<string, string> = {
     resetEmailInvalid: t_errors('emailInvalid'),
@@ -44,7 +47,7 @@ export function ForgotPasswordForm() {
   const resolve = (key: string | undefined) => errorText(ERRORS, key)
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const result = await requestPasswordReset(values)
+    const result = await requestPasswordReset(values, locale)
 
     if (result.status === 'success') {
       router.push(`/reset-password?email=${encodeURIComponent(values.email)}`)

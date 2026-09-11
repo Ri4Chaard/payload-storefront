@@ -1,11 +1,12 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+import type { Locale } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { TextInput } from '@/components/ui/text-input'
@@ -38,6 +39,8 @@ import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schema
 
 export function CreateAccountForm() {
   const t_errors = useTranslations('errors')
+  // Sent to the action, which sends it to the mail (spec 010, FR-042).
+  const locale = useLocale() as Locale
 
   const ERRORS: Record<string, string> = {
     createEmailInvalid: t_errors('emailInvalid'),
@@ -59,7 +62,7 @@ export function CreateAccountForm() {
   const resolve = (key: string | undefined) => errorText(ERRORS, key)
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const result = await registerCustomer(values)
+    const result = await registerCustomer(values, locale)
 
     if (result.status === 'success') {
       router.push(`/verify-email?email=${encodeURIComponent(values.email)}`)

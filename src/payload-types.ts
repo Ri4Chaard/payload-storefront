@@ -621,6 +621,10 @@ export interface Customer {
     totalDocs?: number;
   };
   /**
+   * The language this customer was reading the site in when they registered.
+   */
+  locale?: ('en' | 'ru' | 'uk') | null;
+  /**
    * Opt-in, and off unless the customer said otherwise. Turning this off must never stop a verification code or a password-change notice — those are transactional and travel a different path entirely.
    */
   marketingEmail?: boolean | null;
@@ -1817,6 +1821,7 @@ export interface CustomersSelect<T extends boolean = true> {
   lastName?: T;
   name?: T;
   addresses?: T;
+  locale?: T;
   marketingEmail?: T;
   marketingEmailUpdatedAt?: T;
   marketingEmailSource?: T;

@@ -1,6 +1,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import type { Locale } from '@/i18n/routing'
 import { env } from '@/env'
 
 /**
@@ -51,12 +52,24 @@ interface SyncArgs {
   email: string
   firstName?: null | string
   lastName?: null | string
+  /**
+   * The language this subscriber reads the site in (spec 010, FR-044).
+   *
+   * **Logged, not sent — and that is a limitation worth stating rather than hiding.** Resend's
+   * contacts endpoint accepts `email`, `first_name`, `last_name` and `unsubscribed`, and nothing
+   * else; there is no field to put a language in. The authority is `customers.locale`, which this
+   * mirrors, so a campaign can be segmented by exporting from Payload. Sending it to Resend needs
+   * either their custom-properties API or a second audience per language, and that is a decision
+   * for whoever first writes a Russian campaign.
+   */
+  locale?: Locale
   subscribed: boolean
 }
 
 export async function syncMarketingContact({
   email,
   firstName,
+  locale,
   lastName,
   subscribed,
 }: SyncArgs): Promise<void> {
@@ -65,6 +78,7 @@ export async function syncMarketingContact({
   if (suppressed()) {
     payload.logger.info({
       msg: 'Marketing contact not synced (EMAIL_TRANSPORT=log)',
+      locale,
       subscribed,
     })
     return

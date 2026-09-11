@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { loadMessages } from '@/i18n/request'
+import { loadMessages } from '@/i18n/messages'
 import { BCP47, DEFAULT_LOCALE, LOCALES, LOCALE_LABELS, SECONDARY_LOCALES } from '@/i18n/routing'
 
 /**

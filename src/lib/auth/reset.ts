@@ -1,6 +1,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { tokenForCode } from '@/lib/auth/codes'
 import { authenticateCustomer } from '@/lib/auth/login'
 import { checkPassword } from '@/lib/auth/password'
@@ -55,7 +56,10 @@ export interface ResetInput {
  *     replayed.
  *  5. **Revoke the other sessions** (FR-021), then tell the customer (FR-035).
  */
-export async function completePasswordReset({ handle, password }: ResetInput): Promise<ResetResult> {
+export async function completePasswordReset(
+  { handle, password }: ResetInput,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<ResetResult> {
   const opened = openResetHandle(handle)
   if (!opened.ok) return { ok: false, reason: 'expired' }
 
@@ -95,7 +99,7 @@ export async function completePasswordReset({ handle, password }: ResetInput): P
   // Never gated on the marketing preference (FR-035) — it is how somebody finds out their account
   // was taken. A failed send is logged rather than thrown: the password HAS changed by now, and
   // reporting failure to the person who just changed it would be a lie.
-  await sendPasswordChangedNotice(customer.email)
+  await sendPasswordChangedNotice(customer.email, locale)
 
   return {
     customerId: customer.id,
@@ -187,8 +191,10 @@ export type ChangeResult =
 export async function changeCustomerPassword({
   currentPassword,
   customerId,
+  locale = DEFAULT_LOCALE,
   newPassword,
 }: {
+  locale?: Locale
   currentPassword: string
   customerId: number
   newPassword: string
@@ -227,7 +233,7 @@ export async function changeCustomerPassword({
   // session the verification above minted.
   await endOtherSessions(customerId, token)
 
-  await sendPasswordChangedNotice(customer.email)
+  await sendPasswordChangedNotice(customer.email, locale)
 
   return { customerId, ok: true, token }
 }

@@ -174,7 +174,7 @@ export async function beginCheckout(locale: Locale): Promise<CheckoutResult> {
     if (cart.issues.length > 0) return { ok: false, reason: 'issues' }
 
     const [template, messengers, customer, contact] = await Promise.all([
-      getMessageTemplate(),
+      getMessageTemplate(locale),
       getMessengers(),
       // Optional by construction: `null` for an anonymous visitor, and never a redirect (FR-046).
       getMessageCustomer(),
@@ -216,7 +216,7 @@ export async function buyNow(intent: CartIntent, locale: Locale): Promise<Checko
     }
 
     const [template, messengers, customer, contact] = await Promise.all([
-      getMessageTemplate(),
+      getMessageTemplate(locale),
       getMessengers(),
       getMessageCustomer(),
       getContactDetails(),

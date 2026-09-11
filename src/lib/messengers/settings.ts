@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { cache } from 'react'
 import { getPayload } from 'payload'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { DEFAULT_MESSAGE_TEMPLATE } from '@/globals/contact-settings'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 import { DEFAULT_CONTACT, mapsHref, telHref } from '@/lib/contact/defaults'
@@ -56,10 +57,16 @@ const client = cache(async () => getPayload({ config }))
  * a module holding a document can render a draft or decide availability for itself. Inference gives
  * the same type without the import.
  */
-const settings = cache(async () => {
+const settings = cache(async (locale: Locale = DEFAULT_LOCALE) => {
   try {
     const payload = await client()
-    return await payload.findGlobal({ slug: 'contact-settings', depth: 0, overrideAccess: false })
+    return await payload.findGlobal({
+      slug: 'contact-settings',
+      depth: 0,
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
+      overrideAccess: false,
+    })
   } catch (error) {
     if (!isDatabaseUnreachable(error)) throw error
 
@@ -89,8 +96,16 @@ export const getMessengers = cache(async (): Promise<SellerMessenger[]> => {
     }))
 })
 
-export const getMessageTemplate = cache(async (): Promise<string> => {
-  const doc = await settings()
+/**
+ * The message the shop receives, in the language the enquiry was written in (spec 010, FR-043).
+ *
+ * `messageTemplate` is localized, so this is the one reader here that genuinely needs a language:
+ * a Ukrainian visitor's order should reach WhatsApp in Ukrainian, or the shop answers in the wrong
+ * one. The other readers below expose emails, phone numbers and handles, which are the same in
+ * every language.
+ */
+export const getMessageTemplate = cache(async (locale: Locale = DEFAULT_LOCALE): Promise<string> => {
+  const doc = await settings(locale)
   const template = doc?.messageTemplate
 
   // An empty template is treated as absent rather than as an instruction to send nothing. The
@@ -177,8 +192,8 @@ export interface ContactDetails {
   mapsHref: string
 }
 
-export const getContactDetails = cache(async (): Promise<ContactDetails> => {
-  const doc = await settings()
+export const getContactDetails = cache(async (locale: Locale = DEFAULT_LOCALE): Promise<ContactDetails> => {
+  const doc = await settings(locale)
 
   const filled = (value: unknown, fallback: string): string =>
     typeof value === 'string' && value.trim() !== '' ? value : fallback

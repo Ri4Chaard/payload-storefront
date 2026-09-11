@@ -1,3 +1,4 @@
+import { localeFromContext } from '@/lib/email/transactional'
 import type { PayloadRequest } from 'payload'
 
 /**
@@ -47,14 +48,14 @@ export async function generateVerificationEmailHTML({
     throw new Error('Could not issue a verification code')
   }
 
-  const { html } = await buildVerificationEmail(issued.code)
+  const { html } = await buildVerificationEmail(issued.code, localeFromContext(req?.context))
   return html
 }
 
-export async function generateVerificationEmailSubject(): Promise<string> {
+export async function generateVerificationEmailSubject({ req }: GenerateArgs): Promise<string> {
   const { buildVerificationEmail } = await import('@/lib/email/transactional')
   // The code is not in the subject line. Subjects are shown on lock screens and in notification
   // previews, which is a wider audience than the person holding the phone.
-  const { subject } = await buildVerificationEmail('')
+  const { subject } = await buildVerificationEmail('', localeFromContext(req?.context))
   return subject
 }

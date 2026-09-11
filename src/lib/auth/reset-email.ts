@@ -1,3 +1,4 @@
+import { localeFromContext } from '@/lib/email/transactional'
 import type { PayloadRequest } from 'payload'
 
 /**
@@ -58,13 +59,13 @@ export async function generateResetEmailHTML(args?: GenerateArgs): Promise<strin
     throw new Error(`Reset code throttled (${issued.throttled})`)
   }
 
-  const { html } = await buildResetEmail(issued.code)
+  const { html } = await buildResetEmail(issued.code, localeFromContext(req?.context))
   return html
 }
 
-export async function generateResetEmailSubject(): Promise<string> {
+export async function generateResetEmailSubject(args?: GenerateArgs): Promise<string> {
   const { buildResetEmail } = await import('@/lib/email/transactional')
   // No code in the subject: subjects appear on lock screens and in notification previews.
-  const { subject } = await buildResetEmail('')
+  const { subject } = await buildResetEmail('', localeFromContext(args?.req?.context))
   return subject
 }

@@ -7,6 +7,7 @@ import {
   stampMarketingConsent,
   syncMarketingChoice,
 } from '@/collections/customer-hooks'
+import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS } from '@/i18n/routing'
 import { isAdmin, publicAccess } from '@/lib/access'
 import { generateResetEmailHTML, generateResetEmailSubject } from '@/lib/auth/reset-email'
 import {
@@ -178,6 +179,27 @@ export const Customers: CollectionConfig = {
         defaultColumns: ['country', 'city', 'addressLine1', 'postalCode', 'isDefault'],
         description:
           'Saved by the customer on their profile. Exactly one is the default; marking another moves it.',
+      },
+    },
+    {
+      /*
+        The language this customer reads the site in (spec 010, FR-044).
+
+        Recorded at registration from the page they registered on. Two uses: marketing campaigns can
+        be segmented by it — which is what FR-044 asks for — and it is the fallback for any mail sent
+        to them outside a request, where no page can say.
+
+        NOT localized: it is a fact about a person, like their email address, and it must read the
+        same whichever language an administrator is viewing the admin in.
+      */
+      name: 'locale',
+      type: 'select',
+      defaultValue: DEFAULT_LOCALE,
+      options: LOCALES.map((code) => ({ label: LOCALE_LABELS[code].label, value: code })),
+      label: 'Language',
+      admin: {
+        description: 'The language this customer was reading the site in when they registered.',
+        position: 'sidebar',
       },
     },
     {
