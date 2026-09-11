@@ -51,11 +51,31 @@ export function generateStaticParams() {
  * Only the namespaces a Client Component actually reads (spec 010, research R11).
  *
  * Everything the server renders uses `getTranslations` and never touches this provider, so shipping
- * the whole message file would put every legal, blog and product string into the flight payload of
- * every page for no reader. Adding a namespace here is a deliberate act with a measurable cost —
- * `pnpm measure:js` is where it shows up.
+ * the whole message file would put every string into the flight payload of every page for no reader.
+ * Adding a namespace here is a deliberate act with a measurable cost — `pnpm measure:js` is where it
+ * shows up.
+ *
+ * **A namespace missing from this list fails silently and looks like a template bug.** next-intl
+ * renders the key path itself — a button reading `product.addToCart` — rather than throwing, so it
+ * survives a build, a typecheck and a lint, and is caught only by looking at the page. This list is
+ * derived from what `useTranslations` is actually called with in a Client Component:
+ *
+ *   grep -rl "^'use client'" src | xargs grep -ohE "useTranslations\('([a-z]+)'\)" | sort -u
+ *
+ * `legal` and `email` are deliberately absent: a policy page is server-rendered and mail never
+ * reaches a browser at all.
  */
-const CLIENT_NAMESPACES = ['common', 'header', 'nav', 'cart', 'account', 'forms', 'errors'] as const
+const CLIENT_NAMESPACES = [
+  'account',
+  'cart',
+  'catalog',
+  'common',
+  'errors',
+  'forms',
+  'header',
+  'nav',
+  'product',
+] as const
 
 export default async function FrontendLayout({ children, params }: LayoutProps<'/[locale]'>) {
   /*
@@ -137,29 +157,33 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
           prerendered. A number in a badge is not worth the prerendered catalogue.
         */}
         <NextIntlClientProvider locale={locale} messages={clientMessages}>
-        <CartCountProvider>
-          <ContactBanner social={social} {...reach} />
-          {/*
+          <CartCountProvider>
+            <ContactBanner social={social} {...reach} />
+            {/*
             The switcher's list comes from here rather than from the header's own default, so that
             spec 010's US3 has one place to filter it — the owner switching Ukrainian off changes
             this line's output and nothing else.
           */}
-          <Header social={social} {...reach} locales={enabled.map((code) => LOCALE_LABELS[code])} />
-        {/*
+            <Header
+              social={social}
+              {...reach}
+              locales={enabled.map((code) => LOCALE_LABELS[code])}
+            />
+            {/*
           `<main>` is the landmark the skip link (T072) will target. The skip link is still its own
           task; header and footer are wired up here so they are exercised by a real page rather than
           only by Storybook.
         */}
-          <main id="main">{children}</main>
-          <Footer
-            social={social}
-            legalLinks={policies.legal}
-            customerCareLinks={policies.customerCare}
-            cookieSettings={cookies.enabled ? <CookieSettingsButton /> : null}
-            {...contact}
-          />
+            <main id="main">{children}</main>
+            <Footer
+              social={social}
+              legalLinks={policies.legal}
+              customerCareLinks={policies.customerCare}
+              cookieSettings={cookies.enabled ? <CookieSettingsButton /> : null}
+              {...contact}
+            />
 
-          {/*
+            {/*
             The consent banner (spec 009, FR-017). Last in the body on purpose: it is fixed to the
             viewport, so its position in the DOM decides only where a keyboard meets it — and after
             the footer is wrong. See the note below.
@@ -168,8 +192,8 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
             keeps `cookies()` — a request-time API — out of this layout and leaves every route
             prerenderable.
           */}
-          <CookieBanner settings={cookies} />
-        </CartCountProvider>
+            <CookieBanner settings={cookies} />
+          </CartCountProvider>
         </NextIntlClientProvider>
       </body>
     </html>

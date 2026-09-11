@@ -62,7 +62,10 @@ export function Switch({
       <span className={cn('inline-flex items-center gap-3', className)}>
         <span
           aria-hidden="true"
-          className={cn(TRACK, props.checked && '[&>span]:bg-primary-default [&>span]:translate-x-3.5')}
+          className={cn(
+            TRACK,
+            props.checked && '[&>span]:bg-primary-default [&>span]:translate-x-3.5',
+          )}
         >
           <span className={KNOB} />
         </span>

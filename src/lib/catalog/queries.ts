@@ -35,7 +35,7 @@ import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import type { Category, Collection, Product, Size } from '@/payload-types'
 
 import { COLOURS, DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
-import { formatPrice } from './price'
+import { formatPriceFor, formatPrice } from './price'
 import {
   isProductAvailable,
   lowestPriceMinor,
@@ -125,9 +125,30 @@ interface Reference {
 const reference = cache(async (locale: Locale): Promise<Reference> => {
   const payload = await client()
   const [categories, collections, sizes] = await Promise.all([
-    payload.find({ locale, fallbackLocale: DEFAULT_LOCALE, collection: 'categories', limit: 0, sort: 'order', overrideAccess: false }),
-    payload.find({ locale, fallbackLocale: DEFAULT_LOCALE, collection: 'collections', limit: 0, sort: 'order', overrideAccess: false }),
-    payload.find({ locale, fallbackLocale: DEFAULT_LOCALE, collection: 'sizes', limit: 0, sort: 'order', overrideAccess: false }),
+    payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
+      collection: 'categories',
+      limit: 0,
+      sort: 'order',
+      overrideAccess: false,
+    }),
+    payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
+      collection: 'collections',
+      limit: 0,
+      sort: 'order',
+      overrideAccess: false,
+    }),
+    payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
+      collection: 'sizes',
+      limit: 0,
+      sort: 'order',
+      overrideAccess: false,
+    }),
   ])
   return { categories: categories.docs, collections: collections.docs, sizes: sizes.docs }
 })
@@ -156,7 +177,9 @@ const sizeLabel = (refs: Reference, value: string): string | undefined =>
 // ---------------------------------------------------------------------------------------------
 
 function slugsOf(product: Product, key: 'collections'): string[] {
-  return (product[key] ?? []).map((entry) => (typeof entry === 'number' ? String(entry) : entry.slug))
+  return (product[key] ?? []).map((entry) =>
+    typeof entry === 'number' ? String(entry) : entry.slug,
+  )
 }
 
 function matches(product: Product, filters: FilterState): boolean {
@@ -205,9 +228,7 @@ function sorted(products: Product[], sort: FilterState['sort']): Product[] {
     case 'price-desc':
       return copy.sort((a, b) => priceOf(b) - priceOf(a) || a.id - b.id)
     case 'newest':
-      return copy.sort(
-        (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || b.id - a.id,
-      )
+      return copy.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || b.id - a.id)
     case 'recommended':
     default:
       // Catalogue order — what the owner sees in the admin. It is deliberately NOT a relevance
@@ -222,7 +243,7 @@ function sorted(products: Product[], sort: FilterState['sort']): Product[] {
  * way as the panel that produced it. Labels come from the catalogue, which is why they are built
  * here and not in `filters.ts` — that module is pure URL arithmetic and has never seen a category.
  */
-function chipsFor(filters: FilterState, refs: Reference): AppliedFilterChip[] {
+function chipsFor(filters: FilterState, refs: Reference, locale: Locale): AppliedFilterChip[] {
   const chips: AppliedFilterChip[] = []
 
   for (const slug of filters.category) {
@@ -247,7 +268,7 @@ function chipsFor(filters: FilterState, refs: Reference): AppliedFilterChip[] {
     chips.push({
       key: 'minPrice',
       value: String(filters.minPrice),
-      label: `${formatPrice(filters.minPrice)} – ${formatPrice(filters.maxPrice)}`,
+      label: `${formatPriceFor(locale, filters.minPrice)} – ${formatPriceFor(locale, filters.maxPrice)}`,
     })
   } else if (filters.minPrice !== undefined) {
     chips.push({
@@ -336,11 +357,11 @@ export async function getListing(filters: FilterState, locale: Locale): Promise<
   const shown = found.slice(0, page * PAGE_SIZE)
 
   return {
-    products: shown.map(toProductSummary),
+    products: shown.map((product) => toProductSummary(product, locale)),
     total: found.length,
     page,
     hasMore: shown.length < found.length,
-    appliedChips: chipsFor(applied, refs),
+    appliedChips: chipsFor(applied, refs, locale),
     ignored,
   }
 }
@@ -371,7 +392,7 @@ export async function getProduct(slug: string, locale: Locale): Promise<ProductD
   })
 
   const found = docs[0]
-  return found ? toProductDetail(found) : null
+  return found ? toProductDetail(found, locale) : null
 }
 
 /**
@@ -391,7 +412,10 @@ export async function getProduct(slug: string, locale: Locale): Promise<ProductD
  * Returned as a `Map` because the caller is iterating cart lines and asking "and this one?" — a
  * list would make every line a linear scan of the catalogue.
  */
-export async function getProductsByIds(ids: number[], locale: Locale): Promise<Map<number, ProductDetail>> {
+export async function getProductsByIds(
+  ids: number[],
+  locale: Locale,
+): Promise<Map<number, ProductDetail>> {
   if (ids.length === 0) return new Map()
 
   const payload = await client()
@@ -405,7 +429,7 @@ export async function getProductsByIds(ids: number[], locale: Locale): Promise<M
     overrideAccess: false,
   })
 
-  return new Map(docs.map((product) => [product.id, toProductDetail(product)]))
+  return new Map(docs.map((product) => [product.id, toProductDetail(product, locale)]))
 }
 
 /**
@@ -459,7 +483,10 @@ function facet(
  * filters, which loses the option they were about to press; showing a zero is the honest answer to
  * "do you have this".
  */
-export async function getFilterFacets(locale: Locale, categorySlug?: string): Promise<FilterFacets> {
+export async function getFilterFacets(
+  locale: Locale,
+  categorySlug?: string,
+): Promise<FilterFacets> {
   const [refs, all] = await Promise.all([reference(locale), catalogue(locale)])
 
   const within = categorySlug
@@ -490,7 +517,9 @@ export async function getFilterFacets(locale: Locale, categorySlug?: string): Pr
     sizes: facet(
       within,
       (product) =>
-        (product.sizes ?? []).map((entry) => (typeof entry === 'number' ? String(entry) : entry.value)),
+        (product.sizes ?? []).map((entry) =>
+          typeof entry === 'number' ? String(entry) : entry.value,
+        ),
       refs.sizes
         .slice()
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
@@ -517,7 +546,11 @@ export async function getFilterFacets(locale: Locale, categorySlug?: string): Pr
  * _Complete the Collection_. An empty array means the band does not render (FR-037) — a "related"
  * strip padded out with whatever else is in the shop is worse than no strip.
  */
-export async function getRelated(productId: number, locale: Locale, limit = 4): Promise<ProductSummary[]> {
+export async function getRelated(
+  productId: number,
+  locale: Locale,
+  limit = 4,
+): Promise<ProductSummary[]> {
   const all = await catalogue(locale)
   const product = all.find((entry) => entry.id === productId)
   if (!product) return []
@@ -529,7 +562,7 @@ export async function getRelated(productId: number, locale: Locale, limit = 4): 
     .filter((entry) => entry.id !== productId)
     .filter((entry) => slugsOf(entry, 'collections').some((slug) => collections.includes(slug)))
     .slice(0, limit)
-    .map(toProductSummary)
+    .map((product) => toProductSummary(product, locale))
 }
 
 /**
@@ -546,11 +579,17 @@ export async function getRelated(productId: number, locale: Locale, limit = 4): 
  */
 export async function getFeatured(locale: Locale, limit = 4): Promise<ProductSummary[]> {
   const all = await catalogue(locale)
-  return all.slice(0, limit).map(toProductSummary)
+  return all.slice(0, limit).map((product) => toProductSummary(product, locale))
 }
 
 export async function getShopContent(locale: Locale): Promise<ShopContent> {
   const payload = await client()
-  const shop = await payload.findGlobal({ locale, fallbackLocale: DEFAULT_LOCALE, slug: 'shop', depth: 0, overrideAccess: false })
+  const shop = await payload.findGlobal({
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
+    slug: 'shop',
+    depth: 0,
+    overrideAccess: false,
+  })
   return toShopContent(shop)
 }

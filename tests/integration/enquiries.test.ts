@@ -26,7 +26,9 @@ vi.mock('next/headers', () => ({
 }))
 
 /** Typed by what Payload actually calls it with, so `mock.calls[0][0]` is not an empty tuple. */
-const sendEmail = vi.fn<(message: Record<string, unknown>) => Promise<unknown>>(async () => undefined)
+const sendEmail = vi.fn<(message: Record<string, unknown>) => Promise<unknown>>(
+  async () => undefined,
+)
 
 const payload = await getPayload({ config })
 
@@ -54,8 +56,13 @@ const form = (overrides: Record<string, string> = {}) => {
 const submit = (data: FormData) => submitEnquiry({ status: 'idle' }, data)
 
 const countFor = async (email: string) =>
-  (await payload.count({ collection: 'enquiries', where: { email: { equals: email } }, overrideAccess: true }))
-    .totalDocs
+  (
+    await payload.count({
+      collection: 'enquiries',
+      where: { email: { equals: email } },
+      overrideAccess: true,
+    })
+  ).totalDocs
 
 const rowFor = async (email: string) => {
   const found = await payload.find({
@@ -254,7 +261,13 @@ describe('access', () => {
     await expect(
       payload.create({
         collection: 'enquiries',
-        data: { name: 'Direct', email: 'direct@aurum-testing.dev', message: 'x', notification: 'pending', locale: 'en' },
+        data: {
+          name: 'Direct',
+          email: 'direct@aurum-testing.dev',
+          message: 'x',
+          notification: 'pending',
+          locale: 'en',
+        },
         overrideAccess: false,
       }),
     ).rejects.toThrow()
@@ -284,9 +297,9 @@ describe('access', () => {
   */
   it('refuses an anonymous request outright', async () => {
     await submit(form())
-    await expect(
-      payload.find({ collection: 'enquiries', overrideAccess: false }),
-    ).rejects.toThrow(/not allowed/i)
+    await expect(payload.find({ collection: 'enquiries', overrideAccess: false })).rejects.toThrow(
+      /not allowed/i,
+    )
   })
 
   it('refuses a customer, including for their own enquiries', async () => {
@@ -307,7 +320,11 @@ describe('access', () => {
 describe('the retention purge', () => {
   /** The job takes `req` and uses only `req.payload`, which is what the runner hands it. */
   const runPurge = async () =>
-    (purgeEnquiriesTask.handler as (args: { req: unknown }) => Promise<{ output: { enquiriesDeleted: number } }>)({
+    (
+      purgeEnquiriesTask.handler as (args: {
+        req: unknown
+      }) => Promise<{ output: { enquiriesDeleted: number } }>
+    )({
       req: { payload },
     })
 

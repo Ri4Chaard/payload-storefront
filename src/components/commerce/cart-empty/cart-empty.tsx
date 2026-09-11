@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ export interface CartEmptyProps extends React.ComponentProps<'div'> {
 }
 
 export function CartEmpty({ browseHref = '/all-jewelry', className, ...props }: CartEmptyProps) {
+  const t_nav = useTranslations('nav')
   return (
     <Container
       as="section"
@@ -39,7 +41,7 @@ export function CartEmpty({ browseHref = '/all-jewelry', className, ...props }: 
         look at what is in the collection today.
       </p>
       <Button href={browseHref} variant="primary" className="mt-2.5 uppercase">
-        Browse the collection
+        {t_nav('browseCollection')}
       </Button>
     </Container>
   )

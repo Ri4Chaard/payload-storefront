@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { ProfileRow } from '@/components/account/profile-row'
@@ -30,10 +31,11 @@ export interface MarketingToggleProps {
   subscribed: boolean
 }
 
-const LABEL = 'Email me occasional news and offers'
 const FAILED = 'That did not save. Your preference is unchanged — please try again.'
 
 export function MarketingToggle({ subscribed }: MarketingToggleProps) {
+  const t_account = useTranslations('account')
+  const LABEL = t_account('marketingOptIn')
   const [checked, setChecked] = React.useState(subscribed)
   const [failed, setFailed] = React.useState(false)
   const [pending, startTransition] = React.useTransition()

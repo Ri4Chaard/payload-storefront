@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { countryName, type CountryCode } from '@/lib/countries'
 
 /**
@@ -32,9 +33,11 @@ export interface CustomerAddress {
  * The postcode is left out. It distinguishes nothing a customer looks at, and it is the part of an
  * address most likely to push the line past the width of the box.
  */
-export function formatAddress(address: CustomerAddress): string {
+export function formatAddress(address: CustomerAddress, locale: Locale = DEFAULT_LOCALE): string {
   return [
-    countryName(address.country),
+    // `countries.ts` has resolved names through `Intl.DisplayNames` since spec 004 and has
+    // always taken this argument; spec 010 is simply the first caller to pass one (FR-040).
+    countryName(address.country, locale),
     address.city,
     address.addressLine1,
     address.addressLine2,
@@ -58,14 +61,19 @@ export function formatAddress(address: CustomerAddress): string {
  * MEANS is the kind of parameter whose two call sites drift, and it would put the profile's careful
  * reasoning about line width next to a branch that ignores it.
  */
-export function formatPostalAddress(address: CustomerAddress): string {
+export function formatPostalAddress(
+  address: CustomerAddress,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   return [
     address.addressLine1,
     address.addressLine2,
     address.apartment,
     address.city,
     address.postalCode,
-    countryName(address.country),
+    // `countries.ts` has resolved names through `Intl.DisplayNames` since spec 004 and has
+    // always taken this argument; spec 010 is simply the first caller to pass one (FR-040).
+    countryName(address.country, locale),
   ]
     .filter(Boolean)
     .join(', ')

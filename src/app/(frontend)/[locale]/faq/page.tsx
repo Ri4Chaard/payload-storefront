@@ -94,7 +94,10 @@ function faqStructuredData(questions: Question[]) {
 
 export default async function FaqPage() {
   const locale = await currentLocale()
-  const [page, questions] = await Promise.all([getFaqPage(locale), getAllPublishedQuestions(locale)])
+  const [page, questions] = await Promise.all([
+    getFaqPage(locale),
+    getAllPublishedQuestions(locale),
+  ])
 
   /*
     `null` means the database was unreachable — a container build, and nothing else. The chrome

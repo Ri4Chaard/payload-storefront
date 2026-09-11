@@ -24,7 +24,10 @@ import { getEnabledLocales } from '@/lib/i18n/enabled'
  * `path` is the address WITHOUT a prefix — `/legal/privacy`, the value the href builders already
  * return. Prefixing is this function's job.
  */
-export async function localeAlternates(path: string, locale: Locale): Promise<Metadata['alternates']> {
+export async function localeAlternates(
+  path: string,
+  locale: Locale,
+): Promise<Metadata['alternates']> {
   const enabled = await getEnabledLocales()
 
   const languages = Object.fromEntries(

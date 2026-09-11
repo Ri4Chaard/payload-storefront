@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -25,12 +26,6 @@ import { resetPasswordSchema, type ResetPasswordValues } from '@/lib/auth/schema
  * edited in the DOM before submitting. It is a reference rather than a credential either way — see
  * `src/lib/auth/reset-handle.ts` — but there is no reason to draw it.
  */
-const ERRORS: Record<string, string> = {
-  resetEmailInvalid: 'That does not look like an email address.',
-  resetPasswordMismatch: 'The two passwords do not match.',
-  resetPasswordTooWeak: 'Use at least 8 characters, and avoid a password you use elsewhere.',
-  resetSessionExpired: 'That reset has expired. Request a new code and try again.',
-}
 
 export interface NewPasswordFormProps {
   email: string
@@ -39,6 +34,15 @@ export interface NewPasswordFormProps {
 }
 
 export function NewPasswordForm({ email, handle }: NewPasswordFormProps) {
+  const t_errors = useTranslations('errors')
+
+  const ERRORS: Record<string, string> = {
+    resetEmailInvalid: t_errors('emailInvalid'),
+    resetPasswordMismatch: t_errors('passwordMismatch'),
+    resetPasswordTooWeak: t_errors('passwordWeak'),
+    resetSessionExpired: t_errors('resetExpired'),
+  }
+
   const router = useRouter()
 
   const form = useForm<ResetPasswordValues>({

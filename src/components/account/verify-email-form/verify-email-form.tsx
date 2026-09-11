@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -38,13 +39,6 @@ import { verifyCodeSchema, type VerifyCodeValues } from '@/lib/auth/schemas'
  * someone their code is wrong when it has merely expired is how a person ends up retyping the same
  * six digits until they give up.
  */
-const CODE_ERRORS: Record<string, string> = {
-  codeAlreadyUsed: 'That code has already been used. Request a new one.',
-  codeExpired: 'That code has expired. Request a new one.',
-  codeInvalid: 'Invalid code. Please try again.',
-  codeSuperseded: 'A newer code was sent. Please use the most recent one.',
-  codeTooManyAttempts: 'Too many incorrect attempts. Request a new code.',
-}
 
 export interface VerifyEmailFormProps {
   email: string
@@ -52,6 +46,16 @@ export interface VerifyEmailFormProps {
 }
 
 export function VerifyEmailForm({ email, onVerified }: VerifyEmailFormProps) {
+  const t_errors = useTranslations('errors')
+
+  const CODE_ERRORS: Record<string, string> = {
+    codeAlreadyUsed: t_errors('codeUsed'),
+    codeExpired: t_errors('codeExpired'),
+    codeInvalid: t_errors('codeInvalid'),
+    codeSuperseded: t_errors('codeSuperseded'),
+    codeTooManyAttempts: t_errors('codeAttempts'),
+  }
+
   const form = useForm<VerifyCodeValues>({
     resolver: zodResolver(verifyCodeSchema),
     defaultValues: { code: '', email },

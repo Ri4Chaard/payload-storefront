@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import React from 'react'
 
@@ -79,10 +80,6 @@ const THUMBNAIL =
   'relative h-17 w-17 shrink-0 overflow-hidden rounded-sm border border-transparent xl:h-35 xl:w-30 xl:rounded-none'
 
 /** Previous and next over the set, drawn beneath the rail at 1920 (`297:4591`). */
-const STEPS: readonly { icon: IconName; name: string; step: 1 | -1 }[] = [
-  { icon: 'chevron-up', name: 'Show the previous photograph', step: -1 },
-  { icon: 'chevron-down', name: 'Show the next photograph', step: 1 },
-]
 
 export function ProductGallery({
   images,
@@ -92,6 +89,13 @@ export function ProductGallery({
   className,
   ...props
 }: ProductGalleryProps) {
+  const t_product = useTranslations('product')
+
+  const STEPS: readonly { icon: IconName; name: string; step: 1 | -1 }[] = [
+    { icon: 'chevron-up', name: t_product('previousPhoto'), step: -1 },
+    { icon: 'chevron-down', name: t_product('nextPhoto'), step: 1 },
+  ]
+
   const [index, setIndex] = React.useState(0)
   const [open, setOpen] = React.useState(false)
   const rootRef = React.useRef<HTMLDivElement>(null)

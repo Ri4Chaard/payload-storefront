@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -34,13 +35,16 @@ import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schema
  * Keeping the action pure is what makes those possible.
  */
 /** The action and the schema both return keys; these are the sentences. */
-const ERRORS: Record<string, string> = {
-  createEmailInvalid: 'That does not look like an email address.',
-  createPasswordMismatch: 'The two passwords do not match.',
-  createPasswordTooWeak: 'Use at least 8 characters, and avoid a password you use elsewhere.',
-}
 
 export function CreateAccountForm() {
+  const t_errors = useTranslations('errors')
+
+  const ERRORS: Record<string, string> = {
+    createEmailInvalid: t_errors('emailInvalid'),
+    createPasswordMismatch: t_errors('passwordMismatch'),
+    createPasswordTooWeak: t_errors('passwordWeak'),
+  }
+
   const router = useRouter()
 
   const form = useForm<CreateAccountValues>({

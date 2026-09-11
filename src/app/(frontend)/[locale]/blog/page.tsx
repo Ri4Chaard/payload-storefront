@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
@@ -88,6 +89,7 @@ interface BlogIndexProps {
 
 export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
   const locale = await currentLocale()
+  const t_catalog = await getTranslations('catalog')
   const query = await searchParams
   const category = parseCategory(query.category)
   const page = parsePage(query.page)
@@ -148,6 +150,7 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
 
           <Container className="py-10 xl:py-15">
             <LoadMore
+              label={t_catalog('loadMore')}
               shown={index.shown}
               total={index.total}
               moreHref={index.moreHref}

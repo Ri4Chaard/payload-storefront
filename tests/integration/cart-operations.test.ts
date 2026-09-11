@@ -2,7 +2,13 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { addLine, changeQuantity, checkIntent, createCartFor, dropLine } from '@/lib/cart/operations'
+import {
+  addLine,
+  changeQuantity,
+  checkIntent,
+  createCartFor,
+  dropLine,
+} from '@/lib/cart/operations'
 import type { CartOwner } from '@/lib/cart/session'
 import { resolveCart, type RawCartLine } from '@/lib/cart/totals'
 import { getProduct, getProductsByIds } from '@/lib/catalog/queries'
@@ -66,7 +72,10 @@ afterAll(async () => {
   }
 })
 
-const intentFor = (product: ProductDetail, over: Partial<{ sizeId: number; variantId: number; quantity: number }> = {}) => ({
+const intentFor = (
+  product: ProductDetail,
+  over: Partial<{ sizeId: number; variantId: number; quantity: number }> = {},
+) => ({
   productId: product.id,
   quantity: 1,
   ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
@@ -79,7 +88,10 @@ describe('line identity (FR-004)', () => {
     const owner = await guest()
     const [first, second] = ring.sizes
 
-    expect(second, 'the seeded ring needs at least two sizes for this to mean anything').toBeDefined()
+    expect(
+      second,
+      'the seeded ring needs at least two sizes for this to mean anything',
+    ).toBeDefined()
 
     await addLine(owner, owner.cartId, intentFor(ring, { sizeId: first!.id }))
     await addLine(owner, owner.cartId, intentFor(ring, { sizeId: second!.id }))
@@ -149,14 +161,20 @@ describe('what may be added (FR-002, FR-003)', () => {
   })
 
   it('names the unmade choice rather than refusing vaguely', async () => {
-    const withoutStone = await checkIntent({ productId: ring.id, quantity: 1, sizeId: ring.sizes[0]!.id }, 'en')
+    const withoutStone = await checkIntent(
+      { productId: ring.id, quantity: 1, sizeId: ring.sizes[0]!.id },
+      'en',
+    )
     expect(withoutStone).toEqual({ ok: false, reason: 'missing-option', field: 'diamond' })
 
-    const withoutSize = await checkIntent({
-      productId: ring.id,
-      quantity: 1,
-      variantId: ring.diamondOptions[0]!.id,
-    }, 'en')
+    const withoutSize = await checkIntent(
+      {
+        productId: ring.id,
+        quantity: 1,
+        variantId: ring.diamondOptions[0]!.id,
+      },
+      'en',
+    )
     expect(withoutSize).toEqual({ ok: false, reason: 'missing-option', field: 'size' })
   })
 
@@ -256,7 +274,10 @@ describe('the displayed total is computed here, not read from the cart row', () 
     const rows = await rowsOf(owner)
     const view = resolveCart(
       rows,
-      await getProductsByIds(rows.map((row) => Number(row.product)), 'en'),
+      await getProductsByIds(
+        rows.map((row) => Number(row.product)),
+        'en',
+      ),
     )
 
     const stored = await payload.findByID({

@@ -103,7 +103,8 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
     // would make every save in the admin pay for a page render.
     select: { slug: true },
   })
-  for (const product of docs) for (const path of localised(`/products/${product.slug}`)) revalidatePath(path)
+  for (const product of docs)
+    for (const path of localised(`/products/${product.slug}`)) revalidatePath(path)
 
   // A renamed piece leaves a page at an address no query will ever return again. It has to go, or
   // the old URL keeps serving a piece that has moved.
@@ -131,7 +132,8 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
     limit: 0,
     select: { slug: true },
   })
-  for (const article of articles.docs) for (const path of localised(`/blog/${article.slug}`)) revalidatePath(path)
+  for (const article of articles.docs)
+    for (const path of localised(`/blog/${article.slug}`)) revalidatePath(path)
 }
 
 /**
@@ -152,7 +154,8 @@ async function invalidateArticle(slug: string, orphanedSlug?: string): Promise<v
   const { revalidatePath } = await import('next/cache')
 
   for (const path of localised(`/blog/${slug}`)) revalidatePath(path)
-  if (orphanedSlug && orphanedSlug !== slug) for (const path of localised(`/blog/${orphanedSlug}`)) revalidatePath(path)
+  if (orphanedSlug && orphanedSlug !== slug)
+    for (const path of localised(`/blog/${orphanedSlug}`)) revalidatePath(path)
 }
 
 /**

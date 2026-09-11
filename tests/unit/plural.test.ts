@@ -58,7 +58,11 @@ describe('the cart’s spoken name', () => {
   it('never renders the raw ICU source', () => {
     // A message the runtime failed to parse renders as its own braces, which looks like a template
     // bug rather than a translation one.
-    for (const [locale, messages] of [['en', en], ['ru', ru], ['uk', uk]] as const) {
+    for (const [locale, messages] of [
+      ['en', en],
+      ['ru', ru],
+      ['uk', uk],
+    ] as const) {
       const t = translator(locale, messages)
       for (const count of [0, 1, 2, 5, 11, 21, 101]) {
         expect(t('cart', { count })).not.toContain('plural')

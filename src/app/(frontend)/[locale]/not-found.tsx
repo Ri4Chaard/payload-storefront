@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -15,7 +16,8 @@ import { Container } from '@/components/ui/container'
  * It renders inside the storefront layout, so the header, the footer and the navigation come with
  * it — which is the difference between a dead end and a wrong turn.
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const t_nav = await getTranslations('nav')
   return (
     <Container
       as="section"
@@ -32,7 +34,7 @@ export default function NotFound() {
 
       <div className="flex flex-wrap items-center justify-center gap-2.5">
         <Button variant="primary" href="/all-jewelry">
-          Browse all jewelry
+          {t_nav('browseAll')}
         </Button>
         <Button variant="outline" href="/">
           Back to the home page

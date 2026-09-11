@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
@@ -56,10 +57,18 @@ export type PasswordFieldProps = Omit<TextInputProps, 'iconEnd' | 'trailing' | '
 
 export function PasswordField({
   adornment,
-  concealLabel = 'Hide password',
-  revealLabel = 'Show password',
+  concealLabel,
+  revealLabel,
   ...props
 }: PasswordFieldProps) {
+  const t_account = useTranslations('account')
+  /*
+    Resolved in the body, not as a default parameter: a hook cannot be called in a signature. The
+    props stay overridable — a caller with its own words still wins — and the fallback is now
+    translated rather than being an English literal in the default.
+  */
+  const conceal = concealLabel ?? t_account('hidePassword')
+  const reveal = revealLabel ?? t_account('showPassword')
   const [visible, setVisible] = React.useState(false)
 
   return (
@@ -76,7 +85,7 @@ export function PasswordField({
             // intent was to look at what they typed.
             onClick={() => setVisible((shown) => !shown)}
             aria-pressed={visible}
-            aria-label={visible ? concealLabel : revealLabel}
+            aria-label={visible ? conceal : reveal}
             className={[
               'text-neutral-secondary hover:text-neutral-primary -mr-1 flex size-8 items-center',
               'justify-center transition-colors',

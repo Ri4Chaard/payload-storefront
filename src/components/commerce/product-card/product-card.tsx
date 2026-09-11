@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Link as NextLink } from '@/i18n/navigation'
 import React from 'react'
 
@@ -101,7 +102,7 @@ export function ProductCard({
   href,
   images,
   size = 'default',
-  cta = 'Select size',
+  cta: ctaProp,
   ctaVisibility = 'desktop-hover',
   ctaHref,
   nameFit = 'truncate',
@@ -111,6 +112,14 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
+  const t_product = useTranslations('product')
+  /*
+    Resolved in the body rather than as a default parameter: `useTranslations` is a hook. The prop
+    still wins where a caller passes one — what changed is that the fallback is translated instead
+    of being an English literal in the signature.
+  */
+  const cta = ctaProp ?? t_product('selectSize')
+
   const compact = size === 'compact'
 
   return (

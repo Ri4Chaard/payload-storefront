@@ -51,9 +51,9 @@ describe('the filter URL round-trips', () => {
 
 describe('defaults are absent from the URL', () => {
   it('writes neither page 1, nor the recommended sort, nor an off stock toggle', () => {
-    expect(toQueryString({ ...DEFAULT_FILTERS, page: 1, sort: 'recommended', inStock: false })).toBe(
-      '',
-    )
+    expect(
+      toQueryString({ ...DEFAULT_FILTERS, page: 1, sort: 'recommended', inStock: false }),
+    ).toBe('')
   })
 
   it('writes them once they leave their default', () => {

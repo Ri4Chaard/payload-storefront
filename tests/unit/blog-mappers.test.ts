@@ -79,7 +79,13 @@ const article = (overrides: Partial<Article> = {}): Article =>
 describe('anchors', () => {
   it('slugifies a heading the same way a slug field would', () => {
     const view = toArticleView(
-      article({ chapters: [chapter({ heading: 'Cut: Where Brilliance Begins' }), chapter({ heading: 'Colour' })] }),
+      article({
+        chapters: [
+          chapter({ heading: 'Cut: Where Brilliance Begins' }),
+          chapter({ heading: 'Colour' }),
+        ],
+      }),
+      'en',
     )
 
     expect(view.chapters[0]?.anchor).toBe('cut-where-brilliance-begins')
@@ -99,16 +105,26 @@ describe('anchors', () => {
           chapter({ heading: 'Summary' }),
         ],
       }),
+      'en',
     )
 
-    expect(view.chapters.map((entry) => entry.anchor)).toEqual(['summary', 'the-middle', 'summary-2'])
-    expect(view.contents.map((entry) => entry.anchor)).toEqual(['summary', 'the-middle', 'summary-2'])
+    expect(view.chapters.map((entry) => entry.anchor)).toEqual([
+      'summary',
+      'the-middle',
+      'summary-2',
+    ])
+    expect(view.contents.map((entry) => entry.anchor)).toEqual([
+      'summary',
+      'the-middle',
+      'summary-2',
+    ])
   })
 
   /** Punctuation alone slugifies to nothing, and an empty `id` is not a jump target. */
   it('falls back to the chapter position when a heading has nothing to slugify', () => {
     const view = toArticleView(
       article({ chapters: [chapter({ heading: '???' }), chapter({ heading: 'Real' })] }),
+      'en',
     )
 
     expect(view.chapters[0]?.anchor).toBe('chapter-1')
@@ -120,29 +136,43 @@ describe('contents', () => {
     const view = toArticleView(
       article({
         chapters: [
-          chapter({ heading: 'Cut: Where Brilliance Begins', tocLabel: 'Diamond Cut & Brilliance' }),
+          chapter({
+            heading: 'Cut: Where Brilliance Begins',
+            tocLabel: 'Diamond Cut & Brilliance',
+          }),
           chapter({ heading: 'Colour' }),
         ],
       }),
+      'en',
     )
 
-    expect(view.contents.map((entry) => entry.label)).toEqual(['Diamond Cut & Brilliance', 'Colour'])
+    expect(view.contents.map((entry) => entry.label)).toEqual([
+      'Diamond Cut & Brilliance',
+      'Colour',
+    ])
     // The chapter still renders its real heading — the short form is for the rail only.
     expect(view.chapters[0]?.heading).toBe('Cut: Where Brilliance Begins')
   })
 
   /** FR-028. A contents list of one entry is a control that points at what is already on screen. */
   it('is empty for a single chapter and for none at all', () => {
-    expect(toArticleView(article({ chapters: [chapter({ heading: 'Only' })] })).contents).toEqual([])
-    expect(toArticleView(article({ chapters: [] })).contents).toEqual([])
-    expect(toArticleView(article({})).chapters).toEqual([])
+    expect(
+      toArticleView(article({ chapters: [chapter({ heading: 'Only' })] }), 'en').contents,
+    ).toEqual([])
+    expect(toArticleView(article({ chapters: [] }), 'en').contents).toEqual([])
+    expect(toArticleView(article({}), 'en').chapters).toEqual([])
   })
 
   it('drops a chapter with no heading rather than rendering an unreachable section', () => {
     const view = toArticleView(
       article({
-        chapters: [chapter({ heading: '  ' }), chapter({ heading: 'Real' }), chapter({ heading: 'Also real' })],
+        chapters: [
+          chapter({ heading: '  ' }),
+          chapter({ heading: 'Real' }),
+          chapter({ heading: 'Also real' }),
+        ],
       }),
+      'en',
     )
 
     expect(view.chapters).toHaveLength(2)
@@ -163,6 +193,7 @@ describe('chapter content', () => {
           chapter({ heading: 'Colour' }),
         ],
       }),
+      'en',
     )
 
     expect(view.chapters[0]?.bodyHtml).toContain('<p>A beautifully cut diamond captures light.</p>')
@@ -190,12 +221,36 @@ describe('mosaic emphasis', () => {
     const lead = [...Array(14).keys()].map((index) => emphasisFor(index).tabletLead)
 
     expect(wide).toEqual([
-      true, false, false, false, false, false, true,
-      true, false, false, false, false, false, true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
     ])
     expect(lead).toEqual([
-      true, false, false, false, false, true, false,
-      false, false, false, true, false, false, false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
     ])
   })
 
@@ -204,24 +259,24 @@ describe('mosaic emphasis', () => {
   })
 
   it('reaches a card through the mapper, keyed by its position in the page', () => {
-    expect(toArticleCard(article(), 6).emphasis.desktopWide).toBe(true)
-    expect(toArticleCard(article(), 1).emphasis.desktopWide).toBe(false)
+    expect(toArticleCard(article(), 6, 'en').emphasis.desktopWide).toBe(true)
+    expect(toArticleCard(article(), 1, 'en').emphasis.desktopWide).toBe(false)
   })
 })
 
 describe('dates', () => {
   /** FR-011: one format across every card, every article page and the structured data. */
   it('formats as drawn, with a two-digit day, and leaves the machine value untouched', () => {
-    const card = toArticleCard(article({ publishedOn: '2026-08-08T00:00:00.000Z' }), 0)
+    const card = toArticleCard(article({ publishedOn: '2026-08-08T00:00:00.000Z' }), 0, 'en')
 
     expect(card.publishedLabel).toBe('August 08, 2026')
     expect(card.publishedOn).toBe('2026-08-08T00:00:00.000Z')
   })
 
   it('does not shift the day for a timezone', () => {
-    expect(toArticleCard(article({ publishedOn: '2026-08-13T23:30:00.000Z' }), 0).publishedLabel).toBe(
-      'August 13, 2026',
-    )
+    expect(
+      toArticleCard(article({ publishedOn: '2026-08-13T23:30:00.000Z' }), 0, 'en').publishedLabel,
+    ).toBe('August 13, 2026')
   })
 })
 
@@ -232,8 +287,8 @@ describe('a category that has been deleted', () => {
    * An unresolved relationship reaches the mapper as a bare id.
    */
   it('leaves the article intact and the badge absent', () => {
-    const card = toArticleCard(article({ category: 42 }), 0)
-    const view = toArticleView(article({ category: 42 }))
+    const card = toArticleCard(article({ category: 42 }), 0, 'en')
+    const view = toArticleView(article({ category: 42 }), 'en')
 
     expect(card.category).toBeUndefined()
     expect(card.title).toBe('How to Choose the Perfect Diamond')
@@ -244,7 +299,7 @@ describe('a category that has been deleted', () => {
 
 describe('metadata fallbacks', () => {
   it('uses the article itself when the editor set no overrides', () => {
-    const view = toArticleView(article({}))
+    const view = toArticleView(article({}), 'en')
 
     expect(view.seo).toEqual({})
     expect(view.fallbacks.title).toBe('How to Choose the Perfect Diamond')
@@ -253,7 +308,10 @@ describe('metadata fallbacks', () => {
 
   it('keeps the editor overrides separate from the fallbacks so the route can prefer them', () => {
     const view = toArticleView(
-      article({ seo: { title: 'A better title', description: 'A better description' } } as Partial<Article>),
+      article({
+        seo: { title: 'A better title', description: 'A better description' },
+      } as Partial<Article>),
+      'en',
     )
 
     expect(view.seo.title).toBe('A better title')

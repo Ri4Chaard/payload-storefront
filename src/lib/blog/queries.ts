@@ -106,23 +106,25 @@ export const getArticleSlugs = cache(async (): Promise<string[]> => {
  *
  * Never throws for a missing slug. A URL somebody mistyped is not an error condition.
  */
-export const getArticle = cache(async (slug: string, locale: Locale): Promise<ArticleView | null> => {
-  const payload = await client()
-  const { docs } = await payload.find({
-    locale,
-    fallbackLocale: DEFAULT_LOCALE,
-    collection: 'articles',
-    where: { slug: { equals: slug } },
-    // The category and the hero's uploads. A chapter's own fields are plain text and lexical.
-    depth: 1,
-    limit: 1,
-    overrideAccess: false,
-    draft: false,
-  })
+export const getArticle = cache(
+  async (slug: string, locale: Locale): Promise<ArticleView | null> => {
+    const payload = await client()
+    const { docs } = await payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
+      collection: 'articles',
+      where: { slug: { equals: slug } },
+      // The category and the hero's uploads. A chapter's own fields are plain text and lexical.
+      depth: 1,
+      limit: 1,
+      overrideAccess: false,
+      draft: false,
+    })
 
-  const document = docs[0]
-  return document ? toArticleView(document) : null
-})
+    const document = docs[0]
+    return document ? toArticleView(document, locale) : null
+  },
+)
 
 export interface BlogIndexRequest {
   /** The language the index is rendered in (spec 010, FR-019). */
@@ -154,7 +156,14 @@ export const getBlogIndex = cache(
       const payload = await client()
 
       const [blogPage, categories, articles] = await Promise.all([
-        payload.findGlobal({ locale, fallbackLocale: DEFAULT_LOCALE, slug: 'blog-page', depth: 1, overrideAccess: false, draft: false }),
+        payload.findGlobal({
+          locale,
+          fallbackLocale: DEFAULT_LOCALE,
+          slug: 'blog-page',
+          depth: 1,
+          overrideAccess: false,
+          draft: false,
+        }),
         payload.find({
           locale,
           fallbackLocale: DEFAULT_LOCALE,
@@ -178,6 +187,7 @@ export const getBlogIndex = cache(
       ])
 
       return toBlogIndex({
+        locale,
         page: blogPage,
         categories: categories.docs,
         articles: articles.docs,

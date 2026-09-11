@@ -14,7 +14,9 @@ function switcher(page: import('@playwright/test').Page, code: string) {
 }
 
 test.describe('switching language', () => {
-  test('the selector moves the visitor to the same page in the chosen language', async ({ page }) => {
+  test('the selector moves the visitor to the same page in the chosen language', async ({
+    page,
+  }) => {
     await page.goto('/legal/privacy')
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 
@@ -41,7 +43,10 @@ test.describe('switching language', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'uk')
   })
 
-  test('a returning visitor lands in their own language at the bare address', async ({ page, context }) => {
+  test('a returning visitor lands in their own language at the bare address', async ({
+    page,
+    context,
+  }) => {
     await page.goto('/')
     await switcher(page, 'EN').click()
     await page.getByRole('menuitem', { name: 'RU' }).click()
@@ -70,7 +75,11 @@ test.describe('switching language', () => {
   test('a prefixed address wins over a remembered choice', async ({ page, context }) => {
     // A shared link must survive being opened, or an emailed `/uk/faq` silently changes language.
     await context.addCookies([
-      { name: 'NEXT_LOCALE', value: 'ru', url: page.url() === 'about:blank' ? 'http://localhost' : page.url() },
+      {
+        name: 'NEXT_LOCALE',
+        value: 'ru',
+        url: page.url() === 'about:blank' ? 'http://localhost' : page.url(),
+      },
     ])
     await page.goto('/uk/faq')
     await expect(page).toHaveURL(/\/uk\/faq$/)
@@ -86,7 +95,11 @@ test.describe('switching language', () => {
       phone width it sits over the controls this test needs. A visitor answers it before they do
       anything else; so does this.
     */
-    await page.getByRole('region', { name: 'Cookie consent' }).getByRole('button', { name: /agree/i }).first().click()
+    await page
+      .getByRole('region', { name: 'Cookie consent' })
+      .getByRole('button', { name: /agree/i })
+      .first()
+      .click()
 
     await page.getByRole('button', { name: /menu/i }).first().click()
 
@@ -121,6 +134,9 @@ test.describe('switching language', () => {
     await page.getByRole('menuitem', { name: 'RU' }).click()
     await expect(page).toHaveURL(/\/ru\//)
 
-    await expect(page.getByRole('link', { name: /^Cart, / })).toHaveAttribute('aria-label', before ?? '')
+    await expect(page.getByRole('link', { name: /^Cart, / })).toHaveAttribute(
+      'aria-label',
+      before ?? '',
+    )
   })
 })

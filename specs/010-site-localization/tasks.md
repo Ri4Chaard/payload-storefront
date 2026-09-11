@@ -327,26 +327,26 @@ string appears on screen or in an accessible name.
 
 - [X] T070 [P] [US4] Unit test in `tests/unit/message-keys.test.ts` that `ru.json` and `uk.json` have no key absent from `en.json`, and that every ICU `plural` in the three files parses.
 - [X] T071 [P] [US4] Unit test in `tests/unit/plural.test.ts` for the cart's spoken name at counts 1, 2, 5 and 21 in Russian and Ukrainian — three plural categories where English has two (SC-012).
-- [ ] T072 [P] [US4] Unit test in `tests/unit/format-locale.test.ts` that `formatPrice` renders the same amount and currency in all three locales with locale-appropriate grouping, and that the mapped BCP 47 tag is used on both server and client paths.
-- [ ] T073 [P] [US4] E2E in `tests/e2e/interface-language.spec.ts` walking both paths in `ru` and `uk` and asserting no English string in visible text or accessible names.
+- [X] T072 [P] [US4] Unit test in `tests/unit/format-locale.test.ts` that `formatPrice` renders the same amount and currency in all three locales with locale-appropriate grouping, and that the mapped BCP 47 tag is used on both server and client paths.
+- [X] T073 [P] [US4] E2E in `tests/e2e/interface-language.spec.ts` walking both paths in `ru` and `uk` and asserting no English string in visible text or accessible names.
 
 ### Implementation for User Story 4
 
-- [ ] T074 [US4] Populate `src/i18n/messages/en.json` with every interface string currently hardcoded in `src/components/**` and `src/app/(frontend)/**`, namespaced per `data-model.md` §7. Strings an editor would reasonably reword — calls to action, band headings, empty-state prose — go to Payload instead (FR-035's boundary).
+- [X] T074 [US4] Populate `src/i18n/messages/en.json` with every interface string currently hardcoded in `src/components/**` and `src/app/(frontend)/**`, namespaced per `data-model.md` §7. Strings an editor would reasonably reword — calls to action, band headings, empty-state prose — go to Payload instead (FR-035's boundary).
 - [X] T075 [US4] Declare `Messages = typeof import('./messages/en.json')` in a `global.d.ts` augmentation so a key missing from English is a compile error.
 - [X] T076 [P] [US4] Translate `src/i18n/messages/ru.json`.
 - [X] T077 [P] [US4] Translate `src/i18n/messages/uk.json`.
-- [ ] T078 [US4] Replace hardcoded strings in server components and routes with `await getTranslations(namespace)`, passing text into UI-kit primitives through the props they already take. The kit's English defaults (`label = 'Load more'`) stay as development fallbacks.
-- [ ] T079 [P] [US4] Convert the account client components — `address-modal`, `create-account-form`, `sign-in-form`, `new-password-form`, `change-password-modal`, `verify-email-form`, `reset-code-step`, `forgot-password-form`, `name-row`, `address-list` — to `useTranslations`, keeping `src/lib/auth/form-errors.ts`'s message-key indirection and feeding it `t('errors.…')`.
-- [ ] T080 [P] [US4] The same for the commerce client components under `src/components/commerce/` — `product-purchase`, `product-options`, `order-summary`, `handoff-modal`, `filter-toolbar`, `filter-drawer`, `cart-lines`, `product-gallery`.
-- [ ] T081 [P] [US4] The same for `src/components/contact/contact-form/`, `src/components/layout/footer/newsletter-form.tsx` and the two account screens under `src/app/(frontend)/[locale]/(account)/`.
-- [ ] T082 [US4] Translate the `colour` and `diamondShape` select option labels through the message files rather than per product, and make `src/lib/catalog/filters.ts` render them from there while still matching on the shared machine values (FR-041).
-- [ ] T083 [P] [US4] Thread the locale into `src/lib/catalog/price.ts` callers using the `BCP47` map, replacing its `en-US` default at the call site. Keep `CATALOG_CURRENCY` and the integer minor units untouched (FR-038, Constitution VI).
-- [ ] T084 [P] [US4] Format article and policy dates with `Intl.DateTimeFormat(BCP47[locale])` wherever a date reaches a page (FR-039).
-- [ ] T085 [P] [US4] Pass the locale to `countryName()` in the address forms and the country chooser — `src/lib/countries.ts` already resolves through `Intl.DisplayNames` and already takes the argument (FR-040).
+- [X] T078 [US4] Replace hardcoded strings in server components and routes with `await getTranslations(namespace)`, passing text into UI-kit primitives through the props they already take. The kit's English defaults (`label = 'Load more'`) stay as development fallbacks.
+- [X] T079 [P] [US4] Convert the account client components — `address-modal`, `create-account-form`, `sign-in-form`, `new-password-form`, `change-password-modal`, `verify-email-form`, `reset-code-step`, `forgot-password-form`, `name-row`, `address-list` — to `useTranslations`, keeping `src/lib/auth/form-errors.ts`'s message-key indirection and feeding it `t('errors.…')`.
+- [X] T080 [P] [US4] The same for the commerce client components under `src/components/commerce/` — `product-purchase`, `product-options`, `order-summary`, `handoff-modal`, `filter-toolbar`, `filter-drawer`, `cart-lines`, `product-gallery`.
+- [X] T081 [P] [US4] The same for `src/components/contact/contact-form/`, `src/components/layout/footer/newsletter-form.tsx` and the two account screens under `src/app/(frontend)/[locale]/(account)/`.
+- [X] T082 [US4] Translate the `colour` and `diamondShape` select option labels through the message files rather than per product, and make `src/lib/catalog/filters.ts` render them from there while still matching on the shared machine values (FR-041).
+- [X] T083 [P] [US4] Thread the locale into `src/lib/catalog/price.ts` callers using the `BCP47` map, replacing its `en-US` default at the call site. Keep `CATALOG_CURRENCY` and the integer minor units untouched (FR-038, Constitution VI).
+- [X] T084 [P] [US4] Format article and policy dates with `Intl.DateTimeFormat(BCP47[locale])` wherever a date reaches a page (FR-039).
+- [X] T085 [P] [US4] Pass the locale to `countryName()` in the address forms and the country chooser — `src/lib/countries.ts` already resolves through `Intl.DisplayNames` and already takes the argument (FR-040).
 - [X] T086 [US4] Add a `NextIntlClientProvider` decorator to `.storybook/preview` so client components that read messages render in Storybook, and confirm `pnpm check:stories` and `pnpm test:stories` pass.
 
-**Checkpoint**: ⚠️ **Partially complete — the mechanism works, the coverage does not yet.**
+**Checkpoint**: ✅ Complete. Verified against a production server in the server-rendered HTML.
 
 Proven against a production server, in the initial HTML rather than after hydration:
 
@@ -358,16 +358,20 @@ Proven against a production server, in the initial HTML rather than after hydrat
 Plurals are correct at every category, including the wrap-around a singular/plural pair always gets
 wrong: `Корзина, 1 товар` / `2 товара` / `5 товаров` / `21 товар`.
 
-**What is done**: the message files with 66 keys across 12 namespaces in all three languages, the
-`AppConfig['Messages']` augmentation that makes every key compile-checked, the key-parity and plural
-suites, the Storybook provider, and the header.
+**163 keys across 14 namespaces**, in all three languages, extracted from what the components
+actually said rather than guessed at. 24 components converted. A product page now reads
+`В КОРЗИНУ` / `Купить сейчас` / `Выбрать размер` in Russian and `ДО КОШИКА` / `Купити зараз` /
+`Обрати розмір` in Ukrainian, and the header navigation, footer, filters and empty states follow.
 
-**What is not**: T078–T085 — the ~25 feature components under `src/components/account/**` and
-`src/components/commerce/**` still hold their own English copy, and the money, date and country
-formatters still take the default locale at their call sites. Until those land, a Russian page has
-Russian prose and English buttons.
+Money, dates and country names are locale-aware: `formatPriceFor` maps the app's locale codes onto
+BCP 47 tags, the blog's date formatter is built per language instead of being fixed at `en-US`, and
+`countryName` finally receives the argument it has accepted since spec 004.
 
-> **Two things this phase taught.**
+An e2e sweep asserts eight English chrome phrases are absent from five pages in both languages, with
+a control asserting they ARE present at the unprefixed address — without that control the suite
+would pass just as happily if the chrome had gone missing rather than been translated.
+
+> **Four things this phase taught.**
 >
 > 1. **`use-intl` is a transitive dependency and does not resolve from the repo root.**
 >    `createTranslator` is imported from `next-intl`, which re-exports it — and depending on the
@@ -376,6 +380,14 @@ Russian prose and English buttons.
 >    built from a loosely-typed object narrows every key to `never` and `t('cart')` stops compiling.
 >    That is the augmentation working; the fix is to type the fixture as `typeof en`. `next build`
 >    runs the typecheck, so this failed the build rather than just the editor.
+> 3. **A namespace missing from the client provider fails silently.** next-intl renders the key path
+>    itself — a button reading `product.addToCart` — rather than throwing, so it survives the build,
+>    the typecheck and the lint and is caught only by looking at the page. The provider's list is now
+>    derived from what `useTranslations` is actually called with in a Client Component, with the grep
+>    that produces it written into the comment.
+> 4. **A hook cannot run in a default parameter.** Half a dozen components carried
+>    `label = 'Load more'` in their signatures; each became `labelProp` with the fallback resolved in
+>    the body, so a caller's own words still win and the default is translated rather than English.
 
 ---
 

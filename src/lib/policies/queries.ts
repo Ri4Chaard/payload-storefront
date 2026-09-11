@@ -33,27 +33,29 @@ import type { CookieSettings, FooterPolicies, Policy } from './types'
 const client = cache(async () => getPayload({ config }))
 
 /** One published policy, or `null` — which the route turns into a 404. */
-export const getPolicyBySlug = cache(async (slug: string, locale: Locale): Promise<Policy | null> => {
-  try {
-    const payload = await client()
-    const found = await payload.find({
-      locale,
-      fallbackLocale: DEFAULT_LOCALE,
-      collection: 'policies',
-      where: { slug: { equals: slug } },
-      limit: 1,
-      // The SEO image is an upload relationship and has to be resolved to be rendered.
-      depth: 1,
-      overrideAccess: false,
-      draft: false,
-    })
+export const getPolicyBySlug = cache(
+  async (slug: string, locale: Locale): Promise<Policy | null> => {
+    try {
+      const payload = await client()
+      const found = await payload.find({
+        locale,
+        fallbackLocale: DEFAULT_LOCALE,
+        collection: 'policies',
+        where: { slug: { equals: slug } },
+        limit: 1,
+        // The SEO image is an upload relationship and has to be resolved to be rendered.
+        depth: 1,
+        overrideAccess: false,
+        draft: false,
+      })
 
-    return toPolicy(found.docs[0])
-  } catch (error) {
-    if (!isDatabaseUnreachable(error)) throw error
-    return null
-  }
-})
+      return toPolicy(found.docs[0])
+    } catch (error) {
+      if (!isDatabaseUnreachable(error)) throw error
+      return null
+    }
+  },
+)
 
 /**
  * The footer's policy links, split by where they belong (FR-015b, FR-015c).

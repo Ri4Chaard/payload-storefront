@@ -14,6 +14,8 @@
  * two-line lookup below is cheaper than the bug.
  */
 
+import { BCP47, type Locale } from '@/i18n/routing'
+
 /**
  * Formatting has to be deterministic across the server render and the client hydration, and the
  * runtime default differs between them — Node takes it from `LANG`, the browser from the user. An
@@ -53,6 +55,21 @@ export function minorUnitDigits(currency: string = DEFAULT_CURRENCY, locale?: st
  * total, a division that should have been integer. Constitution VI would rather that surface here
  * than be rounded into something plausible.
  */
+/**
+ * The same formatter, addressed by the app's own locale code (spec 010, FR-038).
+ *
+ * `formatPrice` takes a BCP 47 tag because `Intl` does; the rest of the codebase deals in `en`,
+ * `ru`, `uk`. One mapping, in `src/i18n/routing.ts`, rather than a `locale === 'ru' ? 'ru-RU'`
+ * scattered through the mappers.
+ *
+ * **The amount and the currency do not change — only how they are written.** `$24,900` and
+ * `24 900,00 $` are the same money (FR-038, Constitution VI); one currency, integer minor units,
+ * unchanged.
+ */
+export function formatPriceFor(locale: Locale, minorUnits: number, currency?: string): string {
+  return formatPrice(minorUnits, currency ?? DEFAULT_CURRENCY, BCP47[locale])
+}
+
 export function formatPrice(
   minorUnits: number,
   currency: string = DEFAULT_CURRENCY,

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Link as NextLink } from '@/i18n/navigation'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -123,6 +124,7 @@ export function FilterToolbar({
   clearHref,
   appliedCount,
 }: FilterToolbarProps) {
+  const t_catalog = useTranslations('catalog')
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const triggerRef = React.useRef<HTMLAnchorElement>(null)
@@ -207,7 +209,7 @@ export function FilterToolbar({
           <Rule className="hidden xl:block" />
 
           <div role="group" aria-label="Diamond shape" className="hidden md:block">
-            <p className={GROUP_LABEL}>Shape</p>
+            <p className={GROUP_LABEL}>{t_catalog('diamondShapeLabel')}</p>
             <div className="mt-1 flex items-center gap-1.5 xl:mt-1.5 xl:gap-2.5">
               {facets.shapes.map((shape) => {
                 const selected = filters.shape.some((entry) => entry === shape.value)
@@ -354,6 +356,7 @@ function PriceQuickFilter({
   onCommit: (next: FilterState) => void
   className?: string
 }) {
+  const t_catalog = useTranslations('catalog')
   const [range, setRange] = React.useState<[number, number]>([
     filters.minPrice ?? bounds.min,
     filters.maxPrice ?? bounds.max,
@@ -391,7 +394,7 @@ function PriceQuickFilter({
       <HiddenState filters={filters} />
 
       <div className="w-50">
-        <p className={GROUP_LABEL}>Price</p>
+        <p className={GROUP_LABEL}>{t_catalog('price').replace(':', '')}</p>
         {/*
           The commit hangs off the wrapper rather than the slider. `RangeSlider` spreads its props
           last and would overwrite its own `onPointerUp`, which is what tracks a live drag — the

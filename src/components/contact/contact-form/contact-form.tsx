@@ -1,7 +1,6 @@
 'use client'
 
-
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import React from 'react'
 import { useActionState } from 'react'
 
@@ -34,17 +33,31 @@ export interface ContactFormProps {
   content: ContactFormContent
 }
 
-/** Which sentence a message key stands for. The keys live in the action; the words are content. */
-function fieldMessage(key: string | undefined, content: ContactFormContent): string | undefined {
+/**
+ * Which sentence a message key stands for.
+ *
+ * The keys live in the action; the words are split between two owners, and that split is FR-035's
+ * boundary in miniature. The field NAMES come from `content` — they are Payload-managed copy the
+ * owner writes. The error sentences come from the message files, because "that does not look like an
+ * email address" is not something anybody would ask an editor to reword.
+ *
+ * `t` is passed in rather than called here: this is a plain function, not a component, and a hook
+ * cannot be called from one.
+ */
+function fieldMessage(
+  key: string | undefined,
+  content: ContactFormContent,
+  t_errors: ReturnType<typeof useTranslations<'errors'>>,
+): string | undefined {
   if (!key) return undefined
 
   switch (key) {
     case 'emailInvalid':
-      return 'Please check this email address.'
+      return t_errors('emailCheck')
     case 'emailRequired':
       return `${content.labels.email} is required.`
     case 'emailTooLong':
-      return 'That email address is too long.'
+      return t_errors('emailTooLong')
     case 'messageRequired':
       return `${content.labels.message} is required.`
     case 'messageTooLong':
@@ -52,7 +65,7 @@ function fieldMessage(key: string | undefined, content: ContactFormContent): str
     case 'nameRequired':
       return `${content.labels.name} is required.`
     case 'nameTooLong':
-      return 'That name is too long.'
+      return t_errors('nameTooLong')
     default:
       // A key with no sentence should look wrong in review rather than render as an empty space
       // nobody notices — the convention `src/lib/auth/form-errors.ts` established.
@@ -63,6 +76,7 @@ function fieldMessage(key: string | undefined, content: ContactFormContent): str
 const errored = (state: EnquiryState) => (state.status === 'error' ? state : undefined)
 
 export function ContactForm({ content }: ContactFormProps) {
+  const t_errors = useTranslations('errors')
   const [state, formAction, pending] = useActionState(submitEnquiry, initialEnquiryState)
   const failure = errored(state)
   const locale = useLocale()
@@ -87,7 +101,11 @@ export function ContactForm({ content }: ContactFormProps) {
   */
   if (state.status === 'success') {
     return (
-      <p role="status" aria-live="polite" className="text-body-medium text-neutral-primary max-w-160">
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-body-medium text-neutral-primary max-w-160"
+      >
         {content.messages.success}
       </p>
     )
@@ -129,7 +147,7 @@ export function ContactForm({ content }: ContactFormProps) {
             maxLength={ENQUIRY_MAX.name}
             required
             defaultValue={failure?.values.name ?? ''}
-            error={fieldMessage(failure?.fieldErrors?.name, content)}
+            error={fieldMessage(failure?.fieldErrors?.name, content, t_errors)}
             className="md:flex-1"
           />
           <TextInput
@@ -142,7 +160,7 @@ export function ContactForm({ content }: ContactFormProps) {
             maxLength={ENQUIRY_MAX.email}
             required
             defaultValue={failure?.values.email ?? ''}
-            error={fieldMessage(failure?.fieldErrors?.email, content)}
+            error={fieldMessage(failure?.fieldErrors?.email, content, t_errors)}
             className="md:flex-1"
           />
         </div>
@@ -156,7 +174,7 @@ export function ContactForm({ content }: ContactFormProps) {
           maxLength={ENQUIRY_MAX.message}
           required
           defaultValue={failure?.values.message ?? ''}
-          error={fieldMessage(failure?.fieldErrors?.message, content)}
+          error={fieldMessage(failure?.fieldErrors?.message, content, t_errors)}
         />
 
         {/*

@@ -151,7 +151,10 @@ test('every visible word on /contact is the owner’s', async ({ page }) => {
 })
 
 test('the confirmation is the owner’s wording too', async ({ page }) => {
-  await setContactPage({ ...DEFAULTS, form: { ...DEFAULTS.form, successMessage: 'Got it — thank you.' } })
+  await setContactPage({
+    ...DEFAULTS,
+    form: { ...DEFAULTS.form, successMessage: 'Got it — thank you.' },
+  })
 
   await page.goto('/contact')
   await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
@@ -335,7 +338,13 @@ test.describe('the enquiry list', () => {
 
     await payload.create({
       collection: 'enquiries',
-      data: { name: 'Notified Visitor', email: sent, message: 'x', notification: 'sent', locale: 'en' },
+      data: {
+        name: 'Notified Visitor',
+        email: sent,
+        message: 'x',
+        notification: 'sent',
+        locale: 'en',
+      },
       overrideAccess: true,
     })
     await payload.create({

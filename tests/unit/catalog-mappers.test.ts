@@ -22,7 +22,7 @@ const bySlug = (slug: string): Product => {
   return found
 }
 
-const first = <T,>(list: T[], what: string): T => {
+const first = <T>(list: T[], what: string): T => {
   const [found] = list
   if (found === undefined) throw new Error(`no ${what}`)
   return found
@@ -45,7 +45,7 @@ describe('availability is decided once', () => {
 
   it('is false for a stock-tracked piece at zero — which is still shown', () => {
     expect(isProductAvailable(SOLD_OUT)).toBe(false)
-    expect(toProductSummary(SOLD_OUT).price).toBe('$9,600')
+    expect(toProductSummary(SOLD_OUT, 'en').price).toBe('$9,600')
   })
 
   it('follows the stones when a piece has them, not the parent mode', () => {
@@ -67,44 +67,42 @@ describe('availability is decided once', () => {
   })
 
   it('never lets a count reach the view model', () => {
-    expect(toProductSummary(IN_STOCK)).not.toHaveProperty('inventory')
-    expect(toProductDetail(IN_STOCK)).not.toHaveProperty('inventory')
+    expect(toProductSummary(IN_STOCK, 'en')).not.toHaveProperty('inventory')
+    expect(toProductDetail(IN_STOCK, 'en')).not.toHaveProperty('inventory')
   })
 })
 
 describe('relationship unions are narrowed, loudly', () => {
   it('reads the populated branch', () => {
-    expect(toProductDetail(RING).categoryName).toBe('Diamond Rings')
-    expect(toProductDetail(RING).categorySlug).toBe('rings')
+    expect(toProductDetail(RING, 'en').categoryName).toBe('Diamond Rings')
+    expect(toProductDetail(RING, 'en').categorySlug).toBe('rings')
   })
 
   it('throws rather than rendering a blank when the query asked for too little depth', () => {
     const shallow: Product = { ...RING, category: 1 }
-    expect(() => toProductDetail(shallow)).toThrow(/greater depth/)
+    expect(() => toProductDetail(shallow, 'en')).toThrow(/greater depth/)
   })
 
   it('names the document in the error, so the cause is not three files away', () => {
     const shallow: Product = { ...RING, category: 1 }
-    expect(() => toProductDetail(shallow)).toThrow(/paragon-emerald-cut/)
+    expect(() => toProductDetail(shallow, 'en')).toThrow(/paragon-emerald-cut/)
   })
 })
 
 describe('prices', () => {
   it('advertises the cheapest stone on the card', () => {
     // Base 38,320 with the free stone; the dearest adds 18,400.
-    expect(toProductSummary(RING).price).toBe('$38,320')
+    expect(toProductSummary(RING, 'en').price).toBe('$38,320')
   })
 
   it('says "from" only when the stones actually differ', () => {
-    expect(toProductDetail(RING).fromPrice).toBe('$38,320')
-    expect(toProductDetail(BRACELET).fromPrice).toBeNull()
+    expect(toProductDetail(RING, 'en').fromPrice).toBe('$38,320')
+    expect(toProductDetail(BRACELET, 'en').fromPrice).toBeNull()
   })
 
   it('orders the stones cheapest first and keeps the sold-out one', () => {
-    const options = toProductDetail(RING).diamondOptions
-    expect(options.map((option) => option.priceMinor)).toEqual([
-      3832000, 4252000, 4792000, 5672000,
-    ])
+    const options = toProductDetail(RING, 'en').diamondOptions
+    expect(options.map((option) => option.priceMinor)).toEqual([3832000, 4252000, 4792000, 5672000])
     expect(options.at(-1)?.available).toBe(false)
     expect(options.at(-1)?.label).toBe('Natural 1.5 ct E VS2')
   })
@@ -112,7 +110,7 @@ describe('prices', () => {
 
 describe('images', () => {
   it('carries intrinsic dimensions through', () => {
-    expect(toProductSummary(RING).images[0]).toEqual({
+    expect(toProductSummary(RING, 'en').images[0]).toEqual({
       src: '/photography/product-ring-packshot.webp',
       width: 1274,
       height: 1600,
@@ -133,8 +131,8 @@ describe('images', () => {
 
 describe('rich text', () => {
   it('serialises the details to HTML and closes over an empty field', () => {
-    expect(toProductDetail(RING).detailsHtml).toContain('our atelier')
-    expect(toProductDetail({ ...RING, details: null }).detailsHtml).toBeNull()
+    expect(toProductDetail(RING, 'en').detailsHtml).toContain('our atelier')
+    expect(toProductDetail({ ...RING, details: null }, 'en').detailsHtml).toBeNull()
   })
 
   it('serialises both shop accordions', () => {

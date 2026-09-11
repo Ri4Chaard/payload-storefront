@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { ProductCard } from '@/components/commerce/product-card'
@@ -53,10 +54,18 @@ export function ProductGrid({
   products,
   priorityCount = 4,
   label,
-  cta = 'Buy now',
+  cta: ctaProp,
   className,
   ...props
 }: ProductGridProps) {
+  const t_product = useTranslations('product')
+  /*
+    Resolved in the body rather than as a default parameter: `useTranslations` is a hook. The prop
+    still wins where a caller passes one — what changed is that the fallback is translated instead
+    of being an English literal in the signature.
+  */
+  const cta = ctaProp ?? t_product('buyNow')
+
   return (
     <Container
       as="section"

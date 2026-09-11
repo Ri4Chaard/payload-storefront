@@ -75,7 +75,12 @@ afterAll(async () => {
   }
   for (const id of categories) {
     await payload
-      .delete({ collection: 'article-categories', id, overrideAccess: true, context: skipRevalidation })
+      .delete({
+        collection: 'article-categories',
+        id,
+        overrideAccess: true,
+        context: skipRevalidation,
+      })
       .catch(() => undefined)
   }
 })
@@ -260,7 +265,7 @@ describe('a deleted category (FR-041)', () => {
 
     // The relationship no longer resolves, so the card renders without a badge rather than with a
     // dangling one — and the article keeps its page.
-    const card = toArticleCard(docs[0]!, 0)
+    const card = toArticleCard(docs[0]!, 0, 'en')
     expect(card.category).toBeUndefined()
     expect(card.href).toBe(`/blog/orphan-${suffix}`)
   })

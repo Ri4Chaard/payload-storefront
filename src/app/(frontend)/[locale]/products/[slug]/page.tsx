@@ -100,7 +100,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProduct(slug, locale)
   if (!product) notFound()
 
-  const [shop, related] = await Promise.all([getShopContent(locale), getRelated(product.id, locale)])
+  const [shop, related] = await Promise.all([
+    getShopContent(locale),
+    getRelated(product.id, locale),
+  ])
 
   return (
     <>
@@ -129,7 +132,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               link, and the breadcrumb that would carry a visitor back to the category is the
               `BreadcrumbList` below — a listing is one tap away in the header at every width.
             */}
-            <p className="text-caption text-primary-default font-semibold tracking-[0.04em] uppercase xl:text-body-medium xl:font-medium xl:tracking-normal">
+            <p className="text-caption text-primary-default xl:text-body-medium font-semibold tracking-[0.04em] uppercase xl:font-medium xl:tracking-normal">
               {product.categoryName}
             </p>
 
@@ -257,7 +260,12 @@ function ProductSchema({ product }: { product: ProductDetail }) {
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
-        { '@type': 'ListItem', position: 2, name: product.categoryName, item: `/${product.categorySlug}` },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: product.categoryName,
+          item: `/${product.categorySlug}`,
+        },
         { '@type': 'ListItem', position: 3, name: product.title, item: product.href },
       ],
     },

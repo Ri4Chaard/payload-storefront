@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AddressModal } from '@/components/account/address-modal'
@@ -35,8 +36,6 @@ import type { CountryCode, CountryOption } from '@/lib/countries'
  * `triggerRef` is written at click time so focus returns to the exact line that opened it rather
  * than to the row above.
  */
-const DELETE_ERROR = 'That address could not be removed. Reload the page and try again.'
-
 /** Shared by the two icon buttons that survive as buttons: the `+` and each line's bin. */
 const ICON_BUTTON = [
   'flex size-8 cursor-pointer items-center justify-center transition-colors',
@@ -50,6 +49,8 @@ export interface AddressListProps {
 }
 
 export function AddressList({ addresses, countries, defaultCountry }: AddressListProps) {
+  const t_errors = useTranslations('errors')
+  const DELETE_ERROR = t_errors('addressRemoveFailed')
   const [editing, setEditing] = React.useState<CustomerAddress | null>(null)
   const [formOpen, setFormOpen] = React.useState(false)
   /**
@@ -177,7 +178,10 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
           type="button"
           onClick={(event) => openForm(null, event)}
           aria-label="Add address"
-          className={cn(ICON_BUTTON, 'text-neutral-secondary hover:text-neutral-primary active:text-primary-default')}
+          className={cn(
+            ICON_BUTTON,
+            'text-neutral-secondary hover:text-neutral-primary active:text-primary-default',
+          )}
         >
           <Icon name="plus" className="size-5" />
         </button>
@@ -223,7 +227,10 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
                 type="button"
                 onClick={(event) => openConfirm(address, event)}
                 aria-label={`Delete address: ${summary}`}
-                className={cn(ICON_BUTTON, 'text-neutral-secondary hover:text-status-error-text active:text-status-error-default')}
+                className={cn(
+                  ICON_BUTTON,
+                  'text-neutral-secondary hover:text-status-error-text active:text-status-error-default',
+                )}
               >
                 <Icon name="trash" className="size-5" />
               </button>

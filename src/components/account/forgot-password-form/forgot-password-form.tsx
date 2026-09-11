@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,11 +24,14 @@ import { requestResetSchema, type RequestResetValues } from '@/lib/auth/schemas'
  * The only error this form can show is a malformed address, which is the browser's own check and
  * never reaches the server.
  */
-const ERRORS: Record<string, string> = {
-  resetEmailInvalid: 'That does not look like an email address.',
-}
 
 export function ForgotPasswordForm() {
+  const t_errors = useTranslations('errors')
+
+  const ERRORS: Record<string, string> = {
+    resetEmailInvalid: t_errors('emailInvalid'),
+  }
+
   const router = useRouter()
 
   const form = useForm<RequestResetValues>({

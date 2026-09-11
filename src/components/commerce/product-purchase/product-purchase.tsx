@@ -1,6 +1,6 @@
 'use client'
 
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import React from 'react'
 
 import type { Locale } from '@/i18n/routing'
@@ -103,6 +103,7 @@ export function ProductPurchase({
   className,
   ...props
 }: ProductPurchaseProps) {
+  const t_product = useTranslations('product')
   const locale = useLocale() as Locale
   const [diamond, setDiamond] = React.useState<number | null>(null)
   const [size, setSize] = React.useState<string | null>(null)
@@ -154,14 +155,12 @@ export function ProductPurchase({
     if (field === 'diamond') {
       return reason === 'missing-option'
         ? `Choose a diamond ${before}.`
-        : 'That diamond is no longer available. Choose another.'
+        : t_product('diamondUnavailable')
     }
     if (field === 'size') return `Choose a size ${before}.`
-    if (field === 'product') return 'This piece is not available to order at the moment.'
-    if (field === 'quantity') return 'Choose how many you would like.'
-    return action === 'cart'
-      ? 'That could not be added to your cart. Please try again.'
-      : 'That could not be sent just now. Please try again.'
+    if (field === 'product') return t_product('unavailable')
+    if (field === 'quantity') return t_product('chooseQuantity')
+    return action === 'cart' ? t_product('addFailed') : t_product('sendFailed')
   }
 
   function submit() {
@@ -177,7 +176,7 @@ export function ProductPurchase({
 
       setStatus(
         result.ok
-          ? { kind: 'added', message: 'Added to your cart.' }
+          ? { kind: 'added', message: t_product('addedToCart') }
           : { kind: 'refused', message: refusal(result.field, result.reason) },
       )
     })
@@ -232,10 +231,7 @@ export function ProductPurchase({
         and a change nobody is told about is a change a screen reader user has to go hunting for.
         Polite rather than assertive: it is the consequence of something they just did.
       */}
-      <p
-        aria-live="polite"
-        className="text-heading-1 text-primary-default mt-1.5 md:mt-2 xl:mt-5"
-      >
+      <p aria-live="polite" className="text-heading-1 text-primary-default mt-1.5 md:mt-2 xl:mt-5">
         {shown}
       </p>
 
@@ -290,7 +286,7 @@ export function ProductPurchase({
           iconStart={<Icon name="cart" size="sm" />}
           className="min-w-0 flex-1 uppercase"
         >
-          Add to cart
+          {t_product('addToCart')}
         </Button>
       </div>
 
@@ -304,7 +300,7 @@ export function ProductPurchase({
         disabled={!available || !onBuyNow || handoff !== null}
         className="mt-3 uppercase md:mt-4 xl:mt-5"
       >
-        Buy now
+        {t_product('buyNow')}
       </Button>
 
       {handoff ? (

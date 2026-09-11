@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import { Link as NextLink } from '@/i18n/navigation'
 import React from 'react'
 
@@ -48,10 +49,17 @@ export function CategoryTabs({
   categories,
   active,
   allHref,
-  label = 'Article categories',
+  label: labelProp,
   className,
   ...props
 }: CategoryTabsProps) {
+  const t_blog = useTranslations('blog')
+  /*
+    Resolved in the body, not as a default parameter or a module constant: `useTranslations` is a
+    hook. The prop stays overridable, so a caller with its own words still wins — what changed is
+    that the fallback is translated instead of being an English literal.
+  */
+  const label = labelProp ?? t_blog('categories')
   const tabs = [{ title: 'Latest', slug: undefined, href: allHref }, ...categories]
 
   return (

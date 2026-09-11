@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { resendCode } from '@/lib/auth/actions'
@@ -32,6 +33,7 @@ export interface ResendCodeProps {
 }
 
 export function ResendCode({ email, purpose = 'verify-email', className }: ResendCodeProps) {
+  const t_account = useTranslations('account')
   const [cooldown, setCooldown] = React.useState(0)
   const [status, setStatus] = React.useState('')
   const [sending, startSending] = React.useTransition()
@@ -61,7 +63,7 @@ export function ResendCode({ email, purpose = 'verify-email', className }: Resen
       // Started regardless of the answer. A countdown that appeared only on a real send would say
       // which addresses are registered — the same disclosure the action itself avoids.
       setCooldown(Math.ceil(CODE_RESEND_COOLDOWN_MS / 1000))
-      setStatus('A new code is on its way.')
+      setStatus(t_account('codeSent'))
     })
   }
 

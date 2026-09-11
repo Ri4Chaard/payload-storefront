@@ -1,6 +1,6 @@
 'use client'
 
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import React from 'react'
 
 import type { Locale } from '@/i18n/routing'
@@ -62,6 +62,7 @@ export function OrderSummary({
   className,
   ...props
 }: OrderSummaryProps) {
+  const t_cart = useTranslations('cart')
   const locale = useLocale() as Locale
   const [agreed, setAgreed] = React.useState(false)
   const [acknowledged, setAcknowledged] = React.useState(false)
@@ -79,11 +80,11 @@ export function OrderSummary({
       return
     }
     if (!agreed) {
-      setRefusal('Please agree to the Terms of Use and Return Policy before continuing.')
+      setRefusal(t_cart('agreeFirst'))
       return
     }
     if (!onCheckout) {
-      setRefusal('Checkout is not available yet.')
+      setRefusal(t_cart('checkoutUnavailable'))
       return
     }
 
@@ -103,10 +104,10 @@ export function OrderSummary({
       if (!result.ok) {
         setRefusal(
           result.reason === 'empty'
-            ? 'Your cart is empty.'
+            ? t_cart('empty')
             : result.reason === 'issues'
               ? 'Some pieces in your cart have changed — the details are on the rows above.'
-              : 'Something went wrong opening checkout. Please try again.',
+              : t_cart('checkoutFailed'),
         )
         return
       }

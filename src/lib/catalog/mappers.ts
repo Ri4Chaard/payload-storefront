@@ -29,9 +29,10 @@
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
+import type { Locale } from '@/i18n/routing'
 import type { Category, Media, Product, Shop, Size, Variant } from '@/payload-types'
 
-import { CATALOG_CURRENCY, formatPrice } from './price'
+import { CATALOG_CURRENCY, formatPriceFor } from './price'
 import type {
   CatalogImage,
   CategorySummary,
@@ -181,19 +182,19 @@ export function lowestPriceMinor(product: Product): number {
 export const productHref = (slug: string): string => `/products/${slug}`
 export const categoryHref = (slug: string): string => `/${slug}`
 
-export function toProductSummary(product: Product): ProductSummary {
+export function toProductSummary(product: Product, locale: Locale): ProductSummary {
   return {
     id: product.id,
     slug: product.slug,
     title: product.title,
     href: productHref(product.slug),
-    price: formatPrice(lowestPriceMinor(product)),
+    price: formatPriceFor(locale, lowestPriceMinor(product)),
     images: gallery(product),
     available: isProductAvailable(product),
   }
 }
 
-function toDiamondOption(variant: Variant): DiamondOption {
+function toDiamondOption(variant: Variant, locale: Locale): DiamondOption {
   // A variant's label is its options joined — one today, and joined rather than indexed so that a
   // second variant type arriving later reads correctly instead of silently showing the first.
   const label = variant.options
@@ -207,9 +208,11 @@ function toDiamondOption(variant: Variant): DiamondOption {
   return {
     id: variant.id,
     label: label === '' ? (variant.title ?? `Option ${variant.id}`) : label,
-    price: formatPrice(priceMinor),
+    price: formatPriceFor(locale, priceMinor),
     // A stone always counts: a variant carries a number, and there is no made-to-order flag on one.
-    ...(ceiling(variant.inventory) === undefined ? {} : { maxQuantity: ceiling(variant.inventory) }),
+    ...(ceiling(variant.inventory) === undefined
+      ? {}
+      : { maxQuantity: ceiling(variant.inventory) }),
     priceMinor,
     available: isVariantAvailable(variant),
     ...(image ? { image } : {}),
@@ -228,11 +231,11 @@ function toAttributes(product: Product): ProductAttribute[] {
   })
 }
 
-export function toProductDetail(product: Product): ProductDetail {
-  const summary = toProductSummary(product)
+export function toProductDetail(product: Product, locale: Locale): ProductDetail {
+  const summary = toProductSummary(product, locale)
   const category = populated<Category>(product.category, `product "${product.slug}" category`)
   const diamondOptions = productVariants(product)
-    .map(toDiamondOption)
+    .map((variant) => toDiamondOption(variant, locale))
     // Cheapest first, so the drawn column reads as a price ladder rather than as insertion order.
     .sort((a, b) => a.priceMinor - b.priceMinor)
 
@@ -247,7 +250,8 @@ export function toProductDetail(product: Product): ProductDetail {
     currency: CATALOG_CURRENCY,
     // Only for a piece with no stones, and only when it is counted. With stones the ceiling belongs
     // to whichever one is chosen, and a product-level number would contradict it.
-    ...(diamondOptions.length === 0 && product.availability === 'stock-tracked' &&
+    ...(diamondOptions.length === 0 &&
+    product.availability === 'stock-tracked' &&
     ceiling(product.inventory) !== undefined
       ? { maxQuantity: ceiling(product.inventory) }
       : {}),

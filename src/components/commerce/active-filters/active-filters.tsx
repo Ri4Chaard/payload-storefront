@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Chip } from '@/components/ui/chip'
@@ -38,10 +39,17 @@ export interface ActiveFiltersProps extends Omit<React.ComponentProps<'ul'>, 'ch
 
 export function ActiveFilters({
   filters,
-  label = 'Applied filters',
+  label: labelProp,
   className,
   ...props
 }: ActiveFiltersProps) {
+  const t_catalog = useTranslations('catalog')
+  /*
+    Resolved in the body, not as a default parameter or a module constant: `useTranslations` is a
+    hook. The prop stays overridable, so a caller with its own words still wins — what changed is
+    that the fallback is translated instead of being an English literal.
+  */
+  const label = labelProp ?? t_catalog('appliedFilters')
   // Nothing applied is nothing drawn — an empty rule-bounded strip above the grid reads as a
   // component that failed to load.
   if (filters.length === 0) return null
@@ -50,7 +58,11 @@ export function ActiveFilters({
     // The list IS the row. An inner `<ul className="contents">` inside a flex wrapper would have
     // read the same on screen and dropped the list semantics in browsers that still lose them to
     // `display: contents`.
-    <ul aria-label={label} className={cn('flex flex-wrap items-center gap-2.5', className)} {...props}>
+    <ul
+      aria-label={label}
+      className={cn('flex flex-wrap items-center gap-2.5', className)}
+      {...props}
+    >
       {filters.map((filter) => (
         <li key={filter.id}>
           <Chip

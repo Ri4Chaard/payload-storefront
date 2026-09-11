@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -13,6 +14,7 @@ import { Icon } from '@/components/ui/icon'
  * still outstanding.
  */
 export function RegistrationSuccess() {
+  const t_account = useTranslations('account')
   return (
     <Container>
       <div className="mx-auto flex w-full max-w-160 flex-col items-center gap-10 py-12 text-center md:py-20">
@@ -26,7 +28,7 @@ export function RegistrationSuccess() {
         </span>
 
         <div className="flex flex-col gap-3.5">
-          <h1 className="text-heading-1 text-neutral-primary">Successful registration</h1>
+          <h1 className="text-heading-1 text-neutral-primary">{t_account('registrationSuccess')}</h1>
           <p className="text-body-base text-neutral-primary">
             Your account has been successfully created. Welcome to AURUM!
           </p>

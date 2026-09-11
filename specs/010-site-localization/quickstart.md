@@ -240,6 +240,22 @@ this feature has roughly 89 KB of headroom for next-intl's runtime and the clien
 runtime costs a flat ~15 KB, and it lands in the baseline because the provider is in the root layout
 — so it is charged to every route including the 404, exactly as spec 009's cookie banner was.
 
+### Measured again after US4 (T104)
+
+| Route | Baseline (T001) | Now | Delta |
+| --- | --- | --- | --- |
+| `/not-a-real-page` (framework baseline) | 192.3 KB | **207.4 KB** | +15.1 KB |
+| `/` | 197.6 KB | 212.7 KB | +15.1 KB |
+| `/all-jewelry` (worst route) | 202.9 KB | **217.8 KB** | +14.9 KB |
+| `/legal/privacy` | 187.0 KB | 202.3 KB | +15.3 KB |
+| `/ru` | — | 212.7 KB | identical to `/` |
+| `/ru/all-jewelry` | — | 217.8 KB | identical to `/all-jewelry` |
+
+Unchanged by US4 to within a rounding error, **even though the client provider grew from seven
+namespaces to nine**. Messages travel in the flight payload, not the bundle, so adding a namespace
+costs HTML rather than JavaScript. The worst route sits 10.4 KB above the framework baseline against
+a 100 KB allowance.
+
 **A Russian route measures the same as its English twin, to the decimal.** That is the check that
 says message data is travelling in the flight payload rather than the JavaScript bundle. A widening
 gap between `/x` and `/ru/x` in a later measurement means a message file has been imported into a

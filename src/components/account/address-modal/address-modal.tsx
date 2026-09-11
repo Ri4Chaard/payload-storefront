@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -35,14 +36,6 @@ import type { CountryCode, CountryOption } from '@/lib/countries'
  * courtesy on top of the schema rather than instead of it — `saveAddress` re-validates, because a
  * disabled button is not a check.
  */
-const ERRORS: Record<string, string> = {
-  addressCityRequired: 'Enter a city.',
-  addressCountryRequired: 'Choose a country.',
-  addressLine1Required: 'Enter the street address.',
-  addressNotFound: 'That address is no longer saved to your account.',
-  addressPostcodeRequired: 'Enter a postcode.',
-  addressTooLong: 'That is longer than this field can hold.',
-}
 
 export interface AddressModalProps {
   /** The row being edited, or `null` to create a new one. */
@@ -67,6 +60,18 @@ export function AddressModal({
   open,
   triggerRef,
 }: AddressModalProps) {
+  const t_account = useTranslations('account')
+  const t_errors = useTranslations('errors')
+
+  const ERRORS: Record<string, string> = {
+    addressCityRequired: t_errors('addressCity'),
+    addressCountryRequired: t_errors('addressCountry'),
+    addressLine1Required: t_errors('addressStreet'),
+    addressNotFound: t_errors('addressGone'),
+    addressPostcodeRequired: t_errors('addressPostcode'),
+    addressTooLong: t_errors('addressTooLong'),
+  }
+
   const fieldId = React.useId()
 
   const editing = address !== null
@@ -79,9 +84,7 @@ export function AddressModal({
    * offer a click that would be reverted.
    */
   const lockedDefault = editing ? address.isDefault : addressCount === 0
-  const lockNote = editing
-    ? 'Mark another address as the default to move it.'
-    : 'Your first address is always the default.'
+  const lockNote = editing ? t_account('defaultElsewhere') : t_account('firstAddressDefault')
 
   const emptyValues = React.useCallback(
     (): AddressValues => ({

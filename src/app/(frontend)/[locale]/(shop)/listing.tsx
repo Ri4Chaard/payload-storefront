@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import React from 'react'
 
@@ -58,6 +59,7 @@ export async function Listing({
   searchParams,
 }: ListingProps) {
   const locale = await currentLocale()
+  const t_catalog = await getTranslations('catalog')
   const { filters, dropped } = parseFilters(searchParams)
   const seeded: FilterState = categorySlug ? { ...filters, category: [categorySlug] } : filters
 
@@ -140,6 +142,7 @@ export async function Listing({
 
           <Container className="py-10 xl:py-15">
             <LoadMore
+              label={t_catalog('loadMore')}
               shown={result.products.length}
               total={result.total}
               // `result.page`, not the URL's — a page past the end is clamped by `getListing`,

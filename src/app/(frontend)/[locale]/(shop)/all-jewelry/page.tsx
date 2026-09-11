@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import React from 'react'
@@ -16,16 +17,17 @@ import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
  * A static sibling of `/[category]`, so Next resolves it first and "all-jewelry" is never mistaken
  * for a category slug.
  */
-const TITLE = 'All jewelry'
+
 const BASE = '/all-jewelry'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await currentLocale()
+  const t_nav = await getTranslations('nav')
   const shop = await getShopContent(locale)
 
   return listingMetadata({
     locale,
-    title: TITLE,
+    title: t_nav('allJewelry'),
     subtitle: shop.listingSubtitle,
     basePath: BASE,
   })
@@ -37,6 +39,7 @@ export default async function AllJewelryPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const locale = await currentLocale()
+  const t_nav = await getTranslations('nav')
   const query = await searchParams
 
   /**
@@ -64,10 +67,10 @@ export default async function AllJewelryPage({
 
   return (
     <>
-      <ListingBreadcrumbs title={TITLE} basePath={BASE} />
+      <ListingBreadcrumbs title={t_nav('allJewelry')} basePath={BASE} />
       <Listing
         categorySlug={null}
-        title={TITLE}
+        title={t_nav('allJewelry')}
         subtitle={shop.listingSubtitle}
         basePath={BASE}
         searchParams={query}

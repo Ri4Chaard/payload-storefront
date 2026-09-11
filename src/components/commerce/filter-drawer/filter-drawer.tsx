@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
@@ -80,6 +81,7 @@ export function FilterDrawer({
   currentHref,
   triggerRef,
 }: FilterDrawerProps) {
+  const t_nav = useTranslations('nav')
   const router = useRouter()
   const [draft, setDraft] = React.useState<FilterState>(filters)
 
@@ -164,9 +166,7 @@ export function FilterDrawer({
         this form submits, and a filter change that silently reset a visitor's sort would be a bug
         they could not explain.
       */}
-      {draft.sort !== DEFAULT_SORT ? (
-        <input type="hidden" name="sort" value={draft.sort} />
-      ) : null}
+      {draft.sort !== DEFAULT_SORT ? <input type="hidden" name="sort" value={draft.sort} /> : null}
 
       <Group legend="CATEGORY:">
         {/*
@@ -176,7 +176,7 @@ export function FilterDrawer({
           "exactly one", which is wrong for a filter that combines.
         */}
         <Checkbox
-          label="All jewelry"
+          label={t_nav('allJewelry')}
           checked={draft.category.length === 0}
           onChange={() => setDraft((current) => applyChange(current, { category: [] }))}
         />

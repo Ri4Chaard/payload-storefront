@@ -62,16 +62,23 @@ export interface HeaderProps {
   className?: string
 }
 
-/** Placeholder navigation (T073). Later specs replace this with Payload-managed content. */
-const DEFAULT_NAV = [
-  { label: 'All jewelry', href: '/all-jewelry' },
-  { label: 'Rings', href: '/rings' },
-  { label: 'Bracelets', href: '/bracelets' },
-  { label: 'Earrings', href: '/earrings' },
-  { label: 'Necklaces', href: '/necklaces' },
-  { label: 'About us', href: '/about' },
-  { label: 'Contact us', href: '/contact' },
-]
+/**
+ * Placeholder navigation (T073). Later specs replace this with Payload-managed content.
+ *
+ * **Translated through the message files in the meantime (spec 010, FR-033).** Constitution I puts
+ * navigation in Payload, and it will go there — but leaving these English on a Russian page until
+ * that spec lands would be the most visible untranslated thing on the site. The keys move to the
+ * content model with the labels when the time comes.
+ */
+const NAV_KEYS = [
+  { key: 'allJewelry', href: '/all-jewelry' },
+  { key: 'rings', href: '/rings' },
+  { key: 'bracelets', href: '/bracelets' },
+  { key: 'earrings', href: '/earrings' },
+  { key: 'necklaces', href: '/necklaces' },
+  { key: 'about', href: '/about' },
+  { key: 'contact', href: '/contact' },
+] as const
 
 /**
  * The languages on offer (spec 010, FR-005).
@@ -96,7 +103,7 @@ const DEFAULT_LOCALES: Locale[] = LOCALES.map((locale) => LOCALE_LABELS[locale])
  */
 
 export function Header({
-  navItems = DEFAULT_NAV,
+  navItems: navItemsProp,
   breadcrumbs,
   cartCount,
   social,
@@ -123,6 +130,9 @@ export function Header({
     `next/navigation` would have reported `/ru/about` against an href of `/about`.
   */
   const t = useTranslations('header')
+  const t_nav = useTranslations('nav')
+  const navItems =
+    navItemsProp ?? NAV_KEYS.map(({ key, href }) => ({ label: t_nav(key), href }))
   const activeLocale = useLocale()
   const locale = activeLocale.toUpperCase()
   const setLocale = (code: string) => {

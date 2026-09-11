@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -42,17 +43,19 @@ import { changePasswordSchema, type ChangePasswordValues } from '@/lib/auth/sche
  * to know whether they are about to be signed out and why they were emailed about it — so the panel
  * says both, rather than leaving the message to look like a warning about somebody else.
  */
-const ERRORS: Record<string, string> = {
-  changePasswordMismatch: 'The two passwords do not match.',
-  changePasswordTooWeak: 'Use at least 8 characters, and avoid a password you use elsewhere.',
-  changePasswordWrong: 'That is not your current password.',
-  signInLocked:
-    'Too many attempts. For your security, try again in a few minutes or reset your password.',
-}
 
 const EMPTY: ChangePasswordValues = { confirmPassword: '', currentPassword: '', newPassword: '' }
 
 export function ChangePasswordModal() {
+  const t_errors = useTranslations('errors')
+
+  const ERRORS: Record<string, string> = {
+    changePasswordMismatch: t_errors('passwordMismatch'),
+    changePasswordTooWeak: t_errors('passwordWeak'),
+    changePasswordWrong: t_errors('passwordWrong'),
+    signInLocked: t_errors('signInLocked'),
+  }
+
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [saved, setSaved] = React.useState(false)

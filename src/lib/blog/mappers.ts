@@ -1,6 +1,7 @@
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
+import { BCP47, type Locale } from '@/i18n/routing'
 import { toCatalogImage } from '@/lib/catalog/mappers'
 import type { CatalogImage } from '@/lib/catalog/types'
 import type { StoryMedia } from '@/lib/story/types'
@@ -68,17 +69,32 @@ const slugify = (value: string): string =>
  * what FR-011 asks for.
  *
  * `August 08, 2026`, as drawn: a two-digit day, so a column of dates lines up.
+ *
+ * **One formatter per language, built once (spec 010, FR-039).** The tag was fixed at `en-US`, which
+ * printed an English month name on a Russian article. It is now the requested language's — and
+ * still explicit rather than the runtime default, for the reason the paragraph above gives: Node
+ * takes its default from `LANG` and the browser from the user, so an implicit locale is a hydration
+ * mismatch waiting for a server with different environment variables.
  */
-const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
-  day: '2-digit',
-  year: 'numeric',
-  timeZone: 'UTC',
-})
+const DATE_FORMATS = new Map<Locale, Intl.DateTimeFormat>()
 
-const publishedLabel = (iso: string): string => {
+const dateFormat = (locale: Locale): Intl.DateTimeFormat => {
+  const existing = DATE_FORMATS.get(locale)
+  if (existing) return existing
+
+  const created = new Intl.DateTimeFormat(BCP47[locale], {
+    month: 'long',
+    day: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+  DATE_FORMATS.set(locale, created)
+  return created
+}
+
+const publishedLabel = (iso: string, locale: Locale): string => {
   const date = new Date(iso)
-  return Number.isNaN(date.getTime()) ? '' : DATE_FORMAT.format(date)
+  return Number.isNaN(date.getTime()) ? '' : dateFormat(locale).format(date)
 }
 
 /** A chapter's body, as stored. Derived rather than restated — Constitution I. */
@@ -172,7 +188,7 @@ export const emphasisFor = (index: number): CardEmphasis => ({
   desktopWide: index % 7 === 0 || index % 7 === 6,
 })
 
-export function toArticleCard(document: Article, index: number): ArticleCard {
+export function toArticleCard(document: Article, index: number, locale: Locale): ArticleCard {
   const category = toBlogCategory(document.category)
   const image = media(document.hero)
 
@@ -181,7 +197,7 @@ export function toArticleCard(document: Article, index: number): ArticleCard {
     title: document.title,
     href: articleHref(document.slug),
     publishedOn: document.publishedOn,
-    publishedLabel: publishedLabel(document.publishedOn),
+    publishedLabel: publishedLabel(document.publishedOn, locale),
     ...(category ? { category } : {}),
     ...(image ? { media: image } : {}),
     emphasis: emphasisFor(index),
@@ -263,7 +279,7 @@ const seoOf = (seo: Article['seo'] | BlogPage['seo']) => ({
   ...(toCatalogImage(seo?.image) ? { image: toCatalogImage(seo?.image) as CatalogImage } : {}),
 })
 
-export function toArticleView(document: Article): ArticleView {
+export function toArticleView(document: Article, locale: Locale): ArticleView {
   const chapters = toChapters(document.chapters)
   const hero = media(document.hero)
   const category = toBlogCategory(document.category)
@@ -274,7 +290,7 @@ export function toArticleView(document: Article): ArticleView {
     href: articleHref(document.slug),
     standfirst: document.standfirst,
     publishedOn: document.publishedOn,
-    publishedLabel: publishedLabel(document.publishedOn),
+    publishedLabel: publishedLabel(document.publishedOn, locale),
     updatedOn: document.updatedAt,
     ...(category ? { category } : {}),
     ...(hero ? { hero } : {}),
@@ -290,7 +306,16 @@ export function toArticleView(document: Article): ArticleView {
     fallbacks: {
       title: document.title,
       description: document.standfirst,
-      ...(hero ? { image: { src: hero.src, width: hero.width, height: hero.height, ...(hero.alt ? { alt: hero.alt } : {}) } } : {}),
+      ...(hero
+        ? {
+            image: {
+              src: hero.src,
+              width: hero.width,
+              height: hero.height,
+              ...(hero.alt ? { alt: hero.alt } : {}),
+            },
+          }
+        : {}),
     },
   }
 }
@@ -303,6 +328,9 @@ export function toBlogCategories(documents: ArticleCategory[]): BlogCategory[] {
 }
 
 export interface BlogIndexInput {
+  /** The language the cards' dates are written in (spec 010, FR-039). */
+  locale: Locale
+
   page: BlogPage
   categories: ArticleCategory[]
   articles: Article[]
@@ -317,8 +345,9 @@ export function toBlogIndex({
   articles,
   total,
   activeCategory,
+  locale,
 }: BlogIndexInput): BlogIndexView {
-  const cards = articles.map((article, index) => toArticleCard(article, index))
+  const cards = articles.map((article, index) => toArticleCard(article, index, locale))
   const seo = seoOf(page.seo)
 
   return {
@@ -339,7 +368,10 @@ export function toBlogIndex({
     */
     moreHref:
       cards.length < total
-        ? blogHref({ category: activeCategory, page: Math.floor(cards.length / BLOG_PAGE_SIZE) + 1 })
+        ? blogHref({
+            category: activeCategory,
+            page: Math.floor(cards.length / BLOG_PAGE_SIZE) + 1,
+          })
         : null,
     seo,
     /*

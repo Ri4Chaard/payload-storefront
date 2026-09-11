@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
@@ -34,12 +35,6 @@ import { signInSchema, type SignInValues } from '@/lib/auth/schemas'
  * Saying "we don't know that email" turns this form into a way to enumerate customers (FR-011), and
  * the action deliberately hands back one key for both.
  */
-const ERRORS: Record<string, string> = {
-  signInEmailInvalid: 'That does not look like an email address.',
-  signInFailed: 'That email address and password do not match.',
-  signInLocked:
-    'Too many attempts. For your security, try again in a few minutes or reset your password.',
-}
 
 export interface SignInFormProps {
   /**
@@ -50,6 +45,14 @@ export interface SignInFormProps {
 }
 
 export function SignInForm({ next }: SignInFormProps) {
+  const t_errors = useTranslations('errors')
+
+  const ERRORS: Record<string, string> = {
+    signInEmailInvalid: t_errors('emailInvalid'),
+    signInFailed: t_errors('signInMismatch'),
+    signInLocked: t_errors('signInLocked'),
+  }
+
   const router = useRouter()
 
   const form = useForm<SignInValues>({

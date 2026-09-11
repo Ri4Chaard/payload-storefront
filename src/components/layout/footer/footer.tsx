@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Container } from '@/components/ui/container'
@@ -93,19 +94,19 @@ export interface FooterProps {
  * it arrives through `customerCareLinks` below. That is not tidying — a hardcoded link to a policy
  * the owner can unpublish is a link to a 404 (spec 009, FR-015c).
  */
-const DEFAULT_GROUPS: FooterLinkGroup[] = [
+const defaultGroups = (t_nav: ReturnType<typeof useTranslations<'nav'>>): FooterLinkGroup[] => [
   {
-    title: 'Customer care',
+    title: t_nav('customerCare'),
     links: [
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'FAQ', href: '/faq' },
+      { label: t_nav('contact'), href: '/contact' },
+      { label: t_nav('faq'), href: '/faq' },
     ],
   },
   {
-    title: 'About',
+    title: t_nav('about'),
     links: [
-      { label: 'Our Story', href: '/about' },
-      { label: 'Our Blog', href: '/blog' },
+      { label: t_nav('ourStory'), href: '/about' },
+      { label: t_nav('ourBlog'), href: '/blog' },
     ],
   },
 ]
@@ -168,7 +169,7 @@ function Certifications() {
 }
 
 export function Footer({
-  groups = DEFAULT_GROUPS,
+  groups: groupsProp,
   legalLinks = [],
   customerCareLinks = [],
   cookieSettings,
@@ -182,6 +183,9 @@ export function Footer({
   year = new Date().getFullYear(),
   className,
 }: FooterProps) {
+  const t_nav = useTranslations('nav')
+  // A hook cannot run in a default parameter, so the fallback is resolved here instead.
+  const groups = groupsProp ?? defaultGroups(t_nav)
   return (
     <footer className={cn('bg-background-base text-neutral-white', className)}>
       <Container>
@@ -228,7 +232,7 @@ export function Footer({
           ))}
 
           <div className={COLUMN}>
-            <h2 className={HEADING}>Contacts</h2>
+            <h2 className={HEADING}>{t_nav('contacts')}</h2>
             <div className="text-body-small text-neutral-white/80 flex flex-col items-center gap-5 text-center md:items-start md:text-left">
               <p>{address}</p>
               <p>{openingHours}</p>
@@ -252,7 +256,7 @@ export function Footer({
           </div>
 
           <div className={COLUMN}>
-            <h2 className={HEADING}>Newsletter</h2>
+            <h2 className={HEADING}>{t_nav('newsletter')}</h2>
             <p className="text-body-small text-neutral-white/80 text-center md:text-left">
               Subscribe to receive updates and exclusive offers.
             </p>
