@@ -30,6 +30,12 @@ const COMPONENTS = [
   'UI/Checkbox',
   'UI/Chip',
   'UI/Container',
+  // The consent surfaces (009/T027). The banner is the one component on this site that appears
+  // unbidden over whatever somebody was reading, so its landmark, its name and its focus order are
+  // load-bearing rather than decorative. The chooser is a dialog nothing in Figma draws.
+  'UI/CookieBanner',
+  'UI/CookiePreferences',
+  'UI/CookieSettingsButton',
   'UI/Drawer',
   'UI/EmptyState',
   'UI/FeatureCard',

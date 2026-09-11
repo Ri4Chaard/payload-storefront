@@ -18,6 +18,12 @@ export { Carousel, type CarouselProps, useAutoAdvance } from './carousel'
 export { CategoryCard, type CategoryCardProps } from './category-card'
 export { Checkbox, type CheckboxProps, type CheckboxShape } from './checkbox'
 export { Chip, type ChipProps } from './chip'
+export {
+  CookieBanner,
+  CookieSettingsButton,
+  type CookieBannerProps,
+} from './cookie-banner'
+export { CookiePreferences, type CookiePreferencesProps } from './cookie-preferences'
 export { Container, type ContainerProps } from './container'
 export { Drawer, type DrawerProps } from './drawer'
 export { EmptyState, type EmptyStateProps } from './empty-state'

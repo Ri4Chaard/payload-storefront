@@ -56,6 +56,34 @@ export default tseslint.config(
     },
   },
   {
+    /*
+      Spec 009, T030. The consent library is read and written in the BROWSER, and that is what keeps
+      this site prerenderable: `cookies()` is a request-time API, so reading the decision on the
+      server — in the root layout, where the banner lives — would opt every route on the site into
+      dynamic rendering. `src/components/layout/cart-count/` exists because the same trade was
+      refused once already for the cart badge.
+
+      A rule rather than a comment, because the violation is one plausible-looking import that no
+      diff would flag and no test would catch: everything would still work, and the whole catalogue
+      would quietly stop being prerendered.
+    */
+    files: ['src/lib/consent/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'next/headers',
+              message:
+                'The consent record is read in the browser. `cookies()` is a request-time API and the banner is in the root layout, so a server read opts EVERY route into dynamic rendering — see specs/009-policy-pages-cookie-consent/research.md R3.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],

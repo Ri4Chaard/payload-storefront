@@ -6,8 +6,9 @@ import { CartCountProvider } from '@/components/layout/cart-count'
 import { ContactBanner } from '@/components/layout/contact-banner'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
+import { CookieBanner, CookieSettingsButton } from '@/components/ui'
 import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
-import { getFooterPolicies } from '@/lib/policies/queries'
+import { getCookieSettings, getFooterPolicies } from '@/lib/policies/queries'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -38,7 +39,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
     which the build output confirms. `revalidateGlobalOnChange` on the global is what makes a saved
     change reach those cached pages (FR-042).
   */
-  const [social, contact, policies] = await Promise.all([
+  const [social, contact, policies, cookies] = await Promise.all([
     getSocialLinks(),
     getContactDetails(),
     /*
@@ -47,6 +48,13 @@ export default async function FrontendLayout({ children }: { children: React.Rea
       dynamic rendering, and it tolerates the database being absent during a container build.
     */
     getFooterPolicies(),
+    /*
+      The banner's configuration (spec 009, FR-045). A fourth read on the same terms — and the same
+      reason it is read HERE rather than in the banner: the banner is a client component, and having
+      it fetch its own categories would cost a request per page view to render something the server
+      already had.
+    */
+    getCookieSettings(),
   ])
 
   // Each surface gets what it draws, rather than the whole record spread at it: the strip and the
@@ -75,8 +83,20 @@ export default async function FrontendLayout({ children }: { children: React.Rea
             social={social}
             legalLinks={policies.legal}
             customerCareLinks={policies.customerCare}
+            cookieSettings={cookies.enabled ? <CookieSettingsButton /> : null}
             {...contact}
           />
+
+          {/*
+            The consent banner (spec 009, FR-017). Last in the body on purpose: it is fixed to the
+            viewport, so its position in the DOM decides only where a keyboard meets it — and after
+            the footer is wrong. See the note below.
+
+            It renders nothing until it has read the visitor's decision in the browser, which is what
+            keeps `cookies()` — a request-time API — out of this layout and leaves every route
+            prerenderable.
+          */}
+          <CookieBanner settings={cookies} />
         </CartCountProvider>
       </body>
     </html>
