@@ -1,7 +1,8 @@
 import createMiddleware from 'next-intl/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { DEFAULT_LOCALE, LOCALES, routing, type Locale } from '@/i18n/routing'
+import { localeHref, rememberedRedirect, splitLocale } from '@/i18n/prefix'
+import { LOCALE_COOKIE, routing } from '@/i18n/routing'
 
 /**
  * **`proxy.ts`, not `middleware.ts`** (spec 004, research R9; spec 010, research R3).
@@ -33,27 +34,23 @@ const SESSION_COOKIE = 'payload-token'
 
 const handleLocale = createMiddleware(routing)
 
-/**
- * Split `/ru/account/orders` into its prefix and the path underneath it.
- *
- * The prefix is optional by design (`localePrefix: 'as-needed'`), so an English path returns the
- * default locale and itself — which is what lets every rule below be written once instead of twice.
- */
-function splitLocale(pathname: string): { locale: Locale; path: string; prefixed: boolean } {
-  const [, head = '', ...tail] = pathname.split('/')
-  if ((LOCALES as readonly string[]).includes(head)) {
-    return { locale: head as Locale, path: `/${tail.join('/')}`, prefixed: true }
-  }
-  return { locale: DEFAULT_LOCALE, path: pathname, prefixed: false }
-}
-
-/** `/account` under whichever language the visitor is reading. */
-function localeHref(locale: Locale, path: string): string {
-  return locale === DEFAULT_LOCALE ? path : `/${locale}${path}`
-}
-
 export function proxy(request: NextRequest): NextResponse {
   const { locale, path } = splitLocale(request.nextUrl.pathname)
+
+  /*
+    The remembered choice (spec 010, T024 — FR-008). Unprefixed paths only, and before the account
+    guard so that a returning Russian visitor arriving at `/account` is redirected once, into their
+    own language, rather than being bounced to the English sign-in page and prefixed afterwards.
+  */
+  const remembered = rememberedRedirect(
+    request.nextUrl.pathname,
+    request.cookies.get(LOCALE_COOKIE)?.value,
+  )
+  if (remembered) {
+    const target = new URL(remembered, request.nextUrl)
+    target.search = request.nextUrl.search
+    return NextResponse.redirect(target)
+  }
 
   /*
     The account guard, made locale-aware (spec 010, T016a). Before this feature it matched

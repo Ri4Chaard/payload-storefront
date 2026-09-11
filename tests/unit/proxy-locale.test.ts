@@ -19,7 +19,7 @@ const { config } = await import('@/proxy')
  * matcher: every exclusion in it is load-bearing, and a regression there is invisible until
  * something that should never have been touched starts redirecting.
  */
-const matcher = config.matcher[0]
+const matcher = config.matcher[0] ?? ''
 const pattern = new RegExp(`^${matcher.replace('/:path*', '')}$`)
 
 describe('the proxy matcher', () => {

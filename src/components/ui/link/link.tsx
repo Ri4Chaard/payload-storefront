@@ -1,6 +1,13 @@
 'use client'
 
-import NextLink from 'next/link'
+/*
+  next-intl's `Link`, not `next/link` (spec 010, FR-006). The same component with one behaviour
+  added: the href keeps the prefix of the language being read, so `/cart` from a Russian page goes
+  to `/ru/cart`. Centralising it here is what keeps the href builders in `src/lib` locale-free — a
+  path is a fact about a document, a prefix is a fact about a request. An external href never
+  reaches it.
+*/
+import { Link as NextLink } from '@/i18n/navigation'
 import React from 'react'
 
 import { cn } from '@/lib/cn'

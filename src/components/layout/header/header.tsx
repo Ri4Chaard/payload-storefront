@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import React from 'react'
 
 import { Breadcrumbs, type BreadcrumbItem } from '@/components/ui/breadcrumbs'
@@ -11,6 +11,8 @@ import { useCartCount } from '@/components/layout/cart-count'
 import { LanguageSelector, type Locale } from '@/components/layout/language-selector'
 import { Logo } from '@/components/layout/logo'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { usePathname, useRouter } from '@/i18n/navigation'
+import { LOCALES, LOCALE_LABELS } from '@/i18n/routing'
 import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
@@ -71,10 +73,18 @@ const DEFAULT_NAV = [
   { label: 'Contact us', href: '/contact' },
 ]
 
-const DEFAULT_LOCALES: Locale[] = [
-  { code: 'EN', label: 'English' },
-  { code: 'RU', label: 'Russian' },
-]
+/**
+ * The languages on offer (spec 010, FR-005).
+ *
+ * A default rather than a requirement, so Storybook and any fixed rendering still work — but the
+ * layout passes the real list, filtered to what the owner has switched on. Before spec 010 this was
+ * a hardcoded `EN`/`RU` pair with Ukrainian nowhere in the codebase.
+ *
+ * **`code` is the DISPLAY code and `value` is the route code**, which is why `toLowerCase()` below
+ * is exact rather than hopeful: `tests/unit/i18n-locale.test.ts` asserts that every display code is
+ * its locale upper-cased, so the two can never drift apart unnoticed.
+ */
+const DEFAULT_LOCALES: Locale[] = LOCALES.map((locale) => LOCALE_LABELS[locale])
 
 /**
  * The count belongs in the accessible name, not only in the badge — the badge is `aria-hidden`
@@ -104,10 +114,21 @@ export function Header({
   const count = cartCount ?? liveCount
 
   const pathname = usePathname()
+  const router = useRouter()
 
-  // Locale is local state because nothing routes on it yet. When i18n lands this becomes controlled
-  // by the router; the shape of the prop does not change.
-  const [locale, setLocale] = React.useState(locales[0]?.code ?? 'EN')
+  /*
+    Spec 010 landed, and the prediction held: the locale is the router's now, and the prop shape did
+    not change. `usePathname` here is next-intl's, which returns the path WITHOUT the prefix — that
+    is what lets `current={pathname === item.href}` below keep working on a Russian page, where
+    `next/navigation` would have reported `/ru/about` against an href of `/about`.
+  */
+  const activeLocale = useLocale()
+  const locale = activeLocale.toUpperCase()
+  const setLocale = (code: string) => {
+    // `replace` rather than `push`: switching language is not a place in history to go back to, and
+    // the back button should return to the previous PAGE.
+    router.replace(pathname, { locale: code.toLowerCase() as (typeof LOCALES)[number] })
+  }
 
   const headerRef = React.useRef<HTMLElement>(null)
   // How far above its resting place the header sits — 0, or its own height once it has stepped out

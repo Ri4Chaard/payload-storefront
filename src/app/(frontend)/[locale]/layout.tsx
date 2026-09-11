@@ -13,7 +13,7 @@ import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 import { getCookieSettings, getFooterPolicies } from '@/lib/policies/queries'
 import { asLocale } from '@/i18n/locale'
 import { loadMessages } from '@/i18n/request'
-import { LOCALES } from '@/i18n/routing'
+import { LOCALES, LOCALE_LABELS } from '@/i18n/routing'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -117,7 +117,12 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
         <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <CartCountProvider>
           <ContactBanner social={social} {...reach} />
-          <Header social={social} {...reach} />
+          {/*
+            The switcher's list comes from here rather than from the header's own default, so that
+            spec 010's US3 has one place to filter it — the owner switching Ukrainian off changes
+            this line's output and nothing else.
+          */}
+          <Header social={social} {...reach} locales={LOCALES.map((code) => LOCALE_LABELS[code])} />
         {/*
           `<main>` is the landmark the skip link (T072) will target. The skip link is still its own
           task; header and footer are wired up here so they are exercised by a real page rather than

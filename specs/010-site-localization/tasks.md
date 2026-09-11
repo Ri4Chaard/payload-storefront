@@ -147,23 +147,44 @@ deep, reload, close the tab and return to the bare domain — the language holds
 
 ### Tests for User Story 1
 
-- [ ] T021 [P] [US1] Unit test in `tests/unit/proxy-locale.test.ts` for the remembered-choice rule: unprefixed path + `NEXT_LOCALE=ru` redirects to `/ru<path><search>`; prefixed path with a conflicting cookie is left alone; `NEXT_LOCALE=en` and an absent cookie both delegate.
-- [ ] T022 [P] [US1] E2E in `tests/e2e/language-switch.spec.ts` covering US1's six acceptance scenarios, including the private-window check that a Russian-configured browser still lands on English (FR-010) and the return-visit redirect to `/ru` (FR-008).
-- [ ] T023 [P] [US1] E2E in `tests/e2e/language-switch.spec.ts` that adding an item to the cart and then switching language preserves the cart count and the session (FR-011).
+- [X] T021 [P] [US1] Unit test in `tests/unit/proxy-locale.test.ts` for the remembered-choice rule: unprefixed path + `NEXT_LOCALE=ru` redirects to `/ru<path><search>`; prefixed path with a conflicting cookie is left alone; `NEXT_LOCALE=en` and an absent cookie both delegate.
+- [X] T022 [P] [US1] E2E in `tests/e2e/language-switch.spec.ts` covering US1's six acceptance scenarios, including the private-window check that a Russian-configured browser still lands on English (FR-010) and the return-visit redirect to `/ru` (FR-008).
+- [X] T023 [P] [US1] E2E in `tests/e2e/language-switch.spec.ts` that adding an item to the cart and then switching language preserves the cart count and the session (FR-011).
 
 ### Implementation for User Story 1
 
-- [ ] T024 [US1] Add the remembered-choice rule to `src/proxy.ts`: on an **unprefixed path only**, if `NEXT_LOCALE` names a non-default locale, 307 to the prefixed equivalent; otherwise delegate untouched. Comment why this is ours rather than `localeDetection` — the library's single boolean would also act on `accept-language`, which FR-010 forbids.
-- [ ] T025 [US1] Delete `DEFAULT_LOCALES` from `src/components/layout/header/header.tsx:74` and the `React.useState` locale at line 108; take the locale list and current value as props, and make `onChange` navigate to the same pathname under the new prefix using `src/i18n/navigation.ts`'s router. Remove the now-obsolete comment predicting this change.
-- [ ] T026 [US1] Pass the locale list and current locale from `src/app/(frontend)/[locale]/layout.tsx` into `Header`, built from `LOCALE_LABELS`. (The enabled-set filter arrives in US3 — until then all three are listed.)
-- [ ] T027 [P] [US1] Thread the same props through `src/components/layout/mobile-nav/mobile-nav.tsx` so the panel's switcher works and closes on selection (FR-009). Its existing `locales`/`locale`/`onLocaleChange` props already have the right shape.
-- [ ] T028 [US1] Repoint `src/components/ui/link/` and `src/components/ui/nav-link/` at next-intl's `Link` so every internal href carries the current prefix.
-- [ ] T029 [P] [US1] Repoint the 13 direct `next/link` imports at the kit primitive or at `src/i18n/navigation.ts`; leave `src/lib/catalog/listing-url.ts`, `src/lib/blog/blog-url.ts` and `src/lib/policies/policy-url.ts` returning unprefixed paths (`contracts/i18n-modules.md` §8).
-- [ ] T030 [P] [US1] Update `src/components/layout/language-selector/language-selector.stories.tsx` for the three-locale set. **The component itself must not change.**
-- [ ] T031 [US1] Verify `pnpm build` still prerenders the catalogue — the locale must not have introduced a request-time API into the layout.
+- [X] T024 [US1] Add the remembered-choice rule to `src/proxy.ts`: on an **unprefixed path only**, if `NEXT_LOCALE` names a non-default locale, 307 to the prefixed equivalent; otherwise delegate untouched. Comment why this is ours rather than `localeDetection` — the library's single boolean would also act on `accept-language`, which FR-010 forbids.
+- [X] T025 [US1] Delete `DEFAULT_LOCALES` from `src/components/layout/header/header.tsx:74` and the `React.useState` locale at line 108; take the locale list and current value as props, and make `onChange` navigate to the same pathname under the new prefix using `src/i18n/navigation.ts`'s router. Remove the now-obsolete comment predicting this change.
+- [X] T026 [US1] Pass the locale list and current locale from `src/app/(frontend)/[locale]/layout.tsx` into `Header`, built from `LOCALE_LABELS`. (The enabled-set filter arrives in US3 — until then all three are listed.)
+- [X] T027 [P] [US1] Thread the same props through `src/components/layout/mobile-nav/mobile-nav.tsx` so the panel's switcher works and closes on selection (FR-009). Its existing `locales`/`locale`/`onLocaleChange` props already have the right shape.
+- [X] T028 [US1] Repoint `src/components/ui/link/` and `src/components/ui/nav-link/` at next-intl's `Link` so every internal href carries the current prefix.
+- [X] T029 [P] [US1] Repoint the 13 direct `next/link` imports at the kit primitive or at `src/i18n/navigation.ts`; leave `src/lib/catalog/listing-url.ts`, `src/lib/blog/blog-url.ts` and `src/lib/policies/policy-url.ts` returning unprefixed paths (`contracts/i18n-modules.md` §8).
+- [X] T030 [P] [US1] ~~Update `language-selector.stories.tsx`~~ — **the file does not exist.** The selector has no stories of its own (it is composed from `Menu` and `MenuOption`, which have theirs) and `pnpm check:stories` does not ask for one, since it gates the UI kit and this lives in `layout/`. What the header's new `useLocale()` call *did* require is the Storybook message provider, so **T086 was pulled forward from US4** and `.storybook/preview.tsx` now carries a `NextIntlClientProvider` decorator. **The selector component itself is unchanged, as specified.**
+- [X] T031 [US1] Verify `pnpm build` still prerenders the catalogue — the locale must not have introduced a request-time API into the layout.
 
-**Checkpoint**: US1 is demonstrable end to end. The site is still English in all three languages,
-which is exactly what makes this phase independently testable.
+**Checkpoint**: ✅ US1 is demonstrable end to end, verified against a production server:
+
+| Request | Result |
+| --- | --- |
+| `/` with no cookie | 200, English (FR-010) |
+| `/` with `NEXT_LOCALE=ru` | 307 → `/ru` (FR-008) |
+| `/legal/privacy` with `NEXT_LOCALE=ru` | 307 → `/ru/legal/privacy` |
+| `/uk/cart` with `NEXT_LOCALE=ru` | 200, left alone — a prefix beats a memory |
+| `/` with `Accept-Language: ru-RU` | 200, English — detection stays off |
+
+Seven e2e scenarios and ten more unit assertions pass. The site is still English in all three
+languages, which is exactly what makes this phase independently testable.
+
+> **The prefix decisions were lifted out of `src/proxy.ts` into `src/i18n/prefix.ts`.** The proxy
+> cannot be imported by a unit test — next-intl's middleware reaches for `next/server`, which only
+> resolves inside a Next build — so the rules it applies now live in a pure module beside it. That
+> is also where `splitLocale` stopped being duplicated between the account guard and the locale
+> rule.
+>
+> **The header's `usePathname` had to change source, not just the switcher.** Its nav highlighting
+> compares `pathname === item.href`; with `next/navigation` that compares `/ru/about` against
+> `/about` and quietly stops highlighting anything for two of the three languages. next-intl's
+> `usePathname` returns the path without the prefix, which is the whole fix.
 
 ---
 

@@ -4,7 +4,11 @@ import React from 'react'
 // The storefront stylesheet, so every story renders on brand with the real tokens.
 import '../src/app/(frontend)/[locale]/styles.css'
 
+import { NextIntlClientProvider } from 'next-intl'
+
 import { breakpoints } from '@tokens/mapping'
+import messages from '@/i18n/messages/en.json'
+import { DEFAULT_LOCALE } from '@/i18n/routing'
 import { fontVariables } from '@/styles/fonts'
 
 /**
@@ -22,8 +26,22 @@ const withBrandFonts: Decorator = (Story) => (
   </div>
 )
 
+/**
+ * Messages reach stories the same way they reach the app (spec 010, T086).
+ *
+ * Components that read `useTranslations` or `useLocale` throw without a provider above them — and
+ * since spec 010 the header is one of them. English, because a story is a specimen of the design
+ * rather than of a translation; a component whose Russian rendering needs checking gets a story
+ * that sets its own provider.
+ */
+const withMessages: Decorator = (Story) => (
+  <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={messages}>
+    <Story />
+  </NextIntlClientProvider>
+)
+
 const preview: Preview = {
-  decorators: [withBrandFonts],
+  decorators: [withBrandFonts, withMessages],
   parameters: {
     controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
     backgrounds: {
