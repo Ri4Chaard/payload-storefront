@@ -3145,6 +3145,10 @@ export interface CookieSetting {
    */
   enabled: boolean;
   /**
+   * The paragraph in the cookie banner. The Cookie Policy link is added after it automatically. Line breaks are kept. Leave empty to use the built-in wording.
+   */
+  bannerBody?: string | null;
+  /**
    * Raise this by one to ask EVERY visitor again — do that when the Cookie Policy changes materially, not for a typo. Their previous answers are filled in for them.
    */
   consentVersion: number;
@@ -3352,6 +3356,7 @@ export interface FaqPageSelect<T extends boolean = true> {
  */
 export interface CookieSettingsSelect<T extends boolean = true> {
   enabled?: T;
+  bannerBody?: T;
   consentVersion?: T;
   policy?: T;
   categories?:

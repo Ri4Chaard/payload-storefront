@@ -30,6 +30,10 @@ No analytics, no script gating, no provider integration — cut at the owner's d
 exist as content so the chooser and the Cookie Policy cannot drift apart; nothing consults them to
 load anything, because there is nothing on this site to load.
 
+The banner's paragraph is Payload-managed; its heading and button labels are not. That line moved
+twice during the build and settled where the meaning is — the paragraph is the only part that makes
+a claim about data processing, so it is the only part that must be correctable without a release.
+
 ## Technical Context
 
 **Language/Version**: TypeScript 5 (strict), Node 22, React 19
@@ -67,12 +71,13 @@ this feature takes `/legal/[slug]` and does not contend for it (research R1).
 
 ## Constitution Check
 
-*GATE: evaluated before Phase 0 and re-evaluated after Phase 1 design. Result: **PASS with one
-documented exception** (see Complexity Tracking).*
+*GATE: evaluated before Phase 0, re-evaluated after Phase 1 design, and again after implementation.
+Result: **PASS**. The one exception this plan carried — hardcoded banner copy — was resolved when the
+owner made the banner's body editable; Complexity Tracking keeps the history.*
 
 | Principle | Status | Evidence |
 | --- | --- | --- |
-| **I. Payload Is the Single Source of Truth** | ⚠️ **Exception** | Policy content, categories, banner on/off and consent version are all Payload-managed with no deploy. The banner's own heading, body, and three button labels are **hardcoded** at the owner's explicit direction (FR-025). This is a real violation of the principle's letter and is recorded in Complexity Tracking rather than taken by omission. |
+| **I. Payload Is the Single Source of Truth** | ✅ | Policy content, cookie categories, the banner's paragraph, its on/off switch and the consent version are all Payload-managed with no deploy. What stays in code is the banner's heading and its three button labels — names for what a control does, which the principle itself exempts as "non-content UI affordances". See Complexity Tracking for why this row changed twice. |
 | **II. Reuse Before Creation** | ✅ | `PageHeaderBlock`, `RichText`, `Container`, `EmptyState`, `Modal`, `Drawer`, `Switch`, `Button`, `Link` all reused. **No policy-page component is created** — the route composes kit parts directly, as `src/app/(frontend)/faq/page.tsx` already does; a single-consumer wrapper with no logic is exactly what Constitution II argues against. Shared `slugField` and `seoField` reused. New: the banner and the chooser, which have no equivalent — both go into the UI kit with documented states, not into a feature folder. |
 | **III. Design Tokens Over Magic Values** | ✅ | No new colour, spacing, or type values. `pnpm check:tokens` and `check:styles` gate it. |
 | **IV. Content Modeling & Schema Evolution** | ✅ | Collection, global, and field shapes specified in `data-model.md` before implementation. Every field labelled and described. Slug collisions rejected at save time with an actionable message. Access explicit on both. Drafts and versions on both. One migration with a rollback that drops two new tables holding no prior content. |
@@ -180,5 +185,5 @@ phases land.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| **Constitution I** — the cookie banner's heading, body, and three button labels are hardcoded rather than Payload-managed (FR-025) | The owner's explicit instruction: the wording is settled and will not change. It is coherent with the decision to cut the analytics machinery — adding a cookie category is already a developer task in this design, so fixed copy removes no capability the site would otherwise have had. | Making the copy editable is the constitutional default and was specified that way until the owner reversed it. Rejected on the owner's direction, not on merit. **The cost is real and is accepted with open eyes**: a wording change becomes a release, and this is the one legally-loaded sentence on the site the owner cannot self-correct. Two mitigations are requirements, not intentions — FR-025a forbids the fixed copy from asserting anything about the cookie set (so the editable chooser and Cookie Policy can never contradict it), and FR-025b puts it through the same sign-off as the policy text. |
+| ~~**Constitution I** — the banner's heading, body and button labels hardcoded~~ **Resolved, no longer an exception** | — | The banner's **body is now editable** (FR-025), so the sentence that carried the legal meaning is the owner's and the exception this row existed for is gone. What remains in code is the heading and three button labels, which name controls rather than asserting anything — inside the principle's own carve-out for "non-content UI affordances" rather than a departure from it. **Recorded rather than deleted** because the decision reversed twice: fully editable → fully hardcoded → split. FR-025c keeps the surviving labels free of any claim about the cookie set, permanently, since those genuinely cannot be corrected without a release. |
 | **Spec Out of Scope** — `footerPlacement` has three values (`legal`, `customer-care`, `hidden`) rather than governing the legal row alone | FR-015c requires that unpublishing a policy leaves no link to it anywhere. *Shipping & Returns* is drawn under CUSTOMER CARE, so a `legal`/`hidden` pair would have left a hardcoded link to a 404 the moment that policy was unpublished. | A two-value field satisfies the spec's wording and breaks its requirement. Hardcoding the Customer Care link was the status quo and is what FR-015c exists to end. The footer's navigation remains non-editable — headings, order, and non-policy links are still code; all that moves is which named slot a policy link lands in. |

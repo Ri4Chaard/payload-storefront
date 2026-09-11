@@ -127,9 +127,9 @@ claiming consent for a category the site does not actually have, and keep the ca
 chooser and the text of the Cookie Policy editable from one place so they cannot drift apart or
 drift away from what is true.
 
-The banner's own wording is the deliberate exception: it is fixed in code at the owner's direction
-(FR-025), which is why FR-025a forbids it from asserting anything about the cookie set. A fixed
-sentence that names what the site tracks is a sentence that goes stale without anyone noticing.
+The banner's paragraph is editable too (FR-025); only its heading and button labels are fixed, and
+FR-025c forbids those from asserting anything about the cookie set. A fixed sentence that names what
+the site tracks is a sentence that goes stale without anyone noticing.
 
 ---
 
@@ -242,11 +242,11 @@ not.
 
 ---
 
-### User Story 4 - The owner controls when the banner asks (Priority: P4)
+### User Story 4 - The owner controls what the banner says, and when it asks (Priority: P4)
 
-The banner's words are fixed. What the owner controls is *when it asks*: they can force every
-visitor to be asked again after a material change to the Cookie Policy, and they can switch the
-banner off entirely.
+The owner writes the banner's paragraph, and controls *when it asks*: they can force every visitor
+to be asked again after a material change to the Cookie Policy, and they can switch the banner off
+entirely. Only the heading and the three button labels are fixed in code.
 
 **Why this priority**: A policy change that materially alters what a visitor agreed to invalidates
 the agreement, and re-asking has to be possible on the owner's schedule — the policy text is theirs
@@ -267,15 +267,16 @@ decided is asked again. Switch the banner off and confirm it stops appearing. Ne
    site, **Then** no banner appears and no optional category is treated as consented.
 4. **Given** the owner turns the banner back on, **When** a visitor who had decided returns,
    **Then** their existing decision still stands and they are not asked again.
-5. **Given** an owner in the admin, **When** they open the cookie settings, **Then** the fields they
-   find are only the ones they can act on, and the form says plainly that the banner's wording is
-   fixed and where to raise a change to it.
+5. **Given** an owner editing the banner's paragraph, **When** they publish, **Then** a visitor with
+   no prior decision sees the new wording, with no deploy — and the heading and button labels are
+   unchanged.
+6. **Given** the owner clears the paragraph entirely, **When** a visitor loads the site, **Then** the
+   banner falls back to safe built-in wording rather than rendering a gap.
 
-> **Note on what this story no longer contains.** An earlier draft made the banner's heading, body,
-> and three button labels editable in the admin. That was removed at the owner's direction: the
-> wording is settled and will not change. FR-025 records it as an explicit exception to Constitution
-> I, and FR-025a constrains the fixed copy so that it cannot contradict the parts that *are* still
-> editable.
+> **This story has been rewritten twice.** It first made the whole banner editable; the owner then
+> fixed all of it in code; the owner has now split the two, and the split is the right one. The body
+> is the only part that makes a claim, so it is the only part that has to be correctable without a
+> release. See FR-025.
 
 ---
 
@@ -450,19 +451,26 @@ and social preview, and confirm all four appear in the site's machine-readable l
   keep every control operable by keyboard with visible focus.
 - **FR-024**: The banner MUST NOT trap focus, since the page behind it stays usable; but it MUST NOT
   coexist with a modal dialog in a way that leaves either one unescapable.
-- **FR-025**: The banner's heading, body text, and three button labels are **fixed in code** and are
-  not editable in the admin. Changing any of them is a deployment. This is a deliberate exception to
-  Constitution I ("user-visible copy MUST come from Payload… hardcoded strings are permitted only
-  for developer-facing errors and non-content UI affordances") and MUST be recorded in the plan's
-  Complexity Tracking section rather than taken by omission.
-- **FR-025a**: Because the copy is fixed and the categories are not, the fixed copy MUST be
-  category-agnostic. It MUST NOT enumerate cookie categories, name providers, or state what the site
-  does or does not track — anything it asserts about the cookie set is an assertion that cannot be
-  corrected without a release, and that the editable chooser and Cookie Policy can silently
-  contradict. It says what the banner is for and points at the policy; the policy carries the facts.
-- **FR-025b**: The fixed copy MUST be reviewed by whoever signs off the Cookie Policy before it
-  ships, on the same footing as the policy text. It is the only legally-loaded sentence on the site
-  that the owner cannot correct themselves.
+- **FR-025**: The banner's **body paragraph MUST be editable in the admin**, with no deploy. Its
+  heading and its three button labels are fixed in code.
+
+  > This reverses an earlier decision and is the better arrangement. The spec first made the whole
+  > banner editable; the owner then fixed all of it in code; the owner has now separated the two.
+  > What is left hardcoded — *Cookie Policy*, *Agree*, *Configure All Cookies*, *Allow Technical
+  > Cookies* — names what a control does rather than saying anything, which sits inside Constitution
+  > I's own carve-out for "non-content UI affordances" rather than needing an exception to it. The
+  > sentence that actually makes a claim about data processing is the owner's.
+
+- **FR-025a**: The **default** body shipped with the feature MUST be category-agnostic: it MUST NOT
+  enumerate cookie categories, name providers, or state what the site does or does not track. The
+  categories and the Cookie Policy are both editable, so a default asserting anything about the
+  cookie set can be silently contradicted by an edit nobody reviews. It says what the banner is for
+  and points at the policy; the policy carries the facts. An owner who edits the body takes that
+  judgement on themselves, which is as it should be.
+- **FR-025b**: An empty body MUST fall back to that built-in default rather than rendering a gap.
+- **FR-025c**: The fixed heading and button labels MUST remain free of any claim about the cookie
+  set, for the same reason as FR-025a and permanently — they cannot be corrected without a release.
+- **FR-025d**: Line breaks the owner types in the body MUST be preserved when the banner is drawn.
 - **FR-026**: The owner MUST be able to switch the banner off entirely. With it off, no optional
   category may be treated as consented.
 - **FR-027**: The banner MUST show all three drawn actions at all times, including on the day it
@@ -633,12 +641,12 @@ consent is recorded against them. Nothing is loaded or blocked, because there is
   *which categories existed when they clicked*, so the day an optional category appears, an old
   *Agree* is not read as consent to it. The alternative — a one-button notice that grows into three
   — was considered and rejected in favour of matching the design.
-- **The banner's wording is settled and will not change, so it lives in code.** The owner's
-  decision, and it is coherent with cutting the analytics machinery: adding a cookie category is
-  already a developer task in this design, so fixed banner copy removes no capability the site would
-  otherwise have had. The cost is real and bounded — a wording change becomes a release, and the one
-  legally-loaded sentence the owner cannot self-correct is this one. It is a Constitution I
-  exception and belongs in the plan's Complexity Tracking, not in a comment.
+- **The banner's paragraph is the owner's; its heading and button labels are not.** Settled after
+  two reversals, and the line is drawn where the meaning is: the paragraph is the only part that
+  says anything about data processing, so it is the only part that must be correctable without a
+  release. *Cookie Policy*, *Agree*, *Configure All Cookies* and *Allow Technical Cookies* name
+  controls, which Constitution I already exempts as "non-content UI affordances" — so what remains
+  hardcoded no longer needs an exception to the principle, only a note that it was considered.
 - **A banner is shown even though this site does not legally require one.** A site setting only
   strictly necessary cookies needs no consent banner under GDPR or ePrivacy. It ships anyway because
   it is designed, because it is the honest place to publish what the site does store, and because

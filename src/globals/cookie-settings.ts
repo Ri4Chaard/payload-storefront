@@ -3,15 +3,36 @@ import type { GlobalConfig } from 'payload'
 import { isAdmin } from '@/lib/access'
 
 /**
+ * What the banner says when the owner has not written anything.
+ *
+ * **It may not assert anything about the cookie set** (FR-025a). The categories in the chooser and
+ * the text of the Cookie Policy are both editable, so a default that enumerated categories or
+ * claimed what the site does and does not track could be silently contradicted by an edit neither
+ * of us would see. It says what the banner is for and points at the policy; the policy carries the
+ * facts.
+ *
+ * Note what this is NOT. The drawn copy at Figma `255:3381` says the site "uses third-party
+ * cookies, pixels, and similar technologies", uses "various Google services", and sends
+ * "advertising materials in line with the preferences shown while browsing". None of that is true
+ * of this site, so shipping it as the default would be publishing a false statement about data
+ * processing (FR-016).
+ */
+export const DEFAULT_BANNER_BODY =
+  'We use cookies on this website. Our Cookie Policy explains which ones and why, and you can change your mind at any time from the link in the footer.'
+
+/**
  * What the cookie banner asks, and when (spec 009, FR-026, FR-042, FR-045 – FR-051).
  *
- * **Deliberately small, and the smallness is the record of a decision.** There are no copy fields
- * here. The banner's heading, its paragraph and its three button labels are fixed in
- * `src/components/ui/cookie-banner/copy.ts` at the owner's explicit instruction (FR-025) — a
- * Constitution I exception recorded in `specs/009-policy-pages-cookie-consent/plan.md` under
- * Complexity Tracking, not taken by omission. If you are here looking for the field that changes
- * the banner's wording, it does not exist and its absence is on purpose; changing that wording is a
- * release.
+ * **One copy field, and the split is deliberate.** `bannerBody` is the sentence that actually says
+ * something about this site's data processing, so it belongs to the owner. The heading and the
+ * three button labels stay in `cookie-banner.tsx`: they are `Cookie Policy`, `Agree`,
+ * `Configure All Cookies` and `Allow Technical Cookies` — names for what a control does, closer to
+ * the "non-content UI affordances" Constitution I already carves out than to copy, and renaming a
+ * consent button is not an editorial act.
+ *
+ * An earlier revision of this global had no copy at all and the body was hardcoded beside them. The
+ * owner reversed that, and it is the better arrangement: it removes the one legally-loaded sentence
+ * on this site that the owner could not correct themselves.
  *
  * **There is no script field, no snippet field and no measurement ID field, and none may be added**
  * (FR-048). This site runs no analytics, no tag manager and no third-party script of any kind, and
@@ -50,6 +71,22 @@ export const CookieSettings: GlobalConfig = {
       admin: {
         description:
           'Turn this off and no banner appears. Nothing optional is treated as agreed to while it is off, and decisions people have already made are kept — turning it back on does not ask them again.',
+      },
+    },
+    {
+      name: 'bannerBody',
+      type: 'textarea',
+      label: 'What the banner says',
+      /*
+       * Optional, with a default, rather than required — and that is a data decision rather than a
+       * convenience. Making it required would leave the already-migrated row holding NULL and the
+       * admin refusing to save until somebody noticed. `toCookieSettings` falls back to the same
+       * sentence, so an empty field renders correctly instead of rendering a gap.
+       */
+      defaultValue: DEFAULT_BANNER_BODY,
+      admin: {
+        description:
+          'The paragraph in the cookie banner. The Cookie Policy link is added after it automatically. Line breaks are kept. Leave empty to use the built-in wording.',
       },
     },
     {

@@ -10,7 +10,6 @@ import type { ConsentState } from '@/lib/consent/types'
 import type { CookieSettings } from '@/lib/policies/types'
 import { cn } from '@/lib/cn'
 
-import { BANNER_COPY } from './copy'
 import { OPEN_COOKIE_SETTINGS } from './cookie-settings-button'
 
 /**
@@ -40,9 +39,31 @@ import { OPEN_COOKIE_SETTINGS } from './cookie-settings-button'
  * most visitors press one of the other two buttons and never see it. `React.lazy` keeps it out of
  * the initial bundle.
  *
- * **Every word here is fixed in code** — see `./copy.ts` for why, and for the rule that keeps it
- * safe.
+ * **The paragraph is the owner's; the labels are not.** `settings.bannerBody` comes from Payload,
+ * because it is the sentence that actually says something about this site's data processing and the
+ * owner must be able to correct it without a release. The heading and the three button labels below
+ * are fixed: they name what a control does, which is the "non-content UI affordances" Constitution I
+ * already carves out, and renaming a consent button is not an editorial act.
  */
+
+/**
+ * The fixed labels.
+ *
+ * `region` is the banner's accessible name — it is a landmark, and a landmark that does not say what
+ * it is leaves a screen-reader user with an unexplained region to escape from.
+ *
+ * The three action labels are written in sentence case and drawn in capitals by CSS, so the
+ * accessible name a screen reader announces stays readable while the design gets the capitals it
+ * draws. `Link` inside the paragraph is the Cookie Policy, appended after the owner's text.
+ */
+const LABELS = {
+  region: 'Cookie consent',
+  heading: 'Cookie Policy',
+  link: 'Cookie Policy',
+  agree: 'Agree',
+  configure: 'Configure All Cookies',
+  technical: 'Allow Technical Cookies',
+} as const
 
 const CookiePreferences = React.lazy(() =>
   import('@/components/ui/cookie-preferences').then((module) => ({
@@ -56,7 +77,7 @@ export interface CookieBannerProps {
 }
 
 export function CookieBanner({ settings, className }: CookieBannerProps) {
-  const { enabled, consentVersion, categories, policyHref } = settings
+  const { enabled, consentVersion, bannerBody, categories, policyHref } = settings
 
   /*
     `null` means "not read yet" and is distinct from any real state. Without the distinction the
@@ -168,7 +189,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
       {showBanner ? (
         <section
           role="region"
-          aria-label={BANNER_COPY.region}
+          aria-label={LABELS.region}
           aria-live="polite"
           className={cn(
             /*
@@ -192,13 +213,20 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
               a phone. An `h2` element carrying it, because the page it covers already owns the `h1`:
               the size is the design's, the level is the document's.
             */}
-            <h2 className="text-display text-neutral-primary uppercase">{BANNER_COPY.heading}</h2>
+            <h2 className="text-display text-neutral-primary uppercase">{LABELS.heading}</h2>
 
-            <p className="text-body-medium text-neutral-secondary">
-              {BANNER_COPY.body}{' '}
+            {/*
+              `whitespace-pre-line` because the field is a textarea: an owner who presses Return
+              twice means a paragraph break, and collapsing it would silently rewrite what they
+              wrote. The policy link follows the text rather than sitting inside it, so the owner
+              never has to remember to add it — and it disappears on its own when no policy is
+              linked (FR-022).
+            */}
+            <p className="text-body-medium text-neutral-secondary whitespace-pre-line">
+              {bannerBody}{' '}
               {policyHref ? (
                 <Link href={policyHref} variant="inline">
-                  {BANNER_COPY.link}
+                  {LABELS.link}
                 </Link>
               ) : null}
             </p>
@@ -223,7 +251,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
                 fullWidth
                 onClick={() => settle({ kind: 'all' })}
               >
-                {BANNER_COPY.agree}
+                {LABELS.agree}
               </Button>
 
               <Button
@@ -233,7 +261,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
                 fullWidth
                 onClick={() => setChooserOpen(true)}
               >
-                {BANNER_COPY.configure}
+                {LABELS.configure}
               </Button>
 
               <Button
@@ -242,7 +270,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
                 fullWidth
                 onClick={() => settle({ kind: 'necessary-only' })}
               >
-                {BANNER_COPY.technical}
+                {LABELS.technical}
               </Button>
             </div>
           </div>

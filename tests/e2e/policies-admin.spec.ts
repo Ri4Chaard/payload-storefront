@@ -227,6 +227,7 @@ test.describe('the cookie categories', () => {
     original = {
       enabled: current.enabled,
       consentVersion: current.consentVersion,
+      bannerBody: current.bannerBody,
       policy: current.policy,
       categories: current.categories,
     }
@@ -259,6 +260,44 @@ test.describe('the cookie categories', () => {
     purpose: 'Sign-in, the shopping bag, and this choice.',
     necessary: true,
   }
+
+  test('the owner rewrites what the banner says, with no deploy (FR-025)', async ({ page }) => {
+    /*
+      The one part of the banner that is content. The heading and the three button labels are fixed
+      in the component — they name controls — so this is the whole editable surface, and it is the
+      sentence that actually says something about this site's data processing.
+    */
+    const written = `Aurum keeps cookies to a minimum. ${Date.now()}`
+
+    await payload.updateGlobal({
+      slug: 'cookie-settings',
+      data: { bannerBody: written, _status: 'published' } as never,
+      overrideAccess: true,
+      context: skipRevalidation,
+    })
+
+    await page.goto('/')
+    const region = page.getByRole('region', { name: 'Cookie consent' })
+    await expect(region.getByText(written)).toBeVisible()
+
+    // The fixed labels are untouched by the edit.
+    await expect(region.getByRole('heading', { name: 'Cookie Policy' })).toBeVisible()
+    await expect(region.getByRole('button', { name: 'Agree' })).toBeVisible()
+  })
+
+  test('an empty body falls back to the built-in wording rather than a gap', async ({ page }) => {
+    await payload.updateGlobal({
+      slug: 'cookie-settings',
+      data: { bannerBody: '', _status: 'published' } as never,
+      overrideAccess: true,
+      context: skipRevalidation,
+    })
+
+    await page.goto('/')
+    await expect(
+      page.getByRole('region', { name: 'Cookie consent' }).getByText(/We use cookies on this website/i),
+    ).toBeVisible()
+  })
 
   test('rewording a category changes the chooser, with no deploy (SC-007)', async ({ page }) => {
     await setCategories([{ ...NECESSARY, purpose: 'A freshly reworded explanation.' }])

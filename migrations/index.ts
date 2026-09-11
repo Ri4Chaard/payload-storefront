@@ -15,6 +15,7 @@ import * as migration_20260910_093824_story_page_and_faq from './20260910_093824
 import * as migration_20260910_135959_blog_articles from './20260910_135959_blog_articles';
 import * as migration_20260910_161343_contact_and_faq from './20260910_161343_contact_and_faq';
 import * as migration_20260911_101714_policies_and_cookie_settings from './20260911_101714_policies_and_cookie_settings';
+import * as migration_20260911_115955_cookie_banner_body from './20260911_115955_cookie_banner_body';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20260911_101714_policies_and_cookie_settings.up,
     down: migration_20260911_101714_policies_and_cookie_settings.down,
-    name: '20260911_101714_policies_and_cookie_settings'
+    name: '20260911_101714_policies_and_cookie_settings',
+  },
+  {
+    up: migration_20260911_115955_cookie_banner_body.up,
+    down: migration_20260911_115955_cookie_banner_body.down,
+    name: '20260911_115955_cookie_banner_body'
   },
 ];

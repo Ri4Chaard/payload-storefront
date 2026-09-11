@@ -9,8 +9,6 @@ import { Switch } from '@/components/ui/switch'
 import { breakpoints } from '@tokens/mapping'
 import type { CookieCategory } from '@/lib/policies/types'
 
-import { CHOOSER_COPY } from '@/components/ui/cookie-banner/copy'
-
 /**
  * The per-category chooser behind *Configure All Cookies* (spec 009, T033, T052; FR-028 – FR-033).
  *
@@ -36,6 +34,27 @@ import { CHOOSER_COPY } from '@/components/ui/cookie-banner/copy'
  * this ships, because the site sets nothing optional — so it gets a real message saying exactly
  * that, rather than an empty panel under a heading.
  */
+
+/**
+ * The chooser's own labels, fixed in code.
+ *
+ * UI affordances rather than content — names for what a control does — which is the carve-out
+ * Constitution I makes for exactly this. The one sentence a visitor actually reads for meaning is
+ * `noOptional`, and it says only what is true of every configuration with nothing optional in it;
+ * what the site's cookies ARE is the Cookie Policy's job, and that is the owner's to write.
+ */
+const LABELS = {
+  title: 'Cookie settings',
+  save: 'Save my choices',
+  close: 'Close cookie settings',
+  alwaysOn: 'Always on',
+  /**
+   * Shown when nothing optional is configured — the state on the day this ships, and therefore the
+   * sentence most visitors will actually read (FR-047).
+   */
+  noOptional:
+    'There is nothing optional to choose from. This website only uses the cookies it needs to work.',
+} as const
 
 export interface CookiePreferencesProps {
   open: boolean
@@ -100,7 +119,7 @@ export function CookiePreferences({
 
             {category.necessary ? (
               <span className="text-label text-neutral-secondary shrink-0 uppercase">
-                {CHOOSER_COPY.alwaysOn}
+                {LABELS.alwaysOn}
               </span>
             ) : (
               <Switch
@@ -123,7 +142,7 @@ export function CookiePreferences({
       */}
       {optional.length === 0 ? (
         <p className="text-body-small text-neutral-secondary border-t border-current/10 pt-5">
-          {CHOOSER_COPY.noOptional}
+          {LABELS.noOptional}
         </p>
       ) : null}
     </div>
@@ -131,7 +150,7 @@ export function CookiePreferences({
 
   const footer = (
     <Button variant="primary" onClick={() => onSave(selected)}>
-      {CHOOSER_COPY.save}
+      {LABELS.save}
     </Button>
   )
 
@@ -151,11 +170,11 @@ export function CookiePreferences({
     <Modal
       open={open}
       onClose={onClose}
-      title={CHOOSER_COPY.title}
+      title={LABELS.title}
       size="lg"
       footer={footer}
       triggerRef={triggerRef}
-      closeLabel={CHOOSER_COPY.close}
+      closeLabel={LABELS.close}
     >
       {body}
     </Modal>
@@ -163,7 +182,7 @@ export function CookiePreferences({
     <Drawer
       open={open}
       onClose={onClose}
-      title={CHOOSER_COPY.title}
+      title={LABELS.title}
       side="right"
       footer={footer}
       triggerRef={triggerRef}

@@ -4,8 +4,6 @@ import React from 'react'
 
 import { cn } from '@/lib/cn'
 
-import { CHOOSER_COPY } from './copy'
-
 /**
  * The way back to the cookie chooser, in the footer's legal row (spec 009, T039, FR-032).
  *
@@ -29,6 +27,9 @@ import { CHOOSER_COPY } from './copy'
 /** The one string both sides share. Exported so neither can typo it independently. */
 export const OPEN_COOKIE_SETTINGS = 'aurum:open-cookie-settings'
 
+/** Fixed, like the chooser's own labels: it names a control rather than saying anything. */
+const LABEL = 'Cookie Settings'
+
 export function CookieSettingsButton({ className }: { className?: string }) {
   return (
     <button
@@ -41,7 +42,7 @@ export function CookieSettingsButton({ className }: { className?: string }) {
         className,
       )}
     >
-      {CHOOSER_COPY.footerLink}
+      {LABEL}
     </button>
   )
 }

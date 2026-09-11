@@ -351,6 +351,8 @@ async function seed() {
       data: {
         enabled: true,
         consentVersion: 1,
+        // Left to the field's own `defaultValue` rather than repeated here: two copies of the
+        // banner's wording is one more than can stay in step.
         ...(policy.docs[0] ? { policy: policy.docs[0].id } : {}),
         categories: [CATEGORY],
         _status: 'published',

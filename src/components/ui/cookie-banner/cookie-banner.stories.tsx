@@ -16,6 +16,10 @@ const clearDecision = () => {
   document.cookie = 'aurum-consent=; path=/; max-age=0'
 }
 
+/** The default the mapper substitutes when the owner has written nothing. */
+const BODY =
+  'We use cookies on this website. Our Cookie Policy explains which ones and why, and you can change your mind at any time from the link in the footer.'
+
 const NECESSARY = {
   key: 'necessary',
   name: 'Strictly necessary',
@@ -51,6 +55,7 @@ const meta = {
     settings: {
       enabled: true,
       consentVersion: 1,
+      bannerBody: BODY,
       categories: [NECESSARY],
       policyHref: '/legal/cookies',
     },
@@ -79,7 +84,27 @@ export const WithAnOptionalCategory: Story = {
     settings: {
       enabled: true,
       consentVersion: 1,
+      bannerBody: BODY,
       categories: [NECESSARY, ANALYTICS],
+      policyHref: '/legal/cookies',
+    },
+  },
+}
+
+/**
+ * The owner has rewritten the paragraph, including a line break.
+ *
+ * The one part of this banner that comes from Payload. The heading and the three button labels are
+ * fixed in the component — they name controls rather than saying anything — so no story varies them.
+ */
+export const WithOwnerWrittenBody: Story = {
+  args: {
+    settings: {
+      enabled: true,
+      consentVersion: 1,
+      bannerBody:
+        'Aurum uses a small number of cookies so the site can remember your bag and keep you signed in.\n\nWe do not use analytics or advertising cookies of any kind.',
+      categories: [NECESSARY],
       policyHref: '/legal/cookies',
     },
   },
@@ -93,7 +118,7 @@ export const WithAnOptionalCategory: Story = {
  */
 export const WithoutAPolicyLink: Story = {
   args: {
-    settings: { enabled: true, consentVersion: 1, categories: [NECESSARY] },
+    settings: { enabled: true, consentVersion: 1, bannerBody: BODY, categories: [NECESSARY] },
   },
 }
 
@@ -106,6 +131,6 @@ export const WithoutAPolicyLink: Story = {
  */
 export const Disabled: Story = {
   args: {
-    settings: { enabled: false, consentVersion: 1, categories: [NECESSARY] },
+    settings: { enabled: false, consentVersion: 1, bannerBody: BODY, categories: [NECESSARY] },
   },
 }

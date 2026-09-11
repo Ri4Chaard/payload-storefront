@@ -1,6 +1,7 @@
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
+import { DEFAULT_BANNER_BODY } from '@/globals/cookie-settings'
 import { toCatalogImage } from '@/lib/catalog/mappers'
 import type { CookieSetting, Policy as PolicyDocument } from '@/payload-types'
 
@@ -102,7 +103,9 @@ export const toCookieSettings = (document: CookieSetting | null | undefined): Co
     and nothing optional is treated as agreed to. This is the same conclusion FR-026 reaches for the
     switch the owner controls, arrived at from the other direction.
   */
-  if (!document) return { enabled: false, consentVersion: 1, categories: [] }
+  if (!document) {
+    return { enabled: false, consentVersion: 1, bannerBody: DEFAULT_BANNER_BODY, categories: [] }
+  }
 
   const categories = document.categories.flatMap((row) => {
     const category = toCategory(row)
@@ -119,6 +122,11 @@ export const toCookieSettings = (document: CookieSetting | null | undefined): Co
   return {
     enabled: Boolean(document.enabled),
     consentVersion: document.consentVersion,
+    /*
+      An empty field falls back to the built-in sentence rather than rendering a gap (FR-025). The
+      field is optional precisely so this path exists — see the note on it in the global.
+    */
+    bannerBody: text(document.bannerBody) ?? DEFAULT_BANNER_BODY,
     categories,
     ...(policy?.slug ? { policyHref: policyHref(policy.slug) } : {}),
   }

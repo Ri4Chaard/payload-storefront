@@ -62,6 +62,14 @@ export interface CookieCategory {
 export interface CookieSettings {
   enabled: boolean
   consentVersion: number
+  /**
+   * The banner's paragraph, written by the owner.
+   *
+   * Always a string by the time it reaches a component — the mapper substitutes the built-in
+   * default for an empty field, so the banner never has to decide what to draw when nobody has
+   * written anything.
+   */
+  bannerBody: string
   categories: CookieCategory[]
   /** The Cookie Policy's address, when one is linked and published. The banner copes without it. */
   policyHref?: string
