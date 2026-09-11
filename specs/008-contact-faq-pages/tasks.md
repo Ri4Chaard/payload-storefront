@@ -264,14 +264,14 @@ and confirm both cases are correct.
 
 ### Tests for User Story 5
 
-- [ ] T084 [P] [US5] In `tests/e2e/contact.spec.ts` and `tests/e2e/faq.spec.ts`, assert that with no editor metadata the title and description fall back to each page's own heading and intro, and that with overrides set the owner's values win (FR-048)
-- [ ] T085 [P] [US5] Assert both routes emit a canonical URL and that their content is present in the server response rather than assembled in the browser (FR-003, FR-049)
+- [X] T084 [P] [US5] In `tests/e2e/contact.spec.ts` and `tests/e2e/faq.spec.ts`, assert that with no editor metadata the title and description fall back to each page's own heading and intro, and that with overrides set the owner's values win (FR-048)
+- [X] T085 [P] [US5] Assert both routes emit a canonical URL and that their content is present in the server response rather than assembled in the browser (FR-003, FR-049)
 
 ### Implementation for User Story 5
 
-- [ ] T086 [P] [US5] Add `generateMetadata()` to `src/app/(frontend)/contact/page.tsx` — title, description, canonical and Open Graph, falling back to `ContactPage.fallbacks`, and calling `getContactPage()` a second time at no cost because the loader is `cache()`-wrapped
-- [ ] T087 [P] [US5] Add `generateMetadata()` to `src/app/(frontend)/faq/page.tsx` on the same terms, falling back to the FAQ page's own heading
-- [ ] T088 [US5] Add `/contact` and `/faq` to `STATIC_ROUTES` in `src/app/sitemap.ts` at `monthly` / 0.6, matching `/about` — the sitemap is a claim about what exists, and omitting two live pages makes it wrong ([research.md](./research.md) R13)
+- [X] T086 [P] [US5] Add `generateMetadata()` to `src/app/(frontend)/contact/page.tsx` — title, description, canonical and Open Graph, falling back to `ContactPage.fallbacks`, and calling `getContactPage()` a second time at no cost because the loader is `cache()`-wrapped
+- [X] T087 [P] [US5] Add `generateMetadata()` to `src/app/(frontend)/faq/page.tsx` on the same terms, falling back to the FAQ page's own heading
+- [X] T088 [US5] Add `/contact` and `/faq` to `STATIC_ROUTES` in `src/app/sitemap.ts` at `monthly` / 0.6, matching `/about` — the sitemap is a claim about what exists, and omitting two live pages makes it wrong ([research.md](./research.md) R13)
 
 **Checkpoint**: Both pages are discoverable and shareable.
 

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import React from 'react'
 
 import { PageHeaderBlock } from '@/components/blocks/page-header'
@@ -31,6 +32,56 @@ import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
  * so the layout, the footer and this page pay for them once between them.
  */
 export const dynamic = 'force-dynamic'
+
+/** The address this page is canonically at. One constant, used by the tag and the preview alike. */
+const HREF = '/contact'
+
+/**
+ * Editor-controlled metadata, falling back to what the page itself says (FR-048, FR-049).
+ *
+ * Constitution V requires the owner rather than a developer to decide how this appears in a search
+ * result, and requires a canonical URL. Every SEO field is optional, so the fallbacks are what an
+ * owner who fills in nothing still gets — and they are computed in the mapper from the page's own
+ * headline, intro and photograph, so they cannot name a heading the editor has since emptied.
+ *
+ * This calls `getContactPage()` a second time and pays nothing for it: the loader is
+ * `cache()`-wrapped, so the render and the metadata share one read.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getContactPage()
+
+  // No database — a container build. Emit the bare title rather than nothing; the first real
+  // request replaces it.
+  if (!page) return { title: 'Contact Us' }
+
+  const title = page.seo.title ?? page.fallbacks.title ?? 'Contact Us'
+  const description = page.seo.description ?? page.fallbacks.description
+  const image = page.seo.image ?? page.fallbacks.image
+
+  return {
+    title,
+    ...(description ? { description } : {}),
+    alternates: { canonical: HREF },
+    openGraph: {
+      type: 'website',
+      title,
+      ...(description ? { description } : {}),
+      url: HREF,
+      ...(image
+        ? {
+            images: [
+              {
+                url: image.src,
+                width: image.width,
+                height: image.height,
+                ...(image.alt ? { alt: image.alt } : {}),
+              },
+            ],
+          }
+        : {}),
+    },
+  }
+}
 
 export default async function ContactPage() {
   const [page, socials, details] = await Promise.all([

@@ -45,6 +45,13 @@ const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[numb
     { path: ALL_JEWELRY, changeFrequency: 'daily', priority: 0.9 },
     { path: BLOG_ROOT, changeFrequency: 'weekly', priority: 0.8 },
     { path: '/about', changeFrequency: 'monthly', priority: 0.6 },
+    /*
+      Contact and FAQ (008/T088). Both exist whether or not anything is published — `/faq` renders
+      a heading and a message rather than a 404 when no question is — so they belong in the static
+      list beside `/about` rather than among the rows built from content below.
+    */
+    { path: '/contact', changeFrequency: 'monthly', priority: 0.6 },
+    { path: '/faq', changeFrequency: 'monthly', priority: 0.6 },
   ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

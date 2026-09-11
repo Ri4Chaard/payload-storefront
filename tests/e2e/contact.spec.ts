@@ -336,3 +336,72 @@ test.describe('with JavaScript disabled', () => {
     await expect(page.getByPlaceholder('Message', { exact: true })).toHaveValue('Keep this text.')
   })
 })
+
+/**
+ * How the page presents itself (008/T084, T085 — FR-048, FR-049).
+ */
+test.describe('metadata', () => {
+  test.afterEach(async () => {
+    await payload.updateGlobal({
+      slug: 'contact-page',
+      data: { seo: {} } as never,
+      context: skipRevalidation,
+    })
+  })
+
+  test('falls back to what the page itself says', async ({ page }) => {
+    await payload.updateGlobal({
+      slug: 'contact-page',
+      data: {
+        heading: 'WE’RE HERE TO HELP',
+        intro: 'Questions, custom requests, or styling advice — our team is here for you',
+        seo: {},
+      } as never,
+      context: skipRevalidation,
+    })
+
+    await page.goto('/contact')
+
+    await expect(page).toHaveTitle(/WE’RE HERE TO HELP/)
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      /Questions, custom requests/,
+    )
+  })
+
+  test('prefers what the editor set over the fallbacks', async ({ page }) => {
+    await payload.updateGlobal({
+      slug: 'contact-page',
+      data: {
+        seo: { title: 'Talk to Aurum', description: 'Reach us any way you like.' },
+      } as never,
+      context: skipRevalidation,
+    })
+
+    await page.goto('/contact')
+
+    await expect(page).toHaveTitle(/Talk to Aurum/)
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      'content',
+      'Reach us any way you like.',
+    )
+  })
+
+  test('emits a canonical URL and renders server-side', async ({ page }) => {
+    await page.goto('/contact')
+
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/contact$/)
+
+    // FR-003: the content is in the server response, not assembled in the browser. Fetched
+    // directly rather than read off the rendered page, which would pass either way.
+    const html = await (await page.request.get('/contact')).text()
+    expect(html).toContain('WhatsApp')
+    expect(html).toContain('SEND MESSAGE')
+  })
+
+  test('lists both new pages in the sitemap', async ({ page }) => {
+    const xml = await (await page.request.get('/sitemap.xml')).text()
+    expect(xml).toContain('/contact')
+    expect(xml).toContain('/faq')
+  })
+})
