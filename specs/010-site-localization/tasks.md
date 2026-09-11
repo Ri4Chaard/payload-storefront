@@ -272,21 +272,46 @@ the content stays intact and editable; toggle it on and everything returns.
 
 ### Tests for User Story 3
 
-- [ ] T060 [P] [US3] Integration test in `tests/integration/language-settings.test.ts`: the global defaults to all languages on; disabling one changes the enabled set the storefront reads; the English locale has no field to disable (FR-029).
-- [ ] T061 [P] [US3] E2E in `tests/e2e/language-availability.spec.ts` for US3's five acceptance scenarios — in particular the visitor holding a cookie for a just-disabled language, who must land on real English content and **must not loop**.
+- [X] T060 [P] [US3] Integration test in `tests/integration/language-settings.test.ts`: the global defaults to all languages on; disabling one changes the enabled set the storefront reads; the English locale has no field to disable (FR-029).
+- [X] T061 [P] [US3] E2E in `tests/e2e/language-availability.spec.ts` for US3's five acceptance scenarios — in particular the visitor holding a cookie for a just-disabled language, who must land on real English content and **must not loop**.
 
 ### Implementation for User Story 3
 
-- [ ] T062 [US3] Create `src/globals/language-settings.ts` per `data-model.md` §5 — one checkbox per non-default locale generated from `LOCALES`, explicit `read`/`update` access, `afterChange: [revalidateGlobalOnChange]`, and an admin description stating that English is always offered and why.
-- [ ] T063 [US3] Register it in `src/payload.config.ts` `globals` and regenerate types.
-- [ ] T064 [US3] Add `getEnabledLocales()` to `src/lib/i18n/` (or alongside the other global readers) returning the offered set, defaulting to all three when the global has never been saved.
-- [ ] T065 [US3] Gate the route in `src/app/(frontend)/[locale]/layout.tsx`: a disabled locale redirects to `/language/reset?next=<pathname>`. Keep the read inside the existing `Promise.all` so it costs no extra round trip.
-- [ ] T066 [US3] Create the route handler `src/app/(frontend)/language/reset/route.ts` — clear `NEXT_LOCALE`, validate `next` is a site-relative path (never an open redirect), 307 to the default-locale equivalent. Comment the loop it exists to break: the proxy sends `/` to `/uk`, the layout sends `/uk` back, forever, and a Server Component cannot clear a cookie.
-- [ ] T067 [US3] Confirm `language` is excluded by the `src/proxy.ts` matcher, and add a unit assertion for the matcher pattern in `tests/unit/proxy-locale.test.ts`.
-- [ ] T068 [US3] Filter the selector's list in `src/app/(frontend)/[locale]/layout.tsx` to the enabled set, replacing T026's unfiltered list.
-- [ ] T069 [US3] Extend `src/lib/revalidate.ts` to invalidate each literal path **in every configured locale** — including disabled ones, so re-enabling a language does not serve pre-toggle content (research R17). Keep the literal-path form; the pattern form does not touch prerendered pages, as that file records.
+- [X] T062 [US3] Create `src/globals/language-settings.ts` per `data-model.md` §5 — one checkbox per non-default locale generated from `LOCALES`, explicit `read`/`update` access, `afterChange: [revalidateGlobalOnChange]`, and an admin description stating that English is always offered and why.
+- [X] T063 [US3] Register it in `src/payload.config.ts` `globals` and regenerate types.
+- [X] T064 [US3] Add `getEnabledLocales()` to `src/lib/i18n/` (or alongside the other global readers) returning the offered set, defaulting to all three when the global has never been saved.
+- [X] T065 [US3] Gate the route in `src/app/(frontend)/[locale]/layout.tsx`: a disabled locale redirects to `/language/reset?next=<pathname>`. Keep the read inside the existing `Promise.all` so it costs no extra round trip.
+- [X] T066 [US3] Create the route handler `src/app/(frontend)/language/reset/route.ts` — clear `NEXT_LOCALE`, validate `next` is a site-relative path (never an open redirect), 307 to the default-locale equivalent. Comment the loop it exists to break: the proxy sends `/` to `/uk`, the layout sends `/uk` back, forever, and a Server Component cannot clear a cookie.
+- [X] T067 [US3] Confirm `language` is excluded by the `src/proxy.ts` matcher, and add a unit assertion for the matcher pattern in `tests/unit/proxy-locale.test.ts`.
+- [X] T068 [US3] Filter the selector's list in `src/app/(frontend)/[locale]/layout.tsx` to the enabled set, replacing T026's unfiltered list.
+- [X] T069 [US3] Extend `src/lib/revalidate.ts` to invalidate each literal path **in every configured locale** — including disabled ones, so re-enabling a language does not serve pre-toggle content (research R17). Keep the literal-path form; the pattern form does not touch prerendered pages, as that file records.
 
-**Checkpoint**: The owner controls what visitors see, independently of what exists in the admin.
+**Checkpoint**: ✅ Verified against a production server with Ukrainian switched off:
+
+| Request | Result |
+| --- | --- |
+| `/uk` | `307 → /language/reset` |
+| `/language/reset?next=/legal/privacy` | `307 → /legal/privacy`, `Set-Cookie: NEXT_LOCALE=; Expires=1970` |
+| `/` holding `NEXT_LOCALE=uk` | **3 hops**, ends `200` on the English home page |
+| The home page's HTML | no longer contains `Українська` |
+
+> **Three things this phase got wrong first, all worth keeping.**
+>
+> 1. **Registering a global is not migrating it.** The build failed on four prerendered pages with
+>    `Failed query: select … from "language_settings"` — and correctly did not swallow it, because
+>    `isDatabaseUnreachable` tests for an unreachable *database*, not a missing *table*. A second
+>    migration, `20260911_141700_language_settings`, creates it.
+> 2. **The first loop test was an artifact of the tool.** `curl -b "NEXT_LOCALE=uk"` re-sends that
+>    literal cookie on every hop and ignores `Set-Cookie`, so the reset route looked like it did
+>    nothing — ten hops and still going. With a cookie jar, which is what a browser actually is, it
+>    settles in three. The lesson is about the test, not the code, but the code would have looked
+>    broken to the next person to try it that way.
+> 3. **The e2e suite had to be made serial.** All three tests switch the same global, and Playwright
+>    parallelises a file across workers by default, so they raced each other's writes. `test.describe
+>    .configure({ mode: 'serial' })`, with a note saying why.
+>
+> Also learned the hard way: `PLAYWRIGHT_BASE_URL`, not `BASE_URL`, is what `playwright.config.ts`
+> reads — the earlier runs were silently hitting whatever was on port 3000.
 
 ---
 

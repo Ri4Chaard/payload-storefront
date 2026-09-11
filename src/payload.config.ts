@@ -41,6 +41,7 @@ import { ContactPage } from './globals/contact-page'
 import { ContactSettings } from './globals/contact-settings'
 import { CookieSettings } from './globals/cookie-settings'
 import { FaqPage } from './globals/faq-page'
+import { LanguageSettings } from './globals/language-settings'
 import { Shop } from './globals/shop'
 import { StoryPage } from './globals/story-page'
 import { expireCartsTask } from './jobs/expire-carts'
@@ -111,6 +112,7 @@ export default buildConfig({
     ContactPage,
     FaqPage,
     CookieSettings,
+    LanguageSettings,
   ],
 
   /**

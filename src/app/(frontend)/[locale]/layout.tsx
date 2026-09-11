@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import React from 'react'
 
@@ -14,6 +14,7 @@ import { getCookieSettings, getFooterPolicies } from '@/lib/policies/queries'
 import { asLocale } from '@/i18n/locale'
 import { loadMessages } from '@/i18n/request'
 import { LOCALES, LOCALE_LABELS } from '@/i18n/routing'
+import { getEnabledLocales } from '@/lib/i18n/enabled'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -66,6 +67,27 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
   const { locale: segment } = await params
   const locale = asLocale(segment)
   if (!locale) notFound()
+
+  /*
+    Is this language still on offer? (spec 010, FR-027.)
+
+    The check is here rather than in `src/proxy.ts` because the answer lives in the database and the
+    proxy must not read one. A disabled language is sent to `/language/reset`, which clears the
+    cookie and returns the visitor to the English equivalent — the hop exists because a Server
+    Component cannot clear a cookie, and without clearing it the proxy would send them straight back
+    (research R6).
+  */
+  const enabled = await getEnabledLocales()
+  if (!enabled.includes(locale)) {
+    /*
+      No `next` parameter, so the visitor lands on the English home page rather than on the English
+      equivalent of the page they asked for. Knowing that page means reading `headers()`, which is a
+      request-time API — it would opt the entire site into dynamic rendering to improve the landing
+      spot in the one case where an owner switched a language off while somebody was reading it.
+      The prerendered catalogue is worth more than that.
+    */
+    redirect('/language/reset')
+  }
 
   const messages = loadMessages(locale)
   const clientMessages = Object.fromEntries(
@@ -122,7 +144,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
             spec 010's US3 has one place to filter it — the owner switching Ukrainian off changes
             this line's output and nothing else.
           */}
-          <Header social={social} {...reach} locales={LOCALES.map((code) => LOCALE_LABELS[code])} />
+          <Header social={social} {...reach} locales={enabled.map((code) => LOCALE_LABELS[code])} />
         {/*
           `<main>` is the landmark the skip link (T072) will target. The skip link is still its own
           task; header and footer are wired up here so they are exercised by a real page rather than

@@ -26,6 +26,8 @@
  * change a page goes through Payload, so an exact signal is available, and this is it.
  */
 
+import { DEFAULT_LOCALE, LOCALES } from '@/i18n/routing'
+
 import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
@@ -44,6 +46,21 @@ import type {
  * here, it is the only correct answer.
  */
 export const skipRevalidation: RequestContext = { disableRevalidate: true }
+
+/**
+ * One path becomes three (spec 010, FR-052, research R17).
+ *
+ * Every cached page now exists once per language, so invalidating `/products/x` alone would leave
+ * `/ru/products/x` and `/uk/products/x` serving yesterday's price.
+ *
+ * **The CONFIGURED locales, not the enabled ones.** A language switched off for visitors still has
+ * pages in the cache, and switching it back on must not serve content from before the change —
+ * which is exactly the window in which nobody would be looking. It also keeps this function free of
+ * a database read.
+ */
+function localised(path: string): string[] {
+  return LOCALES.map((locale) => (locale === DEFAULT_LOCALE ? path : `/${locale}${path}`))
+}
 
 /**
  * Every cached path the catalogue can change, named one at a time.
@@ -74,6 +91,7 @@ export const skipRevalidation: RequestContext = { disableRevalidate: true }
  * `next/cache` is imported here rather than at the top of the file so that a process with no Next
  * server around it — `payload run`, a migration — never loads it at all.
  */
+
 async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void> {
   const { revalidatePath } = await import('next/cache')
 
@@ -85,11 +103,11 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
     // would make every save in the admin pay for a page render.
     select: { slug: true },
   })
-  for (const product of docs) revalidatePath(`/products/${product.slug}`)
+  for (const product of docs) for (const path of localised(`/products/${product.slug}`)) revalidatePath(path)
 
   // A renamed piece leaves a page at an address no query will ever return again. It has to go, or
   // the old URL keeps serving a piece that has moved.
-  if (orphanedSlug) revalidatePath(`/products/${orphanedSlug}`)
+  if (orphanedSlug) for (const path of localised(`/products/${orphanedSlug}`)) revalidatePath(path)
 
   /*
     The blog's pages, for the one write that can reach both families: a photograph.
@@ -113,7 +131,7 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
     limit: 0,
     select: { slug: true },
   })
-  for (const article of articles.docs) revalidatePath(`/blog/${article.slug}`)
+  for (const article of articles.docs) for (const path of localised(`/blog/${article.slug}`)) revalidatePath(path)
 }
 
 /**
@@ -133,8 +151,8 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
 async function invalidateArticle(slug: string, orphanedSlug?: string): Promise<void> {
   const { revalidatePath } = await import('next/cache')
 
-  revalidatePath(`/blog/${slug}`)
-  if (orphanedSlug && orphanedSlug !== slug) revalidatePath(`/blog/${orphanedSlug}`)
+  for (const path of localised(`/blog/${slug}`)) revalidatePath(path)
+  if (orphanedSlug && orphanedSlug !== slug) for (const path of localised(`/blog/${orphanedSlug}`)) revalidatePath(path)
 }
 
 /**

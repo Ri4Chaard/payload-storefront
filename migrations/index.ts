@@ -18,6 +18,7 @@ import * as migration_20260911_101714_policies_and_cookie_settings from './20260
 import * as migration_20260911_115955_cookie_banner_body from './20260911_115955_cookie_banner_body';
 import * as migration_20260911_121048_cookie_banner_body_rich_text from './20260911_121048_cookie_banner_body_rich_text';
 import * as migration_20260911_135539_localization from './20260911_135539_localization';
+import * as migration_20260911_141700_language_settings from './20260911_141700_language_settings';
 
 export const migrations = [
   {
@@ -118,6 +119,11 @@ export const migrations = [
   {
     up: migration_20260911_135539_localization.up,
     down: migration_20260911_135539_localization.down,
-    name: '20260911_135539_localization'
+    name: '20260911_135539_localization',
+  },
+  {
+    up: migration_20260911_141700_language_settings.up,
+    down: migration_20260911_141700_language_settings.down,
+    name: '20260911_141700_language_settings'
   },
 ];

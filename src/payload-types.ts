@@ -150,6 +150,7 @@ export interface Config {
     'contact-page': ContactPage;
     'faq-page': FaqPage;
     'cookie-settings': CookieSetting;
+    'language-settings': LanguageSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
@@ -161,6 +162,7 @@ export interface Config {
     'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
     'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
     'cookie-settings': CookieSettingsSelect<false> | CookieSettingsSelect<true>;
+    'language-settings': LanguageSettingsSelect<false> | LanguageSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en' | 'ru' | 'uk';
@@ -3202,6 +3204,25 @@ export interface CookieSetting {
   createdAt?: string | null;
 }
 /**
+ * Which languages the website offers visitors. English is always offered — it is the language everything falls back to when a translation is missing, so the site cannot be without it. Switching a language off hides it from visitors; nothing you have written in it is lost, and you can keep translating it while it is off.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "language-settings".
+ */
+export interface LanguageSetting {
+  id: number;
+  /**
+   * When this is off, Русский disappears from the language switcher and its pages stop being served. Your Русский content stays exactly as you left it.
+   */
+  ruEnabled?: boolean | null;
+  /**
+   * When this is off, Українська disappears from the language switcher and its pages stop being served. Your Українська content stays exactly as you left it.
+   */
+  ukEnabled?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -3388,6 +3409,17 @@ export interface CookieSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "language-settings_select".
+ */
+export interface LanguageSettingsSelect<T extends boolean = true> {
+  ruEnabled?: T;
+  ukEnabled?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
