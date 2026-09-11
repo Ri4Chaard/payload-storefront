@@ -76,7 +76,7 @@ export function FeatureCard({
     <Element
       className={cn(
         'bg-background-container flex shrink-0 flex-col justify-between',
-        'min-h-47.5 w-62.5 p-4',
+        'min-h-47.5 md:w-62.5 p-4',
         'md:min-h-65 md:w-auto md:shrink md:p-7.5',
         'xl:min-h-72.5',
         className,
