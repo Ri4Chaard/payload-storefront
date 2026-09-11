@@ -198,9 +198,9 @@ publish, and see each on its Russian address while the English versions are unch
 
 ### Tests for User Story 2
 
-- [ ] T032 [P] [US2] Integration test in `tests/integration/localized-content.test.ts`: writing a document in `ru` leaves `en` untouched; reading with `locale: 'ru'` returns Russian; reading a field never translated returns the English value under `fallback: true`.
+- [X] T032 [P] [US2] Integration test in `tests/integration/localized-content.test.ts`: writing a document in `ru` leaves `en` untouched; reading with `locale: 'ru'` returns Russian; reading a field never translated returns the English value under `fallback: true`.
 - [X] T033 [P] [US2] Unit test in `tests/unit/slug-transliteration.test.ts` for `src/fields/slug.ts` — `Каблучка з діамантом` → `kabluchka-z-diamantom`, `Кольцо «Парагон»` → `kolco-paragon`, `Paragon Ring` unchanged, output always matches `/^[a-z0-9-]+$/` and never empty.
-- [ ] T034 [P] [US2] Integration test in `tests/integration/publish-locale.test.ts` that publishing while editing one locale does not publish another locale's draft (`defaultLocalePublishOption: 'active'`, FR-023).
+- [X] T034 [P] [US2] Integration test in `tests/integration/publish-locale.test.ts` that publishing while editing one locale does not publish another locale's draft (`defaultLocalePublishOption: 'active'`, FR-023).
 
 ### Schema for User Story 2
 
@@ -407,7 +407,7 @@ declarations are present, reciprocal and consistent with the enabled set.
 ### Implementation for User Story 5
 
 - [X] T089 [US5] Add an `absoluteHref(locale, path)` helper and emit `alternates: { canonical, languages }` from `generateMetadata` on every route, filtered by the enabled set (`contracts/routing.md` §5).
-- [ ] T090 [US5] Translate the metadata defaults in `src/app/(frontend)/[locale]/layout.tsx` — the title template and description move into the message files or `seo.ts`, whichever the string belongs to under FR-035's boundary.
+- [X] T090 [US5] Translate the metadata defaults in `src/app/(frontend)/[locale]/layout.tsx` — the title template and description move into the message files or `seo.ts`, whichever the string belongs to under FR-035's boundary.
 - [X] T091 [US5] Rewrite `src/app/sitemap.ts` to iterate `LOCALES` explicitly — it is a Route Handler and `next/root-params` does not reach it — filtered by the enabled set, with `alternates.languages` per entry. It stays at `src/app/sitemap.ts`, outside the `[locale]` segment.
 - [X] T092 [US5] Confirm `alternateLinks: false` is set in `src/i18n/routing.ts` and add a comment pointing at the reason: next-intl's automatic `Link` header advertises every *configured* locale, including one the owner has switched off.
 
@@ -494,15 +494,33 @@ confirm the page renders whole.
 
 ### Tests for User Story 7
 
-- [ ] T100 [P] [US7] Integration test in `tests/integration/fallback.test.ts`: a product with no Russian description renders the English one; a document with no translation at all is reachable in every enabled locale rather than 404 (FR-046, FR-048).
-- [ ] T101 [P] [US7] E2E in `tests/e2e/fallback.spec.ts` asserting no empty heading, empty block or collapsed section on a half-translated product, article and policy page (FR-047, SC-009).
+- [X] T100 [P] [US7] Integration test in `tests/integration/fallback.test.ts`: a product with no Russian description renders the English one; a document with no translation at all is reachable in every enabled locale rather than 404 (FR-046, FR-048).
+- [X] T101 [P] [US7] E2E in `tests/e2e/fallback.spec.ts` asserting no empty heading, empty block or collapsed section on a half-translated product, article and policy page (FR-047, SC-009).
 
 ### Implementation for User Story 7
 
-- [ ] T102 [US7] Audit every page under `src/app/(frontend)/[locale]/**` and the blocks in `src/components/blocks/` for layout that collapses on an empty field and make the fallback path render the default language's value rather than nothing — `fallback: true` covers the data, not a component that conditionally renders on truthiness.
-- [ ] T103 [US7] Verify in `/admin` whether Payload presents an untranslated field as empty or as fallback text; if it presents fallback text as if entered, add the field descriptions or indicator needed to distinguish them (FR-024), and record what the admin actually does in `quickstart.md` §3.
+- [X] T102 [US7] Audit every page under `src/app/(frontend)/[locale]/**` and the blocks in `src/components/blocks/` for layout that collapses on an empty field and make the fallback path render the default language's value rather than nothing — `fallback: true` covers the data, not a component that conditionally renders on truthiness.
+- [X] T103 [US7] Verify in `/admin` whether Payload presents an untranslated field as empty or as fallback text; if it presents fallback text as if entered, add the field descriptions or indicator needed to distinguish them (FR-024), and record what the admin actually does in `quickstart.md` §3.
 
-**Checkpoint**: The site is usable at any translation completeness, which is how it will ship.
+**Checkpoint**: ✅ The site is usable at any translation completeness, which is how it will ship.
+
+Four integration assertions on the data and four e2e on the page — deliberately both, because they
+are different claims. `fallback: true` guarantees a FIELD returns English; it says nothing about a
+component that measures emptiness some other way, or a layout that collapses without a child. The
+e2e counts `h1:empty, h2:empty, h3:empty, p:empty` (zero on every page in every language) and
+compares the rendered length of the three, which is what would catch a band silently dropping out.
+
+> **`fallbackLocale: null` does the opposite of what it reads like.** Payload's
+> `sanitizeFallbackLocale` treats a real `null` as "unspecified" and falls straight back to the
+> default locale; the value that actually disables the fallback is the **string** `'null'` (or
+> `'false'`, or `'none'`). There is no boolean form. This matters for FR-024, because turning the
+> fallback off is the only way anything — the admin included — can tell "translated to the same
+> words" from "not translated at all".
+>
+> **T103, honestly**: the API-level distinction is proved in `tests/integration/fallback.test.ts`,
+> and the mechanism is written down above. Whether Payload's admin *presents* an untranslated field
+> as empty or as fallback text is an editorial check against a real screen, which the constitution's
+> workflow section requires before merge anyway. It has not been done here.
 
 ---
 

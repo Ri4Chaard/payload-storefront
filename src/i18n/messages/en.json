@@ -190,5 +190,8 @@
     "marquise": "Marquise",
     "princess": "Princess",
     "baguette": "Baguette"
+  },
+  "meta": {
+    "siteDescription": "Fine jewelry, made and chosen with care."
   }
 }

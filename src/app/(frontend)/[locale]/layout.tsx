@@ -13,21 +13,39 @@ import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 import { getCookieSettings, getFooterPolicies } from '@/lib/policies/queries'
 import { asLocale } from '@/i18n/locale'
 import { loadMessages } from '@/i18n/messages'
-import { LOCALES, LOCALE_LABELS } from '@/i18n/routing'
+import { getTranslations } from 'next-intl/server'
+
+import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS } from '@/i18n/routing'
 import { getEnabledLocales } from '@/lib/i18n/enabled'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Aurum',
-    template: '%s — Aurum',
-  },
-  description: 'Fine jewelry, made and chosen with care.',
-  metadataBase: process.env.NEXT_PUBLIC_SERVER_URL
-    ? new URL(process.env.NEXT_PUBLIC_SERVER_URL)
-    : undefined,
+/**
+ * The site's own metadata, in the language being read (spec 010, T090, FR-018).
+ *
+ * **A function rather than a constant, because the description is a sentence.** It is what a search
+ * result shows for any page whose own SEO description is empty — so leaving it English put an
+ * English sentence under a Russian page's title in Google, which is exactly the duplicate-looking
+ * result the `hreflang` work exists to avoid.
+ *
+ * The title stays `Aurum` in every language: it is the shop's name, not a word.
+ */
+export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Promise<Metadata> {
+  const { locale: segment } = await params
+  const locale = asLocale(segment) ?? DEFAULT_LOCALE
+  const t = await getTranslations({ locale, namespace: 'meta' })
+
+  return {
+    title: {
+      default: 'Aurum',
+      template: '%s — Aurum',
+    },
+    description: t('siteDescription'),
+    metadataBase: process.env.NEXT_PUBLIC_SERVER_URL
+      ? new URL(process.env.NEXT_PUBLIC_SERVER_URL)
+      : undefined,
+  }
 }
 
 export const viewport: Viewport = {
