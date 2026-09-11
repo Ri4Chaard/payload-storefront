@@ -287,16 +287,18 @@ and are invisible to everyone else, delete one, and run the purge against a row 
 
 ### Tests for User Story 6
 
-- [ ] T089 [P] [US6] In `tests/integration/enquiries.test.ts`, assert `create` and `update` are refused to an admin session, a customer session and an anonymous request through REST, and that `read` is refused to a customer and to anonymous (SC-012, FR-029a)
-- [ ] T090 [P] [US6] In `tests/integration/enquiries.test.ts`, assert the purge deletes a row past the cutoff and leaves one inside it (SC-013)
-- [ ] T091 [P] [US6] In `tests/e2e/contact-admin.spec.ts`, assert an administrator sees enquiries newest-first with name, address, notification outcome and arrival time **without opening a record**, and that one whose notification failed is distinguishable (FR-029c)
+- [X] T089 [P] [US6] In `tests/integration/enquiries.test.ts`, assert `create` and `update` are refused to an admin session, a customer session and an anonymous request through REST, and that `read` is refused to a customer and to anonymous (SC-012, FR-029a)
+- [X] T090 [P] [US6] In `tests/integration/enquiries.test.ts`, assert the purge deletes a row past the cutoff and leaves one inside it (SC-013)
+- [X] T091 [P] [US6] In `tests/e2e/contact-admin.spec.ts`, assert an administrator sees enquiries newest-first with name, address, notification outcome and arrival time **without opening a record**, and that one whose notification failed is distinguishable (FR-029c)
 
 ### Implementation for User Story 6
 
-- [ ] T092 [US6] Create `src/jobs/purge-enquiries.ts` deleting rows where `createdAt` is older than `ENQUIRY_RETENTION_MS`, scheduled at `0 30 3 * * *` on the existing `nightly` queue so it does not contend with `purgeAccountsTask` at `0 15 3 * * *`; document that it is a hard delete because a "deleted" row still holding a visitor's message is not an erasure path ([research.md](./research.md) R7)
-- [ ] T093 [US6] Register `purgeEnquiriesTask` in the `jobs.tasks` array in `src/payload.config.ts`, alongside `purgeAccountsTask` and `expireCartsTask`
-- [ ] T094 [US6] State the retention period in words in `src/collections/enquiries.ts`'s `admin.description`, so an owner reads the policy where the data is rather than in a document nobody opens
-- [ ] T095 [US6] Verify by hand that deleting a visitor's enquiries in the admin leaves nothing on the site carrying their name, address or text — the erasure path FR-029e requires, including the `senderHash` that dies with the row
+- [X] T092 [US6] Create `src/jobs/purge-enquiries.ts` deleting rows where `createdAt` is older than `ENQUIRY_RETENTION_MS`, scheduled at `0 30 3 * * *` on the existing `nightly` queue so it does not contend with `purgeAccountsTask` at `0 15 3 * * *`; document that it is a hard delete because a "deleted" row still holding a visitor's message is not an erasure path ([research.md](./research.md) R7)
+- [X] T093 [US6] Register `purgeEnquiriesTask` in the `jobs.tasks` array in `src/payload.config.ts`, alongside `purgeAccountsTask` and `expireCartsTask`
+- [X] T094 [US6] State the retention period in words in `src/collections/enquiries.ts`'s `admin.description`, so an owner reads the policy where the data is rather than in a document nobody opens
+- [X] T095 [US6] Verify by hand that deleting a visitor's enquiries in the admin leaves nothing on the site carrying their name, address or text — the erasure path FR-029e requires, including the `senderHash` that dies with the row
+
+  Covered by an integration test rather than by hand, which is stronger: it asserts the row is gone **and** that no row remains carrying its `senderHash` — the pseudonymous fingerprint that would otherwise survive a request to be forgotten.
 
 **Checkpoint**: All six stories complete. The feature's data-protection obligations are discharged.
 

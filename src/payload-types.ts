@@ -168,6 +168,7 @@ export interface Config {
     tasks: {
       purgeAccounts: TaskPurgeAccounts;
       expireCarts: TaskExpireCarts;
+      purgeEnquiries: TaskPurgeEnquiries;
       inline: {
         input: unknown;
         output: unknown;
@@ -1519,7 +1520,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'purgeAccounts' | 'expireCarts';
+        taskSlug: 'inline' | 'purgeAccounts' | 'expireCarts' | 'purgeEnquiries';
         taskID: string;
         input?:
           | {
@@ -1552,7 +1553,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'purgeAccounts' | 'expireCarts') | null;
+  taskSlug?: ('inline' | 'purgeAccounts' | 'expireCarts' | 'purgeEnquiries') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -3237,6 +3238,16 @@ export interface TaskExpireCarts {
   output: {
     guestCartsDeleted: number;
     customerCartsDeleted: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPurgeEnquiries".
+ */
+export interface TaskPurgeEnquiries {
+  input?: unknown;
+  output: {
+    enquiriesDeleted: number;
   };
 }
 /**

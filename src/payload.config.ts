@@ -42,6 +42,7 @@ import { Shop } from './globals/shop'
 import { StoryPage } from './globals/story-page'
 import { expireCartsTask } from './jobs/expire-carts'
 import { purgeAccountsTask } from './jobs/purge-accounts'
+import { purgeEnquiriesTask } from './jobs/purge-enquiries'
 import {
   adminOnlyFieldAccess,
   adminOrPublishedStatus,
@@ -250,7 +251,7 @@ export default buildConfig({
    * work and does not silently become the runner for every job a later feature adds.
    */
   jobs: {
-    tasks: [purgeAccountsTask, expireCartsTask],
+    tasks: [purgeAccountsTask, expireCartsTask, purgeEnquiriesTask],
     autoRun: [{ cron: '0 0/15 * * * *', queue: 'nightly' }],
     // Nothing reads a completed purge back. Keeping every run forever would make the jobs table the
     // one thing in this system that grows without bound, which is a poor look on a cleanup job.

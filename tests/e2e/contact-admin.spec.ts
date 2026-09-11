@@ -279,3 +279,84 @@ test('a draft is not what a visitor sees', async ({ page }) => {
   await page.goto('/contact')
   await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('DRAFTED, NOT PUBLISHED')
 })
+
+/**
+ * The enquiry list as an administrator meets it (008/T091, FR-029c).
+ *
+ * **This is the one place in this file that drives the real admin panel**, and it has to be: the
+ * requirement is about what an owner can see *without opening a record*. Asserting the collection's
+ * `defaultColumns` from the config would check that the setting exists, not that it does its job.
+ *
+ * The generous timeout is for `next dev`, which compiles the admin panel on first request.
+ */
+test.describe('the enquiry list', () => {
+  const PASSWORD = 'a-long-enough-password'
+  let adminEmail: string
+
+  test.beforeAll(async () => {
+    adminEmail = `e2e-enquiries-${Date.now()}@admin.aurum-testing.dev`
+    await payload.create({
+      collection: 'admins',
+      data: { email: adminEmail, name: 'Enquiry list check', password: PASSWORD },
+      overrideAccess: true,
+    })
+  })
+
+  test.afterEach(async () => {
+    await payload.delete({
+      collection: 'enquiries',
+      where: { email: { contains: 'aurum-testing.dev' } },
+      overrideAccess: true,
+      context: skipRevalidation,
+    })
+  })
+
+  test('shows who wrote and whether we told anyone, without opening a record', async ({ page }) => {
+    const sent = `sent-${Date.now()}@aurum-testing.dev`
+    const failed = `failed-${Date.now()}@aurum-testing.dev`
+
+    await payload.create({
+      collection: 'enquiries',
+      data: { name: 'Notified Visitor', email: sent, message: 'x', notification: 'sent' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'enquiries',
+      data: {
+        name: 'Silent Visitor',
+        email: failed,
+        message: 'x',
+        notification: 'failed',
+        notificationError: 'Resend is unreachable',
+      },
+      overrideAccess: true,
+    })
+
+    test.setTimeout(240_000)
+    await page.goto('/admin/login')
+    await page.locator('#field-email').fill(adminEmail)
+    await page.locator('#field-password').fill(PASSWORD)
+    await page.getByRole('button', { name: 'Login', exact: true }).click()
+    await page.waitForURL((url) => !url.pathname.includes('/admin/login'), { timeout: 120_000 })
+
+    await page.goto('/admin/collections/enquiries')
+
+    const table = page.locator('table')
+    await expect(table).toBeVisible({ timeout: 120_000 })
+
+    // Who wrote, their address, and — the column that earns its place — whether the email went out.
+    await expect(table).toContainText('Notified Visitor')
+    await expect(table).toContainText(sent)
+    await expect(table).toContainText('Silent Visitor')
+
+    /*
+      The two outcomes are distinguishable at a glance (FR-029c). This is what lets an owner find
+      the enquiries they were never emailed about, which is the whole reason the outcome is stored
+      rather than only logged.
+    */
+    const silentRow = page.locator('tr', { hasText: 'Silent Visitor' })
+    await expect(silentRow).toContainText(/failed/i)
+    const notifiedRow = page.locator('tr', { hasText: 'Notified Visitor' })
+    await expect(notifiedRow).toContainText(/sent/i)
+  })
+})

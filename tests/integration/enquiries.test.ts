@@ -2,7 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ENQUIRY_RATE_LIMIT } from '@/lib/contact/config'
+import { ENQUIRY_RATE_LIMIT, ENQUIRY_RETENTION_DAYS } from '@/lib/contact/config'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
@@ -39,6 +39,7 @@ const realSendEmail = payload.sendEmail.bind(payload)
 payload.sendEmail = sendEmail as unknown as typeof payload.sendEmail
 
 const { submitEnquiry } = await import('@/lib/contact/actions')
+const { purgeEnquiriesTask } = await import('@/jobs/purge-enquiries')
 
 const form = (overrides: Record<string, string> = {}) => {
   const data = new FormData()
@@ -293,5 +294,79 @@ describe('access', () => {
     await expect(
       payload.find({ collection: 'enquiries', overrideAccess: false, user: asCustomer }),
     ).rejects.toThrow(/not allowed/i)
+  })
+})
+
+/**
+ * Retention and erasure (008/T090, FR-029d, FR-029e, SC-013).
+ *
+ * **Constitution VI attaches both to any point that collects personal data**, and storing enquiries
+ * created one. The purge is what bounds how long the shop holds a stranger's name, address and
+ * message; deleting a row is what answers a request to be forgotten.
+ */
+describe('the retention purge', () => {
+  /** The job takes `req` and uses only `req.payload`, which is what the runner hands it. */
+  const runPurge = async () =>
+    (purgeEnquiriesTask.handler as (args: { req: unknown }) => Promise<{ output: { enquiriesDeleted: number } }>)({
+      req: { payload },
+    })
+
+  const age = async (id: number | string, days: number) => {
+    const at = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+    // Written straight to the column: `createdAt` is Payload's own and an update would not move it.
+    await payload.db.drizzle.execute(
+      `update enquiries set created_at = '${at}' where id = ${Number(id)}` as never,
+    )
+  }
+
+  it('deletes a row past the cutoff and leaves one inside it', async () => {
+    const stale = form()
+    const fresh = form()
+    await submit(stale)
+    await submit(fresh)
+
+    const staleRow = await rowFor(stale.get('email') as string)
+    await age(staleRow!.id, ENQUIRY_RETENTION_DAYS + 5)
+
+    const { output } = await runPurge()
+    expect(output.enquiriesDeleted).toBeGreaterThanOrEqual(1)
+
+    expect(await countFor(stale.get('email') as string)).toBe(0)
+    expect(await countFor(fresh.get('email') as string)).toBe(1)
+  })
+
+  it('leaves a row exactly inside the window', async () => {
+    const data = form()
+    await submit(data)
+    const row = await rowFor(data.get('email') as string)
+    await age(row!.id, ENQUIRY_RETENTION_DAYS - 1)
+
+    await runPurge()
+    expect(await countFor(data.get('email') as string)).toBe(1)
+  })
+})
+
+/**
+ * FR-029e. Deletion is the erasure path — reachable by a person, not only by the nightly job — and
+ * it has to take the `senderHash` with it, or a pseudonymous fingerprint of the visitor survives a
+ * request to be forgotten.
+ */
+describe('erasure', () => {
+  it('an administrator can delete an enquiry, and nothing of it remains', async () => {
+    const data = form()
+    await submit(data)
+    const email = data.get('email') as string
+    const row = await rowFor(email)
+    expect(row?.senderHash).toBeTruthy()
+
+    await payload.delete({ collection: 'enquiries', id: row!.id, overrideAccess: true })
+
+    expect(await countFor(email)).toBe(0)
+    const bySender = await payload.count({
+      collection: 'enquiries',
+      where: { senderHash: { equals: row!.senderHash } },
+      overrideAccess: true,
+    })
+    expect(bySender.totalDocs).toBe(0)
   })
 })
