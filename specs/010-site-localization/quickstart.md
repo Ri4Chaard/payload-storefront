@@ -224,6 +224,27 @@ Every figure reproduces spec 009's to the decimal, which is a useful check on bo
 worst route sits **10.6 KB above the 192.3 KB framework baseline against a 100 KB allowance** — so
 this feature has roughly 89 KB of headroom for next-intl's runtime and the client message payload.
 
+### Measured again 2026-09-11, after Foundational + US1 + US2 + US3 + US5 (T104)
+
+| Route | Before | After | Delta |
+| --- | --- | --- | --- |
+| `/not-a-real-page` (framework baseline) | 192.3 KB | **207.2 KB** | +14.9 KB |
+| `/` | 197.6 KB | 212.7 KB | +15.1 KB |
+| `/all-jewelry` (worst route) | 202.9 KB | **217.9 KB** | +15.0 KB |
+| `/legal/privacy` | 187.0 KB | 202.0 KB | +15.0 KB |
+| `/ru` | — | 212.7 KB | identical to `/` |
+| `/ru/legal/privacy` | — | 202.0 KB | identical to `/legal/privacy` |
+
+**Both constitutional clauses pass.** The worst route is 217.9 KB against the 300 KB cap, and
+**10.7 KB above the new 207.2 KB framework baseline** against a 100 KB allowance. next-intl's client
+runtime costs a flat ~15 KB, and it lands in the baseline because the provider is in the root layout
+— so it is charged to every route including the 404, exactly as spec 009's cookie banner was.
+
+**A Russian route measures the same as its English twin, to the decimal.** That is the check that
+says message data is travelling in the flight payload rather than the JavaScript bundle. A widening
+gap between `/x` and `/ru/x` in a later measurement means a message file has been imported into a
+Client Component, or the provider is carrying namespaces no client reads.
+
 `next-intl@4.14.4` pulls `@swc/core` and `@parcel/watcher` transitively. Both are native binaries
 backing its optional message extractor; both are build-time only and reach no browser.
 

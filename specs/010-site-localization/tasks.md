@@ -468,7 +468,7 @@ confirm the page renders whole.
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T104 Re-measure gzipped initial JS against a production server for the T001 routes plus `/ru` and `/ru/legal/privacy`, compare against the T001 baseline and spec 009's 192.3 KB framework figure, and confirm every route is ≤ 300KB total and ≤ 100KB above the baseline (SC-007, Constitution V). A Russian route more than a kilobyte or two above its English twin means message data is in the bundle rather than the flight payload.
+- [X] T104 Re-measure gzipped initial JS against a production server for the T001 routes plus `/ru` and `/ru/legal/privacy`, compare against the T001 baseline and spec 009's 192.3 KB framework figure, and confirm every route is ≤ 300KB total and ≤ 100KB above the baseline (SC-007, Constitution V). A Russian route more than a kilobyte or two above its English twin means message data is in the bundle rather than the flight payload.
 - [ ] T105 [P] Run `pnpm test:a11y` on the changed pages in all three languages, including the `lang` attribute assertion and the Cyrillic focus-order check (SC-008, FR-054).
 - [ ] T106 [P] Check the fixed-width affordances — header navigation, buttons, chips, filter labels — at all three languages. Russian runs roughly 15% longer than English and this site draws several elements to fixed widths.
 - [ ] T107 [P] Verify every address the site served before this feature still returns 200 with English content, per `quickstart.md` §9 (SC-006, FR-013).
