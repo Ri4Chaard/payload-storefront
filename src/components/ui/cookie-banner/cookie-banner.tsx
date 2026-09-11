@@ -65,6 +65,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
   */
   const [state, setState] = React.useState<ConsentState | null>(null)
   const [chooserOpen, setChooserOpen] = React.useState(false)
+  const [modalOpen, setModalOpen] = React.useState(false)
   const configureRef = React.useRef<HTMLButtonElement>(null)
 
   React.useEffect(() => {
@@ -89,6 +90,47 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
     window.addEventListener(OPEN_COOKIE_SETTINGS, open)
     return () => window.removeEventListener(OPEN_COOKIE_SETTINGS, open)
   }, [consentVersion, categories])
+
+  /*
+    Stand down while a modal dialog owns the screen (FR-024).
+
+    **Found by the accessibility sweep, not by reading the code.** `/account` opens dialogs, and a
+    dialog's scrim is 40% black drawn over everything behind it — including this banner, which is
+    `position: fixed` and therefore not covered by the `inert` that `useOverlay` applies to `main`
+    and `footer`. The banner stayed live underneath: its body text measured 3.23:1 against the
+    dimmed surface where AA requires 4.5:1, and its three buttons were still in the page while a
+    focus trap said they were not reachable.
+
+    Hiding is the right answer rather than raising the z-index above the scrim. A modal is a task
+    the visitor chose; the banner is ambient. Floating it over a dialog would put two competing
+    surfaces on screen and let somebody press a consent button the trap has excluded.
+
+    **The signal is the scroll lock, and the two more obvious signals are both wrong.**
+
+    `[aria-modal="true"]` looks like the semantic answer and is not: `Modal` and `Drawer` stay
+    mounted when closed and hide themselves with a class, so the attribute is in the DOM whether or
+    not anything is open. Watching for it hid the banner on every page that merely *has* a dialog
+    component — `/cart`, `/account` — whether or not the visitor had opened one.
+
+    Watching `document.body` for that attribute with `subtree: true, childList: true` is the other
+    mistake, and it is a performance one: the callback then runs on every DOM mutation anywhere on
+    the page, on every route, for a banner most visitors dismiss in one press.
+
+    `useOverlay` sets `documentElement.style.overflow = 'hidden'` for exactly as long as an overlay
+    is open, and clears it on close. One element, one attribute, no subtree — and it covers `Modal`,
+    `Drawer`, `Lightbox` and `MobileNav` alike, because all four go through that hook. An overlay
+    that opts out of the scroll lock is not claiming the page, and correctly does not hide this.
+  */
+  React.useEffect(() => {
+    const root = document.documentElement
+    const check = () => setModalOpen(root.style.overflow === 'hidden')
+
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(root, { attributes: true, attributeFilter: ['style'] })
+
+    return () => observer.disconnect()
+  }, [])
 
   const settle = React.useCallback(
     (decision: Decision) => {
@@ -119,7 +161,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
     Still reading, or already decided. Either way the banner itself is not drawn — but the chooser
     still can be, because the footer can ask for it at any time.
   */
-  const showBanner = state !== null && state.status !== 'decided'
+  const showBanner = state !== null && state.status !== 'decided' && !modalOpen
 
   return (
     <>

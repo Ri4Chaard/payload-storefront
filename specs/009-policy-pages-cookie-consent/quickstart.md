@@ -216,28 +216,56 @@ pnpm build && pnpm start
 pnpm measure:js http://localhost:3000 / /all-jewelry /products/<slug> /legal/privacy
 ```
 
-### Baseline, measured 2026-09-11 before any code in this feature landed (T001)
+### Measured 2026-09-11, before and after (T001, T060)
 
-Every `/_next/static/**.js` the route's HTML references, gzipped locally at default level so the
-figure does not depend on how the server was configured.
+Gzipped JavaScript fetched **by a real browser** before the load event, counted per route from a
+fresh context. `pnpm measure:js` drives Chromium and records every `/_next/static/**.js` response.
 
-| Route | Chunks | Gzipped initial JS |
-| --- | --- | --- |
-| `/` | 15 | **235.1 KB** |
-| `/all-jewelry` | 13 | **220.3 KB** |
-| `/products/zolotoe-kolco-s-brilliantom` | 15 | **235.1 KB** |
-| `/faq` | 14 | **225.2 KB** |
+| Route | Before | After | Delta |
+| --- | --- | --- | --- |
+| `/not-a-real-page` (404 — the framework baseline) | 181.6 KB | 192.3 KB | +10.7 KB |
+| `/` | 196.4 KB | 197.6 KB | +1.2 KB |
+| `/all-jewelry` | 202.6 KB | 202.9 KB | +0.3 KB |
+| `/products/<slug>` | 196.4 KB | 197.6 KB | +1.2 KB |
+| `/faq` | 186.5 KB | 187.0 KB | +0.5 KB |
+| `/legal/privacy` | — | 187.0 KB | new route |
 
-`/faq` is the closest existing analogue to a policy page — content, no catalogue interactivity — so
-it is the row `/legal/privacy` should be compared against rather than `/`.
+**Both constitutional clauses pass with room to spare.** The worst route is 202.9 KB against a
+300 KB cap, and 10.6 KB above the measured 192.3 KB framework baseline against a 100 KB allowance.
 
-> **Not directly comparable to the constitution's 181KB framework baseline.** That figure was
-> measured on 2026-09-03 against a 404 page carrying no application code; this one counts every
-> chunk the route's HTML references. What SC-011 is accountable for is the **delta** between this
-> table and the same measurement after the banner lands. Re-measure with the identical script and
-> method or the comparison is worthless.
+The 404 rises more than any real route because it carries the least other client code, so the
+banner is a larger share of a smaller bundle — not because it costs more there.
 
-Record gzipped initial JS for `/`, `/all-jewelry`, `/products/<slug>`, and `/legal/privacy`. Every route
+> **The measurement method was corrected mid-implementation, and the first attempt was wrong in a
+> flattering direction.** `measure-js.ts` originally scraped `/_next/static/**.js` URLs out of the
+> server markup. That silently undercounts: a client component reached through the RSC flight
+> payload has its chunk requested by the client runtime through a manifest, and that URL never
+> appears in the document. Measured that way the banner looked free on every route. The script now
+> drives a browser. Any future comparison must use the same script, or it is comparing two different
+> quantities.
+>
+> Two further traps, both met: a stale `next start` holding port 3000 silently serves the previous
+> build against the current `.next` (check the server log for `EADDRINUSE` before trusting a number),
+> and an async response handler must be awaited or every route reports an identical total.
+
+**The 404 figure independently corroborates the constitution.** Principle V records a framework
+baseline of 181 KB measured on 2026-09-03 by a different method; this measured 181.6 KB. The two
+agreeing to within a kilobyte is a useful check on both.
+
+### The chooser is fetched on demand, not on load (T061)
+
+Verified on `/legal/privacy` against a production server: 12 files and 187.0 KB before any
+interaction, then pressing *Configure All Cookies* fetches **one further chunk of 1.0 KB**. It is
+small because `Modal`, `Drawer` and `Switch` are already in the shared bundle; what is deferred is
+the chooser itself.
+
+> **This did not work on the first attempt, and the failure was invisible.** `src/components/ui/index.ts`
+> re-exported `CookiePreferences`, so importing `CookieBanner` from the barrel pulled the barrel's
+> whole module graph and the chooser landed back in the initial chunk — `React.lazy` split nothing.
+> The fix is a comment in that file explaining why the chooser is deliberately absent from the
+> barrel. If a future change adds it back, this measurement is how the regression is caught.
+
+Record gzipped initial JS forRecord gzipped initial JS for `/`, `/all-jewelry`, `/products/<slug>`, and `/legal/privacy`. Every route
 must be ≤ 300KB total **and** ≤ 100KB above the 181KB framework baseline. This feature adds a client
 component to the root layout, so the delta is charged to **every** route — compare against the
 figures recorded before the change, and confirm the chooser's code is absent from the initial bundle

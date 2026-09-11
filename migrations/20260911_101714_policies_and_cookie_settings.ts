@@ -129,6 +129,41 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_policies_id_idx" ON "payload_locked_documents_rels" USING btree ("policies_id");`)
 }
 
+/*
+ * HAND-EDITED, and this note is why a generated file has a comment in it.
+ *
+ * Two things were wrong with the `down` as `payload migrate:create` emitted it. Both were found by
+ * actually running `pnpm payload migrate:down` (spec 009, T067) rather than by reading the file and
+ * assuming — the `up` is fine, and nothing else would ever have exercised this.
+ *
+ * **1. `DROP CONSTRAINT` without `IF EXISTS`.** It failed every time:
+ *
+ *     constraint "payload_locked_documents_rels_policies_fk" of relation
+ *     "payload_locked_documents_rels" does not exist
+ *
+ * Ordering is the cause: `DROP TABLE "policies" CASCADE` a few lines above already removes every
+ * dependent object, the foreign key included, so by the time that statement runs there is nothing
+ * left to drop and it aborts the transaction. `IF EXISTS` is the minimal fix.
+ *
+ * **2. The jobs enum revert, which is not this feature's change at all.** The `up` carries
+ * `ALTER TYPE "enum_payload_jobs_task_slug" ADD VALUE 'purgeEnquiries'` — schema drift from spec
+ * 008, which added `purgeEnquiriesTask` to `payload.config.ts` without a migration to match. This
+ * migration is simply the first one generated since, so it absorbed the difference.
+ *
+ * The generated `down` therefore recreates the enum WITHOUT `purgeEnquiries`, and Postgres refuses
+ * to cast any existing row still holding that value. The two `DELETE`s below are what make the
+ * rollback possible. Deleting them is correct rather than merely convenient: a job row whose
+ * `task_slug` no longer exists in the enum cannot be represented at all, and these rows are
+ * transient by construction — `payload.config.ts` sets `deleteJobOnComplete: true`, so a completed
+ * purge is discarded anyway.
+ *
+ * **Worth fixing at the source separately**: the drift belongs in its own migration rather than
+ * riding along with an unrelated feature, and until that happens every future `migrate:create` will
+ * keep re-detecting it.
+ *
+ * Re-run `migrate:down` followed by `migrate` after touching this file.
+ */
+
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    ALTER TABLE "policies" DISABLE ROW LEVEL SECURITY;
@@ -143,8 +178,10 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "cookie_settings" CASCADE;
   DROP TABLE "_cookie_settings_v_version_categories" CASCADE;
   DROP TABLE "_cookie_settings_v" CASCADE;
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_policies_fk";
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT IF EXISTS "payload_locked_documents_rels_policies_fk";
   
+  DELETE FROM "payload_jobs_log" WHERE "task_slug" = 'purgeEnquiries';
+  DELETE FROM "payload_jobs" WHERE "task_slug" = 'purgeEnquiries';
   ALTER TABLE "payload_jobs_log" ALTER COLUMN "task_slug" SET DATA TYPE text;
   DROP TYPE "public"."enum_payload_jobs_log_task_slug";
   CREATE TYPE "public"."enum_payload_jobs_log_task_slug" AS ENUM('inline', 'purgeAccounts', 'expireCarts');

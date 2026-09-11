@@ -251,16 +251,16 @@ confirm all four appear in the site's machine-readable list of addresses.
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T060 Measure gzipped initial JS against a production server for `/`, `/all-jewelry`, `/products/<slug>` and `/legal/privacy`, compare with the T001 baseline, and confirm every route is ≤ 300KB total and ≤ 100KB above the 181KB framework baseline (SC-011, Constitution V).
-- [ ] T061 Confirm via the Network panel on `/legal/privacy` that the `src/components/ui/cookie-preferences/` chunk is absent from the initial bundle and arrives only when *Configure All Cookies* is pressed.
-- [ ] T062 [P] Verify the privacy claim by measurement, not assertion, following `specs/009-policy-pages-cookie-consent/quickstart.md` §5 — with a fresh profile and each of the three decisions in turn, browse the catalogue, open a product, add to cart, and open a policy page; confirm the only cookies present are the session cookie, `aurum-cart`, `aurum-cart-count` and `aurum-consent`, that local and session storage are empty, and that third-party requests number zero (SC-004, SC-008a).
-- [ ] T063 [P] Manual accessibility pass the automated scan cannot cover, following `specs/009-policy-pages-cookie-consent/quickstart.md` §9 — tab order reaches the banner early, the banner does not trap focus while the chooser does and returns focus on close, the banner is announced without stealing focus mid-sentence, and `prefers-reduced-motion` is respected (SC-009).
-- [ ] T064 [P] Confirm the banner and `src/lib/consent/cookie.ts` behave with cookies blocked entirely — it reappears on every page, nothing throws, and the visitor is treated as having refused everything optional (contract §5).
-- [ ] T065 [P] Run `pnpm lint`, `pnpm typecheck`, `pnpm check:naming`, `pnpm check:tokens`, `pnpm check:styles`, `pnpm check:stories`.
-- [ ] T066 [P] Run `pnpm test`, `pnpm test:integration`, `pnpm test:e2e`, `pnpm test:a11y`, `pnpm test:stories`.
-- [ ] T067 Verify the migration's rollback against a database holding seeded content, per `data-model.md` §5 — both tables are new, so the down migration drops them and nothing pre-existing is at risk. Confirm that claim rather than trusting it.
-- [ ] T068 Walk `specs/009-policy-pages-cookie-consent/quickstart.md` end to end and correct anything that no longer matches the build.
-- [ ] T069 Confirm the Complexity Tracking entries in `plan.md` still describe what shipped — the FR-025 hardcoded-copy exception and the three-value `footerPlacement` — and that FR-025a and FR-025b were honoured in the delivered copy.
+- [X] T060 Measure gzipped initial JS against a production server for `/`, `/all-jewelry`, `/products/<slug>` and `/legal/privacy`, compare with the T001 baseline, and confirm every route is ≤ 300KB total and ≤ 100KB above the 181KB framework baseline (SC-011, Constitution V).
+- [X] T061 Confirm via the Network panel on `/legal/privacy` that the `src/components/ui/cookie-preferences/` chunk is absent from the initial bundle and arrives only when *Configure All Cookies* is pressed.
+- [X] T062 [P] Verify the privacy claim by measurement, not assertion, following `specs/009-policy-pages-cookie-consent/quickstart.md` §5 — with a fresh profile and each of the three decisions in turn, browse the catalogue, open a product, add to cart, and open a policy page; confirm the only cookies present are the session cookie, `aurum-cart`, `aurum-cart-count` and `aurum-consent`, that local and session storage are empty, and that third-party requests number zero (SC-004, SC-008a).
+- [X] T063 [P] Manual accessibility pass the automated scan cannot cover, following `specs/009-policy-pages-cookie-consent/quickstart.md` §9 — tab order reaches the banner early, the banner does not trap focus while the chooser does and returns focus on close, the banner is announced without stealing focus mid-sentence, and `prefers-reduced-motion` is respected (SC-009).
+- [X] T064 [P] Confirm the banner and `src/lib/consent/cookie.ts` behave with cookies blocked entirely — it reappears on every page, nothing throws, and the visitor is treated as having refused everything optional (contract §5).
+- [X] T065 [P] Run `pnpm lint`, `pnpm typecheck`, `pnpm check:naming`, `pnpm check:tokens`, `pnpm check:styles`, `pnpm check:stories`.
+- [X] T066 [P] Run `pnpm test`, `pnpm test:integration`, `pnpm test:e2e`, `pnpm test:a11y`, `pnpm test:stories`.
+- [X] T067 Verify the migration's rollback against a database holding seeded content, per `data-model.md` §5 — both tables are new, so the down migration drops them and nothing pre-existing is at risk. Confirm that claim rather than trusting it.
+- [X] T068 Walk `specs/009-policy-pages-cookie-consent/quickstart.md` end to end and correct anything that no longer matches the build.
+- [X] T069 Confirm the Complexity Tracking entries in `plan.md` still describe what shipped — the FR-025 hardcoded-copy exception and the three-value `footerPlacement` — and that FR-025a and FR-025b were honoured in the delivered copy.
 
 ---
 

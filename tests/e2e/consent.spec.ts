@@ -210,6 +210,29 @@ test.describe('the page stays usable while the banner is up', () => {
     }
   })
 
+  test('it stands down while a modal dialog owns the screen (FR-024)', async ({ page }) => {
+    /*
+      Found by the accessibility sweep on `/account`, not by review. A dialog's scrim is drawn over
+      everything behind it, and the banner is `position: fixed` — so it is not covered by the
+      `inert` that `useOverlay` applies to `main` and `footer`. It stayed live underneath at 3.23:1
+      contrast, with three buttons in the page that a focus trap said were unreachable.
+    */
+    await page.goto('/')
+    await expect(banner(page)).toBeVisible()
+
+    await page.getByRole('button', { name: 'Configure All Cookies' }).click()
+    await expect(chooser(page)).toBeVisible()
+
+    // The banner is gone while the dialog is up, and nothing has been recorded.
+    await expect(banner(page)).toBeHidden()
+    expect(await consentCookie(page)).toBeUndefined()
+
+    // And it returns when the dialog closes without a decision.
+    await page.keyboard.press('Escape')
+    await expect(chooser(page)).toBeHidden()
+    await expect(banner(page)).toBeVisible()
+  })
+
   test('the banner adds no horizontal scrolling at 390px', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
@@ -221,6 +244,68 @@ test.describe('the page stays usable while the banner is up', () => {
 
     expect(overflows).toBe(false)
   })
+})
+
+/**
+ * SC-004 and SC-008a — the central privacy claim of this feature, measured rather than asserted.
+ *
+ * The site says, in a policy it publishes, that it uses no analytics and no third-party tracking.
+ * That sentence is only worth what it can be checked against, so this checks it: browse under each
+ * possible decision and confirm that nothing beyond the four necessary cookies is stored and that
+ * no request leaves this origin.
+ *
+ * It is a test rather than a manual step in the quickstart because it is the assertion most likely
+ * to be quietly falsified later — by a font, an embed, or a dependency that phones home.
+ */
+test.describe('nothing optional is stored or contacted', () => {
+  const ALLOWED = new Set([
+    'aurum-consent',
+    'aurum-cart',
+    'aurum-cart-count',
+    'payload-token',
+  ])
+
+  for (const decision of ['no decision', 'Agree', 'Allow Technical Cookies'] as const) {
+    test(`with ${decision}, only necessary cookies exist and no third party is contacted`, async ({
+      page,
+      context,
+      baseURL,
+    }) => {
+      const origin = new URL(baseURL ?? 'http://localhost:3000').origin
+      const foreign = new Set<string>()
+
+      page.on('request', (request) => {
+        const url = new URL(request.url())
+        if (url.protocol.startsWith('http') && url.origin !== origin) foreign.add(url.origin)
+      })
+
+      await page.goto('/')
+      if (decision !== 'no decision') {
+        await page.getByRole('button', { name: decision }).click()
+        await expect(banner(page)).toBeHidden()
+      }
+
+      for (const route of ['/all-jewelry', '/legal/cookies', '/faq']) {
+        await page.goto(route)
+      }
+
+      const names = (await context.cookies()).map((cookie) => cookie.name)
+      const unexpected = names.filter(
+        (name) => ![...ALLOWED].some((allowed) => name.includes(allowed)),
+      )
+
+      expect(unexpected, `unexpected cookies: ${unexpected.join(', ')}`).toEqual([])
+      expect([...foreign], 'this site contacts no third party').toEqual([])
+
+      const storage = await page.evaluate(() => ({
+        local: Object.keys(window.localStorage),
+        session: Object.keys(window.sessionStorage),
+      }))
+
+      expect(storage.local).toEqual([])
+      expect(storage.session).toEqual([])
+    })
+  }
 })
 
 test.describe('a browser that refuses to store anything', () => {
