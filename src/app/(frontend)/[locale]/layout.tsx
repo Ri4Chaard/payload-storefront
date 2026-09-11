@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next'
+import { notFound } from 'next/navigation'
+import { NextIntlClientProvider } from 'next-intl'
 import React from 'react'
 
 import { colorValue } from '@tokens/mapping'
@@ -9,6 +11,9 @@ import { Header } from '@/components/layout/header'
 import { CookieBanner, CookieSettingsButton } from '@/components/ui'
 import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 import { getCookieSettings, getFooterPolicies } from '@/lib/policies/queries'
+import { asLocale } from '@/i18n/locale'
+import { loadMessages } from '@/i18n/request'
+import { LOCALES } from '@/i18n/routing'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
@@ -30,7 +35,46 @@ export const viewport: Viewport = {
   themeColor: colorValue('background-bg'),
 }
 
-export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
+/**
+ * The three languages are prerendered (spec 010, FR-012).
+ *
+ * Each of these multiplies every prerendered route family below it — `/products/[slug]`,
+ * `/blog/[slug]`, `/legal/[slug]` — by three. That is the intended cost: a visitor reading Russian
+ * gets a static page, not a render.
+ */
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }))
+}
+
+/**
+ * Only the namespaces a Client Component actually reads (spec 010, research R11).
+ *
+ * Everything the server renders uses `getTranslations` and never touches this provider, so shipping
+ * the whole message file would put every legal, blog and product string into the flight payload of
+ * every page for no reader. Adding a namespace here is a deliberate act with a measurable cost —
+ * `pnpm measure:js` is where it shows up.
+ */
+const CLIENT_NAMESPACES = ['common', 'header', 'nav', 'cart', 'account', 'forms', 'errors'] as const
+
+export default async function FrontendLayout({ children, params }: LayoutProps<'/[locale]'>) {
+  /*
+    The segment is effectively a catch-all: `/anything` matches it before it matches nothing. So a
+    value that is not one of the three languages is not a locale, it is a 404 — and it has to be
+    refused here, above the render, or `/not-a-real-page` would render the whole chrome in English
+    around an empty middle.
+  */
+  const { locale: segment } = await params
+  const locale = asLocale(segment)
+  if (!locale) notFound()
+
+  const messages = loadMessages(locale)
+  const clientMessages = Object.fromEntries(
+    CLIENT_NAMESPACES.filter((name) => name in messages).map((name) => [
+      name,
+      messages[name as keyof typeof messages],
+    ]),
+  )
+
   /*
     One read, three consumers (spec 005, T072, FR-052).
 
@@ -62,7 +106,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
   const reach = { email: contact.email, phone: contact.phone, phoneHref: contact.phoneHref }
 
   return (
-    <html lang="en" className={fontVariables}>
+    <html lang={locale} className={fontVariables}>
       <body>
         {/*
           The badge's count lives in a client provider, not in this layout (spec 005, T025, R8).
@@ -70,6 +114,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
           the whole site into dynamic rendering — including `/products/[slug]`, which is
           prerendered. A number in a badge is not worth the prerendered catalogue.
         */}
+        <NextIntlClientProvider locale={locale} messages={clientMessages}>
         <CartCountProvider>
           <ContactBanner social={social} {...reach} />
           <Header social={social} {...reach} />
@@ -98,6 +143,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
           */}
           <CookieBanner settings={cookies} />
         </CartCountProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

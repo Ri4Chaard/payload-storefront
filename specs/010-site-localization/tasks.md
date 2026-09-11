@@ -64,13 +64,27 @@ gate and macOS's case-insensitive filesystem will not catch a violation locally.
 
 **Purpose**: Capture the baseline and stand up the skeleton before anything moves.
 
-- [ ] T001 Record pre-change gzipped initial JS for `/`, `/all-jewelry`, `/products/<slug>`, `/legal/privacy` and `/not-a-real-page` against a production server (`pnpm build && pnpm start && pnpm measure:js`), and write the five numbers into `specs/010-site-localization/quickstart.md` §8. **Before any code lands** — this feature adds a client provider to the root layout, so its cost is charged to every route and SC-007 has nothing to compare against afterwards.
-- [ ] T002 Add `next-intl@4.14.4` to `package.json` dependencies, install, and confirm `pnpm typecheck` still passes. Record in the same quickstart section that `@swc/core` and `@parcel/watcher` arrive transitively as build-time native binaries and reach no browser.
-- [ ] T003 [P] Create the `src/i18n/` skeleton — `routing.ts`, `locale.ts`, `request.ts`, `navigation.ts`, `messages/en.json`, `messages/ru.json`, `messages/uk.json` — as empty stubs, and confirm `pnpm check:naming` passes on the new paths.
-- [ ] T004 [P] Restore a production-sized content dump into a scratch database (`aurum_rehearsal`) for the migration rehearsal in T046, per `quickstart.md` Prerequisites.
-- [ ] T005 Compose `createNextIntlPlugin('./src/i18n/request.ts')` with the existing `withPayload(...)` in `next.config.mjs`, keeping `devBundleServerPackages: false` and the image formats untouched, and confirm `pnpm dev` boots.
+- [X] T001 Record pre-change gzipped initial JS for `/`, `/all-jewelry`, `/products/<slug>`, `/legal/privacy` and `/not-a-real-page` against a production server (`pnpm build && pnpm start && pnpm measure:js`), and write the five numbers into `specs/010-site-localization/quickstart.md` §8. **Before any code lands** — this feature adds a client provider to the root layout, so its cost is charged to every route and SC-007 has nothing to compare against afterwards.
+- [X] T002 Add `next-intl@4.14.4` to `package.json` dependencies, install, and confirm `pnpm typecheck` still passes. Record in the same quickstart section that `@swc/core` and `@parcel/watcher` arrive transitively as build-time native binaries and reach no browser.
+- [X] T003 [P] Create the `src/i18n/` skeleton — `routing.ts`, `locale.ts`, `request.ts`, `navigation.ts`, `messages/en.json`, `messages/ru.json`, `messages/uk.json` — as empty stubs, and confirm `pnpm check:naming` passes on the new paths.
+- [X] T004 [P] Restore a production-sized content dump into a scratch database (`aurum_rehearsal`) for the migration rehearsal in T046, per `quickstart.md` Prerequisites.
+- [X] T005 Compose `createNextIntlPlugin('./src/i18n/request.ts')` with the existing `withPayload(...)` in `next.config.mjs`, keeping `devBundleServerPackages: false` and the image formats untouched, and confirm `pnpm dev` boots.
 
 **Checkpoint**: Baseline captured, dependency in, nothing behaves differently yet.
+
+> **Two corrections from executing this phase.**
+>
+> 1. **`src/proxy.ts` already exists.** Spec 004 shipped it as the account-route guard, and `plan.md`
+>    listed it as new — wrong. T016 composes with it rather than creating it, and the account guard's
+>    `/account/:path*` matcher and its `/sign-in` redirect both have to become locale-aware, or a
+>    Russian visitor clicking "account" lands on the English sign-in page. See T016a.
+> 2. **T004 used a local seeded database, not a production restore.** 31 products, 15 articles, 4
+>    policies — real content, but not production-sized. T052's rehearsal proves the migration's
+>    *correctness*; it does not prove its *duration* or its behaviour against production row counts.
+>    That rehearsal must be repeated against a real restore before this ships (SC-011).
+>
+> The baseline reproduced spec 009's five figures to the decimal, measured on port 3100 because port
+> 3000 held a pre-existing server — the stale-server trap 009/quickstart.md documents.
 
 ---
 
@@ -85,24 +99,40 @@ through these.
 `locale` a *root parameter*, and therefore what makes `next/root-params` resolve at all. Every other
 phase depends on it, and it is one mechanical diff that is cheaper reviewed once.
 
-- [ ] T006 Write `src/i18n/routing.ts` — `LOCALES`, `DEFAULT_LOCALE`, `LOCALE_LABELS`, `BCP47`, and `defineRouting` with exactly the five options in `contracts/i18n-modules.md` §1 (`localePrefix: 'as-needed'`, `localeDetection: false`, `localeCookie.maxAge` of 12 months, `alternateLinks: false`). Comment each option with the requirement it implements — each one is FR-013, FR-010, FR-008 and FR-027 respectively, not a preference.
-- [ ] T007 Write `src/i18n/locale.ts` — `currentLocale()` and `asLocale()`, the only place `next/root-params`' `string | undefined` is narrowed, with the two-root-layout reason in a comment.
-- [ ] T008 Write `src/i18n/request.ts` — `getRequestConfig` reading through `currentLocale()`, with `loadMessages` deep-merging `en` beneath the requested locale so a missing key renders the English sentence (FR-037). Do **not** use the `requestLocale` parameter; next-intl 4.14.4 marks it `@deprecated Please migrate to next/root-params`.
-- [ ] T009 [P] Write `src/i18n/navigation.ts` — `createNavigation(routing)` re-exporting `Link`, `redirect`, `usePathname`, `useRouter`.
-- [ ] T010 [P] Unit tests in `tests/unit/i18n-locale.test.ts` for `asLocale` (valid, unknown, `undefined`, wrong case) and for the English merge in `loadMessages` (a key present only in `en` resolves; a key present in neither is a type error).
-- [ ] T011 Create `src/app/(frontend)/[locale]/` and move `layout.tsx`, `page.tsx`, `not-found.tsx` and `styles.css` into it with `git mv`, fixing the relative import of `./styles.css`.
-- [ ] T012 [P] `git mv` the six `(account)` routes into `src/app/(frontend)/[locale]/(account)/` — `account`, `create-account`, `forgot-password`, `reset-password` (with `reset-password-screen.tsx`), `sign-in`, `verify-email` (with `verify-email-screen.tsx`).
-- [ ] T013 [P] `git mv` the `(shop)` group into `src/app/(frontend)/[locale]/(shop)/` — `[category]`, `all-jewelry`, `cart` and the shared `listing.tsx`.
-- [ ] T014 [P] `git mv` `about`, `blog` (with `[slug]`), `contact`, `faq`, `legal/[slug]` and `products/[slug]` into `src/app/(frontend)/[locale]/`.
-- [ ] T015 Rewrite `src/app/(frontend)/[locale]/layout.tsx` as the storefront root layout: `<html lang={await locale()}>` replacing the literal `en` (FR-015), `generateStaticParams` returning the three locales, `notFound()` for a segment value that is not a locale, and `NextIntlClientProvider` carrying **only** the `common`, `header`, `nav`, `cart`, `account`, `forms` and `errors` namespaces (research R11). Keep the four existing global reads and the `Promise.all` around them.
-- [ ] T016 Write `src/proxy.ts` — `createMiddleware(routing)` with the matcher from `contracts/routing.md` §2, excluding `api`, `admin`, `_next`, `_vercel`, `language` and any path containing a dot. Named `proxy`, not `middleware`.
-- [ ] T017 Repair every import path broken by T011–T014 across `src/app/(frontend)/**`, then run `pnpm typecheck` and `pnpm lint` clean.
-- [ ] T018 [P] E2E smoke in `tests/e2e/locale-routing.spec.ts`: `/`, `/ru` and `/uk` all render the home page; `/legal/privacy` still returns 200 with English content (FR-013); `/de/anything` 404s rather than erroring.
-- [ ] T019 [P] Confirm `/admin` and `/api/*` are untouched — a Playwright check in `tests/e2e/locale-routing.spec.ts` that `/admin` loads and never gains a locale prefix.
-- [ ] T020 Run `pnpm check:naming` and `pnpm build` to prove the moved tree compiles and prerenders.
+- [X] T006 Write `src/i18n/routing.ts` — `LOCALES`, `DEFAULT_LOCALE`, `LOCALE_LABELS`, `BCP47`, and `defineRouting` with exactly the five options in `contracts/i18n-modules.md` §1 (`localePrefix: 'as-needed'`, `localeDetection: false`, `localeCookie.maxAge` of 12 months, `alternateLinks: false`). Comment each option with the requirement it implements — each one is FR-013, FR-010, FR-008 and FR-027 respectively, not a preference.
+- [X] T007 Write `src/i18n/locale.ts` — `currentLocale()` and `asLocale()`, the only place `next/root-params`' `string | undefined` is narrowed, with the two-root-layout reason in a comment.
+- [X] T008 Write `src/i18n/request.ts` — `getRequestConfig` reading through `currentLocale()`, with `loadMessages` deep-merging `en` beneath the requested locale so a missing key renders the English sentence (FR-037). Do **not** use the `requestLocale` parameter; next-intl 4.14.4 marks it `@deprecated Please migrate to next/root-params`.
+- [X] T009 [P] Write `src/i18n/navigation.ts` — `createNavigation(routing)` re-exporting `Link`, `redirect`, `usePathname`, `useRouter`.
+- [X] T010 [P] Unit tests in `tests/unit/i18n-locale.test.ts` for `asLocale` (valid, unknown, `undefined`, wrong case) and for the English merge in `loadMessages` (a key present only in `en` resolves; a key present in neither is a type error).
+- [X] T011 Create `src/app/(frontend)/[locale]/` and move `layout.tsx`, `page.tsx`, `not-found.tsx` and `styles.css` into it with `git mv`, fixing the relative import of `./styles.css`.
+- [X] T012 [P] `git mv` the six `(account)` routes into `src/app/(frontend)/[locale]/(account)/` — `account`, `create-account`, `forgot-password`, `reset-password` (with `reset-password-screen.tsx`), `sign-in`, `verify-email` (with `verify-email-screen.tsx`).
+- [X] T013 [P] `git mv` the `(shop)` group into `src/app/(frontend)/[locale]/(shop)/` — `[category]`, `all-jewelry`, `cart` and the shared `listing.tsx`.
+- [X] T014 [P] `git mv` `about`, `blog` (with `[slug]`), `contact`, `faq`, `legal/[slug]` and `products/[slug]` into `src/app/(frontend)/[locale]/`.
+- [X] T015 Rewrite `src/app/(frontend)/[locale]/layout.tsx` as the storefront root layout: `<html lang={await locale()}>` replacing the literal `en` (FR-015), `generateStaticParams` returning the three locales, `notFound()` for a segment value that is not a locale, and `NextIntlClientProvider` carrying **only** the `common`, `header`, `nav`, `cart`, `account`, `forms` and `errors` namespaces (research R11). Keep the four existing global reads and the `Promise.all` around them.
+- [X] T016 Write `src/proxy.ts` — `createMiddleware(routing)` with the matcher from `contracts/routing.md` §2, excluding `api`, `admin`, `_next`, `_vercel`, `language` and any path containing a dot. Named `proxy`, not `middleware`.
+- [X] T016a Make the **existing** account guard in `src/proxy.ts` locale-aware: widen its matcher to `/:locale(ru|uk)?/account/:path*` and build its `/sign-in` redirect under the requesting locale's prefix, so a Russian visitor is not bounced to the English sign-in page. Its `next` parameter stays validated as a same-origin relative path.
+- [X] T017 Repair every import path broken by T011–T014 across `src/app/(frontend)/**`, then run `pnpm typecheck` and `pnpm lint` clean.
+- [X] T018 [P] E2E smoke in `tests/e2e/locale-routing.spec.ts`: `/`, `/ru` and `/uk` all render the home page; `/legal/privacy` still returns 200 with English content (FR-013); `/de/anything` 404s rather than erroring.
+- [X] T019 [P] Confirm `/admin` and `/api/*` are untouched — a Playwright check in `tests/e2e/locale-routing.spec.ts` that `/admin` loads and never gains a locale prefix.
+- [X] T020 Run `pnpm check:naming` and `pnpm build` to prove the moved tree compiles and prerenders.
 
-**Checkpoint**: The site serves the same English content at three address shapes. Nothing is
+**Checkpoint**: ✅ The site serves the same English content at three address shapes. Nothing is
 translated yet, and that is the correct state.
+
+> **Three things the move actually broke**, all found by the build rather than by reading:
+>
+> - `styles.css` imports `../../styles/tokens.css` relatively, and moving it one level deeper made
+>   that path wrong. Turbopack's error names the resolved path, so it is obvious once seen — and
+>   invisible to `tsc`, which does not resolve CSS.
+> - `.storybook/preview.tsx` imports that same stylesheet by path.
+> - `eslint-rules/catalog-boundary.mjs` names `src/app/(frontend)/page.tsx` in its allowance list for
+>   mock imports — a deliberately hardcoded path, per its own comment, so that "a wildcard hides how
+>   much is left, a path says exactly". Moving the home page made the rule fire on it.
+>
+> Verified against a production server: `/`, `/ru`, `/uk` all 200 with `<html lang>` matching;
+> `/legal/privacy` and eight other pre-existing addresses still 200 unprefixed; `/de/anything` 404s;
+> `/admin` is untouched. Prerendered paths tripled as designed — 15 articles became 45, 30 products
+> became 90.
 
 ---
 

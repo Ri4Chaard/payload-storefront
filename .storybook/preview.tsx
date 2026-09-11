@@ -2,7 +2,7 @@ import type { Decorator, Preview } from '@storybook/nextjs-vite'
 import React from 'react'
 
 // The storefront stylesheet, so every story renders on brand with the real tokens.
-import '../src/app/(frontend)/styles.css'
+import '../src/app/(frontend)/[locale]/styles.css'
 
 import { breakpoints } from '@tokens/mapping'
 import { fontVariables } from '@/styles/fonts'

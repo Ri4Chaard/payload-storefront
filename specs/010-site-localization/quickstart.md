@@ -172,15 +172,28 @@ pnpm build && pnpm start
 pnpm measure:js http://localhost:3000 /not-a-real-page / /all-jewelry /products/<slug> /legal/privacy /ru /ru/legal/privacy
 ```
 
-Compare against spec 009's figures, measured the same way on 2026-09-11 — **and only with this script**,
-for the reason 009/quickstart.md records at length:
+Compare against the baseline below — **and only with this script**, for the reason
+009/quickstart.md records at length.
 
-| Route | 009 measured | This feature must stay under |
-| --- | --- | --- |
-| `/not-a-real-page` (framework baseline) | 192.3 KB | — |
-| `/` | 197.6 KB | 300 KB total **and** baseline + 100 KB |
-| `/all-jewelry` | 202.9 KB | same |
-| `/legal/privacy` | 187.0 KB | same |
+### Baseline measured 2026-09-11, before any of this feature landed (T001)
+
+Taken against a production server on port 3100 (port 3000 held a pre-existing server; measuring
+against a stale one is the trap 009 documents).
+
+| Route | Requests | Measured | Ceiling |
+| --- | --- | --- | --- |
+| `/not-a-real-page` (framework baseline) | 13 | **192.3 KB** | — |
+| `/` | 13 | 197.6 KB | 300 KB total **and** baseline + 100 KB |
+| `/all-jewelry` | 14 | **202.9 KB** (worst route) | same |
+| `/products/<slug>` | 13 | 197.6 KB | same |
+| `/legal/privacy` | 12 | 187.0 KB | same |
+
+Every figure reproduces spec 009's to the decimal, which is a useful check on both measurements. The
+worst route sits **10.6 KB above the 192.3 KB framework baseline against a 100 KB allowance** — so
+this feature has roughly 89 KB of headroom for next-intl's runtime and the client message payload.
+
+`next-intl@4.14.4` pulls `@swc/core` and `@parcel/watcher` transitively. Both are native binaries
+backing its optional message extractor; both are build-time only and reach no browser.
 
 A Russian route should measure within a kilobyte or two of its English twin; a large gap means message
 data is landing in the bundle rather than the flight payload, or the client provider is carrying

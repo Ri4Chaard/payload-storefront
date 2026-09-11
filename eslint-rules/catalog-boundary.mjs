@@ -60,7 +60,8 @@ const PAYLOAD_TYPES = /(^|\/)payload-types$/
  */
 const MOCK_READERS = [
   /^src\/mocks\//,
-  'src/app/(frontend)/page.tsx',
+  // Moved under `[locale]` by spec 010. Still one named file, still the same exemption.
+  'src/app/(frontend)/[locale]/page.tsx',
   /\.stories\.tsx$/,
   // Testing a mapper means handing it a document, and a fixture IS a document.
   /^tests\//,
