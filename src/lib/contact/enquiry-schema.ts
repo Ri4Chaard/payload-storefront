@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { DEFAULT_LOCALE, LOCALES } from '@/i18n/routing'
+
 
 import { EMAIL_SHAPE } from '@/lib/auth/schemas'
 
@@ -56,6 +58,20 @@ export const enquirySchema = z.object({
    * Optional, because a browser that does not submit an empty hidden input is not a bot.
    */
   website: z.string().optional(),
+  /**
+   * The language the sender was reading in (spec 010, FR-043).
+   *
+   * **Carried in the form rather than read from the cookie**, because a visitor who arrived on
+   * `/ru/contact` from a link and never touched the switcher has no cookie — and their
+   * acknowledgement would go out in English. The page knows its own language; the cookie only knows
+   * whether anyone pressed anything.
+   *
+   * It arrives from a hidden input, so it is attacker-controlled like every other field here, and it
+   * is validated against the three the site has rather than trusted. An absent or unknown value
+   * falls back to English rather than failing the submission — a broken language tag must not cost
+   * somebody their enquiry.
+   */
+  locale: z.enum(LOCALES).catch(DEFAULT_LOCALE),
 })
 
 export type EnquiryValues = z.infer<typeof enquirySchema>
@@ -88,5 +104,6 @@ export function readEnquiryForm(formData: FormData): Record<string, string> {
     email: field('email'),
     message: field('message'),
     website: field('website'),
+    locale: field('locale'),
   }
 }

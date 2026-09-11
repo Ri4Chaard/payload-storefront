@@ -24,6 +24,7 @@ export const processSteps: Block = {
     {
       name: 'heading',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Heading',
       admin: { description: 'Centred above the steps, e.g. “FROM DIAMOND TO JEWEL”.' },
@@ -38,8 +39,8 @@ export const processSteps: Block = {
       },
       fields: [
         mediaSlot({ label: 'Picture', description: 'The tile above the step’s title.' }),
-        { name: 'title', type: 'text', required: true, label: 'Title' },
-        { name: 'caption', type: 'text', label: 'Caption' },
+        { name: 'title', type: 'text', required: true, label: 'Title', localized: true },
+        { name: 'caption', type: 'text', label: 'Caption', localized: true },
       ],
     },
   ],

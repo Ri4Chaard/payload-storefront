@@ -37,6 +37,7 @@ export const Sizes: CollectionConfig = {
     {
       name: 'label',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Label',
       admin: { description: 'What the customer reads in the selector, e.g. "2.25" or "45 cm".' },

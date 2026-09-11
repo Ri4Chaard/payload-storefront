@@ -104,6 +104,7 @@ export const Policies: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Title',
       admin: {
@@ -120,6 +121,7 @@ export const Policies: CollectionConfig = {
        */
       name: 'subtitle',
       type: 'text',
+      localized: true,
       label: 'Subtitle',
       admin: {
         description:
@@ -129,6 +131,7 @@ export const Policies: CollectionConfig = {
     {
       name: 'body',
       type: 'richText',
+      localized: true,
       label: 'Body',
       /*
        * Headings are KEPT, and narrowed to two levels.

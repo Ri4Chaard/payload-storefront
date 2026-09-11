@@ -140,6 +140,7 @@ export const ContactSettings: GlobalConfig = {
     {
       name: 'address',
       type: 'textarea',
+      localized: true,
       defaultValue: DEFAULT_CONTACT.address,
       label: 'Address',
       admin: {
@@ -150,6 +151,7 @@ export const ContactSettings: GlobalConfig = {
     {
       name: 'openingHours',
       type: 'text',
+      localized: true,
       defaultValue: DEFAULT_CONTACT.openingHours,
       label: 'Opening hours',
       admin: { description: 'One line, as it should read in the footer — e.g. “Daily · 10:00 AM–9:00 PM”.' },
@@ -262,6 +264,7 @@ export const ContactSettings: GlobalConfig = {
     {
       name: 'messageTemplate',
       type: 'textarea',
+      localized: true,
       defaultValue: DEFAULT_MESSAGE_TEMPLATE,
       label: 'Message wording',
       admin: {

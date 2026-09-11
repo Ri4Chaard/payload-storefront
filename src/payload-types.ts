@@ -140,7 +140,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ru' | 'uk') | ('en' | 'ru' | 'uk')[];
   globals: {
     shop: Shop;
     'account-settings': AccountSetting;
@@ -163,7 +163,7 @@ export interface Config {
     'cookie-settings': CookieSettingsSelect<false> | CookieSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'ru' | 'uk';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -1253,6 +1253,10 @@ export interface Enquiry {
   email: string;
   message: string;
   /**
+   * The language the sender was reading the site in when they wrote.
+   */
+  locale: 'en' | 'ru' | 'uk';
+  /**
    * Whether the email telling you about this reached you. “Failed” means the message is safe here but nobody was told — it is worth answering.
    */
   notification: 'pending' | 'sent' | 'failed';
@@ -2064,6 +2068,7 @@ export interface EnquiriesSelect<T extends boolean = true> {
   name?: T;
   email?: T;
   message?: T;
+  locale?: T;
   notification?: T;
   notificationError?: T;
   senderHash?: T;

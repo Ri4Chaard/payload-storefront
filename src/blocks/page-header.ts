@@ -22,12 +22,14 @@ export const pageHeader: Block = {
     {
       name: 'eyebrow',
       type: 'text',
+      localized: true,
       label: 'Eyebrow',
       admin: { description: 'The small line above the headline, e.g. “OUR STORY”.' },
     },
     {
       name: 'heading',
       type: 'textarea',
+      localized: true,
       required: true,
       label: 'Headline',
       admin: { description: 'The page’s main statement. Drawn over two lines.' },
@@ -43,6 +45,7 @@ export const pageHeader: Block = {
     {
       name: 'body',
       type: 'textarea',
+      localized: true,
       label: 'Intro paragraph',
       admin: {
         description: 'Optional. One or two sentences under the headline.',

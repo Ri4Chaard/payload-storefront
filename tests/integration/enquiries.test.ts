@@ -254,7 +254,7 @@ describe('access', () => {
     await expect(
       payload.create({
         collection: 'enquiries',
-        data: { name: 'Direct', email: 'direct@aurum-testing.dev', message: 'x', notification: 'pending' },
+        data: { name: 'Direct', email: 'direct@aurum-testing.dev', message: 'x', notification: 'pending', locale: 'en' },
         overrideAccess: false,
       }),
     ).rejects.toThrow()

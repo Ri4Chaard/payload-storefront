@@ -148,6 +148,8 @@ export async function submitEnquiry(
         email: parsed.data.email,
         message: parsed.data.message,
         notification: 'pending',
+        // FR-043 — the acknowledgement and the messenger handoff are answered in this language.
+        locale: parsed.data.locale,
         ...(hash ? { senderHash: hash } : {}),
       },
     })

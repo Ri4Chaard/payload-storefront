@@ -26,6 +26,7 @@ import { Questions } from './collections/questions'
 import { VerificationCodes } from './collections/verification-codes'
 import { variantsCollectionOverride } from './collections/variants'
 import { emailFromName, emailOverrideRecipient, env } from './env'
+import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS } from './i18n/routing'
 import { logEmailAdapter } from './lib/email/log-adapter'
 import { addressFields } from './fields/address-fields'
 import {
@@ -205,6 +206,34 @@ export default buildConfig({
       }),
     ),
   ],
+
+  /**
+   * Three languages (spec 010, FR-001, research R5).
+   *
+   * **The list comes from `src/i18n/routing.ts` rather than being repeated here.** The storefront's
+   * router, the `language-settings` checkboxes and this config all have to agree about what a locale
+   * is, and the cheapest way to guarantee that is to have one of them own it.
+   *
+   * `fallback: true` is FR-046 in one key: a field with no value in the requested locale resolves to
+   * English rather than rendering blank. It is also Payload's default — written out because
+   * Constitution IV forbids taking a default by omission.
+   *
+   * **`defaultLocalePublishOption: 'active'` is NOT the default, and the change is deliberate.**
+   * Payload ships `'all'`, where pressing Publish while editing Russian publishes every locale's
+   * draft — including a half-finished Ukrainian one. FR-023 says an unpublished translation must not
+   * reach visitors, so the button publishes the language being edited and "publish all" remains
+   * available as the secondary action.
+   *
+   * **Every locale is always configured here, whatever the owner has switched off.** Visibility is
+   * `language-settings`' business, and keeping the two lists separate is what lets a translation be
+   * finished in the admin before anybody can read it (FR-030).
+   */
+  localization: {
+    locales: LOCALES.map((code) => ({ code, label: LOCALE_LABELS[code].label })),
+    defaultLocale: DEFAULT_LOCALE,
+    fallback: true,
+    defaultLocalePublishOption: 'active',
+  },
 
   editor: lexicalEditor(),
   secret: env.PAYLOAD_SECRET,

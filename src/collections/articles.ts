@@ -83,6 +83,7 @@ export const Articles: CollectionConfig = {
             {
               name: 'title',
               type: 'text',
+              localized: true,
               required: true,
               label: 'Title',
               admin: {
@@ -92,6 +93,7 @@ export const Articles: CollectionConfig = {
             {
               name: 'standfirst',
               type: 'textarea',
+              localized: true,
               required: true,
               label: 'Standfirst',
               admin: {
@@ -134,6 +136,7 @@ export const Articles: CollectionConfig = {
                 {
                   name: 'heading',
                   type: 'text',
+                  localized: true,
                   required: true,
                   label: 'Heading',
                   admin: {
@@ -144,6 +147,7 @@ export const Articles: CollectionConfig = {
                 {
                   name: 'tocLabel',
                   type: 'text',
+                  localized: true,
                   label: 'Contents label',
                   admin: {
                     description:
@@ -153,6 +157,7 @@ export const Articles: CollectionConfig = {
                 {
                   name: 'lede',
                   type: 'text',
+                  localized: true,
                   label: 'Lede',
                   admin: {
                     description:
@@ -162,6 +167,7 @@ export const Articles: CollectionConfig = {
                 {
                   name: 'body',
                   type: 'richText',
+                  localized: true,
                   required: true,
                   label: 'Body',
                   /**
@@ -188,6 +194,7 @@ export const Articles: CollectionConfig = {
                 {
                   name: 'pullQuote',
                   type: 'textarea',
+                  localized: true,
                   label: 'Pull quote',
                   admin: {
                     description:

@@ -52,6 +52,7 @@ export const ContactPage: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
+      localized: true,
       defaultValue: 'CONTACT US',
       label: 'Eyebrow',
       admin: { description: 'The small line above the headline, e.g. “CONTACT US”.' },
@@ -59,6 +60,7 @@ export const ContactPage: GlobalConfig = {
     {
       name: 'heading',
       type: 'textarea',
+      localized: true,
       required: true,
       defaultValue: 'WE’RE HERE TO HELP',
       label: 'Headline',
@@ -67,6 +69,7 @@ export const ContactPage: GlobalConfig = {
     {
       name: 'intro',
       type: 'textarea',
+      localized: true,
       defaultValue: 'Questions, custom requests, or styling advice — our team is here for you',
       label: 'Intro paragraph',
       admin: { description: 'One line under the headline.' },
@@ -82,6 +85,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'heading',
           type: 'text',
+          localized: true,
           required: true,
           defaultValue: 'SEND US A MESSAGE',
           label: 'Heading',
@@ -89,6 +93,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'body',
           type: 'textarea',
+          localized: true,
           defaultValue:
             'To make an enquiry, please use the contact form below. Our Aurum team will be happy to assist you with diamonds, orders, delivery, or any other questions.',
           label: 'Intro paragraph',
@@ -101,6 +106,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'nameLabel',
           type: 'text',
+          localized: true,
           required: true,
           defaultValue: 'Name',
           label: 'Name field label',
@@ -108,6 +114,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'emailLabel',
           type: 'text',
+          localized: true,
           required: true,
           defaultValue: 'E-mail',
           label: 'Email field label',
@@ -115,6 +122,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'messageLabel',
           type: 'text',
+          localized: true,
           required: true,
           defaultValue: 'Message',
           label: 'Message field label',
@@ -122,6 +130,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'submitLabel',
           type: 'text',
+          localized: true,
           required: true,
           defaultValue: 'SEND MESSAGE',
           label: 'Button label',
@@ -129,6 +138,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'footnote',
           type: 'text',
+          localized: true,
           /*
             The drawing reads “We’ll get back to you ass soon as possible.” — a typo, corrected here
             (FR-046). The drawing and the site now disagree by one letter, which is the right way
@@ -141,6 +151,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'successMessage',
           type: 'textarea',
+          localized: true,
           required: true,
           defaultValue:
             'Thank you — your message has reached us. We’ll be in touch as soon as we can.',
@@ -153,6 +164,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'errorMessage',
           type: 'textarea',
+          localized: true,
           required: true,
           defaultValue:
             'We couldn’t receive your message just now. Please try again, or reach us on WhatsApp, Telegram or Instagram.',
@@ -191,6 +203,7 @@ export const ContactPage: GlobalConfig = {
         {
           name: 'heading',
           type: 'text',
+          localized: true,
           required: true,
           defaultValue: 'Frequently Asked Questions',
           label: 'Heading',

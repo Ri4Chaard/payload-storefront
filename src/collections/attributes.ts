@@ -41,6 +41,7 @@ export const Attributes: CollectionConfig = {
     {
       name: 'label',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Label',
       admin: { description: 'What the customer reads, e.g. "Chain length".' },
@@ -78,6 +79,11 @@ export const Attributes: CollectionConfig = {
         condition: (data) => data?.type === 'select',
         description: 'The values a product may choose from.',
       },
+      /*
+        The row's `value` is the machine key a filter matches on (FR-041), so it is NOT localized —
+        translating it would mean a Russian visitor's filter matched nothing. The human-readable
+        label above it is the localized half.
+      */
       fields: [{ name: 'value', type: 'text', required: true, label: 'Value' }],
     },
     {

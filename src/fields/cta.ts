@@ -26,6 +26,7 @@ export const ctaField = (): Field => ({
     {
       name: 'label',
       type: 'text',
+      localized: true,
       label: 'Button text',
       admin: { description: 'e.g. “EXPLORE THE COLLECTION”. Empty means no button.' },
     },

@@ -37,6 +37,7 @@ export const Categories: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Title',
       admin: { description: 'The heading on the category listing, e.g. "Diamond Rings".' },
@@ -45,6 +46,7 @@ export const Categories: CollectionConfig = {
     {
       name: 'subtitle',
       type: 'text',
+      localized: true,
       label: 'Subtitle',
       admin: {
         description:

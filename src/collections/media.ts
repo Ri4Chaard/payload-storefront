@@ -63,6 +63,7 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Alternative text',
       admin: {

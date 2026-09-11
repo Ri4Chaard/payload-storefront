@@ -38,6 +38,7 @@ export const Collections: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Title',
       admin: { description: 'The collection’s name, e.g. "Molten".' },
@@ -46,6 +47,7 @@ export const Collections: CollectionConfig = {
     {
       name: 'description',
       type: 'textarea',
+      localized: true,
       label: 'Description',
       admin: { description: 'Optional. Not shown on the listing today.' },
     },

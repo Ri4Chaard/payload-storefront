@@ -59,6 +59,7 @@ export const Questions: CollectionConfig = {
     {
       name: 'question',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Question',
       admin: { description: 'As a visitor would ask it, e.g. “Do you ship internationally?”.' },
@@ -66,6 +67,7 @@ export const Questions: CollectionConfig = {
     {
       name: 'answer',
       type: 'richText',
+      localized: true,
       required: true,
       label: 'Answer',
       admin: { description: 'Links and lists are supported.' },

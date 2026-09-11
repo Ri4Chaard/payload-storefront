@@ -151,6 +151,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
             {
               name: 'title',
               type: 'text',
+              localized: true,
               required: true,
               label: 'Name',
               admin: {
@@ -161,6 +162,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
             {
               name: 'description',
               type: 'textarea',
+              localized: true,
               label: 'Description',
               admin: {
                 description:
@@ -189,6 +191,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
             {
               name: 'details',
               type: 'richText',
+              localized: true,
               label: 'Product details',
               admin: {
                 description:
@@ -215,7 +218,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                       required: true,
                       label: 'Attribute',
                     },
-                    { name: 'value', type: 'text', required: true, label: 'Value' },
+                    { name: 'value', type: 'text', required: true, label: 'Value', localized: true },
                   ],
                 },
               ],

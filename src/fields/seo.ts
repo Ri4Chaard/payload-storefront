@@ -16,12 +16,14 @@ const seoFields = (): Field[] => [
   {
     name: 'title',
     type: 'text',
+    localized: true,
     label: 'Meta title',
     admin: { description: 'Shown in search results and the browser tab. Around 60 characters.' },
   },
   {
     name: 'description',
     type: 'textarea',
+    localized: true,
     label: 'Meta description',
     admin: {
       description: 'The sentence beneath the title in search results. Around 155 characters.',

@@ -25,6 +25,7 @@ export const closerLook: Block = {
     {
       name: 'body',
       type: 'textarea',
+      localized: true,
       label: 'Paragraph',
       admin: { description: 'The band’s main copy.' },
     },
@@ -36,7 +37,7 @@ export const closerLook: Block = {
       admin: {
         description: 'Small pills beneath the paragraph. Any number, or none — the row wraps.',
       },
-      fields: [{ name: 'label', type: 'text', required: true, label: 'Text' }],
+      fields: [{ name: 'label', type: 'text', required: true, label: 'Text', localized: true }],
     },
     {
       name: 'figures',
@@ -46,7 +47,7 @@ export const closerLook: Block = {
       admin: { description: 'A word over a caption, e.g. “CERTIFIED” / “selected diamonds”.' },
       fields: [
         { name: 'word', type: 'text', required: true, label: 'Word' },
-        { name: 'caption', type: 'text', required: true, label: 'Caption' },
+        { name: 'caption', type: 'text', required: true, label: 'Caption', localized: true },
       ],
     },
     mediaSlot({ label: 'Side media', description: 'Sits beside the copy at desktop, below it on a phone.' }),

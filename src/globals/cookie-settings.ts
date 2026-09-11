@@ -128,6 +128,7 @@ export const CookieSettings: GlobalConfig = {
     {
       name: 'bannerBody',
       type: 'richText',
+      localized: true,
       label: 'What the banner says',
       /*
        * **Rich text, with a deliberately short toolbar.** Paragraphs, bold, italic, underline and
@@ -242,6 +243,7 @@ export const CookieSettings: GlobalConfig = {
         {
           name: 'name',
           type: 'text',
+          localized: true,
           required: true,
           label: 'Name',
           admin: { description: 'What the chooser calls it, e.g. “Strictly necessary”.' },
@@ -249,6 +251,7 @@ export const CookieSettings: GlobalConfig = {
         {
           name: 'purpose',
           type: 'textarea',
+          localized: true,
           required: true,
           label: 'What it is for',
           admin: {

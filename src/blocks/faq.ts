@@ -30,6 +30,7 @@ export const faq: Block = {
     {
       name: 'heading',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Heading',
       admin: { description: 'e.g. “EVERY DETAIL, ANSWERED”.' },
@@ -37,6 +38,7 @@ export const faq: Block = {
     {
       name: 'body',
       type: 'textarea',
+      localized: true,
       label: 'Intro paragraph',
     },
     ctaField(),

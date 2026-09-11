@@ -47,6 +47,38 @@ SELECT count(*) FROM policies_locales WHERE _locale = 'en' AND (title IS NULL OR
 Expected: the two counts in the first query match for every table in data-model.md §10, and the second
 returns `0`.
 
+### Rehearsed 2026-09-11 (T052)
+
+Against a restored copy holding 31 products, 15 articles, 4 policies, 31 media and 12 article
+chapters. **Not a production-sized restore** — that rehearsal is still outstanding and is what SC-011
+actually asks for; this one proves the migration is *correct*, not how long it takes.
+
+| Table | Rows before | `_locales` rows at `en` | Rows with a NULL where content was |
+| --- | --- | --- | --- |
+| `products` | 31 | 31 | 0 |
+| `policies` | 4 | 4 | 0 |
+| `articles` | 15 | 15 | 0 |
+| `media` | 31 | 31 | 0 |
+| `articles_chapters` | 12 | 12 | 0 |
+| `questions` | 6 | 6 | 0 |
+
+Down and up again both clean: every parent table came back with its content intact, `SELECT title
+FROM policies` read "Privacy Policy" again, and zero `_locales` or `_carry_` tables were left behind.
+
+> **Two things the rehearsal caught that reading could not.**
+>
+> 1. **The generated migration carries no data at all** — 48 `CREATE TABLE`, 157 `DROP COLUMN`, zero
+>    `INSERT`. Run as generated it empties every translated field on the site. The 48 `INSERT …
+>    SELECT 'en', …` statements between the creates and the drops are hand-written, and the counts
+>    above are the evidence they work.
+> 2. **The first rollback attempt failed outright**: `column "alt" of relation "media" contains null
+>    values`. The generated `down` re-adds six columns as `NOT NULL` to tables that already have
+>    rows, which Postgres refuses, and it drops the `_locales` tables *before* re-adding the columns
+>    — so there is nowhere to put the words and no way to satisfy the constraint. The fix is in the
+>    file: English rows are stashed in `_carry_*` tables first, the six columns go back nullable, the
+>    words are restored, and `SET NOT NULL` is re-asserted at the end so the rolled-back schema
+>    matches what it started as.
+
 **Then roll back and check again** — a rollback nobody has run is not a rollback path:
 
 ```bash

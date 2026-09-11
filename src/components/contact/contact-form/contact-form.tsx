@@ -1,5 +1,7 @@
 'use client'
 
+
+import { useLocale } from 'next-intl'
 import React from 'react'
 import { useActionState } from 'react'
 
@@ -63,6 +65,7 @@ const errored = (state: EnquiryState) => (state.status === 'error' ? state : und
 export function ContactForm({ content }: ContactFormProps) {
   const [state, formAction, pending] = useActionState(submitEnquiry, initialEnquiryState)
   const failure = errored(state)
+  const locale = useLocale()
 
   /*
     Focus moves to the first control at fault (FR-019) — the ENHANCED path only. Without JavaScript
@@ -168,6 +171,16 @@ export function ContactForm({ content }: ContactFormProps) {
           kind can reach it. `autoComplete="off"` stops a browser filling it in helpfully, which
           would refuse a real person.
         */}
+        {/*
+          The language the visitor is reading in (spec 010, FR-043).
+
+          A hidden input rather than a cookie read on the server: somebody who arrived on
+          `/ru/contact` from a link and never touched the switcher has no cookie, and their
+          acknowledgement would go out in English. The page knows its own language. The action
+          validates this against the three the site has rather than trusting it.
+        */}
+        <input type="hidden" name="locale" value={locale} />
+
         <div aria-hidden="true" className="sr-only">
           <label htmlFor="contact-website">Website</label>
           <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />

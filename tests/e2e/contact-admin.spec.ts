@@ -335,7 +335,7 @@ test.describe('the enquiry list', () => {
 
     await payload.create({
       collection: 'enquiries',
-      data: { name: 'Notified Visitor', email: sent, message: 'x', notification: 'sent' },
+      data: { name: 'Notified Visitor', email: sent, message: 'x', notification: 'sent', locale: 'en' },
       overrideAccess: true,
     })
     await payload.create({
@@ -344,6 +344,7 @@ test.describe('the enquiry list', () => {
         name: 'Silent Visitor',
         email: failed,
         message: 'x',
+        locale: 'en',
         notification: 'failed',
         notificationError: 'Resend is unreachable',
       },

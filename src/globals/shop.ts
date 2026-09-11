@@ -40,6 +40,7 @@ export const Shop: GlobalConfig = {
     {
       name: 'detailsTitle',
       type: 'text',
+      localized: true,
       label: 'Product details heading',
       defaultValue: 'PRODUCT DETAILS',
       admin: { description: 'The first accordion’s heading on every product page.' },
@@ -47,6 +48,7 @@ export const Shop: GlobalConfig = {
     {
       name: 'warrantyTitle',
       type: 'text',
+      localized: true,
       label: 'Warranty heading',
       defaultValue: '3 YEAR WARRANTY + FREE RETURNS',
       admin: {
@@ -57,6 +59,7 @@ export const Shop: GlobalConfig = {
     {
       name: 'deliveryTitle',
       type: 'text',
+      localized: true,
       label: 'Delivery heading',
       defaultValue: 'DELIVERY',
       admin: { description: 'The third accordion’s heading.' },
@@ -64,6 +67,7 @@ export const Shop: GlobalConfig = {
     {
       name: 'warranty',
       type: 'richText',
+      localized: true,
       label: 'Warranty and returns',
       admin: {
         description: 'The "3 year warranty + free returns" accordion, shown on every product.',
@@ -72,12 +76,14 @@ export const Shop: GlobalConfig = {
     {
       name: 'delivery',
       type: 'richText',
+      localized: true,
       label: 'Delivery',
       admin: { description: 'The "Delivery" accordion, shown on every product.' },
     },
     {
       name: 'listingSubtitle',
       type: 'text',
+      localized: true,
       label: 'Default listing subtitle',
       admin: {
         description:

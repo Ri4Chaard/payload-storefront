@@ -30,18 +30,21 @@ export const banner: Block = {
     {
       name: 'eyebrow',
       type: 'text',
+      localized: true,
       label: 'Eyebrow',
       admin: { description: 'The small line above the headline. Leave empty to omit it.' },
     },
     {
       name: 'heading',
       type: 'textarea',
+      localized: true,
       required: true,
       label: 'Headline',
     },
     {
       name: 'body',
       type: 'textarea',
+      localized: true,
       label: 'Paragraph',
     },
     ctaField(),

@@ -39,6 +39,7 @@ export const BlogPage: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
+      localized: true,
       defaultValue: 'OUR BLOG',
       label: 'Eyebrow',
       admin: { description: 'The small line above the headline, e.g. “OUR BLOG”.' },
@@ -46,6 +47,7 @@ export const BlogPage: GlobalConfig = {
     {
       name: 'heading',
       type: 'textarea',
+      localized: true,
       required: true,
       defaultValue: 'Stories of diamonds, craftsmanship, and timeless beauty',
       label: 'Headline',
@@ -54,6 +56,7 @@ export const BlogPage: GlobalConfig = {
     {
       name: 'emptyTitle',
       type: 'text',
+      localized: true,
       required: true,
       defaultValue: 'Nothing published yet',
       label: 'Empty heading',
@@ -64,6 +67,7 @@ export const BlogPage: GlobalConfig = {
     {
       name: 'emptyDescription',
       type: 'textarea',
+      localized: true,
       required: true,
       defaultValue: 'The first stories are being written. Check back soon.',
       label: 'Empty message',

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS } from '@/i18n/routing'
 import { isAdmin } from '@/lib/access'
 import { ENQUIRY_MAX, ENQUIRY_RETENTION_DAYS } from '@/lib/contact/config'
 
@@ -99,6 +100,28 @@ export const Enquiries: CollectionConfig = {
       maxLength: ENQUIRY_MAX.message,
       label: 'Message',
       admin: { readOnly: true, rows: 10 },
+    },
+    {
+      /*
+        The language the enquiry arrived in (spec 010, FR-043).
+
+        Recorded rather than inferred, and NOT localized — it is a fact about one submission, like
+        the sender's address. The acknowledgement is sent in it and the messenger handoff carries it,
+        so the shop answers a Ukrainian enquiry in Ukrainian instead of guessing from the prose.
+
+        `readOnly`, like every other field a visitor filled in: an admin editing it would be
+        rewriting history.
+      */
+      name: 'locale',
+      type: 'select',
+      required: true,
+      defaultValue: DEFAULT_LOCALE,
+      options: LOCALES.map((code) => ({ label: LOCALE_LABELS[code].label, value: code })),
+      label: 'Language',
+      admin: {
+        readOnly: true,
+        description: 'The language the sender was reading the site in when they wrote.',
+      },
     },
     {
       name: 'notification',

@@ -50,6 +50,7 @@ export const ArticleCategories: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
       required: true,
       label: 'Title',
       admin: {

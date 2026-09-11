@@ -199,33 +199,33 @@ publish, and see each on its Russian address while the English versions are unch
 ### Tests for User Story 2
 
 - [ ] T032 [P] [US2] Integration test in `tests/integration/localized-content.test.ts`: writing a document in `ru` leaves `en` untouched; reading with `locale: 'ru'` returns Russian; reading a field never translated returns the English value under `fallback: true`.
-- [ ] T033 [P] [US2] Unit test in `tests/unit/slug-transliteration.test.ts` for `src/fields/slug.ts` — `Каблучка з діамантом` → `kabluchka-z-diamantom`, `Кольцо «Парагон»` → `kolco-paragon`, `Paragon Ring` unchanged, output always matches `/^[a-z0-9-]+$/` and never empty.
+- [X] T033 [P] [US2] Unit test in `tests/unit/slug-transliteration.test.ts` for `src/fields/slug.ts` — `Каблучка з діамантом` → `kabluchka-z-diamantom`, `Кольцо «Парагон»` → `kolco-paragon`, `Paragon Ring` unchanged, output always matches `/^[a-z0-9-]+$/` and never empty.
 - [ ] T034 [P] [US2] Integration test in `tests/integration/publish-locale.test.ts` that publishing while editing one locale does not publish another locale's draft (`defaultLocalePublishOption: 'active'`, FR-023).
 
 ### Schema for User Story 2
 
-- [ ] T035 [US2] Add the `localization` block to `src/payload.config.ts` — three locales with their own-language labels, `defaultLocale: 'en'`, `fallback: true`, `defaultLocalePublishOption: 'active'` — sourcing the locale list from `src/i18n/routing.ts` so the three languages have one definition. Every value written out, never taken by omission (Constitution IV).
-- [ ] T036 [P] [US2] Mark `localized: true` in `src/fields/seo.ts` (`title`, `description`, not `image`) and `src/fields/cta.ts` (`label`, not `href`) — the two shared configs that localize metadata and button text everywhere at once.
-- [ ] T037 [P] [US2] `src/collections/articles.ts` — localize `title`, `standfirst` and the `chapters[]` row fields `heading`, `tocLabel`, `lede`, `body`, `pullQuote`. The array itself stays shared.
-- [ ] T038 [P] [US2] `src/collections/policies.ts` — localize `title`, `subtitle`, `body`.
-- [ ] T039 [P] [US2] `src/collections/products.ts` — localize `title`, `description`, `details` and `attributes[].value`. Prices, gallery, sizes, stock, `colour` and `diamondShape` stay shared.
-- [ ] T040 [P] [US2] `src/collections/categories.ts`, `collections.ts`, `article-categories.ts` — localize the titles, subtitle and description; leave `slug`, `image` and `order` shared.
-- [ ] T041 [P] [US2] `src/collections/sizes.ts` (`label` only — `value` is the size), `attributes.ts` (`label`, `options[].label` only — `name` and `options[].value` are the filter keys FR-041 matches on), `questions.ts` (`question`, `answer`).
-- [ ] T042 [P] [US2] `src/collections/media.ts` — localize `alt` (FR-019 names alt text explicitly); the file and its sizes stay single.
-- [ ] T043 [P] [US2] Globals `src/globals/shop.ts`, `blog-page.ts`, `faq-page.ts` — localize every text and rich-text field listed in `data-model.md` §3.
-- [ ] T044 [P] [US2] Globals `src/globals/contact-page.ts` and `contact-settings.ts` — localize the 13 contact-page copy fields, and `address`, `openingHours`, `messageTemplate`; leave emails, phone, `mapsUrl` and the messenger rows shared.
-- [ ] T045 [P] [US2] Global `src/globals/cookie-settings.ts` — localize `bannerBody`, `categories[].name`, `categories[].purpose`. **`categories[].key` must stay shared** — it is the identifier written into spec 009's consent cookie, and translating it would invalidate every stored consent record.
-- [ ] T046 [P] [US2] Blocks `src/blocks/banner.ts`, `page-header.ts`, `closer-look.ts`, `process-steps.ts`, `faq.ts` — localize their headings, bodies and array row text; leave arrangement, media and relationships shared.
-- [ ] T047 [US2] Add Cyrillic→Latin transliteration to `src/fields/slug.ts` covering both alphabets including `ї`, `є`, `і`, `ґ`, `ы`, `э`, `ъ`, `щ`, `ж`. The field stays **non-localized** (R7), and derivation stays create-only.
-- [ ] T048 [US2] Run `pnpm generate:types` and commit `src/payload-types.ts` in the same change (Constitution, Technology Stack).
+- [X] T035 [US2] Add the `localization` block to `src/payload.config.ts` — three locales with their own-language labels, `defaultLocale: 'en'`, `fallback: true`, `defaultLocalePublishOption: 'active'` — sourcing the locale list from `src/i18n/routing.ts` so the three languages have one definition. Every value written out, never taken by omission (Constitution IV).
+- [X] T036 [P] [US2] Mark `localized: true` in `src/fields/seo.ts` (`title`, `description`, not `image`) and `src/fields/cta.ts` (`label`, not `href`) — the two shared configs that localize metadata and button text everywhere at once.
+- [X] T037 [P] [US2] `src/collections/articles.ts` — localize `title`, `standfirst` and the `chapters[]` row fields `heading`, `tocLabel`, `lede`, `body`, `pullQuote`. The array itself stays shared.
+- [X] T038 [P] [US2] `src/collections/policies.ts` — localize `title`, `subtitle`, `body`.
+- [X] T039 [P] [US2] `src/collections/products.ts` — localize `title`, `description`, `details` and `attributes[].value`. Prices, gallery, sizes, stock, `colour` and `diamondShape` stay shared.
+- [X] T040 [P] [US2] `src/collections/categories.ts`, `collections.ts`, `article-categories.ts` — localize the titles, subtitle and description; leave `slug`, `image` and `order` shared.
+- [X] T041 [P] [US2] `src/collections/sizes.ts` (`label` only — `value` is the size), `attributes.ts` (`label`, `options[].label` only — `name` and `options[].value` are the filter keys FR-041 matches on), `questions.ts` (`question`, `answer`).
+- [X] T042 [P] [US2] `src/collections/media.ts` — localize `alt` (FR-019 names alt text explicitly); the file and its sizes stay single.
+- [X] T043 [P] [US2] Globals `src/globals/shop.ts`, `blog-page.ts`, `faq-page.ts` — localize every text and rich-text field listed in `data-model.md` §3.
+- [X] T044 [P] [US2] Globals `src/globals/contact-page.ts` and `contact-settings.ts` — localize the 13 contact-page copy fields, and `address`, `openingHours`, `messageTemplate`; leave emails, phone, `mapsUrl` and the messenger rows shared.
+- [X] T045 [P] [US2] Global `src/globals/cookie-settings.ts` — localize `bannerBody`, `categories[].name`, `categories[].purpose`. **`categories[].key` must stay shared** — it is the identifier written into spec 009's consent cookie, and translating it would invalidate every stored consent record.
+- [X] T046 [P] [US2] Blocks `src/blocks/banner.ts`, `page-header.ts`, `closer-look.ts`, `process-steps.ts`, `faq.ts` — localize their headings, bodies and array row text; leave arrangement, media and relationships shared.
+- [X] T047 [US2] Add Cyrillic→Latin transliteration to `src/fields/slug.ts` covering both alphabets including `ї`, `є`, `і`, `ґ`, `ы`, `э`, `ъ`, `щ`, `ж`. The field stays **non-localized** (R7), and derivation stays create-only.
+- [X] T048 [US2] Run `pnpm generate:types` and commit `src/payload-types.ts` in the same change (Constitution, Technology Stack).
 
 ### Migration for User Story 2
 
-- [ ] T049 [US2] Generate the migration with `pnpm payload migrate:create localization` and read the generated `migrations/<timestamp>_localization.ts` and its `.json` snapshot in full before running it anywhere.
-- [ ] T050 [US2] Hand-edit `migrations/<timestamp>_localization.ts` `up()` to `INSERT … SELECT 'en', id, …` every localized column into its `_locales` table **before** the generated `DROP COLUMN` statements, for every table family in `data-model.md` §10 — including the `_v` version tables.
-- [ ] T051 [US2] Write the matching `down()` in `migrations/<timestamp>_localization.ts`: copy `_locale = 'en'` rows back into the parent tables, then drop the locales tables. A rollback nobody has run is not a rollback path.
-- [ ] T052 [US2] Rehearse both directions against the `aurum_rehearsal` restore from T004 — `migrate`, verify row counts and that no `_locales` row arrived NULL, `migrate:down`, verify the original content, `migrate` again. Record the counts in `specs/010-site-localization/quickstart.md` §1.
-- [ ] T053 [P] [US2] Add `locale` (select `en`/`ru`/`uk`, not localized) to `src/collections/enquiries.ts` in the same migration — it is US6's field but it belongs to this schema change.
+- [X] T049 [US2] Generate the migration with `pnpm payload migrate:create localization` and read the generated `migrations/<timestamp>_localization.ts` and its `.json` snapshot in full before running it anywhere.
+- [X] T050 [US2] Hand-edit `migrations/<timestamp>_localization.ts` `up()` to `INSERT … SELECT 'en', id, …` every localized column into its `_locales` table **before** the generated `DROP COLUMN` statements, for every table family in `data-model.md` §10 — including the `_v` version tables.
+- [X] T051 [US2] Write the matching `down()` in `migrations/<timestamp>_localization.ts`: copy `_locale = 'en'` rows back into the parent tables, then drop the locales tables. A rollback nobody has run is not a rollback path.
+- [X] T052 [US2] Rehearse both directions against the `aurum_rehearsal` restore from T004 — `migrate`, verify row counts and that no `_locales` row arrived NULL, `migrate:down`, verify the original content, `migrate` again. Record the counts in `specs/010-site-localization/quickstart.md` §1.
+- [X] T053 [P] [US2] Add `locale` (select `en`/`ru`/`uk`, not localized) to `src/collections/enquiries.ts` in the same migration — it is US6's field but it belongs to this schema change.
 
 ### Data layer for User Story 2
 

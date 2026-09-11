@@ -43,6 +43,7 @@ export const FaqPage: GlobalConfig = {
     {
       name: 'heading',
       type: 'textarea',
+      localized: true,
       required: true,
       defaultValue: 'Frequently Asked Questions',
       label: 'Headline',
@@ -51,6 +52,7 @@ export const FaqPage: GlobalConfig = {
     {
       name: 'emptyTitle',
       type: 'text',
+      localized: true,
       required: true,
       defaultValue: 'Nothing here yet',
       label: 'Empty heading',
@@ -59,6 +61,7 @@ export const FaqPage: GlobalConfig = {
     {
       name: 'emptyDescription',
       type: 'textarea',
+      localized: true,
       required: true,
       defaultValue:
         'We’re writing the answers to the questions we’re asked most. In the meantime, our team is a message away.',
