@@ -186,21 +186,24 @@ test('a fifth policy gets its own address and its own footer slot, with no deplo
 }) => {
   test.setTimeout(120_000)
 
+  // Title timestamped as well as the slug — see the note in `policies.spec.ts`: two files creating
+  // the same-titled policy put two matching links in one footer.
   const slug = `e2e-admin-fifth-${suffix}`
+  const title = `Repairs Policy ${suffix}`
   await make({
     slug,
-    title: 'Accessibility Statement',
+    title,
     body: body('We are working towards WCAG 2.2 Level AA.'),
     footerPlacement: 'legal',
     footerOrder: 950,
   })
 
   await page.goto(`/legal/${slug}`)
-  await expect(page.getByRole('heading', { level: 1, name: 'Accessibility Statement' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
 
   await page.goto('/')
   await expect(
-    page.locator('footer').getByRole('link', { name: 'Accessibility Statement' }),
+    page.locator('footer').getByRole('link', { name: title }),
   ).toHaveAttribute('href', `/legal/${slug}`)
 })
 

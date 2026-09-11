@@ -1,3 +1,4 @@
+import { HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import type { CollectionConfig } from 'payload'
 
 import { seoField } from '@/fields/seo'
@@ -130,17 +131,30 @@ export const Policies: CollectionConfig = {
       type: 'richText',
       label: 'Body',
       /*
-       * The DEFAULT lexical features, headings included — and the contrast with
-       * `src/collections/articles.ts` is deliberate rather than an inconsistency. An article's
-       * chapter body has headings REMOVED, because each chapter already has one above it and a
-       * stray heading inside would create a section the contents rail cannot see. A policy has no
-       * contents rail and its entire structure is headed sections — INFORMATION WE COLLECT, HOW WE
-       * USE IT, YOUR PRIVACY RIGHTS. Copying that filter here would strip the one feature this
-       * content needs most (009/research.md R8).
+       * Headings are KEPT, and narrowed to two levels.
+       *
+       * **Kept**, unlike `src/collections/articles.ts`, which removes the heading feature entirely
+       * so a chapter body cannot hide a section from the contents rail. A policy has no rail and
+       * its whole structure is headed sections — INFORMATION WE COLLECT, HOW WE USE IT, YOUR
+       * PRIVACY RIGHTS — so copying that filter would strip the one feature this content needs
+       * most (009/research.md R8).
+       *
+       * **Narrowed to `h2` and `h3`**, because the page already owns its `h1`: the title above the
+       * body is the document's only top-level heading, and a second one typed into a policy would
+       * break the outline a screen reader follows. Constitution IV asks for validation that makes
+       * invalid content impossible to save; this is that rule applied to structure — the toolbar
+       * simply does not offer the levels that would be wrong, the same way `articles` does not
+       * offer headings at all.
        */
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures.filter((feature) => feature.key !== 'heading'),
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3'] }),
+        ],
+      }),
       admin: {
         description:
-          'The policy itself. Headings, paragraphs, bullet and numbered lists, bold, italic and links.',
+          'The policy itself. Use Heading 2 for each section — it is drawn bold and capitalised, as the design does. Paragraphs, bullet and numbered lists, bold, italic and links all work.',
       },
     },
     seoField(),

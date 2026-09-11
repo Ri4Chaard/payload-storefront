@@ -1,6 +1,6 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { getFooterPolicies, getPolicyBySlug } from '@/lib/policies/queries'
 
@@ -178,6 +178,38 @@ describe('the footer follows what is published', () => {
 describe('cookie categories cannot describe a site that does not exist', () => {
   const current = async () =>
     payload.findGlobal({ slug: 'cookie-settings', depth: 0, overrideAccess: true })
+
+  /*
+    Snapshot and restore, because `cookie-settings` is a single global that drives the banner on
+    every page of the site — not a row this file created and can delete.
+
+    Every write below is expected to be REJECTED, so in principle nothing changes and this is
+    belt-and-braces. In practice it is not optional: a validator that lets one of these through
+    leaves the dev database holding a category nobody typed, and the failure then surfaces somewhere
+    unrelated — an e2e test asserting the site offers exactly one category, hours later, with
+    nothing pointing back to here. That happened while this suite was being written.
+  */
+  let original: Record<string, unknown>
+
+  beforeAll(async () => {
+    const settings = await current()
+    original = {
+      enabled: settings.enabled,
+      consentVersion: settings.consentVersion,
+      policy: settings.policy,
+      categories: settings.categories,
+    }
+  })
+
+  afterAll(async () => {
+    await payload
+      .updateGlobal({
+        slug: 'cookie-settings',
+        data: { ...original, _status: 'published' } as never,
+        overrideAccess: true,
+      })
+      .catch(() => undefined)
+  })
 
   it('refuses an empty category list', async () => {
     const before = await current()

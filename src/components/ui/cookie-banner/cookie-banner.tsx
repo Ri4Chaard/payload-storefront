@@ -171,17 +171,30 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
           aria-label={BANNER_COPY.region}
           aria-live="polite"
           className={cn(
-            'bg-background-container fixed inset-x-0 bottom-0 z-30 shadow-lg',
-            'md:inset-x-auto md:bottom-6 md:left-6 md:max-w-160',
+            /*
+              Full-bleed and flush to the bottom below `xl`, a centred panel above it — which is what
+              the three frames draw. Tablet `544:16179` is 768 wide at x=0 and sits on the bottom
+              edge; mobile `544:16200` does the same at 390. Desktop `196:1452` is 1300 wide, centred
+              (`left-1/2 -translate-x-1/2`), with a ~40px gap beneath.
+
+              `max-w-325` is 1300px on the 4px spacing scale, the same idiom `PageHeaderBlock` uses
+              for its `md:max-w-167`.
+            */
+            'fixed inset-x-0 bottom-0 z-30',
+            'bg-background-bg shadow-lg',
+            'xl:right-auto xl:bottom-10 xl:left-1/2 xl:w-full xl:max-w-325 xl:-translate-x-1/2',
             className,
           )}
         >
           <div className="flex flex-col gap-5 p-5 md:p-7.5">
-            <h2 className="text-heading-2 text-neutral-primary uppercase">
-              {BANNER_COPY.heading}
-            </h2>
+            {/*
+              `text-display` is the design's H1 — 36px TT Ramillas at desktop, fluid down to 24px on
+              a phone. An `h2` element carrying it, because the page it covers already owns the `h1`:
+              the size is the design's, the level is the document's.
+            */}
+            <h2 className="text-display text-neutral-primary uppercase">{BANNER_COPY.heading}</h2>
 
-            <p className="text-body-base text-neutral-primary/80">
+            <p className="text-body-medium text-neutral-secondary">
               {BANNER_COPY.body}{' '}
               {policyHref ? (
                 <Link href={policyHref} variant="inline">
@@ -191,17 +204,22 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
             </p>
 
             {/*
-              Three actions of equal weight and equal width, in the drawn order. FR-019 is the reason
-              they are the same size and the same number of presses: refusing must be exactly as easy
-              as accepting, and a "reject" tucked behind the chooser would fail that whether or not
-              anybody noticed.
+              Three filled buttons of equal width, in the drawn order — `196:1462`, `196:1482`,
+              `196:1487`, all `primary/default` on `flex-[1_0_0]`.
 
-              Stacked full-width below `md`, in a row above it — the mobile frame at `544:16200`.
+              **The design is more compliant than the obvious implementation.** An earlier version
+              had *Agree* filled and the other two outlined, which is the conventional pattern and
+              is exactly what FR-019 forbids: refusing must be as easy and as prominent as accepting.
+              Three identical buttons say that visually rather than merely satisfying it on a
+              stopwatch.
+
+              Stacked full-width below `md` with the drawn 8px gap, a row above it at 12px, and the
+              desktop 20px from `xl`.
             */}
-            <div className="flex flex-col gap-2.5 md:flex-row md:gap-3.5">
+            <div className="flex flex-col gap-2 md:flex-row md:gap-3 xl:gap-5">
               <Button
                 variant="primary"
-                className="md:flex-1"
+                className="uppercase md:flex-1"
                 fullWidth
                 onClick={() => settle({ kind: 'all' })}
               >
@@ -210,8 +228,8 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
 
               <Button
                 ref={configureRef}
-                variant="outline"
-                className="md:flex-1"
+                variant="primary"
+                className="uppercase md:flex-1"
                 fullWidth
                 onClick={() => setChooserOpen(true)}
               >
@@ -219,8 +237,8 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
               </Button>
 
               <Button
-                variant="outline"
-                className="md:flex-1"
+                variant="primary"
+                className="uppercase md:flex-1"
                 fullWidth
                 onClick={() => settle({ kind: 'necessary-only' })}
               >

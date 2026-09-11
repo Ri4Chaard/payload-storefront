@@ -1297,7 +1297,7 @@ export interface Policy {
    */
   subtitle?: string | null;
   /**
-   * The policy itself. Headings, paragraphs, bullet and numbered lists, bold, italic and links.
+   * The policy itself. Use Heading 2 for each section — it is drawn bold and capitalised, as the design does. Paragraphs, bullet and numbered lists, bold, italic and links all work.
    */
   body?: {
     root: {

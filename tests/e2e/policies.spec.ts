@@ -101,9 +101,21 @@ test.describe('the footer no longer publishes dead links', () => {
       Array.from(new Set(anchors.map((anchor) => anchor.getAttribute('href') ?? ''))),
     )
 
-    expect(hrefs.length).toBeGreaterThan(0)
+    /*
+      Other tests in this file and in `policies-admin.spec.ts` create policies at timestamped
+      `e2e-*` addresses, place them in the footer, and then unpublish or delete them. Running in
+      parallel, one of those can vanish between this footer being rendered and its link being
+      requested — a race in the TEST FIXTURES, not a dead link on the site.
 
-    for (const href of hrefs) {
+      Filtering them keeps the assertion exactly as strong as it should be: every link the real site
+      chrome publishes resolves. Their own appearance and disappearance is asserted where it belongs,
+      in the tests that create them.
+    */
+    const chrome = hrefs.filter((href) => !href.startsWith('/legal/e2e-'))
+
+    expect(chrome.length).toBeGreaterThan(0)
+
+    for (const href of chrome) {
       const response = await page.request.get(href)
       expect(response.status(), `${href} should not be a dead link`).toBeLessThan(400)
     }
@@ -170,21 +182,29 @@ test.describe('publishing controls what exists', () => {
   test('a policy the owner creates gets an address and a footer link, with no deploy', async ({
     page,
   }) => {
-    const slug = `e2e-fifth-${Date.now()}`
+    /*
+      A unique title, not just a unique slug. Two tests in two files both created an
+      "Accessibility Statement"; run in parallel the footer held both, and a by-name locator matched
+      two anchors and failed on strict mode. The slug was already timestamped — the title has to be
+      too, because that is what the footer renders and what these assertions look for.
+    */
+    const stamp = Date.now()
+    const slug = `e2e-fifth-${stamp}`
+    const title = `Accessibility Statement ${stamp}`
     await make({
       slug,
-      title: 'Accessibility Statement',
+      title,
       body: body('We are working towards WCAG 2.2 Level AA across this website.'),
       footerPlacement: 'legal',
       footerOrder: 940,
     })
 
     await page.goto('/')
-    const anchor = page.locator('footer').getByRole('link', { name: 'Accessibility Statement' })
+    const anchor = page.locator('footer').getByRole('link', { name: title })
     await expect(anchor).toHaveAttribute('href', `/legal/${slug}`)
 
     await anchor.click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Accessibility Statement' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
     await expect(page.getByText('WCAG 2.2 Level AA')).toBeVisible()
   })
 })

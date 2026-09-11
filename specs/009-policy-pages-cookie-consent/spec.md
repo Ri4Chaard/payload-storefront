@@ -47,9 +47,14 @@ document:
 2. A centred subtitle. Three of the four read `Last Updated: August 2026`; `SHIPPING & RETURNS`
    reads `Enjoy complimentary shipping and returns on all orders` — so the line is a free text
    field, not a rendered date.
-3. One column of prose: a lede paragraph, then headed sections in small caps, then paragraphs,
-   bullet lists, bolded run-in terms (`**Exchanges:** …`), and inline links (`hello@unsaid.com`,
+3. One column of prose: a lede paragraph, then headed sections, then paragraphs, bullet lists,
+   bolded run-in terms (`**Exchanges:** …`), and inline links (`hello@unsaid.com`,
    `Google's Privacy & Terms site`).
+
+   **A section heading is bold and darker, not bigger** (`422:10504`): `H3/Bold` — Manrope 700 at
+   16px — in `neutral/primary`, against a body of `H3/Medium` 500 in `neutral/secondary`. The
+   distinction between them is weight, colour and capitals at one size, never a step up the type
+   scale.
 4. A signature couplet at the foot of three of them — `Aurum` / `Timeless brilliance. Modern
    responsibility.`
 5. The existing site footer.
@@ -60,9 +65,12 @@ the existing `RichText` renderer in the existing `Container`, and that is all.
 
 ### What the banner contains
 
-Bottom-anchored over the page, not a full-screen overlay — the hero stays visible and the visitor
-can still read the site. Title `COOKIE POLICY`, one block of prose with an inline link, then three
-buttons of equal weight and equal width:
+A wide panel over the page, not a full-screen overlay — the hero stays visible and the visitor can
+still read the site. Desktop (`196:1452`) centres a 1300px panel on `background/bg` with a gap
+beneath; tablet and mobile go full-bleed and sit flush to the bottom edge. Title `COOKIE POLICY` in
+the serif H1 at 36px, one block of prose at 16px in `neutral/secondary`, then three buttons of equal
+weight and equal width — **all three filled in `primary/default`**, not one primary and two
+outlines:
 
 | Button | What it means |
 | --- | --- |
@@ -71,6 +79,11 @@ buttons of equal weight and equal width:
 | `ALLOW TECHNICAL COOKIES` | Strictly necessary only — the refusal |
 
 Desktop and tablet lay the three out in a row; mobile stacks them full-width in the same order.
+
+**The three identical buttons are the design being more compliant than the obvious build.** Filling
+*Agree* and outlining the other two is the conventional pattern and is exactly what FR-019 forbids:
+refusing has to be as easy and as prominent as accepting. Three matching buttons say that visually
+rather than merely satisfying it on a stopwatch.
 
 ### What is deliberately absent from the drawing
 
