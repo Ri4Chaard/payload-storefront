@@ -49,6 +49,13 @@ export function QuestionList({
 }: QuestionListProps) {
   return (
     <Accordion
+      /*
+        A stable hook for tests, because the page chrome has headings of its own — the footer alone
+        carries four `h2`s, so "the level-2 headings on the page" is not the question list.
+        Defaulted here rather than passed by each of the three consumers, and overridable through
+        `props` below.
+      */
+      data-testid="question-list"
       icon={null}
       headingLevel={headingLevel}
       {...(defaultOpen ? { defaultOpen: defaultOpen.map(String) } : {})}

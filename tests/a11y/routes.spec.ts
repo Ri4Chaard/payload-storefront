@@ -67,10 +67,11 @@ const ROUTES = [
   '/blog',
   '/blog?category=guides',
   '/blog/how-to-choose-the-perfect-diamond',
-  // Contact (008). The only route on this site carrying a form a visitor can submit without an
-  // account, so it is the one whose error and pending states an automated scan has never seen
-  // before. `/faq` joins it when that route lands.
+  // Contact and FAQ (008). `/contact` is the only route on this site carrying a form a visitor can
+  // submit without an account, so it is the one whose error and pending states an automated scan
+  // has never seen before. `/faq` is a column of expandable rows and nothing else.
   '/contact',
+  '/faq',
 ]
 
 const WIDTHS = [

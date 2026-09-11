@@ -203,19 +203,21 @@ appear in the admin's Order with their answers expandable — with no change to 
 
 ### Tests for User Story 3
 
-- [ ] T065 [P] [US3] In `tests/e2e/faq.spec.ts`, assert every published question appears in the collection's `order`, and that this differs from any relationship-driven selection (FR-037)
-- [ ] T066 [P] [US3] In `tests/e2e/faq.spec.ts`, assert expanding a second question leaves the first open (FR-035), and that unpublishing one removes it from `/faq`, `/contact` and `/about` with no other edit (SC-006)
-- [ ] T067 [P] [US3] In `tests/e2e/faq.spec.ts`, assert that with **no** published questions the page renders its heading and the editor's empty message and returns 200, not 404 (FR-039)
+- [X] T065 [P] [US3] In `tests/e2e/faq.spec.ts`, assert every published question appears in the collection's `order`, and that this differs from any relationship-driven selection (FR-037)
+- [X] T066 [P] [US3] In `tests/e2e/faq.spec.ts`, assert expanding a second question leaves the first open (FR-035), and that unpublishing one removes it from `/faq`, `/contact` and `/about` with no other edit (SC-006)
+- [X] T067 [P] [US3] In `tests/e2e/faq.spec.ts`, assert that with **no** published questions the page renders its heading and the editor's empty message and returns 200, not 404 (FR-039)
 
 ### Implementation for User Story 3
 
-- [ ] T068 [US3] Add `getAllPublishedQuestions()` to `src/lib/questions/queries.ts` sorting by the collection's `order` ascending, with a docstring contrasting it against `getSelectedQuestions` per [contracts/question-list.md](./contracts/question-list.md) §2 — the two loaders are the `order` field's own admin description made executable
-- [ ] T069 [US3] Add `getFaqPage()` to `src/lib/questions/queries.ts`, `cache()`-wrapped and database-unreachable tolerant, recording in a comment why it lives in this tier rather than a two-field tier of its own: the FAQ page **is** the questions
-- [ ] T070 [US3] Create `src/app/(frontend)/faq/page.tsx` with `force-dynamic`, composing `PageHeaderBlock` (`headingLevel={1}`, no eyebrow) above `QuestionList` (`headingLevel={2}`) per [contracts/question-list.md](./contracts/question-list.md) §5
-- [ ] T071 [US3] Render the empty case on `/faq` using the kit's `EmptyState` with `emptyTitle` and `emptyDescription` from the global — never a 404, because every page on the site links here
-- [ ] T072 [P] [US3] Emit `schema.org/FAQPage` JSON-LD on `/faq` built from the view models rather than documents (FR-052), with a comment recording that `/contact` deliberately does **not** get it because its questions are an editor-chosen fourth band ([research.md](./research.md) R12)
-- [ ] T073 [P] [US3] Add `/faq` to `ROUTES` in `tests/a11y/routes.spec.ts`
-- [ ] T074 [US3] Verify the footer's **FAQ** link now resolves — the last of the four dead links (SC-001)
+- [X] T068 [US3] Add `getAllPublishedQuestions()` to `src/lib/questions/queries.ts` sorting by the collection's `order` ascending, with a docstring contrasting it against `getSelectedQuestions` per [contracts/question-list.md](./contracts/question-list.md) §2 — the two loaders are the `order` field's own admin description made executable
+- [X] T069 [US3] Add `getFaqPage()` to `src/lib/questions/queries.ts`, `cache()`-wrapped and database-unreachable tolerant, recording in a comment why it lives in this tier rather than a two-field tier of its own: the FAQ page **is** the questions
+- [X] T070 [US3] Create `src/app/(frontend)/faq/page.tsx` with `force-dynamic`, composing `PageHeaderBlock` (`headingLevel={1}`, no eyebrow) above `QuestionList` (`headingLevel={2}`) per [contracts/question-list.md](./contracts/question-list.md) §5
+- [X] T071 [US3] Render the empty case on `/faq` using the kit's `EmptyState` with `emptyTitle` and `emptyDescription` from the global — never a 404, because every page on the site links here
+- [X] T072 [P] [US3] Emit `schema.org/FAQPage` JSON-LD on `/faq` built from the view models rather than documents (FR-052), with a comment recording that `/contact` deliberately does **not** get it because its questions are an editor-chosen fourth band ([research.md](./research.md) R12)
+- [X] T073 [P] [US3] Add `/faq` to `ROUTES` in `tests/a11y/routes.spec.ts`
+- [X] T074 [US3] Verify the footer's **FAQ** link now resolves — the last of the four dead links (SC-001)
+
+  **All four dead links closed (SC-001).** Every navigation item, footer link and call to action on this site now resolves.
 
 **Checkpoint**: Both routes exist. Every link in the site chrome resolves.
 
