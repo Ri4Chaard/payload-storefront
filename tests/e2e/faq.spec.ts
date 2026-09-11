@@ -4,6 +4,8 @@ import { getPayload } from 'payload'
 
 import { skipRevalidation } from '@/lib/revalidate'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * The FAQ page, end to end (008/T065 – T067).
  *
@@ -21,6 +23,22 @@ import { skipRevalidation } from '@/lib/revalidate'
 test.describe.configure({ mode: 'serial' })
 
 const payload = await getPayload({ config })
+
+/**
+ * **Serialised against the other suites that rewrite the same rows** — see
+ * `tests/shared-content-lock.ts`. `mode: 'serial'` above only orders this file; the lock is what
+ * keeps `contact.spec.ts`, `contact-admin.spec.ts` and `faq.spec.ts` out of each other's way when
+ * Playwright runs them in parallel workers.
+ */
+let releaseSharedContent: () => Promise<void>
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
+
+test.afterAll(async () => {
+  await releaseSharedContent?.()
+})
 
 const answer = (text: string) =>
   ({

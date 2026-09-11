@@ -2,8 +2,11 @@
 
 **Feature**: `008-contact-faq-pages` | **Plan**: [plan.md](./plan.md)
 
-How to prove this feature works end to end. Runnable checks first, then the four things that only a
-person can confirm.
+How to prove this feature works end to end. Runnable checks first, then what only a person can
+confirm.
+
+**Status as of 2026-09-11**: everything below has been run and passes, except the screen-reader pass
+in item 4 of the last section — which is called out there rather than quietly counted as done.
 
 ---
 
@@ -155,11 +158,14 @@ their name, address or text.
    `419:10831`; `/faq` against `266:4468`, `422:9509`, `422:9881`. Watch the channel grid's
    four → 2×2 → stacked transition and the form photograph moving from beside the form to beneath
    it.
-3. **The card chrome** — the open item from [research.md](./research.md) R2. Confirm the hairline
-   separation between the four cards against `get_design_context` on `312:8535`.
+3. ~~**The card chrome**~~ — **settled at T006**: `get_design_context` on `312:8535` shows four
+   `bg-white` panels with a 20px gap and no borders, so the separation is gutters, which is what
+   `FeatureCard` already does.
 4. **Keyboard and screen reader over the form.** Tab through it, submit it empty, and confirm the
-   error is announced rather than only rendered. Automated scans do not catch an error that never
-   reaches a live region.
+   error is *announced* rather than only rendered. The mechanics are now asserted — `aria-invalid`
+   on the control, the error bound through `aria-describedby`, and a live region for the
+   form-level failure — but whether a real screen reader says something a person can act on is
+   still a human judgement. **This is the one item on this list nobody has done by hand.**
 
 ---
 
@@ -171,8 +177,24 @@ pnpm build && pnpm start
 
 Measure gzipped initial JS against a **production server**, not the build log — Next 16 with
 Turbopack no longer prints per-route JS, and the constitution's budget is what the browser fetches
-before load. `/contact` ≤ 300KB total and ≤ 100KB over the 181KB baseline; `/faq` should sit near
-the baseline, carrying one client leaf.
+before load.
 
-`/contact` carries two: the form and the accordion. If the budget is tight, the form is the one to
-look at — the accordion is already on `/about`.
+**Measured 2026-09-11**, summing the gzipped transfer of every `/_next/static/**.js` the route
+requests:
+
+| Route | Total | Over baseline |
+| --- | --- | --- |
+| `/404` (framework baseline, no application code) | 170.7 KB | — |
+| `/about` | 225.2 KB | 54.5 KB |
+| `/blog` | 225.2 KB | 54.5 KB |
+| **`/contact`** | **227.4 KB** | **56.7 KB** |
+| **`/faq`** | **225.2 KB** | **54.5 KB** |
+
+Both inside the budget with room: ≤ 300 KB total and ≤ 100 KB above the baseline.
+
+Two things worth noting. The baseline **re-measured at 170.7 KB**, below the 181 KB the
+constitution recorded on 2026-09-03 — and re-measuring rather than carrying the old number forward
+is what Principle V asks for, since it is "a fact about the current dependencies, not a target".
+And `/contact` costs only **2.2 KB more than `/faq`**, which is the whole of the contact form: the
+progressive-enhancement approach turns out to be cheaper on the wire than the react-hook-form
+pattern it declined to follow.

@@ -5,6 +5,8 @@ import { getPayload } from 'payload'
 import { DEFAULT_CONTACT } from '@/lib/contact/defaults'
 import { skipRevalidation } from '@/lib/revalidate'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * The contact page, end to end (008/T031 – T033).
  *
@@ -27,6 +29,22 @@ import { skipRevalidation } from '@/lib/revalidate'
 test.describe.configure({ mode: 'serial' })
 
 const payload = await getPayload({ config })
+
+/**
+ * **Serialised against the other suites that rewrite the same rows** — see
+ * `tests/shared-content-lock.ts`. `mode: 'serial'` above only orders this file; the lock is what
+ * keeps `contact.spec.ts`, `contact-admin.spec.ts` and `faq.spec.ts` out of each other's way when
+ * Playwright runs them in parallel workers.
+ */
+let releaseSharedContent: () => Promise<void>
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
+
+test.afterAll(async () => {
+  await releaseSharedContent?.()
+})
 
 /** The shop's own accounts, as an owner would have set them. */
 const MESSENGERS = [
@@ -251,6 +269,32 @@ test.describe('the message form', () => {
     await expect(page.getByPlaceholder('Message', { exact: true })).toHaveValue('Keep this text.')
   })
 
+  /**
+   * FR-019's "announce the failure", not merely render it (008/T102).
+   *
+   * **An automated scan cannot catch this**, which is why it is asserted here: `axe` sees a page
+   * with an error message on it and is satisfied. What matters is that the message reaches a screen
+   * reader — through a live region for the form-level failure, and through `aria-describedby` for
+   * the field-level one, so the error is read out as part of the control rather than as loose text
+   * somewhere on the page.
+   */
+  test('a failure is announced, not just rendered', async ({ page }) => {
+    await page.goto('/contact')
+
+    await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
+    await page.getByPlaceholder('E-mail', { exact: true }).fill('not-an-email')
+    await page.getByPlaceholder('Message', { exact: true }).fill('Anything.')
+    await page.getByRole('button', { name: /send message/i }).click()
+
+    const email = page.getByPlaceholder('E-mail', { exact: true })
+    await expect(email).toHaveAttribute('aria-invalid', 'true')
+
+    // The message the control points at is the message a visitor sees.
+    const describedBy = await email.getAttribute('aria-describedby')
+    expect(describedBy).toBeTruthy()
+    await expect(page.locator(`#${describedBy}`)).toContainText(/check this email address/i)
+  })
+
   test('an empty form names every required field', async ({ page }) => {
     await page.goto('/contact')
     await page.getByRole('button', { name: /send message/i }).click()
@@ -341,21 +385,27 @@ test.describe('with JavaScript disabled', () => {
  * How the page presents itself (008/T084, T085 — FR-048, FR-049).
  */
 test.describe('metadata', () => {
-  test.afterEach(async () => {
-    await payload.updateGlobal({
+  /*
+    Cleared with explicit nulls rather than `seo: {}`. An empty object is indistinguishable from
+    "no change" once Payload merges group fields, so the next test would read the title this one
+    wrote — which is exactly how the first version of these two tests failed each other.
+  */
+  const clearSeo = async () =>
+    payload.updateGlobal({
       slug: 'contact-page',
-      data: { seo: {} } as never,
+      data: { seo: { title: null, description: null, image: null } } as never,
       context: skipRevalidation,
     })
-  })
+
+  test.afterEach(clearSeo)
 
   test('falls back to what the page itself says', async ({ page }) => {
+    await clearSeo()
     await payload.updateGlobal({
       slug: 'contact-page',
       data: {
         heading: 'WE’RE HERE TO HELP',
         intro: 'Questions, custom requests, or styling advice — our team is here for you',
-        seo: {},
       } as never,
       context: skipRevalidation,
     })

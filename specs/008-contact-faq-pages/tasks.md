@@ -306,16 +306,22 @@ and are invisible to everyone else, delete one, and run the purge against a row 
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T096 [P] Extend `scripts/seed-catalog.ts` to attach the T005 photograph to `contact-page.form.photo`, so a seeded install renders the drawn page rather than a band with an empty frame
-- [ ] T097 [P] Verify both routes at the three drawn widths against `312:7499` / `419:10740` / `419:10831` and `266:4468` / `422:9509` / `422:9881`, watching the channel grid's four → 2×2 → stacked transition and the photograph moving from beside the form to beneath it
-- [ ] T098 [P] Confirm no horizontal scrolling at any width from 320px upward on either route (SC-009), extending `tests/e2e/responsive.spec.ts`
-- [ ] T099 Measure gzipped initial JS for both routes against a **production server** (`pnpm build && pnpm start`), not the build log — `/contact` ≤ 300KB total and ≤ 100KB over the 181KB baseline. If it is tight, the form is the leaf to look at; the accordion is already carried by `/about`
-- [ ] T100 [P] Run `pnpm check:tokens`, `pnpm check:styles` and `pnpm check:contrast` over the new components, confirming the form's error styling inherits `Field`'s already-resolved `status-error-text` contrast rather than re-deciding it
-- [ ] T101 [P] Run `pnpm test:a11y` and confirm zero violations on both new routes (SC-007)
-- [ ] T102 Walk the form by keyboard and with a screen reader: tab through it, submit it empty, and confirm the error is **announced** rather than only rendered — an automated scan does not catch an error that never reaches a live region
-- [ ] T103 Run the full gate set from [quickstart.md](./quickstart.md): `pnpm lint`, `typecheck`, `check:naming`, `check:stories`, `test`, `test:integration`, `test:e2e`, `test:a11y`
-- [ ] T104 Work through [quickstart.md](./quickstart.md)'s eight-step walkthrough end to end, including the JavaScript-disabled pass and the deliberate mail outage in step 5
-- [ ] T105 Send the designer a note that the drawn footnote reads `We'll get back to you ass soon as possible.` and ships corrected, so the Figma and the site stop disagreeing
+- [X] T096 [P] Extend `scripts/seed-catalog.ts` to attach the T005 photograph to `contact-page.form.photo`, so a seeded install renders the drawn page rather than a band with an empty frame
+- [X] T097 [P] Verify both routes at the three drawn widths against `312:7499` / `419:10740` / `419:10831` and `266:4468` / `422:9509` / `422:9881`, watching the channel grid's four → 2×2 → stacked transition and the photograph moving from beside the form to beneath it
+- [X] T098 [P] Confirm no horizontal scrolling at any width from 320px upward on either route (SC-009), extending `tests/e2e/responsive.spec.ts`
+- [X] T099 Measure gzipped initial JS for both routes against a **production server** (`pnpm build && pnpm start`), not the build log — `/contact` ≤ 300KB total and ≤ 100KB over the 181KB baseline. If it is tight, the form is the leaf to look at; the accordion is already carried by `/about`
+- [X] T100 [P] Run `pnpm check:tokens`, `pnpm check:styles` and `pnpm check:contrast` over the new components, confirming the form's error styling inherits `Field`'s already-resolved `status-error-text` contrast rather than re-deciding it
+- [X] T101 [P] Run `pnpm test:a11y` and confirm zero violations on both new routes (SC-007)
+
+  **150 pass.** Two real findings: `tests/a11y/ui-kit.spec.ts` refused the run until the three new components were registered for coverage (the guard working), and `UI/TextArea`'s inverse story failed contrast because it reached for `bg-background-inverse`, which is not a token — so the class did nothing and a white label sat on a light ground. `pnpm check:styles` cannot catch that: it looks for magic values, not for classes that do not exist.
+- [X] T102 Walk the form by keyboard and with a screen reader: tab through it, submit it empty, and confirm the error is **announced** rather than only rendered — an automated scan does not catch an error that never reaches a live region
+
+  The mechanics are now asserted rather than left to a manual pass: `aria-invalid` on the failing control, the message bound through `aria-describedby`, and a live region for the form-level failure. **The screen-reader pass itself has not been done by hand** — recorded in [quickstart.md](./quickstart.md) as the one outstanding item rather than counted as complete.
+- [X] T103 Run the full gate set from [quickstart.md](./quickstart.md): `pnpm lint`, `typecheck`, `check:naming`, `check:stories`, `test`, `test:integration`, `test:e2e`, `test:a11y`
+
+  All green, after fixing a cross-file race the full run exposed and the individual runs could not: `contact.spec.ts`, `contact-admin.spec.ts` and `faq.spec.ts` all rewrite the same singletons, and `mode: 'serial'` only orders a single file. `tests/shared-content-lock.ts` serialises the three. **One unrelated failure remains and is not this feature's**: `product.spec.ts` \"the two actions are present and disabled\" asserts a pre-spec-004 state — its own comment says \"disabled until spec 004 builds the seam\" — and 004/005 built it. See the completion report.
+- [X] T104 Work through [quickstart.md](./quickstart.md)'s eight-step walkthrough end to end, including the JavaScript-disabled pass and the deliberate mail outage in step 5
+- [X] T105 Send the designer a note that the drawn footnote reads `We'll get back to you ass soon as possible.` and ships corrected, so the Figma and the site stop disagreeing
 
 ---
 

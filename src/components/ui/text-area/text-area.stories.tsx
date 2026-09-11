@@ -51,13 +51,21 @@ export const Disabled: Story = {
   args: { disabled: true, defaultValue: 'Sending…' },
 }
 
-/** The dark-surface tone, kept in step with `TextInput` so the two never diverge. */
+/**
+ * The dark-surface tone, kept in step with `TextInput` so the two never diverge.
+ *
+ * **`bg-background-base` is the dark ground**, not a light one — the token is named for the site's
+ * base surface, which is `#130000`. A first draft of this story reached for `bg-background-inverse`,
+ * which is not a token at all, so the class did nothing and the white label sat on a light
+ * background. The accessibility sweep caught it as a contrast violation, which is exactly the
+ * failure a non-existent utility class produces and the reason `pnpm check:styles` cannot: it looks
+ * for magic values, not for classes that do not exist.
+ */
 export const Inverse: Story = {
   args: { tone: 'inverse' },
-  parameters: { backgrounds: { default: 'dark' } },
   decorators: [
     (Story) => (
-      <div className="bg-background-inverse max-w-160 p-10">
+      <div className="bg-background-base max-w-160 p-10">
         <Story />
       </div>
     ),

@@ -34,6 +34,14 @@ const ROUTES = [
   '/forgot-password',
   '/verify-email?email=responsive%40aurum-testing.dev',
   '/reset-password?email=responsive%40aurum-testing.dev',
+  /*
+    008/T098. Drawn at 1920, 768 and 390, so 1024 and 320 are derivations again — and the contact
+    page is the one most exposed to them: a four-across card grid, a form whose two top fields sit
+    side by side above `md`, and a band that splits the viewport in half at `xl`. Three arrangements
+    that each have to collapse without anything sticking out past the edge.
+  */
+  '/contact',
+  '/faq',
 ]
 
 const PASSWORD = 'a-long-enough-password'
