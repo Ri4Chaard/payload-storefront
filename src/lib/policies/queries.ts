@@ -2,7 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
-import { DEFAULT_BANNER_BODY } from '@/globals/cookie-settings'
+import { DEFAULT_BANNER_BODY_HTML } from '@/globals/cookie-settings'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 
 import { toCookieSettings, toPolicy, toPolicyLink } from './mappers'
@@ -132,6 +132,11 @@ export const getCookieSettings = cache(async (): Promise<CookieSettings> => {
     return toCookieSettings(document)
   } catch (error) {
     if (!isDatabaseUnreachable(error)) throw error
-    return { enabled: false, consentVersion: 1, bannerBody: DEFAULT_BANNER_BODY, categories: [] }
+    return {
+      enabled: false,
+      consentVersion: 1,
+      bannerBodyHtml: DEFAULT_BANNER_BODY_HTML,
+      categories: [],
+    }
   }
 })

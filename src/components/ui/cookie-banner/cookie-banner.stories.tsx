@@ -16,9 +16,12 @@ const clearDecision = () => {
   document.cookie = 'aurum-consent=; path=/; max-age=0'
 }
 
-/** The default the mapper substitutes when the owner has written nothing. */
+/**
+ * Serialised HTML, because that is what the banner receives — the lexical document is converted on
+ * the server, in `src/lib/policies/mappers.ts`, so a story hands over the same shape a page does.
+ */
 const BODY =
-  'We use cookies on this website. Our Cookie Policy explains which ones and why, and you can change your mind at any time from the link in the footer.'
+  '<p>We use cookies on this website. Our Cookie Policy explains which ones and why, and you can change your mind at any time from the link in the footer.</p>'
 
 const NECESSARY = {
   key: 'necessary',
@@ -55,7 +58,7 @@ const meta = {
     settings: {
       enabled: true,
       consentVersion: 1,
-      bannerBody: BODY,
+      bannerBodyHtml: BODY,
       categories: [NECESSARY],
       policyHref: '/legal/cookies',
     },
@@ -84,7 +87,7 @@ export const WithAnOptionalCategory: Story = {
     settings: {
       enabled: true,
       consentVersion: 1,
-      bannerBody: BODY,
+      bannerBodyHtml: BODY,
       categories: [NECESSARY, ANALYTICS],
       policyHref: '/legal/cookies',
     },
@@ -92,7 +95,7 @@ export const WithAnOptionalCategory: Story = {
 }
 
 /**
- * The owner has rewritten the paragraph, including a line break.
+ * The owner has rewritten the text, with two paragraphs, a bold run and an italic one.
  *
  * The one part of this banner that comes from Payload. The heading and the three button labels are
  * fixed in the component — they name controls rather than saying anything — so no story varies them.
@@ -102,8 +105,9 @@ export const WithOwnerWrittenBody: Story = {
     settings: {
       enabled: true,
       consentVersion: 1,
-      bannerBody:
-        'Aurum uses a small number of cookies so the site can remember your bag and keep you signed in.\n\nWe do not use analytics or advertising cookies of any kind.',
+      bannerBodyHtml:
+        '<p>Aurum uses <strong>a small number</strong> of cookies so the site can remember your bag and keep you signed in.</p>' +
+        '<p>We use <em>no</em> analytics or advertising cookies of any kind.</p>',
       categories: [NECESSARY],
       policyHref: '/legal/cookies',
     },
@@ -118,7 +122,26 @@ export const WithOwnerWrittenBody: Story = {
  */
 export const WithoutAPolicyLink: Story = {
   args: {
-    settings: { enabled: true, consentVersion: 1, bannerBody: BODY, categories: [NECESSARY] },
+    settings: { enabled: true, consentVersion: 1, bannerBodyHtml: BODY, categories: [NECESSARY] },
+  },
+}
+
+/**
+ * The owner wrote their own link, so the automatic one is not appended.
+ *
+ * Without the check that produces this, an owner doing the sensible thing — linking the policy in
+ * the sentence where it reads best — would get two links to the same page.
+ */
+export const WithTheOwnersOwnLink: Story = {
+  args: {
+    settings: {
+      enabled: true,
+      consentVersion: 1,
+      bannerBodyHtml:
+        '<p>We use cookies so this site works. Read our <a href="/legal/cookies">Cookie Policy</a> for the details.</p>',
+      categories: [NECESSARY],
+      policyHref: '/legal/cookies',
+    },
   },
 }
 
@@ -131,6 +154,6 @@ export const WithoutAPolicyLink: Story = {
  */
 export const Disabled: Story = {
   args: {
-    settings: { enabled: false, consentVersion: 1, bannerBody: BODY, categories: [NECESSARY] },
+    settings: { enabled: false, consentVersion: 1, bannerBodyHtml: BODY, categories: [NECESSARY] },
   },
 }

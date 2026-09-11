@@ -1,5 +1,16 @@
 import type { GlobalConfig } from 'payload'
 
+import {
+  BoldFeature,
+  FixedToolbarFeature,
+  InlineToolbarFeature,
+  ItalicFeature,
+  LinkFeature,
+  ParagraphFeature,
+  UnderlineFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+
 import { isAdmin } from '@/lib/access'
 
 /**
@@ -19,6 +30,47 @@ import { isAdmin } from '@/lib/access'
  */
 export const DEFAULT_BANNER_BODY =
   'We use cookies on this website. Our Cookie Policy explains which ones and why, and you can change your mind at any time from the link in the footer.'
+
+/** The same sentence as serialised HTML — what the mapper falls back to when the field is empty. */
+export const DEFAULT_BANNER_BODY_HTML = `<p>${DEFAULT_BANNER_BODY}</p>`
+
+/**
+ * The same sentence as a lexical document, for the field's `defaultValue`.
+ *
+ * Written out rather than imported from a helper because a `defaultValue` is stored into every new
+ * row and into the migration's `ADD COLUMN` default — it has to be a plain literal that cannot
+ * change shape underneath existing data.
+ */
+const DEFAULT_BANNER_BODY_DOCUMENT = {
+  root: {
+    type: 'root',
+    format: '' as const,
+    indent: 0,
+    version: 1,
+    direction: 'ltr' as const,
+    children: [
+      {
+        type: 'paragraph',
+        format: '' as const,
+        indent: 0,
+        version: 1,
+        direction: 'ltr' as const,
+        textFormat: 0,
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: DEFAULT_BANNER_BODY,
+            version: 1,
+          },
+        ],
+      },
+    ],
+  },
+}
 
 /**
  * What the cookie banner asks, and when (spec 009, FR-026, FR-042, FR-045 – FR-051).
@@ -75,18 +127,43 @@ export const CookieSettings: GlobalConfig = {
     },
     {
       name: 'bannerBody',
-      type: 'textarea',
+      type: 'richText',
       label: 'What the banner says',
       /*
-       * Optional, with a default, rather than required — and that is a data decision rather than a
-       * convenience. Making it required would leave the already-migrated row holding NULL and the
-       * admin refusing to save until somebody noticed. `toCookieSettings` falls back to the same
-       * sentence, so an empty field renders correctly instead of rendering a gap.
+       * **Rich text, with a deliberately short toolbar.** Paragraphs, bold, italic, underline and
+       * links — the formatting the drawn banner actually uses, and nothing else. No headings: the
+       * banner already has one above this, and a second inside the paragraph would break the
+       * document outline a screen reader follows. No lists, no uploads, no blocks: a consent notice
+       * that needs a bulleted list is a notice that should have been the Cookie Policy.
+       *
+       * Same rule as `src/collections/policies.ts` narrowing its headings to `h2`/`h3` — the
+       * toolbar does not offer what would be wrong, rather than a renderer coping with it later.
+       *
+       * **The conversion to HTML happens on the server**, in `src/lib/policies/mappers.ts`, so the
+       * banner — a client component in the root layout, charged to every route — receives a string
+       * and never carries a lexical runtime.
        */
-      defaultValue: DEFAULT_BANNER_BODY,
+      editor: lexicalEditor({
+        features: () => [
+          ParagraphFeature(),
+          BoldFeature(),
+          ItalicFeature(),
+          UnderlineFeature(),
+          LinkFeature({ enabledCollections: ['policies'] }),
+          FixedToolbarFeature(),
+          InlineToolbarFeature(),
+        ],
+      }),
+      /*
+       * Optional, with a default, rather than required — and that is a data decision rather than a
+       * convenience. Making it required would leave an existing row holding NULL and the admin
+       * refusing to save until somebody noticed. `toCookieSettings` falls back to the same sentence,
+       * so an empty field renders correctly instead of rendering a gap.
+       */
+      defaultValue: DEFAULT_BANNER_BODY_DOCUMENT,
       admin: {
         description:
-          'The paragraph in the cookie banner. The Cookie Policy link is added after it automatically. Line breaks are kept. Leave empty to use the built-in wording.',
+          'The text in the cookie banner. Bold, italic, underline and links are available. A link to the Cookie Policy is added automatically unless you add one yourself. Leave empty to use the built-in wording.',
       },
     },
     {

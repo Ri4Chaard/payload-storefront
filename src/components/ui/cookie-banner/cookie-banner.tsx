@@ -4,6 +4,7 @@ import React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
+import { RichText } from '@/components/ui/rich-text'
 import { readConsentCookie, writeConsentCookie } from '@/lib/consent/cookie'
 import { decide, readState, startingSelection, type Decision } from '@/lib/consent/record'
 import type { ConsentState } from '@/lib/consent/types'
@@ -77,7 +78,7 @@ export interface CookieBannerProps {
 }
 
 export function CookieBanner({ settings, className }: CookieBannerProps) {
-  const { enabled, consentVersion, bannerBody, categories, policyHref } = settings
+  const { enabled, consentVersion, bannerBodyHtml, categories, policyHref } = settings
 
   /*
     `null` means "not read yet" and is distinct from any real state. Without the distinction the
@@ -216,20 +217,32 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
             <h2 className="text-display text-neutral-primary uppercase">{LABELS.heading}</h2>
 
             {/*
-              `whitespace-pre-line` because the field is a textarea: an owner who presses Return
-              twice means a paragraph break, and collapsing it would silently rewrite what they
-              wrote. The policy link follows the text rather than sitting inside it, so the owner
-              never has to remember to add it — and it disappears on its own when no policy is
-              linked (FR-022).
+              The owner's text, serialised to HTML on the server. `RichText` styles it for the policy
+              pages, where body copy is `neutral-primary/80`; the banner draws its prose in
+              `neutral-secondary`, so the override rides in on `className`.
             */}
-            <p className="text-body-medium text-neutral-secondary whitespace-pre-line">
-              {bannerBody}{' '}
-              {policyHref ? (
+            <RichText
+              html={bannerBodyHtml}
+              className="[&_p]:text-neutral-secondary [&_li]:text-neutral-secondary"
+            />
+
+            {/*
+              A guaranteed way to the Cookie Policy (FR-022) — but only when the owner has not
+              written their own link.
+
+              The toolbar offers links now, so the sensible thing for an owner to do is put one in
+              the sentence where it reads best. Appending a second unconditionally would give that
+              owner two links to the same page; never appending would let an owner who forgets ship
+              a consent banner with no route to the policy at all. Checking is cheap and removes
+              both failures.
+            */}
+            {policyHref && !bannerBodyHtml.includes('<a ') ? (
+              <p className="text-body-medium">
                 <Link href={policyHref} variant="inline">
                   {LABELS.link}
                 </Link>
-              ) : null}
-            </p>
+              </p>
+            ) : null}
 
             {/*
               Three filled buttons of equal width, in the drawn order — `196:1462`, `196:1482`,

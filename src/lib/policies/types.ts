@@ -63,13 +63,17 @@ export interface CookieSettings {
   enabled: boolean
   consentVersion: number
   /**
-   * The banner's paragraph, written by the owner.
+   * The banner's text, written by the owner — serialised HTML, not a plain string.
    *
-   * Always a string by the time it reaches a component — the mapper substitutes the built-in
+   * Named for what it holds so nobody renders it as text and wonders where the `<strong>` went. The
+   * conversion happens in the mapper, on the server, which is what keeps a lexical runtime out of
+   * the client bundle for a component that sits on every route.
+   *
+   * Always populated by the time it reaches a component: the mapper substitutes the built-in
    * default for an empty field, so the banner never has to decide what to draw when nobody has
    * written anything.
    */
-  bannerBody: string
+  bannerBodyHtml: string
   categories: CookieCategory[]
   /** The Cookie Policy's address, when one is linked and published. The banner copes without it. */
   policyHref?: string

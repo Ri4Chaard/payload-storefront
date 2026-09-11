@@ -32,7 +32,8 @@ const suffix = Date.now()
 let email: string
 const created: number[] = []
 
-const body = (text: string) => ({
+/** `format: 1` is lexical's bold bit — the same value the editor writes when you press the button. */
+const body = (text: string, { bold = false }: { bold?: boolean } = {}) => ({
   root: {
     type: 'root',
     format: '' as const,
@@ -47,7 +48,15 @@ const body = (text: string) => ({
         version: 1,
         direction: 'ltr' as const,
         children: [
-          { type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 },
+          {
+            type: 'text',
+            detail: 0,
+            format: bold ? 1 : 0,
+            mode: 'normal',
+            style: '',
+            text,
+            version: 1,
+          },
         ],
       },
     ],
@@ -106,6 +115,37 @@ test('Policies and Cookie banner are both reachable in the admin', async ({ page
   await expect(page.getByRole('link', { name: 'Cookie banner', exact: true })).toBeVisible({
     timeout: 120_000,
   })
+})
+
+test('the banner text is a real editor, with formatting controls', async ({ page }) => {
+  test.setTimeout(240_000)
+  await signIn(page)
+
+  await page.goto('/admin/globals/cookie-settings')
+
+  /*
+    The field is `richText` with a hand-picked feature list, and a bad list fails at RUNTIME in the
+    admin rather than at build — the field renders as an empty box or throws, and nothing else in
+    this suite would notice. So this asserts the editor is actually there and actually offers the
+    formatting the owner was promised.
+  */
+  await page.locator('form').first().waitFor({ timeout: 120_000 })
+
+  /*
+    Located by the editor itself rather than by a `#field-bannerBody` wrapper, because Payload does
+    not give a `richText` field one — the other fields on this global have `#field-enabled`,
+    `#field-consentVersion` and so on, and this one has none. Worth writing down: the obvious
+    selector fails in a way that looks like the field is missing.
+  */
+  await expect(page.locator('[contenteditable="true"]')).toBeVisible({ timeout: 120_000 })
+
+  // The formatting the owner asked for by name, and nothing they did not: no headings, no lists.
+  for (const control of ['bold', 'italic', 'underline', 'link']) {
+    await expect(
+      page.locator(`button.toolbar-popup__button-${control}`).first(),
+      `the ${control} control should be in the toolbar`,
+    ).toBeVisible({ timeout: 60_000 })
+  }
 })
 
 test('a draft is invisible, and publishing shows it (FR-011)', async ({ page }) => {
@@ -271,7 +311,7 @@ test.describe('the cookie categories', () => {
 
     await payload.updateGlobal({
       slug: 'cookie-settings',
-      data: { bannerBody: written, _status: 'published' } as never,
+      data: { bannerBody: body(written), _status: 'published' } as never,
       overrideAccess: true,
       context: skipRevalidation,
     })
@@ -285,10 +325,29 @@ test.describe('the cookie categories', () => {
     await expect(region.getByRole('button', { name: 'Agree' })).toBeVisible()
   })
 
+  test('formatting the owner applies survives to the page', async ({ page }) => {
+    // The whole point of the field being rich text rather than a textarea. `<strong>` reaching the
+    // banner proves the lexical document is serialised on the server and rendered as markup, not
+    // escaped into visible angle brackets.
+    const emphasised = `Only essential cookies ${Date.now()}`
+
+    await payload.updateGlobal({
+      slug: 'cookie-settings',
+      data: { bannerBody: body(emphasised, { bold: true }), _status: 'published' } as never,
+      overrideAccess: true,
+      context: skipRevalidation,
+    })
+
+    await page.goto('/')
+    const region = page.getByRole('region', { name: 'Cookie consent' })
+
+    await expect(region.locator('strong', { hasText: emphasised })).toBeVisible()
+  })
+
   test('an empty body falls back to the built-in wording rather than a gap', async ({ page }) => {
     await payload.updateGlobal({
       slug: 'cookie-settings',
-      data: { bannerBody: '', _status: 'published' } as never,
+      data: { bannerBody: null, _status: 'published' } as never,
       overrideAccess: true,
       context: skipRevalidation,
     })

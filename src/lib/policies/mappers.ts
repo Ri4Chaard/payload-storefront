@@ -1,7 +1,7 @@
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { DEFAULT_BANNER_BODY } from '@/globals/cookie-settings'
+import { DEFAULT_BANNER_BODY_HTML } from '@/globals/cookie-settings'
 import { toCatalogImage } from '@/lib/catalog/mappers'
 import type { CookieSetting, Policy as PolicyDocument } from '@/payload-types'
 
@@ -24,11 +24,17 @@ const text = (value: string | null | undefined): string | undefined => {
 /**
  * Serialised body, or `undefined` when the document is empty.
  *
+ * Takes either lexical field on this feature — a policy's body or the cookie banner's text. Payload
+ * generates a separate type per field even though both describe the same document shape, so the
+ * union is what lets one serialiser serve both rather than two copies drifting apart.
+ *
  * `undefined` rather than an empty string is what lets the route tell "the owner has not written
  * this yet" from "the owner wrote something", and draw the placeholder FR-006 requires instead of an
  * empty column. `src/lib/blog/mappers.ts` reached the same convention.
  */
-export const bodyHtml = (value: PolicyDocument['body']): string | undefined => {
+export const bodyHtml = (
+  value: CookieSetting['bannerBody'] | PolicyDocument['body'] | null | undefined,
+): string | undefined => {
   if (!value) return undefined
 
   // The generated type describes the same document `SerializedEditorState` does, one field at a
@@ -104,7 +110,12 @@ export const toCookieSettings = (document: CookieSetting | null | undefined): Co
     switch the owner controls, arrived at from the other direction.
   */
   if (!document) {
-    return { enabled: false, consentVersion: 1, bannerBody: DEFAULT_BANNER_BODY, categories: [] }
+    return {
+      enabled: false,
+      consentVersion: 1,
+      bannerBodyHtml: DEFAULT_BANNER_BODY_HTML,
+      categories: [],
+    }
   }
 
   const categories = document.categories.flatMap((row) => {
@@ -125,8 +136,11 @@ export const toCookieSettings = (document: CookieSetting | null | undefined): Co
     /*
       An empty field falls back to the built-in sentence rather than rendering a gap (FR-025). The
       field is optional precisely so this path exists — see the note on it in the global.
+
+      `bodyHtml` is the same serialiser the policy pages use, so a bold run or a link an owner
+      writes here comes out as the same markup it does there.
     */
-    bannerBody: text(document.bannerBody) ?? DEFAULT_BANNER_BODY,
+    bannerBodyHtml: bodyHtml(document.bannerBody) ?? DEFAULT_BANNER_BODY_HTML,
     categories,
     ...(policy?.slug ? { policyHref: policyHref(policy.slug) } : {}),
   }

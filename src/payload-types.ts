@@ -3145,9 +3145,23 @@ export interface CookieSetting {
    */
   enabled: boolean;
   /**
-   * The paragraph in the cookie banner. The Cookie Policy link is added after it automatically. Line breaks are kept. Leave empty to use the built-in wording.
+   * The text in the cookie banner. Bold, italic, underline and links are available. A link to the Cookie Policy is added automatically unless you add one yourself. Leave empty to use the built-in wording.
    */
-  bannerBody?: string | null;
+  bannerBody?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   /**
    * Raise this by one to ask EVERY visitor again — do that when the Cookie Policy changes materially, not for a typo. Their previous answers are filled in for them.
    */

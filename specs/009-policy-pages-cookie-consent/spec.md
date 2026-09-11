@@ -470,7 +470,14 @@ and social preview, and confirm all four appear in the site's machine-readable l
 - **FR-025b**: An empty body MUST fall back to that built-in default rather than rendering a gap.
 - **FR-025c**: The fixed heading and button labels MUST remain free of any claim about the cookie
   set, for the same reason as FR-025a and permanently — they cannot be corrected without a release.
-- **FR-025d**: Line breaks the owner types in the body MUST be preserved when the banner is drawn.
+- **FR-025d**: The body MUST be edited as formatted text, not as a plain string: the owner MUST be
+  able to apply bold, italic and underline, write more than one paragraph, and add their own links.
+  The toolbar MUST NOT offer headings — the banner already has one, and a second inside the
+  paragraph would break the document outline — nor lists, uploads or blocks, which belong in the
+  Cookie Policy rather than in a consent notice.
+- **FR-025e**: The automatic link to the Cookie Policy MUST be omitted when the owner's own text
+  already contains a link, so that linking the policy where it reads best does not produce two links
+  to the same page. When their text contains none, it MUST still be added (FR-022).
 - **FR-026**: The owner MUST be able to switch the banner off entirely. With it off, no optional
   category may be treated as consented.
 - **FR-027**: The banner MUST show all three drawn actions at all times, including on the day it
