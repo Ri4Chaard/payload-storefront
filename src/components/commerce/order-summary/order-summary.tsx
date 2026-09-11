@@ -1,7 +1,9 @@
 'use client'
 
+import { useLocale } from 'next-intl'
 import React from 'react'
 
+import type { Locale } from '@/i18n/routing'
 import { HandoffModal } from '@/components/commerce/handoff-modal'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -39,7 +41,8 @@ export interface OrderSummaryProps extends React.ComponentProps<'section'> {
    * file importing a `'use server'` module drags the whole Payload config into the browser bundle.
    * Omitted in a story, where the button says checkout is not available rather than pretending.
    */
-  onCheckout?: () => Promise<CheckoutResult>
+  /* The language, for the same reason as `product-purchase` — see its note. */
+  onCheckout?: (locale: Locale) => Promise<CheckoutResult>
   /**
    * Lines have changed underneath the customer since they were added (FR-014).
    *
@@ -59,6 +62,7 @@ export function OrderSummary({
   className,
   ...props
 }: OrderSummaryProps) {
+  const locale = useLocale() as Locale
   const [agreed, setAgreed] = React.useState(false)
   const [acknowledged, setAcknowledged] = React.useState(false)
   const [refusal, setRefusal] = React.useState<null | string>(null)
@@ -94,7 +98,7 @@ export function OrderSummary({
      * another.
      */
     startTransition(async () => {
-      const result = await onCheckout()
+      const result = await onCheckout(locale)
 
       if (!result.ok) {
         setRefusal(

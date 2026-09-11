@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { ArticleBody } from '@/components/blog/article-body'
 import { ArticleHeader } from '@/components/blog/article-header'
 import { TableOfContents } from '@/components/blog/table-of-contents'
@@ -74,8 +75,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
+  const locale = await currentLocale()
   const { slug } = await params
-  const article = await getArticle(slug)
+  const article = await getArticle(slug, locale)
   if (!article) return {}
 
   const title = article.seo.title ?? article.fallbacks.title
@@ -110,8 +112,9 @@ export async function generateMetadata({
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const locale = await currentLocale()
   const { slug } = await params
-  const article = await getArticle(slug)
+  const article = await getArticle(slug, locale)
 
   /*
     `null` covers three cases and answers all of them the same way: no such article, an article that

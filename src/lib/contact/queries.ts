@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 
 import { toContactPage } from './mappers'
@@ -39,10 +40,12 @@ const client = cache(async () => getPayload({ config }))
  * still fail the build, or the day the database is misconfigured looks exactly like the day nobody
  * has written the page.
  */
-export const getContactPage = cache(async (): Promise<ContactPage | null> => {
+export const getContactPage = cache(async (locale: Locale): Promise<ContactPage | null> => {
   try {
     const payload = await client()
     const document = await payload.findGlobal({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       slug: 'contact-page',
       depth: 2,
       // The access rules do the work: `adminOrPublishedStatus` on `questions` makes a draft

@@ -1,5 +1,6 @@
 import { cache } from 'react'
 
+import type { Locale } from '@/i18n/routing'
 import { getProductsByIds } from '@/lib/catalog/queries'
 
 import { findCartId, ownerRequest, payloadClient, resolveCartOwner, type CartOwner } from './session'
@@ -62,7 +63,7 @@ async function readRows(owner: CartOwner): Promise<null | RawCartLine[]> {
  * Returns an empty view rather than `null` for "no cart", so a caller cannot forget the null and
  * the empty state is an ordinary render rather than a branch (FR-015).
  */
-export const getCart = cache(async (): Promise<CartView> => {
+export const getCart = cache(async (locale: Locale): Promise<CartView> => {
   const owner = await resolveCartOwner()
   const rows = await readRows(owner)
   if (!rows || rows.length === 0) return emptyCart()
@@ -71,7 +72,7 @@ export const getCart = cache(async (): Promise<CartView> => {
     .map((row) => relationId(row.product))
     .filter((id): id is number => id !== undefined)
 
-  return resolveCart(rows, await getProductsByIds(ids))
+  return resolveCart(rows, await getProductsByIds(ids, locale))
 })
 
 /**

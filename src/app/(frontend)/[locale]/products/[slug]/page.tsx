@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/commerce'
 import { addToCart, buyNow } from '@/lib/cart/actions'
 import { JewelryCarousel } from '@/components/sections'
@@ -58,8 +59,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
+  const locale = await currentLocale()
   const { slug } = await params
-  const product = await getProduct(slug)
+  const product = await getProduct(slug, locale)
   if (!product) return {}
 
   const title = product.seo.title ?? product.title
@@ -91,11 +93,12 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const locale = await currentLocale()
   const { slug } = await params
-  const product = await getProduct(slug)
+  const product = await getProduct(slug, locale)
   if (!product) notFound()
 
-  const [shop, related] = await Promise.all([getShopContent(), getRelated(product.id)])
+  const [shop, related] = await Promise.all([getShopContent(locale), getRelated(product.id, locale)])
 
   return (
     <>

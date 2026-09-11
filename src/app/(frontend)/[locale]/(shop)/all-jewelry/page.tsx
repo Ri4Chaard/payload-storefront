@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { dropIdlePriceEnds, parseFilters } from '@/lib/catalog/filters'
 import { canonicalListing } from '@/lib/catalog/listing-url'
 import { getCategories, getFilterFacets, getShopContent } from '@/lib/catalog/queries'
@@ -19,7 +20,8 @@ const TITLE = 'All jewelry'
 const BASE = '/all-jewelry'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const shop = await getShopContent()
+  const locale = await currentLocale()
+  const shop = await getShopContent(locale)
 
   return listingMetadata({
     title: TITLE,
@@ -33,6 +35,7 @@ export default async function AllJewelryPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const locale = await currentLocale()
   const query = await searchParams
 
   /**
@@ -50,13 +53,13 @@ export default async function AllJewelryPage({
    */
   const { filters, dropped } = parseFilters(query)
   const [categories, facets] = await Promise.all([
-    getCategories(),
-    getFilterFacets(filters.category.length === 1 ? filters.category[0] : undefined),
+    getCategories(locale),
+    getFilterFacets(locale, filters.category.length === 1 ? filters.category[0] : undefined),
   ])
   const canonical = canonicalListing(filters, dropIdlePriceEnds(filters, facets.price), categories, dropped)
   if (canonical) redirect(canonical)
 
-  const shop = await getShopContent()
+  const shop = await getShopContent(locale)
 
   return (
     <>

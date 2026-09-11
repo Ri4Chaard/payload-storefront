@@ -19,7 +19,7 @@ import type { FilterState } from '@/lib/catalog/types'
  * draft is unreachable by either route into the module.
  */
 const listing = (overrides: Partial<FilterState> = {}) =>
-  getListing({ ...DEFAULT_FILTERS, ...overrides })
+  getListing({ ...DEFAULT_FILTERS, ...overrides }, 'en')
 
 describe('getListing', () => {
   /**
@@ -115,15 +115,15 @@ describe('getListing', () => {
 
 describe('getProduct', () => {
   it('returns a piece by slug', async () => {
-    const product = await getProduct('paragon-emerald-cut-diamond-engagement-ring')
+    const product = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
     expect(product?.title).toBe('Paragon Emerald Cut Diamond Engagement Ring')
     expect(product?.diamondOptions).toHaveLength(4)
     expect(product?.sizes).toHaveLength(5)
   })
 
   it('returns null for a draft, exactly as it does for a slug that names nothing', async () => {
-    expect(await getProduct('unreleased-spartan-cuff')).toBeNull()
-    expect(await getProduct('no-such-piece')).toBeNull()
+    expect(await getProduct('unreleased-spartan-cuff', 'en')).toBeNull()
+    expect(await getProduct('no-such-piece', 'en')).toBeNull()
   })
 })
 
@@ -144,7 +144,7 @@ describe('getProductSlugs', () => {
 
 describe('getFilterFacets', () => {
   it('offers every option in a group, whatever the category holds', async () => {
-    const facets = await getFilterFacets('rings')
+    const facets = await getFilterFacets('en', 'rings')
     expect(facets.shapes).toHaveLength(7)
     expect(facets.colours).toHaveLength(4)
     expect(facets.price.min).toBeLessThan(facets.price.max)
@@ -153,7 +153,7 @@ describe('getFilterFacets', () => {
   it('offers an option no piece in the category has, rather than hiding it', async () => {
     // Hiding zero-count options makes the drawer change shape as a visitor filters, which loses
     // the option they were reaching for. A zero is the honest answer to "do you have this".
-    const facets = await getFilterFacets('bracelets')
+    const facets = await getFilterFacets('en', 'bracelets')
     const empty = facets.shapes.filter((option) => option.count === 0)
     expect(empty.length, 'no shape is absent from bracelets — pick a sparser group').toBeGreaterThan(
       0,
@@ -162,28 +162,28 @@ describe('getFilterFacets', () => {
   })
 
   it('always counts categories over the whole catalogue', async () => {
-    const withinRings = await getFilterFacets('rings')
-    const everywhere = await getFilterFacets()
+    const withinRings = await getFilterFacets('en', 'rings')
+    const everywhere = await getFilterFacets('en', 'en')
     expect(withinRings.categories).toEqual(everywhere.categories)
   })
 })
 
 describe('getRelated', () => {
   it('returns pieces sharing a collection, never the piece itself', async () => {
-    const related = await getRelated(1)
+    const related = await getRelated(1, 'en')
     expect(related.length).toBeGreaterThan(0)
     expect(related.map((product) => product.id)).not.toContain(1)
   })
 
   it('returns nothing for a piece in no collection, so the band does not render', async () => {
-    expect(await getRelated(999)).toEqual([])
-    expect(await getRelated(-1)).toEqual([])
+    expect(await getRelated(999, 'en')).toEqual([])
+    expect(await getRelated(-1, 'en')).toEqual([])
   })
 })
 
 describe('the rest', () => {
   it('orders categories the way the owner arranged them', async () => {
-    expect((await getCategories()).map((category) => category.slug)).toEqual([
+    expect((await getCategories('en')).map((category) => category.slug)).toEqual([
       'rings',
       'bracelets',
       'earrings',
@@ -192,6 +192,6 @@ describe('the rest', () => {
   })
 
   it('reads the shop global', async () => {
-    expect((await getShopContent()).listingSubtitle).toBeTruthy()
+    expect((await getShopContent('en')).listingSubtitle).toBeTruthy()
   })
 })

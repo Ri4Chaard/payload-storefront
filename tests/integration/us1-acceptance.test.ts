@@ -33,7 +33,7 @@ let categoryId: number
 let gallery: number[]
 let productId: number
 
-const listing = () => getListing({ ...DEFAULT_FILTERS, page: 99 })
+const listing = () => getListing({ ...DEFAULT_FILTERS, page: 99 }, 'en')
 
 beforeAll(async () => {
   payload = await getPayload({ config })
@@ -95,7 +95,7 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
     productId = product.id
     created.push(product.id)
 
-    const found = await getProduct(`${MARKER}-solitaire`)
+    const found = await getProduct(`${MARKER}-solitaire`, 'en')
     expect(found?.title).toBe('Acceptance Solitaire')
     expect(found?.description).toBe('A piece created by the T295 acceptance walk.')
     expect(found?.price).toBe('$4,200')
@@ -127,7 +127,7 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
     created.push(draft.id)
 
     // What the route sees. `null` is the 404, and it says nothing about whether the piece exists.
-    expect(await getProduct(`${MARKER}-draft`)).toBeNull()
+    expect(await getProduct(`${MARKER}-draft`, 'en')).toBeNull()
     const { products } = await listing()
     expect(products.map((entry) => entry.slug)).not.toContain(`${MARKER}-draft`)
 
@@ -144,12 +144,12 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
       context: skipRevalidation,
     })
 
-    const found = await getProduct(`${MARKER}-solitaire`)
+    const found = await getProduct(`${MARKER}-solitaire`, 'en')
     expect(found?.available).toBe(false)
     // Still on the listing — the owner wants it seen (spec Edge Cases); only IN STOCK ONLY hides it.
     const { products } = await listing()
     expect(products.map((entry) => entry.slug)).toContain(`${MARKER}-solitaire`)
-    const orderable = await getListing({ ...DEFAULT_FILTERS, page: 99, inStock: true })
+    const orderable = await getListing({ ...DEFAULT_FILTERS, page: 99, inStock: true }, 'en')
     expect(orderable.products.map((entry) => entry.slug)).not.toContain(`${MARKER}-solitaire`)
   })
 
@@ -163,7 +163,7 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
       context: skipRevalidation,
     })
 
-    const found = await getProduct(`${MARKER}-solitaire`)
+    const found = await getProduct(`${MARKER}-solitaire`, 'en')
     expect(found?.available).toBe(true)
     expect(found?.maxQuantity, 'nothing is counted, so nothing caps the stepper').toBeUndefined()
   })
@@ -177,7 +177,7 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
       context: skipRevalidation,
     })
 
-    const found = await getProduct(`${MARKER}-solitaire`)
+    const found = await getProduct(`${MARKER}-solitaire`, 'en')
     const { products } = await listing()
     const card = products.find((entry) => entry.slug === `${MARKER}-solitaire`)
 
@@ -197,7 +197,7 @@ describe('US1 — the owner publishes a catalogue nobody has to deploy', () => {
       context: skipRevalidation,
     })
 
-    expect(await getProduct(`${MARKER}-solitaire`)).toBeNull()
+    expect(await getProduct(`${MARKER}-solitaire`, 'en')).toBeNull()
     const { products } = await listing()
     expect(products.map((entry) => entry.slug)).not.toContain(`${MARKER}-solitaire`)
   })

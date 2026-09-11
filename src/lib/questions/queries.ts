@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { toCatalogImage } from '@/lib/catalog/mappers'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 import type { FaqPage as FaqPageDocument } from '@/payload-types'
@@ -40,10 +41,12 @@ const client = cache(async () => getPayload({ config }))
  * that silently truncated its own FAQ would be worse than a slow one. If that ever stops being
  * true, this is the line to revisit rather than a `LoadMore` somebody bolts on.
  */
-export const getAllPublishedQuestions = cache(async (): Promise<Question[]> => {
+export const getAllPublishedQuestions = cache(async (locale: Locale): Promise<Question[]> => {
   try {
     const payload = await client()
     const found = await payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       collection: 'questions',
       sort: 'order',
       limit: 0,
@@ -81,10 +84,12 @@ const text = (value: string | null | undefined): string | undefined => {
  * Tolerates a build with no database for the reason `src/lib/catalog/prerender.ts` records at
  * length: the production image runs `next build` before the migrations, so nothing is reachable.
  */
-export const getFaqPage = cache(async (): Promise<FaqPage | null> => {
+export const getFaqPage = cache(async (locale: Locale): Promise<FaqPage | null> => {
   try {
     const payload = await client()
     const document: FaqPageDocument = await payload.findGlobal({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       slug: 'faq-page',
       depth: 1,
       overrideAccess: false,

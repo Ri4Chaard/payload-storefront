@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { getCategories, getShopContent } from '@/lib/catalog/queries'
 
 import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
@@ -33,7 +34,8 @@ import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
 export const dynamic = 'force-dynamic'
 
 async function resolve(slug: string) {
-  const categories = await getCategories()
+  const locale = await currentLocale()
+  const categories = await getCategories(locale)
   return categories.find((category) => category.slug === slug) ?? null
 }
 
@@ -42,11 +44,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string }>
 }): Promise<Metadata> {
+  const locale = await currentLocale()
   const { category: slug } = await params
   const category = await resolve(slug)
   if (!category) return {}
 
-  const shop = await getShopContent()
+  const shop = await getShopContent(locale)
 
   return listingMetadata({
     title: category.title,
@@ -62,11 +65,12 @@ export default async function CategoryPage({
   params: Promise<{ category: string }>
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const locale = await currentLocale()
   const { category: slug } = await params
   const category = await resolve(slug)
   if (!category) notFound()
 
-  const shop = await getShopContent()
+  const shop = await getShopContent(locale)
 
   return (
     <>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { ActiveFilters, type RemovableFilter } from '@/components/commerce/active-filters'
 import { FilterToolbar } from '@/components/commerce/filter-toolbar'
 import { ProductGrid } from '@/components/commerce/product-grid'
@@ -54,14 +55,15 @@ export async function Listing({
   basePath,
   searchParams,
 }: ListingProps) {
+  const locale = await currentLocale()
   const { filters, dropped } = parseFilters(searchParams)
   const seeded: FilterState = categorySlug ? { ...filters, category: [categorySlug] } : filters
 
   const [categories, facets] = await Promise.all([
-    getCategories(),
+    getCategories(locale),
     // Scoped to the category being looked at, so SIZE offers ring sizes on `/rings`. More than one
     // category applied has no single scope, and the whole catalogue is the honest answer.
-    getFilterFacets(seeded.category.length === 1 ? seeded.category[0] : undefined),
+    getFilterFacets(locale, seeded.category.length === 1 ? seeded.category[0] : undefined),
   ])
 
   /**
@@ -72,7 +74,7 @@ export async function Listing({
    * — including the next address the visitor follows, which is where the redundant pair disappears.
    */
   const applied = dropIdlePriceEnds(seeded, facets.price)
-  const result = await getListing(applied)
+  const result = await getListing(applied, locale)
 
   const ignored: DroppedFilter[] = [...dropped, ...result.ignored]
 

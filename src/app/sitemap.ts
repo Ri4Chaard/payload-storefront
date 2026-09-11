@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 
+import { DEFAULT_LOCALE } from '@/i18n/routing'
 import { BLOG_ROOT, articleHref } from '@/lib/blog/blog-url'
 import { getArticleSlugs } from '@/lib/blog/queries'
 import { ALL_JEWELRY } from '@/lib/catalog/listing-url'
@@ -68,7 +69,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const [categories, products, articles, policies] = await Promise.all([
-      getCategories(),
+      /*
+        The default language. A sitemap lists ADDRESSES, and a category's address is its slug, which
+        is shared across languages (spec 010, R7) — so the language here only decides which words
+        are read and thrown away. It is named rather than inferred because `sitemap.ts` is a Route
+        Handler, and `next/root-params` does not reach one.
+      */
+      getCategories(DEFAULT_LOCALE),
       getProductSlugs(),
       getArticleSlugs(),
       /*

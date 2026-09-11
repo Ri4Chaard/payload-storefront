@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { PageHeaderBlock } from '@/components/blocks/page-header'
 import { Container, EmptyState, RichText } from '@/components/ui'
 import { policyHref } from '@/lib/policies/policy-url'
@@ -44,8 +45,9 @@ interface Params {
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const locale = await currentLocale()
   const { slug } = await params
-  const policy = await getPolicyBySlug(slug)
+  const policy = await getPolicyBySlug(slug, locale)
 
   // No database — a container build. Emit nothing rather than throwing; the first real request
   // replaces it. `/faq` takes the same precaution for the same reason.
@@ -90,8 +92,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
  */
 
 export default async function PolicyPage({ params }: Params) {
+  const locale = await currentLocale()
   const { slug } = await params
-  const policy = await getPolicyBySlug(slug)
+  const policy = await getPolicyBySlug(slug, locale)
 
   if (!policy) notFound()
 

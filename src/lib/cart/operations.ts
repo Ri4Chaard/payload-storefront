@@ -1,5 +1,6 @@
 import { addItem, removeItem, updateItem } from '@payloadcms/plugin-ecommerce'
 
+import type { Locale } from '@/i18n/routing'
 import { cartItemMatcher } from '@/collections/carts'
 import { validateIntent, type CartIntent, type PurchasableProduct } from '@/lib/catalog/cart-intent'
 import { getProductsByIds } from '@/lib/catalog/queries'
@@ -44,8 +45,9 @@ function purchasable(product: ProductDetail): PurchasableProduct {
  */
 export async function checkIntent(
   intent: CartIntent,
+  locale: Locale,
 ): Promise<{ ok: true; product: ProductDetail } | (CartOpResult & { ok: false })> {
-  const products = await getProductsByIds([intent.productId])
+  const products = await getProductsByIds([intent.productId], locale)
   const product = products.get(intent.productId)
   if (!product) return { ok: false, reason: 'unavailable', field: 'product' }
 

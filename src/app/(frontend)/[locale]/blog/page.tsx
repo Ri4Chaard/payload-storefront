@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { ArticleMosaic } from '@/components/blog/article-mosaic'
 import { CategoryTabs } from '@/components/blog/category-tabs'
 import { PageHeaderBlock } from '@/components/blocks/page-header'
@@ -44,7 +45,8 @@ export const dynamic = 'force-dynamic'
  * newest article's photograph would misrepresent the blog as that article.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const index = await getBlogIndex({ page: 1 })
+  const locale = await currentLocale()
+  const index = await getBlogIndex({ locale, page: 1 })
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
@@ -83,11 +85,12 @@ interface BlogIndexProps {
 }
 
 export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
+  const locale = await currentLocale()
   const query = await searchParams
   const category = parseCategory(query.category)
   const page = parsePage(query.page)
 
-  const index = await getBlogIndex({ ...(category ? { category } : {}), page })
+  const index = await getBlogIndex({ locale, ...(category ? { category } : {}), page })
 
   /*
     `null` means the database was unreachable — a container build, and nothing else. Render the

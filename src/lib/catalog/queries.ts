@@ -12,7 +12,7 @@
  * 1. **Everything was already `async`**, including bodies that did no waiting. A signature that
  *    changes shape at swap time is not a seam, and none of these changed.
  * 2. **Filtering, sorting and paging happen inside `getListing`.** They still do — see the note on
- *    `catalogue()` for what runs in the database and what cannot.
+ *    `catalogue(locale)` for what runs in the database and what cannot.
  * 3. **Drafts are excluded by the access rule, not by a filter here.** The fixture body needed a
  *    `published()` predicate because an array has no access control; the real one passes
  *    `overrideAccess: false` and lets `adminOrPublishedStatus` do it. That predicate was deleted
@@ -31,6 +31,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import type { Category, Collection, Product, Size } from '@/payload-types'
 
 import { COLOURS, DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
@@ -94,9 +95,11 @@ const client = cache(async () => getPayload({ config }))
  * into the query. That is recorded as T304 rather than guessed at now, because the hook has to be
  * written and backfilled and it is not what closes the 002 deviation.
  */
-const catalogue = cache(async (): Promise<Product[]> => {
+const catalogue = cache(async (locale: Locale): Promise<Product[]> => {
   const payload = await client()
   const { docs } = await payload.find({
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
     collection: 'products',
     depth: 2,
     limit: 0,
@@ -119,12 +122,12 @@ interface Reference {
   sizes: Size[]
 }
 
-const reference = cache(async (): Promise<Reference> => {
+const reference = cache(async (locale: Locale): Promise<Reference> => {
   const payload = await client()
   const [categories, collections, sizes] = await Promise.all([
-    payload.find({ collection: 'categories', limit: 0, sort: 'order', overrideAccess: false }),
-    payload.find({ collection: 'collections', limit: 0, sort: 'order', overrideAccess: false }),
-    payload.find({ collection: 'sizes', limit: 0, sort: 'order', overrideAccess: false }),
+    payload.find({ locale, fallbackLocale: DEFAULT_LOCALE, collection: 'categories', limit: 0, sort: 'order', overrideAccess: false }),
+    payload.find({ locale, fallbackLocale: DEFAULT_LOCALE, collection: 'collections', limit: 0, sort: 'order', overrideAccess: false }),
+    payload.find({ locale, fallbackLocale: DEFAULT_LOCALE, collection: 'sizes', limit: 0, sort: 'order', overrideAccess: false }),
   ])
   return { categories: categories.docs, collections: collections.docs, sizes: sizes.docs }
 })
@@ -293,8 +296,8 @@ function unknownValues(filters: FilterState, refs: Reference): DroppedFilter[] {
   return dropped
 }
 
-export async function getListing(filters: FilterState): Promise<ListingResult> {
-  const [refs, all] = await Promise.all([reference(), catalogue()])
+export async function getListing(filters: FilterState, locale: Locale): Promise<ListingResult> {
+  const [refs, all] = await Promise.all([reference(locale), catalogue(locale)])
   const ignored = unknownValues(filters, refs)
 
   // A dropped value must not narrow the result — the grid shows what WAS applied, and the notice
@@ -351,9 +354,11 @@ export async function getListing(filters: FilterState): Promise<ListingResult> {
  * The two are deliberately indistinguishable from outside: a 403 on an unpublished slug tells a
  * stranger the piece exists, which is the leak FR-009 is written against.
  */
-export async function getProduct(slug: string): Promise<ProductDetail | null> {
+export async function getProduct(slug: string, locale: Locale): Promise<ProductDetail | null> {
   const payload = await client()
   const { docs } = await payload.find({
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
     collection: 'products',
     depth: 2,
     limit: 1,
@@ -386,11 +391,13 @@ export async function getProduct(slug: string): Promise<ProductDetail | null> {
  * Returned as a `Map` because the caller is iterating cart lines and asking "and this one?" — a
  * list would make every line a linear scan of the catalogue.
  */
-export async function getProductsByIds(ids: number[]): Promise<Map<number, ProductDetail>> {
+export async function getProductsByIds(ids: number[], locale: Locale): Promise<Map<number, ProductDetail>> {
   if (ids.length === 0) return new Map()
 
   const payload = await client()
   const { docs } = await payload.find({
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
     collection: 'products',
     depth: 2,
     limit: 0,
@@ -404,7 +411,7 @@ export async function getProductsByIds(ids: number[]): Promise<Map<number, Produ
 /**
  * Every published slug, for the product route's `generateStaticParams` (003/T294).
  *
- * **Not `catalogue()`.** That cache holds fully resolved documents because a page draws them;
+ * **Not `catalogue(locale)`.** That cache holds fully resolved documents because a page draws them;
  * a list of strings has no business filling it, and `depth: 0` with `select` is the difference
  * between one cheap query at build time and thirty products' worth of joins thrown away.
  *
@@ -415,6 +422,7 @@ export async function getProductsByIds(ids: number[]): Promise<Map<number, Produ
 export async function getProductSlugs(): Promise<string[]> {
   const payload = await client()
   const { docs } = await payload.find({
+    /* No locale: `slug` is shared across languages (spec 010, R7), so this read is language-free. */
     collection: 'products',
     depth: 0,
     limit: 0,
@@ -424,8 +432,8 @@ export async function getProductSlugs(): Promise<string[]> {
   return docs.map((product) => product.slug)
 }
 
-export async function getCategories(): Promise<CategorySummary[]> {
-  const { categories } = await reference()
+export async function getCategories(locale: Locale): Promise<CategorySummary[]> {
+  const { categories } = await reference(locale)
   // `order` is the column the owner drags in the admin; ties fall back to id so that two
   // categories sharing an order do not swap places between requests.
   return [...categories]
@@ -451,8 +459,8 @@ function facet(
  * filters, which loses the option they were about to press; showing a zero is the honest answer to
  * "do you have this".
  */
-export async function getFilterFacets(categorySlug?: string): Promise<FilterFacets> {
-  const [refs, all] = await Promise.all([reference(), catalogue()])
+export async function getFilterFacets(locale: Locale, categorySlug?: string): Promise<FilterFacets> {
+  const [refs, all] = await Promise.all([reference(locale), catalogue(locale)])
 
   const within = categorySlug
     ? all.filter(
@@ -509,8 +517,8 @@ export async function getFilterFacets(categorySlug?: string): Promise<FilterFace
  * _Complete the Collection_. An empty array means the band does not render (FR-037) — a "related"
  * strip padded out with whatever else is in the shop is worse than no strip.
  */
-export async function getRelated(productId: number, limit = 4): Promise<ProductSummary[]> {
-  const all = await catalogue()
+export async function getRelated(productId: number, locale: Locale, limit = 4): Promise<ProductSummary[]> {
+  const all = await catalogue(locale)
   const product = all.find((entry) => entry.id === productId)
   if (!product) return []
 
@@ -536,13 +544,13 @@ export async function getRelated(productId: number, limit = 4): Promise<ProductS
  * Four by default: the drawn row is four cards across at 1920 and the band's own arrows appear only
  * when there are more than fit, so four is the number that draws exactly as designed.
  */
-export async function getFeatured(limit = 4): Promise<ProductSummary[]> {
-  const all = await catalogue()
+export async function getFeatured(locale: Locale, limit = 4): Promise<ProductSummary[]> {
+  const all = await catalogue(locale)
   return all.slice(0, limit).map(toProductSummary)
 }
 
-export async function getShopContent(): Promise<ShopContent> {
+export async function getShopContent(locale: Locale): Promise<ShopContent> {
   const payload = await client()
-  const shop = await payload.findGlobal({ slug: 'shop', depth: 0, overrideAccess: false })
+  const shop = await payload.findGlobal({ locale, fallbackLocale: DEFAULT_LOCALE, slug: 'shop', depth: 0, overrideAccess: false })
   return toShopContent(shop)
 }

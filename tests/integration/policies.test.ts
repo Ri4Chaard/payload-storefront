@@ -66,7 +66,7 @@ describe('draft policies are unreachable, not merely hidden', () => {
     const slug = `t-draft-${Date.now()}`
     await make({ slug, title: 'Draft Policy', _status: 'draft' })
 
-    expect(await getPolicyBySlug(slug)).toBeNull()
+    expect(await getPolicyBySlug(slug, 'en')).toBeNull()
   })
 
   it('a draft is not readable through the collection API either', async () => {
@@ -87,7 +87,7 @@ describe('draft policies are unreachable, not merely hidden', () => {
     const slug = `t-live-${Date.now()}`
     await make({ slug, title: 'Live Policy', subtitle: 'Last Updated: Today' })
 
-    const policy = await getPolicyBySlug(slug)
+    const policy = await getPolicyBySlug(slug, 'en')
 
     expect(policy?.title).toBe('Live Policy')
     expect(policy?.href).toBe(`/legal/${slug}`)
@@ -142,7 +142,7 @@ describe('the footer follows what is published', () => {
     await make({ slug: `t-l1-${stamp}`, title: 'First Legal', footerPlacement: 'legal', footerOrder: 910 })
     await make({ slug: `t-cc-${stamp}`, title: 'A Care Page', footerPlacement: 'customer-care', footerOrder: 900 })
 
-    const { legal, customerCare } = await getFooterPolicies()
+    const { legal, customerCare } = await getFooterPolicies('en')
     const labels = legal.map((link) => link.label)
 
     expect(labels.indexOf('First Legal')).toBeLessThan(labels.indexOf('Second Legal'))
@@ -154,7 +154,7 @@ describe('the footer follows what is published', () => {
     const stamp = Date.now()
     await make({ slug: `t-hidden-${stamp}`, title: 'Deliberately Unlisted', footerPlacement: 'hidden' })
 
-    const { legal, customerCare } = await getFooterPolicies()
+    const { legal, customerCare } = await getFooterPolicies('en')
     const all = [...legal, ...customerCare].map((link) => link.label)
 
     expect(all).not.toContain('Deliberately Unlisted')
@@ -170,7 +170,7 @@ describe('the footer follows what is published', () => {
       _status: 'draft',
     })
 
-    const { legal } = await getFooterPolicies()
+    const { legal } = await getFooterPolicies('en')
     expect(legal.map((link) => link.label)).not.toContain('Withdrawn Policy')
   })
 })

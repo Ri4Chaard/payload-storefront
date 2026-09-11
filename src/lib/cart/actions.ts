@@ -2,6 +2,7 @@
 
 import { refresh } from 'next/cache'
 
+import type { Locale } from '@/i18n/routing'
 import type { CustomerUser } from '@/lib/auth/dal'
 import type { CartIntent } from '@/lib/catalog/cart-intent'
 import { CATALOG_CURRENCY, formatPrice } from '@/lib/catalog/price'
@@ -81,9 +82,9 @@ async function settle(): Promise<number> {
  * is not defensive style, it is what stops a displayed price from becoming a charged one:
  * everything the total is built from is read on the server, from the published catalogue.
  */
-export async function addToCart(intent: CartIntent): Promise<CartActionResult> {
+export async function addToCart(intent: CartIntent, locale: Locale): Promise<CartActionResult> {
   try {
-    const checked = await checkIntent(intent)
+    const checked = await checkIntent(intent, locale)
     if (!checked.ok) return checked
 
     const owner = await resolveCartOwner()
@@ -164,11 +165,11 @@ export async function removeLine(lineId: string): Promise<CartActionResult> {
  * copyable message and the shop's contact details — the modal always offers that (FR-024), so an
  * empty messenger list is an ordinary success with an empty array.
  */
-export async function beginCheckout(): Promise<CheckoutResult> {
+export async function beginCheckout(locale: Locale): Promise<CheckoutResult> {
   try {
     // Re-read rather than trusting whatever the page was rendered with. A cart can go stale between
     // the render and the press, and the message must describe what is true now.
-    const cart = await getCart()
+    const cart = await getCart(locale)
     if (cart.empty) return { ok: false, reason: 'empty' }
     if (cart.issues.length > 0) return { ok: false, reason: 'issues' }
 
@@ -205,9 +206,9 @@ export async function beginCheckout(): Promise<CheckoutResult> {
  * The piece is validated exactly as ADD TO CART validates it, against the published catalogue, then
  * described to the composer as a one-line cart. It never becomes a row anywhere.
  */
-export async function buyNow(intent: CartIntent): Promise<CheckoutResult> {
+export async function buyNow(intent: CartIntent, locale: Locale): Promise<CheckoutResult> {
   try {
-    const checked = await checkIntent(intent)
+    const checked = await checkIntent(intent, locale)
     if (!checked.ok) {
       // The refusals BUY NOW can raise are the ones ADD TO CART raises; the product page already
       // has words for them, so this reports the same shape rather than inventing a second set.

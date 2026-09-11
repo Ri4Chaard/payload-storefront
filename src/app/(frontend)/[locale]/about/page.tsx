@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { BlockRenderer } from '@/components/blocks'
 import { getStoryPage } from '@/lib/story/queries'
 
@@ -40,11 +41,12 @@ const HREF = '/about'
  * owner who fills in nothing still gets — and they are computed from the composed page, which means
  * they follow a reorder instead of naming a band that has moved or gone.
  *
- * This calls `getStoryPage()` a second time and pays nothing for it: the loader is `cache()`-wrapped,
+ * This calls `getStoryPage(locale)` a second time and pays nothing for it: the loader is `cache()`-wrapped,
  * so the render and the metadata share one read.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getStoryPage()
+  const locale = await currentLocale()
+  const page = await getStoryPage(locale)
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
@@ -80,7 +82,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const page = await getStoryPage()
+  const locale = await currentLocale()
+  const page = await getStoryPage(locale)
 
   /*
     `null` means the database was unreachable — a container build, and nothing else. An empty

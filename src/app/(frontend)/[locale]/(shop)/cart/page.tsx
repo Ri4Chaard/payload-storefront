@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { CartEmpty, CartLines, OrderSummary } from '@/components/commerce'
 import { SectionHeading } from '@/components/sections'
 import { Container } from '@/components/ui'
@@ -31,7 +32,8 @@ export const metadata: Metadata = {
 }
 
 export default async function CartPage() {
-  const cart = await getCart()
+  const locale = await currentLocale()
+  const cart = await getCart(locale)
 
   return (
     <>

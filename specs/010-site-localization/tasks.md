@@ -229,15 +229,37 @@ publish, and see each on its Russian address while the English versions are unch
 
 ### Data layer for User Story 2
 
-- [ ] T054 [P] [US2] Thread an explicit `locale` parameter through `src/lib/catalog/queries.ts` into every `payload.find`/`findGlobal` call with `fallbackLocale: DEFAULT_LOCALE`. A parameter, **not** an internal root-params call — `sitemap.ts` is a Route Handler and would throw.
-- [ ] T055 [P] [US2] The same for `src/lib/blog/queries.ts`.
-- [ ] T056 [P] [US2] The same for `src/lib/policies/queries.ts`, including `getFooterPolicies` and `getCookieSettings`, which the root layout calls.
-- [ ] T057 [P] [US2] The same for `src/lib/contact/queries.ts`, `src/lib/questions/`, `src/lib/story/` and `src/lib/messengers/settings.ts`.
-- [ ] T058 [US2] Pass `await currentLocale()` from every page and layout under `src/app/(frontend)/[locale]/**` and from each `generateMetadata` into those loaders; no component below the page reaches for the locale itself.
+- [X] T054 [P] [US2] Thread an explicit `locale` parameter through `src/lib/catalog/queries.ts` into every `payload.find`/`findGlobal` call with `fallbackLocale: DEFAULT_LOCALE`. A parameter, **not** an internal root-params call — `sitemap.ts` is a Route Handler and would throw.
+- [X] T055 [P] [US2] The same for `src/lib/blog/queries.ts`.
+- [X] T056 [P] [US2] The same for `src/lib/policies/queries.ts`, including `getFooterPolicies` and `getCookieSettings`, which the root layout calls.
+- [X] T057 [P] [US2] The same for `src/lib/contact/queries.ts`, `src/lib/questions/`, `src/lib/story/` and `src/lib/messengers/settings.ts`.
+- [X] T058 [US2] Pass `await currentLocale()` from every page and layout under `src/app/(frontend)/[locale]/**` and from each `generateMetadata` into those loaders; no component below the page reaches for the locale itself.
 - [ ] T059 [US2] Verify in `/admin` that switching editing language shows per-language values for word fields and one shared value for images, prices, dates and slugs — the editorial verification Constitution's workflow section requires before merge.
 
-**Checkpoint**: The owner can translate the site and visitors can read the translations. US1 + US2
-together are a shippable product with all three languages on.
+**Checkpoint**: ✅ Proven end to end against a production server. One Russian title written straight
+into `policies_locales`, then:
+
+| Address | `<h1>` |
+| --- | --- |
+| `/legal/privacy` | `Privacy Policy` |
+| `/ru/legal/privacy` | `ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ` |
+| `/uk/legal/privacy` | `Privacy Policy` — the fallback, not a blank heading (US7, FR-046) |
+
+> **The locale reached further than the loaders.** Threading it surfaced three call sites the plan
+> had not named, all of them places where `next/root-params` cannot reach and the contract's rule
+> therefore had to hold:
+>
+> - **`src/lib/cart/*`** — `getCart`, `checkIntent`, `addToCart`, `buyNow` and `beginCheckout` are
+>   reached from Server Actions, so each takes the locale as an argument. Without it a Russian
+>   visitor's cart line comes back in English.
+> - **`src/app/sitemap.ts`** — a Route Handler, so it names `DEFAULT_LOCALE` explicitly. Harmless
+>   here because a sitemap lists addresses and a slug is shared across languages.
+> - **`product-purchase` and `order-summary`** — client components holding server-action props, so
+>   their prop types gained the locale and they read it from `useLocale()`. This is
+>   `contracts/i18n-modules.md` §5 in practice rather than in principle.
+>
+> `getArticleSlugs`, `getPolicySlugs` and `getProductSlugs` deliberately stayed language-free: they
+> select `slug`, which is shared across all three (R7), so asking for a language would be noise.
 
 ---
 

@@ -38,7 +38,7 @@ const restore: (() => Promise<unknown>)[] = []
 let pendant: ProductDetail
 
 beforeAll(async () => {
-  const withNone = await getProduct('butterfly-diamond-pendant')
+  const withNone = await getProduct('butterfly-diamond-pendant', 'en')
   if (!withNone) throw new Error('Seed the catalogue first: pnpm seed')
   pendant = withNone
 })
@@ -72,7 +72,7 @@ async function rowsOf(owner: CartOwner): Promise<RawCartLine[]> {
 async function view(owner: CartOwner) {
   const rows = await rowsOf(owner)
   const ids = rows.map((row) => Number(row.product)).filter((id) => Number.isInteger(id))
-  return resolveCart(rows, await getProductsByIds(ids))
+  return resolveCart(rows, await getProductsByIds(ids, 'en'))
 }
 
 const intentFor = (product: ProductDetail, quantity = 1) => ({
@@ -133,7 +133,7 @@ describe('a line whose product is withdrawn (FR-014)', () => {
 describe('a line whose stock has gone (FR-014)', () => {
   it('is excluded from the total but still rendered, with the reason in words', async () => {
     const owner = await guest()
-    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-mini-pendant')
+    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-mini-pendant', 'en')
     expect(soldOut, 'the seed keeps a stock-tracked piece with stock').not.toBeNull()
 
     await addLine(owner, owner.cartId, intentFor(soldOut!, 1))
@@ -174,7 +174,7 @@ describe('a line priced differently than when it was added (FR-014)', () => {
 describe('a line asking for more than is left (FR-014)', () => {
   it('clamps the quantity to what remains and says by how much', async () => {
     const owner = await guest()
-    const stocked = await getProduct('butterfly-ruby-pink-sapphire-diamond-mini-pendant')
+    const stocked = await getProduct('butterfly-ruby-pink-sapphire-diamond-mini-pendant', 'en')
 
     await addLine(owner, owner.cartId, intentFor(stocked!, 3))
 

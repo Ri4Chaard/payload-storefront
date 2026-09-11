@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { PageHeaderBlock } from '@/components/blocks/page-header'
 import { FaqBandBlock } from '@/components/blocks/faq-band'
 import { ChannelGrid, type ChannelGridItem } from '@/components/contact/channel-grid'
@@ -44,11 +45,12 @@ const HREF = '/contact'
  * owner who fills in nothing still gets — and they are computed in the mapper from the page's own
  * headline, intro and photograph, so they cannot name a heading the editor has since emptied.
  *
- * This calls `getContactPage()` a second time and pays nothing for it: the loader is
+ * This calls `getContactPage(locale)` a second time and pays nothing for it: the loader is
  * `cache()`-wrapped, so the render and the metadata share one read.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getContactPage()
+  const locale = await currentLocale()
+  const page = await getContactPage(locale)
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
@@ -84,8 +86,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
+  const locale = await currentLocale()
   const [page, socials, details] = await Promise.all([
-    getContactPage(),
+    getContactPage(locale),
     getSocialLinks(),
     getContactDetails(),
   ])

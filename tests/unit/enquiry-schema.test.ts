@@ -115,18 +115,21 @@ describe('enquirySchema', () => {
 })
 
 describe('readEnquiryForm', () => {
-  it('reads the four fields off a form encoding', () => {
+  it('reads the five fields off a form encoding', () => {
     const data = new FormData()
     data.set('name', 'Yara')
     data.set('email', 'yara@example.com')
     data.set('message', 'Hello.')
     data.set('website', '')
+    // The hidden language field spec 010 added (FR-043) — the page knows which language it is.
+    data.set('locale', 'ru')
 
     expect(readEnquiryForm(data)).toEqual({
       name: 'Yara',
       email: 'yara@example.com',
       message: 'Hello.',
       website: '',
+      locale: 'ru',
     })
   })
 
@@ -141,6 +144,9 @@ describe('readEnquiryForm', () => {
       email: '',
       message: '',
       website: '',
+      // Spec 010: absent like the rest, and the schema catches it back to English rather than
+      // failing the submission — a broken language tag must not cost somebody their enquiry.
+      locale: '',
     })
   })
 

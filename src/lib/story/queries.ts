@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 
 import { toStoryPage } from './mappers'
@@ -47,10 +48,12 @@ const client = cache(async () => getPayload({ config }))
  * still fail the build, or the day the database is misconfigured looks exactly like the day the
  * shop has no About page.
  */
-export const getStoryPage = cache(async (): Promise<StoryPage | null> => {
+export const getStoryPage = cache(async (locale: Locale): Promise<StoryPage | null> => {
   try {
     const payload = await client()
     const document = await payload.findGlobal({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       slug: 'story-page',
       depth: 2,
       // The access rules do the work: `adminOrPublishedStatus` on `questions` makes a draft

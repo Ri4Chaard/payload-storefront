@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 
 import { BLOG_PAGE_SIZE } from './blog-url'
@@ -54,10 +55,12 @@ const warnNoDatabase = (what: string): void => {
  * correct rendering of "no categories", and the index above it already handles the `null` case
  * through `getBlogIndex`.
  */
-export const getBlogCategories = cache(async (): Promise<BlogCategory[]> => {
+export const getBlogCategories = cache(async (locale: Locale): Promise<BlogCategory[]> => {
   try {
     const payload = await client()
     const { docs } = await payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       collection: 'article-categories',
       depth: 0,
       limit: 0,
@@ -82,6 +85,7 @@ export const getBlogCategories = cache(async (): Promise<BlogCategory[]> => {
 export const getArticleSlugs = cache(async (): Promise<string[]> => {
   const payload = await client()
   const { docs } = await payload.find({
+    /* No locale: `slug` is shared across languages (spec 010, R7), so this read is language-free. */
     collection: 'articles',
     depth: 0,
     limit: 0,
@@ -102,9 +106,11 @@ export const getArticleSlugs = cache(async (): Promise<string[]> => {
  *
  * Never throws for a missing slug. A URL somebody mistyped is not an error condition.
  */
-export const getArticle = cache(async (slug: string): Promise<ArticleView | null> => {
+export const getArticle = cache(async (slug: string, locale: Locale): Promise<ArticleView | null> => {
   const payload = await client()
   const { docs } = await payload.find({
+    locale,
+    fallbackLocale: DEFAULT_LOCALE,
     collection: 'articles',
     where: { slug: { equals: slug } },
     // The category and the hero's uploads. A chapter's own fields are plain text and lexical.
@@ -119,6 +125,8 @@ export const getArticle = cache(async (slug: string): Promise<ArticleView | null
 })
 
 export interface BlogIndexRequest {
+  /** The language the index is rendered in (spec 010, FR-019). */
+  locale: Locale
   /** A category slug, already known to exist — the route 404s before it gets here. */
   category?: string
   /** Inclusive from one. Page 2 means the first fourteen articles. */
@@ -141,13 +149,15 @@ export interface BlogIndexRequest {
  * is selected.
  */
 export const getBlogIndex = cache(
-  async ({ category, page }: BlogIndexRequest): Promise<BlogIndexView | null> => {
+  async ({ category, locale, page }: BlogIndexRequest): Promise<BlogIndexView | null> => {
     try {
       const payload = await client()
 
       const [blogPage, categories, articles] = await Promise.all([
-        payload.findGlobal({ slug: 'blog-page', depth: 1, overrideAccess: false, draft: false }),
+        payload.findGlobal({ locale, fallbackLocale: DEFAULT_LOCALE, slug: 'blog-page', depth: 1, overrideAccess: false, draft: false }),
         payload.find({
+          locale,
+          fallbackLocale: DEFAULT_LOCALE,
           collection: 'article-categories',
           depth: 0,
           limit: 0,
@@ -155,6 +165,8 @@ export const getBlogIndex = cache(
           overrideAccess: false,
         }),
         payload.find({
+          locale,
+          fallbackLocale: DEFAULT_LOCALE,
           collection: 'articles',
           ...(category ? { where: { 'category.slug': { equals: category } } } : {}),
           depth: 1,

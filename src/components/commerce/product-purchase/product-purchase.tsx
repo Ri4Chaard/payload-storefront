@@ -1,7 +1,9 @@
 'use client'
 
+import { useLocale } from 'next-intl'
 import React from 'react'
 
+import type { Locale } from '@/i18n/routing'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { QuantityStepper } from '@/components/ui/quantity-stepper'
@@ -74,9 +76,17 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
    * The Server Action, handed down by the route. Omitted in a story, where there is no server —
    * the button then does nothing rather than pretending to.
    */
-  onAddToCart?: (intent: CartIntent) => Promise<CartActionResult>
+  /*
+    The language reaches the action as an ARGUMENT (spec 010, FR-042, contracts/i18n-modules.md §5).
+
+    A Server Action cannot call `next/root-params`, and reading the locale cookie inside it would be
+    wrong for a visitor who arrived on a `/ru/…` page from a link and never touched the switcher —
+    they have no cookie, and their cart line would come back in English. The page knows its own
+    language, so the page says.
+  */
+  onAddToCart?: (intent: CartIntent, locale: Locale) => Promise<CartActionResult>
   /** Opens the handoff for this piece alone, leaving the cart untouched (FR-020). */
-  onBuyNow?: (intent: CartIntent) => Promise<CheckoutResult>
+  onBuyNow?: (intent: CartIntent, locale: Locale) => Promise<CheckoutResult>
 }
 
 export function ProductPurchase({
@@ -93,6 +103,7 @@ export function ProductPurchase({
   className,
   ...props
 }: ProductPurchaseProps) {
+  const locale = useLocale() as Locale
   const [diamond, setDiamond] = React.useState<number | null>(null)
   const [size, setSize] = React.useState<string | null>(null)
   const [wanted, setWanted] = React.useState(1)
@@ -159,6 +170,7 @@ export function ProductPurchase({
     startTransition(async () => {
       const result = await onAddToCart(
         intentFrom({ productId, quantity, diamondId: diamond, sizeValue: size, sizes }),
+        locale,
       )
 
       if (result.ok) announceCartCount()
@@ -190,6 +202,7 @@ export function ProductPurchase({
     startTransition(async () => {
       const result = await onBuyNow(
         intentFrom({ productId, quantity, diamondId: diamond, sizeValue: size, sizes }),
+        locale,
       )
 
       if (result.ok) {

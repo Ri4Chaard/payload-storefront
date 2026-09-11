@@ -51,8 +51,8 @@ let ring: ProductDetail
 let pendant: ProductDetail
 
 beforeAll(async () => {
-  const withOptions = await getProduct('paragon-emerald-cut-diamond-engagement-ring')
-  const withNone = await getProduct('butterfly-diamond-pendant')
+  const withOptions = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
+  const withNone = await getProduct('butterfly-diamond-pendant', 'en')
   if (!withOptions || !withNone) {
     throw new Error('Seed the catalogue first: pnpm seed')
   }
@@ -133,7 +133,7 @@ describe('what may be added (FR-002, FR-003)', () => {
     const id = draft.docs[0]?.id
     expect(id, 'the seed keeps one draft so this rule is exercised').toBeDefined()
 
-    expect(await checkIntent({ productId: id!, quantity: 1 })).toEqual({
+    expect(await checkIntent({ productId: id!, quantity: 1 }, 'en')).toEqual({
       ok: false,
       reason: 'unavailable',
       field: 'product',
@@ -141,7 +141,7 @@ describe('what may be added (FR-002, FR-003)', () => {
   })
 
   it('refuses a product id that names nothing', async () => {
-    expect(await checkIntent({ productId: 999_999, quantity: 1 })).toEqual({
+    expect(await checkIntent({ productId: 999_999, quantity: 1 }, 'en')).toEqual({
       ok: false,
       reason: 'unavailable',
       field: 'product',
@@ -149,14 +149,14 @@ describe('what may be added (FR-002, FR-003)', () => {
   })
 
   it('names the unmade choice rather than refusing vaguely', async () => {
-    const withoutStone = await checkIntent({ productId: ring.id, quantity: 1, sizeId: ring.sizes[0]!.id })
+    const withoutStone = await checkIntent({ productId: ring.id, quantity: 1, sizeId: ring.sizes[0]!.id }, 'en')
     expect(withoutStone).toEqual({ ok: false, reason: 'missing-option', field: 'diamond' })
 
     const withoutSize = await checkIntent({
       productId: ring.id,
       quantity: 1,
       variantId: ring.diamondOptions[0]!.id,
-    })
+    }, 'en')
     expect(withoutSize).toEqual({ ok: false, reason: 'missing-option', field: 'size' })
   })
 
@@ -165,11 +165,11 @@ describe('what may be added (FR-002, FR-003)', () => {
    * page. FR-002 wants the refusal to name the piece rather than send the visitor to fix a stone.
    */
   it('refuses a piece that is stock tracked and sold out, naming the piece', async () => {
-    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-ear-climbers')
+    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-ear-climbers', 'en')
     expect(soldOut, 'the seed keeps one sold-out piece so this rule is exercised').not.toBeNull()
     expect(soldOut!.available).toBe(false)
 
-    expect(await checkIntent({ productId: soldOut!.id, quantity: 1 })).toEqual({
+    expect(await checkIntent({ productId: soldOut!.id, quantity: 1 }, 'en')).toEqual({
       ok: false,
       reason: 'unavailable',
       field: 'product',
@@ -177,13 +177,13 @@ describe('what may be added (FR-002, FR-003)', () => {
   })
 
   it('accepts a piece that offers no choices at all', async () => {
-    const checked = await checkIntent({ productId: pendant.id, quantity: 1 })
+    const checked = await checkIntent({ productId: pendant.id, quantity: 1 }, 'en')
     expect(checked.ok).toBe(true)
   })
 
   it('refuses a quantity that is not a positive whole number', async () => {
     for (const quantity of [0, -1, 1.5]) {
-      const checked = await checkIntent(intentFor(ring, { quantity }))
+      const checked = await checkIntent(intentFor(ring, { quantity }), 'en')
       expect(checked, `quantity ${quantity}`).toEqual({
         ok: false,
         reason: 'error',
@@ -256,7 +256,7 @@ describe('the displayed total is computed here, not read from the cart row', () 
     const rows = await rowsOf(owner)
     const view = resolveCart(
       rows,
-      await getProductsByIds(rows.map((row) => Number(row.product))),
+      await getProductsByIds(rows.map((row) => Number(row.product)), 'en'),
     )
 
     const stored = await payload.findByID({
@@ -296,7 +296,7 @@ describe('buy now never touches the cart (FR-020, SC-005)', () => {
 
     // A different piece entirely, through the path BUY NOW takes: validate, then compose. Nothing
     // in that path may reach the cart.
-    const checked = await checkIntent(intentFor(pendant))
+    const checked = await checkIntent(intentFor(pendant), 'en')
     expect(checked.ok).toBe(true)
 
     const after = await rowsOf(owner)
@@ -305,7 +305,7 @@ describe('buy now never touches the cart (FR-020, SC-005)', () => {
 
   it('does not create a cart for a visitor who has none', async () => {
     const before = await payload.count({ collection: 'carts', overrideAccess: true })
-    await checkIntent({ productId: pendant.id, quantity: 1 })
+    await checkIntent({ productId: pendant.id, quantity: 1 }, 'en')
     const after = await payload.count({ collection: 'carts', overrideAccess: true })
 
     expect(after.totalDocs).toBe(before.totalDocs)

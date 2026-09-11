@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { DEFAULT_BANNER_BODY_HTML } from '@/globals/cookie-settings'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 
@@ -32,10 +33,12 @@ import type { CookieSettings, FooterPolicies, Policy } from './types'
 const client = cache(async () => getPayload({ config }))
 
 /** One published policy, or `null` — which the route turns into a 404. */
-export const getPolicyBySlug = cache(async (slug: string): Promise<Policy | null> => {
+export const getPolicyBySlug = cache(async (slug: string, locale: Locale): Promise<Policy | null> => {
   try {
     const payload = await client()
     const found = await payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       collection: 'policies',
       where: { slug: { equals: slug } },
       limit: 1,
@@ -58,12 +61,14 @@ export const getPolicyBySlug = cache(async (slug: string): Promise<Policy | null
  * Unpublishing removes a policy from this result, and therefore from the footer, with nothing else
  * to remember — which is the whole point of the footer reading content instead of a constant.
  */
-export const getFooterPolicies = cache(async (): Promise<FooterPolicies> => {
+export const getFooterPolicies = cache(async (locale: Locale): Promise<FooterPolicies> => {
   const empty: FooterPolicies = { legal: [], customerCare: [] }
 
   try {
     const payload = await client()
     const found = await payload.find({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       collection: 'policies',
       where: { footerPlacement: { not_equals: 'hidden' } },
       sort: 'footerOrder',
@@ -97,6 +102,7 @@ export const getFooterPolicies = cache(async (): Promise<FooterPolicies> => {
 export const getPolicySlugs = cache(async (): Promise<string[]> => {
   const payload = await client()
   const found = await payload.find({
+    /* No locale: `slug` is shared across languages (spec 010, R7), so this read is language-free. */
     collection: 'policies',
     limit: 0,
     depth: 0,
@@ -119,10 +125,12 @@ export const getPolicySlugs = cache(async (): Promise<string[]> => {
  * A failure returns the disabled shape rather than throwing. A site that cannot read its cookie
  * settings must not show a consent banner it cannot describe.
  */
-export const getCookieSettings = cache(async (): Promise<CookieSettings> => {
+export const getCookieSettings = cache(async (locale: Locale): Promise<CookieSettings> => {
   try {
     const payload = await client()
     const document = await payload.findGlobal({
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
       slug: 'cookie-settings',
       depth: 1,
       overrideAccess: false,

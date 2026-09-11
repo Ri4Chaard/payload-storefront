@@ -91,14 +91,14 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
       beside it: a Local API read is not a request-time API, so this does not opt any route into
       dynamic rendering, and it tolerates the database being absent during a container build.
     */
-    getFooterPolicies(),
+    getFooterPolicies(locale),
     /*
       The banner's configuration (spec 009, FR-045). A fourth read on the same terms — and the same
       reason it is read HERE rather than in the banner: the banner is a client component, and having
       it fetch its own categories would cost a request per page view to render something the server
       already had.
     */
-    getCookieSettings(),
+    getCookieSettings(locale),
   ])
 
   // Each surface gets what it draws, rather than the whole record spread at it: the strip and the

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { AboutBand, CategoryBand, Hero, JewelryCarousel } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
 import { getCategories, getFeatured } from '@/lib/catalog/queries'
@@ -59,8 +60,9 @@ export const metadata: Metadata = {
 const CATEGORY_CTA = 'View collection'
 
 export default async function HomePage() {
+  const locale = await currentLocale()
   const { hero, categories, featured, about } = homeContent
-  const [pieces, shopCategories] = await Promise.all([getFeatured(), getCategories()])
+  const [pieces, shopCategories] = await Promise.all([getFeatured(locale), getCategories(locale)])
 
   /**
    * Only the categories that have a photograph. `CategoryCard` is a picture with a title over it,

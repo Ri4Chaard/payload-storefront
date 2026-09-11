@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 
+import { currentLocale } from '@/i18n/locale'
 import { PageHeaderBlock } from '@/components/blocks/page-header'
 import { Container, EmptyState, QuestionList } from '@/components/ui'
 import { getAllPublishedQuestions, getFaqPage } from '@/lib/questions/queries'
@@ -29,7 +30,8 @@ export const dynamic = 'force-dynamic'
 const HREF = '/faq'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getFaqPage()
+  const locale = await currentLocale()
+  const page = await getFaqPage(locale)
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
@@ -89,7 +91,8 @@ function faqStructuredData(questions: Question[]) {
 }
 
 export default async function FaqPage() {
-  const [page, questions] = await Promise.all([getFaqPage(), getAllPublishedQuestions()])
+  const locale = await currentLocale()
+  const [page, questions] = await Promise.all([getFaqPage(locale), getAllPublishedQuestions(locale)])
 
   /*
     `null` means the database was unreachable — a container build, and nothing else. The chrome
