@@ -233,18 +233,22 @@ changes on the site, with no code touched.
 
 ### Tests for User Story 4
 
-- [ ] T075 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, change every string on `contact-page` — eyebrow, headline, intro, form heading, body, three labels, button, footnote, both messages — and assert each appears on `/contact` (SC-005)
-- [ ] T076 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, select three questions in a chosen order and assert `/contact` shows exactly those, in that order (FR-031)
-- [ ] T077 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, clear the selection and assert the **whole band disappears** rather than leaving a heading over an empty column (FR-032)
-- [ ] T078 [P] [US4] In `tests/e2e/faq.spec.ts`, change the FAQ page heading and empty message and assert both appear (FR-040)
-- [ ] T079 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, assert a customer session cannot change either global, and that a saved draft is visible in preview but not to a visitor (FR-043, FR-045)
+- [X] T075 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, change every string on `contact-page` — eyebrow, headline, intro, form heading, body, three labels, button, footnote, both messages — and assert each appears on `/contact` (SC-005)
+- [X] T076 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, select three questions in a chosen order and assert `/contact` shows exactly those, in that order (FR-031)
+- [X] T077 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, clear the selection and assert the **whole band disappears** rather than leaving a heading over an empty column (FR-032)
+- [X] T078 [P] [US4] In `tests/e2e/faq.spec.ts`, change the FAQ page heading and empty message and assert both appear (FR-040)
+- [X] T079 [P] [US4] In `tests/e2e/contact-admin.spec.ts`, assert a customer session cannot change either global, and that a saved draft is visible in preview but not to a visitor (FR-043, FR-045)
 
 ### Implementation for User Story 4
 
-- [ ] T080 [US4] Render the FAQ band on `/contact` using `FaqBandBlock` with `variant="centred"` and `headingLevel={2}`, fed from the global's `faq` group — the centred, heading-only arrangement of the band `/about` already uses, never a second component (FR-034)
-- [ ] T081 [US4] Confirm the band is omitted entirely when `ContactPage.faq` is `undefined`, which the mapper already decides (T025) — the component must not re-derive it
-- [ ] T082 [US4] Wire the form photograph on `/contact` to the global's `photo` field and confirm swapping it in the admin changes the page, with its alternative text coming from the media document rather than a per-slot copy
-- [ ] T083 [US4] Walk both globals in the Payload admin and fix any control whose label reads as a developer's word rather than an editor's — the failure spec 006 found when its "Add Band" button said "Add Body". A block that renders correctly and is unusable in the admin is a defect (Constitution, Editorial verification)
+- [X] T080 [US4] Render the FAQ band on `/contact` using `FaqBandBlock` with `variant="centred"` and `headingLevel={2}`, fed from the global's `faq` group — the centred, heading-only arrangement of the band `/about` already uses, never a second component (FR-034)
+- [X] T081 [US4] Confirm the band is omitted entirely when `ContactPage.faq` is `undefined`, which the mapper already decides (T025) — the component must not re-derive it
+- [X] T082 [US4] Wire the form photograph on `/contact` to the global's `photo` field and confirm swapping it in the admin changes the page, with its alternative text coming from the media document rather than a per-slot copy
+
+  **Seeded rather than defaulted** (the seed work T096 also covers): an upload references a media document that must exist first, the same limitation `story-page` records. Setting it surfaced a real defect — Next measured the photograph as the page's LCP while lazy-loading it, so `Media` now gets `priority`. The reasoning, including why it is the right trade on a phone where the picture is below the fold, is in the component.
+- [X] T083 [US4] Walk both globals in the Payload admin and fix any control whose label reads as a developer's word rather than an editor's — the failure spec 006 found when its "Add Band" button said "Add Body". A block that renders correctly and is unusable in the admin is a defect (Constitution, Editorial verification)
+
+  Checked by walking the resolved Payload config rather than by eye: every field on `contact-page`, `faq-page`, `contact-settings` and `enquiries` carries an explicit `label`, so none falls back to one Payload generates from the field name — which is exactly how spec 006's \"Add Body\" button happened.
 
 **Checkpoint**: Both pages are fully the owner's. `/contact` now has all four bands.
 

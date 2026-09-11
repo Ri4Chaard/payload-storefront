@@ -60,6 +60,18 @@ export function MessageBand({ heading, body, form }: MessageBandProps) {
               picture beside a form they came to type in.
             */
             sizes="(min-width: 1280px) 50vw, 100vw"
+            /*
+              Eager, because Next measured it as this page's Largest Contentful Paint and was
+              lazy-loading it — the band sits directly under a 290px card row, so at desktop and
+              tablet the photograph is in the viewport on arrival.
+
+              It is genuinely below the fold on a phone, where it is drawn beneath the whole form,
+              and `priority` cannot be conditional on viewport. This is the right side of that
+              trade: it is the only image on the page, and a phone spends the bytes on the one
+              picture it was going to load a moment later anyway, where a desktop visitor gets an
+              LCP that is not waiting on a lazy fetch (Constitution V).
+            */
+            priority
             className="h-full w-full"
           />
         </div>

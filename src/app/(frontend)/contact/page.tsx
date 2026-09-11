@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { PageHeaderBlock } from '@/components/blocks/page-header'
+import { FaqBandBlock } from '@/components/blocks/faq-band'
 import { ChannelGrid, type ChannelGridItem } from '@/components/contact/channel-grid'
 import { MessageBand } from '@/components/contact/message-band'
 import { getContactPage } from '@/lib/contact/queries'
@@ -89,6 +90,24 @@ export default async function ContactPage() {
         {...(page.form.body ? { body: page.form.body } : {})}
         form={page.form}
       />
+      {/*
+        The centred variant of the band `/about` already uses (FR-034) — a heading over a single
+        column, no intro and no button, exactly as `312:8689` draws it. One band with two
+        arrangements, never a second component.
+
+        **Absent entirely when the editor has chosen no questions**, or when every question they
+        chose has been unpublished. That decision is the mapper's: `ContactPage.faq` is `undefined`
+        rather than an empty list, so this component cannot forget it and the rule is testable
+        without rendering anything (FR-032).
+      */}
+      {page.faq ? (
+        <FaqBandBlock
+          variant="centred"
+          heading={page.faq.heading}
+          questions={page.faq.questions}
+          headingLevel={2}
+        />
+      ) : null}
     </>
   )
 }

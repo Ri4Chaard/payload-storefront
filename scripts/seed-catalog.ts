@@ -973,6 +973,34 @@ console.log(
   `      ${BLOG_CATEGORIES.length} categories, ${SEED_ARTICLES.length} articles, ${FEATURE_CHAPTERS.length} chapters on the feature`,
 )
 
+/*
+  The contact page's photograph (008/T096).
+
+  **The copy ships as the global's field defaults; the picture cannot** — an upload references a
+  media document that has to exist first, which is the same limitation `story-page` records above.
+  Without this the band renders without a photograph, which is correct under FR-023 and simply
+  thinner than drawn.
+
+  The questions band is deliberately left unselected: FR-032 means it does not appear until an
+  editor chooses questions, and a seed that picked some for them would put words on the page that
+  nobody decided to say.
+*/
+console.log('› contact page')
+const contactPhoto = await upsertMedia(
+  'contact-send-us-a-message.webp',
+  'A diamond necklace and matching earrings in an open jewellery case',
+)
+
+await payload.updateGlobal({
+  slug: 'contact-page',
+  // Only the photograph. Every string on this page is a field default, so writing them here would
+  // create a second copy of the shipped wording that could drift from the one in the global.
+  data: { form: { photo: contactPhoto.id } } as never,
+  context: skipRevalidation,
+})
+
+console.log('      1 photograph on the contact form')
+
 console.log('\nSeeded.')
 process.exit(0)
 
