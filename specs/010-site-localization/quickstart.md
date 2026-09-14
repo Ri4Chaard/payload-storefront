@@ -346,6 +346,14 @@ needs a session silently sees an anonymous visitor: the profile saves nothing, `
 row with `customer_id IS NULL`, and the page renders as though nothing happened. No error is logged
 anywhere. Use port 3000.
 
+**And `EMAIL_TRANSPORT=log` is not optional either — this one spends real money.**
+`playwright.config.ts` sets it on the server **it** starts, and nowhere else. Point the suite at your
+own `pnpm start` with `PLAYWRIGHT_BASE_URL` and that flag is absent, so every registration, every
+password reset and every resend in the account specs goes through the real Resend adapter and spends
+real quota. Roughly twenty sends per full run. `EMAIL_OVERRIDE_RECIPIENT` keeps them all going to one
+address rather than to invented customers, which contains the damage but not the cost. Start an
+external server as `EMAIL_TRANSPORT=log PORT=3000 pnpm start`.
+
 ### The sixteen failures this feature did not cause
 
 Twelve of them are one inherited defect: **the cookie banner is 900px tall at a 390x700 viewport**,
@@ -441,3 +449,31 @@ per-language values for the word fields and one shared value for images, prices,
 This is the check the Constitution's workflow section requires before merge, and it is the one thing
 in this spec no automated test can stand in for — the schema can be right in every assertion and
 still be wrong about which fields an editor expects to differ.
+
+### Seeding all three languages (T110, second pass)
+
+`pnpm seed:translations` grew from a four-document demonstration into the full pass. Run it after
+`pnpm seed` and `pnpm seed:policies`; it writes 99 documents per language — 4 categories, 4
+collections, 4 article categories, 3 attributes, 31 products, 7 articles, 31 photographs, the 6 FAQ
+answers, 4 policy headings and the shop, blog, FAQ and contact globals.
+
+The words live in `scripts/seed-translations-data.ts` with no code in it, so a translator can be
+handed one file. The apply loop is `scripts/seed-translations.ts`: find by slug, write the locale,
+report what was missing rather than creating it — a translation with nothing to attach to means the
+English seed did not run, and quietly creating half a document would hide that.
+
+**Three things stay English on purpose**, and a reviewer should expect to see them that way: article
+chapter bodies, policy bodies and the Story page's blocks. They are the long-form editorial a real
+site spends months translating, and a seed that hid that state would misrepresent what the site looks
+like the week after this ships. The policy bodies are the sharpest case — a placeholder paragraph
+saying "not translated yet" was written first and then removed, because on a legal page it REPLACES
+the text a visitor came to read with a note about its absence. Falling back to the authoritative
+English leaves them able to read the terms, and `fallback.spec.ts` was right to fail on the
+placeholder.
+
+One real finding came out of seeding it: with Russian titles, **`ProductCard`'s title truncates at
+`xl`** where the English one fits. That is `xl:truncate` — the design's own decision that one line is
+enough at that width, with the ellipsis as the affordance — so `text-length.spec.ts` now skips
+elements whose `text-overflow` is `ellipsis` and tests only for text cut off flush with nothing to
+say it is missing. Worth knowing before launch: the Russian and Ukrainian catalogue shows more
+ellipses than the English one.

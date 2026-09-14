@@ -1,24 +1,49 @@
 import config from '@payload-config'
-import { getPayload } from 'payload'
+import { getPayload, type Payload } from 'payload'
 
+import { SECONDARY_LOCALES, type Locale } from '@/i18n/routing'
 import { skipRevalidation } from '@/lib/revalidate'
 
+import {
+  ARTICLES,
+  ARTICLE_CATEGORIES,
+  ATTRIBUTES,
+  BLOG_PAGE,
+  CATEGORIES,
+  COLLECTIONS,
+  CONTACT_FORM,
+  CONTACT_PAGE,
+  FAQ_PAGE,
+  MEDIA,
+  POLICIES,
+  PRODUCTS,
+  QUESTIONS,
+  SHOP,
+} from './seed-translations-data'
+
 /**
- * Sample Russian and Ukrainian content, so three languages can be SEEN (spec 010, T110).
+ * Russian and Ukrainian for everything the English seeds create (spec 010, T110).
  *
- * **Not a translation of the site — a demonstration that the machinery works.** A reviewer opening
- * `/ru/legal/privacy` should find Russian words there without first having to write any, and an
- * editor should be able to see what a half-translated document looks like, because that is the state
- * the site will spend months in. It touches one policy, one category, one product and one article per
- * language and leaves everything else to fall back, which is deliberate: a fully translated seed
- * would hide the fallback behaviour this feature depends on.
+ * **Run it after `pnpm seed` and `pnpm seed:policies`, never instead of them.** Those two write the
+ * documents; this one writes the other two languages into documents that already exist. A document
+ * it cannot find is reported and skipped rather than created, because a translation with nothing to
+ * attach to is a sign the English seed did not run, and silently creating a half-document would hide
+ * that.
+ *
+ * **Idempotent.** Every write is an update keyed by slug, so re-running overwrites the same fields
+ * with the same words. It is safe to run against a database that is already translated, and safe to
+ * run twice.
  *
  * **Every write passes `context: skipRevalidation`.** This runs under `payload run`, where there is
  * no request scope for `revalidatePath` to reach — it throws `Invariant: static generation store
  * missing` rather than doing nothing — and a dev server running alongside is a different process
  * whose cache this one could not invalidate anyway. The same rule every other seed script follows.
  *
- * Idempotent: re-running overwrites the same documents with the same words.
+ * **What it deliberately leaves in English**, so that a reviewer can see the fallback working on a
+ * real page rather than only in a test: the article chapter bodies, the policy bodies (see
+ * `seed-translations-data.ts` for why those are a special case), and the Story page's blocks. Those
+ * are the long-form editorial that a real site spends months translating, and a seed that hid that
+ * state would be lying about what the site looks like the week after this ships.
  */
 
 /** Lexical's node shape, as Payload's generated type describes it. */
@@ -31,9 +56,7 @@ const paragraph = (text: string): Node => ({
   version: 1,
   direction: 'ltr',
   textFormat: 0,
-  children: [
-    { type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 },
-  ],
+  children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 }],
 })
 
 /** `direction` is a literal union in the generated type, so it is narrowed rather than inferred. */
@@ -48,183 +71,186 @@ const richText = (...paragraphs: string[]) => ({
   },
 })
 
-const COOKIE_POLICY = {
-  ru: { title: 'ПОЛИТИКА COOKIE' },
-  uk: { title: 'ПОЛІТИКА COOKIE' },
-} as const
+/** What happened, counted rather than narrated — one line per collection instead of per document. */
+type Tally = { missing: string[]; refused: string[]; written: number }
 
-const POLICY = {
-  ru: {
-    title: 'ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ',
-    subtitle: 'Обновлено: август 2026',
-    body: richText(
-      'Мы собираем только те данные, которые нужны, чтобы принять и выполнить ваш заказ: имя, адрес эл. почты и адрес доставки.',
-      'Мы не продаём ваши данные. Вы можете в любой момент запросить их копию или удаление, написав нам.',
-    ),
-  },
-  uk: {
-    title: 'ПОЛІТИКА КОНФІДЕНЦІЙНОСТІ',
-    subtitle: 'Оновлено: серпень 2026',
-    body: richText(
-      'Ми збираємо лише ті дані, які потрібні, щоб прийняти та виконати ваше замовлення: ім’я, адресу ел. пошти та адресу доставки.',
-      'Ми не продаємо ваші дані. Ви можете будь-коли запросити їхню копію або видалення, написавши нам.',
-    ),
-  },
-} as const
+const tally = (): Tally => ({ missing: [], refused: [], written: 0 })
+
+const report = (label: string, locale: Locale, counts: Tally): void => {
+  const parts = [`${counts.written} written`]
+  if (counts.missing.length > 0) parts.push(`${counts.missing.length} not found`)
+  if (counts.refused.length > 0) parts.push(`${counts.refused.length} refused`)
+  const mark = counts.refused.length > 0 ? '!' : counts.missing.length > 0 ? '–' : '✓'
+  console.log(`  ${mark} ${locale}: ${label} — ${parts.join(', ')}`)
+  for (const slug of counts.missing) console.log(`      not found: ${slug}`)
+  for (const detail of counts.refused) console.log(`      refused: ${detail}`)
+}
 
 /**
- * One product translated, and only its TITLE and DESCRIPTION — not its details.
+ * Update one document per entry of a `{ key: { ru, uk } }` map, found by a field rather than an id.
  *
- * That gap is the point: it is what makes the fallback visible on a real page rather than only in a
- * test, and what an editor will recognise as their own to-do list.
+ * `field` is `slug` for almost everything; `media` has no slug and is found by `filename`, and
+ * `questions` and `attributes` by the English text itself. Passing the lookup field in is what lets
+ * one function serve all six collections.
  */
-const PRODUCT = {
-  ru: { title: 'Многослойное колье-цепочка', description: 'Три цепочки разной длины, носятся вместе или по отдельности.' },
-  uk: { title: 'Багатошарове намисто-ланцюжок', description: 'Три ланцюжки різної довжини, носяться разом або окремо.' },
-} as const
+async function translateCollection(
+  payload: Payload,
+  collection: string,
+  field: string,
+  locale: Locale,
+  entries: Record<string, Record<string, unknown>>,
+  label: string,
+): Promise<void> {
+  const counts = tally()
 
-/**
- * One article, translated only as far as its card goes — title and standfirst.
- *
- * Its chapters stay English on purpose. A reader arriving from `/ru/blog` sees a Russian headline
- * and then an English body, which is exactly the state a real blog passes through and exactly what
- * the per-field fallback is for.
- */
-const ARTICLE = {
-  ru: {
-    title: 'Как выбрать идеальный бриллиант',
-    standfirst: 'Четыре характеристики, по которым оценивают камень, и та, что решает больше всех.',
-  },
-  uk: {
-    title: 'Як обрати ідеальний діамант',
-    standfirst: 'Чотири характеристики, за якими оцінюють камінь, і та, що вирішує найбільше.',
-  },
-} as const
+  for (const [key, data] of Object.entries(entries)) {
+    const { docs } = await payload.find({
+      collection: collection as never,
+      where: { [field]: { equals: key } },
+      limit: 1,
+      overrideAccess: true,
+    })
 
-const CATEGORY = {
-  ru: { title: 'Колье', subtitle: 'Бриллиантовые колье' },
-  uk: { title: 'Намиста', subtitle: 'Діамантові намиста' },
-} as const
+    const doc = docs[0] as { id: number | string } | undefined
+    if (!doc) {
+      counts.missing.push(key)
+      continue
+    }
+
+    try {
+      await payload.update({
+        collection: collection as never,
+        id: doc.id,
+        locale,
+        data: data as never,
+        context: skipRevalidation,
+        overrideAccess: true,
+      })
+      counts.written += 1
+    } catch (error) {
+      const detail = (error as { data?: { errors?: { message?: string; path?: string }[] } }).data
+      counts.refused.push(`${key} — ${JSON.stringify(detail?.errors ?? String(error))}`)
+    }
+  }
+
+  report(label, locale, counts)
+}
+
+async function translateGlobal(
+  payload: Payload,
+  slug: string,
+  locale: Locale,
+  data: Record<string, unknown>,
+  label: string,
+): Promise<void> {
+  const counts = tally()
+  try {
+    await payload.updateGlobal({
+      slug: slug as never,
+      locale,
+      data: data as never,
+      context: skipRevalidation,
+      overrideAccess: true,
+    })
+    counts.written = 1
+  } catch (error) {
+    const detail = (error as { data?: { errors?: { message?: string; path?: string }[] } }).data
+    counts.refused.push(`${slug} — ${JSON.stringify(detail?.errors ?? String(error))}`)
+  }
+  report(label, locale, counts)
+}
+
+/** `{ slug: { ru: {...}, uk: {...} } }` narrowed to one locale: `{ slug: {...} }`. */
+const forLocale = <T extends Record<string, unknown>>(
+  entries: Record<string, Record<'ru' | 'uk', T>>,
+  locale: 'ru' | 'uk',
+): Record<string, T> =>
+  Object.fromEntries(Object.entries(entries).map(([key, value]) => [key, value[locale]]))
 
 async function seed(): Promise<void> {
   const payload = await getPayload({ config })
 
-  console.log('Seeding Russian and Ukrainian sample content…\n')
+  console.log('Seeding Russian and Ukrainian content…\n')
 
-  for (const locale of ['ru', 'uk'] as const) {
-    const policies = await payload.find({
-      collection: 'policies',
-      where: { slug: { equals: 'privacy' } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    const policy = policies.docs[0]
-    if (policy) {
-      await payload.update({
-        collection: 'policies',
-        id: policy.id,
-        locale,
-        data: { ...POLICY[locale] },
-        context: skipRevalidation,
-        overrideAccess: true,
-      })
-      console.log(`  ✓ ${locale}: privacy policy`)
-    } else {
-      console.log(`  – ${locale}: no privacy policy to translate (run seed:policies first)`)
-    }
+  for (const locale of SECONDARY_LOCALES) {
+    await translateCollection(payload, 'categories', 'slug', locale, forLocale(CATEGORIES, locale), 'categories')
+    await translateCollection(payload, 'collections', 'slug', locale, forLocale(COLLECTIONS, locale), 'collections')
+    await translateCollection(payload, 'article-categories', 'slug', locale, forLocale(ARTICLE_CATEGORIES, locale), 'article categories')
+    await translateCollection(payload, 'attributes', 'name', locale, forLocale(ATTRIBUTES, locale), 'attributes')
+    await translateCollection(payload, 'products', 'slug', locale, forLocale(PRODUCTS, locale), 'products')
+    await translateCollection(payload, 'articles', 'slug', locale, forLocale(ARTICLES, locale), 'articles')
+
+    // `media` is found by filename, and carries exactly one word-bearing field.
+    await translateCollection(
+      payload,
+      'media',
+      'filename',
+      locale,
+      Object.fromEntries(Object.entries(MEDIA).map(([file, alt]) => [file, { alt: alt[locale] }])),
+      'photographs',
+    )
+
+    // The FAQ's answers are one paragraph each, wrapped here rather than in the data file.
+    await translateCollection(
+      payload,
+      'questions',
+      'question',
+      locale,
+      Object.fromEntries(
+        Object.entries(QUESTIONS).map(([english, value]) => [
+          english,
+          { question: value[locale].question, answer: richText(value[locale].answer) },
+        ]),
+      ),
+      'the FAQ',
+    )
 
     /*
-      The cookie policy's TITLE only, and only because the footer draws it.
+      **Titles and subtitles only — the bodies fall back, and that is the product decision.**
 
-      Every language's footer links to this document by its title, so an untranslated one leaves a
-      Latin "Cookie Policy" in a Russian footer — the one place on the site where a fallback is
-      conspicuous rather than merely honest. Its body is left to fall back like every other policy's.
+      The first version of this wrote a short paragraph saying "the translation is not ready yet".
+      That is worse than the fallback in the one place it matters most: it REPLACES the legal text a
+      visitor came to read with a note about its absence. A policy falling back to the authoritative
+      English is a reader who can still read the terms; a placeholder is a reader who cannot.
+
+      It is also what `tests/e2e/fallback.spec.ts` measures — `/legal/terms` must render the same
+      number of blocks in all three languages — and that test was right to fail on the placeholder.
     */
-    const cookiePolicies = await payload.find({
-      collection: 'policies',
-      where: { slug: { equals: 'cookies' } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    const cookiePolicy = cookiePolicies.docs[0]
-    if (cookiePolicy) {
-      await payload.update({
-        collection: 'policies',
-        id: cookiePolicy.id,
-        locale,
-        data: { ...COOKIE_POLICY[locale] },
-        context: skipRevalidation,
-        overrideAccess: true,
-      })
-      console.log(`  ✓ ${locale}: cookie policy title (body falls back)`)
-    }
+    await translateCollection(payload, 'policies', 'slug', locale, forLocale(POLICIES, locale), 'policies')
 
-    const products = await payload.find({
-      collection: 'products',
-      where: { slug: { equals: 'layered-chain-necklace' } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    const product = products.docs[0]
-    if (product) {
-      try {
-        await payload.update({
-          collection: 'products',
-          id: product.id,
-          locale,
-          data: { ...PRODUCT[locale] },
-          context: skipRevalidation,
-          overrideAccess: true,
-        })
-        console.log(`  ✓ ${locale}: one product (title and description only — details fall back)`)
-      } catch (error) {
-        const detail = (error as { data?: { errors?: { message?: string; path?: string }[] } }).data
-        console.log(`  ! ${locale}: product refused —`, JSON.stringify(detail?.errors ?? error))
-      }
-    }
+    const shop = SHOP[locale]
+    await translateGlobal(
+      payload,
+      'shop',
+      locale,
+      {
+        detailsTitle: shop.detailsTitle,
+        warrantyTitle: shop.warrantyTitle,
+        deliveryTitle: shop.deliveryTitle,
+        listingSubtitle: shop.listingSubtitle,
+        warranty: richText(...(shop.warranty as string[])),
+        delivery: richText(...(shop.delivery as string[])),
+      },
+      'shop settings',
+    )
 
-    const articles = await payload.find({
-      collection: 'articles',
-      where: { slug: { equals: 'how-to-choose-the-perfect-diamond' } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    const article = articles.docs[0]
-    if (article) {
-      await payload.update({
-        collection: 'articles',
-        id: article.id,
-        locale,
-        data: { ...ARTICLE[locale] },
-        context: skipRevalidation,
-        overrideAccess: true,
-      })
-      console.log(`  ✓ ${locale}: one article (title and standfirst only — chapters fall back)`)
-    } else {
-      console.log(`  – ${locale}: no article to translate (run seed:blog first)`)
-    }
+    await translateGlobal(payload, 'blog-page', locale, BLOG_PAGE[locale], 'the blog page')
+    await translateGlobal(payload, 'faq-page', locale, FAQ_PAGE[locale], 'the FAQ page')
+    await translateGlobal(
+      payload,
+      'contact-page',
+      locale,
+      { ...CONTACT_PAGE[locale], form: CONTACT_FORM[locale] },
+      'the contact page',
+    )
 
-    const categories = await payload.find({
-      collection: 'categories',
-      where: { slug: { equals: 'necklaces' } },
-      limit: 1,
-      overrideAccess: true,
-    })
-    const category = categories.docs[0]
-    if (category) {
-      await payload.update({
-        collection: 'categories',
-        id: category.id,
-        locale,
-        data: { ...CATEGORY[locale] },
-        context: skipRevalidation,
-        overrideAccess: true,
-      })
-      console.log(`  ✓ ${locale}: one category`)
-    }
+    console.log('')
   }
 
-  console.log('\nDone. Everything not listed above falls back to English, on purpose.')
+  console.log(
+    'Done. Article bodies, policy bodies and the Story page stay English on purpose — that is the\n' +
+      'per-field fallback, and it is what a half-translated site actually looks like.',
+  )
   process.exit(0)
 }
 

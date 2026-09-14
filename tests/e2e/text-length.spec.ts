@@ -88,6 +88,15 @@ const clippedOn = async (page: import('@playwright/test').Page, href: string): P
         const box = node.getBoundingClientRect()
         if (box.width <= 1 || box.height <= 1) return false
         if (style.clipPath.startsWith('inset(50%')) return false
+        /*
+          A designed truncation is not a clip. `ProductCard`'s title carries `xl:truncate`, which is
+          `text-overflow: ellipsis` — the design's own decision that one line is enough at that
+          width, with the ellipsis as the affordance saying so. Russian titles run long enough to
+          reach it where English ones do not, and that is the truncation working rather than a box
+          that cannot hold its text. What this test is for is the other kind: text cut off flush,
+          with nothing to tell the reader anything is missing.
+        */
+        if (style.textOverflow === 'ellipsis') return false
         return node.scrollWidth > node.clientWidth + 2
       })
       .map(pathOf)
