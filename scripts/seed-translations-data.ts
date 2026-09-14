@@ -659,3 +659,45 @@ export const CONTACT_FORM: Record<'ru' | 'uk', Record<string, string>> = {
       'Не вдалося отримати ваше повідомлення. Спробуйте ще раз або напишіть нам у WhatsApp, Telegram чи Instagram.',
   },
 }
+
+/**
+ * The home page, which stopped being a fixture file in spec 010.
+ *
+ * `about.body` is an array of paragraphs in the global; it is held here as an array of strings and
+ * wrapped into `{ text }` rows by the apply script, the same way the FAQ's answers are wrapped into
+ * Lexical nodes.
+ */
+export const HOME_PAGE: Record<'ru' | 'uk', Record<string, string | string[]>> = {
+  ru: {
+    heroHeadline: 'Красота выращенных бриллиантов',
+    heroLede:
+      'Каждый бриллиант создаётся с заботой о будущем, без компромиссов в качестве и игре света. Современная роскошь, в которой сходятся безупречная работа, ответственность и доступность',
+    heroCtaLabel: 'В магазин',
+    categoriesHeading: 'Категории',
+    featuredHeading: 'Все украшения',
+    featuredCtaLabel: 'Смотреть все',
+    aboutHeadingLead: 'О бренде',
+    aboutHeadingEmphasis: 'Aurum',
+    aboutCtaLabel: 'Наша история',
+    aboutBody: [
+      'Откройте для себя коллекцию колец с выращенными бриллиантами, где вечная красота встречается с ответственным подходом.',
+      'Идеальны для помолвки, свадьбы или особого случая: в каждом изделии сходятся исключительная игра света, сдержанная роскошь и вневременная элегантность',
+    ],
+  },
+  uk: {
+    heroHeadline: 'Краса вирощених діамантів',
+    heroLede:
+      'Кожен діамант створюється з турботою про майбутнє, без компромісів у якості та грі світла. Сучасна розкіш, у якій сходяться бездоганна робота, відповідальність і доступність',
+    heroCtaLabel: 'До магазину',
+    categoriesHeading: 'Категорії',
+    featuredHeading: 'Усі прикраси',
+    featuredCtaLabel: 'Дивитися все',
+    aboutHeadingLead: 'Про бренд',
+    aboutHeadingEmphasis: 'Aurum',
+    aboutCtaLabel: 'Наша історія',
+    aboutBody: [
+      'Відкрийте для себе колекцію каблучок з вирощеними діамантами, де вічна краса зустрічається з відповідальним підходом.',
+      'Ідеальні для заручин, весілля чи особливої нагоди: у кожному виробі сходяться виняткова гра світла, стримана розкіш і позачасова елегантність',
+    ],
+  },
+}

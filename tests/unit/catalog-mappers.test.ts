@@ -8,7 +8,7 @@ import {
   toProductSummary,
   toShopContent,
 } from '@/lib/catalog/mappers'
-import { categoryFixtures, productFixtures, shopFixture } from '@/mocks/catalog'
+import { categoryFixtures, productFixtures, shopFixture } from '../fixtures/catalog'
 import type { Media, Product } from '@/payload-types'
 
 /**

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { homeContent } from '@/mocks'
+import { featuredFixture } from '../sections.fixtures'
 
 import { JewelryCarousel } from './jewelry-carousel'
 
@@ -12,7 +12,7 @@ const meta = {
   title: 'Sections/JewelryCarousel',
   component: JewelryCarousel,
   parameters: { layout: 'fullscreen' },
-  args: homeContent.featured,
+  args: featuredFixture,
 } satisfies Meta<typeof JewelryCarousel>
 
 export default meta
@@ -34,13 +34,13 @@ export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 export const MoreThanFits: Story = {
   args: {
     items: [
-      ...homeContent.featured.items,
-      ...homeContent.featured.items.map((item) => ({ ...item, href: `${item.href}-2` })),
+      ...featuredFixture.items,
+      ...featuredFixture.items.map((item) => ({ ...item, href: `${item.href}-2` })),
     ],
   },
 }
 
 /** Two pieces. Nothing overflows at any width above a phone, so no arrow ever appears. */
 export const Few: Story = {
-  args: { items: homeContent.featured.items.slice(0, 2) },
+  args: { items: featuredFixture.items.slice(0, 2) },
 }

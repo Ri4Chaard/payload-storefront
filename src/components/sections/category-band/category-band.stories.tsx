@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { homeContent } from '@/mocks'
+import { categoryBandFixture } from '../sections.fixtures'
 
 import { CategoryBand } from './category-band'
 
@@ -12,7 +12,7 @@ const meta = {
   title: 'Sections/CategoryBand',
   component: CategoryBand,
   parameters: { layout: 'fullscreen' },
-  args: homeContent.categories,
+  args: categoryBandFixture,
 } satisfies Meta<typeof CategoryBand>
 
 export default meta
@@ -30,7 +30,7 @@ export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 /** A collection name long enough to prove the tile is not sized by its title. */
 export const WithLongerNames: Story = {
   args: {
-    items: homeContent.categories.items.map((item, index) =>
+    items: categoryBandFixture.items.map((item, index) =>
       index === 0 ? { ...item, title: 'Engagement rings' } : item,
     ),
   },

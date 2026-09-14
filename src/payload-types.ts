@@ -145,6 +145,7 @@ export interface Config {
     shop: Shop;
     'account-settings': AccountSetting;
     'contact-settings': ContactSetting;
+    'home-page': HomePage;
     'story-page': StoryPage;
     'blog-page': BlogPage;
     'contact-page': ContactPage;
@@ -157,6 +158,7 @@ export interface Config {
     shop: ShopSelect<false> | ShopSelect<true>;
     'account-settings': AccountSettingsSelect<false> | AccountSettingsSelect<true>;
     'contact-settings': ContactSettingsSelect<false> | ContactSettingsSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
     'story-page': StoryPageSelect<false> | StoryPageSelect<true>;
     'blog-page': BlogPageSelect<false> | BlogPageSelect<true>;
     'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
@@ -2948,6 +2950,98 @@ export interface ContactSetting {
   createdAt?: string | null;
 }
 /**
+ * The headline, the two band headings, and the About band beneath them.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  /**
+   * The first screen — a photograph with the headline over its lower edge.
+   */
+  hero: {
+    /**
+     * The page’s `h1`. Real text over the photograph, never part of it.
+     */
+    headline: string;
+    /**
+     * The sentence under the headline.
+     */
+    lede: string;
+    /**
+     * The one way in from the hero. It goes to the full catalogue.
+     */
+    ctaLabel: string;
+    /**
+     * The full-bleed backdrop. Decorative — the headline over it already says what it shows — so it needs no alternative text.
+     */
+    photo?: (number | null) | Media;
+  };
+  /**
+   * Above the four category tiles. The tiles themselves are the categories in Catalogue → Categories.
+   */
+  categoriesHeading: string;
+  /**
+   * Above the featured row. The pieces are whichever are marked Featured in Catalogue → Products.
+   */
+  featuredHeading: string;
+  /**
+   * The link beside that heading, to the full catalogue.
+   */
+  featuredCtaLabel: string;
+  /**
+   * The band above the service promises, with a photograph beside it.
+   */
+  about: {
+    /**
+     * Drawn in the text colour, e.g. “About”.
+     */
+    headingLead: string;
+    /**
+     * Drawn in the brand colour, e.g. “Aurum”.
+     */
+    headingEmphasis: string;
+    /**
+     * One box per paragraph. The band draws two.
+     */
+    body?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Goes to the Our Story page.
+     */
+    ctaLabel: string;
+    /**
+     * Stands beside the copy, so it is not decoration — its alternative text comes from the media library.
+     */
+    photo?: (number | null) | Media;
+  };
+  /**
+   * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
+   */
+  seo?: {
+    /**
+     * Shown in search results and the browser tab. Around 60 characters.
+     */
+    title?: string | null;
+    /**
+     * The sentence beneath the title in search results. Around 155 characters.
+     */
+    description?: string | null;
+    /**
+     * Used when the page is shared. Falls back to the first photograph.
+     */
+    image?: (number | null) | Media;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * The /about page. Add, remove and reorder the bands below.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3292,6 +3386,48 @@ export interface ContactSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   messageTemplate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        headline?: T;
+        lede?: T;
+        ctaLabel?: T;
+        photo?: T;
+      };
+  categoriesHeading?: T;
+  featuredHeading?: T;
+  featuredCtaLabel?: T;
+  about?:
+    | T
+    | {
+        headingLead?: T;
+        headingEmphasis?: T;
+        body?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        ctaLabel?: T;
+        photo?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

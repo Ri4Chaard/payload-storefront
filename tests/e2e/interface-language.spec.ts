@@ -114,15 +114,15 @@ const CHROME = Object.entries(en).flatMap(([namespace, entries]) =>
 )
 
 /*
-  The home page is deliberately absent.
+  The home page is here as of spec 010.
 
-  Its hero, about band and featured row still read from `src/mocks` — the last of the deviation spec
-  002 opened, and the one file `eslint-rules/catalog-boundary.mjs` still exempts by name. Those
-  strings are CONTENT that has not been modelled in Payload yet, not interface chrome, so they are
-  not this feature's to translate and a test that failed on them would be failing on another spec's
-  backlog.
+  It was absent for as long as its hero, about band and band headings read `src/mocks/home.ts` —
+  content that had not been modelled in Payload, so a test failing on it would have been failing on
+  another spec's backlog. That file is gone and the words are the `home-page` global, which makes
+  the page ordinary: its chrome is ours and its copy is the owner's.
 */
 const PAGES = [
+  '/',
   '/all-jewelry',
   '/rings',
   '/products/layered-chain-necklace',

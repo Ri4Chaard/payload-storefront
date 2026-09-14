@@ -14,6 +14,7 @@ import {
   CONTACT_FORM,
   CONTACT_PAGE,
   FAQ_PAGE,
+  HOME_PAGE,
   MEDIA,
   POLICIES,
   PRODUCTS,
@@ -232,6 +233,31 @@ async function seed(): Promise<void> {
         delivery: richText(...(shop.delivery as string[])),
       },
       'shop settings',
+    )
+
+    const home = HOME_PAGE[locale]
+    await translateGlobal(
+      payload,
+      'home-page',
+      locale,
+      {
+        hero: {
+          headline: home.heroHeadline,
+          lede: home.heroLede,
+          ctaLabel: home.heroCtaLabel,
+        },
+        categoriesHeading: home.categoriesHeading,
+        featuredHeading: home.featuredHeading,
+        featuredCtaLabel: home.featuredCtaLabel,
+        about: {
+          headingLead: home.aboutHeadingLead,
+          headingEmphasis: home.aboutHeadingEmphasis,
+          ctaLabel: home.aboutCtaLabel,
+          // The array's ROWS are shared across locales; only the text inside them is localized.
+          body: (home.aboutBody as string[]).map((text) => ({ text })),
+        },
+      },
+      'the home page',
     )
 
     await translateGlobal(payload, 'blog-page', locale, BLOG_PAGE[locale], 'the blog page')

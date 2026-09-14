@@ -90,6 +90,10 @@ const DOCUMENT_TYPE_READERS = [
   // `/about`, `/contact` and `/faq` all draw the same rows, and a `/faq` page reading its content
   // out of a module named `story` is the coupling spec 007 had to undo on `PageHeaderBlock`.
   /^src\/lib\/questions\//,
+  // The home page's data tier (spec 010), which exists because the page stopped reading fixtures.
+  // Same job as the four above: `home-page` goes in, the four bands' props come out, and this is
+  // the last file that may name a document.
+  /^src\/lib\/home\//,
   // The contact page's tier (008/T023-T026), and the home of `defaults.ts` — the shop's own
   // fallback details, which moved here from `src/lib/contact.ts` so the tier and the module do not
   // share a name. Fifth instance of the same tier; same reason as the four above.

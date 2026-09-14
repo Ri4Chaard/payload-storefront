@@ -6,8 +6,8 @@ import { currentLocale } from '@/i18n/locale'
 import { AboutBand, CategoryBand, Hero, JewelryCarousel } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
 import { getCategories, getFeatured } from '@/lib/catalog/queries'
+import { getHomeContent } from '@/lib/home/queries'
 import { shopPromises } from '@/lib/shop-promises'
-import { homeContent } from '@/mocks'
 
 /**
  * The home page (002/T108), from Figma node 255:3353.
@@ -17,15 +17,18 @@ import { homeContent } from '@/mocks'
  * changing one prop here, with `JewelryCarousel` untouched. A section that imported the mocks
  * itself would have made that a rewrite.
  *
- * **The categories and the featured pieces are real; the rest of this page is not, yet.** The hero
- * and the about band are not modelled in Payload at all, so they still read `homeContent` — this is
- * the one file the T293 lint rule still lets do that, named rather than covered by a wildcard so
- * that how much is left stays visible.
+ * **Every word on this page now comes from Payload** (spec 010). The hero, the two band headings
+ * and the about band read `home-page`; the tiles and the pieces read the catalogue. `src/mocks/`
+ * is gone, and with it the last of the fixture content spec 002 opened — `payload.config.ts`,
+ * `story-page.ts` and the catalogue-boundary lint rule each named it as the outstanding one.
  *
- * The two bands' HEADINGS stay with the fixtures for the same reason: "Shop by category" and the
- * "View all" link are copy, and copy has no home in the schema yet. What came from Payload is the
- * part an owner changes weekly — which pieces are shown, which categories exist, and the
- * photograph on each tile.
+ * Spec 010 is what forced it. A string in a TypeScript constant has no locale, so the drawn
+ * headline stayed English on `/ru` however much of the interface moved; the only way to translate
+ * it was to give it somewhere to be translated.
+ *
+ * **The page still renders without that global.** `getHomeContent` returns `null` when there is no
+ * database, and each band below is written to be absent rather than empty in that case — the same
+ * rule the catalogue bands already followed.
  *
  * The heading hierarchy is decided here rather than inside the bands, because it is a property of
  * the page: the hero owns the only `h1`, and every band heading is an `h2` beneath it (FR-026).
@@ -64,8 +67,11 @@ export default async function HomePage() {
     It moved out of a module constant when it became a translation (spec 010).
   */
   const CATEGORY_CTA = (await getTranslations('catalog'))('viewCollectionShort')
-  const { hero, categories, featured, about } = homeContent
-  const [pieces, shopCategories] = await Promise.all([getFeatured(locale), getCategories(locale)])
+  const [content, pieces, shopCategories] = await Promise.all([
+    getHomeContent(locale),
+    getFeatured(locale),
+    getCategories(locale),
+  ])
 
   /**
    * Only the categories that have a photograph. `CategoryCard` is a picture with a title over it,
@@ -84,14 +90,22 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero {...hero} />
+      {/*
+        Absent rather than empty without a photograph, like every other band on this page. `Hero` is
+        a full-bleed picture with the headline over its lower edge; drawn with no picture it is a
+        black rectangle, which reads as a broken page rather than as a shorter one. `pnpm seed`
+        uploads it, so this is the state after somebody deletes it in the admin.
+      */}
+      {content?.hero.image ? <Hero {...content.hero} image={content.hero.image} /> : null}
 
       {/*
         Real categories, in the order the owner arranged them. The heading is still fixture copy;
         the tiles are the catalogue. Absent rather than empty when none of them is photographed,
         for the same reason the featured row is.
       */}
-      {tiles.length > 0 ? <CategoryBand heading={categories.heading} items={tiles} /> : null}
+      {content && tiles.length > 0 ? (
+        <CategoryBand heading={content.categoriesHeading} items={tiles} />
+      ) : null}
 
       {/*
         Real pieces, with the band's copy still coming from the fixtures. `JewelryCarousel` takes
@@ -100,9 +114,9 @@ export default async function HomePage() {
         Absent rather than empty when the catalogue is: a heading and a "View all" over no pieces
         advertises a shop with nothing in it, which is worse than a page that is one band shorter.
       */}
-      {pieces.length > 0 ? (
+      {content && pieces.length > 0 ? (
         <JewelryCarousel
-          {...featured}
+          {...content.featured}
           items={pieces.map((piece) => ({
             name: piece.title,
             price: piece.price,
@@ -112,7 +126,7 @@ export default async function HomePage() {
         />
       ) : null}
 
-      <AboutBand {...about} />
+      {content?.about.image ? <AboutBand {...content.about} image={content.about.image} /> : null}
 
       {/*
         The service promises are spec 001's component, consumed unchanged — which is the point of

@@ -20,6 +20,7 @@ import * as migration_20260911_121048_cookie_banner_body_rich_text from './20260
 import * as migration_20260911_135539_localization from './20260911_135539_localization';
 import * as migration_20260911_141700_language_settings from './20260911_141700_language_settings';
 import * as migration_20260911_152747_customer_locale from './20260911_152747_customer_locale';
+import * as migration_20260914_101035_home_page from './20260914_101035_home_page';
 
 export const migrations = [
   {
@@ -130,6 +131,11 @@ export const migrations = [
   {
     up: migration_20260911_152747_customer_locale.up,
     down: migration_20260911_152747_customer_locale.down,
-    name: '20260911_152747_customer_locale'
+    name: '20260911_152747_customer_locale',
+  },
+  {
+    up: migration_20260914_101035_home_page.up,
+    down: migration_20260914_101035_home_page.down,
+    name: '20260914_101035_home_page'
   },
 ];

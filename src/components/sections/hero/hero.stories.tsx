@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { homeContent } from '@/mocks'
+import { heroFixture } from '../sections.fixtures'
 
 import { Hero } from './hero'
 
@@ -16,7 +16,7 @@ const meta = {
   title: 'Sections/Hero',
   component: Hero,
   parameters: { layout: 'fullscreen' },
-  args: homeContent.hero,
+  args: heroFixture,
 } satisfies Meta<typeof Hero>
 
 export default meta

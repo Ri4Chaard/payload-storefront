@@ -8,7 +8,8 @@ import { isAdmin } from '@/lib/access'
  *
  * **The first page on this site whose COMPOSITION comes out of Payload.** Spec 002 shipped the home
  * page reading `src/mocks/home.ts` for its hero and about band, and named that as the last of the
- * deviation it opened. This page is drawn with seven bands and roughly forty distinct strings, and
+ * deviation it opened; spec 010 closed it with the `home-page` global, for the reason this page
+ * anticipated — copy in a constant cannot be edited, and cannot be translated either. This page is drawn with seven bands and roughly forty distinct strings, and
  * Constitution I does not permit any of them to live in a component — nor, once the requester asked
  * for it, the arrangement either.
  *

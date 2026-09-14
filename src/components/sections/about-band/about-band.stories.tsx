@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
-import { homeContent } from '@/mocks'
+import { aboutFixture } from '../sections.fixtures'
 
 import { AboutBand } from './about-band'
 
@@ -9,7 +9,7 @@ const meta = {
   title: 'Sections/AboutBand',
   component: AboutBand,
   parameters: { layout: 'fullscreen' },
-  args: homeContent.about,
+  args: aboutFixture,
 } satisfies Meta<typeof AboutBand>
 
 export default meta
@@ -28,7 +28,7 @@ export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 export const WithLongerCopy: Story = {
   args: {
     body: [
-      ...homeContent.about.body,
+      ...aboutFixture.body,
       'Every stone is independently graded, every setting finished by hand, and every piece ' +
         'delivered with the paperwork to prove it.',
     ],

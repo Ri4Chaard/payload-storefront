@@ -985,6 +985,32 @@ console.log(
   editor chooses questions, and a seed that picked some for them would put words on the page that
   nobody decided to say.
 */
+console.log('› the home page')
+/**
+ * The home page's two photographs (spec 010).
+ *
+ * **Only the photographs, like the contact page above.** Every string in `home-page` is a field
+ * default, so writing them here would create a second copy of the shipped wording that could drift
+ * from the one in the global.
+ *
+ * They were served straight from `public/photography` while the page read `src/mocks/home.ts`. Now
+ * that it reads Payload, the owner has to be able to change the picture behind the headline without
+ * a deployment — the same reasoning the category tiles followed one spec earlier.
+ */
+const heroPhoto = await upsertMedia('hero.webp', 'A model wearing a diamond necklace and earrings')
+const aboutPhoto = await upsertMedia(
+  'about.webp',
+  'A ruby and diamond collar from the Aurum collection',
+)
+
+await payload.updateGlobal({
+  slug: 'home-page',
+  data: { hero: { photo: heroPhoto.id }, about: { photo: aboutPhoto.id } } as never,
+  context: skipRevalidation,
+})
+
+console.log('      2 photographs on the home page')
+
 console.log('› contact page')
 const contactPhoto = await upsertMedia(
   'contact-send-us-a-message.webp',

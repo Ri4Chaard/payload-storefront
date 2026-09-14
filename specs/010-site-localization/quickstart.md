@@ -507,3 +507,39 @@ word-for-word a title an editor owns: `common.cookiePolicy`, `blog.ourBlog`, `na
 
 323 message keys, 28 chrome checks across 13 pages in two languages, and the scanners
 (`scan3`/`scan4` in the session scratch) return nothing but those two institute names.
+
+### `src/mocks/` is gone (spec 002's last deviation, closed here)
+
+The home page's hero, its two band headings and its About copy were served to visitors out of
+`src/mocks/home.ts` — a recorded deviation from Constitution I, staged in spec 001 and narrowed by
+every spec since. `payload.config.ts`, `story-page.ts` and `eslint-rules/catalog-boundary.mjs` each
+named it as the outstanding one.
+
+Spec 010 is what forced it, and the reason is worth recording: **a TypeScript constant has no
+locale.** Eight strings stayed English on `/ru` no matter how much of the interface moved, and the
+only way to translate them was to give them somewhere to be translated. Inlining them into the
+components would have translated them and left the owner exactly as unable to edit them.
+
+So there is a `home-page` global now, flat-fielded like `blog-page`, with the drawn copy as field
+defaults so a fresh install renders the designed page. `pnpm seed` uploads the two photographs —
+`hero.webp` and `about.webp` were in `public/` but had never entered the media library, so the
+owner could not have changed them either. `pnpm seed:translations` writes the Russian and Ukrainian.
+
+What is left of the fixtures is `src/components/sections/sections.fixtures.ts`: specimen props for
+the four bands' stories, beside the components rather than under `src/mocks/`, following
+`filter-toolbar.fixtures.ts`. `src/mocks/catalog.ts` moved to `tests/fixtures/catalog.ts`, where its
+one consumer — a mapper unit test — makes more sense.
+
+`tests/unit/mocks-boundary.test.ts` now asserts the opposite of what it used to. It existed to prove
+the boundary was crossed somewhere, because a lint rule forbidding an import nobody writes passes
+over an empty repository. It proves the deviation is gone instead: no `src/mocks` directory, and
+nothing under `src/` importing one.
+
+`/` joins `interface-language.spec.ts`'s page list for the first time — it was excluded for exactly
+as long as its copy was another spec's backlog. 30 chrome checks now.
+
+**One inherited trap found on the way.** `blog-admin.spec.ts` failed for two runs, and it was not
+the code: 39 abandoned `lifecycle-*` articles had accumulated from crashed runs, and the spec's
+`afterAll` only deletes what its own worker created. Deleting them fixed it, and the same test
+passes at `45b46db` and with this work on top. If that spec starts failing, count the articles
+before reading the diff.

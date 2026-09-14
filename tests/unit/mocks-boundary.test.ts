@@ -1,22 +1,27 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
 /**
- * The mock boundary (002/T135, SC-008; narrowed by 003/T236).
+ * The mock boundary, now closed (002/T135; narrowed by 003/T236; closed by spec 010).
  *
- * Content comes from `src/mocks/` rather than Payload, which is a recorded deviation from
- * Constitution I. What makes it a *staged* deviation rather than a permanent one is that only the
- * catalogue's `queries.ts` and the route-level loaders may read it: swapping in a Payload query is
- * then one file, and no component changes.
+ * **This test used to assert the opposite of what it asserts now, and that is the point.** For
+ * eight specs the storefront served some of its content from `src/mocks/` — a recorded deviation
+ * from Constitution I, staged in spec 001 and narrowed every spec since. What made it a *staged*
+ * deviation rather than a permanent one was that only route loaders could read it, so swapping in
+ * Payload was one file per route. This test proved that boundary was actually crossed somewhere,
+ * because a lint rule forbidding an import nobody writes passes over an empty repository and a gate
+ * that cannot fail is not evidence of anything.
  *
- * **The offender half of this test moved to ESLint** — `catalog/no-mock-imports` in
- * `eslint-rules/catalog-boundary.mjs`. A linter reports at the import, in the editor, while the
- * line is being typed, which is strictly better than a test naming a path after the fact. What a
- * linter structurally CANNOT do is what is left here: assert that the boundary is crossed
- * somewhere. A rule that forbids an import nobody writes passes over an empty repository, and a
- * gate that cannot fail is not evidence of anything.
+ * Spec 010 closed it. The home page's hero, band headings and About copy are the `home-page` global
+ * now; a TypeScript constant has no locale, so the alternative was a page that stayed English in
+ * Russian for ever. What is left of those fixtures is specimen props for Storybook, next to the
+ * components they draw.
+ *
+ * So the gate flips: it no longer proves the deviation is contained, it proves the deviation is
+ * gone. `eslint-rules/catalog-boundary.mjs` keeps `no-mock-imports` for the day somebody
+ * reintroduces the directory — this is what would catch it being reintroduced and then read.
  */
 const ROOT = resolve(import.meta.dirname, '../..')
 
@@ -28,17 +33,19 @@ function walk(dir: string): string[] {
 }
 
 describe('the mock content boundary', () => {
-  it('is actually crossed, or the lint rule guards nothing', () => {
-    const readers = [
-      ...walk(resolve(ROOT, 'src/app')),
-      resolve(ROOT, 'src/lib/catalog/queries.ts'),
-    ]
+  it('has no mock content directory left to guard', () => {
+    expect(
+      existsSync(resolve(ROOT, 'src/mocks')),
+      'src/mocks is back — content the application serves belongs in Payload (Constitution I)',
+    ).toBe(false)
+  })
+
+  it('is read by nothing under src/', () => {
+    const readers = walk(resolve(ROOT, 'src'))
       .filter((file) => /\.tsx?$/.test(file))
       .filter((file) => /from '@\/mocks/.test(readFileSync(file, 'utf8')))
+      .map((file) => file.slice(ROOT.length + 1))
 
-    expect(
-      readers.length,
-      'nothing reads mock content — catalog/no-mock-imports is vacuously satisfied',
-    ).toBeGreaterThan(0)
+    expect(readers, `these still read mock content: ${readers.join(', ')}`).toEqual([])
   })
 })

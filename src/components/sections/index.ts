@@ -14,8 +14,9 @@
  * accessibility sweep reaches them.
  *
  * **Sections never read content.** They receive it. The route-level loader is the only thing that
- * imports from `src/mocks/`, which is what keeps the swap to Payload at one file per route
- * (FR-003, SC-008).
+ * reads it — which is what kept the swap from fixtures to Payload at one file per route (FR-003,
+ * SC-008), and is why spec 010 could retire `src/mocks/` by rewriting one page and none of these.
+ * `sections.fixtures.ts` is what remains of those fixtures: specimen props for the stories.
  */
 export { AboutBand, type AboutBandProps } from './about-band'
 export { CategoryBand, type CategoryBandProps } from './category-band'

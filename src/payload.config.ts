@@ -37,6 +37,7 @@ import {
 } from './fields/address-hooks'
 import { AccountSettings } from './globals/account-settings'
 import { BlogPage } from './globals/blog-page'
+import { HomePage } from './globals/home-page'
 import { ContactPage } from './globals/contact-page'
 import { ContactSettings } from './globals/contact-settings'
 import { CookieSettings } from './globals/cookie-settings'
@@ -73,8 +74,10 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
  * `@payloadcms/plugin-ecommerce`: `products`, `variants`, `variantTypes`, `variantOptions`, and
  * `carts`.
  *
- * The storefront still renders from `src/mocks/` at this point. That is the last remaining part of
- * the deviation spec 002 opened, and it closes in this spec's final phase, in one file.
+ * `src/mocks/` is gone as of spec 010, which closed the last of the deviation spec 002 opened. The
+ * home page's hero, band headings and About copy are the `home-page` global; nothing the storefront
+ * serves comes from a TypeScript constant any more. `tests/unit/mocks-boundary.test.ts` is the gate
+ * that keeps it that way.
  */
 export default buildConfig({
   admin: {
@@ -107,6 +110,7 @@ export default buildConfig({
     Shop,
     AccountSettings,
     ContactSettings,
+    HomePage,
     StoryPage,
     BlogPage,
     ContactPage,
