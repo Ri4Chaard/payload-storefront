@@ -89,7 +89,7 @@ export function AboutBand({
           ))}
         </div>
 
-        <Button href={cta.href} className="uppercase">
+        <Button href={cta.href} className="uppercase" hoverEffect="slide">
           {cta.label}
         </Button>
       </div>

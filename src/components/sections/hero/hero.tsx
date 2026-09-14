@@ -83,7 +83,7 @@ export function Hero({ headline, lede, cta, image, scrim = true, className, ...p
         {lede}
       </p>
 
-      <Button href={cta.href} variant="inverse" className="uppercase">
+      <Button href={cta.href} variant="inverse" hoverEffect="slide" className="uppercase">
         {cta.label}
       </Button>
     </section>

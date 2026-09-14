@@ -107,7 +107,7 @@ export function JewelryCarousel({
       />
 
       {cta ? (
-        <Button href={cta.href} className="uppercase">
+        <Button href={cta.href} className="uppercase" hoverEffect="slide">
           {cta.label}
         </Button>
       ) : null}
