@@ -186,6 +186,33 @@ const renamedFrom = (
   return typeof before === 'string' && before !== after ? before : undefined
 }
 
+/**
+ * A document that has just been created and is not published yet.
+ *
+ * **Nothing public can be stale because of it**, so there is nothing to invalidate: it has no page,
+ * it is in no listing, and no other page draws it. Returning early is therefore correct on its own
+ * terms — but it is also load-bearing, and the reason is worth spelling out, because the failure it
+ * prevents is invisible.
+ *
+ * `products` and `variants` autosave (the e-commerce plugin turns it on, and spec 003 kept it). For
+ * an autosaving collection, Payload's `/create` route does not render a blank form: it calls
+ * `payload.create({ draft: true })` **during the server render of the view** and redirects to the
+ * new document. That write runs this hook, `invalidate()` calls `revalidatePath`, and Next refuses
+ * — "used `revalidatePath` during render which is unsupported" — which is a throw, not a warning.
+ *
+ * Payload's `DocumentView` catches every error, logs it, and returns nothing. So the panel served a
+ * page with a working sidebar and an EMPTY document area: no form, no fields, no error, nothing in
+ * the browser console. `/admin/collections/products/create` had simply stopped existing, and only
+ * the two autosaving collections were affected — every other Create screen worked, which is what
+ * made it look like a products problem rather than a revalidation one.
+ *
+ * Checking `_status` rather than trying to detect the render phase is deliberate: there is no
+ * supported way to ask Next "am I rendering", and a `try`/`catch` around `revalidatePath` would
+ * swallow real failures to keep this one quiet.
+ */
+const isUnpublishedNewDocument = (operation: string, doc: unknown): boolean =>
+  operation === 'create' && (doc as { _status?: unknown } | undefined)?._status === 'draft'
+
 /** The slug on a document, when it has one. */
 const slugOf = (doc: unknown): string | undefined => {
   const slug = (doc as { slug?: unknown } | undefined)?.slug
@@ -200,10 +227,12 @@ export const revalidateOnChange: CollectionAfterChangeHook = async ({
   collection,
   context,
   doc,
+  operation,
   previousDoc,
   req,
 }) => {
   if (context.disableRevalidate) return
+  if (isUnpublishedNewDocument(operation, doc)) return
   await invalidate(req.payload, renamedFrom(collection.slug, doc, previousDoc))
 }
 
@@ -242,9 +271,11 @@ export const revalidateArticleOnChange: CollectionAfterChangeHook = async ({
   collection,
   context,
   doc,
+  operation,
   previousDoc,
 }) => {
   if (context.disableRevalidate) return
+  if (isUnpublishedNewDocument(operation, doc)) return
 
   const slug = slugOf(doc)
   if (slug) await invalidateArticle(slug, renamedFrom(collection.slug, doc, previousDoc))
