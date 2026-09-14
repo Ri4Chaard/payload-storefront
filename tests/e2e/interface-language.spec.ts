@@ -33,6 +33,12 @@ import { acquireSharedContentLock } from '../shared-content-lock'
  * both are Payload content correctly falling back. Substring matching reported all three as
  * failures; whole-string matching reports none of them and still catches every real leak, because a
  * component that forgets to translate renders the English value *as the entire label*.
+ *
+ * **The comparison folds case.** `CookieSettingsButton` rendered "Cookie Settings" while the key
+ * `common.cookieSettings` held "Cookie settings", and one capital letter was enough for the whole
+ * check to walk past it. Nothing about a label's capitalisation makes it more or less translated —
+ * several of them are sentence case in the message file and drawn in capitals by CSS — so case is
+ * noise here, and treating it as signal only hides leaks.
  */
 
 /*
@@ -63,16 +69,40 @@ test.afterAll(async () => {
  *     written, so searching for them proves nothing.
  *   - **Anything under five characters.** "Save", "EN", "Copy" and "Email" appear inside longer
  *     words, inside product names and inside addresses; the noise would swamp the signal.
- *   - **Words that are legitimately the same in every language.** A brand or a borrowed technical
- *     term is not an untranslated string, and asserting it is absent would force a translator to
- *     invent a difference that does not exist.
+ *   - **Values that are word-for-word an editorial title.** See the set below: when the words on the
+ *     page belong to a Payload document, an English rendering is a fallback working correctly.
  */
-const IDENTICAL_ACROSS_LANGUAGES = new Set<string>([])
+const COLLIDES_WITH_EDITORIAL_TITLES = new Set<string>([
+  /*
+    Both of these are word-for-word the title of a document an editor owns, so the string on the
+    page is Payload's and not ours, and an untranslated one is the editor's to-do list rather than a
+    bug in the code (FR-046).
+
+      `common.cookiePolicy`      the banner's link label, and the title of the `policies` document
+                                 the footer links to — the footer's link text comes from the
+                                 document, so it falls back to English until somebody translates it.
+      `blog.ourBlog`, `nav.ourBlog`  the blog index's heading, from the `blog-page` global, and the
+                                 footer's link to it.
+
+    They are named here rather than dropped from the message files because the CODE still needs
+    them: the cookie banner draws its own heading before any policy is fetched.
+  */
+  'common.cookiePolicy',
+  'blog.ourBlog',
+  'nav.ourBlog',
+  // `/about` is almost entirely editorial, and three of its own words collide: the page is titled
+  // "Our Story", one of its bands is headed "Select", and its closing call to action reads
+  // "Contact us" — the same three phrases the footer and the nav use as labels.
+  'nav.ourStory',
+  'nav.contact',
+  'legal.contactUs',
+  'forms.select',
+])
 
 const CHROME = Object.entries(en).flatMap(([namespace, entries]) =>
   Object.entries(entries as Record<string, string>)
     .filter(([key, value]) => {
-      if (IDENTICAL_ACROSS_LANGUAGES.has(`${namespace}.${key}`)) return false
+      if (COLLIDES_WITH_EDITORIAL_TITLES.has(`${namespace}.${key}`)) return false
       if (value.includes('{') || value.includes('<')) return false
       return value.length >= 5
     })
@@ -134,7 +164,7 @@ const visibleStrings = async (page: import('@playwright/test').Page): Promise<Se
     return found
   })
 
-  return new Set([...fromDom, (await page.title()).trim()])
+  return new Set([...fromDom, (await page.title()).trim()].map((entry) => entry.toLowerCase()))
 }
 
 for (const locale of SECONDARY_LOCALES) {
@@ -144,7 +174,7 @@ for (const locale of SECONDARY_LOCALES) {
         await page.goto(`/${locale}${path}`)
         const rendered = await visibleStrings(page)
 
-        const leaked = CHROME.filter((entry) => rendered.has(entry.value)).map(
+        const leaked = CHROME.filter((entry) => rendered.has(entry.value.toLowerCase())).map(
           (entry) => `${entry.id} = "${entry.value}"`,
         )
 

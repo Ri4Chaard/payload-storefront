@@ -22,7 +22,12 @@
     "cookieNoOptional": "There is nothing optional to choose from. This website only uses the cookies it needs to work.",
     "emailUs": "Email us: {email}",
     "callUs": "Call us: {phone}",
-    "emailUsLabel": "Email Us"
+    "emailUsLabel": "Email Us",
+    "cookieConsent": "Cookie consent",
+    "cookiePolicy": "Cookie Policy",
+    "cookieAgree": "Agree",
+    "cookieConfigure": "Configure All Cookies",
+    "cookieTechnical": "Allow Technical Cookies"
   },
   "header": {
     "primaryNav": "Primary",

@@ -328,13 +328,13 @@ Everything below ran against `pnpm build && PORT=3000 pnpm start` with the proje
 | `pnpm check:stories` | 40 components, all with stories |
 | `pnpm test` | 329 passed (28 files) |
 | `pnpm test:integration` | 295 passed (30 files) |
-| `pnpm test:e2e --project=e2e` | 369 passed, 9 failed — **all nine inherited**, see below |
+| `pnpm test:e2e --project=e2e` | 370 passed, 8 failed — **all eight inherited**, see below |
 | `pnpm test:a11y` | 168 passed, 5 failed — **all five inherited** |
 | `pnpm test:stories` | 107 passed, 3 failed — **all three inherited** |
 | `pnpm payload generate:types` | no diff — `payload-types.ts` is current |
-| `pnpm measure:js` | worst route 217.9 KB against a 207.6 KB baseline — 10.3 KB of a 100 KB allowance |
+| `pnpm measure:js` | worst route 218.1 KB against a 207.8 KB baseline — 10.3 KB of a 100 KB allowance |
 
-`/ru/all-jewelry` measures **217.9 KB, identical to `/all-jewelry`**, which is the check that says
+`/ru/all-jewelry` measures **218.1 KB, identical to `/all-jewelry`**, which is the check that says
 message data travels in the flight payload rather than the JavaScript bundle.
 
 **`PORT` is not free, and getting it wrong costs a day.** `NEXT_PUBLIC_SERVER_URL` is
@@ -346,18 +346,18 @@ needs a session silently sees an anonymous visitor: the profile saves nothing, `
 row with `customer_id IS NULL`, and the page renders as though nothing happened. No error is logged
 anywhere. Use port 3000.
 
-### The seventeen failures this feature did not cause
+### The sixteen failures this feature did not cause
 
-Thirteen of them are one inherited defect: **the cookie banner is 900px tall at a 390x700 viewport**,
+Twelve of them are one inherited defect: **the cookie banner is 900px tall at a 390x700 viewport**,
 so it covers the screen and intercepts every click at mobile width.
 `src/components/ui/cookie-banner/` is untouched by spec 010, and its copy is byte-identical before
 and after the migration — 831 characters across 13 text nodes in both the pre-migration dump and
-`cookie_settings_locales`. It accounts for eight e2e failures (the home menu, the listing drawer,
-three product-gallery tests, the cart's keyboard path and `/account` at 390 and 320) and all five
-a11y failures. Which tests it catches varies between runs, because it depends on which mobile-width
-click happens while the banner is on screen. **Capping the banner's height below `md` and letting it
-scroll would return all thirteen** — it is the single highest-value fix in the repository right now,
-and it belongs to spec 009.
+`cookie_settings_locales`. It accounts for seven e2e failures (the home menu, the listing drawer,
+three product-gallery tests and `/account` at 390 and 320) and all five a11y failures. Which tests it
+catches varies between runs, because it depends on which mobile-width click happens while the banner
+is on screen. **Capping the banner's height below `md` and letting it scroll would return all
+twelve** — it is the single highest-value fix in the repository right now, and it belongs to spec
+009.
 
 The other four:
 
@@ -407,3 +407,29 @@ with language:
   in both languages therefore appeared under two different names, so the Russian one looked new. It
   passed only while the label was still untranslated — the very bug being fixed. It now keys on a
   DOM path, and skips `sr-only` controls, whose one-pixel box makes every one of them "clipped".
+
+### The second sweep, after the chrome was wired
+
+Running the derived check for the first time turned up two more classes it could not see, both now
+closed:
+
+- **Case.** `CookieSettingsButton` rendered "Cookie Settings" while `common.cookieSettings` held
+  "Cookie settings", and one capital letter was enough to walk past it. The comparison folds case
+  now — several labels are sentence case in the message file and drawn in capitals by CSS, so case
+  was never signal here.
+- **Kit defaults nobody passes.** `Select` and `SearchField` carried English placeholder defaults
+  (`'Select'`, `'What are you searching for?'`) as default parameters, which cannot call a hook.
+  Both resolve in the body now, the prop still overriding. The first attempt wrote
+  `placeholderProp ?? useTranslations('forms')('select')`, which short-circuits — a conditional hook
+  call that changes hook order the moment a caller passes a placeholder. The translator is read
+  unconditionally.
+
+Seven keys are excluded by name in `interface-language.spec.ts`, each because its English value is
+word-for-word a title an editor owns on this site: `common.cookiePolicy`, `blog.ourBlog`,
+`nav.ourBlog`, `nav.ourStory`, `nav.contact`, `legal.contactUs` and `forms.select`. `/about` alone
+accounts for four of them — it is almost entirely editorial, and its page title, one band heading and
+its closing call to action are "Our Story", "Select" and "Contact us".
+
+`pnpm seed:translations` now also translates the **cookie policy's title**, because the footer links
+to that document by its title and an untranslated one leaves a Latin "Cookie Policy" in a Russian
+footer — the one place on this site where a fallback is conspicuous rather than merely honest.

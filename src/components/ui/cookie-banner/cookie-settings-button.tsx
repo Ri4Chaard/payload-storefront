@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { cn } from '@/lib/cn'
@@ -27,10 +28,10 @@ import { cn } from '@/lib/cn'
 /** The one string both sides share. Exported so neither can typo it independently. */
 export const OPEN_COOKIE_SETTINGS = 'aurum:open-cookie-settings'
 
-/** Fixed, like the chooser's own labels: it names a control rather than saying anything. */
-const LABEL = 'Cookie Settings'
-
 export function CookieSettingsButton({ className }: { className?: string }) {
+  // Names a control rather than saying anything, so it is chrome and lives in the message files.
+  const t_common = useTranslations('common')
+
   return (
     <button
       type="button"
@@ -42,7 +43,7 @@ export function CookieSettingsButton({ className }: { className?: string }) {
         className,
       )}
     >
-      {LABEL}
+      {t_common('cookieSettings')}
     </button>
   )
 }

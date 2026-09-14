@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
@@ -38,7 +39,7 @@ export interface SearchFieldProps extends Omit<React.ComponentProps<'input'>, 't
 export function SearchField({
   label,
   onClear,
-  placeholder = 'What are you searching for?',
+  placeholder: placeholderProp,
   value,
   defaultValue,
   onChange,
@@ -48,6 +49,14 @@ export function SearchField({
   disabled,
   ...props
 }: SearchFieldProps) {
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const t_forms = useTranslations('forms')
+  const placeholder = placeholderProp ?? t_forms('search')
+
   const generated = React.useId()
   const inputId = id ?? generated
   const inputRef = React.useRef<HTMLInputElement>(null)

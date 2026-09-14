@@ -22,7 +22,12 @@
     "cookieNoOptional": "Выбирать нечего: сайт использует только те cookie, без которых он не работает.",
     "emailUs": "Напишите нам: {email}",
     "callUs": "Позвоните нам: {phone}",
-    "emailUsLabel": "Напишите нам"
+    "emailUsLabel": "Напишите нам",
+    "cookieConsent": "Согласие на cookie",
+    "cookiePolicy": "Политика cookie",
+    "cookieAgree": "Принять",
+    "cookieConfigure": "Настроить все cookie",
+    "cookieTechnical": "Только технические cookie"
   },
   "header": {
     "primaryNav": "Основная навигация",

@@ -48,6 +48,11 @@ const richText = (...paragraphs: string[]) => ({
   },
 })
 
+const COOKIE_POLICY = {
+  ru: { title: 'ПОЛИТИКА COOKIE' },
+  uk: { title: 'ПОЛІТИКА COOKIE' },
+} as const
+
 const POLICY = {
   ru: {
     title: 'ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ',
@@ -126,6 +131,32 @@ async function seed(): Promise<void> {
       console.log(`  ✓ ${locale}: privacy policy`)
     } else {
       console.log(`  – ${locale}: no privacy policy to translate (run seed:policies first)`)
+    }
+
+    /*
+      The cookie policy's TITLE only, and only because the footer draws it.
+
+      Every language's footer links to this document by its title, so an untranslated one leaves a
+      Latin "Cookie Policy" in a Russian footer — the one place on the site where a fallback is
+      conspicuous rather than merely honest. Its body is left to fall back like every other policy's.
+    */
+    const cookiePolicies = await payload.find({
+      collection: 'policies',
+      where: { slug: { equals: 'cookies' } },
+      limit: 1,
+      overrideAccess: true,
+    })
+    const cookiePolicy = cookiePolicies.docs[0]
+    if (cookiePolicy) {
+      await payload.update({
+        collection: 'policies',
+        id: cookiePolicy.id,
+        locale,
+        data: { ...COOKIE_POLICY[locale] },
+        context: skipRevalidation,
+        overrideAccess: true,
+      })
+      console.log(`  ✓ ${locale}: cookie policy title (body falls back)`)
     }
 
     const products = await payload.find({

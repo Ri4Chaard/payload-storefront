@@ -22,7 +22,12 @@
     "cookieNoOptional": "Обирати нічого: сайт використовує лише ті cookie, без яких він не працює.",
     "emailUs": "Напишіть нам: {email}",
     "callUs": "Зателефонуйте нам: {phone}",
-    "emailUsLabel": "Напишіть нам"
+    "emailUsLabel": "Напишіть нам",
+    "cookieConsent": "Згода на cookie",
+    "cookiePolicy": "Політика cookie",
+    "cookieAgree": "Прийняти",
+    "cookieConfigure": "Налаштувати всі cookie",
+    "cookieTechnical": "Лише технічні cookie"
   },
   "header": {
     "primaryNav": "Основна навігація",

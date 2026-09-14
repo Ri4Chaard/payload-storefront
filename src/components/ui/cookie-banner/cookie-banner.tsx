@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -57,14 +58,15 @@ import { OPEN_COOKIE_SETTINGS } from './cookie-settings-button'
  * accessible name a screen reader announces stays readable while the design gets the capitals it
  * draws. `Link` inside the paragraph is the Cookie Policy, appended after the owner's text.
  */
-const LABELS = {
-  region: 'Cookie consent',
-  heading: 'Cookie Policy',
-  link: 'Cookie Policy',
-  agree: 'Agree',
-  configure: 'Configure All Cookies',
-  technical: 'Allow Technical Cookies',
-} as const
+const labels = (t_common: ReturnType<typeof useTranslations<'common'>>) =>
+  ({
+    region: t_common('cookieConsent'),
+    heading: t_common('cookiePolicy'),
+    link: t_common('cookiePolicy'),
+    agree: t_common('cookieAgree'),
+    configure: t_common('cookieConfigure'),
+    technical: t_common('cookieTechnical'),
+  }) as const
 
 const CookiePreferences = React.lazy(() =>
   import('@/components/ui/cookie-preferences').then((module) => ({
@@ -78,6 +80,7 @@ export interface CookieBannerProps {
 }
 
 export function CookieBanner({ settings, className }: CookieBannerProps) {
+  const LABELS = labels(useTranslations('common'))
   const { enabled, consentVersion, bannerBodyHtml, categories, policyHref } = settings
 
   /*

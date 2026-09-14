@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
@@ -64,13 +65,21 @@ export function Select({
   options,
   value,
   onChange,
-  placeholder = 'Select',
+  placeholder: placeholderProp,
   disabled = false,
   describedBy,
   invalid = false,
   className,
   ...props
 }: SelectProps) {
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const t_forms = useTranslations('forms')
+  const placeholder = placeholderProp ?? t_forms('select')
+
   const [open, setOpen] = React.useState(false)
   const rootRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLButtonElement>(null)
