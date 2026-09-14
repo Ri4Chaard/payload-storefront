@@ -433,3 +433,11 @@ its closing call to action are "Our Story", "Select" and "Contact us".
 `pnpm seed:translations` now also translates the **cookie policy's title**, because the footer links
 to that document by its title and an untranslated one leaves a Latin "Cookie Policy" in a Russian
 footer — the one place on this site where a fallback is conspicuous rather than merely honest.
+
+### T059, the editorial check — done 2026-09-14
+
+Verified by hand in `/admin` against the running site: switching a document's editing language shows
+per-language values for the word fields and one shared value for images, prices, dates and slugs.
+This is the check the Constitution's workflow section requires before merge, and it is the one thing
+in this spec no automated test can stand in for — the schema can be right in every assertion and
+still be wrong about which fields an editor expects to differ.

@@ -234,7 +234,7 @@ publish, and see each on its Russian address while the English versions are unch
 - [X] T056 [P] [US2] The same for `src/lib/policies/queries.ts`, including `getFooterPolicies` and `getCookieSettings`, which the root layout calls.
 - [X] T057 [P] [US2] The same for `src/lib/contact/queries.ts`, `src/lib/questions/`, `src/lib/story/` and `src/lib/messengers/settings.ts`.
 - [X] T058 [US2] Pass `await currentLocale()` from every page and layout under `src/app/(frontend)/[locale]/**` and from each `generateMetadata` into those loaders; no component below the page reaches for the locale itself.
-- [ ] T059 [US2] Verify in `/admin` that switching editing language shows per-language values for word fields and one shared value for images, prices, dates and slugs — the editorial verification Constitution's workflow section requires before merge.
+- [X] T059 [US2] Verify in `/admin` that switching editing language shows per-language values for word fields and one shared value for images, prices, dates and slugs — the editorial verification Constitution's workflow section requires before merge.
 
 **Checkpoint**: ✅ Proven end to end against a production server. One Russian title written straight
 into `policies_locales`, then:
