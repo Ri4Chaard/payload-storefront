@@ -139,6 +139,16 @@ const LIST = 'flex flex-col items-center gap-2.5 md:items-start md:gap-3.5'
  * arbitrary SVG reach the optimiser. That is a real risk for a gain of zero.
  */
 function Certifications() {
+  /*
+    **The two `alt` strings here stay English in every language, on purpose** (spec 010).
+
+    They are the registered names of two organisations — the Gemological Institute of America and
+    the International Gemological Institute — not descriptions of the marks. Translating an
+    institution's name invents an institution: a reader looking for "GIA" on a certificate would
+    not find "Геммологический институт Америки" printed on it. They are the only English left in
+    the footer, and `tests/e2e/interface-language.spec.ts` does not flag them because they are not
+    message keys.
+  */
   return (
     <div className="flex items-center gap-2.5 md:flex-col md:items-start">
       {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
@@ -112,6 +113,7 @@ export function IconButton({
   className,
   ...props
 }: IconButtonProps) {
+  const t_common = useTranslations('common')
   const reveal = hoverEffect === 'reveal' ? revealSkins[variant] : undefined
 
   const classes = cn(
@@ -203,7 +205,7 @@ export function IconButton({
         {...anchorProps}
       >
         {content}
-        {isExternal ? <span className="sr-only"> (opens in a new tab)</span> : null}
+        {isExternal ? <span className="sr-only">{t_common('opensInNewTab')}</span> : null}
       </a>
     )
   }

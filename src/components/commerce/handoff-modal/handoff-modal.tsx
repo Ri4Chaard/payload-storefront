@@ -111,7 +111,7 @@ export function HandoffModal({
             note={
               messenger.carriesMessage
                 ? undefined
-                : 'Opens an empty chat — copy your order below first.'
+                : t_cart('opensEmptyChat')
             }
             onClick={() => {
               // Copied on the way out for the row that cannot carry it, so the customer arrives
@@ -128,8 +128,8 @@ export function HandoffModal({
       <div className="mt-5 border-t border-black/10 pt-5 pb-7.5">
         <p className="text-body-small text-neutral-primary">
           {messengers.length === 0
-            ? 'No messenger is set up at the moment. Copy your order and send it to us however suits you.'
-            : 'Prefer to send it yourself? Copy your order and paste it anywhere.'}
+            ? t_cart('noMessenger')
+            : t_cart('sendYourself')}
         </p>
 
         <label className="sr-only" htmlFor="handoff-message">
@@ -149,14 +149,14 @@ export function HandoffModal({
 
         <div className="mt-2.5 flex flex-wrap items-center gap-4">
           <Button type="button" variant="secondary" onClick={copy}>
-            {copied ? 'Copied' : 'Copy order'}
+            {copied ? 'Copied' : t_cart('copyOrder')}
           </Button>
           {/*
             `aria-live` rather than a toast: the button's own label changes, and a screen reader
             needs to be told that something happened without the focus moving.
           */}
           <p role="status" aria-live="polite" className="text-body-small text-neutral-secondary">
-            {copied ? 'Your order is on the clipboard.' : ''}
+            {copied ? t_cart('orderCopied') : ''}
           </p>
         </div>
 

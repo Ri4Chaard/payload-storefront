@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -90,13 +91,20 @@ export function CategoryCard({
   title,
   href,
   image,
-  cta = 'View the collection',
+  cta: ctaProp,
   headingLevel = 3,
   sizes = '(min-width: 1280px) 415px, 50vw',
   scrim = true,
   className,
   ...props
 }: CategoryCardProps) {
+  const t_catalog = useTranslations('catalog')
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const cta = ctaProp ?? t_catalog('viewCollection')
   const Heading = `h${headingLevel}` as const
 
   return (

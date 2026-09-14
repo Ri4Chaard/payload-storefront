@@ -34,10 +34,6 @@ import { nameSchema, type NameValues } from '@/lib/auth/schemas'
  * Remounting is what guarantees that, and it closes a second, less obvious hole; `NameDialog`'s
  * `useForm` has the reasoning.
  */
-const ERRORS: Record<string, string> = {
-  nameTooLong: 'That is longer than a name can be here — 100 characters at most.',
-}
-
 export interface NameRowProps {
   firstName: null | string
   lastName: null | string
@@ -99,6 +95,8 @@ interface NameDialogProps extends NameRowProps {
 function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDialogProps) {
   const t_account = useTranslations('account')
   const t_common = useTranslations('common')
+  // Resolved here rather than at module scope: `useTranslations` is a hook (spec 010).
+  const ERRORS: Record<string, string> = { nameTooLong: useTranslations('errors')('nameTooLong') }
   /**
    * **Mounted fresh for each opening, so these are the only values it ever loads.**
    *

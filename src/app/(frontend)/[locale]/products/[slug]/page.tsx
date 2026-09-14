@@ -190,7 +190,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <JewelryCarousel
           heading={t_product('completeCollection')}
           headingId="complete-the-collection"
-          trackLabel="More from this collection"
+          trackLabel={t_product('moreFromCollection')}
           // Five seconds. The row is a shop window beside a piece the visitor is already reading
           // about, so it offers rather than demands: it never starts for someone who asked for
           // reduced motion, holds while it is hovered or focused, and stops for good the moment

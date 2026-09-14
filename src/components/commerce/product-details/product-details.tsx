@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Accordion } from '@/components/ui/accordion'
@@ -59,13 +60,25 @@ export function ProductDetails({
   attributes,
   warrantyHtml,
   deliveryHtml,
-  detailsTitle = 'PRODUCT DETAILS',
-  warrantyTitle = '3 YEAR WARRANTY + FREE RETURNS',
-  deliveryTitle = 'DELIVERY',
+  detailsTitle: detailsTitleProp,
+  warrantyTitle: warrantyTitleProp,
+  deliveryTitle: deliveryTitleProp,
   headingLevel = 2,
   className,
   ...props
 }: ProductDetailsProps) {
+  /*
+    Resolved in the body, not as default parameters: `useTranslations` is a hook (spec 010).
+
+    These three are the developer's fallback for headings the SHOP GLOBAL owns — the caller passes
+    the owner's words whenever there are any, and only an empty global reaches these. Translating
+    them anyway is what stops an unconfigured shop rendering a Russian product page with three
+    English headings on it.
+  */
+  const t_product = useTranslations('product')
+  const detailsTitle = detailsTitleProp ?? t_product('detailsTitleFallback')
+  const warrantyTitle = warrantyTitleProp ?? t_product('warrantyTitleFallback')
+  const deliveryTitle = deliveryTitleProp ?? t_product('deliveryTitleFallback')
   const rows = [
     detailsHtml || attributes.length > 0
       ? {

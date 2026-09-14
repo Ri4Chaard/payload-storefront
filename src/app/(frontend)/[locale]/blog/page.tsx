@@ -47,12 +47,13 @@ export const dynamic = 'force-dynamic'
  * newest article's photograph would misrepresent the blog as that article.
  */
 export async function generateMetadata(): Promise<Metadata> {
+  const t_blog = await getTranslations('blog')
   const locale = await currentLocale()
   const index = await getBlogIndex({ locale, page: 1 })
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
-  if (!index) return { title: 'Our Blog' }
+  if (!index) return { title: t_blog('ourBlog') }
 
   const title = index.seo.title ?? index.fallbacks.title
   const description = index.seo.description
@@ -113,7 +114,7 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
   if (category && !index.categories.some((entry) => entry.slug === category)) notFound()
 
   const active = index.categories.find((entry) => entry.slug === category)
-  const listLabel = active ? `Articles in ${active.title}` : 'Latest articles'
+  const listLabel = active ? `Articles in ${active.title}` : t_blog('latestArticles')
 
   return (
     <>

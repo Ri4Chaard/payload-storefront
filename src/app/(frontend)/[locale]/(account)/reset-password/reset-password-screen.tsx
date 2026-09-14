@@ -66,7 +66,7 @@ export function ResetPasswordScreen({ email, signedIn }: ResetPasswordScreenProp
       subtitle={t_account('enterTheCodeSubtitle')}
       footer={
         <>
-          Didn’t receive the code? <ResendCode email={email} purpose="reset-password" />
+          {t_account('noCodePrompt')} <ResendCode email={email} purpose="reset-password" />
         </>
       }
     >

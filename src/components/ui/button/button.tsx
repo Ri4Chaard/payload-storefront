@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { cn } from '@/lib/cn'
@@ -218,6 +219,7 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
+  const t_common = useTranslations('common')
   const slide = hoverEffect === 'slide' ? slideSkins[variant] : undefined
   const reveal = hoverEffect === 'reveal' ? revealSkins[variant] : undefined
   const animated = slide ?? reveal
@@ -305,7 +307,7 @@ export function Button({
         {...anchorProps}
       >
         {content}
-        {isExternal ? <span className="sr-only"> (opens in a new tab)</span> : null}
+        {isExternal ? <span className="sr-only">{t_common('opensInNewTab')}</span> : null}
       </a>
     )
   }

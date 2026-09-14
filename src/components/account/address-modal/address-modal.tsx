@@ -154,8 +154,8 @@ export function AddressModal({
       onClose={onClose}
       // The design draws one frame, for adding. A modal that says ADD ADDRESS over an address that
       // already exists is worse than a title the frame does not have.
-      title={editing ? 'EDIT ADDRESS' : 'ADD ADDRESS'}
-      closeLabel={editing ? 'Close edit address' : 'Close add address'}
+      title={editing ? t_account('editAddress') : t_account('addAddress')}
+      closeLabel={editing ? t_account('closeEditAddress') : t_account('closeAddAddress')}
       triggerRef={triggerRef}
       footer={
         <>

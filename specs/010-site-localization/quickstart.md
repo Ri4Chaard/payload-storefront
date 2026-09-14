@@ -477,3 +477,33 @@ enough at that width, with the ellipsis as the affordance — so `text-length.sp
 elements whose `text-overflow` is `ellipsis` and tests only for text cut off flush with nothing to
 say it is missing. Worth knowing before launch: the Russian and Ukrainian catalogue shows more
 ellipses than the English one.
+
+### The third sweep — multi-line prose, and defaults nobody passes
+
+The `not-found.tsx` paragraph was found by eye, not by a scan, and it showed the scanner had a blind
+spot: it matched JSX text nodes on ONE line, and that paragraph is wrapped across two. Widening the
+pattern to span newlines turned up seven more of the same shape — the consent line on the cart
+summary, the unavailable-piece note, the change-password confirmation, "Didn't receive the code?" on
+two screens, and the `(opens in a new tab)` announcement in `Button`, `Link` and `IconButton`.
+
+A second sweep for **any** English-looking string literal (not just JSX text) found the rest: fifteen
+default parameters that a caller usually overrides and nobody notices until they don't —
+`Pagination`'s `label`, `LoadMore`'s, `CategoryCard`'s `cta`, `JewelryCarousel`'s `trackLabel`,
+`ProductDetails`' three shop-global fallbacks, `ProductOptions`' two — plus the metadata titles for
+the home, contact, FAQ, About and blog pages and the JSON-LD breadcrumb on an article.
+
+Every one of those is now resolved in the component body rather than as a default parameter, because
+`useTranslations` is a hook. The prop still wins when a caller passes one; what changed is that the
+fallback is translated.
+
+**Two things stay English deliberately**, both in the footer: the `alt` text of the GIA and IGI
+certification marks. They are the registered names of two organisations, not descriptions — a reader
+looking for "GIA" on a certificate will not find "Геммологический институт Америки" printed on it.
+
+Nine keys are excluded by name in `interface-language.spec.ts`, each because its English value is
+word-for-word a title an editor owns: `common.cookiePolicy`, `blog.ourBlog`, `nav.ourBlog`,
+`nav.ourStory`, `nav.contact`, `legal.contactUs`, `forms.select`, `meta.ourStory` and
+`meta.contactUs`.
+
+323 message keys, 28 chrome checks across 13 pages in two languages, and the scanners
+(`scan3`/`scan4` in the session scratch) return nothing but those two institute names.

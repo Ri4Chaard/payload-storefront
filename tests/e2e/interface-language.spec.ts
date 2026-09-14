@@ -97,6 +97,10 @@ const COLLIDES_WITH_EDITORIAL_TITLES = new Set<string>([
   'nav.contact',
   'legal.contactUs',
   'forms.select',
+  // The same two words again, as the metadata fallbacks used when a CMS page is missing entirely.
+  // `meta.contactUs` reaches the footer's link to the contact page, which is a Payload title.
+  'meta.ourStory',
+  'meta.contactUs',
 ])
 
 const CHROME = Object.entries(en).flatMap(([namespace, entries]) =>

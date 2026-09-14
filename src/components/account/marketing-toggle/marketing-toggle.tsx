@@ -31,11 +31,11 @@ export interface MarketingToggleProps {
   subscribed: boolean
 }
 
-const FAILED = 'That did not save. Your preference is unchanged — please try again.'
-
 export function MarketingToggle({ subscribed }: MarketingToggleProps) {
   const t_account = useTranslations('account')
   const t_common = useTranslations('common')
+  // Resolved here rather than at module scope: `useTranslations` is a hook (spec 010).
+  const FAILED = useTranslations('errors')('marketingNotSaved')
   const LABEL = t_account('marketingOptIn')
   const [checked, setChecked] = React.useState(subscribed)
   const [failed, setFailed] = React.useState(false)

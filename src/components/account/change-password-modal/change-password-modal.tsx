@@ -130,7 +130,7 @@ export function ChangePasswordModal() {
       <Modal
         open={open}
         onClose={close}
-        title={saved ? 'PASSWORD CHANGED' : 'CHANGE PASSWORD'}
+        title={saved ? t_account('passwordChanged') : t_account('changePassword')}
         closeLabel={t_account('closeChangePassword')}
         triggerRef={triggerRef}
         footer={
@@ -180,8 +180,7 @@ export function ChangePasswordModal() {
               as an alarm if nothing here has mentioned it.
             */}
             <p className="text-body-small text-neutral-secondary max-w-80">
-              You are still signed in on this device. Any other device has been signed out, and we
-              have emailed you a confirmation.
+              {t_account('stillSignedIn')}
             </p>
           </div>
         ) : (

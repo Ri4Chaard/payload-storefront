@@ -8,6 +8,7 @@
   reaches it.
 */
 import { Link as NextLink } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { cn } from '@/lib/cn'
@@ -62,6 +63,7 @@ export function Link({
   children,
   ...props
 }: LinkProps) {
+  const t_common = useTranslations('common')
   const isExternal = external ?? /^(?:[a-z]+:)?\/\//i.test(href)
   // Only the variants that are NOT underlined at rest get the rule that grows on hover. Drawing
   // both would double the line.
@@ -79,7 +81,7 @@ export function Link({
           )}
         />
       ) : null}
-      {isExternal ? <span className="sr-only"> (opens in a new tab)</span> : null}
+      {isExternal ? <span className="sr-only">{t_common('opensInNewTab')}</span> : null}
     </>
   )
 

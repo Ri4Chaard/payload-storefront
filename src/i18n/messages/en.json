@@ -27,7 +27,8 @@
     "cookiePolicy": "Cookie Policy",
     "cookieAgree": "Agree",
     "cookieConfigure": "Configure All Cookies",
-    "cookieTechnical": "Allow Technical Cookies"
+    "cookieTechnical": "Allow Technical Cookies",
+    "opensInNewTab": " (opens in a new tab)"
   },
   "header": {
     "primaryNav": "Primary",
@@ -61,7 +62,9 @@
     "browseCollection": "Browse the collection",
     "notFound": "Page not found",
     "pageDoesNotExist": "This page does not exist",
-    "backToHome": "Back to the home page"
+    "backToHome": "Back to the home page",
+    "notFoundBody": "The address may have changed, or the piece may no longer be published. Everything we make is in the shop.",
+    "home": "Home"
   },
   "cart": {
     "title": "Items in your cart",
@@ -93,7 +96,11 @@
     "handoffIntro": "To complete your order, please contact us through your preferred social platform.",
     "handoffNote": "Nothing has been ordered yet and no payment is taken on this site. Sending the message opens the conversation, and we will confirm availability, the final price and delivery there.",
     "orderReadyToCopy": "Your order, ready to copy",
-    "consent": "I agree to the <terms>Terms of Use</terms> and <returns>Return Policy.</returns>"
+    "consent": "I agree to the <terms>Terms of Use</terms> and <returns>Return Policy.</returns>",
+    "linesChanged": "Some pieces in your cart have changed — the details are on the rows above.",
+    "linesChangedRetry": "Some pieces in your cart have changed — the details are on the rows above. Press Checkout again to continue.",
+    "opensEmptyChat": "Opens an empty chat — copy your order below first.",
+    "noMessenger": "No messenger is set up at the moment. Copy your order and send it to us however suits you."
   },
   "catalog": {
     "filters": "FILTERS",
@@ -131,7 +138,15 @@
     "emptyCategoryBody": "This category has no pieces published. There is plenty elsewhere.",
     "seeAllJewelry": "See all jewelry",
     "noResultsBody": "Every piece is made in small numbers, so a narrow search can come up empty. Widening it usually helps.",
-    "clearAllFilters": "Clear all filters"
+    "clearAllFilters": "Clear all filters",
+    "featuredJewelry": "Featured jewelry",
+    "showPrevious": "Show previous pieces",
+    "showMore": "Show more pieces",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "viewCollection": "View the collection",
+    "pagination": "Pagination",
+    "viewCollectionShort": "View collection"
   },
   "product": {
     "chooseSize": "Choose a size",
@@ -163,7 +178,11 @@
     "personalSupportBody": "Our specialists will help you choose the perfect piece and answer any questions",
     "securePayments": "Secure payments",
     "securePaymentsBody": "Your information is protected with modern encryption technology",
-    "completeCollection": "Complete the Collection"
+    "completeCollection": "Complete the Collection",
+    "moreFromCollection": "More from this collection",
+    "detailsTitleFallback": "PRODUCT DETAILS",
+    "warrantyTitleFallback": "3 YEAR WARRANTY + FREE RETURNS",
+    "deliveryTitleFallback": "DELIVERY"
   },
   "account": {
     "signIn": "Log in",
@@ -234,7 +253,9 @@
     "metaVerifyEmail": "Verify your email",
     "metaForgotPassword": "Forgot password",
     "metaCreateAccount": "Create account",
-    "metaResetPassword": "Reset your password"
+    "metaResetPassword": "Reset your password",
+    "noCodePrompt": "Didn’t receive the code?",
+    "stillSignedIn": "You are still signed in on this device. Any other device has been signed out, and we have emailed you a confirmation."
   },
   "forms": {
     "emailAddress": "Email Address",
@@ -279,7 +300,10 @@
     "addressTooLong": "That is longer than this field can hold.",
     "addressGone": "That address is no longer saved to your account.",
     "addressRemoveFailed": "That address could not be removed. Reload the page and try again.",
-    "signInLocked": "Too many attempts. For your security, try again in a few minutes or reset your password."
+    "signInLocked": "Too many attempts. For your security, try again in a few minutes or reset your password.",
+    "messageTooLong": "That message is too long — please shorten it.",
+    "tooManyMessages": "That is a lot of messages in a short time. Please give it an hour, or reach us on WhatsApp, Telegram or Instagram.",
+    "marketingNotSaved": "That did not save. Your preference is unchanged — please try again."
   },
   "email": {
     "verifySubject": "Your Aurum verification code",
@@ -302,7 +326,8 @@
     "categories": "Article categories",
     "latest": "Latest",
     "onThisPage": "On this page:",
-    "ourBlog": "Our Blog"
+    "ourBlog": "Our Blog",
+    "latestArticles": "Latest articles"
   },
   "colour": {
     "black": "Black",
@@ -320,6 +345,11 @@
     "baguette": "Baguette"
   },
   "meta": {
-    "siteDescription": "Fine jewelry, made and chosen with care."
+    "siteDescription": "Fine jewelry, made and chosen with care.",
+    "homeTitle": "Aurum — Lab-grown diamond jewelry",
+    "homeDescription": "Lab-grown diamond rings, bracelets, earrings and necklaces. Exceptional brilliance and refined luxury, made with a responsible approach.",
+    "contactUs": "Contact Us",
+    "ourStory": "Our Story",
+    "faq": "Frequently Asked Questions"
   }
 }

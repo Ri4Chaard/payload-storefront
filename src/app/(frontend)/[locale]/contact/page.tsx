@@ -51,14 +51,15 @@ const HREF = '/contact'
  * `cache()`-wrapped, so the render and the metadata share one read.
  */
 export async function generateMetadata(): Promise<Metadata> {
+  const t_meta = await getTranslations('meta')
   const locale = await currentLocale()
   const page = await getContactPage(locale)
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
-  if (!page) return { title: 'Contact Us' }
+  if (!page) return { title: t_meta('contactUs') }
 
-  const title = page.seo.title ?? page.fallbacks.title ?? 'Contact Us'
+  const title = page.seo.title ?? page.fallbacks.title ?? t_meta('contactUs')
   const description = page.seo.description ?? page.fallbacks.description
   const image = page.seo.image ?? page.fallbacks.image
 

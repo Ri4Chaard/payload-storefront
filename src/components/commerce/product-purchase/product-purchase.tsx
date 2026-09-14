@@ -321,7 +321,7 @@ export function ProductPurchase({
       */}
       {!available ? (
         <p role="status" className="text-body-small text-neutral-primary mt-3">
-          This piece is not available to order at the moment.
+          {t_product('notAvailable')}
         </p>
       ) : null}
 

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
@@ -134,10 +135,17 @@ export interface FeatureStripProps extends React.ComponentProps<'div'> {
 
 export function FeatureStrip({
   items,
-  label = 'Why shop with us',
+  label: labelProp,
   className,
   ...props
 }: FeatureStripProps) {
+  const t_product = useTranslations('product')
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const label = labelProp ?? t_product('whyShopWithUs')
   return (
     <ScrollArea
       orientation="horizontal"

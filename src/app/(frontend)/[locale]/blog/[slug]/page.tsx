@@ -116,6 +116,7 @@ export async function generateMetadata({
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const t_blog = await getTranslations('blog')
+  const t_nav = await getTranslations('nav')
   const locale = await currentLocale()
   const { slug } = await params
   const article = await getArticle(slug, locale)
@@ -130,7 +131,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <Container as="article" className="py-10 xl:py-12.5">
-      <ArticleSchema article={article} />
+      <ArticleSchema article={article} blogName={t_blog('ourBlog')} homeName={t_nav('home')} />
       <div className="md:grid md:grid-cols-[1fr_13.75rem] md:gap-8 xl:grid-cols-[1fr_31.25rem] xl:gap-5">
         <div className="md:col-start-1 md:row-start-1">
           <ArticleHeader
@@ -184,7 +185,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
  * `dateModified` is Payload's own `updatedAt` rather than a field an editor maintains. An editor
  * asked to keep a "last updated" date honest will not, and a wrong one is worse than none.
  */
-function ArticleSchema({ article }: { article: ArticleView }) {
+/**
+ * The breadcrumb's two fixed names arrive as props (spec 010).
+ *
+ * This component is synchronous, and `getTranslations` is not — so rather than make the schema
+ * async for two words, the page that already holds the translators hands them down. Structured data
+ * is read by search engines in the language of the page it sits on, so leaving them English on a
+ * Russian article would describe a breadcrumb the visitor never sees.
+ */
+function ArticleSchema({
+  article,
+  blogName,
+  homeName,
+}: {
+  article: ArticleView
+  blogName: string
+  homeName: string
+}) {
   const document = [
     {
       '@context': 'https://schema.org',
@@ -202,8 +219,8 @@ function ArticleSchema({ article }: { article: ArticleView }) {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
-        { '@type': 'ListItem', position: 2, name: 'Our Blog', item: BLOG_ROOT },
+        { '@type': 'ListItem', position: 1, name: homeName, item: '/' },
+        { '@type': 'ListItem', position: 2, name: blogName, item: BLOG_ROOT },
         { '@type': 'ListItem', position: 3, name: article.title, item: article.href },
       ],
     },

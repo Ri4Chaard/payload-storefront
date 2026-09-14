@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { localeAlternates } from '@/lib/i18n/alternates'
@@ -46,14 +47,15 @@ const HREF = '/about'
  * so the render and the metadata share one read.
  */
 export async function generateMetadata(): Promise<Metadata> {
+  const t_meta = await getTranslations('meta')
   const locale = await currentLocale()
   const page = await getStoryPage(locale)
 
   // No database — a container build. Emit the bare title rather than nothing; the first real
   // request replaces it.
-  if (!page) return { title: 'Our Story' }
+  if (!page) return { title: t_meta('ourStory') }
 
-  const title = page.seo.title ?? page.fallbacks.title ?? 'Our Story'
+  const title = page.seo.title ?? page.fallbacks.title ?? t_meta('ourStory')
   const description = page.seo.description ?? page.fallbacks.description
   const image = page.seo.image ?? page.fallbacks.image
 

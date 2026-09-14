@@ -52,13 +52,16 @@ export function ProductOptions({
   onDiamondChange,
   onSizeChange,
   idPrefix = 'product',
-  diamondLabel = 'Choose Your Diamond:',
-  sizeLabel = 'Size:',
+  diamondLabel: diamondLabelProp,
+  sizeLabel: sizeLabelProp,
   disabled = false,
   className,
   ...props
 }: ProductOptionsProps) {
   const t_product = useTranslations('product')
+  // Resolved in the body, not as default parameters: `useTranslations` is a hook (spec 010).
+  const diamondLabel = diamondLabelProp ?? t_product('chooseDiamondHeading')
+  const sizeLabel = sizeLabelProp ?? t_product('sizeLabel')
   if (diamonds.length === 0 && sizes.length === 0) return null
 
   const diamondId = `${idPrefix}-diamond`
@@ -69,7 +72,7 @@ export function ProductOptions({
     label: option.label,
     // The price where it can be bought, the reason it cannot where it cannot. A price beside a
     // stone nobody can order is the less useful of the two.
-    meta: option.available ? option.price : 'Out of stock',
+    meta: option.available ? option.price : t_product('outOfStock'),
     disabled: !option.available,
   }))
 

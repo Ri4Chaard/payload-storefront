@@ -75,7 +75,7 @@ export function OrderSummary({
     if (blocked && !acknowledged) {
       setAcknowledged(true)
       setRefusal(
-        'Some pieces in your cart have changed — the details are on the rows above. Press Checkout again to continue with the cart as it stands.',
+        t_cart('linesChangedRetry'),
       )
       return
     }
@@ -106,7 +106,7 @@ export function OrderSummary({
           result.reason === 'empty'
             ? t_cart('empty')
             : result.reason === 'issues'
-              ? 'Some pieces in your cart have changed — the details are on the rows above.'
+              ? t_cart('linesChanged')
               : t_cart('checkoutFailed'),
         )
         return
@@ -170,12 +170,20 @@ export function OrderSummary({
           setRefusal(null)
         }}
         className="mt-5"
-        label={
-          <>
-            I agree to the <Link href="/terms">Terms of Use</Link> and{' '}
-            <Link href="/returns">Return Policy.</Link>
-          </>
-        }
+        /*
+          `t.rich` rather than a sentence split around two links (spec 010).
+
+          The obvious translation is three strings — "I agree to the", "and", and the two link
+          labels — assembled in this order. That order is English. Russian and Ukrainian put the
+          object before the verb often enough that a fixed assembly produces a sentence a native
+          reader stumbles over, and no translator can fix it from inside the fragments. One message
+          with `<terms>` and `<returns>` tags lets the whole sentence be rewritten, links and all,
+          in the order that language actually wants.
+        */
+        label={t_cart.rich('consent', {
+          terms: (chunks) => <Link href="/terms">{chunks}</Link>,
+          returns: (chunks) => <Link href="/returns">{chunks}</Link>,
+        })}
       />
 
       {/*

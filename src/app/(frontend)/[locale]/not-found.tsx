@@ -28,8 +28,7 @@ export default async function NotFound() {
       <h1 className="text-display uppercase">{t_nav('pageDoesNotExist')}</h1>
 
       <p className="text-body-base text-neutral-secondary max-w-150">
-        The address may have changed, or the piece may no longer be published. Everything we make is
-        in the shop.
+        {t_nav('notFoundBody')}
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-2.5">

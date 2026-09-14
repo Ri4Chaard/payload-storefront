@@ -1,4 +1,5 @@
 import { Link as NextLink } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Icon } from '@/components/ui/icon'
@@ -63,10 +64,17 @@ export function Pagination({
   page,
   totalPages,
   hrefFor,
-  label = 'Pagination',
+  label: labelProp,
   className,
   ...props
 }: PaginationProps) {
+  const t_catalog = useTranslations('catalog')
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const label = labelProp ?? t_catalog('pagination')
   // One page is not a choice, and a control offering none is noise at the foot of every short
   // listing in the shop.
   if (totalPages <= 1) return null
@@ -87,7 +95,7 @@ export function Pagination({
   return (
     <nav aria-label={label} className={cn('flex justify-center', className)} {...props}>
       <ol className="flex items-center gap-2.5">
-        <li>{step(page - 1, 'chevron-left', 'Previous page')}</li>
+        <li>{step(page - 1, 'chevron-left', t_catalog('previousPage'))}</li>
 
         {windowed(page, totalPages).map((entry, index) =>
           entry === GAP ? (
@@ -114,7 +122,7 @@ export function Pagination({
           ),
         )}
 
-        <li>{step(page + 1, 'chevron-right', 'Next page')}</li>
+        <li>{step(page + 1, 'chevron-right', t_catalog('nextPage'))}</li>
       </ol>
     </nav>
   )

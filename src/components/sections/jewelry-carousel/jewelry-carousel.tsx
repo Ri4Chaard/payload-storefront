@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { ProductCard } from '@/components/commerce'
@@ -62,12 +63,19 @@ export function JewelryCarousel({
   heading,
   items,
   cta,
-  trackLabel = 'Featured jewelry',
+  trackLabel: trackLabelProp,
   headingId = 'featured-heading',
   autoAdvance,
   className,
   ...props
 }: JewelryCarouselProps) {
+  const t_catalog = useTranslations('catalog')
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const trackLabel = trackLabelProp ?? t_catalog('featuredJewelry')
   return (
     <Container
       as="section"
@@ -79,8 +87,8 @@ export function JewelryCarousel({
 
       <Carousel
         label={trackLabel}
-        prevLabel="Show previous pieces"
-        nextLabel="Show more pieces"
+        prevLabel={t_catalog('showPrevious')}
+        nextLabel={t_catalog('showMore')}
         autoAdvance={autoAdvance}
         trackClassName="gap-2.5 md:gap-5"
         // 174px, then 400px, then a quarter of the content width less the three gaps between the

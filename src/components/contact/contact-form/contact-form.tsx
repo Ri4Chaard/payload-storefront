@@ -61,7 +61,7 @@ function fieldMessage(
     case 'messageRequired':
       return `${content.labels.message} is required.`
     case 'messageTooLong':
-      return 'That message is too long — please shorten it.'
+      return t_errors('messageTooLong')
     case 'nameRequired':
       return `${content.labels.name} is required.`
     case 'nameTooLong':
@@ -131,7 +131,7 @@ export function ContactForm({ content }: ContactFormProps) {
           className="text-body-medium text-status-error-text mb-5"
         >
           {failure.message === 'throttled'
-            ? 'That is a lot of messages in a short time. Please give it an hour, or reach us on WhatsApp, Telegram or Instagram.'
+            ? t_errors('tooManyMessages')
             : content.messages.error}
         </p>
       ) : null}

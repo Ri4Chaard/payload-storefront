@@ -46,23 +46,24 @@ import { homeContent } from '@/mocks'
  */
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  // Not the layout's `%s — Aurum` template: on the home page that would read "Aurum — Aurum".
-  title: { absolute: 'Aurum — Lab-grown diamond jewelry' },
-  description:
-    'Lab-grown diamond rings, bracelets, earrings and necklaces. Exceptional brilliance and ' +
-    'refined luxury, made with a responsible approach.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t_meta = await getTranslations('meta')
+  return {
+    // Not the layout's `%s — Aurum` template: on the home page that would read "Aurum — Aurum".
+    title: { absolute: t_meta('homeTitle') },
+    description: t_meta('homeDescription'),
+  }
 }
-
-/**
- * Per-tile copy the schema does not hold. One sentence, identical on every tile, drawn at node
- * 138:492 — a field for it would be four copies of the same words for an owner to keep in step.
- */
-const CATEGORY_CTA = 'View collection'
 
 export default async function HomePage() {
   const locale = await currentLocale()
   const t_product = await getTranslations('product')
+  /*
+    Per-tile copy the schema does not hold. One sentence, identical on every tile, drawn at node
+    138:492 — a field for it would be four copies of the same words for an owner to keep in step.
+    It moved out of a module constant when it became a translation (spec 010).
+  */
+  const CATEGORY_CTA = (await getTranslations('catalog'))('viewCollectionShort')
   const { hero, categories, featured, about } = homeContent
   const [pieces, shopCategories] = await Promise.all([getFeatured(locale), getCategories(locale)])
 

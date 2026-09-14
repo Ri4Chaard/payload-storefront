@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import type { ContentsEntry } from '@/lib/blog/types'
@@ -41,10 +42,17 @@ export interface TableOfContentsProps extends Omit<React.ComponentProps<'nav'>, 
 
 export function TableOfContents({
   entries,
-  label = 'On this page:',
+  label: labelProp,
   className,
   ...props
 }: TableOfContentsProps) {
+  const t_blog = useTranslations('blog')
+  /*
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    prop stays overridable, so a caller with its own words still wins — what changed is that the
+    fallback is translated instead of being an English literal.
+  */
+  const label = labelProp ?? t_blog('onThisPage')
   // Below two chapters the list points at what is already on screen. The mapper has usually already
   // dropped it (FR-028); this is the renderer refusing to draw an empty card if it has not.
   if (entries.length < 2) return null

@@ -33,7 +33,7 @@ export function VerifyEmailScreen({ email }: { email: string }) {
       subtitle={t_account('verifySent')}
       footer={
         <>
-          Didn’t receive the code? <ResendCode email={email} />
+          {t_account('noCodePrompt')} <ResendCode email={email} />
         </>
       }
     >
