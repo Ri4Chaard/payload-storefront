@@ -42,6 +42,7 @@ export interface ResetCodeStepProps {
 
 export function ResetCodeStep({ email, onVerified }: ResetCodeStepProps) {
   const t_errors = useTranslations('errors')
+  const t_forms = useTranslations('forms')
 
   const CODE_ERRORS: Record<string, string> = {
     codeAlreadyUsed: t_errors('codeUsed'),
@@ -82,7 +83,7 @@ export function ResetCodeStep({ email, onVerified }: ResetCodeStepProps) {
         name="code"
         render={({ field }) => (
           <OtpInput
-            label="Reset code"
+            label={t_forms('resetCode')}
             name={field.name}
             value={field.value}
             onChange={field.onChange}

@@ -328,10 +328,14 @@ Everything below ran against `pnpm build && PORT=3000 pnpm start` with the proje
 | `pnpm check:stories` | 40 components, all with stories |
 | `pnpm test` | 329 passed (28 files) |
 | `pnpm test:integration` | 295 passed (30 files) |
-| `pnpm test:e2e --project=e2e` | 356 passed, 5 failed — **all five inherited**, see below |
-| `pnpm test:a11y` | 167 passed, 6 failed — **all six inherited**, see below |
-| `pnpm test:stories` | 106 passed, 4 failed — 3 inherited, 1 fixed here |
+| `pnpm test:e2e --project=e2e` | 369 passed, 9 failed — **all nine inherited**, see below |
+| `pnpm test:a11y` | 168 passed, 5 failed — **all five inherited** |
+| `pnpm test:stories` | 107 passed, 3 failed — **all three inherited** |
 | `pnpm payload generate:types` | no diff — `payload-types.ts` is current |
+| `pnpm measure:js` | worst route 217.9 KB against a 207.6 KB baseline — 10.3 KB of a 100 KB allowance |
+
+`/ru/all-jewelry` measures **217.9 KB, identical to `/all-jewelry`**, which is the check that says
+message data travels in the flight payload rather than the JavaScript bundle.
 
 **`PORT` is not free, and getting it wrong costs a day.** `NEXT_PUBLIC_SERVER_URL` is
 `http://localhost:3000`, and Payload derives its CSRF allowlist from it. Payload's cookie token
@@ -342,37 +346,64 @@ needs a session silently sees an anonymous visitor: the profile saves nothing, `
 row with `customer_id IS NULL`, and the page renders as though nothing happened. No error is logged
 anywhere. Use port 3000.
 
-### The eleven failures this feature did not cause
+### The seventeen failures this feature did not cause
 
-Nine of them are one inherited defect: **the cookie banner is 900px tall at a 390x700 viewport**, so
-it covers the screen and intercepts every click at mobile width. `src/components/ui/cookie-banner/`
-is untouched by spec 010, and its copy is byte-identical before and after the migration — 831
-characters across 13 text nodes in both the pre-migration dump and `cookie_settings_locales`. It
-accounts for `home.spec.ts` (menu), `listing.spec.ts` (drawer), `responsive.spec.ts` (`/account` at
-390 and 320) and five of the six a11y failures.
+Thirteen of them are one inherited defect: **the cookie banner is 900px tall at a 390x700 viewport**,
+so it covers the screen and intercepts every click at mobile width.
+`src/components/ui/cookie-banner/` is untouched by spec 010, and its copy is byte-identical before
+and after the migration — 831 characters across 13 text nodes in both the pre-migration dump and
+`cookie_settings_locales`. It accounts for eight e2e failures (the home menu, the listing drawer,
+three product-gallery tests, the cart's keyboard path and `/account` at 390 and 320) and all five
+a11y failures. Which tests it catches varies between runs, because it depends on which mobile-width
+click happens while the banner is on screen. **Capping the banner's height below `md` and letting it
+scroll would return all thirteen** — it is the single highest-value fix in the repository right now,
+and it belongs to spec 009.
 
-The other two:
+The other four:
 
 - `product.spec.ts` — "the two actions are present and disabled" expects ADD TO CART to be disabled.
   The cart shipped in spec 005 and the button works; spec 010 only swapped its literal string for
   `t('addToCart')` and did not touch the `disabled` logic.
-- `routes.spec.ts` — `/` at 1920 never reaches `networkidle`, because
-  `_next/image?url=/photography/about.webp&w=1080` is started by the browser and never finishes. The
-  same URL serves in 68 ms over curl, `/about` at the same width is fine, and both the band and its
-  mock (`src/mocks/home.ts`) predate this feature.
+- `ui-kit.spec.ts` — three or four stories 404 on `/media/sample.mp4`, which is not in `public/`.
+  The story predates this feature (`c2ce64e`).
+- `ui-kit.spec.ts` — a hero whose height deliberately stopped matching the drawn 754px (`1cf6a31`)
+  and a feature card whose width deliberately stopped matching 250px (`752ac3a`). Both tests assert
+  numbers their components were later changed, on purpose, to stop honouring.
 
-And one that WAS this feature's, now fixed: `ui-kit.spec.ts`'s "language menu is operable by
-keyboard" pressed ArrowDown twice expecting to wrap from RU back to EN. There are three languages
-now, so the second press lands on UK. Three story failures remain and are inherited — a hero whose
-height deliberately stopped matching the drawn 754px (`1cf6a31`), a feature card whose width
-deliberately stopped matching 250px (`752ac3a`), and `ui-videomedia--reduced-motion` asking for
-`/media/sample.mp4`, which is not in `public/`.
+### What this verification actually found
 
-### One defect this verification found (T110)
+**Three defects of our own, and one of them was large.**
 
-`articles.chapters.heading` and `articles.chapters.body` were `required` AND `localized`. An array
-row is shared across all three locales — the array is not localized, the words inside it are — so an
-editor opening an article to put its headline into Russian was refused by four chapters they had
-never touched, and could not save at all. Same shape as the four fields already relaxed in
-`closer-look.ts` and `process-steps.ts`; `required` is dropped on both. No migration: the columns in
-`articles_chapters_locales` are already nullable.
+1. **US4 was about half-wired.** 94 of the 165 message keys were never read by anything. The header,
+   the catalogue toolbar and the product actions had been converted; the entire account area, the
+   cart, the filter drawer, the footer, the shop promises, the cookie preferences and every page
+   title had not. `/ru/sign-in` rendered "Email Address", "Password" and "Log in" in English.
+
+   The reason it was not caught is worth more than the fix: `interface-language.spec.ts` tested a
+   **hand-written list of eight phrases**, and it passed because those eight were exactly the ones
+   already translated. It now derives its forbidden list from `en.json` itself and checks both the
+   rendered text and the accessible names (`aria-label`, `placeholder`, `alt`, `title`) — the second
+   half is where "Open menu", "Account", "Primary" and "Close filters" were hiding, none of which
+   appear in `innerText` at all. 28 checks across 13 pages in two languages, and a key added
+   tomorrow is covered the moment it exists.
+
+2. **`articles.chapters.heading` and `.body` were `required` AND `localized`.** An array row is
+   shared across all three locales, so an editor opening an article to put its headline into Russian
+   was refused by four chapters they had never touched, and could not save at all. Same shape as the
+   four fields already relaxed in `closer-look.ts` and `process-steps.ts`; `required` is dropped on
+   both. No migration — those columns are already nullable.
+
+3. **Twenty Storybook stories rendered nothing.** Since this feature the header, the mobile menu,
+   the product card, the pagination and the filter toolbar all reach `@/i18n/navigation`, whose
+   `useRouter` is `next/navigation`'s underneath and throws unless Storybook has mounted its App
+   Router mock. `nextjs: { appDirectory: true }` in `.storybook/preview.tsx` fixes all twenty.
+
+**And two of our own tests were lying**, both in the same way — they compared strings that change
+with language:
+
+- `ui-kit.spec.ts`'s language-menu keyboard test pressed ArrowDown twice expecting to wrap from RU
+  back to EN. There are three languages now.
+- `text-length.spec.ts` keyed its clipped-control set on each control's TEXT. An element that clips
+  in both languages therefore appeared under two different names, so the Russian one looked new. It
+  passed only while the label was still untranslated — the very bug being fixed. It now keys on a
+  DOM path, and skips `sr-only` controls, whose one-pixel box makes every one of them "clipped".

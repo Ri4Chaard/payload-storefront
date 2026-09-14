@@ -47,20 +47,50 @@ const WIDTHS = [
   { name: 'desktop', width: 1440, height: 900 },
 ]
 
-/** Which controls cannot show their own label, on one page in one language. */
+/**
+ * Which controls cannot show their own label, on one page in one language.
+ *
+ * **Each one is named by WHERE it is, never by what it says**, and that correction is the whole
+ * reason this helper is more than three lines. The first version keyed the set on the control's
+ * text, which is the one property that changes between the two pages being compared: an element
+ * that clips in BOTH languages appeared under two different names, so the Russian one looked new
+ * and the test failed on a control English clips just as badly. It only passed before because the
+ * label in question was still untranslated on the Russian page, which is precisely the bug this
+ * feature was fixing. A DOM path is stable across languages and says nothing about the words.
+ *
+ * **Visually hidden controls are skipped.** An `sr-only` element is deliberately one pixel with its
+ * overflow hidden, so `scrollWidth > clientWidth` is true of every one of them in every language.
+ * That is the class working as designed, not a layout that cannot hold its text.
+ */
 const clippedOn = async (page: import('@playwright/test').Page, href: string): Promise<string[]> => {
   await page.goto(href)
   return page.evaluate(() => {
-    const controls = Array.from(document.querySelectorAll<HTMLElement>('button, a[href]'))
-    return controls
+    /** `main > div:nth-of-type(2) > button:nth-of-type(1)` — position, not prose. */
+    const pathOf = (node: Element): string => {
+      const steps: string[] = []
+      for (let at: Element | null = node; at && at !== document.body; at = at.parentElement) {
+        const tag = at.tagName.toLowerCase()
+        const siblings = Array.from(at.parentElement?.children ?? []).filter(
+          (child) => child.tagName === at!.tagName,
+        )
+        steps.unshift(siblings.length > 1 ? `${tag}:nth-of-type(${siblings.indexOf(at) + 1})` : tag)
+      }
+      return steps.join('>')
+    }
+
+    return Array.from(document.querySelectorAll<HTMLElement>('button, a[href]'))
       .filter((node) => {
         const style = getComputedStyle(node)
         // A deliberate scroller is not an overflow, and a hidden control has no width to measure.
         if (style.overflowX === 'auto' || style.overflowX === 'scroll') return false
         if (style.display === 'none' || style.visibility === 'hidden') return false
+        // Visually hidden: one-pixel boxes and the `clip-path` half of the `sr-only` recipe.
+        const box = node.getBoundingClientRect()
+        if (box.width <= 1 || box.height <= 1) return false
+        if (style.clipPath.startsWith('inset(50%')) return false
         return node.scrollWidth > node.clientWidth + 2
       })
-      .map((node) => (node.textContent ?? '').trim().slice(0, 40))
+      .map(pathOf)
   })
 }
 
@@ -73,7 +103,7 @@ for (const viewport of WIDTHS) {
 
       for (const locale of LOCALES.filter((code) => code !== 'en')) {
         const translated = await clippedOn(page, `/${locale}${path}`)
-        const newlyClipped = translated.filter((label) => !english.has(label))
+        const newlyClipped = translated.filter((where) => !english.has(where))
 
         expect(
           newlyClipped,

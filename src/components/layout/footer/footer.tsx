@@ -184,6 +184,7 @@ export function Footer({
   className,
 }: FooterProps) {
   const t_nav = useTranslations('nav')
+  const t_common = useTranslations('common')
   // A hook cannot run in a default parameter, so the fallback is resolved here instead.
   const groups = groupsProp ?? defaultGroups(t_nav)
   return (
@@ -238,7 +239,7 @@ export function Footer({
               <p>{openingHours}</p>
               <div className="flex flex-col items-center gap-2.5 md:items-start">
                 <Link href={mapsHref} variant="inverse-inline">
-                  Open in Maps
+                  {t_common('openInMaps')}
                 </Link>
                 {/*
                   The design sets these as plain text. They are links here because a phone number a
@@ -246,10 +247,10 @@ export function Footer({
                   them looking exactly as drawn — no underline until hover.
                 */}
                 <Link href={phoneHref} variant="inverse">
-                  Call us: {phone}
+                  {t_common('callUs', { phone })}
                 </Link>
                 <Link href={`mailto:${email}`} variant="inverse">
-                  Email us: {email}
+                  {t_common('emailUs', { email })}
                 </Link>
               </div>
             </div>
@@ -258,7 +259,7 @@ export function Footer({
           <div className={COLUMN}>
             <h2 className={HEADING}>{t_nav('newsletter')}</h2>
             <p className="text-body-small text-neutral-white/80 text-center md:text-left">
-              Subscribe to receive updates and exclusive offers.
+              {t_common('newsletterPrompt')}
             </p>
             <NewsletterForm />
             <ul className="flex items-center gap-5">
@@ -278,7 +279,7 @@ export function Footer({
         </div>
 
         <nav
-          aria-label="Legal"
+          aria-label={t_nav('legal')}
           className="flex flex-wrap items-center justify-center gap-5 pt-5 pb-7.5 xl:py-12.5"
         >
           {legalLinks.map((link) => (

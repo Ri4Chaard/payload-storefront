@@ -28,6 +28,9 @@
  */
 
 import config from '@payload-config'
+import { createTranslator } from 'next-intl'
+
+import { loadMessages } from '@/i18n/messages'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
@@ -489,6 +492,20 @@ export async function getFilterFacets(
 ): Promise<FilterFacets> {
   const [refs, all] = await Promise.all([reference(locale), catalogue(locale)])
 
+  /*
+    `createTranslator` over `loadMessages`, not `getTranslations` (spec 010, R-notes in
+    `src/lib/email/transactional.ts`).
+
+    `getTranslations` resolves through `next-intl/server`, which only exists under Next's
+    `react-server` condition — so it throws "`getTranslations` is not supported in Client
+    Components" under Vitest, where the integration tests call this function directly. The locale is
+    already a parameter here, so there is nothing to read from a request scope anyway: building the
+    translator from it is both the portable form and the honest one.
+  */
+  const messages = loadMessages(locale) as Record<string, Record<string, string>>
+  const t_colour = createTranslator({ locale, messages, namespace: 'colour' })
+  const t_shape = createTranslator({ locale, messages, namespace: 'diamondShape' })
+
   const within = categorySlug
     ? all.filter(
         (product) => typeof product.category !== 'number' && product.category.slug === categorySlug,
@@ -525,15 +542,27 @@ export async function getFilterFacets(
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((entry) => ({ value: entry.value, label: entry.label })),
     ),
+    /*
+      **Colours and shapes are the two facets whose words live in code** (spec 010).
+
+      Every other facet here labels itself from Payload — a category, a collection and a size are
+      documents an editor writes, so their titles are localized fields and fall back on their own.
+      These two are enum values (`COLOURS`, `SHAPES`), and `titleCase('multicolor')` is an English
+      sentence built from an identifier. They are interface chrome by the README's rule, so the
+      words come from the message files and the enum stays the key.
+
+      `titleCase` remains the fallback for a value added to the enum before its key exists — an
+      English label is a better failure than a raw `diamondShape.cushion` on the page.
+    */
     colours: facet(
       within,
       (product) => product.colour ?? [],
-      COLOURS.map((value) => ({ value, label: titleCase(value) })),
+      COLOURS.map((value) => ({ value, label: t_colour.has(value) ? t_colour(value) : titleCase(value) })),
     ),
     shapes: facet(
       within,
       (product) => product.diamondShape ?? [],
-      SHAPES.map((value) => ({ value, label: titleCase(value) })),
+      SHAPES.map((value) => ({ value, label: t_shape.has(value) ? t_shape(value) : titleCase(value) })),
     ),
     price: {
       min: prices.length > 0 ? Math.min(...prices) : 0,

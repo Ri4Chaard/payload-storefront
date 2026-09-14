@@ -14,7 +14,6 @@ import { RangeSlider } from '@/components/ui/range-slider'
 import { Switch } from '@/components/ui/switch'
 import {
   DEFAULT_SORT,
-  SORT_LABELS,
   applyChange,
   dropIdlePriceEnds,
   toggleFilter,
@@ -26,6 +25,7 @@ import {
   type DiamondShape,
   type FilterFacets,
   type FilterState,
+  type SortOrder,
 } from '@/lib/catalog/types'
 import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
@@ -117,6 +117,22 @@ const PRICE_STEP = 10_000
 const floorTo = (amount: number, step: number) => Math.floor(amount / step) * step
 const ceilTo = (amount: number, step: number) => Math.ceil(amount / step) * step
 
+/**
+ * The sort orders, as message keys rather than as words (spec 010).
+ *
+ * `SORT_LABELS` in `@/lib/catalog/filters` is still the English wording and still what the no-JS
+ * `<option>` list and the tests read. This map exists because a `Record<SortOrder, string>` of
+ * sentences cannot be translated where it is declared — it is a module constant, and a translator
+ * is a hook. Keeping the shape identical is what makes the two impossible to drift apart: adding a
+ * sort order without a key here does not compile.
+ */
+const SORT_KEYS: Record<SortOrder, 'sortNewest' | 'sortPriceAsc' | 'sortPriceDesc' | 'sortRecommended'> = {
+  newest: 'sortNewest',
+  'price-asc': 'sortPriceAsc',
+  'price-desc': 'sortPriceDesc',
+  recommended: 'sortRecommended',
+}
+
 export function FilterToolbar({
   filters,
   facets,
@@ -149,7 +165,7 @@ export function FilterToolbar({
     */
     <Container
       as="section"
-      aria-label="Filter and sort"
+      aria-label={t_catalog('filterAndSort')}
       className={cn(
         'bg-background-container border-y border-black/10 py-3 md:py-4',
         'xl:border-t-0 xl:bg-transparent xl:pt-0 xl:pb-5',
@@ -194,7 +210,7 @@ export function FilterToolbar({
             }}
             className={cn(TRIGGER, 'flex-1 md:w-40 md:flex-none xl:w-50')}
           >
-            Filters
+            {t_catalog('filtersLabel')}
             {/*
             The count is drawn on the phone and nowhere else (node 412:7875, FR-028). Above `md`
             the chip row beneath this control names every one of them, and a number that repeats
@@ -208,7 +224,7 @@ export function FilterToolbar({
           {/* Drawn at 1920 only. The 768 frame separates its two groups with a 24px gap and nothing. */}
           <Rule className="hidden xl:block" />
 
-          <div role="group" aria-label="Diamond shape" className="hidden md:block">
+          <div role="group" aria-label={t_catalog('diamondShapeLabel')} className="hidden md:block">
             <p className={GROUP_LABEL}>{t_catalog('diamondShapeLabel')}</p>
             <div className="mt-1 flex items-center gap-1.5 xl:mt-1.5 xl:gap-2.5">
               {facets.shapes.map((shape) => {
@@ -259,13 +275,13 @@ export function FilterToolbar({
 
         <div className="flex flex-1 items-center gap-3 md:flex-none md:gap-6 xl:gap-7.5">
           <Menu
-            label="Sort by"
+            label={t_catalog('sortBy')}
             align="end"
             className="flex-1 md:flex-none"
             triggerClassName={cn(TRIGGER, 'w-full md:w-40 xl:w-50')}
             trigger={
               <>
-                Sort by
+                {t_catalog('sortBy')}
                 <Icon name="chevron-down" size="sm" className="ml-2 size-5 xl:ml-2.5 xl:size-4" />
               </>
             }
@@ -279,12 +295,12 @@ export function FilterToolbar({
                 // its fill would be invisible to anyone who cannot separate the two shades.
                 meta={
                   filters.sort === order ? (
-                    <Icon name="check" size="xs" label="Current ordering" className="size-4" />
+                    <Icon name="check" size="xs" label={t_catalog('currentOrdering')} className="size-4" />
                   ) : undefined
                 }
                 onClick={() => router.push(hrefFor(applyChange(filters, { sort: order })))}
               >
-                {SORT_LABELS[order]}
+                {t_catalog(SORT_KEYS[order])}
               </MenuOption>
             ))}
           </Menu>
@@ -299,7 +315,7 @@ export function FilterToolbar({
             <Switch
               as="span"
               checked={filters.inStock}
-              label="In-stock only"
+              label={t_catalog('inStockOnly')}
               // Label first, toggle second, as drawn. `Switch` puts them the other way round because
               // that is the order every other control in the kit uses.
               className="flex-row-reverse gap-3.5 uppercase"
@@ -409,7 +425,7 @@ function PriceQuickFilter({
           }}
         >
           <RangeSlider
-            label="price"
+            label={t_catalog('priceRange')}
             min={bounds.min}
             max={bounds.max}
             step={PRICE_STEP}
@@ -428,7 +444,7 @@ function PriceQuickFilter({
       </div>
 
       <button type="submit" className="sr-only">
-        Apply price range
+        {t_catalog('applyPriceRange')}
       </button>
     </form>
   )

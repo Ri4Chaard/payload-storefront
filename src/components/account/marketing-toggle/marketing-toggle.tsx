@@ -35,6 +35,7 @@ const FAILED = 'That did not save. Your preference is unchanged — please try a
 
 export function MarketingToggle({ subscribed }: MarketingToggleProps) {
   const t_account = useTranslations('account')
+  const t_common = useTranslations('common')
   const LABEL = t_account('marketingOptIn')
   const [checked, setChecked] = React.useState(subscribed)
   const [failed, setFailed] = React.useState(false)
@@ -68,7 +69,7 @@ export function MarketingToggle({ subscribed }: MarketingToggleProps) {
 
   return (
     <ProfileRow
-      label="Marketing preferences"
+      label={t_account('marketingPreferences')}
       action={
         <Switch
           label={LABEL}
@@ -86,7 +87,7 @@ export function MarketingToggle({ subscribed }: MarketingToggleProps) {
       <span className="flex flex-col gap-1">
         <span className="flex items-center gap-2.5">
           <Icon name="mail" className="text-neutral-secondary size-5" />
-          Email
+          {t_common('email')}
         </span>
         {failed ? (
           <span role="alert" className="text-body-small text-status-error-text">

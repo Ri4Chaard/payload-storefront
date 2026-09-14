@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -58,6 +59,7 @@ export function HandoffModal({
   contact,
   triggerRef,
 }: HandoffModalProps) {
+  const t_cart = useTranslations('cart')
   const [copied, setCopied] = React.useState(false)
 
   // The confirmation is transient; it must not still be showing the next time the modal opens.
@@ -80,14 +82,14 @@ export function HandoffModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Your selection is in the cart"
+      title={t_cart('selectionInCart')}
       size="lg"
       align="center"
       triggerRef={triggerRef}
-      closeLabel="Close and return to your cart"
+      closeLabel={t_cart('closeReturn')}
     >
       <p className="text-body-medium text-neutral-primary text-center">
-        To complete your order, please contact us through your preferred social platform.
+        {t_cart('handoffIntro')}
       </p>
 
       {/*
@@ -95,8 +97,7 @@ export function HandoffModal({
         page must not leave anybody believing an order is now in a queue somewhere.
       */}
       <p className="text-body-small text-neutral-secondary mt-2.5 text-center text-balance">
-        Nothing has been ordered yet and no payment is taken on this site. Sending the message opens
-        the conversation, and we will confirm availability, the final price and delivery there.
+        {t_cart('handoffNote')}
       </p>
 
       <div className="mt-5 flex flex-col gap-2.5">
@@ -132,7 +133,7 @@ export function HandoffModal({
         </p>
 
         <label className="sr-only" htmlFor="handoff-message">
-          Your order, ready to copy
+          {t_cart('orderReadyToCopy')}
         </label>
         <textarea
           id="handoff-message"

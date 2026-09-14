@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { localeAlternates } from '@/lib/i18n/alternates'
@@ -114,6 +115,7 @@ export async function generateMetadata({
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const t_blog = await getTranslations('blog')
   const locale = await currentLocale()
   const { slug } = await params
   const article = await getArticle(slug, locale)
@@ -132,7 +134,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <div className="md:grid md:grid-cols-[1fr_13.75rem] md:gap-8 xl:grid-cols-[1fr_31.25rem] xl:gap-5">
         <div className="md:col-start-1 md:row-start-1">
           <ArticleHeader
-            eyebrow={{ label: 'Our blog', href: BLOG_ROOT }}
+            eyebrow={{ label: t_blog('ourBlog'), href: BLOG_ROOT }}
             title={article.title}
             standfirst={article.standfirst}
           />
@@ -150,6 +152,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {/* Second in the DOM, beside the article from md up. On a phone it stays exactly here. */}
         <TableOfContents
           entries={article.contents}
+          label={t_blog('onThisPage')}
           className="mt-8 md:col-start-2 md:row-span-2 md:row-start-1 md:mt-0 md:self-start"
         />
 

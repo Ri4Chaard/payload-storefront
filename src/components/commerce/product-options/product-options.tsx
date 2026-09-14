@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Field } from '@/components/ui/field'
@@ -57,6 +58,7 @@ export function ProductOptions({
   className,
   ...props
 }: ProductOptionsProps) {
+  const t_product = useTranslations('product')
   if (diamonds.length === 0 && sizes.length === 0) return null
 
   const diamondId = `${idPrefix}-diamond`
@@ -85,7 +87,7 @@ export function ProductOptions({
             options={stones}
             value={diamond === null ? null : String(diamond)}
             onChange={(value) => onDiamondChange(Number(value))}
-            placeholder="Choose a diamond"
+            placeholder={t_product('chooseDiamond')}
             disabled={disabled}
           />
         </Field>
@@ -98,7 +100,7 @@ export function ProductOptions({
             options={measurements}
             value={size}
             onChange={onSizeChange}
-            placeholder="Choose a size"
+            placeholder={t_product('chooseSize')}
             disabled={disabled}
           />
         </Field>

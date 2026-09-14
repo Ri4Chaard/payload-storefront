@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { AddressList } from '@/components/account/address-list'
@@ -34,13 +35,14 @@ import { getAccountSettings, offeredCountries } from '@/lib/auth/settings'
  * day the card was built, because FR-022 fixes the order and a card that grows a row in the middle
  * later is a card that gets re-reviewed three times. It accepts a click now.
  */
-export const metadata: Metadata = {
-  title: 'My account',
-  robots: { follow: false, index: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t_account = await getTranslations('account')
+  return { title: t_account('myAccount'), robots: { follow: false, index: false } }
 }
 
 export default async function AccountPage() {
   const customer = await requireCustomer('/account')
+  const t_account = await getTranslations('account')
 
   /**
    * The address form's two settings, resolved on the server (FR-028, FR-030).
@@ -54,14 +56,14 @@ export default async function AccountPage() {
   return (
     <Container>
       <div className="py-12 md:py-20">
-        <h1 className="text-heading-1 text-neutral-primary mb-7.5">My account</h1>
+        <h1 className="text-heading-1 text-neutral-primary mb-7.5">{t_account('myAccount')}</h1>
 
         <div className="bg-neutral-white p-6 md:p-12">
           <dl className="flex flex-col gap-6">
             {/* FR-023 — read-only, and deliberately without an affordance. Changing the address a
                 customer signs in with is out of scope, and a pencil that opens nothing is worse
                 than no pencil. */}
-            <ProfileRow label="Email">{customer.email}</ProfileRow>
+            <ProfileRow label={t_account('email')}>{customer.email}</ProfileRow>
 
             {/* The row and its modal travel together: the open state is client-side, so the
                 control that opens it cannot live out here. Same for `AddressList` below. */}
@@ -80,7 +82,7 @@ export default async function AccountPage() {
 
             {/* FR-049 — `Security`, once, everywhere. The composed frames say `safety`; the card
                 itself says `Security`, and one label site-wide is the requirement. */}
-            <ProfileRow label="Security">
+            <ProfileRow label={t_account('security')}>
               <ChangePasswordModal />
             </ProfileRow>
           </dl>

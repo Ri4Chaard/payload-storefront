@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Container, FeatureCard } from '@/components/ui'
@@ -42,10 +43,11 @@ export interface ChannelGridProps {
 }
 
 export function ChannelGrid({ items }: ChannelGridProps) {
+  const t_common = useTranslations('common')
   if (items.length === 0) return null
 
   return (
-    <Container as="section" aria-label="Ways to reach us" className="pb-10 xl:pb-12.5">
+    <Container as="section" aria-label={t_common('waysToReachUs')} className="pb-10 xl:pb-12.5">
       {/*
         A list, because that is what it is — four alternatives of equal standing. The count is
         announced, which is worth more here than on a decorative row: "four ways to reach us" is

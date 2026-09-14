@@ -48,6 +48,9 @@ const EMPTY: ChangePasswordValues = { confirmPassword: '', currentPassword: '', 
 
 export function ChangePasswordModal() {
   const t_errors = useTranslations('errors')
+  const t_account = useTranslations('account')
+  const t_common = useTranslations('common')
+  const t_forms = useTranslations('forms')
 
   const ERRORS: Record<string, string> = {
     changePasswordMismatch: t_errors('passwordMismatch'),
@@ -128,19 +131,19 @@ export function ChangePasswordModal() {
         open={open}
         onClose={close}
         title={saved ? 'PASSWORD CHANGED' : 'CHANGE PASSWORD'}
-        closeLabel="Close change password"
+        closeLabel={t_account('closeChangePassword')}
         triggerRef={triggerRef}
         footer={
           saved ? (
             // One way out, and it is the same one Escape and the close button take. A confirmation
             // with a Cancel beside it invites the question of what there is left to cancel.
             <Button type="button" variant="primary" onClick={close}>
-              Done
+              {t_common('done')}
             </Button>
           ) : (
             <>
               <Button type="button" variant="outline" onClick={close}>
-                Cancel
+                {t_common('cancel')}
               </Button>
               <Button
                 type="submit"
@@ -148,7 +151,7 @@ export function ChangePasswordModal() {
                 variant="primary"
                 disabled={isSubmitting}
               >
-                Save
+                {t_common('save')}
               </Button>
             </>
           )
@@ -168,7 +171,7 @@ export function ChangePasswordModal() {
           >
             <Icon name="seal-check" className="text-status-success-default size-12" />
 
-            <p className="text-body-base text-neutral-primary">Your password has been updated.</p>
+            <p className="text-body-base text-neutral-primary">{t_account('passwordUpdated')}</p>
 
             {/*
               Both of these are facts about what just happened, and both pre-empt a question. The
@@ -190,8 +193,8 @@ export function ChangePasswordModal() {
           >
             <PasswordField
               {...form.register('currentPassword')}
-              label="Current password"
-              placeholder="Enter current password"
+              label={t_forms('currentPassword')}
+              placeholder={t_forms('enterCurrent')}
               autoComplete="current-password"
               required
               error={resolve(errors.currentPassword?.message)}
@@ -199,15 +202,15 @@ export function ChangePasswordModal() {
               // confirm. Before the reveal toggle, so reading order matches the drawing.
               adornment={
                 <span className="text-body-small mr-2 shrink-0 whitespace-nowrap">
-                  <Link href="/forgot-password">Forgot password?</Link>
+                  <Link href="/forgot-password">{t_account('forgotPassword')}</Link>
                 </span>
               }
             />
 
             <PasswordField
               {...form.register('newPassword')}
-              label="New password"
-              placeholder="Enter new password"
+              label={t_account('newPasswordLabel')}
+              placeholder={t_forms('enterNew')}
               autoComplete="new-password"
               required
               error={resolve(errors.newPassword?.message)}
@@ -215,8 +218,8 @@ export function ChangePasswordModal() {
 
             <PasswordField
               {...form.register('confirmPassword')}
-              label="Confirm new password"
-              placeholder="Confirm new password"
+              label={t_account('confirmNewPassword')}
+              placeholder={t_forms('confirmNew')}
               autoComplete="new-password"
               required
               error={resolve(errors.confirmPassword?.message)}

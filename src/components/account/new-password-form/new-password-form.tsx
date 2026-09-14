@@ -35,6 +35,8 @@ export interface NewPasswordFormProps {
 
 export function NewPasswordForm({ email, handle }: NewPasswordFormProps) {
   const t_errors = useTranslations('errors')
+  const t_forms = useTranslations('forms')
+  const t_common = useTranslations('common')
 
   const ERRORS: Record<string, string> = {
     resetEmailInvalid: t_errors('emailInvalid'),
@@ -72,8 +74,8 @@ export function NewPasswordForm({ email, handle }: NewPasswordFormProps) {
     <form onSubmit={onSubmit} className="flex flex-col gap-7.5" noValidate>
       <PasswordField
         {...form.register('password')}
-        label="New Password"
-        placeholder="New Password"
+        label={t_forms('newPassword')}
+        placeholder={t_forms('newPassword')}
         hideLabel
         autoComplete="new-password"
         required
@@ -82,8 +84,8 @@ export function NewPasswordForm({ email, handle }: NewPasswordFormProps) {
 
       <PasswordField
         {...form.register('confirmPassword')}
-        label="Confirm Password"
-        placeholder="Confirm Password"
+        label={t_forms('confirmPassword')}
+        placeholder={t_forms('confirmPassword')}
         hideLabel
         autoComplete="new-password"
         required
@@ -98,7 +100,7 @@ export function NewPasswordForm({ email, handle }: NewPasswordFormProps) {
       ) : null}
 
       <Button type="submit" variant="primary" disabled={isSubmitting} className="w-full">
-        Save
+        {t_common('save')}
       </Button>
     </form>
   )

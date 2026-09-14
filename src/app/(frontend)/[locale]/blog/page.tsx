@@ -90,6 +90,7 @@ interface BlogIndexProps {
 export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
   const locale = await currentLocale()
   const t_catalog = await getTranslations('catalog')
+  const t_blog = await getTranslations('blog')
   const query = await searchParams
   const category = parseCategory(query.category)
   const page = parsePage(query.page)
@@ -140,7 +141,7 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
             control that admits it cannot help. This is the case `EmptyState.action` was made
             optional for (007/T007).
           */
-          {...(active ? { action: { href: BLOG_ROOT, label: 'See all articles' } } : {})}
+          {...(active ? { action: { href: BLOG_ROOT, label: t_blog('allArticles') } } : {})}
         />
       ) : (
         <>

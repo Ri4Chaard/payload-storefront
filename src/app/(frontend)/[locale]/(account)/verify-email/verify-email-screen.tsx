@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AuthCard } from '@/components/account/auth-card'
@@ -20,6 +21,7 @@ import { VerifyEmailForm } from '@/components/account/verify-email-form'
  * "Didn't receive the code? Resend".
  */
 export function VerifyEmailScreen({ email }: { email: string }) {
+  const t_account = useTranslations('account')
   const [verified, setVerified] = React.useState(false)
   const onVerified = React.useCallback(() => setVerified(true), [])
 
@@ -27,8 +29,8 @@ export function VerifyEmailScreen({ email }: { email: string }) {
 
   return (
     <AuthCard
-      title="VERIFY YOUR EMAIL"
-      subtitle="We’ve sent a verification code to your email address"
+      title={t_account('verifyEmail')}
+      subtitle={t_account('verifySent')}
       footer={
         <>
           Didn’t receive the code? <ResendCode email={email} />

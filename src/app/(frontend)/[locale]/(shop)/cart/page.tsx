@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { currentLocale } from '@/i18n/locale'
@@ -26,19 +27,20 @@ import { getCart } from '@/lib/cart/loader'
  * `export const dynamic` as well would be a second statement of the same fact, free to drift.
  */
 
-export const metadata: Metadata = {
-  title: 'Shopping cart',
-  robots: { index: false, follow: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t_cart = await getTranslations('cart')
+  return { title: t_cart('shoppingCart'), robots: { index: false, follow: false } }
 }
 
 export default async function CartPage() {
   const locale = await currentLocale()
   const cart = await getCart(locale)
+  const t_cart = await getTranslations('cart')
 
   return (
     <>
       <Container className="pt-10 pb-7.5 xl:pt-15 xl:pb-10">
-        <SectionHeading as="h1">Shopping cart</SectionHeading>
+        <SectionHeading as="h1">{t_cart('shoppingCart')}</SectionHeading>
       </Container>
 
       {cart.empty ? (

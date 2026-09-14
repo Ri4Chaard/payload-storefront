@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -43,18 +44,18 @@ import type { CookieCategory } from '@/lib/policies/types'
  * `noOptional`, and it says only what is true of every configuration with nothing optional in it;
  * what the site's cookies ARE is the Cookie Policy's job, and that is the owner's to write.
  */
-const LABELS = {
-  title: 'Cookie settings',
-  save: 'Save my choices',
-  close: 'Close cookie settings',
-  alwaysOn: 'Always on',
-  /**
-   * Shown when nothing optional is configured — the state on the day this ships, and therefore the
-   * sentence most visitors will actually read (FR-047).
-   */
-  noOptional:
-    'There is nothing optional to choose from. This website only uses the cookies it needs to work.',
-} as const
+const labels = (t_common: ReturnType<typeof useTranslations<'common'>>) =>
+  ({
+    title: t_common('cookieSettings'),
+    save: t_common('cookieSave'),
+    close: t_common('cookieClose'),
+    alwaysOn: t_common('cookieAlwaysOn'),
+    /**
+     * Shown when nothing optional is configured — the state on the day this ships, and therefore
+     * the sentence most visitors will actually read (FR-047).
+     */
+    noOptional: t_common('cookieNoOptional'),
+  }) as const
 
 export interface CookiePreferencesProps {
   open: boolean
@@ -74,6 +75,7 @@ export function CookiePreferences({
   onClose,
   triggerRef,
 }: CookiePreferencesProps) {
+  const LABELS = labels(useTranslations('common'))
   const [selected, setSelected] = React.useState<string[]>(initialSelection)
 
   /*

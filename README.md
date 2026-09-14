@@ -189,6 +189,14 @@ an email address" is chrome anywhere.
 `src/app/(frontend)/[locale]/layout.tsx`.** A namespace missing from that list does not throw — the
 button renders `product.addToCart` instead of "ADD TO CART", and nothing else notices.
 
+**A key that exists but is never read is the failure mode to watch for.** Adding the English string
+and both translations is the easy half; the half that gets forgotten is calling the translator at
+the place that renders it, and nothing about a half-finished conversion looks wrong — the page still
+says "Email Address", just in the wrong language. `tests/e2e/interface-language.spec.ts` is the
+guard: it reads every value out of `en.json` and fails if any of them renders on a Russian or
+Ukrainian page, in the text OR in an `aria-label`, `placeholder`, `alt` or `title`. Run it after
+adding strings.
+
 ### Translating a page
 
 In the admin, switch the locale control at the top of the document and type. Only fields holding

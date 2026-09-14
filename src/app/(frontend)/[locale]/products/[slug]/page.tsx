@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { localeAlternates } from '@/lib/i18n/alternates'
@@ -12,7 +13,7 @@ import { minorUnitDigits } from '@/lib/catalog/price'
 import { prerenderable } from '@/lib/catalog/prerender'
 import { getProduct, getProductSlugs, getRelated, getShopContent } from '@/lib/catalog/queries'
 import type { ProductDetail } from '@/lib/catalog/types'
-import { SHOP_PROMISES } from '@/lib/shop-promises'
+import { shopPromises } from '@/lib/shop-promises'
 
 /**
  * One piece (003/T264, T266–T268). Nodes `231:1901` (1920), `410:7283` (1024), `410:7626` (390).
@@ -100,9 +101,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProduct(slug, locale)
   if (!product) notFound()
 
-  const [shop, related] = await Promise.all([
+  const [shop, related, t_product] = await Promise.all([
     getShopContent(locale),
     getRelated(product.id, locale),
+    getTranslations('product'),
   ])
 
   return (
@@ -186,7 +188,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       */}
       {related.length > 0 ? (
         <JewelryCarousel
-          heading="Complete the Collection"
+          heading={t_product('completeCollection')}
           headingId="complete-the-collection"
           trackLabel="More from this collection"
           // Five seconds. The row is a shop window beside a piece the visitor is already reading
@@ -203,7 +205,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         />
       ) : null}
 
-      <FeatureStrip items={SHOP_PROMISES} />
+      <FeatureStrip items={shopPromises(t_product)} label={t_product('whyShopWithUs')} />
     </>
   )
 }

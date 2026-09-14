@@ -23,6 +23,7 @@ export interface CartEmptyProps extends React.ComponentProps<'div'> {
 
 export function CartEmpty({ browseHref = '/all-jewelry', className, ...props }: CartEmptyProps) {
   const t_nav = useTranslations('nav')
+  const t_cart = useTranslations('cart')
   return (
     <Container
       as="section"
@@ -34,11 +35,10 @@ export function CartEmpty({ browseHref = '/all-jewelry', className, ...props }: 
       {...props}
     >
       <h2 id="cart-empty-title" className="text-heading-1">
-        Your cart is empty
+        {t_cart('empty')}
       </h2>
       <p className="text-body-medium max-w-150 text-balance">
-        Nothing has been added yet. Every piece is made in small numbers, so it is worth taking a
-        look at what is in the collection today.
+        {t_cart('emptyBody')}
       </p>
       <Button href={browseHref} variant="primary" className="mt-2.5 uppercase">
         {t_nav('browseCollection')}

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { AuthCard } from '@/components/account/auth-card'
@@ -7,9 +8,9 @@ import { Link } from '@/components/ui/link'
 import { getCustomer } from '@/lib/auth/dal'
 
 /** Nodes `429:12087` and `614:13323` (spec 004, US3). `noindex` like every account route. */
-export const metadata: Metadata = {
-  title: 'Forgot password',
-  robots: { follow: false, index: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t_account = await getTranslations('account')
+  return { title: t_account('metaForgotPassword'), robots: { follow: false, index: false } }
 }
 
 /**
@@ -27,17 +28,18 @@ export const metadata: Metadata = {
  * that route out is the point of it.
  */
 export default async function ForgotPasswordPage() {
+  const t_account = await getTranslations('account')
   const customer = await getCustomer()
 
   return (
     <AuthCard
-      title="FORGOT PASSWORD"
-      subtitle="Enter the email address associated with your account."
+      title={t_account('forgotPasswordTitle')}
+      subtitle={t_account('forgotPasswordSubtitle')}
       footer={
         customer ? (
-          <Link href="/account">Back to my account</Link>
+          <Link href="/account">{t_account('backToAccount')}</Link>
         ) : (
-          <Link href="/sign-in">Back to sign in</Link>
+          <Link href="/sign-in">{t_account('backToSignIn')}</Link>
         )
       }
     >

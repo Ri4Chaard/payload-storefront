@@ -82,6 +82,7 @@ export function FilterDrawer({
   triggerRef,
 }: FilterDrawerProps) {
   const t_nav = useTranslations('nav')
+  const t_catalog = useTranslations('catalog')
   const router = useRouter()
   const [draft, setDraft] = React.useState<FilterState>(filters)
 
@@ -141,7 +142,8 @@ export function FilterDrawer({
     <Drawer
       open={open}
       onClose={onClose}
-      title="FILTERS"
+      title={t_catalog('filters')}
+      closeLabel={t_catalog('closeFilters')}
       id={FILTER_PANEL_ID}
       // `Drawer` is drawn at 350px, which leaves a 40px strip of listing beside it on a phone.
       // FR-027 asks the filter panel to COVER the viewport below `md`, so this one widens.
@@ -153,10 +155,10 @@ export function FilterDrawer({
       footer={
         <>
           <Button variant="outline" href={clearHref} className="flex-1">
-            CLEAR
+            {t_catalog('clear')}
           </Button>
           <Button variant="primary" type="submit" className="flex-1">
-            APPLY
+            {t_catalog('apply')}
           </Button>
         </>
       }
@@ -168,7 +170,7 @@ export function FilterDrawer({
       */}
       {draft.sort !== DEFAULT_SORT ? <input type="hidden" name="sort" value={draft.sort} /> : null}
 
-      <Group legend="CATEGORY:">
+      <Group legend={t_catalog('category')}>
         {/*
           "All jewelry" is the absence of a category rather than one of them, so it carries no name
           and submits nothing: without scripting, unticking the others is what widens the listing.
@@ -188,7 +190,7 @@ export function FilterDrawer({
         />
       </Group>
 
-      <Group legend="COLOR:">
+      <Group legend={t_catalog('colour')}>
         <Options
           name="colour"
           options={facets.colours}
@@ -198,16 +200,16 @@ export function FilterDrawer({
       </Group>
 
       {hasPrice ? (
-        <Group legend="PRICE:">
+        <Group legend={t_catalog('price')}>
           <div className="flex items-end gap-3.5">
             <PriceField
-              label="MIN"
+              label={t_catalog('priceMin')}
               amount={lower}
               onCommit={(amount) => setPrice([Math.min(amount, upper), upper])}
             />
             <span aria-hidden="true" className="bg-neutral-primary mb-6 h-0.5 w-3.5 rounded-xs" />
             <PriceField
-              label="MAX"
+              label={t_catalog('priceMax')}
               amount={upper}
               onCommit={(amount) => setPrice([lower, Math.max(amount, lower)])}
             />
@@ -215,7 +217,7 @@ export function FilterDrawer({
 
           <RangeSlider
             className="mt-6"
-            label="price"
+            label={t_catalog('priceRange')}
             min={bounds.min}
             max={bounds.max}
             step={PRICE_STEP}
@@ -228,7 +230,7 @@ export function FilterDrawer({
         </Group>
       ) : null}
 
-      <Group legend="SIZE:">
+      <Group legend={t_catalog('size')}>
         <Options
           name="size"
           options={facets.sizes}
@@ -237,7 +239,7 @@ export function FilterDrawer({
         />
       </Group>
 
-      <Group legend="COLLECTION:">
+      <Group legend={t_catalog('collection')}>
         <Options
           name="collection"
           options={facets.collections}
@@ -246,7 +248,7 @@ export function FilterDrawer({
         />
       </Group>
 
-      <Group legend="DIAMOND SHAPE:">
+      <Group legend={t_catalog('diamondShape')}>
         <Options
           name="shape"
           options={facets.shapes}
@@ -256,11 +258,11 @@ export function FilterDrawer({
       </Group>
 
       {/* Hidden where the toolbar draws it, and the only copy of it below that width. */}
-      <Group legend="AVAILABILITY:" className="xl:hidden">
+      <Group legend={t_catalog('availability')} className="xl:hidden">
         <Switch
           name="inStock"
           value="1"
-          label="In-stock only"
+          label={t_catalog('inStockOnly')}
           checked={draft.inStock}
           onChange={(event) =>
             setDraft((current) => applyChange(current, { inStock: event.target.checked }))

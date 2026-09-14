@@ -62,6 +62,7 @@ export function AddressModal({
 }: AddressModalProps) {
   const t_account = useTranslations('account')
   const t_errors = useTranslations('errors')
+  const t_common = useTranslations('common')
 
   const ERRORS: Record<string, string> = {
     addressCityRequired: t_errors('addressCity'),
@@ -159,7 +160,7 @@ export function AddressModal({
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t_common('cancel')}
           </Button>
           {/* Outside the `<form>` and wired by `form=`, as every modal in this feature is: the
               design puts the actions in the footer and the fields in the body. */}
@@ -169,7 +170,7 @@ export function AddressModal({
             variant="primary"
             disabled={incomplete || isSubmitting}
           >
-            Save
+            {t_common('save')}
           </Button>
         </>
       }
@@ -177,7 +178,7 @@ export function AddressModal({
       <form id="address-form" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
         <Field
           id={`${fieldId}-country`}
-          label="Country"
+          label={t_account('country')}
           hideLabel
           error={resolve(errors.country?.message)}
         >
@@ -188,15 +189,15 @@ export function AddressModal({
             onChange={(value) =>
               form.setValue('country', value as CountryCode, { shouldValidate: true })
             }
-            placeholder="Country"
+            placeholder={t_account('country')}
             invalid={Boolean(errors.country)}
           />
         </Field>
 
         <TextInput
           {...form.register('addressLine1')}
-          label="Address line 1"
-          placeholder="Address line 1"
+          label={t_account('addressLine1')}
+          placeholder={t_account('addressLine1')}
           hideLabel
           autoComplete="address-line1"
           error={resolve(errors.addressLine1?.message)}
@@ -204,8 +205,8 @@ export function AddressModal({
 
         <TextInput
           {...form.register('addressLine2')}
-          label="Address line 2"
-          placeholder="Address line 2 (optional)"
+          label={t_account('addressLine2')}
+          placeholder={t_account('addressLine2Optional')}
           hideLabel
           autoComplete="address-line2"
           error={resolve(errors.addressLine2?.message)}
@@ -213,8 +214,8 @@ export function AddressModal({
 
         <TextInput
           {...form.register('apartment')}
-          label="Apartment, suite, etc"
-          placeholder="Apartment, suite, etc (optional)"
+          label={t_account('apartment')}
+          placeholder={t_account('apartmentOptional')}
           hideLabel
           // No `autoComplete` token fits: `address-line3` is not one, and the browser's own
           // apartment data lives inside line 2. An empty box is better than a wrong autofill.
@@ -224,8 +225,8 @@ export function AddressModal({
         <div className="flex flex-col gap-5 sm:flex-row">
           <TextInput
             {...form.register('city')}
-            label="City"
-            placeholder="City"
+            label={t_account('city')}
+            placeholder={t_account('city')}
             hideLabel
             autoComplete="address-level2"
             error={resolve(errors.city?.message)}
@@ -233,8 +234,8 @@ export function AddressModal({
           />
           <TextInput
             {...form.register('postalCode')}
-            label="Postcode"
-            placeholder="Postcode"
+            label={t_account('postcode')}
+            placeholder={t_account('postcode')}
             hideLabel
             autoComplete="postal-code"
             error={resolve(errors.postalCode?.message)}
@@ -245,7 +246,7 @@ export function AddressModal({
         <div className="flex flex-col gap-1.5">
           <Checkbox
             {...form.register('isDefault')}
-            label="This is my default address"
+            label={t_account('defaultAddress')}
             disabled={lockedDefault}
           />
           {lockedDefault ? (

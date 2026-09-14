@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { AuthCard } from '@/components/account/auth-card'
@@ -35,20 +36,21 @@ export interface ResetPasswordScreenProps {
 }
 
 export function ResetPasswordScreen({ email, signedIn }: ResetPasswordScreenProps) {
+  const t_account = useTranslations('account')
   const [handle, setHandle] = React.useState<null | string>(null)
   const onVerified = React.useCallback((issued: string) => setHandle(issued), [])
 
   if (handle) {
     return (
       <AuthCard
-        title="NEW PASSWORD"
-        subtitle="Create a new password for your account."
+        title={t_account('newPasswordTitle')}
+        subtitle={t_account('newPasswordSubtitle')}
         footer={
           signedIn ? (
-            <Link href="/account">Back to my account</Link>
+            <Link href="/account">{t_account('backToAccount')}</Link>
           ) : (
             <>
-              Already have an account? <Link href="/sign-in">Log in</Link>
+              {t_account('haveAccountPrompt')} <Link href="/sign-in">{t_account('signIn')}</Link>
             </>
           )
         }
@@ -60,8 +62,8 @@ export function ResetPasswordScreen({ email, signedIn }: ResetPasswordScreenProp
 
   return (
     <AuthCard
-      title="ENTER THE CODE"
-      subtitle="We have sent a 6-digit code to your email"
+      title={t_account('enterTheCode')}
+      subtitle={t_account('enterTheCodeSubtitle')}
       footer={
         <>
           Didn’t receive the code? <ResendCode email={email} purpose="reset-password" />

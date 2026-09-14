@@ -30,12 +30,12 @@ export function RegistrationSuccess() {
         <div className="flex flex-col gap-3.5">
           <h1 className="text-heading-1 text-neutral-primary">{t_account('registrationSuccess')}</h1>
           <p className="text-body-base text-neutral-primary">
-            Your account has been successfully created. Welcome to AURUM!
+            {t_account('createdBody')}
           </p>
         </div>
 
         <Button href="/sign-in" variant="primary" className="w-full max-w-120">
-          Start shopping
+          {t_account('startShopping')}
         </Button>
       </div>
     </Container>

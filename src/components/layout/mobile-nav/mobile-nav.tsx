@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Link as NextLink } from '@/i18n/navigation'
 import React from 'react'
 
@@ -114,6 +115,7 @@ export function MobileNav({
   social = [],
   className,
 }: MobileNavProps) {
+  const t_header = useTranslations('header')
   const [open, setOpen] = React.useState(false)
   // The panel is fixed, so it needs the header's bottom edge in viewport coordinates. It cannot be
   // `top-full` on an absolute child: the header scrolls, and the panel has to reach the bottom of
@@ -189,7 +191,7 @@ export function MobileNav({
         ref={triggerRef}
         variant="bare"
         icon={open ? 'close' : 'menu'}
-        label={open ? 'Close menu' : 'Open menu'}
+        label={open ? t_header('closeMenu') : t_header('openMenu')}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
@@ -213,7 +215,7 @@ export function MobileNav({
             : 'hidden opacity-0 [clip-path:inset(0_0_100%_0)]',
         )}
       >
-        <Container as="nav" aria-label="Primary" className="border-b border-black/10 py-7.5">
+        <Container as="nav" aria-label={t_header('primaryNav')} className="border-b border-black/10 py-7.5">
           <ul className="flex flex-col gap-7.5">
             {items.map((item) => (
               <li key={item.href}>

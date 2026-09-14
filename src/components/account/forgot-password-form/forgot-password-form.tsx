@@ -28,6 +28,7 @@ import { requestResetSchema, type RequestResetValues } from '@/lib/auth/schemas'
 
 export function ForgotPasswordForm() {
   const t_errors = useTranslations('errors')
+  const t_forms = useTranslations('forms')
   // Sent to the action, which sends it to the mail (spec 010, FR-042).
   const locale = useLocale() as Locale
 
@@ -61,8 +62,8 @@ export function ForgotPasswordForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-7.5" noValidate>
       <TextInput
         {...form.register('email')}
-        label="Email Address"
-        placeholder="Email Address"
+        label={t_forms('emailAddress')}
+        placeholder={t_forms('emailAddress')}
         hideLabel
         type="email"
         autoComplete="email"
@@ -77,7 +78,7 @@ export function ForgotPasswordForm() {
       ) : null}
 
       <Button type="submit" variant="primary" disabled={isSubmitting} className="w-full">
-        Send Code
+        {t_forms('sendCode')}
       </Button>
     </form>
   )

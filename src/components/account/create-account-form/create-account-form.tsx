@@ -39,6 +39,8 @@ import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schema
 
 export function CreateAccountForm() {
   const t_errors = useTranslations('errors')
+  const t_forms = useTranslations('forms')
+  const t_account = useTranslations('account')
   // Sent to the action, which sends it to the mail (spec 010, FR-042).
   const locale = useLocale() as Locale
 
@@ -76,8 +78,8 @@ export function CreateAccountForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-7.5" noValidate>
       <TextInput
         {...form.register('email')}
-        label="Email Address"
-        placeholder="Email Address"
+        label={t_forms('emailAddress')}
+        placeholder={t_forms('emailAddress')}
         hideLabel
         type="email"
         autoComplete="email"
@@ -87,8 +89,8 @@ export function CreateAccountForm() {
 
       <TextInput
         {...form.register('password')}
-        label="Password"
-        placeholder="Password"
+        label={t_forms('password')}
+        placeholder={t_forms('password')}
         hideLabel
         type="password"
         autoComplete="new-password"
@@ -98,8 +100,8 @@ export function CreateAccountForm() {
 
       <TextInput
         {...form.register('confirmPassword')}
-        label="Confirm Password"
-        placeholder="Confirm Password"
+        label={t_forms('confirmPassword')}
+        placeholder={t_forms('confirmPassword')}
         hideLabel
         type="password"
         autoComplete="new-password"
@@ -109,7 +111,7 @@ export function CreateAccountForm() {
 
       <Checkbox
         {...form.register('marketingConsent')}
-        label="Email me occasional news and offers."
+        label={t_account('marketingOptIn')}
       />
 
       {/* Only failures that belong to no single field, so nothing is said twice. */}
@@ -120,7 +122,7 @@ export function CreateAccountForm() {
       ) : null}
 
       <Button type="submit" variant="primary" disabled={isSubmitting} className="w-full">
-        Create Account
+        {t_account('createAccountAction')}
       </Button>
     </form>
   )

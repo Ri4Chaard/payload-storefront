@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { localeAlternates } from '@/lib/i18n/alternates'
@@ -95,6 +96,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function PolicyPage({ params }: Params) {
   const locale = await currentLocale()
+  const t_legal = await getTranslations('legal')
   const { slug } = await params
   const policy = await getPolicyBySlug(slug, locale)
 
@@ -124,9 +126,9 @@ export default async function PolicyPage({ params }: Params) {
           FR-015c removes its footer link at the same moment, so nothing points at it.
         */
         <EmptyState
-          title="Nothing here yet"
-          description="We’re writing this page. In the meantime, our team is a message away."
-          action={{ href: '/contact', label: 'Contact us' }}
+          title={t_legal('nothingHereYet')}
+          description={t_legal('beingWritten')}
+          action={{ href: '/contact', label: t_legal('contactUs') }}
         />
       )}
     </>

@@ -60,7 +60,7 @@ export function CategoryTabs({
     that the fallback is translated instead of being an English literal.
   */
   const label = labelProp ?? t_blog('categories')
-  const tabs = [{ title: 'Latest', slug: undefined, href: allHref }, ...categories]
+  const tabs = [{ title: t_blog('latest'), slug: undefined, href: allHref }, ...categories]
 
   return (
     <nav aria-label={label} className={className} {...props}>

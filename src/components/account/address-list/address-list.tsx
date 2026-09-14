@@ -50,6 +50,8 @@ export interface AddressListProps {
 
 export function AddressList({ addresses, countries, defaultCountry }: AddressListProps) {
   const t_errors = useTranslations('errors')
+  const t_account = useTranslations('account')
+  const t_common = useTranslations('common')
   const DELETE_ERROR = t_errors('addressRemoveFailed')
   const [editing, setEditing] = React.useState<CustomerAddress | null>(null)
   const [formOpen, setFormOpen] = React.useState(false)
@@ -121,17 +123,17 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
       <Modal
         open={confirming !== null}
         onClose={() => setConfirming(null)}
-        title="DELETE ADDRESS"
-        closeLabel="Close delete address"
+        title={t_account('deleteAddress')}
+        closeLabel={t_account('closeDeleteAddress')}
         size="sm"
         triggerRef={triggerRef}
         footer={
           <>
             <Button type="button" variant="outline" onClick={() => setConfirming(null)}>
-              Cancel
+              {t_common('cancel')}
             </Button>
             <Button type="button" variant="primary" onClick={confirmRemove} disabled={removing}>
-              Delete
+              {t_common('delete')}
             </Button>
           </>
         }
@@ -158,11 +160,11 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
   if (addresses.length === 0) {
     return (
       <ProfileRow
-        label="Addresses"
+        label={t_account('addresses')}
         // FR-025 — the state a customer with no addresses sees, in the words the design writes.
-        empty="No addresses added"
+        empty={t_account('noAddresses')}
         onActivate={(event) => openForm(null, event)}
-        activateLabel="Add address"
+        activateLabel={t_account('addAddressAction')}
         action={<Icon name="plus" className="text-neutral-secondary size-5" />}
         dialog={dialogs}
       />
@@ -171,13 +173,13 @@ export function AddressList({ addresses, countries, defaultCountry }: AddressLis
 
   return (
     <ProfileRow
-      label="Addresses"
+      label={t_account('addresses')}
       align="start"
       action={
         <button
           type="button"
           onClick={(event) => openForm(null, event)}
-          aria-label="Add address"
+          aria-label={t_account('addAddressAction')}
           className={cn(
             ICON_BUTTON,
             'text-neutral-secondary hover:text-neutral-primary active:text-primary-default',

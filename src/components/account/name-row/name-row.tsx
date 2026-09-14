@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,6 +44,7 @@ export interface NameRowProps {
 }
 
 export function NameRow({ firstName, lastName }: NameRowProps) {
+  const t_account = useTranslations('account')
   const [open, setOpen] = React.useState(false)
   /**
    * Bumped on every opening, and used as the dialog's `key` — see the note on `useForm` in
@@ -63,14 +65,14 @@ export function NameRow({ firstName, lastName }: NameRowProps) {
 
   return (
     <ProfileRow
-      label="Full name"
+      label={t_account('fullName')}
       // FR-025. A customer who has not given a name sees that they have not, rather than a box that
       // looks like it failed to load.
-      empty="No name added"
+      empty={t_account('noName')}
       onActivate={openModal}
       // Named for the row it edits. Five rows, and "Edit" three times over tells a screen-reader
       // user which controls exist and nothing about which one they want.
-      activateLabel="Edit full name"
+      activateLabel={t_account('editName')}
       action={<Icon name="edit" className="text-neutral-secondary size-5" />}
       dialog={
         <NameDialog
@@ -95,6 +97,8 @@ interface NameDialogProps extends NameRowProps {
 }
 
 function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDialogProps) {
+  const t_account = useTranslations('account')
+  const t_common = useTranslations('common')
   /**
    * **Mounted fresh for each opening, so these are the only values it ever loads.**
    *
@@ -129,13 +133,13 @@ function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDial
     <Modal
       open={open}
       onClose={onClose}
-      title="FULL NAME"
-      closeLabel="Close full name"
+      title={t_account('fullNameTitle')}
+      closeLabel={t_account('closeFullName')}
       triggerRef={triggerRef}
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t_common('cancel')}
           </Button>
           {/*
             Outside the `<form>`, so it is wired by `form=`. The design puts the actions in the
@@ -143,7 +147,7 @@ function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDial
             to be explicit rather than positional.
           */}
           <Button type="submit" form="name-form" variant="primary" disabled={isSubmitting}>
-            Save
+            {t_common('save')}
           </Button>
         </>
       }
@@ -152,8 +156,8 @@ function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDial
         <div className="flex flex-col gap-5 sm:flex-row">
           <TextInput
             {...form.register('firstName')}
-            label="First name"
-            placeholder="First name"
+            label={t_account('firstName')}
+            placeholder={t_account('firstName')}
             hideLabel
             autoComplete="given-name"
             error={resolve(errors.firstName?.message)}
@@ -161,8 +165,8 @@ function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDial
           />
           <TextInput
             {...form.register('lastName')}
-            label="Last name"
-            placeholder="Last name"
+            label={t_account('lastName')}
+            placeholder={t_account('lastName')}
             hideLabel
             autoComplete="family-name"
             error={resolve(errors.lastName?.message)}

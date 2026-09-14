@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { CartItem } from '@/components/commerce/cart-item'
@@ -43,6 +44,8 @@ export function CartLines({
   className,
   ...props
 }: CartLinesProps) {
+  const t_cart = useTranslations('cart')
+  const t_common = useTranslations('common')
   /** Which line a Server Action is currently in flight for. One at a time is enough. */
   const [busyId, setBusyId] = React.useState<null | string>(null)
   const [pendingRemoval, setPendingRemoval] = React.useState<CartLineView | null>(null)
@@ -92,7 +95,7 @@ export function CartLines({
         anonymous list among the several a page carries. It is also what lets a test address the
         cart's rows rather than the footer's navigation.
       */}
-      <ul aria-label="Items in your cart">
+      <ul aria-label={t_cart('title')}>
         {lines.map((line) => (
           <CartItem
             key={line.id}
@@ -117,18 +120,18 @@ export function CartLines({
       <Modal
         open={pendingRemoval !== null}
         onClose={() => setPendingRemoval(null)}
-        title="REMOVE ITEM"
+        title={t_cart('remove')}
         size="lg"
         align="center"
         triggerRef={cardRef}
-        closeLabel="Keep this item in your cart"
+        closeLabel={t_cart('keep')}
       >
         <p className="text-body-medium text-neutral-primary pb-7.5 text-center">
-          Are you sure you want to remove this item from your cart?
+          {t_cart('removeConfirm')}
         </p>
         <div className="flex justify-center pb-7.5">
           <Button type="button" variant="primary" onClick={confirmRemoval} disabled={!onRemove}>
-            Remove
+            {t_common('remove')}
           </Button>
         </div>
       </Modal>

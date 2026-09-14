@@ -261,7 +261,7 @@ export function Header({
             variant="bare"
             href="/account"
             icon="user"
-            label="Account"
+            label={t('account')}
             className={iconChrome}
           />
         </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { AuthCard } from '@/components/account/auth-card'
@@ -9,9 +10,9 @@ import { getCustomer } from '@/lib/auth/dal'
 import { safeNextPath } from '@/lib/auth/schemas'
 
 /** Node `408:7412` (spec 004, US2). `noindex` like every account route. */
-export const metadata: Metadata = {
-  title: 'Log in',
-  robots: { follow: false, index: false },
+export async function generateMetadata(): Promise<Metadata> {
+  const t_account = await getTranslations('account')
+  return { title: t_account('signIn'), robots: { follow: false, index: false } }
 }
 
 export default async function SignInPage({
@@ -19,6 +20,7 @@ export default async function SignInPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const t_account = await getTranslations('account')
   const { next } = await searchParams
   const target = typeof next === 'string' ? next : undefined
 
@@ -38,11 +40,11 @@ export default async function SignInPage({
 
   return (
     <AuthCard
-      title="WELCOME BACK"
-      subtitle="Please fill in the information below:"
+      title={t_account('welcomeBack')}
+      subtitle={t_account('createAccountPrompt')}
       footer={
         <>
-          Don’t have an account? <Link href="/create-account">Create one</Link>
+          {t_account('noAccountPrompt')} <Link href="/create-account">{t_account('createOne')}</Link>
         </>
       }
     >

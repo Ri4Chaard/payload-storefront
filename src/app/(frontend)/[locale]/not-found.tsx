@@ -25,7 +25,7 @@ export default async function NotFound() {
     >
       <p className="text-eyebrow text-neutral-secondary uppercase">404</p>
 
-      <h1 className="text-display uppercase">This page does not exist</h1>
+      <h1 className="text-display uppercase">{t_nav('pageDoesNotExist')}</h1>
 
       <p className="text-body-base text-neutral-secondary max-w-150">
         The address may have changed, or the piece may no longer be published. Everything we make is
@@ -37,7 +37,7 @@ export default async function NotFound() {
           {t_nav('browseAll')}
         </Button>
         <Button variant="outline" href="/">
-          Back to the home page
+          {t_nav('backToHome')}
         </Button>
       </div>
     </Container>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -20,24 +21,27 @@ import { TextInput } from '@/components/ui/text-input'
  * disappears the moment someone types, so the name lives in the accessibility tree instead.
  */
 export function NewsletterForm() {
+  const t_common = useTranslations('common')
+  const t_nav = useTranslations('nav')
+  const t_forms = useTranslations('forms')
   return (
     <form
       className="flex w-full flex-col gap-2.5"
       onSubmit={(event) => event.preventDefault()}
-      aria-label="Newsletter sign-up"
+      aria-label={t_common('newsletterSignUp')}
     >
       <TextInput
-        label="Email address"
+        label={t_nav('emailAddress')}
         hideLabel
         tone="inverse"
         type="email"
         name="email"
         autoComplete="email"
-        placeholder="EMAIL"
+        placeholder={t_nav('emailLabel')}
         required
       />
       <Button type="submit" variant="inverse" hoverEffect="reveal" fullWidth className="uppercase">
-        Subscribe
+        {t_forms('subscribe')}
       </Button>
     </form>
   )

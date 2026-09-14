@@ -35,6 +35,15 @@ export interface DrawerProps extends Omit<React.ComponentProps<'div'>, 'title'> 
   onClose: () => void
   /** Drawn as the panel's heading, and the dialog's accessible name. */
   title: string
+  /**
+   * The close control's accessible name.
+   *
+   * **Composed from `title` only as a fallback, and that fallback is English-shaped** (spec 010).
+   * `Close ${title.toLowerCase()}` is a sentence built in code, so a translated title produces half
+   * a sentence — "Close фильтры" — and lowercasing is itself a language-specific operation. A caller
+   * that has a translator passes the whole phrase instead.
+   */
+  closeLabel?: string
   /** Which edge it comes from. The filter panel is drawn on the left. */
   side?: 'left' | 'right'
   /** `CLEAR` and `APPLY`. Pinned below the scrolling body; omit it and the body fills the panel. */
@@ -68,6 +77,7 @@ export function Drawer({
   triggerRef,
   asForm = false,
   formProps,
+  closeLabel,
   closeHref,
   children,
   className,
@@ -94,7 +104,7 @@ export function Drawer({
         <IconButton
           variant="bare"
           icon="close"
-          label={`Close ${title.toLowerCase()}`}
+          label={closeLabel ?? `Close ${title.toLowerCase()}`}
           {...(closeHref ? { href: closeHref } : {})}
           onClick={(event) => {
             // Cancel the navigation the no-JavaScript path depends on. Scripting is here, so the

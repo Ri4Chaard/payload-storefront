@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { localeAlternates } from '@/lib/i18n/alternates'
@@ -89,10 +90,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const locale = await currentLocale()
-  const [page, socials, details] = await Promise.all([
+  const [page, socials, details, t_common] = await Promise.all([
     getContactPage(locale),
     getSocialLinks(),
     getContactDetails(),
+    getTranslations('common'),
   ])
 
   /*
@@ -120,7 +122,7 @@ export default async function ContactPage() {
     })),
     {
       icon: 'mail' as const,
-      label: 'Email Us',
+      label: t_common('emailUsLabel'),
       value: details.email,
       href: `mailto:${details.email}`,
     },

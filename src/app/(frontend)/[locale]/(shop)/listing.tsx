@@ -135,7 +135,9 @@ export async function Listing({
       ) : null}
 
       {result.products.length === 0 ? (
-        <EmptyState {...emptyState(categorySlug, basePath, hasActiveFilters(filters))} />
+        <EmptyState
+          {...emptyState(t_catalog, categorySlug, basePath, hasActiveFilters(filters))}
+        />
       ) : (
         <>
           <ProductGrid className="pt-4 xl:pt-5" products={result.products} label={title} />
@@ -172,22 +174,26 @@ export async function Listing({
  * page's, and a kit component holding a sentence about jewellery is user-visible copy in a
  * component, which Constitution I permits only for developer-facing errors.
  */
-function emptyState(categorySlug: string | null, basePath: string, narrowed: boolean) {
+function emptyState(
+  t_catalog: Awaited<ReturnType<typeof getTranslations<'catalog'>>>,
+  categorySlug: string | null,
+  basePath: string,
+  narrowed: boolean,
+) {
   if (categorySlug !== null && !narrowed) {
     return {
-      title: 'Nothing here yet',
-      description: 'This category has no pieces published. There is plenty elsewhere.',
-      action: { href: '/all-jewelry', label: 'See all jewelry' },
+      title: t_catalog('nothingHereYet'),
+      description: t_catalog('emptyCategoryBody'),
+      action: { href: '/all-jewelry', label: t_catalog('seeAllJewelry') },
     }
   }
 
   return {
-    title: 'Nothing matches those filters',
-    description:
-      'Every piece is made in small numbers, so a narrow search can come up empty. Widening it usually helps.',
+    title: t_catalog('noResults'),
+    description: t_catalog('noResultsBody'),
     action: {
       href: categorySlug ? basePath : '/all-jewelry',
-      label: 'Clear all filters',
+      label: t_catalog('clearAllFilters'),
     },
   }
 }

@@ -123,7 +123,7 @@ export function OrderSummary({
       {...props}
     >
       <h2 id="order-summary-title" className="text-heading-2 text-neutral-primary">
-        Order summary
+        {t_cart('orderSummary')}
       </h2>
 
       <dl className="mt-5 flex flex-col gap-3.5">
@@ -160,7 +160,7 @@ export function OrderSummary({
         disabled={handoff !== null}
         className="mt-7.5 uppercase"
       >
-        Checkout
+        {t_cart('checkout')}
       </Button>
 
       <Checkbox

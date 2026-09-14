@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { currentLocale } from '@/i18n/locale'
 import { AboutBand, CategoryBand, Hero, JewelryCarousel } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
 import { getCategories, getFeatured } from '@/lib/catalog/queries'
-import { SHOP_PROMISES } from '@/lib/shop-promises'
+import { shopPromises } from '@/lib/shop-promises'
 import { homeContent } from '@/mocks'
 
 /**
@@ -61,6 +62,7 @@ const CATEGORY_CTA = 'View collection'
 
 export default async function HomePage() {
   const locale = await currentLocale()
+  const t_product = await getTranslations('product')
   const { hero, categories, featured, about } = homeContent
   const [pieces, shopCategories] = await Promise.all([getFeatured(locale), getCategories(locale)])
 
@@ -121,7 +123,7 @@ export default async function HomePage() {
         outline that jumped h1 → h3 and skipped a level (FR-026). The drawn order puts it here
         anyway; the heading hierarchy is the reason to keep it here.
       */}
-      <FeatureStrip items={SHOP_PROMISES} />
+      <FeatureStrip items={shopPromises(t_product)} label={t_product('whyShopWithUs')} />
     </>
   )
 }

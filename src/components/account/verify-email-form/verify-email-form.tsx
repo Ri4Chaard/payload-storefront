@@ -47,6 +47,7 @@ export interface VerifyEmailFormProps {
 
 export function VerifyEmailForm({ email, onVerified }: VerifyEmailFormProps) {
   const t_errors = useTranslations('errors')
+  const t_forms = useTranslations('forms')
 
   const CODE_ERRORS: Record<string, string> = {
     codeAlreadyUsed: t_errors('codeUsed'),
@@ -83,7 +84,7 @@ export function VerifyEmailForm({ email, onVerified }: VerifyEmailFormProps) {
         name="code"
         render={({ field }) => (
           <OtpInput
-            label="Verification code"
+            label={t_forms('verificationCode')}
             name={field.name}
             value={field.value}
             onChange={field.onChange}

@@ -46,6 +46,8 @@ export interface SignInFormProps {
 
 export function SignInForm({ next }: SignInFormProps) {
   const t_errors = useTranslations('errors')
+  const t_forms = useTranslations('forms')
+  const t_account = useTranslations('account')
 
   const ERRORS: Record<string, string> = {
     signInEmailInvalid: t_errors('emailInvalid'),
@@ -83,8 +85,8 @@ export function SignInForm({ next }: SignInFormProps) {
     <form onSubmit={onSubmit} className="flex flex-col gap-7.5" noValidate>
       <TextInput
         {...form.register('email')}
-        label="Email Address"
-        placeholder="Email Address"
+        label={t_forms('emailAddress')}
+        placeholder={t_forms('emailAddress')}
         hideLabel
         type="email"
         autoComplete="email"
@@ -94,8 +96,8 @@ export function SignInForm({ next }: SignInFormProps) {
 
       <PasswordField
         {...form.register('password')}
-        label="Password"
-        placeholder="Password"
+        label={t_forms('password')}
+        placeholder={t_forms('password')}
         hideLabel
         autoComplete="current-password"
         required
@@ -103,7 +105,7 @@ export function SignInForm({ next }: SignInFormProps) {
       />
 
       <div className="text-body-small text-right">
-        <Link href="/forgot-password">Forgot password?</Link>
+        <Link href="/forgot-password">{t_account('forgotPassword')}</Link>
       </div>
 
       {errors.root ? (
@@ -113,7 +115,7 @@ export function SignInForm({ next }: SignInFormProps) {
       ) : null}
 
       <Button type="submit" variant="primary" disabled={isSubmitting} className="w-full">
-        Log in
+        {t_account('signIn')}
       </Button>
     </form>
   )

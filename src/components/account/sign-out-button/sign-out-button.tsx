@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
@@ -19,6 +20,7 @@ import { signOutCustomer } from '@/lib/auth/actions'
  * client half of the same job.
  */
 export function SignOutButton() {
+  const t_account = useTranslations('account')
   const router = useRouter()
   const [pending, startTransition] = React.useTransition()
 
@@ -35,7 +37,7 @@ export function SignOutButton() {
         })
       }}
     >
-      Sign out
+      {t_account('signOut')}
     </Button>
   )
 }
