@@ -1,10 +1,8 @@
 import { createTranslator } from 'next-intl'
 
-import type { RequestContext } from 'payload'
-
 import { loadMessages } from '@/i18n/messages'
 
-import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/routing'
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
@@ -108,28 +106,6 @@ function copy(locale: Locale): (key: string) => string {
   const messages = loadMessages(locale) as Record<string, Record<string, string>>
   const t = createTranslator({ locale, messages, namespace: 'email' })
   return (key: string) => t(key as Parameters<typeof t>[0])
-}
-
-/**
- * Getting the language into mail that PAYLOAD sends (spec 010, FR-042).
- *
- * Registration and password reset are the two messages this codebase does not send itself: Payload
- * sends them, through `verify.generateEmailHTML` and `forgotPassword.generateEmailHTML`. Those hooks
- * receive a `req` and nothing of the action's own scope, so the locale travels the way anything else
- * reaches a Payload hook — on `req.context`, the same mechanism `skipRevalidation` uses.
- *
- * Reading the `NEXT_LOCALE` cookie off `req` instead would be wrong for the same reason it is wrong
- * everywhere else in this feature: a visitor who arrived on `/ru/create-account` from a link has no
- * cookie, and their verification code would arrive in English.
- */
-export const localeContext = (locale: Locale): RequestContext => ({ locale })
-
-/** Read it back inside a hook, falling back to English rather than throwing. */
-export const localeFromContext = (context: RequestContext | undefined): Locale => {
-  const value = context?.locale
-  return typeof value === 'string' && (LOCALES as readonly string[]).includes(value)
-    ? (value as Locale)
-    : DEFAULT_LOCALE
 }
 
 export interface BuiltEmail {

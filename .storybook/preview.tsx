@@ -7,7 +7,7 @@ import '../src/app/(frontend)/[locale]/styles.css'
 import { NextIntlClientProvider } from 'next-intl'
 
 import { breakpoints } from '@tokens/mapping'
-import messages from '@/i18n/messages/en.json'
+import messages from '@/i18n/messages/en.json' with { type: 'json' }
 import { DEFAULT_LOCALE } from '@/i18n/routing'
 import { fontVariables } from '@/styles/fonts'
 
@@ -44,6 +44,19 @@ const preview: Preview = {
   decorators: [withBrandFonts, withMessages],
   parameters: {
     controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
+    /**
+     * The App Router mock, mounted for every story (spec 010, T105).
+     *
+     * Since spec 010 the site's links and nav controls come from `@/i18n/navigation` — next-intl's
+     * `Link`, `useRouter` and `usePathname`, which are the `next/navigation` ones underneath with a
+     * locale prefix applied. `next/navigation`'s `useRouter` throws `invariant expected app router
+     * to be mounted` unless Storybook has mounted its router mock, and that is what this flag does.
+     *
+     * It is global rather than per-story because the header, the mobile menu, the product card, the
+     * pagination and the filter toolbar are all now in that set, and the failure it prevents is a
+     * story that renders NOTHING — a blank specimen, with the reason only in the browser console.
+     */
+    nextjs: { appDirectory: true },
     backgrounds: {
       options: {
         page: { name: 'Page', value: '#f8f7f6' },

@@ -1,4 +1,4 @@
-import { localeFromContext } from '@/lib/email/transactional'
+import { localeFromContext } from '@/i18n/locale-context'
 import type { PayloadRequest } from 'payload'
 
 /**

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * The locale segment, end to end (spec 010, T018, T019 — FR-012, FR-013, FR-015).
  *
@@ -8,6 +10,25 @@ import { expect, test } from '@playwright/test'
  * keep them working. If someone later switches the routing to prefix every locale, every other test
  * in the repository still passes and this one fails — which is the point.
  */
+
+/*
+  **Takes the shared-content lock, as a READER.**
+
+  `language-availability.spec.ts` switches Ukrainian off and on again, and every assertion in this
+  file depends on all three languages being offered. `test.describe.configure({ mode: 'serial' })`
+  only orders one file; the lock is what keeps two files out of each other's way, and
+  `tests/shared-content-lock.ts` documents the same failure this had: `<html lang="en">` where `uk`
+  was expected, because the other suite had it switched off at that moment.
+*/
+let releaseSharedContent: (() => Promise<void>) | undefined
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
+
+test.afterAll(async () => {
+  await releaseSharedContent?.()
+})
 
 const OLD_ADDRESSES = [
   '/',

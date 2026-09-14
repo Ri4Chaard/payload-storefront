@@ -527,14 +527,14 @@ compares the rendered length of the three, which is what would catch a band sile
 ## Phase 10: Polish & Cross-Cutting Concerns
 
 - [X] T104 Re-measure gzipped initial JS against a production server for the T001 routes plus `/ru` and `/ru/legal/privacy`, compare against the T001 baseline and spec 009's 192.3 KB framework figure, and confirm every route is ≤ 300KB total and ≤ 100KB above the baseline (SC-007, Constitution V). A Russian route more than a kilobyte or two above its English twin means message data is in the bundle rather than the flight payload.
-- [ ] T105 [P] Run `pnpm test:a11y` on the changed pages in all three languages, including the `lang` attribute assertion and the Cyrillic focus-order check (SC-008, FR-054).
-- [ ] T106 [P] Check the fixed-width affordances — header navigation, buttons, chips, filter labels — at all three languages. Russian runs roughly 15% longer than English and this site draws several elements to fixed widths.
-- [ ] T107 [P] Verify every address the site served before this feature still returns 200 with English content, per `quickstart.md` §9 (SC-006, FR-013).
-- [ ] T108 [P] Run the full suite — `pnpm typecheck`, `pnpm lint`, `pnpm check:naming`, `pnpm check:stories`, `pnpm test`, `pnpm test:integration`, `pnpm test:e2e`.
-- [ ] T109 [P] Confirm `src/payload-types.ts` is current and committed with the schema change, and that no hand-written interface mirrors a localized collection.
-- [ ] T110 [P] Seed Russian and Ukrainian sample content for at least one product, article and policy so a reviewer can see all three languages without writing translations first — extend `scripts/seed-catalog.ts` and `scripts/seed-policies.ts`, passing `skipRevalidation` as those scripts already do.
-- [ ] T111 [P] Record the production migration runbook in `specs/010-site-localization/quickstart.md` §1 — backup, run, verify, and the exact rollback command, with the rehearsal's measured row counts.
-- [ ] T112 Update `README.md` with how to add a string, how to translate a page, and the one rule that decides where a string lives (Payload for editorial copy, `src/i18n/messages/` for interface chrome).
+- [X] T105 [P] Run `pnpm test:a11y` on the changed pages in all three languages, including the `lang` attribute assertion and the Cyrillic focus-order check (SC-008, FR-054).
+- [X] T106 [P] Check the fixed-width affordances — header navigation, buttons, chips, filter labels — at all three languages. Russian runs roughly 15% longer than English and this site draws several elements to fixed widths.
+- [X] T107 [P] Verify every address the site served before this feature still returns 200 with English content, per `quickstart.md` §9 (SC-006, FR-013).
+- [X] T108 [P] Run the full suite — `pnpm typecheck`, `pnpm lint`, `pnpm check:naming`, `pnpm check:stories`, `pnpm test`, `pnpm test:integration`, `pnpm test:e2e`.
+- [X] T109 [P] Confirm `src/payload-types.ts` is current and committed with the schema change, and that no hand-written interface mirrors a localized collection.
+- [X] T110 [P] Seed Russian and Ukrainian sample content for at least one product, article and policy so a reviewer can see all three languages without writing translations first — extend `scripts/seed-catalog.ts` and `scripts/seed-policies.ts`, passing `skipRevalidation` as those scripts already do. **Built as its own script instead**, `scripts/seed-translations.ts` (`pnpm seed:translations`): the two named scripts create content, and translations of content that may not exist yet are a second, re-runnable step rather than a branch inside each of them. It covers a policy, a product, an article and a category, each translated only as far as its title and summary so the per-field fallback stays visible. Writing it is what found the `required` + `localized` defect in `articles.chapters`.
+- [X] T111 [P] Record the production migration runbook in `specs/010-site-localization/quickstart.md` §1 — backup, run, verify, and the exact rollback command, with the rehearsal's measured row counts.
+- [X] T112 Update `README.md` with how to add a string, how to translate a page, and the one rule that decides where a string lives (Payload for editorial copy, `src/i18n/messages/` for interface chrome).
 
 ---
 

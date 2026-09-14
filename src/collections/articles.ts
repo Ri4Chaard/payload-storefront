@@ -133,11 +133,25 @@ export const Articles: CollectionConfig = {
                   'The article itself. Drag to reorder — this is the reading order and the order of the contents list. The contents list appears from two chapters upward.',
               },
               fields: [
+              /*
+                **`heading` and `body` are required in English only** (spec 010, T110).
+
+                Same rule as `closerLook` and `processSteps`: a chapter row is shared across all
+                three locales — the array is not localized, the words inside it are — so a
+                `required` localized child must be filled in EVERY language before the document can
+                be saved in ANY of them. An editor opening an article to put its headline into
+                Russian was refused by four chapters they had never intended to touch, and could not
+                save at all. The seed script met it first.
+
+                Without `required` the field is still required of the person writing the article,
+                because an article with an empty chapter body is caught by the one thing that
+                actually renders it — and every language falls back to the English chapter until
+                somebody translates it.
+              */
                 {
                   name: 'heading',
                   type: 'text',
                   localized: true,
-                  required: true,
                   label: 'Heading',
                   admin: {
                     description:
@@ -168,7 +182,6 @@ export const Articles: CollectionConfig = {
                   name: 'body',
                   type: 'richText',
                   localized: true,
-                  required: true,
                   label: 'Body',
                   /**
                    * **Headings are removed on purpose, and it is a structural rule rather than a

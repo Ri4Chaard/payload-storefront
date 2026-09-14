@@ -37,7 +37,20 @@ export const closerLook: Block = {
       admin: {
         description: 'Small pills beneath the paragraph. Any number, or none — the row wraps.',
       },
-      fields: [{ name: 'label', type: 'text', required: true, label: 'Text', localized: true }],
+      /*
+        **Required, but not in every language** (spec 010, T110).
+
+        A row in this array is shared across all three locales — arrays are not localized, the words
+        inside them are — so a `required` localized child has to be filled in EVERY language before
+        the document can be saved in ANY of them. An editor who opened a product in Russian to change
+        its title met "This field is required" on a row they had not touched, and could not save at
+        all. The seed script hit it first, which is the only reason it was found before an editor
+        did.
+
+        Dropping `required` restores the intent: the row must have a value, and the English one is
+        what every other language falls back to until somebody translates it.
+      */
+      fields: [{ name: 'label', type: 'text', label: 'Text', localized: true }],
     },
     {
       name: 'figures',
@@ -47,7 +60,7 @@ export const closerLook: Block = {
       admin: { description: 'A word over a caption, e.g. “CERTIFIED” / “selected diamonds”.' },
       fields: [
         { name: 'word', type: 'text', required: true, label: 'Word' },
-        { name: 'caption', type: 'text', required: true, label: 'Caption', localized: true },
+        { name: 'caption', type: 'text', label: 'Caption', localized: true },
       ],
     },
     mediaSlot({ label: 'Side media', description: 'Sits beside the copy at desktop, below it on a phone.' }),

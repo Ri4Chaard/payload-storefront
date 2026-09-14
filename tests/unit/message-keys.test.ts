@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import en from '@/i18n/messages/en.json'
-import ru from '@/i18n/messages/ru.json'
-import uk from '@/i18n/messages/uk.json'
+import en from '@/i18n/messages/en.json' with { type: 'json' }
+import ru from '@/i18n/messages/ru.json' with { type: 'json' }
+import uk from '@/i18n/messages/uk.json' with { type: 'json' }
 import { LOCALES } from '@/i18n/routing'
 
 /**

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * No English left on a translated page (spec 010, T073 — FR-033, SC-002).
  *
@@ -12,6 +14,25 @@ import { expect, test } from '@playwright/test'
  * The check is therefore a list of known chrome strings that must NOT appear, rather than a blanket
  * "no Latin characters" — which would fail on "Aurum", "WhatsApp" and every product name.
  */
+
+/*
+  **Takes the shared-content lock, as a READER.**
+
+  `language-availability.spec.ts` switches Ukrainian off and on again, and every assertion in this
+  file depends on all three languages being offered. `test.describe.configure({ mode: 'serial' })`
+  only orders one file; the lock is what keeps two files out of each other's way, and
+  `tests/shared-content-lock.ts` documents the same failure this had: `<html lang="en">` where `uk`
+  was expected, because the other suite had it switched off at that moment.
+*/
+let releaseSharedContent: (() => Promise<void>) | undefined
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
+
+test.afterAll(async () => {
+  await releaseSharedContent?.()
+})
 const ENGLISH_CHROME = [
   'Add to cart',
   'Buy now',

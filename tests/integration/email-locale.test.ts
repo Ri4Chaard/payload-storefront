@@ -1,12 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { LOCALES } from '@/i18n/routing'
-import {
-  buildResetEmail,
-  buildVerificationEmail,
-  localeContext,
-  localeFromContext,
-} from '@/lib/email/transactional'
+import { localeContext, localeFromContext } from '@/i18n/locale-context'
+import { buildResetEmail, buildVerificationEmail } from '@/lib/email/transactional'
 
 /**
  * Transactional mail in the language the request was made in (spec 010, T093 — FR-042, FR-045).

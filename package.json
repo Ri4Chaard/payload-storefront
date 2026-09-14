@@ -35,7 +35,8 @@
     "seed:policies": "payload run scripts/seed-policies.ts",
     "check:styles": "tsx scripts/check-styles.ts",
     "measure:js": "tsx scripts/measure-js.ts",
-    "test:stories": "playwright test --project=stories"
+    "test:stories": "playwright test --project=stories",
+    "seed:translations": "payload run scripts/seed-translations.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

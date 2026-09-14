@@ -157,6 +157,64 @@ Three things to know:
   Payload's own job queue — there is no cron service to install. It stops running on a serverless
   host, silently, because a function that only exists during a request cannot hold a timer.
 
+## Three languages
+
+The site is English, Russian and Ukrainian. English lives at the addresses it always did —
+`/legal/privacy` — and the other two sit under a prefix: `/ru/legal/privacy`, `/uk/legal/privacy`.
+Nothing that was published before moved.
+
+### Where a string lives, and how to decide
+
+There is one rule, and it decides every case:
+
+| If it is… | It lives in | Changed by |
+| --- | --- | --- |
+| Something an editor writes — a heading, a policy, a product description, a call to action, an SEO description | **Payload**, as a localized field | The owner, in the admin, without a deploy |
+| Interface chrome — a validation sentence, a form label, an accessible name, "Load more" | **`src/i18n/messages/*.json`** | A developer, in a commit |
+
+The test is whether somebody would reasonably ask an editor to reword it. "ADD TO CART" would be a
+Payload field on a site where marketing rewrites buttons; here it is chrome. "That does not look like
+an email address" is chrome anywhere.
+
+### Adding a string
+
+1. Add the key to `src/i18n/messages/en.json`. English is the type source — a key that is not there
+   does not compile.
+2. Translate it in `ru.json` and `uk.json`. `pnpm test tests/unit/message-keys.test.ts` fails if you
+   forget, if a placeholder goes missing, or if a Russian plural lacks its `few`/`many` cases.
+3. Read it with `getTranslations('namespace')` in a Server Component, `useTranslations('namespace')`
+   in a Client Component.
+
+**If you use a namespace in a Client Component, add it to `CLIENT_NAMESPACES` in
+`src/app/(frontend)/[locale]/layout.tsx`.** A namespace missing from that list does not throw — the
+button renders `product.addToCart` instead of "ADD TO CART", and nothing else notices.
+
+### Translating a page
+
+In the admin, switch the locale control at the top of the document and type. Only fields holding
+words are per-language; prices, images, dates and slugs are entered once and shared. Anything left
+untranslated falls back to English, so a half-translated site renders whole.
+
+```bash
+pnpm seed:translations   # sample Russian and Ukrainian content, so three languages can be seen
+```
+
+### Turning a language off
+
+**Settings → Languages** in the admin. Switching Ukrainian off removes it from the switcher, stops
+its addresses serving and drops it from the sitemap, within a minute and without a deploy. Nothing
+you have written in it is lost, and you can keep translating it while it is off. English has no
+switch: it is what everything falls back to.
+
+### Things that will surprise you
+
+- **Slugs are always English**, in every language. A Cyrillic title is transliterated —
+  "Каблучка з діамантом" becomes `kabluchka-z-diamantom`.
+- **A visitor's language is never guessed.** Browser settings and IP are not read. Everyone starts in
+  English; the switcher is the only way to change it, and the choice is remembered for a year.
+- **A `required` field that is also localized must be filled in every language** before a document
+  can be saved in any of them. That is why the localized fields inside arrays are not required.
+
 ## Commands
 
 | Command | Purpose |

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * US1 — a visitor switches language and stays switched (spec 010, T022, T023).
  *
@@ -7,6 +9,25 @@ import { expect, test } from '@playwright/test'
  * on a soft navigation, the redirect happens in the proxy before the render, and "stays switched"
  * is a property of several requests rather than of one function.
  */
+
+/*
+  **Takes the shared-content lock, as a READER.**
+
+  `language-availability.spec.ts` switches Ukrainian off and on again, and every assertion in this
+  file depends on all three languages being offered. `test.describe.configure({ mode: 'serial' })`
+  only orders one file; the lock is what keeps two files out of each other's way, and
+  `tests/shared-content-lock.ts` documents the same failure this had: `<html lang="en">` where `uk`
+  was expected, because the other suite had it switched off at that moment.
+*/
+let releaseSharedContent: (() => Promise<void>) | undefined
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
+
+test.afterAll(async () => {
+  await releaseSharedContent?.()
+})
 
 /** The header's switcher is a menu button whose accessible name carries the current language. */
 function switcher(page: import('@playwright/test').Page, code: string) {
@@ -122,21 +143,41 @@ test.describe('switching language', () => {
   test('switching language keeps the cart', async ({ page }) => {
     // FR-011. The cart lives in its own cookie keyed by session; nothing about a locale change
     // should touch it, and this is the test that says so.
-    await page.goto('/all-jewelry')
-    await page.locator('a[href*="/products/"]').first().click()
+    /*
+      A piece with neither a stone nor a size, chosen on purpose — `cart.spec.ts` uses the same one
+      for the same reason. The first product in the grid needs a diamond and a size selected before
+      ADD TO CART is enabled, so clicking it added nothing and the badge stayed empty. The original
+      assertion compared the label before and after and passed anyway, because "Cart, empty" equals
+      "Cart, empty".
+    */
+    await page.goto('/products/butterfly-diamond-pendant')
     await page.getByRole('button', { name: /add to cart/i }).click()
+    await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
-    const badge = page.getByRole('link', { name: /^Cart, / })
-    await expect(badge).toBeVisible()
-    const before = await badge.getAttribute('aria-label')
+    /*
+      Wait for the COUNT, not merely for the badge.
+
+      The badge is always there — it reads "Cart, empty" until the client provider hears about the
+      addition — so `toBeVisible()` alone passes before the cart has anything in it, and the
+      comparison afterwards then compares nothing to nothing.
+    */
+    const badge = page.getByRole('link', { name: /^Cart, \d/ })
+    await expect(badge).toBeVisible({ timeout: 15_000 })
+    const countBefore = (await badge.getAttribute('aria-label'))?.match(/\d+/)?.[0]
+    expect(countBefore).toBeTruthy()
 
     await switcher(page, 'EN').click()
     await page.getByRole('menuitem', { name: 'RU' }).click()
     await expect(page).toHaveURL(/\/ru\//)
 
-    await expect(page.getByRole('link', { name: /^Cart, / })).toHaveAttribute(
-      'aria-label',
-      before ?? '',
-    )
+    /*
+      The COUNT, not the label. The accessible name is `Cart, 2 items` in English and
+      `Корзина, 2 товара` in Russian, so comparing the strings would assert that the switcher had
+      FAILED — the opposite of what this test is for. What must survive a language change is the
+      cart, and the number is the cart.
+    */
+    const after = page.getByRole('link', { name: /^Корзина, / })
+    await expect(after).toBeVisible()
+    expect((await after.getAttribute('aria-label'))?.match(/\d+/)?.[0]).toBe(countBefore)
   })
 })

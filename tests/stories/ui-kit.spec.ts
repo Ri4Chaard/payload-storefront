@@ -170,6 +170,10 @@ test('language menu is operable by keyboard', async ({ page }) => {
   await page.keyboard.press('ArrowDown')
   await expect(page.getByRole('menuitem', { name: 'RU' })).toBeFocused()
 
+  // Three languages since spec 010, not two — the step that used to wrap now lands on Ukrainian.
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByRole('menuitem', { name: 'UK' })).toBeFocused()
+
   // Wrapping, so the arrow keys never dead-end.
   await page.keyboard.press('ArrowDown')
   await expect(page.getByRole('menuitem', { name: 'EN' })).toBeFocused()

@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test'
 
 import { LOCALES } from '@/i18n/routing'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * Three indexable pages, not one page with two duplicates (spec 010, T087 — FR-016, SC-005).
  *
@@ -10,6 +12,25 @@ import { LOCALES } from '@/i18n/routing'
  * right, and Google quietly drops two of them. That would undo the reason the locale is in the URL
  * at all.
  */
+
+/*
+  **Takes the shared-content lock, as a READER.**
+
+  `language-availability.spec.ts` switches Ukrainian off and on again, and every assertion in this
+  file depends on all three languages being offered. `test.describe.configure({ mode: 'serial' })`
+  only orders one file; the lock is what keeps two files out of each other's way, and
+  `tests/shared-content-lock.ts` documents the same failure this had: `<html lang="en">` where `uk`
+  was expected, because the other suite had it switched off at that moment.
+*/
+let releaseSharedContent: (() => Promise<void>) | undefined
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
+
+test.afterAll(async () => {
+  await releaseSharedContent?.()
+})
 const PAGES = ['/legal/privacy', '/blog', '/faq']
 
 const linkFor = (html: string, rel: string, hreflang?: string) => {

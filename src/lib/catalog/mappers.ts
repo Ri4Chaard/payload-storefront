@@ -225,9 +225,20 @@ function toSizeOption(size: number | Size): SizeOption {
 }
 
 function toAttributes(product: Product): ProductAttribute[] {
-  return (product.attributes ?? []).map((entry) => {
+  /*
+    A row with no value in this language is dropped rather than rendered empty (spec 010, FR-047).
+
+    `attributes[].value` stopped being `required` when it became localized: a row is shared across
+    all three languages, so a required localized child would have forced every translation to be
+    complete before a document could be saved in any of them. The cost is that a value can be absent
+    here, and an attribute row reading "Metal:" with nothing after it is worse than one that is not
+    drawn at all.
+  */
+  return (product.attributes ?? []).flatMap((entry) => {
     const definition = populated(entry.attribute, 'a product attribute')
-    return { name: definition.name, label: definition.label, value: entry.value }
+    const value = entry.value
+    if (typeof value !== 'string' || value.trim() === '') return []
+    return [{ name: definition.name, label: definition.label, value }]
   })
 }
 

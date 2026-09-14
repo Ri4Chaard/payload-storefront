@@ -369,7 +369,7 @@ export interface CloserLook {
    */
   chips?:
     | {
-        label: string;
+        label?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -379,7 +379,7 @@ export interface CloserLook {
   figures?:
     | {
         word: string;
-        caption: string;
+        caption?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -487,7 +487,7 @@ export interface ProcessSteps {
            */
           poster?: (number | null) | Media;
         };
-        title: string;
+        title?: string | null;
         caption?: string | null;
         id?: string | null;
       }[]
@@ -1189,7 +1189,7 @@ export interface Article {
         /**
          * The chapter’s heading, and what the contents list links to. Renaming it changes the link to this chapter.
          */
-        heading: string;
+        heading?: string | null;
         /**
          * Optional. A shorter version for the contents list, when the heading is too long to sit in the rail.
          */
@@ -1201,7 +1201,7 @@ export interface Article {
         /**
          * Paragraphs, bold, links and lists. Headings are not offered — each chapter already has one above.
          */
-        body: {
+        body?: {
           root: {
             type: string;
             children: {
@@ -1215,7 +1215,7 @@ export interface Article {
             version: number;
           };
           [k: string]: unknown;
-        };
+        } | null;
         /**
          * Optional. A line set apart from the surrounding text, with a rule beside it.
          */
@@ -1423,7 +1423,7 @@ export interface Product {
   attributes?:
     | {
         attribute: number | Attribute;
-        value: string;
+        value?: string | null;
         id?: string | null;
       }[]
     | null;

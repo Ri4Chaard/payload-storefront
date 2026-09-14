@@ -6,7 +6,8 @@ import { getPayload } from 'payload'
 import { revalidatePath } from 'next/cache'
 
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
-import { localeContext } from '@/lib/email/transactional'
+import { localeContext } from '@/i18n/locale-context'
+import { localised } from '@/lib/revalidate'
 import { consumeCode, issueCode, type CodeFailure } from '@/lib/auth/codes'
 import { requireCustomer, requireCustomerUser, type CustomerUser } from '@/lib/auth/dal'
 import { authenticateCustomer } from '@/lib/auth/login'
@@ -223,7 +224,7 @@ export async function signIn(
 
   // The header and any cached shell were rendered for an anonymous visitor. Without this the
   // customer is signed in and the page still says otherwise until something else forces a refresh.
-  revalidatePath('/', 'layout')
+  for (const path of localised('/')) revalidatePath(path, 'layout')
 
   return ok({ next: safeNextPath(input.next) })
 }
@@ -239,7 +240,7 @@ export async function signIn(
  */
 export async function signOutCustomer(): Promise<ActionResult> {
   await clearSession()
-  revalidatePath('/', 'layout')
+  for (const path of localised('/')) revalidatePath(path, 'layout')
   return ok()
 }
 
@@ -500,7 +501,7 @@ export async function resetPassword(
   }
 
   if (outcome.token) await establishSession(outcome.token)
-  revalidatePath('/', 'layout')
+  for (const path of localised('/')) revalidatePath(path, 'layout')
 
   /**
    * An unverified customer can reach this: `forgotPassword` does not check `_verified`, and the DAL
@@ -556,7 +557,7 @@ export async function updateName(input: NameValues): Promise<ActionResult> {
    * while somebody is typing into them. That is a real defect and not a theoretical one; see the
    * `useForm` note in `src/components/account/address-modal/address-modal.tsx`.
    */
-  revalidatePath('/account')
+  for (const path of localised('/account')) revalidatePath(path)
 
   return ok()
 }
@@ -598,7 +599,7 @@ export async function changePassword(input: ChangePasswordValues): Promise<Actio
   }
 
   if (outcome.token) await establishSession(outcome.token)
-  revalidatePath('/account')
+  for (const path of localised('/account')) revalidatePath(path)
 
   return ok()
 }
@@ -684,7 +685,7 @@ export async function saveAddress(input: SaveAddressValues): Promise<ActionResul
     await payload.update({ collection: 'addresses', data, id, overrideAccess: false, user })
   }
 
-  revalidatePath('/account')
+  for (const path of localised('/account')) revalidatePath(path)
 
   return ok()
 }
@@ -714,7 +715,7 @@ export async function deleteAddress(input: DeleteAddressValues): Promise<ActionR
   const payload = await client()
   await payload.delete({ collection: 'addresses', id: owned.id, overrideAccess: false, user })
 
-  revalidatePath('/account')
+  for (const path of localised('/account')) revalidatePath(path)
 
   return ok()
 }
@@ -752,7 +753,7 @@ export async function setMarketingEmail(input: MarketingEmailValues): Promise<Ac
 
   // The row is server-rendered from `getCustomer()`, so the switch's stored position comes back
   // with this response. See the note in `updateName` for why there is no `router.refresh()`.
-  revalidatePath('/account')
+  for (const path of localised('/account')) revalidatePath(path)
 
   return ok()
 }

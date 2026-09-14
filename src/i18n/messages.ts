@@ -1,6 +1,6 @@
-import en from './messages/en.json'
-import ru from './messages/ru.json'
-import uk from './messages/uk.json'
+import en from './messages/en.json' with { type: 'json' }
+import ru from './messages/ru.json' with { type: 'json' }
+import uk from './messages/uk.json' with { type: 'json' }
 import { DEFAULT_LOCALE, type Locale } from './routing'
 
 /**

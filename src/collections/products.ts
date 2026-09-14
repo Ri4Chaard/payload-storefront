@@ -218,7 +218,20 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                       required: true,
                       label: 'Attribute',
                     },
-                    { name: 'value', type: 'text', required: true, label: 'Value', localized: true },
+      /*
+        **Required, but not in every language** (spec 010, T110).
+
+        A row in this array is shared across all three locales — arrays are not localized, the words
+        inside them are — so a `required` localized child has to be filled in EVERY language before
+        the document can be saved in ANY of them. An editor who opened a product in Russian to change
+        its title met "This field is required" on a row they had not touched, and could not save at
+        all. The seed script hit it first, which is the only reason it was found before an editor
+        did.
+
+        Dropping `required` restores the intent: the row must have a value, and the English one is
+        what every other language falls back to until somebody translates it.
+      */
+                    { name: 'value', type: 'text', label: 'Value', localized: true },
                   ],
                 },
               ],

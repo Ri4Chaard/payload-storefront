@@ -4,6 +4,8 @@ import { getPayload } from 'payload'
 
 import { skipRevalidation } from '@/lib/revalidate'
 
+import { acquireSharedContentLock } from '../shared-content-lock'
+
 /**
  * US3 — the owner decides which languages the site offers (spec 010, T061).
  *
@@ -27,6 +29,7 @@ const setUkrainian = (enabled: boolean) =>
 
 test.afterAll(async () => {
   await setUkrainian(true)
+  await releaseSharedContent?.()
 })
 
 /*
@@ -36,6 +39,19 @@ test.afterAll(async () => {
   three independent fixtures.
 */
 test.describe.configure({ mode: 'serial' })
+
+/*
+  **And the shared-content lock on top of that**, for the reason `tests/shared-content-lock.ts`
+  already documents: `mode: 'serial'` only orders THIS file, and `language-settings` is a singleton
+  that other suites read. Without it, `language-switch.spec.ts` ran while this file had Ukrainian
+  switched off and saw `<html lang="en">` where it expected `uk` — a cross-file race that looks
+  exactly like a product defect.
+*/
+let releaseSharedContent: (() => Promise<void>) | undefined
+
+test.beforeAll(async () => {
+  releaseSharedContent = await acquireSharedContentLock()
+})
 
 test.describe('language availability', () => {
   test('a disabled language stops serving, and its content survives', async ({ page }) => {

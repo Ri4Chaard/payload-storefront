@@ -47,6 +47,32 @@ SELECT count(*) FROM policies_locales WHERE _locale = 'en' AND (title IS NULL OR
 Expected: the two counts in the first query match for every table in data-model.md §10, and the second
 returns `0`.
 
+### The production runbook (T111)
+
+```bash
+# 1. Back up. The migration drops 157 columns; there is no undo that does not start here.
+pg_dump "$DATABASE_URI" > aurum-before-localization.sql
+
+# 2. Run. Three migrations, in order, in one command.
+pnpm payload migrate
+
+# 3. Verify, before letting traffic in.
+psql "$DATABASE_URI" -c "SELECT (SELECT count(*) FROM policies) = (SELECT count(*) FROM policies_locales WHERE _locale='en') AS policies_ok;"
+psql "$DATABASE_URI" -c "SELECT count(*) FROM products_locales WHERE _locale='en' AND title IS NULL;"   -- expect 0
+
+# 4. If anything is wrong:
+pnpm payload migrate:down    # reverses ONE migration; run three times to undo all three
+```
+
+The three migrations, oldest first: `20260911_135539_localization` (the big one — 48 `_locales`
+tables, 157 columns moved), `20260911_141700_language_settings` (one new table),
+`20260911_152747_customer_locale` (one nullable column).
+
+**Row counts measured on the rehearsal set**, for comparison against a production run: 31 products,
+15 articles, 4 policies, 31 media, 12 article chapters, 6 questions — all carried, zero nulls, in
+175 ms. A production-sized set will take longer; the `INSERT … SELECT` statements are proportional to
+row count and the `DROP COLUMN`s are not.
+
 ### Rehearsed 2026-09-11 (T052)
 
 Against a restored copy holding 31 products, 15 articles, 4 policies, 31 media and 12 article
@@ -287,3 +313,66 @@ done
 Expected: `200` for every one of them, serving English. Not a redirect to the site root, not a `/en/`
 prefix, not a 404. This is the check that says the `as-needed` prefix decision was implemented as
 specified.
+
+---
+
+## 10. The suite, run against a production server on 2026-09-14 (T105–T109)
+
+Everything below ran against `pnpm build && PORT=3000 pnpm start` with the project database.
+
+| Check | Result |
+| --- | --- |
+| `pnpm typecheck` | clean |
+| `pnpm lint` | clean |
+| `pnpm check:naming` | 762 paths, all kebab-case |
+| `pnpm check:stories` | 40 components, all with stories |
+| `pnpm test` | 329 passed (28 files) |
+| `pnpm test:integration` | 295 passed (30 files) |
+| `pnpm test:e2e --project=e2e` | 356 passed, 5 failed — **all five inherited**, see below |
+| `pnpm test:a11y` | 167 passed, 6 failed — **all six inherited**, see below |
+| `pnpm test:stories` | 106 passed, 4 failed — 3 inherited, 1 fixed here |
+| `pnpm payload generate:types` | no diff — `payload-types.ts` is current |
+
+**`PORT` is not free, and getting it wrong costs a day.** `NEXT_PUBLIC_SERVER_URL` is
+`http://localhost:3000`, and Payload derives its CSRF allowlist from it. Payload's cookie token
+extraction (`node_modules/payload/dist/auth/extractJWT.js`) rejects a cookie whenever the request
+carries an `Origin` the allowlist does not contain — and a Server Action POST always carries one,
+while a page GET does not. Run the suite against a server on any other port and every action that
+needs a session silently sees an anonymous visitor: the profile saves nothing, `saveAddress` writes a
+row with `customer_id IS NULL`, and the page renders as though nothing happened. No error is logged
+anywhere. Use port 3000.
+
+### The eleven failures this feature did not cause
+
+Nine of them are one inherited defect: **the cookie banner is 900px tall at a 390x700 viewport**, so
+it covers the screen and intercepts every click at mobile width. `src/components/ui/cookie-banner/`
+is untouched by spec 010, and its copy is byte-identical before and after the migration — 831
+characters across 13 text nodes in both the pre-migration dump and `cookie_settings_locales`. It
+accounts for `home.spec.ts` (menu), `listing.spec.ts` (drawer), `responsive.spec.ts` (`/account` at
+390 and 320) and five of the six a11y failures.
+
+The other two:
+
+- `product.spec.ts` — "the two actions are present and disabled" expects ADD TO CART to be disabled.
+  The cart shipped in spec 005 and the button works; spec 010 only swapped its literal string for
+  `t('addToCart')` and did not touch the `disabled` logic.
+- `routes.spec.ts` — `/` at 1920 never reaches `networkidle`, because
+  `_next/image?url=/photography/about.webp&w=1080` is started by the browser and never finishes. The
+  same URL serves in 68 ms over curl, `/about` at the same width is fine, and both the band and its
+  mock (`src/mocks/home.ts`) predate this feature.
+
+And one that WAS this feature's, now fixed: `ui-kit.spec.ts`'s "language menu is operable by
+keyboard" pressed ArrowDown twice expecting to wrap from RU back to EN. There are three languages
+now, so the second press lands on UK. Three story failures remain and are inherited — a hero whose
+height deliberately stopped matching the drawn 754px (`1cf6a31`), a feature card whose width
+deliberately stopped matching 250px (`752ac3a`), and `ui-videomedia--reduced-motion` asking for
+`/media/sample.mp4`, which is not in `public/`.
+
+### One defect this verification found (T110)
+
+`articles.chapters.heading` and `articles.chapters.body` were `required` AND `localized`. An array
+row is shared across all three locales — the array is not localized, the words inside it are — so an
+editor opening an article to put its headline into Russian was refused by four chapters they had
+never touched, and could not save at all. Same shape as the four fields already relaxed in
+`closer-look.ts` and `process-steps.ts`; `required` is dropped on both. No migration: the columns in
+`articles_chapters_locales` are already nullable.

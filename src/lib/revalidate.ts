@@ -26,7 +26,7 @@
  * change a page goes through Payload, so an exact signal is available, and this is it.
  */
 
-import { DEFAULT_LOCALE, LOCALES } from '@/i18n/routing'
+import { LOCALES } from '@/i18n/routing'
 
 import type {
   CollectionAfterChangeHook,
@@ -57,9 +57,17 @@ export const skipRevalidation: RequestContext = { disableRevalidate: true }
  * pages in the cache, and switching it back on must not serve content from before the change —
  * which is exactly the window in which nobody would be looking. It also keeps this function free of
  * a database read.
+ *
+ * **English gets BOTH `/x` and `/en/x`, and that is the part that was wrong first.** The address bar
+ * says `/account`, but the proxy rewrites it to `/en/account` before anything renders — so that is
+ * the route Next caches, and it is what `next build` prints in its route list
+ * (`● /en/products/…`). Invalidating only the address the visitor sees quietly misses every
+ * prerendered page: the name saved, the row did not change, and nothing anywhere reported an error.
+ * Both forms are named because the bare one is still what an unrewritten request would key on.
  */
-function localised(path: string): string[] {
-  return LOCALES.map((locale) => (locale === DEFAULT_LOCALE ? path : `/${locale}${path}`))
+export function localised(path: string): string[] {
+  const prefixed = LOCALES.map((locale) => (path === '/' ? `/${locale}` : `/${locale}${path}`))
+  return [path, ...prefixed]
 }
 
 /**
