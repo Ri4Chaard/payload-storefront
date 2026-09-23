@@ -62,7 +62,6 @@ export const PreTicked: Story = {
       ...storyFilters,
       category: ['rings'],
       colour: ['clear'],
-      size: ['2.5'],
       shape: ['oval', 'emerald'],
       minPrice: 120_000,
       maxPrice: 730_000,

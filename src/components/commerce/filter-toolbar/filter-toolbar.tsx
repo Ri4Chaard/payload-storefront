@@ -468,7 +468,6 @@ function HiddenState({ filters }: { filters: FilterState }) {
   const lists: [string, readonly string[]][] = [
     ['category', filters.category],
     ['collection', filters.collection],
-    ['size', filters.size],
     ['colour', filters.colour],
     ['shape', filters.shape],
   ]

@@ -35,9 +35,9 @@ import { getPayload } from 'payload'
 import { cache } from 'react'
 
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
-import type { Category, Collection, Product, Size } from '@/payload-types'
+import type { Category, Collection, Colour, Product } from '@/payload-types'
 
-import { COLOURS, DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
+import { DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
 import { formatPriceFor, formatPrice } from './price'
 import {
   isProductAvailable,
@@ -122,12 +122,12 @@ const catalogue = cache(async (locale: Locale): Promise<Product[]> => {
 interface Reference {
   categories: Category[]
   collections: Collection[]
-  sizes: Size[]
+  colours: Colour[]
 }
 
 const reference = cache(async (locale: Locale): Promise<Reference> => {
   const payload = await client()
-  const [categories, collections, sizes] = await Promise.all([
+  const [categories, collections, colours] = await Promise.all([
     payload.find({
       locale,
       fallbackLocale: DEFAULT_LOCALE,
@@ -147,13 +147,17 @@ const reference = cache(async (locale: Locale): Promise<Reference> => {
     payload.find({
       locale,
       fallbackLocale: DEFAULT_LOCALE,
-      collection: 'sizes',
+      collection: 'colours',
       limit: 0,
       sort: 'order',
       overrideAccess: false,
     }),
   ])
-  return { categories: categories.docs, collections: collections.docs, sizes: sizes.docs }
+  return {
+    categories: categories.docs,
+    collections: collections.docs,
+    colours: colours.docs,
+  }
 })
 
 /** What the listing sorts and filters on — the price the card advertises. */
@@ -172,8 +176,16 @@ const categoryTitle = (refs: Reference, slug: string): string | undefined =>
 const collectionTitle = (refs: Reference, slug: string): string | undefined =>
   refs.collections.find((entry) => entry.slug === slug)?.title
 
-const sizeLabel = (refs: Reference, value: string): string | undefined =>
-  refs.sizes.find((entry) => entry.value === value)?.label
+
+/**
+ * A colour's customer-facing name, from the catalogue (spec 011, US3).
+ *
+ * It used to come from the `colour.*` message keys with `titleCase` behind it. A colour is the
+ * owner's now, so its name is a localized field on the row and falls back the way every other
+ * editorial label does — one place to change it rather than three JSON files (011/research.md R3).
+ */
+const colourLabel = (refs: Reference, value: string): string | undefined =>
+  refs.colours.find((entry) => entry.value === value)?.label
 
 // ---------------------------------------------------------------------------------------------
 // getListing
@@ -194,15 +206,13 @@ function matches(product: Product, filters: FilterState): boolean {
     if (!filters.collection.some((slug) => collections.includes(slug))) return false
   }
 
-  if (filters.size.length > 0) {
-    const sizes = (product.sizes ?? []).map((entry) =>
-      typeof entry === 'number' ? String(entry) : entry.value,
-    )
-    if (!filters.size.some((value) => sizes.includes(value))) return false
-  }
 
   if (filters.colour.length > 0) {
-    const colours = product.colour ?? []
+    // Relationship rows as of spec 011, so this reads a `value` off each the way `slugsOf` does for
+    // collections rather than comparing enum strings.
+    const colours = (product.colour ?? []).map((entry) =>
+      typeof entry === 'number' ? String(entry) : entry.value,
+    )
     if (!filters.colour.some((value) => colours.includes(value))) return false
   }
 
@@ -255,11 +265,8 @@ function chipsFor(filters: FilterState, refs: Reference, locale: Locale): Applie
   for (const slug of filters.collection) {
     chips.push({ key: 'collection', value: slug, label: collectionTitle(refs, slug) ?? slug })
   }
-  for (const value of filters.size) {
-    chips.push({ key: 'size', value, label: `Size ${sizeLabel(refs, value) ?? value}` })
-  }
   for (const value of filters.colour) {
-    chips.push({ key: 'colour', value, label: titleCase(value) })
+    chips.push({ key: 'colour', value, label: colourLabel(refs, value) ?? value })
   }
   for (const value of filters.shape) {
     chips.push({ key: 'shape', value, label: titleCase(value) })
@@ -313,8 +320,9 @@ function unknownValues(filters: FilterState, refs: Reference): DroppedFilter[] {
   for (const slug of filters.collection) {
     if (!collectionTitle(refs, slug)) dropped.push({ key: 'collection', value: slug })
   }
-  for (const value of filters.size) {
-    if (!sizeLabel(refs, value)) dropped.push({ key: 'size', value })
+  // Colour joined this list in spec 011, when it stopped being an enum the parser could judge.
+  for (const value of filters.colour) {
+    if (!colourLabel(refs, value)) dropped.push({ key: 'colour', value })
   }
 
   return dropped
@@ -330,7 +338,7 @@ export async function getListing(filters: FilterState, locale: Locale): Promise<
     ...filters,
     category: filters.category.filter((slug) => Boolean(categoryTitle(refs, slug))),
     collection: filters.collection.filter((slug) => Boolean(collectionTitle(refs, slug))),
-    size: filters.size.filter((value) => Boolean(sizeLabel(refs, value))),
+    colour: filters.colour.filter((value) => Boolean(colourLabel(refs, value))),
   }
 
   const found = sorted(
@@ -503,7 +511,6 @@ export async function getFilterFacets(
     translator from it is both the portable form and the honest one.
   */
   const messages = loadMessages(locale) as Record<string, Record<string, string>>
-  const t_colour = createTranslator({ locale, messages, namespace: 'colour' })
   const t_shape = createTranslator({ locale, messages, namespace: 'diamondShape' })
 
   const within = categorySlug
@@ -531,33 +538,23 @@ export async function getFilterFacets(
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((entry) => ({ value: entry.slug, label: entry.title })),
     ),
-    sizes: facet(
-      within,
-      (product) =>
-        (product.sizes ?? []).map((entry) =>
-          typeof entry === 'number' ? String(entry) : entry.value,
-        ),
-      refs.sizes
-        .slice()
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((entry) => ({ value: entry.value, label: entry.label })),
-    ),
     /*
-      **Colours and shapes are the two facets whose words live in code** (spec 010).
+      **Shape is the last facet whose words live in code** (spec 010).
 
-      Every other facet here labels itself from Payload — a category, a collection and a size are
-      documents an editor writes, so their titles are localized fields and fall back on their own.
-      These two are enum values (`COLOURS`, `SHAPES`), and `titleCase('multicolor')` is an English
-      sentence built from an identifier. They are interface chrome by the README's rule, so the
-      words come from the message files and the enum stays the key.
+      Every other facet here labels itself from Payload — a category, a collection and, as of spec
+      011, a colour are documents an editor writes, so their titles are localized fields that fall
+      back on their own. Shape is still an enum, `titleCase('marquise')` is an English sentence built
+      from an identifier, and it is interface chrome by the README's rule: the words come from the
+      message files and the enum stays the key.
 
       `titleCase` remains the fallback for a value added to the enum before its key exists — an
       English label is a better failure than a raw `diamondShape.cushion` on the page.
     */
     colours: facet(
       within,
-      (product) => product.colour ?? [],
-      COLOURS.map((value) => ({ value, label: t_colour.has(value) ? t_colour(value) : titleCase(value) })),
+      (product) =>
+        (product.colour ?? []).map((entry) => (typeof entry === 'number' ? String(entry) : entry.value)),
+      refs.colours.map((colour) => ({ value: colour.value, label: colour.label })),
     ),
     shapes: facet(
       within,

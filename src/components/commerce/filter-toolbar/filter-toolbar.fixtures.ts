@@ -23,13 +23,6 @@ export const storyFacets: FilterFacets = {
     option('molten', 'Molten'),
     option('spartan', 'Spartan', 0),
   ],
-  sizes: [
-    option('2', '2'),
-    option('2.25', '2.25'),
-    option('2.5', '2.5'),
-    option('2.75', '2.75'),
-    option('3', '3'),
-  ],
   colours: [
     option('black', 'Black'),
     option('clear', 'Clear'),

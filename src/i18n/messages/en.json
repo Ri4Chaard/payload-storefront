@@ -118,7 +118,6 @@
     "diamondShape": "DIAMOND SHAPE:",
     "availability": "AVAILABILITY:",
     "price": "PRICE:",
-    "size": "SIZE:",
     "diamondShapeLabel": "Diamond shape",
     "resultCount": "{count, plural, one {# piece} other {# pieces}}",
     "clear": "CLEAR",
@@ -149,11 +148,9 @@
     "viewCollectionShort": "View collection"
   },
   "product": {
-    "chooseSize": "Choose a size",
-    "selectSize": "Select size",
-    "sizeLabel": "Size:",
     "chooseDiamond": "Choose a diamond",
     "chooseDiamondHeading": "Choose Your Diamond:",
+    "viewPiece": "View piece",
     "chooseQuantity": "Choose how many you would like.",
     "addToCart": "ADD TO CART",
     "buyNow": "Buy now",
@@ -328,12 +325,6 @@
     "onThisPage": "On this page:",
     "ourBlog": "Our Blog",
     "latestArticles": "Latest articles"
-  },
-  "colour": {
-    "black": "Black",
-    "clear": "Clear",
-    "green": "Green",
-    "multicolor": "Multicolor"
   },
   "diamondShape": {
     "round": "Round",

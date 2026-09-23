@@ -118,7 +118,6 @@
     "diamondShape": "ОГРАНКА:",
     "availability": "НАЛИЧИЕ:",
     "price": "ЦЕНА:",
-    "size": "РАЗМЕР:",
     "diamondShapeLabel": "Огранка бриллианта",
     "resultCount": "{count, plural, one {# украшение} few {# украшения} many {# украшений} other {# украшения}}",
     "clear": "СБРОСИТЬ",
@@ -149,11 +148,9 @@
     "viewCollectionShort": "Смотреть коллекцию"
   },
   "product": {
-    "chooseSize": "Выберите размер",
-    "selectSize": "Выбрать размер",
-    "sizeLabel": "Размер:",
     "chooseDiamond": "Выберите бриллиант",
     "chooseDiamondHeading": "Выберите свой бриллиант:",
+    "viewPiece": "Смотреть",
     "chooseQuantity": "Выберите количество.",
     "addToCart": "В КОРЗИНУ",
     "buyNow": "Купить сейчас",
@@ -328,12 +325,6 @@
     "onThisPage": "На этой странице:",
     "ourBlog": "Наш блог",
     "latestArticles": "Последние статьи"
-  },
-  "colour": {
-    "black": "Чёрный",
-    "clear": "Прозрачный",
-    "green": "Зелёный",
-    "multicolor": "Разноцветный"
   },
   "diamondShape": {
     "round": "Круглая",

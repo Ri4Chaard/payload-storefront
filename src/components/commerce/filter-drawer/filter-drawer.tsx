@@ -230,14 +230,6 @@ export function FilterDrawer({
         </Group>
       ) : null}
 
-      <Group legend={t_catalog('size')}>
-        <Options
-          name="size"
-          options={facets.sizes}
-          selected={draft.size}
-          onToggle={(value) => setDraft((current) => toggleFilter(current, 'size', value))}
-        />
-      </Group>
 
       <Group legend={t_catalog('collection')}>
         <Options

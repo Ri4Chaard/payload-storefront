@@ -21,7 +21,6 @@ import type { FilterState } from '@/lib/catalog/types'
 const FULL: FilterState = {
   category: ['rings', 'earrings'],
   collection: ['molten'],
-  size: ['2.25', '2.5'],
   colour: ['black', 'clear'],
   shape: ['pear', 'round'],
   minPrice: 120000,
@@ -70,10 +69,28 @@ describe('defaults are absent from the URL', () => {
 })
 
 describe('unknown values are dropped and reported', () => {
-  it('drops a colour the schema does not have', () => {
+  /**
+   * **Colour left this list in spec 011**, and the assertion is reversed rather than deleted.
+   *
+   * It used to be a closed set this module could judge, and the test asserted `purple` was dropped
+   * here. Colour is an owner-managed vocabulary now, so the valid set is a fact about the database
+   * that a pure URL module has never seen — exactly the position `category`, `collection` and
+   * `size` have always been in. The value is carried through and `getListing` decides, reporting
+   * the drop into the same list the visitor is shown.
+   *
+   * `tests/integration/colours.test.ts` is where "purple is dropped" is now proved, because that is
+   * where a catalogue exists to contradict it.
+   */
+  it('carries an unrecognised colour through for the catalogue to judge', () => {
     const { filters, dropped } = parseFilters({ colour: ['black', 'purple'] })
-    expect(filters.colour).toEqual(['black'])
-    expect(dropped).toEqual([{ key: 'colour', value: 'purple' }])
+    expect(filters.colour).toEqual(['black', 'purple'])
+    expect(dropped).toEqual([])
+  })
+
+  it('still judges shape, which is still an enum', () => {
+    const { filters, dropped } = parseFilters({ shape: ['round', 'trillion'] })
+    expect(filters.shape).toEqual(['round'])
+    expect(dropped).toEqual([{ key: 'shape', value: 'trillion' }])
   })
 
   it('drops an unknown sort rather than sorting by nothing', () => {
@@ -103,7 +120,7 @@ describe('unknown values are dropped and reported', () => {
   })
 
   it('collapses a repeated value to one filter', () => {
-    expect(parseFilters({ size: ['2.25', '2.25'] }).filters.size).toEqual(['2.25'])
+    expect(parseFilters({ colour: ['black', 'black'] }).filters.colour).toEqual(['black'])
   })
 
   it('keeps an unknown category — only the catalogue can judge that one', () => {
@@ -156,10 +173,10 @@ describe('toggleFilter', () => {
 
   it('leaves every other group alone', () => {
     const filters = { ...DEFAULT_FILTERS, category: ['rings'], colour: ['black' as const] }
-    expect(toggleFilter(filters, 'size', '2.5')).toMatchObject({
+    expect(toggleFilter(filters, 'shape', 'oval')).toMatchObject({
       category: ['rings'],
       colour: ['black'],
-      size: ['2.5'],
+      shape: ['oval'],
     })
   })
 })
