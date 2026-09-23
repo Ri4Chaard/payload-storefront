@@ -22,16 +22,14 @@ const RING: PurchasableProduct = {
     { id: 10, available: true },
     { id: 11, available: false },
   ],
-  sizes: [{ id: 20 }, { id: 21 }],
 }
 
-const PLAIN_BAND: PurchasableProduct = { id: 2, available: true, diamonds: [], sizes: [] }
+const PLAIN_BAND: PurchasableProduct = { id: 2, available: true, diamonds: [] }
 
-const good: CartIntent = { productId: 1, variantId: 10, sizeId: 20, quantity: 1 }
+const good: CartIntent = { productId: 1, variantId: 10, quantity: 1 }
 
 /** Written out rather than destructured off `good`: an optional key has to be ABSENT, not undefined. */
-const withoutStone: CartIntent = { productId: 1, sizeId: 20, quantity: 1 }
-const withoutSize: CartIntent = { productId: 1, variantId: 10, quantity: 1 }
+const withoutStone: CartIntent = { productId: 1, quantity: 1 }
 
 describe('validateIntent', () => {
   it('accepts an intent with every choice made', () => {
@@ -47,10 +45,6 @@ describe('validateIntent', () => {
       field: 'diamond',
       reason: 'missing-option',
     })
-  })
-
-  it('names the size when it has not been chosen', () => {
-    expect(validateIntent(withoutSize, RING)).toEqual({ field: 'size', reason: 'missing-option' })
   })
 
   /** FR-040 — an unavailable stone is offered, and refused if it is somehow chosen anyway. */
@@ -72,12 +66,6 @@ describe('validateIntent', () => {
     })
   })
 
-  it('refuses a size the piece is not made in', () => {
-    expect(validateIntent({ ...good, sizeId: 999 }, RING)).toEqual({
-      field: 'size',
-      reason: 'missing-option',
-    })
-  })
 
   /**
    * The piece before its parts. A sold-out ring cannot be rescued by choosing a stone for it, and
@@ -108,7 +96,7 @@ describe('the intent that crosses the seam', () => {
    */
   it('carries identifiers only — never a price', () => {
     const keys = Object.keys(good)
-    expect(keys.sort()).toEqual(['productId', 'quantity', 'sizeId', 'variantId'])
+    expect(keys.sort()).toEqual(['productId', 'quantity', 'variantId'])
 
     for (const key of keys) {
       expect(key, `"${key}" looks like money crossing the seam`).not.toMatch(
@@ -131,92 +119,28 @@ describe('the intent that crosses the seam', () => {
 })
 
 /**
- * The size trap (spec 005, T015, research R16).
+ * The intent that crosses the seam.
  *
- * Two selects sit beside each other on the product page and use opposite conventions: the stone's
- * options carry `String(option.id)` and its handler does `Number(value)`, while the size's carry
- * `option.value` — a label. `Number("6.5")` is `6.5`: not an id, not an error, and stored as a
- * broken relationship. This is the function that keeps the two apart.
+ * **This block used to be about the size trap** (spec 005, T015, research R16), and the trap went
+ * with the sizes in spec 011. Two selects sat beside each other on the product page using opposite
+ * conventions — the stone's options carried `String(option.id)` with a handler doing
+ * `Number(value)`, the size's carried `option.value`, a label — so `Number("6.5")` produced `6.5`:
+ * not an id, not an error, and stored as a broken relationship. There is one select now.
+ *
+ * What remains is worth keeping: the intent is assembled in one tested place rather than in three
+ * lines of a component, and a choice nobody made is omitted rather than sent as a placeholder.
  */
 describe('intentFrom', () => {
-  const SIZES = [
-    { id: 21, value: '6' },
-    { id: 22, value: '6.5' },
-    { id: 23, value: '7' },
-  ]
-
-  it('maps a size VALUE to its numeric id, never to the value parsed as a number', () => {
-    const intent = intentFrom({
-      productId: 1,
-      quantity: 1,
-      diamondId: 11,
-      sizeValue: '6.5',
-      sizes: SIZES,
-    })
-
-    expect(intent.sizeId).toBe(22)
-    expect(intent.sizeId).not.toBe(6.5)
-    expect(Number.isInteger(intent.sizeId)).toBe(true)
-  })
-
   it('carries the stone id through as it stands', () => {
-    const intent = intentFrom({
-      productId: 1,
-      quantity: 2,
-      diamondId: 11,
-      sizeValue: '6',
-      sizes: SIZES,
-    })
+    const intent = intentFrom({ productId: 1, quantity: 2, diamondId: 11 })
 
-    expect(intent).toEqual({ productId: 1, quantity: 2, variantId: 11, sizeId: 21 })
+    expect(intent).toEqual({ productId: 1, quantity: 2, variantId: 11 })
   })
 
   it('omits a choice that has not been made rather than sending a placeholder', () => {
-    const intent = intentFrom({
-      productId: 1,
-      quantity: 1,
-      diamondId: null,
-      sizeValue: null,
-      sizes: SIZES,
-    })
+    const intent = intentFrom({ productId: 1, quantity: 1, diamondId: null })
 
     expect(intent).toEqual({ productId: 1, quantity: 1 })
-    expect('sizeId' in intent).toBe(false)
     expect('variantId' in intent).toBe(false)
-  })
-
-  /**
-   * A value naming no size of this piece yields nothing, so `validateIntent` refuses it as a
-   * missing choice — which is the right answer. Guessing an id would silently order a size the
-   * customer never picked.
-   */
-  it('yields no size for a value the piece does not offer', () => {
-    const intent = intentFrom({
-      productId: 1,
-      quantity: 1,
-      diamondId: 11,
-      sizeValue: '99',
-      sizes: SIZES,
-    })
-
-    expect(intent.sizeId).toBeUndefined()
-    expect(validateIntent(intent, { id: 1, available: true, diamonds: [{ id: 11, available: true }], sizes: [{ id: 21 }] })).toEqual({
-      field: 'size',
-      reason: 'missing-option',
-    })
-  })
-
-  it('still carries no money, whatever it is given', () => {
-    const intent = intentFrom({
-      productId: 1,
-      quantity: 1,
-      diamondId: 11,
-      sizeValue: '6',
-      sizes: SIZES,
-    })
-
-    for (const key of Object.keys(intent)) {
-      expect(key).not.toMatch(/price|amount|total|cost|currency|minor/i)
-    }
   })
 })

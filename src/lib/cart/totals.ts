@@ -25,7 +25,6 @@ export interface RawCartLine {
   id?: null | string
   product?: number | { id: number } | null
   quantity?: null | number
-  size?: number | { id: number } | null
   variant?: number | { id: number } | null
 }
 
@@ -55,7 +54,6 @@ function orphanLine(row: RawCartLine, quantity: number): CartLineView {
     href: null,
     image: null,
     diamond: null,
-    size: null,
     unitPrice: formatPrice(0),
     lineTotal: formatPrice(0),
     unitMinor: 0,
@@ -93,12 +91,10 @@ export function resolveLine(
   }
 
   const variantId = relationId(row.variant)
-  const sizeId = relationId(row.size)
 
   const chosen: DiamondOption | undefined = product.diamondOptions.find(
     (option) => option.id === variantId,
   )
-  const size = product.sizes.find((option) => option.id === sizeId)
 
   // The stone's price where the piece has stones, the piece's own where it does not. `carts_items`
   // carries no price of its own by design (research R6) — FR-012 wants the current one, and a
@@ -142,7 +138,6 @@ export function resolveLine(
       href: product.href,
       image: product.images[0] ?? null,
       diamond: chosen?.label ?? null,
-      size: size?.label ?? null,
       unitPrice: formatPrice(unitMinor),
       lineTotal: formatPrice(lineMinor),
       unitMinor,

@@ -118,7 +118,6 @@ describe('getProduct', () => {
     const product = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
     expect(product?.title).toBe('Paragon Emerald Cut Diamond Engagement Ring')
     expect(product?.diamondOptions).toHaveLength(4)
-    expect(product?.sizes).toHaveLength(5)
   })
 
   it('returns null for a draft, exactly as it does for a slug that names nothing', async () => {

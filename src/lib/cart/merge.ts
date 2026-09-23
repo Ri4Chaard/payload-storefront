@@ -1,4 +1,3 @@
-import { cartItemMatcher } from '@/collections/carts'
 
 import { createCartFor } from './operations'
 import { findCartId, ownerRequest, payloadClient, type CartOwner } from './session'
@@ -62,17 +61,15 @@ interface MergedItem {
   variant?: number
 }
 
-/** The shape `cartItemMatcher` expects on the incoming side: ids, not documents. */
+/** The write shape: ids, not documents. */
 function asNewItem(row: RawCartLine) {
   const product = relationId(row.product)
   const variant = relationId(row.variant)
-  const size = relationId(row.size)
 
   return {
     product: product as number,
     quantity: Math.max(1, Math.trunc(row.quantity ?? 1)),
     ...(variant === undefined ? {} : { variant }),
-    ...(size === undefined ? {} : { size }),
   }
 }
 
@@ -124,11 +121,16 @@ export async function mergeGuestCart(
     const newItem = asNewItem(guestRow)
     if (typeof newItem.product !== 'number') continue
 
-    const match = items.find((existingItem) =>
-      cartItemMatcher({
-        existingItem: existingItem as Parameters<typeof cartItemMatcher>[0]['existingItem'],
-        newItem,
-      }),
+    /*
+      Same product, same stone, same line — the plugin's own rule, applied here by hand because the
+      merge works on plain data rather than through `addItem`.
+
+      This used to call a custom `cartItemMatcher` that also compared size. Sizes left in spec 011,
+      and with them the only reason the default was not enough.
+    */
+    const match = items.find(
+      (existingItem) =>
+        existingItem.product === newItem.product && existingItem.variant === newItem.variant,
     )
 
     if (match) {

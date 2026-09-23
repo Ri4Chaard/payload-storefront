@@ -79,7 +79,6 @@ const intentFor = (product: ProductDetail, quantity = 1) => ({
   productId: product.id,
   quantity,
   ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
-  ...(product.sizes[0] ? { sizeId: product.sizes[0].id } : {}),
 })
 
 const edit = (id: number, data: Record<string, unknown>) =>

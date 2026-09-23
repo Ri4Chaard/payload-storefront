@@ -20,7 +20,6 @@ const line = (over: Partial<CartLineView> = {}): CartLineView => ({
   href: '/products/butterfly-diamond-pendant',
   image: { src: pendant.src, width: 800, height: 800 },
   diamond: null,
-  size: null,
   unitPrice: '$24,900',
   lineTotal: '$24,900',
   unitMinor: 2490000,
@@ -43,7 +42,7 @@ type Story = StoryObj<typeof meta>
 /** One piece, no choices to make — the simplest row the cart can hold. */
 export const SingleLine: Story = {}
 
-/** Three rows, two of them carrying a chosen stone and size. */
+/** Three rows, two of them carrying a chosen stone. */
 export const Filled: Story = {
   args: {
     lines: [
@@ -51,7 +50,6 @@ export const Filled: Story = {
         id: 'a',
         title: 'PARAGON EMERALD CUT DIAMOND ENGAGEMENT RING',
         diamond: 'Lab 1.5 ct D VS1',
-        size: '6',
         unitPrice: '$38,320',
         lineTotal: '$76,640',
         quantity: 2,

@@ -189,7 +189,6 @@ describe('the message a signed-in customer actually gets', () => {
         href: '/products/butterfly-diamond-pendant',
         image: null,
         diamond: null,
-        size: null,
         unitPrice: '$24,900',
         lineTotal: '$24,900',
         unitMinor: 2490000,

@@ -146,6 +146,6 @@ export function CartLines({
  * nothing at all instead of an empty paragraph holding open a gap.
  */
 function optionsLabel(line: CartLineView): string | undefined {
-  const parts = [line.diamond, line.size === null ? null : `Size ${line.size}`].filter(Boolean)
-  return parts.length > 0 ? parts.join(' · ') : undefined
+  // Just the stone since spec 011 — size was the other half until it was deprecated.
+  return line.diamond ?? undefined
 }

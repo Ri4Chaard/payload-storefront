@@ -448,10 +448,24 @@ test('a category in the query is redirected onto its own path', async ({ page })
 })
 
 /** A stale value has a report to render, and the redirect would rewrite the query that carries it. */
-test('a category in the query stays put when something else was dropped', async ({ page }) => {
+/**
+ * **The URL now canonicalises and the report survives it** — spec 011 moved where an unknown colour
+ * is judged, and this assertion moved with it.
+ *
+ * `canonicalListing` refuses to rewrite a query carrying a value the catalogue rejected, because
+ * rebuilding the query from the parsed state is how such a report gets lost. That applied to colour
+ * while colour was a closed set the PARSER could reject. It is an owner-managed vocabulary now, so
+ * `puce` survives parsing, travels through the redirect intact, and is reported by `getListing` on
+ * the other side.
+ *
+ * The outcome is better than what this used to assert: the visitor lands on the canonical path AND
+ * is still told what was ignored. What must never happen is the value disappearing silently, which
+ * is what the second assertion guards.
+ */
+test('an unknown colour is still reported after the URL canonicalises', async ({ page }) => {
   await page.goto('/all-jewelry?category=rings&colour=puce')
 
-  await expect(page).toHaveURL('/all-jewelry?category=rings&colour=puce')
+  await expect(page).toHaveURL('/rings?colour=puce')
   await expect(page.getByRole('status').filter({ hasText: /^Ignored/ })).toContainText(/puce/i)
 })
 
