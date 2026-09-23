@@ -33,7 +33,15 @@ export interface CatalogImage {
   alt?: string
 }
 
-export type ColourValue = NonNullable<Product['colour']>[number]
+/**
+ * A colour's stable identifier — `black`, `rose-gold` — as it appears in `?colour=`.
+ *
+ * **A string as of spec 011, where it used to be a union derived from the enum.** Colour is an
+ * owner-managed vocabulary now, so the set is a fact about the database rather than about the
+ * schema, and no type can enumerate it. Validity is checked where the catalogue is in scope —
+ * `getListing` — exactly as it always has been for `category` and `collection` (011/research.md R2).
+ */
+export type ColourValue = string
 export type DiamondShape = NonNullable<Product['diamondShape']>[number]
 
 /** The card, the grid, and _Complete the Collection_. */
@@ -56,6 +64,14 @@ export interface DiamondOption {
   priceMinor: number
   available: boolean
   /**
+   * What this stone says about itself (spec 011, FR-009).
+   *
+   * Only what DIFFERS from the piece — carat weight, certificate. The product page lays these over
+   * the piece's own rows when the stone is selected; see `mergeAttributes`. Empty is the ordinary
+   * case and means "this stone is described entirely by its piece".
+   */
+  attributes: ProductAttribute[]
+  /**
    * The most a customer may order OF THIS STONE. Absent where nothing is counted.
    *
    * Not the same thing as `inventory`, which the note at the top of this file keeps out on purpose.
@@ -69,11 +85,6 @@ export interface DiamondOption {
   image?: CatalogImage
 }
 
-export interface SizeOption {
-  id: number
-  label: string
-  value: string
-}
 
 /** A descriptive property from the owner-defined `attributes` collection. Not a filter. */
 export interface ProductAttribute {
@@ -102,11 +113,19 @@ export interface ProductDetail extends ProductSummary {
    */
   maxQuantity?: number
   description: string | null
+  /**
+   * Whether the piece is made to order (spec 011, FR-007).
+   *
+   * A boolean about the piece's MODE, not a count — the rule at the top of this file still holds,
+   * and a component still has no way to learn how many of anything exist. It is here so the page can
+   * say "made to order" once, under the price, rather than leaving a customer to infer it from the
+   * absence of an out-of-stock label on four stones.
+   */
+  madeToOrder: boolean
   gallery: CatalogImage[]
   /** Serialised from the `details` rich text. `null` where the owner left it empty. */
   detailsHtml: string | null
   diamondOptions: DiamondOption[]
-  sizes: SizeOption[]
   attributes: ProductAttribute[]
   /**
    * `"From $2,400"`-style prefix money, set only where stones differ in price. `null` means the
@@ -162,7 +181,6 @@ export const SORT_ORDERS: readonly SortOrder[] = [
 export type FilterKey =
   | 'category'
   | 'collection'
-  | 'size'
   | 'colour'
   | 'shape'
   | 'minPrice'
@@ -181,7 +199,6 @@ export type FilterKey =
 export interface FilterState {
   category: string[]
   collection: string[]
-  size: string[]
   colour: ColourValue[]
   shape: DiamondShape[]
   /** Integer minor units, so nothing ever parses a formatted string back into money. */
@@ -222,7 +239,6 @@ export interface FacetOption {
 export interface FilterFacets {
   categories: FacetOption[]
   collections: FacetOption[]
-  sizes: FacetOption[]
   colours: FacetOption[]
   shapes: FacetOption[]
   /** The slider's ends, in minor units. Equal min and max means one price and no slider. */

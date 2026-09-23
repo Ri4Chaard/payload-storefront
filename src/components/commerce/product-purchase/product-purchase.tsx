@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
 import { QuantityStepper } from '@/components/ui/quantity-stepper'
 import { HandoffModal } from '@/components/commerce/handoff-modal'
+import { usePublishSelectedVariant } from '@/components/commerce/selected-variant'
 import { announceCartCount } from '@/components/layout/cart-count'
 import type { CheckoutResult } from '@/lib/cart/actions-types'
 import type { CartActionResult } from '@/lib/cart/types'
 import { intentFrom, type CartIntent } from '@/lib/catalog/cart-intent'
-import type { DiamondOption, SizeOption } from '@/lib/catalog/types'
+import type { DiamondOption } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 import { ProductOptions } from '../product-options'
@@ -66,8 +67,9 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
   /** Set only where the stones differ, in which case the label reads "From …". */
   fromPrice: string | null
   description: string | null
+  /** FR-007. Whether to say so under the price — a fact about the piece, never a count. */
+  madeToOrder?: boolean
   diamonds: DiamondOption[]
-  sizes: SizeOption[]
   /** The piece as a whole. An unavailable one says so in text, not in colour (FR-040). */
   available: boolean
   /** The ceiling for a piece with no stones. With stones, each stone carries its own. */
@@ -94,8 +96,8 @@ export function ProductPurchase({
   price,
   fromPrice,
   description,
+  madeToOrder = false,
   diamonds,
-  sizes,
   available,
   maxQuantity,
   onAddToCart,
@@ -106,7 +108,12 @@ export function ProductPurchase({
   const t_product = useTranslations('product')
   const locale = useLocale() as Locale
   const [diamond, setDiamond] = React.useState<number | null>(null)
-  const [size, setSize] = React.useState<string | null>(null)
+  /*
+    The details beside this column show the selected stone's own properties (spec 011, FR-013), and
+    they are a sibling in the server-rendered page rather than a child. Publishing the id is the
+    whole of the coupling — see `SelectedVariantProvider` for why it is not a bigger one.
+  */
+  const publishSelection = usePublishSelectedVariant()
   const [wanted, setWanted] = React.useState(1)
   const [pending, startTransition] = React.useTransition()
   const [handoff, setHandoff] = React.useState<null | Extract<CheckoutResult, { ok: true }>>(null)
@@ -157,7 +164,6 @@ export function ProductPurchase({
         ? `Choose a diamond ${before}.`
         : t_product('diamondUnavailable')
     }
-    if (field === 'size') return `Choose a size ${before}.`
     if (field === 'product') return t_product('unavailable')
     if (field === 'quantity') return t_product('chooseQuantity')
     return action === 'cart' ? t_product('addFailed') : t_product('sendFailed')
@@ -168,7 +174,7 @@ export function ProductPurchase({
     setStatus(null)
     startTransition(async () => {
       const result = await onAddToCart(
-        intentFrom({ productId, quantity, diamondId: diamond, sizeValue: size, sizes }),
+        intentFrom({ productId, quantity, diamondId: diamond,  }),
         locale,
       )
 
@@ -200,7 +206,7 @@ export function ProductPurchase({
     setStatus(null)
     startTransition(async () => {
       const result = await onBuyNow(
-        intentFrom({ productId, quantity, diamondId: diamond, sizeValue: size, sizes }),
+        intentFrom({ productId, quantity, diamondId: diamond,  }),
         locale,
       )
 
@@ -220,7 +226,6 @@ export function ProductPurchase({
    */
   function missingChoice(): null | string {
     if (diamonds.length > 0 && diamond === null) return refusal('diamond', 'missing-option', 'buy')
-    if (sizes.length > 0 && size === null) return refusal('size', 'missing-option', 'buy')
     return null
   }
 
@@ -235,6 +240,21 @@ export function ProductPurchase({
         {shown}
       </p>
 
+      {/*
+        FR-007 — the piece says how it is made, once.
+
+        Made to order is a property of the PIECE, not of a stone (011/spec.md Assumptions), so it is
+        stated here rather than repeated beside every option in the selector below. Four stones each
+        captioned "Made to order" would be four copies of one fact, and would crowd out the price,
+        which is the reason to choose between them at all.
+
+        Without it the mode is only inferable from an absence — no stone ever reads "Out of stock" —
+        which is not something a customer should have to notice.
+      */}
+      {madeToOrder ? (
+        <p className="text-body-small text-neutral-secondary mt-2">{t_product('madeToOrder')}</p>
+      ) : null}
+
       {description ? (
         <p className="text-body-medium text-neutral-primary/80 mt-4 xl:mt-5">{description}</p>
       ) : null}
@@ -244,11 +264,11 @@ export function ProductPurchase({
 
       <ProductOptions
         diamonds={diamonds}
-        sizes={sizes}
         diamond={diamond}
-        size={size}
-        onDiamondChange={setDiamond}
-        onSizeChange={setSize}
+        onDiamondChange={(id) => {
+          setDiamond(id)
+          publishSelection(id)
+        }}
         disabled={!available}
         className="mt-5"
       />

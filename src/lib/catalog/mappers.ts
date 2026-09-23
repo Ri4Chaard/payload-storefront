@@ -30,7 +30,7 @@ import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import type { Locale } from '@/i18n/routing'
-import type { Category, Media, Product, Shop, Size, Variant } from '@/payload-types'
+import type { Category, Media, Product, Shop,  Variant } from '@/payload-types'
 
 import { CATALOG_CURRENCY, formatPriceFor } from './price'
 import type {
@@ -41,7 +41,6 @@ import type {
   ProductDetail,
   ProductSummary,
   ShopContent,
-  SizeOption,
 } from './types'
 
 /**
@@ -125,8 +124,26 @@ function html(value: Product['details'] | Shop['warranty']): string | null {
 // Availability — the rule, in one place
 // ---------------------------------------------------------------------------------------------
 
-/** A stone is available above its own zero, whatever the parent's availability mode says. */
-export function isVariantAvailable(variant: Variant): boolean {
+/**
+ * A stone is available if its piece is made to order, or if it has one left (spec 011, FR-002).
+ *
+ * **This used to read "above its own zero, whatever the parent's availability mode says", and that
+ * comment was the defect.** It is the honest rule for a stock-tracked piece and the wrong one for a
+ * made-to-order piece, where there is no quantity to type in: an owner who marked a ring
+ * always-available and added five stones got five stones at zero, and a page that refused to sell
+ * any of them. Nothing on screen explained why, because from the storefront's side the piece looked
+ * exactly like one that had genuinely sold out.
+ *
+ * The piece's mode is passed rather than read from a parent pointer because every caller already
+ * has the product in hand. That is also what keeps `variants.availability` — the denormalised column
+ * the admin form needs — out of the storefront's path entirely: a mirror that fell out of step can
+ * misdraw a form, and can never sell what should not be sold (011/research.md R5, R6).
+ */
+export function isVariantAvailable(
+  variant: Variant,
+  availability: Product['availability'],
+): boolean {
+  if (availability === 'made-to-order') return true
   return (variant.inventory ?? 0) > 0
 }
 
@@ -149,7 +166,16 @@ function productVariants(product: Product): Variant[] {
 
 export function isProductAvailable(product: Product): boolean {
   const variants = productVariants(product)
-  if (variants.length > 0) return variants.some(isVariantAvailable)
+  if (variants.length > 0) {
+    return variants.some((variant) => isVariantAvailable(variant, product.availability))
+  }
+
+  /*
+    No stones left to offer — which covers a piece that never had any, AND a made-to-order piece
+    whose every stone has been taken off sale (FR-008). Unpublished stones never reach this mapper,
+    so by the time the question is asked the two are indistinguishable, and falling back to the
+    piece's own mode is right for both: a selector with nothing in it is not a thing to draw.
+  */
   if (product.availability === 'made-to-order') return true
   return (product.inventory ?? 0) > 0
 }
@@ -194,7 +220,11 @@ export function toProductSummary(product: Product, locale: Locale): ProductSumma
   }
 }
 
-function toDiamondOption(variant: Variant, locale: Locale): DiamondOption {
+function toDiamondOption(
+  variant: Variant,
+  locale: Locale,
+  availability: Product['availability'],
+): DiamondOption {
   // A variant's label is its options joined — one today, and joined rather than indexed so that a
   // second variant type arriving later reads correctly instead of silently showing the first.
   const label = variant.options
@@ -209,22 +239,34 @@ function toDiamondOption(variant: Variant, locale: Locale): DiamondOption {
     id: variant.id,
     label: label === '' ? (variant.title ?? `Option ${variant.id}`) : label,
     price: formatPriceFor(locale, priceMinor),
-    // A stone always counts: a variant carries a number, and there is no made-to-order flag on one.
-    ...(ceiling(variant.inventory) === undefined
+    /*
+      No ceiling on a made-to-order stone (FR-003). A count stored from when the piece was stock
+      tracked is deliberately still there — switching modes does not erase it (FR-004) — so the mode
+      has to be consulted here rather than the number trusted.
+    */
+    ...(availability === 'made-to-order' || ceiling(variant.inventory) === undefined
       ? {}
       : { maxQuantity: ceiling(variant.inventory) }),
     priceMinor,
-    available: isVariantAvailable(variant),
+    available: isVariantAvailable(variant, availability),
+    // What this stone says about itself, where it differs from its piece (FR-009). Empty for a
+    // stone carrying none, which is every stone until an owner fills one in.
+    attributes: toAttributes(variant.attributes),
     ...(image ? { image } : {}),
   }
 }
 
-function toSizeOption(size: number | Size): SizeOption {
-  const document = populated<Size>(size, 'a size')
-  return { id: document.id, label: document.label, value: document.value }
-}
 
-function toAttributes(product: Product): ProductAttribute[] {
+/**
+ * The owner-defined rows on a piece or on a stone (spec 011, FR-009).
+ *
+ * Takes the array rather than the document, because as of 011 a variant carries an identically
+ * shaped one and the two must be read the same way. A second reader would be a second place for the
+ * dropped-row rule below to drift.
+ */
+function toAttributes(
+  rows: Product['attributes'] | Variant['attributes'],
+): ProductAttribute[] {
   /*
     A row with no value in this language is dropped rather than rendered empty (spec 010, FR-047).
 
@@ -234,7 +276,7 @@ function toAttributes(product: Product): ProductAttribute[] {
     here, and an attribute row reading "Metal:" with nothing after it is worse than one that is not
     drawn at all.
   */
-  return (product.attributes ?? []).flatMap((entry) => {
+  return (rows ?? []).flatMap((entry) => {
     const definition = populated(entry.attribute, 'a product attribute')
     const value = entry.value
     if (typeof value !== 'string' || value.trim() === '') return []
@@ -242,11 +284,36 @@ function toAttributes(product: Product): ProductAttribute[] {
   })
 }
 
+/**
+ * The piece's rows, with the selected stone's laid over them (spec 011, FR-010, FR-011, FR-016).
+ *
+ * **By attribute, never by position.** Two rows for one attribute is the outcome to avoid — a stone
+ * showing two carat weights is worse than one showing neither — and matching on the attribute's own
+ * `name` is what makes "replace" mean replace.
+ *
+ * **Order is the attribute's, not the row's.** A value must not jump up the list because it happened
+ * to come from the stone rather than from the piece; the customer is comparing two stones, and a
+ * list that reshuffles between them is a list they have to re-read rather than scan. The piece's
+ * order is kept for everything it defines, and anything only the stone carries follows it.
+ */
+export function mergeAttributes(
+  piece: ProductAttribute[],
+  stone: ProductAttribute[],
+): ProductAttribute[] {
+  if (stone.length === 0) return piece
+
+  const overrides = new Map(stone.map((row) => [row.name, row]))
+  const merged = piece.map((row) => overrides.get(row.name) ?? row)
+  const seen = new Set(piece.map((row) => row.name))
+
+  return [...merged, ...stone.filter((row) => !seen.has(row.name))]
+}
+
 export function toProductDetail(product: Product, locale: Locale): ProductDetail {
   const summary = toProductSummary(product, locale)
   const category = populated<Category>(product.category, `product "${product.slug}" category`)
   const diamondOptions = productVariants(product)
-    .map((variant) => toDiamondOption(variant, locale))
+    .map((variant) => toDiamondOption(variant, locale, product.availability))
     // Cheapest first, so the drawn column reads as a price ladder rather than as insertion order.
     .sort((a, b) => a.priceMinor - b.priceMinor)
 
@@ -268,10 +335,10 @@ export function toProductDetail(product: Product, locale: Locale): ProductDetail
       : {}),
     description: product.description ?? null,
     gallery: summary.images,
+    madeToOrder: product.availability === 'made-to-order',
     detailsHtml: html(product.details),
     diamondOptions,
-    sizes: (product.sizes ?? []).map(toSizeOption),
-    attributes: toAttributes(product),
+    attributes: toAttributes(product.attributes),
     fromPrice: varies ? summary.price : null,
     collectionIds: (product.collections ?? []).map((entry) =>
       typeof entry === 'number' ? entry : entry.id,

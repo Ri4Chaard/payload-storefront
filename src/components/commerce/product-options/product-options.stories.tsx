@@ -7,32 +7,30 @@ import { ProductOptions } from './product-options'
  * Nodes `301:5008` (1920), `410:7314` (1024), `410:7647` (390) — side by side at 1280 and up,
  * stacked below it.
  *
- * The stories vary what the CATALOGUE offers, because that is what varies: a piece may have stones
- * and no sizes, sizes and no stones, or neither.
+ * The stories vary what the CATALOGUE offers: a piece may offer a choice of stone or none at all.
+ * Sizes were the second axis until spec 011 deprecated them.
  */
 const DIAMONDS = [
-  { id: 1, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true },
-  { id: 2, label: 'Lab 1.5 ct D VS1 With Halo', price: '$38,320', priceMinor: 3832000, available: true },
-  { id: 3, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false },
+  { id: 1, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
+  {
+    id: 2,
+    label: 'Lab 1.5 ct D VS1 With Halo',
+    price: '$38,320',
+    priceMinor: 3832000,
+    available: true,
+    attributes: [],
+  },
+  { id: 3, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
 ]
 
-const SIZES = [
-  { id: 1, label: '3', value: '3' },
-  { id: 2, label: '3.5', value: '3.5' },
-  { id: 3, label: '4', value: '4' },
-  { id: 4, label: '4.5', value: '4.5' },
-]
 
 function Demo(props: React.ComponentProps<typeof ProductOptions>) {
   const [diamond, setDiamond] = React.useState<number | null>(null)
-  const [size, setSize] = React.useState<string | null>(null)
   return (
     <ProductOptions
       {...props}
       diamond={diamond}
-      size={size}
       onDiamondChange={setDiamond}
-      onSizeChange={setSize}
     />
   )
 }
@@ -43,11 +41,8 @@ const meta = {
   parameters: { layout: 'padded' },
   args: {
     diamonds: DIAMONDS,
-    sizes: SIZES,
     diamond: null,
-    size: null,
     onDiamondChange: () => {},
-    onSizeChange: () => {},
   },
   render: (args) => <Demo {...args} />,
 } satisfies Meta<typeof ProductOptions>
@@ -55,18 +50,20 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Both choices, as the ring is drawn. The third stone is out of stock and cannot be picked. */
+/** The stone list, as the ring is drawn. The third stone is out of stock and cannot be picked. */
 export const Default: Story = {}
 
-/** A piece sold in one stone. The size stays, the stone list does not appear at all. */
-export const SizeOnly: Story = {
-  args: { diamonds: [] },
-}
+/*
+  There is deliberately NO story for a piece with no stones.
 
-/** A pendant: one size, several stones. */
-export const DiamondOnly: Story = {
-  args: { sizes: [] },
-}
+  The component returns `null` in that case — an empty select is a control that cannot be used, so
+  nothing is drawn at all — and a story of nothing renders an empty canvas that the accessibility
+  sweep waits on until it times out. The state is covered where it can be seen: `product.spec.ts`
+  asserts the pendant's page offers no selector.
+
+  It previously existed as `SizeOnly`, which rendered because sizes filled the gap. Spec 011
+  deprecated sizes and the gap became the whole component.
+*/
 
 /** A piece that cannot be ordered. The controls are drawn and inert rather than removed. */
 export const Disabled: Story = {
