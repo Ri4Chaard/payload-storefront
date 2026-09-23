@@ -14,9 +14,17 @@ import { ProductPurchase } from './product-purchase'
  * walk, which have a server to talk to.
  */
 const DIAMONDS = [
-  { id: 1, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true },
-  { id: 2, label: 'Lab 1.5 ct D VS1 With Halo', price: '$38,320', priceMinor: 3832000, available: true },
-  { id: 3, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false },
+  { id: 1, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
+  {
+    id: 2,
+    label: 'Lab 1.5 ct D VS1 With Halo',
+    price: '$38,320',
+    priceMinor: 3832000,
+    available: true,
+    // What a stone says about itself, where it differs from its piece (spec 011, FR-009).
+    attributes: [{ name: 'carat', label: 'Carat weight', value: '1.5 ct' }],
+  },
+  { id: 3, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
 ]
 
 const meta = {
@@ -28,13 +36,8 @@ const meta = {
     price: '$24,900',
     fromPrice: '$24,900',
     description:
-      'Available in a variety of carat weights, every stone is set by hand. Size, carat weight and stone quantities vary slightly from one ring to another.',
+      'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
     diamonds: DIAMONDS,
-    sizes: [
-      { id: 1, label: '3', value: '3' },
-      { id: 2, label: '3.5', value: '3.5' },
-      { id: 3, label: '4', value: '4' },
-    ],
     available: true,
   },
 } satisfies Meta<typeof ProductPurchase>
@@ -52,7 +55,7 @@ export const SinglePrice: Story = {
 
 /** A piece with no choices at all — just a price and the two actions. */
 export const NoOptions: Story = {
-  args: { fromPrice: null, diamonds: [], sizes: [] },
+  args: { fromPrice: null, diamonds: [] },
 }
 
 /** Sold out. The reason is in TEXT, not in colour, and the controls go with it (FR-040). */

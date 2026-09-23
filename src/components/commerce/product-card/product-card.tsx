@@ -118,7 +118,13 @@ export function ProductCard({
     still wins where a caller passes one — what changed is that the fallback is translated instead
     of being an English literal in the signature.
   */
-  const cta = ctaProp ?? t_product('selectSize')
+  /*
+    "View piece" since spec 011. It read "Select size" while the product page opened on a size
+    selector — the card promised the next step. Sizes are deprecated, so the promise was to a
+    control that no longer exists, and the honest label is what the card actually does: open the
+    piece.
+  */
+  const cta = ctaProp ?? t_product('viewPiece')
 
   const compact = size === 'compact'
 

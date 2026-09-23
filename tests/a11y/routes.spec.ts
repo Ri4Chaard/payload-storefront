@@ -381,8 +381,6 @@ for (const { name, width, height } of [
     await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
     await page.getByRole('combobox', { name: /diamond/i }).click()
     await page.getByRole('option').first().click()
-    await page.getByRole('combobox', { name: /size/i }).click()
-    await page.getByRole('option').first().click()
     await page.getByRole('button', { name: /add to cart/i }).click()
     await expect(page.getByText(/added to your cart/i)).toBeVisible()
 

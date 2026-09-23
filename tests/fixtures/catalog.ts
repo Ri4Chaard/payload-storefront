@@ -30,10 +30,10 @@ import type {
   Attribute,
   Category,
   Collection,
+  Colour,
   Media,
   Product,
   Shop,
-  Size,
   Variant,
   VariantOption,
   VariantType,
@@ -165,18 +165,22 @@ const collection = (slug: string): Collection => {
   return found
 }
 
-/** Ring sizes. `label` is what the selector shows; `value` is what travels in the URL. */
-export const sizeFixtures: Size[] = ['2', '2.25', '2.5', '2.75', '3'].map((value, index) => ({
-  id: index + 1,
-  label: value,
-  value,
-  order: index + 1,
-  ...STAMPS,
-}))
 
-const size = (value: string): Size => {
-  const found = sizeFixtures.find((entry) => entry.value === value)
-  if (!found) throw new Error(`no size "${value}"`)
+
+/**
+ * The owner-managed colours (spec 011). `label` is what the drawer shows; `value` is what travels
+ * in the URL and is what a link bookmarked before 011 still carries.
+ */
+export const colourFixtures: Colour[] = [
+  { id: 1, label: 'Black', value: 'black', order: 0, ...STAMPS },
+  { id: 2, label: 'Clear', value: 'clear', order: 1, ...STAMPS },
+  { id: 3, label: 'Green', value: 'green', order: 2, ...STAMPS },
+  { id: 4, label: 'Multicolor', value: 'multicolor', order: 3, ...STAMPS },
+]
+
+const colour = (value: string): Colour => {
+  const found = colourFixtures.find((entry) => entry.value === value)
+  if (!found) throw new Error(`no colour "${value}"`)
   return found
 }
 
@@ -231,8 +235,7 @@ interface Piece {
   price: number
   description?: string
   collectionSlugs?: string[]
-  sizeValues?: string[]
-  colour?: Product['colour']
+  colour?: string[]
   diamondShape?: Product['diamondShape']
   availability?: Product['availability']
   inventory?: number
@@ -290,8 +293,7 @@ function build(piece: Piece): Product {
       })) ?? [],
     category: category(piece.categorySlug),
     collections: (piece.collectionSlugs ?? []).map(collection),
-    sizes: (piece.sizeValues ?? []).map(size),
-    colour: piece.colour ?? [],
+    colour: (piece.colour ?? []).map(colour),
     diamondShape: piece.diamondShape ?? [],
     enableVariants: Boolean(piece.withStones),
     variantTypes: piece.withStones ? variantTypeFixtures : [],
@@ -307,7 +309,7 @@ function build(piece: Piece): Product {
 const DRAWN: Piece[] = [
   {
     // The piece the product page is drawn around (node 231:1901). BOTH option paths: stones that
-    // move the price, and sizes that do not.
+    // move the price. Sizes were the other axis until spec 011 deprecated them.
     id: 1,
     slug: 'paragon-emerald-cut-diamond-engagement-ring',
     title: 'Paragon Emerald Cut Diamond Engagement Ring',
@@ -315,9 +317,8 @@ const DRAWN: Piece[] = [
     gallery: RING_GALLERY,
     price: 38320,
     description:
-      'Available in a variety of carat weights, every stone is set by hand. Size, carat weight and stone quantities vary slightly from one ring to another.',
+      'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
     collectionSlugs: ['deia'],
-    sizeValues: ['2', '2.25', '2.5', '2.75', '3'],
     colour: ['clear'],
     diamondShape: ['emerald', 'round'],
     availability: 'made-to-order',
@@ -329,7 +330,7 @@ const DRAWN: Piece[] = [
     ],
   },
   {
-    // Sizes but no stones — the middle case of FR-008's "neither, either, or both".
+    // No stones at all — a piece with no choice to make.
     id: 2,
     slug: 'pave-butterfly-diamond-bracelet',
     title: 'Pavé Butterfly Diamond Bracelet',
@@ -338,7 +339,6 @@ const DRAWN: Piece[] = [
     price: 37400,
     description: 'Butterflies in pavé diamonds, set along a flexible band.',
     collectionSlugs: ['molten'],
-    sizeValues: ['2', '2.25'],
     colour: ['clear'],
     diamondShape: ['round', 'oval'],
     attributes: [
@@ -347,7 +347,7 @@ const DRAWN: Piece[] = [
     ],
   },
   {
-    // Neither stones nor sizes, and stock-tracked at a real count.
+    // No stones, and stock-tracked at a real count.
     id: 3,
     slug: 'butterfly-diamond-pendant',
     title: 'Butterfly Diamond Pendant',
@@ -435,7 +435,8 @@ const FILLER_PIECES: { title: string; categorySlug: string }[] = [
   { title: 'Layered Chain Necklace', categorySlug: 'necklaces' },
 ]
 
-const FILLER_COLOURS: NonNullable<Product['colour']>[] = [
+// Colour VALUES, resolved to rows by the builder — the same strings a URL carries.
+const FILLER_COLOURS: string[][] = [
   ['clear'],
   ['black'],
   ['green'],
@@ -479,7 +480,6 @@ const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
     price: 1200 + index * 1950,
     description: `${title}, made to order in our atelier.`,
     collectionSlugs: [pick(['deia', 'marvel', 'molten', 'spartan'], index)],
-    sizeValues: categorySlug === 'rings' ? ['2', '2.5', '3'] : [],
     colour: pick(FILLER_COLOURS, index),
     diamondShape: pick(FILLER_SHAPES, index),
     availability: stocked ? 'stock-tracked' : 'made-to-order',

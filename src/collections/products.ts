@@ -3,6 +3,7 @@ import type { Field } from 'payload'
 
 import { seoTab } from '@/fields/seo'
 import { slugField } from '@/fields/slug'
+import { cascadeAvailability } from '@/collections/product-hooks'
 import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
@@ -105,7 +106,13 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
    */
   hooks: {
     ...defaultCollection.hooks,
-    afterChange: [...(defaultCollection.hooks?.afterChange ?? []), revalidateOnChange],
+    afterChange: [
+      ...(defaultCollection.hooks?.afterChange ?? []),
+      revalidateOnChange,
+      // Carries `availability` down to every stone, so the quantity field can hide itself on one
+      // (spec 011, FR-001). See `./product-hooks.ts` for why a variant cannot just ask its parent.
+      cascadeAvailability,
+    ],
     afterDelete: [...(defaultCollection.hooks?.afterDelete ?? []), revalidateOnDelete],
   },
 
@@ -271,32 +278,35 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
               ],
             },
             {
-              name: 'sizes',
-              type: 'relationship',
-              relationTo: 'sizes',
-              hasMany: true,
-              label: 'Sizes',
-              admin: {
-                description:
-                  'The sizes this piece is made in. Leave empty and no size selector is shown. Sizes never change the price — stones do.',
-              },
-            },
-            {
               type: 'row',
               fields: [
                 {
+                  /*
+                    **The owner's list as of spec 011, not four values in this file.**
+
+                    It was a `select` whose options were written here, which made adding rose gold a
+                    developer task and a deployment — the one arrangement every other descriptive
+                    vocabulary in this shop avoids. A relationship gets the picker, the localized
+                    labels and referential integrity for free.
+
+                    Modelled on `category` above rather than on the departing `sizes`: what made
+                    sizes heavy was its ROLE on the product — a required selector, part of cart-line
+                    identity — and colour has none of that and must never acquire it
+                    (011/research.md R1).
+
+                    The link a customer bookmarked still works, because the four rows the migration
+                    seeds keep `black`, `clear`, `green` and `multicolor` as their `value` (FR-020).
+                  */
                   name: 'colour',
-                  type: 'select',
+                  type: 'relationship',
+                  relationTo: 'colours',
                   hasMany: true,
                   index: true,
                   label: 'Colour',
-                  options: [
-                    { label: 'Black', value: 'black' },
-                    { label: 'Clear', value: 'clear' },
-                    { label: 'Green', value: 'green' },
-                    { label: 'Multicolor', value: 'multicolor' },
-                  ],
-                  admin: { description: 'Filterable, and shown in the product details.' },
+                  admin: {
+                    description:
+                      'Filterable, and shown in the product details. Manage the list under Colours.',
+                  },
                 },
                 {
                   name: 'diamondShape',

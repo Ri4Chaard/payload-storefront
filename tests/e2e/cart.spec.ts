@@ -25,11 +25,9 @@ const WIDTHS = [
 
 test('a visitor fills a cart and reads it back at every width', async ({ page }) => {
   // Built through the interface rather than seeded, so the cookie, the rows and the badge are all
-  // the real ones. A piece with both a stone and a size, then a piece with neither.
+  // the real ones. A piece that offers a stone, then a piece that offers no choice at all.
   await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
   await page.getByRole('combobox', { name: /diamond/i }).click()
-  await page.getByRole('option').first().click()
-  await page.getByRole('combobox', { name: /size/i }).click()
   await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
@@ -48,8 +46,8 @@ test('a visitor fills a cart and reads it back at every width', async ({ page })
 
     await expect(page.getByRole('heading', { name: /shopping cart/i })).toBeVisible()
     await expect(cartRows(page)).toHaveCount(2)
-    // The chosen stone and size travel onto the line (FR-008).
-    await expect(page.getByText(/Size 2/i).first()).toBeVisible()
+    // The chosen stone travels onto the line (FR-008). Size did too until spec 011 removed it.
+    await expect(cartRows(page).first()).toContainText(/ct/)
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -158,16 +156,12 @@ test('buy now opens the handoff for one piece and leaves the cart alone', async 
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
   await page.goto('/products/pave-butterfly-diamond-bracelet')
-  await page.getByRole('combobox', { name: /size/i }).click()
-  await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
   // Now BUY NOW on a third, unrelated piece.
   await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
   await page.getByRole('combobox', { name: /diamond/i }).click()
-  await page.getByRole('option').first().click()
-  await page.getByRole('combobox', { name: /size/i }).click()
   await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /buy now/i }).click()
 

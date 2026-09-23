@@ -30,7 +30,6 @@ const line = (over: Partial<CartLineView> = {}): CartLineView => ({
   href: '/products/butterfly-diamond-pendant',
   image: null,
   diamond: null,
-  size: null,
   unitPrice: '$24,900',
   lineTotal: '$24,900',
   unitMinor: 2490000,
@@ -51,14 +50,13 @@ const cart = (lines: CartLineView[], subtotal = '$24,900'): CartView => ({
 })
 
 describe('what the seller is told (SC-002)', () => {
-  it('names every piece, its stone, its size and how many', () => {
+  it('names every piece, its stone and how many', () => {
     const message = composeMessage(
       cart([
         line({
           id: 'a',
           title: 'Paragon Emerald Cut Diamond Engagement Ring',
           diamond: 'Lab 1.5 ct D VS1',
-          size: '6',
           quantity: 2,
           lineTotal: '$76,640',
         }),
@@ -70,7 +68,6 @@ describe('what the seller is told (SC-002)', () => {
 
     expect(message).toContain('2 × Paragon Emerald Cut Diamond Engagement Ring')
     expect(message).toContain('Lab 1.5 ct D VS1')
-    expect(message).toContain('size 6')
     expect(message).toContain('$76,640')
     expect(message).toContain('1 × Butterfly Diamond Pendant')
   })
@@ -214,7 +211,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
 
 describe('composing is deterministic (FR-026, SC-004)', () => {
   it('produces the same message every time from the same cart', () => {
-    const one = cart([line({ diamond: 'Lab 1.5 ct D VS1', size: '6' })])
+    const one = cart([line({ diamond: 'Lab 1.5 ct D VS1' })])
     const customer = { name: 'Aisha Karimova', address: 'Astana' }
 
     const first = composeMessage(one, TEMPLATE, customer)
@@ -238,7 +235,6 @@ describe('a single-piece message', () => {
           line({
             title: 'Paragon Emerald Cut Diamond Engagement Ring',
             diamond: 'Lab 1.5 ct D VS1',
-            size: '6',
             quantity: 1,
             lineTotal: '$38,320',
           }),
@@ -252,7 +248,6 @@ describe('a single-piece message', () => {
     const items = message.split('\n').filter((row) => /^\d+ × /.test(row))
     expect(items).toHaveLength(1)
     expect(items[0]).toContain('Lab 1.5 ct D VS1')
-    expect(items[0]).toContain('size 6')
     expect(message).toContain('Total: $38,320')
   })
 })

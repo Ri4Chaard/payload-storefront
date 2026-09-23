@@ -807,7 +807,7 @@ test('product card CTA is hidden but never trapped', async ({ page }) => {
     waitUntil: 'load',
   })
 
-  const cta = page.getByRole('button', { name: 'Select size' })
+  const cta = page.getByRole('button', { name: 'View piece' })
   const opacity = () => cta.evaluate((el) => getComputedStyle(el).opacity)
   await expect.poll(opacity).toBe('0')
 
@@ -842,7 +842,7 @@ test('product card is one link with the arrows and CTA above it', async ({ page 
   expect(overPhoto, 'the photograph is not part of the product link').toBe(true)
 
   // ...but the arrows and the CTA are not, or they would be dead controls under the overlay.
-  for (const name of [/^Next photograph/, 'Select size']) {
+  for (const name of [/^Next photograph/, 'View piece']) {
     const control = page.getByRole('button', { name })
     const cb = (await control.boundingBox())!
     const hit = await page.evaluate(
@@ -918,7 +918,7 @@ test('product card reveals its controls at rest on a touch device', async ({ bro
   await expect
     .poll(() =>
       page
-        .getByRole('button', { name: 'Select size' })
+        .getByRole('button', { name: 'View piece' })
         .evaluate((el) => getComputedStyle(el).opacity),
     )
     .toBe('1')
@@ -952,7 +952,7 @@ test('the phone card drops its action rather than hiding one nobody can reach', 
   // What matters is HOW it is absent: `display: none`, so it is gone from the tab order too. An
   // `opacity-0` button here would be invisible, focusable and 174px wide — the exact trap the
   // three-way reveal exists to prevent, reintroduced by the fix for it.
-  await expect(page.getByRole('button', { name: 'Select size' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'View piece' })).toHaveCount(0)
 
   // The carousel arrows are a different matter — they stay, and stay revealed, because a phone is
   // where swiping through a product's photographs matters most.

@@ -80,7 +80,7 @@ export interface Config {
     media: Media;
     categories: Category;
     collections: Collection;
-    sizes: Size;
+    colours: Colour;
     attributes: Attribute;
     'verification-codes': VerificationCode;
     questions: Question;
@@ -117,7 +117,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
-    sizes: SizesSelect<false> | SizesSelect<true>;
+    colours: ColoursSelect<false> | ColoursSelect<true>;
     attributes: AttributesSelect<false> | AttributesSelect<true>;
     'verification-codes': VerificationCodesSelect<false> | VerificationCodesSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
@@ -1012,25 +1012,23 @@ export interface Collection {
   createdAt: string;
 }
 /**
+ * The colours a piece can be filtered by. Renaming a label never changes its link.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sizes".
+ * via the `definition` "colours".
  */
-export interface Size {
+export interface Colour {
   id: number;
   /**
-   * What the customer reads in the selector, e.g. "2.25" or "45 cm".
+   * What the customer reads in the filter, e.g. "Black".
    */
   label: string;
   /**
-   * What appears in the address bar when this size is filtered on. Keep it unique within a category — "2.25", "45cm".
+   * What appears in the address bar when this colour is filtered on. Keep it lowercase and hyphenated — "rose-gold". Changing it breaks links that already exist.
    */
   value: string;
   /**
-   * Which kind of piece this size applies to. Leave empty if it applies to all.
-   */
-  category?: (number | null) | Category;
-  /**
-   * Lowest first in the selector and the drawer.
+   * Lowest first in the filter drawer.
    */
   order?: number | null;
   updatedAt: string;
@@ -1359,9 +1357,26 @@ export interface Variant {
   title?: string | null;
   product: number | Product;
   options: (number | VariantOption)[];
+  /**
+   * How many of this stone exist. At zero it is shown as unavailable. Made-to-order pieces do not ask.
+   */
   inventory?: number | null;
   priceInUSDEnabled?: boolean | null;
   priceInUSD?: number | null;
+  /**
+   * Only what differs from the piece — carat weight, certificate. Anything left out is inherited from the product.
+   */
+  attributes?:
+    | {
+        attribute: number | Attribute;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Follows the product. Set it on the piece, not here — every stone of a made-to-order piece is made to order.
+   */
+  availability?: ('made-to-order' | 'stock-tracked') | null;
   /**
    * Optional. A photograph of this particular stone, shown when it is selected. Falls back to the product gallery.
    */
@@ -1438,13 +1453,9 @@ export interface Product {
    */
   collections?: (number | Collection)[] | null;
   /**
-   * The sizes this piece is made in. Leave empty and no size selector is shown. Sizes never change the price — stones do.
+   * Filterable, and shown in the product details. Manage the list under Colours.
    */
-  sizes?: (number | Size)[] | null;
-  /**
-   * Filterable, and shown in the product details.
-   */
-  colour?: ('black' | 'clear' | 'green' | 'multicolor')[] | null;
+  colour?: (number | Colour)[] | null;
   /**
    * A piece may set more than one.
    */
@@ -1522,10 +1533,6 @@ export interface Cart {
         product?: (number | null) | Product;
         variant?: (number | null) | Variant;
         quantity: number;
-        /**
-         * The size the customer chose, where the piece offers a choice.
-         */
-        size?: (number | null) | Size;
         id?: string | null;
       }[]
     | null;
@@ -1684,8 +1691,8 @@ export interface PayloadLockedDocument {
         value: number | Collection;
       } | null)
     | ({
-        relationTo: 'sizes';
-        value: number | Size;
+        relationTo: 'colours';
+        value: number | Colour;
       } | null)
     | ({
         relationTo: 'attributes';
@@ -1962,12 +1969,11 @@ export interface CollectionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sizes_select".
+ * via the `definition` "colours_select".
  */
-export interface SizesSelect<T extends boolean = true> {
+export interface ColoursSelect<T extends boolean = true> {
   label?: T;
   value?: T;
-  category?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2140,6 +2146,14 @@ export interface VariantsSelect<T extends boolean = true> {
   inventory?: T;
   priceInUSDEnabled?: T;
   priceInUSD?: T;
+  attributes?:
+    | T
+    | {
+        attribute?: T;
+        value?: T;
+        id?: T;
+      };
+  availability?: T;
   image?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2192,7 +2206,6 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   category?: T;
   collections?: T;
-  sizes?: T;
   colour?: T;
   diamondShape?: T;
   enableVariants?: T;
@@ -2223,7 +2236,6 @@ export interface CartsSelect<T extends boolean = true> {
         product?: T;
         variant?: T;
         quantity?: T;
-        size?: T;
         id?: T;
       };
   secret?: T;

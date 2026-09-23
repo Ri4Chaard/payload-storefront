@@ -301,8 +301,8 @@ test('choosing a diamond changes the price', async ({ page }) => {
   const chosen = await options.first().textContent()
   await options.first().click()
 
-  // The trigger now carries the value, which is what makes a screen reader say "Size, 6" rather
-  // than "Size, button".
+  // The trigger now carries the value, which is what makes a screen reader say "Diamond, Lab 1.0"
+  // rather than "Diamond, button".
   await expect(stones).toContainText(chosen!.split('$')[0]!.trim())
   await expect(page.getByText(/^From \$/)).toHaveCount(0)
 })
@@ -322,40 +322,61 @@ test('an unavailable diamond is shown and cannot be selected', async ({ page }) 
 })
 
 /**
- * The two actions are disabled until spec 004 builds the seam behind them (FR-041). Asserted so
- * that wiring them up is a deliberate change with a failing test to notice, rather than something
- * that quietly half-happens.
+ * **This asserted the opposite until spec 011, and had been stale for two specs.**
+ *
+ * It was written in 003 to say the actions were "disabled until spec 004 builds the seam behind
+ * them", so that wiring them up would be a deliberate change with a failing test to notice. Spec 005
+ * built the seam and this was not revisited; what kept it green afterwards was the size selector
+ * refusing to let anything be ordered before a size was picked, which is not what it claims to
+ * measure. Removing sizes took that prop away and the staleness surfaced.
  */
-test('the two actions are present and disabled', async ({ page }) => {
+test('the two actions are live on a piece that can be ordered', async ({ page }) => {
   await page.goto(RING)
 
-  await expect(page.getByRole('button', { name: 'Add to cart' })).toBeDisabled()
-  await expect(page.getByRole('button', { name: 'Buy now' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Add to cart' })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Buy now' })).toBeEnabled()
 
   // The stepper beside them is real, and stops at one.
   const decrease = page.getByRole('button', { name: /decrease/i })
   await expect(decrease).toBeDisabled()
 })
 
-/** The picker is a listbox, not a menu: it has a value, and it says so. */
-test('the size picker exposes its value and its state', async ({ page }) => {
+/**
+ * The picker is a listbox, not a menu: it has a value, and it says so.
+ *
+ * Asserted on the STONE picker since spec 011 removed sizes. The claim is about the kit's `Select`
+ * — expanded state, value on the trigger, focus returning — and the stone selector is the one that
+ * remains to make it against.
+ */
+test('the stone picker exposes its value and its state', async ({ page }) => {
   await page.goto(RING)
 
-  const sizes = page.getByRole('combobox', { name: /size/i })
-  await expect(sizes).toHaveAttribute('aria-expanded', 'false')
+  const stones = page.getByRole('combobox', { name: /diamond/i })
+  await expect(stones).toHaveAttribute('aria-expanded', 'false')
 
-  await sizes.click()
-  await expect(sizes).toHaveAttribute('aria-expanded', 'true')
+  await stones.click()
+  await expect(stones).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByRole('listbox')).toBeVisible()
 
   const first = page.getByRole('option').first()
   const label = (await first.textContent())!.trim()
   await first.click()
 
-  await expect(sizes).toHaveAttribute('aria-expanded', 'false')
-  await expect(sizes).toContainText(label)
+  await expect(stones).toHaveAttribute('aria-expanded', 'false')
+  await expect(stones).toContainText(label.split('$')[0]!.trim())
   // Focus comes back to the trigger rather than being stranded in a panel that has gone.
-  await expect(sizes).toBeFocused()
+  await expect(stones).toBeFocused()
+})
+
+/** FR-025 — a piece adds to the cart in one action now that no size is demanded first. */
+test('a piece can be added to the cart without choosing a size', async ({ page }) => {
+  await page.goto(RING)
+
+  await expect(page.getByRole('combobox', { name: /size/i })).toHaveCount(0)
+
+  await page.getByRole('combobox', { name: /diamond/i }).click()
+  await page.getByRole('option').first().click()
+  await expect(page.getByRole('button', { name: /add to cart/i })).toBeEnabled()
 })
 
 /**
@@ -393,11 +414,19 @@ test('a made-to-order piece counts past any stock number', async ({ page }) => {
 })
 
 /**
- * The ceiling belongs to the chosen stone, and stones differ — four of one, one of another. The
- * quantity is stored as what was ASKED FOR and capped at the moment of use, so moving to a scarcer
- * stone lowers it and moving back restores it rather than leaving the visitor stuck at the low mark.
+ * The ceiling belongs to the chosen stone — **on a stock-tracked piece**.
+ *
+ * This used to be asserted against the engagement ring, which is MADE TO ORDER. That passed only
+ * because of the defect spec 011/US1 fixes: a made-to-order stone was gated on a count it has no
+ * business having, so picking the scarcest one clamped the quantity to 1. A made-to-order piece has
+ * nothing to run out of and now has no ceiling at all (011/FR-003) — which the test above this one
+ * has always said, and the two contradicted each other.
+ *
+ * The claim itself still holds and still matters, so it moves to a piece where a count means
+ * something. The quantity is stored as what was ASKED FOR and capped at the moment of use, so moving
+ * to a scarcer stone lowers it rather than leaving the visitor stuck at the low mark.
  */
-test('the ceiling follows the chosen diamond', async ({ page }) => {
+test('a made-to-order piece keeps no ceiling whichever stone is chosen', async ({ page }) => {
   await page.goto(RING)
 
   const count = page.locator('[role="group"] span[aria-live="polite"]')
@@ -405,13 +434,13 @@ test('the ceiling follows the chosen diamond', async ({ page }) => {
   for (let press = 0; press < 3; press += 1) await increase.click()
   await expect(count).toHaveText('4')
 
-  // The scarcest stone the fixtures offer has one in the shop.
+  // The stone with the smallest count in the shop. It changes nothing: nothing is being counted.
   await page.getByRole('combobox', { name: /diamond/i }).click()
   const scarce = page.getByRole('option').filter({ hasText: /2\.0 ct/ })
   await scarce.first().click()
 
-  await expect(count, 'the quantity outlived a stone that cannot supply it').toHaveText('1')
-  await expect(increase).toBeDisabled()
+  await expect(count, 'a made-to-order stone has no count to be capped by').toHaveText('4')
+  await expect(increase).toBeEnabled()
 })
 
 // ---------------------------------------------------------------------------------------------

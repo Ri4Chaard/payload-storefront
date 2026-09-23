@@ -79,29 +79,18 @@ const intentFor = (
   productId: product.id,
   quantity: 1,
   ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
-  ...(product.sizes[0] ? { sizeId: product.sizes[0].id } : {}),
   ...over,
 })
 
 describe('line identity (FR-004)', () => {
-  it('treats the same ring in two sizes as two lines, not a quantity of two', async () => {
-    const owner = await guest()
-    const [first, second] = ring.sizes
-
-    expect(
-      second,
-      'the seeded ring needs at least two sizes for this to mean anything',
-    ).toBeDefined()
-
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: first!.id }))
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: second!.id }))
-
-    const rows = await rowsOf(owner)
-    expect(rows).toHaveLength(2)
-    expect(rows.every((row) => row.quantity === 1)).toBe(true)
-  })
-
-  it('sums into one line when the product, stone and size all match', async () => {
+  /*
+    **The two-sizes case left with sizes in spec 011.** It used to be the reason this shop passed a
+    custom `cartItemMatcher` at all: one ring in a size 6 and a size 7 merging into a quantity of
+    two is an order the seller cannot fulfil. With size gone, a line is a product and a stone, which
+    is exactly what the plugin's own matcher compares — so the override was deleted and the rule it
+    protected is the one below, unchanged.
+  */
+  it('sums into one line when the product and stone both match', async () => {
     const owner = await guest()
 
     await addLine(owner, owner.cartId, intentFor(ring))
@@ -123,15 +112,12 @@ describe('line identity (FR-004)', () => {
     expect(await rowsOf(owner)).toHaveLength(2)
   })
 
-  it('carries the chosen size onto the row, which is the whole reason the column exists', async () => {
-    const owner = await guest()
-    const size = ring.sizes[0]!
-
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: size.id }))
-
-    const rows = await rowsOf(owner)
-    expect(rows[0]?.size).toBe(size.id)
-  })
+  /*
+    The test that proved a chosen size reached the row went with the column in spec 011. Its
+    subject — "a selection that is not a variant survives the trip from the product page to the
+    seller" — no longer has an instance: a line is a product and a stone, and the stone is a
+    variant the plugin already carries.
+  */
 })
 
 describe('what may be added (FR-002, FR-003)', () => {
@@ -160,22 +146,19 @@ describe('what may be added (FR-002, FR-003)', () => {
     })
   })
 
+  /*
+    The second half of this — "and names the unmade SIZE" — went with sizes in spec 011. The stone
+    is the only choice a piece asks for now, so there is one unmade choice to name rather than two.
+  */
   it('names the unmade choice rather than refusing vaguely', async () => {
-    const withoutStone = await checkIntent(
-      { productId: ring.id, quantity: 1, sizeId: ring.sizes[0]!.id },
-      'en',
-    )
+    const withoutStone = await checkIntent({ productId: ring.id, quantity: 1 }, 'en')
     expect(withoutStone).toEqual({ ok: false, reason: 'missing-option', field: 'diamond' })
 
-    const withoutSize = await checkIntent(
-      {
-        productId: ring.id,
-        quantity: 1,
-        variantId: ring.diamondOptions[0]!.id,
-      },
+    const complete = await checkIntent(
+      { productId: ring.id, quantity: 1, variantId: ring.diamondOptions[0]!.id },
       'en',
     )
-    expect(withoutSize).toEqual({ ok: false, reason: 'missing-option', field: 'size' })
+    expect(complete.ok, 'a piece with its one choice made is addable').toBe(true)
   })
 
   /**
@@ -237,8 +220,8 @@ describe('changing and removing (FR-009, FR-010)', () => {
 
   it('removes the line it is given and leaves the rest', async () => {
     const owner = await guest()
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: ring.sizes[0]!.id }))
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: ring.sizes[1]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[0]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[1]!.id }))
 
     const rows = await rowsOf(owner)
     await dropLine(owner, owner.cartId, String(rows[0]!.id))
@@ -308,8 +291,8 @@ describe('buy now never touches the cart (FR-020, SC-005)', () => {
   it('leaves an existing cart byte-identical — same lines, quantities and row ids', async () => {
     const owner = await guest()
 
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: ring.sizes[0]!.id }))
-    await addLine(owner, owner.cartId, intentFor(ring, { sizeId: ring.sizes[1]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[0]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[1]!.id }))
     await addLine(owner, owner.cartId, intentFor(pendant, { quantity: 2 }))
 
     const before = await rowsOf(owner)

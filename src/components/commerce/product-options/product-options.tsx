@@ -5,7 +5,7 @@ import React from 'react'
 
 import { Field } from '@/components/ui/field'
 import { Select, type SelectOption } from '@/components/ui/select'
-import type { DiamondOption, SizeOption } from '@/lib/catalog/types'
+import type { DiamondOption } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 /**
@@ -21,39 +21,30 @@ import { cn } from '@/lib/cn'
  * - **An unavailable stone is drawn and not selectable** (FR-040), and says so where its price
  *   would be. Hiding it would turn a temporary shortage into a catalogue that looks smaller than
  *   it is, and the visitor would never learn the piece exists in that stone at all.
- * - **A group with nothing in it is not drawn.** A piece with one stone and no sizes offers no
- *   choices, so it gets no controls — an empty select is a control that cannot be used.
+ * - **A group with nothing in it is not drawn.** A piece with no stones offers no choice, so it
+ *   gets no controls — an empty select is a control that cannot be used.
  *
- * The sizes carry no metadata because the catalogue holds none. The drawing puts "In stock" or
- * "Made to order" beside every size (node `301:5845`); `Size` has no such field, and inventing one
- * here would print a promise the shop has not made. Recorded as a question for the owner rather
- * than filled in.
+ * **Sizes were the other selector here until spec 011 deprecated them.** They never moved the price
+ * and the shop stopped selling by them, so the column is one control shorter and a piece can be
+ * added to a cart in a single action.
  */
 export interface ProductOptionsProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
   diamonds: DiamondOption[]
-  sizes: SizeOption[]
-  /** The chosen stone's id, and the chosen size's value. `null` is "not chosen yet". */
+  /** The chosen stone's id. `null` is "not chosen yet". */
   diamond: number | null
-  size: string | null
   onDiamondChange: (id: number) => void
-  onSizeChange: (value: string) => void
   /** Ids, so the page can keep them unique when more than one of these is ever on a page. */
   idPrefix?: string
   diamondLabel?: string
-  sizeLabel?: string
   disabled?: boolean
 }
 
 export function ProductOptions({
   diamonds,
-  sizes,
   diamond,
-  size,
   onDiamondChange,
-  onSizeChange,
   idPrefix = 'product',
   diamondLabel: diamondLabelProp,
-  sizeLabel: sizeLabelProp,
   disabled = false,
   className,
   ...props
@@ -61,11 +52,9 @@ export function ProductOptions({
   const t_product = useTranslations('product')
   // Resolved in the body, not as default parameters: `useTranslations` is a hook (spec 010).
   const diamondLabel = diamondLabelProp ?? t_product('chooseDiamondHeading')
-  const sizeLabel = sizeLabelProp ?? t_product('sizeLabel')
-  if (diamonds.length === 0 && sizes.length === 0) return null
+  if (diamonds.length === 0) return null
 
   const diamondId = `${idPrefix}-diamond`
-  const sizeId = `${idPrefix}-size`
 
   const stones: SelectOption[] = diamonds.map((option) => ({
     value: String(option.id),
@@ -74,11 +63,6 @@ export function ProductOptions({
     // stone nobody can order is the less useful of the two.
     meta: option.available ? option.price : t_product('outOfStock'),
     disabled: !option.available,
-  }))
-
-  const measurements: SelectOption[] = sizes.map((option) => ({
-    value: option.value,
-    label: option.label,
   }))
 
   return (
@@ -91,19 +75,6 @@ export function ProductOptions({
             value={diamond === null ? null : String(diamond)}
             onChange={(value) => onDiamondChange(Number(value))}
             placeholder={t_product('chooseDiamond')}
-            disabled={disabled}
-          />
-        </Field>
-      ) : null}
-
-      {sizes.length > 0 ? (
-        <Field id={sizeId} label={sizeLabel} disabled={disabled} className="min-w-0 flex-1">
-          <Select
-            id={sizeId}
-            options={measurements}
-            value={size}
-            onChange={onSizeChange}
-            placeholder={t_product('chooseSize')}
             disabled={disabled}
           />
         </Field>

@@ -19,6 +19,7 @@ const RING: ProductDetail = {
   slug: 'ring',
   title: 'Paragon Emerald Cut Diamond Engagement Ring',
   href: '/products/ring',
+  madeToOrder: false,
   price: '$24,900',
   images: [{ src: '/ring.webp', width: 800, height: 800 }],
   available: true,
@@ -31,8 +32,8 @@ const RING: ProductDetail = {
   gallery: [],
   detailsHtml: null,
   diamondOptions: [
-    { id: 11, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true },
-    { id: 12, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false },
+    { id: 11, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
+    { id: 12, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
     {
       id: 13,
       label: 'Lab 1.5 ct D VS1',
@@ -40,9 +41,9 @@ const RING: ProductDetail = {
       priceMinor: 3832000,
       available: true,
       maxQuantity: 2,
+      attributes: [],
     },
   ],
-  sizes: [{ id: 21, label: '6', value: '6' }],
   attributes: [],
   fromPrice: null,
   collectionIds: [],
@@ -58,14 +59,12 @@ const PENDANT: ProductDetail = {
   href: '/products/pendant',
   priceMinor: 2490000,
   diamondOptions: [],
-  sizes: [],
 }
 
 const line = (over: Partial<RawCartLine> = {}): RawCartLine => ({
   id: 'row-1',
   product: 1,
   variant: 11,
-  size: 21,
   quantity: 1,
   ...over,
 })
@@ -80,18 +79,16 @@ describe('resolveLine', () => {
     expect(resolved.unitMinor).toBe(3832000)
     expect(resolved.unitPrice).toBe('$38,320')
     expect(resolved.diamond).toBe('Lab 1.5 ct D VS1')
-    expect(resolved.size).toBe('6')
   })
 
   it('prices a piece with no stones from the piece itself', () => {
     const { line: resolved } = resolveLine(
-      line({ product: 2, variant: null, size: null }),
+      line({ product: 2, variant: null }),
       PENDANT,
     )
 
     expect(resolved.unitMinor).toBe(2490000)
     expect(resolved.diamond).toBeNull()
-    expect(resolved.size).toBeNull()
   })
 
   /**
@@ -149,7 +146,7 @@ describe('resolveCart', () => {
     const view = resolveCart(
       [
         line({ id: 'a', quantity: 2 }),
-        line({ id: 'b', product: 2, variant: null, size: null, quantity: 1 }),
+        line({ id: 'b', product: 2, variant: null, quantity: 1 }),
       ],
       catalogue(RING, PENDANT),
     )

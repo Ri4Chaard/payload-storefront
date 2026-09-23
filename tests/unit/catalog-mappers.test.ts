@@ -48,22 +48,36 @@ describe('availability is decided once', () => {
     expect(toProductSummary(SOLD_OUT, 'en').price).toBe('$9,600')
   })
 
-  it('follows the stones when a piece has them, not the parent mode', () => {
-    // The ring is made-to-order, so the parent mode alone would say "always available". What
-    // actually decides it is whether any stone is left.
+  /**
+   * **This assertion was reversed by spec 011, deliberately.**
+   *
+   * It used to read "follows the stones when a piece has them, not the parent mode", and asserted
+   * that a made-to-order ring whose every stone sat at zero was unavailable. That was the defect
+   * 011/US1 fixes: a made-to-order piece has no quantity to type into a stone, so the honest empty
+   * field made the piece unorderable and nothing on the page said why. The mode now decides, and a
+   * count is consulted only where one means something.
+   */
+  it('lets the piece’s mode decide, and consults counts only when it is stock tracked', () => {
     expect(RING.availability).toBe('made-to-order')
     expect(isProductAvailable(RING)).toBe(true)
 
-    const allTaken: Product = {
-      ...RING,
+    const emptied = (product: Product): Product => ({
+      ...product,
       variants: {
-        ...RING.variants,
-        docs: (RING.variants?.docs ?? []).map((variant) =>
+        ...product.variants,
+        docs: (product.variants?.docs ?? []).map((variant) =>
           typeof variant === 'number' ? variant : { ...variant, inventory: 0 },
         ),
       },
-    }
-    expect(isProductAvailable(allTaken)).toBe(false)
+    })
+
+    // Made to order: every stone is offered however empty its quantity (011/FR-002).
+    expect(isProductAvailable(emptied(RING))).toBe(true)
+
+    // Stock tracked: the counts govern again, exactly as before (011/FR-005).
+    const tracked: Product = { ...RING, availability: 'stock-tracked' }
+    expect(isProductAvailable(tracked)).toBe(true)
+    expect(isProductAvailable(emptied(tracked))).toBe(false)
   })
 
   it('never lets a count reach the view model', () => {
@@ -100,11 +114,23 @@ describe('prices', () => {
     expect(toProductDetail(BRACELET, 'en').fromPrice).toBeNull()
   })
 
-  it('orders the stones cheapest first and keeps the sold-out one', () => {
+  it('orders the stones cheapest first and keeps the one with no count', () => {
     const options = toProductDetail(RING, 'en').diamondOptions
     expect(options.map((option) => option.priceMinor)).toEqual([3832000, 4252000, 4792000, 5672000])
-    expect(options.at(-1)?.available).toBe(false)
     expect(options.at(-1)?.label).toBe('Natural 1.5 ct E VS2')
+
+    /*
+      The ring is made to order, so the stone at zero is offered like every other (011/FR-002) and
+      carries no ceiling (011/FR-003). It used to read as sold out here — see the availability block
+      above for why that reversed. The claim this test still makes is about ORDER: a stone nobody
+      can order today is still listed, in its place in the price ladder, rather than disappearing
+      and making the ladder move between two page loads.
+    */
+    expect(options.at(-1)?.available).toBe(true)
+    expect(options.at(-1)?.maxQuantity).toBeUndefined()
+
+    const tracked = toProductDetail({ ...RING, availability: 'stock-tracked' }, 'en')
+    expect(tracked.diamondOptions.at(-1)?.available).toBe(false)
   })
 })
 

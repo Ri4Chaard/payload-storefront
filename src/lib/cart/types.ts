@@ -33,8 +33,6 @@ export interface CartLineView {
   image: CatalogImage | null
   /** The chosen stone's label. `null` where the piece offers no choice. */
   diamond: string | null
-  /** The chosen size's label. `null` where the piece offers no choice. */
-  size: string | null
   /** Formatted. */
   unitPrice: string
   /** Formatted. `unitMinor × quantity`. */
@@ -118,7 +116,7 @@ export function emptyCart(): CartView {
 export type CartActionFailure = 'error' | 'missing-option' | 'not-found' | 'unavailable'
 
 /** Which control the customer has to go and fix. The sentence belongs to whoever renders it. */
-export type CartActionField = 'diamond' | 'product' | 'quantity' | 'size'
+export type CartActionField = 'diamond' | 'product' | 'quantity'
 
 export type CartActionResult =
   | { itemCount: number; ok: true }

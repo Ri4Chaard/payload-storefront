@@ -244,7 +244,6 @@ export async function buyNow(intent: CartIntent, locale: Locale): Promise<Checko
  */
 function singleLineCart(product: ProductDetail, intent: CartIntent): CartView {
   const chosen = product.diamondOptions.find((option) => option.id === intent.variantId)
-  const size = product.sizes.find((option) => option.id === intent.sizeId)
 
   const unitMinor = chosen ? chosen.priceMinor : product.priceMinor
   const total = unitMinor * intent.quantity
@@ -257,7 +256,6 @@ function singleLineCart(product: ProductDetail, intent: CartIntent): CartView {
         href: product.href,
         image: product.images[0] ?? null,
         diamond: chosen?.label ?? null,
-        size: size?.label ?? null,
         unitPrice: formatPrice(unitMinor),
         lineTotal: formatPrice(total),
         unitMinor,

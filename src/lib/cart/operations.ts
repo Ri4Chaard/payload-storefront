@@ -1,7 +1,6 @@
 import { addItem, removeItem, updateItem } from '@payloadcms/plugin-ecommerce'
 
 import type { Locale } from '@/i18n/routing'
-import { cartItemMatcher } from '@/collections/carts'
 import { validateIntent, type CartIntent, type PurchasableProduct } from '@/lib/catalog/cart-intent'
 import { getProductsByIds } from '@/lib/catalog/queries'
 import type { ProductDetail } from '@/lib/catalog/types'
@@ -32,7 +31,6 @@ function purchasable(product: ProductDetail): PurchasableProduct {
       id: option.id,
       available: option.available,
     })),
-    sizes: product.sizes.map((size) => ({ id: size.id })),
   }
 }
 
@@ -105,14 +103,17 @@ export async function addLine(
     payload,
     cartsSlug: 'carts',
     cartID: cartId,
-    // Passed explicitly. Without it the plugin's default matcher sees a size 6 and a size 7 of one
-    // ring as the same line and merges them into a quantity of two — which the seller then cannot
-    // fulfil. `src/collections/carts.ts` records the whole reasoning.
-    cartItemMatcher,
+    /*
+      The plugin's DEFAULT matcher, as of spec 011.
+
+      A custom one used to be passed here because size was a product field rather than a variant
+      type, so two sizes of one ring would otherwise merge into a quantity of two the seller could
+      not fulfil. Sizes are gone; a line is a product and a stone, which is exactly what the default
+      compares. See `src/collections/carts.ts`.
+    */
     item: {
       product: intent.productId,
       ...(intent.variantId === undefined ? {} : { variant: intent.variantId }),
-      ...(intent.sizeId === undefined ? {} : { size: intent.sizeId }),
     },
     quantity: intent.quantity,
     req: await ownerLocalReq(owner),

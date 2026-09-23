@@ -1,63 +1,26 @@
-import { defaultCartItemMatcher } from '@payloadcms/plugin-ecommerce'
-import type { CartItemMatcher } from '@payloadcms/plugin-ecommerce'
 import type { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
-import type { Field } from 'payload'
 
 /**
  * A customer's selection.
  *
- * Enabled in this spec but unused by its pages: the cart interface, the request record and the
- * messenger handoff are all spec 004. What lands here is the table and the one adjustment the
- * catalogue's shape forces, so that 004 starts against a schema that already fits.
+ * **It used to add a `size` to each item, and spec 011 took it back out.** The plugin's cart item is
+ * `{ product, quantity, variant }` and size was not a variant type (003/research.md R3), so a chosen
+ * size had nowhere to live and the item gained a field for it. Sizes are deprecated as of 011: the
+ * selector is gone from the product page, the vocabulary is gone from the admin, and the column
+ * would only be somewhere for a value nothing can produce.
  *
- * **Why an extra field is needed at all.** The plugin's cart item is `{ product, quantity, variant }`
- * — there is nowhere for a selection that is not a variant. Because size is a product field rather
- * than a variant type (003/research.md R3), a chosen size would be lost between the product page and
- * the seller's message. So the item gains `size`.
+ * **`cartItemMatcher` went with it, and that is the part worth noticing.** Two lines used to be the
+ * same line only if the product, the stone AND the size matched — the plugin's own extension point,
+ * used so that one ring in two sizes could not merge into a quantity of two the seller could not
+ * fulfil. With size gone the plugin's default matcher is correct again, so the override is deleted
+ * rather than left as a function that compares one fewer thing. A line saved before this change
+ * keeps working; two lines that differed only by size merge on their next meeting, which is the
+ * right answer once the difference no longer exists (011/FR-029).
  */
-const addSizeToItems = (fields: Field[]): Field[] =>
-  fields.map((field) => {
-    if (field.type !== 'array' || field.name !== 'items') return field
-
-    return {
-      ...field,
-      fields: [
-        ...field.fields,
-        {
-          name: 'size',
-          type: 'relationship',
-          relationTo: 'sizes',
-          label: 'Size',
-          admin: { description: 'The size the customer chose, where the piece offers a choice.' },
-        },
-      ],
-    }
-  })
-
 export const cartsCollectionOverride: CollectionOverride = ({ defaultCollection }) => ({
   ...defaultCollection,
   admin: {
     ...defaultCollection.admin,
     group: 'Shop',
   },
-  fields: addSizeToItems(defaultCollection.fields),
 })
-
-/**
- * Two lines are the same line only if the product, the stone AND the size match.
- *
- * Without this, the plugin's default matcher sees the same ring in a size 6 and a size 7 as one item
- * and merges them into a quantity of two — which the seller then cannot fulfil. The plugin documents
- * this exact extension point using a delivery option as its example, so this is the intended seam
- * rather than a workaround.
- */
-export const cartItemMatcher: CartItemMatcher = ({ existingItem, newItem }) => {
-  if (!defaultCartItemMatcher({ existingItem, newItem })) return false
-
-  const existingSize =
-    existingItem.size && typeof existingItem.size === 'object'
-      ? (existingItem.size as { id: unknown }).id
-      : existingItem.size
-
-  return newItem.size ? existingSize === newItem.size : !existingSize
-}

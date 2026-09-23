@@ -118,7 +118,6 @@
     "diamondShape": "ОГРАНКА:",
     "availability": "НАЯВНІСТЬ:",
     "price": "ЦІНА:",
-    "size": "РОЗМІР:",
     "diamondShapeLabel": "Огранка діаманта",
     "resultCount": "{count, plural, one {# прикраса} few {# прикраси} many {# прикрас} other {# прикраси}}",
     "clear": "СКИНУТИ",
@@ -149,11 +148,9 @@
     "viewCollectionShort": "Дивитися колекцію"
   },
   "product": {
-    "chooseSize": "Оберіть розмір",
-    "selectSize": "Обрати розмір",
-    "sizeLabel": "Розмір:",
     "chooseDiamond": "Оберіть діамант",
     "chooseDiamondHeading": "Оберіть свій діамант:",
+    "viewPiece": "Переглянути",
     "chooseQuantity": "Оберіть кількість.",
     "addToCart": "ДО КОШИКА",
     "buyNow": "Купити зараз",
@@ -328,12 +325,6 @@
     "onThisPage": "На цій сторінці:",
     "ourBlog": "Наш блог",
     "latestArticles": "Останні статті"
-  },
-  "colour": {
-    "black": "Чорний",
-    "clear": "Прозорий",
-    "green": "Зелений",
-    "multicolor": "Різнокольоровий"
   },
   "diamondShape": {
     "round": "Кругла",

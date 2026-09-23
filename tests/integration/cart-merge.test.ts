@@ -89,29 +89,35 @@ const intentFor = (
   productId: product.id,
   quantity: 1,
   ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
-  ...(product.sizes[0] ? { sizeId: product.sizes[0].id } : {}),
   ...over,
 })
 
 describe('mergeGuestCart', () => {
-  it('keeps both sizes of one ring rather than collapsing them into a quantity of two', async () => {
+  /**
+   * **Two STONES, where this used to say two sizes** (spec 011).
+   *
+   * The claim is the same and the axis moved: a merge must not collapse two lines a customer
+   * deliberately made distinct. Size was that axis until it was deprecated, and the stone is what
+   * remains — so the test follows the rule rather than the removed field.
+   */
+  it('keeps two stones of one ring rather than collapsing them into a quantity of two', async () => {
     const alice = await customer()
     const anon = await guest()
-    const [small, large] = ring.sizes
-    expect(large, 'the seeded ring needs two sizes').toBeDefined()
+    const [first, second] = ring.diamondOptions
+    expect(second, 'the seeded ring needs two stones').toBeDefined()
 
     const accountCart = (await createCartFor(alice)).cartId
     carts.push(accountCart)
-    await addLine(alice, accountCart, intentFor(ring, { sizeId: small!.id }))
-    await addLine(anon, anon.cartId, intentFor(ring, { sizeId: large!.id }))
+    await addLine(alice, accountCart, intentFor(ring, { variantId: first!.id }))
+    await addLine(anon, anon.cartId, intentFor(ring, { variantId: second!.id }))
 
     const { cartId } = await mergeGuestCart(alice, { cartId: anon.cartId, secret: anon.secret })
 
     const rows = await rowsOf(alice, cartId)
     expect(rows).toHaveLength(2)
     expect(rows.every((row) => row.quantity === 1)).toBe(true)
-    expect(new Set(rows.map((row) => relationId(row.size)))).toEqual(
-      new Set([small!.id, large!.id]),
+    expect(new Set(rows.map((row) => relationId(row.variant)))).toEqual(
+      new Set([first!.id, second!.id]),
     )
   })
 

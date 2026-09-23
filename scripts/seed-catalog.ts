@@ -62,7 +62,13 @@ const payload = await getPayload({ config })
 
 /** Find-or-create by a unique field, then keep the document in step with the seed. */
 async function upsert<
-  T extends 'categories' | 'collections' | 'sizes' | 'attributes' | 'article-categories' | 'articles',
+  T extends
+    | 'categories'
+    | 'collections'
+    | 'colours'
+    | 'attributes'
+    | 'article-categories'
+    | 'articles',
 >(
   collection: T,
   field: string,
@@ -155,10 +161,21 @@ for (const [index, title] of ['Deia', 'Marvel', 'Molten', 'Spartan'].entries()) 
   collections[slug] = await upsert('collections', 'slug', slug, { title, slug, order: index + 1 })
 }
 
-console.log('› sizes')
-const sizes: Record<string, { id: number | string }> = {}
-for (const [index, value] of ['2', '2.25', '2.5', '2.75', '3'].entries()) {
-  sizes[value] = await upsert('sizes', 'value', value, { label: value, value, order: index + 1 })
+console.log('› colours')
+/*
+  The owner's vocabulary as of spec 011, seeded with the four values that used to be an enum and
+  KEEPING those values — every link bookmarked or indexed before 011 filters on this string.
+*/
+const colours: Record<string, { id: number | string }> = {}
+for (const [index, [value, label]] of (
+  [
+    ['black', 'Black'],
+    ['clear', 'Clear'],
+    ['green', 'Green'],
+    ['multicolor', 'Multicolor'],
+  ] as const
+).entries()) {
+  colours[value] = await upsert('colours', 'value', value, { label, value, order: index })
 }
 
 console.log('› attributes')
@@ -271,7 +288,6 @@ type ProductSeed = {
   price: number
   description: string
   collections?: (number | string)[]
-  sizes?: (number | string)[]
   colour?: string[]
   diamondShape?: string[]
   availability: 'made-to-order' | 'stock-tracked'
@@ -284,8 +300,9 @@ type ProductSeed = {
 
 const productSeeds: ProductSeed[] = [
   {
-    // The piece the product page is drawn around (node 231:1901). BOTH option types: stones that
-    // move the price, sizes that do not. Five photographs, in the drawn thumbnail order.
+    // The piece the product page is drawn around (node 231:1901). Stones that move the price —
+    // sizes were the other axis until spec 011 deprecated them. Five photographs, in the drawn
+    // thumbnail order.
     //
     // Named "Paragon" after the 1920 frame; the 768 and 390 frames say "Polygon" (spec Open
     // Question 8). The drawn description names a competitor and is placeholder, so this is written
@@ -302,15 +319,8 @@ const productSeeds: ProductSeed[] = [
     ],
     price: 38320,
     description:
-      'Available in a variety of carat weights, every stone is set by hand. Size, carat weight and stone quantities vary slightly from one ring to another.',
+      'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
     collections: [need(collections, 'deia', 'collection').id],
-    sizes: [
-      need(sizes, '2', 'size').id,
-      need(sizes, '2.25', 'size').id,
-      need(sizes, '2.5', 'size').id,
-      need(sizes, '2.75', 'size').id,
-      need(sizes, '3', 'size').id,
-    ],
     colour: ['clear'],
     diamondShape: ['emerald', 'round'],
     availability: 'made-to-order',
@@ -330,7 +340,6 @@ const productSeeds: ProductSeed[] = [
     price: 37400,
     description: 'Butterflies in pavé diamonds, set along a flexible band.',
     collections: [need(collections, 'molten', 'collection').id],
-    sizes: [need(sizes, '2', 'size').id, need(sizes, '2.25', 'size').id],
     colour: ['clear'],
     diamondShape: ['round', 'oval'],
     availability: 'made-to-order',
@@ -404,7 +413,6 @@ const productSeeds: ProductSeed[] = [
     price: 21500,
     description: 'Кольцо из белого золота с бриллиантом огранки «принцесса».',
     collections: [need(collections, 'deia', 'collection').id],
-    sizes: [need(sizes, '2', 'size').id, need(sizes, '2.5', 'size').id],
     colour: ['clear'],
     diamondShape: ['princess'],
     availability: 'made-to-order',
@@ -489,10 +497,6 @@ for (const [index, { title, categorySlug }] of FILLER.entries()) {
     price: 1200 + index * 1950,
     description: `${title}, made to order in our atelier.`,
     collections: [need(collections, pick(['deia', 'marvel', 'molten', 'spartan'], index), 'collection').id],
-    sizes:
-      categorySlug === 'rings'
-        ? [need(sizes, '2', 'size').id, need(sizes, '2.5', 'size').id, need(sizes, '3', 'size').id]
-        : [],
     colour: pick(FILLER_COLOURS, index),
     diamondShape: pick(FILLER_SHAPES, index),
     availability: stocked ? 'stock-tracked' : 'made-to-order',
@@ -531,8 +535,7 @@ for (const seed of productSeeds) {
     details: richText([seed.description, 'Handcrafted in our atelier.']),
     category: seed.category.id,
     collections: seed.collections ?? [],
-    sizes: seed.sizes ?? [],
-    colour: seed.colour ?? [],
+    colour: (seed.colour ?? []).map((value) => need(colours, value, 'colour').id),
     diamondShape: seed.diamondShape ?? [],
     attributes: seed.attributes ?? [],
     availability: seed.availability,

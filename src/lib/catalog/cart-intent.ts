@@ -35,8 +35,6 @@ export interface CartIntent {
   productId: number
   /** The chosen stone. Absent where the piece offers none. */
   variantId?: number
-  /** The chosen size's id. Absent where the piece offers none. */
-  sizeId?: number
   quantity: number
 }
 
@@ -53,8 +51,6 @@ export interface PurchasableProduct {
   available: boolean
   /** Stone ids the piece offers, and whether each can currently be bought. */
   diamonds: { id: number; available: boolean }[]
-  /** Size ids the piece offers. Sizes carry no stock of their own (003/research.md R3). */
-  sizes: { id: number }[]
 }
 
 /**
@@ -68,7 +64,6 @@ export interface PurchasableProduct {
 export type UnmetRequirement =
   | { field: 'product'; reason: 'unavailable' }
   | { field: 'diamond'; reason: 'missing-option' | 'unavailable' }
-  | { field: 'size'; reason: 'missing-option' }
   | { field: 'quantity'; reason: 'error' }
 
 export function validateIntent(
@@ -88,12 +83,6 @@ export function validateIntent(
     if (!chosen || !chosen.available) return { field: 'diamond', reason: 'unavailable' }
   }
 
-  if (product.sizes.length > 0) {
-    if (intent.sizeId === undefined) return { field: 'size', reason: 'missing-option' }
-    if (!product.sizes.some((size) => size.id === intent.sizeId)) {
-      return { field: 'size', reason: 'missing-option' }
-    }
-  }
 
   if (!Number.isInteger(intent.quantity) || intent.quantity < 1) {
     return { field: 'quantity', reason: 'error' }
@@ -105,30 +94,23 @@ export function validateIntent(
 /**
  * What the product page holds, turned into an intent (spec 005, T020, research R16).
  *
- * **A function rather than three lines in the component, because of one specific trap.** The two
- * selects beside each other on that page use opposite conventions: the stone's options are built as
- * `value: String(option.id)` and its handler does `Number(value)`, while the size's are built as
- * `value: option.value` — so the component holds `"6.5"`, a label, where the database wants a
- * numeric id. `Number("6.5")` is `6.5`, which is not an id, does not throw, and would be stored as
- * a broken relationship. Written here it is covered by a test; written inline it is covered by
- * nobody.
+ * **It used to earn its keep by catching a size trap, and spec 011 removed the trap with the
+ * sizes.** The two selects beside each other used opposite conventions — the stone's options were
+ * built as `value: String(option.id)` with a handler doing `Number(value)`, the size's as
+ * `value: option.value` — so the component held `"6.5"`, a label, where the database wanted an id.
+ * `Number("6.5")` is `6.5`: not an id, no error, a broken relationship stored. That is gone.
  *
- * An unmatched size yields `undefined` rather than a guess, so `validateIntent` refuses it as a
- * missing choice — which is the correct outcome for a value that names no size of this piece.
+ * Kept anyway, because the page still builds an intent and one place to build it is still better
+ * than three lines in a component nobody tests.
  */
 export function intentFrom(args: {
   diamondId: null | number
   productId: number
   quantity: number
-  sizeValue: null | string
-  sizes: { id: number; value: string }[]
 }): CartIntent {
-  const size = args.sizeValue === null ? undefined : args.sizes.find((option) => option.value === args.sizeValue)
-
   return {
     productId: args.productId,
     quantity: args.quantity,
     ...(args.diamondId === null ? {} : { variantId: args.diamondId }),
-    ...(size === undefined ? {} : { sizeId: size.id }),
   }
 }
