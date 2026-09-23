@@ -16,7 +16,7 @@ import { Drawer } from './drawer'
 const GROUPS = [
   { label: 'CATEGORY:', options: ['All jewelry', 'Rings', 'Bracelets', 'Earrings', 'Necklaces'] },
   { label: 'COLOR:', options: ['Black', 'Clear', 'Green', 'Multicolor'] },
-  { label: 'SIZE:', options: ['2', '2.25', '2.5', '2.75', '3'] },
+  { label: 'SHAPE:', options: ['Round', 'Oval', 'Emerald', 'Pear', 'Marquise'] },
   { label: 'COLLECTION:', options: ['Deia', 'Marvel', 'Molten', 'Spartan'] },
 ]
 
