@@ -5,7 +5,12 @@ import React from 'react'
 
 import { localeAlternates } from '@/lib/i18n/alternates'
 import { currentLocale } from '@/i18n/locale'
-import { ProductDetails, ProductGallery, ProductPurchase } from '@/components/commerce'
+import {
+  ProductDetailsForSelection,
+  ProductGallery,
+  ProductPurchase,
+  SelectedVariantProvider,
+} from '@/components/commerce'
 import { addToCart, buyNow } from '@/lib/cart/actions'
 import { JewelryCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
@@ -152,31 +157,39 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               which stop after the price. FR-035 puts it in the column at every width, and the
               visitor on a phone is the one least able to go and find it elsewhere.
             */}
-            <ProductPurchase
-              productId={product.id}
-              price={product.price}
-              fromPrice={product.fromPrice}
-              description={product.description}
-              diamonds={product.diamondOptions}
-              sizes={product.sizes}
-              available={product.available}
-              maxQuantity={product.maxQuantity}
-              onAddToCart={addToCart}
-              onBuyNow={buyNow}
-            />
+            <SelectedVariantProvider>
+              <ProductPurchase
+                productId={product.id}
+                price={product.price}
+                fromPrice={product.fromPrice}
+                description={product.description}
+                madeToOrder={product.madeToOrder}
+                diamonds={product.diamondOptions}
+                available={product.available}
+                maxQuantity={product.maxQuantity}
+                onAddToCart={addToCart}
+                onBuyNow={buyNow}
+              />
 
-            <ProductDetails
-              detailsHtml={product.detailsHtml}
-              attributes={product.attributes}
-              warrantyHtml={shop.warrantyHtml}
-              deliveryHtml={shop.deliveryHtml}
-              // Headings from the shop global since T292a. The component still defaults them to the
-              // drawn strings, so it renders correctly in a story with no Payload behind it.
-              detailsTitle={shop.detailsTitle}
-              warrantyTitle={shop.warrantyTitle}
-              deliveryTitle={shop.deliveryTitle}
-              className="mt-2 xl:mt-7.5"
-            />
+              {/*
+              The details follow the selected stone (spec 011, FR-013). The provider wraps both
+              because the selection is made in one and read in the other; `ProductDetails` itself is
+              untouched, and the wrapper only decides which attribute list it is handed.
+            */}
+              <ProductDetailsForSelection
+                detailsHtml={product.detailsHtml}
+                attributes={product.attributes}
+                diamonds={product.diamondOptions}
+                warrantyHtml={shop.warrantyHtml}
+                deliveryHtml={shop.deliveryHtml}
+                // Headings from the shop global since T292a. The component still defaults them to the
+                // drawn strings, so it renders correctly in a story with no Payload behind it.
+                detailsTitle={shop.detailsTitle}
+                warrantyTitle={shop.warrantyTitle}
+                deliveryTitle={shop.deliveryTitle}
+                className="mt-2 xl:mt-7.5"
+              />
+            </SelectedVariantProvider>
           </div>
         </div>
       </Container>
