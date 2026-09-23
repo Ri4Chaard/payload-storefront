@@ -14,13 +14,13 @@ import { ArticleCategories } from './collections/article-categories'
 import { Articles } from './collections/articles'
 import { Attributes } from './collections/attributes'
 import { Categories } from './collections/categories'
-import { cartItemMatcher, cartsCollectionOverride } from './collections/carts'
+import { cartsCollectionOverride } from './collections/carts'
 import { Collections } from './collections/collections'
+import { Colours } from './collections/colours'
 import { Customers } from './collections/customers'
 import { Media } from './collections/media'
 import { Policies } from './collections/policies'
 import { productsCollectionOverride } from './collections/products'
-import { Sizes } from './collections/sizes'
 import { Enquiries } from './collections/enquiries'
 import { Questions } from './collections/questions'
 import { VerificationCodes } from './collections/verification-codes'
@@ -96,7 +96,7 @@ export default buildConfig({
     Media,
     Categories,
     Collections,
-    Sizes,
+    Colours,
     Attributes,
     VerificationCodes,
     Questions,
@@ -162,7 +162,8 @@ export default buildConfig({
 
         carts: {
           allowGuestCarts: true,
-          cartItemMatcher,
+          // `cartItemMatcher` left with sizes in spec 011 — the plugin's default is correct again
+          // now that a line is a product and a stone. See `./collections/carts.ts`.
           cartsCollectionOverride,
         },
 

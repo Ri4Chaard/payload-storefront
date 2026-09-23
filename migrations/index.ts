@@ -21,6 +21,9 @@ import * as migration_20260911_135539_localization from './20260911_135539_local
 import * as migration_20260911_141700_language_settings from './20260911_141700_language_settings';
 import * as migration_20260911_152747_customer_locale from './20260911_152747_customer_locale';
 import * as migration_20260914_101035_home_page from './20260914_101035_home_page';
+import * as migration_20260923_142504_colours_and_variant_fields from './20260923_142504_colours_and_variant_fields';
+import * as migration_20260923_145052_colour_vocabulary from './20260923_145052_colour_vocabulary';
+import * as migration_20260923_150652_remove_sizes from './20260923_150652_remove_sizes';
 
 export const migrations = [
   {
@@ -136,6 +139,21 @@ export const migrations = [
   {
     up: migration_20260914_101035_home_page.up,
     down: migration_20260914_101035_home_page.down,
-    name: '20260914_101035_home_page'
+    name: '20260914_101035_home_page',
+  },
+  {
+    up: migration_20260923_142504_colours_and_variant_fields.up,
+    down: migration_20260923_142504_colours_and_variant_fields.down,
+    name: '20260923_142504_colours_and_variant_fields',
+  },
+  {
+    up: migration_20260923_145052_colour_vocabulary.up,
+    down: migration_20260923_145052_colour_vocabulary.down,
+    name: '20260923_145052_colour_vocabulary',
+  },
+  {
+    up: migration_20260923_150652_remove_sizes.up,
+    down: migration_20260923_150652_remove_sizes.down,
+    name: '20260923_150652_remove_sizes'
   },
 ];
