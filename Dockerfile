@@ -68,7 +68,7 @@ COPY . .
 # on the missing module. It has to be generated here, in the image, from this image's dependencies.
 # Copying a developer's local copy would bake in whatever was on their machine, which is how a stale
 # map reached production once already.
-RUN pnpm generate:importmap
+RUN pnpm payload generate:importmap
 
 RUN pnpm build
 

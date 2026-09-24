@@ -26,25 +26,16 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: aurum-db
-    # Local development only. A deployment brings its own database.
-    profiles: [local]
+    container_name: aurum-dev-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-aurum}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aurum}
       POSTGRES_DB: ${POSTGRES_DB:-aurum}
-    ports:
-      # Loopback only — Postgres has no business on a machine's public interface.
-      - '127.0.0.1:5432:5432'
     volumes:
-      - aurum-db-data:/var/lib/postgresql/data
+      - aurum-dev-db-data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U ${POSTGRES_USER:-aurum} -d ${POSTGRES_DB:-aurum}',
-        ]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-aurum} -d ${POSTGRES_DB:-aurum}']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -52,50 +43,23 @@ services:
   app:
     build:
       context: .
-      # next build inlines NEXT_PUBLIC_* into the client bundle, so the public origin is decided
-      # here, at build time. Change it and the image must be rebuilt, not just restarted.
+      dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SERVER_URL: '${NEXT_PUBLIC_SERVER_URL:?set NEXT_PUBLIC_SERVER_URL in .env — the public origin of this deployment}'
-    image: aurum-app
-    container_name: aurum-app
-    profiles: [dev]
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+    container_name: aurum-dev-app
     restart: unless-stopped
-    environment:
-      # The database lives outside this file. Point DATABASE_URI at it in the deployment's .env —
-      # a managed instance, or another compose project on the same host, in which case
-      # host.docker.internal below resolves to the host's gateway address.
-      DATABASE_URI: '${DATABASE_URI:?set DATABASE_URI in .env — the deployment database}'
-      PAYLOAD_SECRET: '${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env — generate one with openssl rand -base64 32}'
-      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
-      # Transactional mail (spec 004). Required, because registration cannot complete without a
-      # verification code and a verification code cannot be sent without these. Guarded like the two
-      # above so that a deployment missing one is refused by `docker compose up`, by name, instead of
-      # by the container after an image has been built and a migration half-attempted.
-      RESEND_API_KEY: '${RESEND_API_KEY:?set RESEND_API_KEY in .env — a Resend sending key}'
-      EMAIL_FROM_ADDRESS: '${EMAIL_FROM_ADDRESS:?set EMAIL_FROM_ADDRESS in .env — must be on a domain verified in Resend, or sends are rejected}'
-      # Optional, and unset is a supported state for all three: the code reads them with `?.trim()`
-      # and treats empty as absent, so `:-` passes an empty string rather than failing the deploy.
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
-      EMAIL_OVERRIDE_RECIPIENT: ${EMAIL_OVERRIDE_RECIPIENT:-}
-      RESEND_AUDIENCE_ID: ${RESEND_AUDIENCE_ID:-}
-      # EMAIL_TRANSPORT is deliberately NOT forwarded. It belongs to the test runners, and `log`
-      # silently stops every message — a stray copy in a deployment's .env would turn a shop that
-      # cannot send verification codes into a shop that looks like it is working.
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
     ports:
-      # Publish behind a reverse proxy that terminates TLS; bind APP_PORT to 127.0.0.1 once one
-      # is in front of it.
-      - '${APP_PORT:-3000}:3000'
+      - '127.0.0.1:3000:3000'
+    environment:
+      DATABASE_URI: ${DATABASE_URI}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
     volumes:
-      # Uploads are written to the container's filesystem by Payload's local storage adapter, so
-      # they need a volume to survive a redeploy.
-      - aurum-media:/app/media
-    # Migrations are generated and committed, never auto-pushed (Constitution IV), so a deploy has
-    # to apply them. Doing it here rather than in the image's CMD keeps `docker run` honest: the
-    # container that boots is the container that migrated, and a failed migration stops the deploy.
-    command: sh -c 'pnpm payload migrate && pnpm start'
+      - aurum-dev-media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
-  aurum-db-data:
-  aurum-media:
+  aurum-dev-db-data:
+  aurum-dev-media:
