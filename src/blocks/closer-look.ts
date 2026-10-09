@@ -58,8 +58,14 @@ export const closerLook: Block = {
       label: 'Figures',
       labels: { singular: 'Figure', plural: 'Figures' },
       admin: { description: 'A word over a caption, e.g. “CERTIFIED” / “selected diamonds”.' },
+      /*
+        `word` is localized for the same reason `caption` is: it is copy, not a key. Left shared, it
+        was one value across all three locales, so saving the page in Russian rewrote the English
+        word and the other way round. Not `required`, for the reason the chip label above records —
+        a required localized child in an array blocks saving in every language until all are filled.
+      */
       fields: [
-        { name: 'word', type: 'text', required: true, label: 'Word' },
+        { name: 'word', type: 'text', label: 'Word', localized: true },
         { name: 'caption', type: 'text', label: 'Caption', localized: true },
       ],
     },

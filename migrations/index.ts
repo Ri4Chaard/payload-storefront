@@ -24,6 +24,7 @@ import * as migration_20260914_101035_home_page from './20260914_101035_home_pag
 import * as migration_20260923_142504_colours_and_variant_fields from './20260923_142504_colours_and_variant_fields';
 import * as migration_20260923_145052_colour_vocabulary from './20260923_145052_colour_vocabulary';
 import * as migration_20260923_150652_remove_sizes from './20260923_150652_remove_sizes';
+import * as migration_20261009_133850_localize_figure_word from './20261009_133850_localize_figure_word';
 
 export const migrations = [
   {
@@ -154,6 +155,11 @@ export const migrations = [
   {
     up: migration_20260923_150652_remove_sizes.up,
     down: migration_20260923_150652_remove_sizes.down,
-    name: '20260923_150652_remove_sizes'
+    name: '20260923_150652_remove_sizes',
+  },
+  {
+    up: migration_20261009_133850_localize_figure_word.up,
+    down: migration_20261009_133850_localize_figure_word.down,
+    name: '20261009_133850_localize_figure_word'
   },
 ];

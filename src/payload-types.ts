@@ -380,7 +380,7 @@ export interface CloserLook {
    */
   figures?:
     | {
-        word: string;
+        word?: string | null;
         caption?: string | null;
         id?: string | null;
       }[]
