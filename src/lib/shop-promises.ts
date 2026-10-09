@@ -29,8 +29,8 @@ export const shopPromises = (
   },
   {
     icon: 'seal-check',
-    title: t_product('qualityGuarantee'),
-    description: t_product('qualityGuaranteeBody'),
+    title: t_product('warranty'),
+    description: t_product('warrantyBody'),
   },
   {
     icon: 'customer-support',
