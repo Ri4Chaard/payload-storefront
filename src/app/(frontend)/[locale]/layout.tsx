@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Pr
   return {
     title: {
       default: 'Aurum',
-      template: '%s — Aurum',
+      template: '%s | Aurum',
     },
     description: t('siteDescription'),
     metadataBase: process.env.NEXT_PUBLIC_SERVER_URL

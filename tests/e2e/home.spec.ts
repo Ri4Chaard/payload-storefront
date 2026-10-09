@@ -20,7 +20,7 @@ test('the page has a title, a description, and exactly one first-level heading',
 }) => {
   await page.goto('/')
 
-  await expect(page).toHaveTitle('Aurum — Lab-grown diamond jewelry')
+  await expect(page).toHaveTitle('Aurum | Lab-grown diamond jewelry')
   const description = page.locator('meta[name="description"]')
   await expect(description).toHaveAttribute('content', /lab-grown diamond/i)
 

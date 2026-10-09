@@ -52,7 +52,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   const t_meta = await getTranslations('meta')
   return {
-    // Not the layout's `%s — Aurum` template: on the home page that would read "Aurum — Aurum".
+    // Not the layout's `%s | Aurum` template: on the home page that would read "Aurum | Aurum".
     title: { absolute: t_meta('homeTitle') },
     description: t_meta('homeDescription'),
   }
