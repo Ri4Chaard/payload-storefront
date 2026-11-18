@@ -72,10 +72,10 @@ export interface HeaderProps {
  */
 const NAV_KEYS = [
   { key: 'allJewelry', href: '/all-jewelry' },
-  { key: 'rings', href: '/rings' },
-  { key: 'bracelets', href: '/bracelets' },
-  { key: 'earrings', href: '/earrings' },
-  { key: 'necklaces', href: '/necklaces' },
+  { key: 'category-1', href: '/category-1' },
+  { key: 'category-2', href: '/category-2' },
+  { key: 'category-3', href: '/category-3' },
+  { key: 'category-4', href: '/category-4' },
   { key: 'about', href: '/about' },
   { key: 'contact', href: '/contact' },
 ] as const
@@ -216,9 +216,9 @@ export function Header({
         <Logo className="absolute left-1/2 -translate-x-1/2 xl:static xl:translate-x-0" />
 
         <nav aria-label={t('primaryNav')} className="hidden xl:block">
-          <ul className="flex items-center gap-7.5">
+          <ul className="flex items-center gap-5">
             {navItems.map((item) => (
-              <li key={item.href}>
+              <li key={item.href} className="whitespace-nowrap">
                 <NavLink href={item.href} current={pathname === item.href}>
                   {item.label}
                 </NavLink>

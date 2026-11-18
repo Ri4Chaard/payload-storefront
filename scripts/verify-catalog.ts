@@ -33,7 +33,7 @@ const draft = await payload.create({
     category: (
       await payload.find({
         collection: 'categories',
-        where: { slug: { equals: 'rings' } },
+        where: { slug: { equals: 'category-1' } },
         limit: 1,
       })
     ).docs[0]!.id,

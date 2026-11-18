@@ -76,7 +76,7 @@ test('every call to action leads somewhere', async ({ page }) => {
     expect(href, 'a call to action points at nothing').toMatch(/^\//)
   }
 
-  expect(hrefs).toContain('/rings')
+  expect(hrefs).toContain('/category-1')
   expect(hrefs).toContain('/all-jewelry')
   expect(hrefs).toContain('/about')
 })
@@ -129,11 +129,11 @@ test('the page renders and every link works with JavaScript disabled', async ({ 
   await expect(page.getByRole('region', { name: 'Shop by category' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'All jewelry' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'About Aurum' })).toBeVisible()
-  // Scoped to the band: the header navigation has a "Rings" link too, and matching both is a
+  // Scoped to the band: the header navigation has a "Category 1" link too, and matching both is a
   // strict-mode violation rather than a stronger assertion.
   await expect(
-    page.getByRole('region', { name: 'Shop by category' }).getByRole('link', { name: /Rings/ }),
-  ).toHaveAttribute('href', '/rings')
+    page.getByRole('region', { name: 'Shop by category' }).getByRole('link', { name: /Category 1/ }),
+  ).toHaveAttribute('href', '/category-1')
 
   // The carousel degrades to a plain scroller rather than disappearing: its arrows depend on a
   // measurement only the client can take, so they are simply absent — and the track still scrolls.
@@ -279,7 +279,7 @@ for (const { name, width, height } of [
       .locator('a[href]')
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')))
     for (const href of hrefs) expect(href).toMatch(/^\//)
-    expect(hrefs).toContain('/rings')
+    expect(hrefs).toContain('/category-1')
     expect(hrefs).toContain('/about')
 
     // Everything the panel covers is out of the tab order; the header above it is not, because it

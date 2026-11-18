@@ -587,7 +587,7 @@ test('search field clears by pointer and by Escape, keeping focus', async ({ pag
   })
 
   const input = page.getByRole('searchbox', { name: 'Search the catalogue' })
-  await expect(input).toHaveValue('Rings')
+  await expect(input).toHaveValue('Category 1')
 
   await page.getByRole('button', { name: /clear/i }).click()
   await expect(input).toHaveValue('')
@@ -595,7 +595,7 @@ test('search field clears by pointer and by Escape, keeping focus', async ({ pag
   await expect(input).toBeFocused()
   await expect(page.getByRole('button', { name: /clear/i })).toHaveCount(0)
 
-  await input.fill('Bracelets')
+  await input.fill('Category 2')
   await input.press('Escape')
   await expect(input).toHaveValue('')
   await expect(input).toBeFocused()
@@ -626,14 +626,14 @@ test('category card is one link covering the whole tile', async ({ page }) => {
   await expect(page.locator('#storybook-root a')).toHaveCount(1)
   await expect(page.locator('#storybook-root button')).toHaveCount(0)
 
-  const link = page.getByRole('link', { name: /Rings/ })
-  await expect(link).toHaveAttribute('href', '/rings')
+  const link = page.getByRole('link', { name: /Category 1/ })
+  await expect(link).toHaveAttribute('href', '/category-1')
   // The photograph is decorative inside a link that carries its own text — a descriptive alt would
   // be announced ahead of the title.
-  await expect(link).toHaveAccessibleName('Rings View the collection')
+  await expect(link).toHaveAccessibleName('Category 1 View the collection')
 
   // The heading survives being inside the anchor, so a page of these still has an outline.
-  await expect(page.getByRole('heading', { level: 3, name: 'Rings' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 3, name: 'Category 1' })).toBeVisible()
 
   // The hit area is the whole card, not the drawn block at the bottom.
   const hit = await page.evaluate(() => {
@@ -688,7 +688,7 @@ test('category card zooms its photograph on hover and on focus', async ({ page }
   const scale = () => image.evaluate((el) => getComputedStyle(el).scale)
   await expect.poll(scale).toBe('none')
 
-  await page.getByRole('link', { name: /Rings/ }).hover()
+  await page.getByRole('link', { name: /Category 1/ }).hover()
   await expect.poll(scale).toBe('1.1')
 
   // Figma draws the zoom for a pointer. A keyboard visitor reaching the CTA should see the same
@@ -1197,11 +1197,11 @@ test('a category tile is one link named for its collection, not for its photogra
   await expect(page.locator('#storybook-root button')).toHaveCount(0)
 
   const first = links.first()
-  await expect(first).toHaveAttribute('href', '/rings')
-  // "Rings View collection" — the photograph contributes nothing, which is the point of its empty
+  await expect(first).toHaveAttribute('href', '/category-1')
+  // "Category 1 View collection" — the photograph contributes nothing, which is the point of its empty
   // alt. A description here would be read out in FRONT of the collection name.
   const name = (await first.evaluate((el) => el.textContent))!.trim()
-  expect(name.startsWith('Rings')).toBe(true)
+  expect(name.startsWith('Category 1')).toBe(true)
 
   // The band is a labelled region and a real list, so its size is known before it is walked.
   await expect(page.getByRole('region', { name: 'Shop by category' })).toBeVisible()
@@ -1215,7 +1215,7 @@ test('the compact tile keeps its label inside the card', async ({ page }) => {
   })
 
   // 174px wide, 16px inset — 142px for a label `Button` refuses to wrap. "VIEW COLLECTION" sets to
-  // 140px at the drawn 14px in Manrope, so at the drawn size it leaves the card entirely. This is
+  // 140px at the drawn 14px in the body face, so at the drawn size it leaves the card entirely. This is
   // the assertion that caught it, and the reason the compact frame drops a further type step.
   const cta = page.locator('#storybook-root a').first().locator('span.group')
   const box = (await cta.boundingBox())!
@@ -1529,10 +1529,10 @@ for (const { name, width, height, gutter, disc } of [
     // The drawn order. Uppercasing is CSS, so the accessible names stay sentence case.
     await expect(links).toHaveText([
       'All jewelry',
-      'Rings',
-      'Bracelets',
-      'Earrings',
-      'Necklaces',
+      'Category 1',
+      'Category 2',
+      'Category 3',
+      'Category 4',
       'About us',
       'Contact us',
     ])
@@ -1545,7 +1545,7 @@ for (const { name, width, height, gutter, disc } of [
     )
 
     // Every row ends in the arrow the design draws, and it is decorative — the link is already
-    // named by its label, and "Rings, image" would be a worse name than "Rings".
+    // named by its label, and "Rings, image" would be a worse name than "Category 1".
     const arrows = nav.locator('svg')
     await expect(arrows).toHaveCount(7)
     expect(await arrows.first().getAttribute('aria-hidden')).toBe('true')
@@ -1908,7 +1908,7 @@ test('a closed drawer is out of the tab order entirely', async ({ page }) => {
     waitUntil: 'networkidle',
   })
   await expect(page.getByRole('dialog', { name: 'Filters' })).toBeHidden()
-  await expect(page.getByRole('checkbox', { name: 'Rings' })).toBeHidden()
+  await expect(page.getByRole('checkbox', { name: 'Category 1' })).toBeHidden()
 })
 
 const LIGHTBOX_STORY = `${STORYBOOK}/iframe.html?id=ui-lightbox--default&viewMode=story`

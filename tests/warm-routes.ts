@@ -18,7 +18,7 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 const ROUTES = [
   '/',
   '/all-jewelry',
-  '/rings',
+  '/category-1',
   '/products/paragon-emerald-cut-diamond-engagement-ring',
   // The account flow (004). Three specs and the a11y sweep all open these, so whichever worker gets
   // there first was paying the compilation inside an assertion.

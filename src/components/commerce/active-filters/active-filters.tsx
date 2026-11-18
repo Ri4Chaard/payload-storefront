@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn'
 
 /**
  * The row of applied filters beneath the toolbar (003/T272, FR-025). Nodes `225:1482` and
- * `I355:7627;355:7602` — `Rings ×`, `Up to $7,300 ×`, `Best selling ×`.
+ * `I355:7627;355:7602` — `Category 1 ×`, `Up to $7,300 ×`, `Best selling ×`.
  *
  * **Every chip is a link, and the whole pill is the control.** A filter lives in the URL, so
  * removing one is an address rather than a state change — which is what lets the chip row work
@@ -67,7 +67,7 @@ export function ActiveFilters({
         <li key={filter.id}>
           <Chip
             href={filter.href}
-            // The visible word is inside the accessible name, so a visitor who says "Rings" to a
+            // The visible word is inside the accessible name, so a visitor who says "Category 1" to a
             // voice control still reaches this chip (WCAG 2.5.3).
             aria-label={`Remove ${filter.label} filter`}
             className="gap-2"

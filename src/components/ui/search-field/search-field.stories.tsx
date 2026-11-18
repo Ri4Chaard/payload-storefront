@@ -28,9 +28,9 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /** Filled: the clear affordance appears. Escape clears it too. */
-export const WithAValue: Story = { args: { defaultValue: 'Rings' } }
+export const WithAValue: Story = { args: { defaultValue: 'Category 1' } }
 
-export const Disabled: Story = { args: { defaultValue: 'Rings', disabled: true } }
+export const Disabled: Story = { args: { defaultValue: 'Category 1', disabled: true } }
 
 /** Controlled, which is how a real search page drives it. */
 export const Controlled: Story = {

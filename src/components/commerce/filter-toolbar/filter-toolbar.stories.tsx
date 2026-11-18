@@ -40,7 +40,7 @@ export const WithFiltersApplied: Story = {
     appliedCount: 3,
     filters: {
       ...storyFilters,
-      category: ['rings'],
+      category: ['category-1'],
       shape: ['oval'],
       minPrice: 120_000,
       maxPrice: 730_000,

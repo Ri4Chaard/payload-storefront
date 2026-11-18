@@ -2,7 +2,7 @@
  * Where a filter state lives (003/T273, contract §4).
  *
  * One rule, in one function: **a single category is a path, and everything else is a query.**
- * `/rings?colour=black` rather than `/all-jewelry?category=rings&colour=black`, because the two
+ * `/category-1?colour=black` rather than `/all-jewelry?category=category-1&colour=black`, because the two
  * would otherwise be two addresses for one grid — two cache entries, two things for a crawler to
  * index, and two answers to "what is the canonical URL of the ring listing".
  *
@@ -13,8 +13,8 @@
  * disagree about.
  *
  * **Zero categories, or more than one, is the whole shop.** There is no route for "rings and
- * bracelets" and inventing one would mean a page per combination; `/all-jewelry?category=rings&
- * category=bracelets` says exactly what it is.
+ * bracelets" and inventing one would mean a page per combination; `/all-jewelry?category=category-1&
+ * category=category-2` says exactly what it is.
  */
 
 import { toQueryString } from './filters'

@@ -55,11 +55,11 @@ describe('getListing', () => {
   })
 
   it('combines groups with AND and values within a group with OR', async () => {
-    const rings = await listing({ category: ['rings'] })
-    const both = await listing({ category: ['rings', 'bracelets'] })
+    const rings = await listing({ category: ['category-1'] })
+    const both = await listing({ category: ['category-1', 'category-2'] })
     expect(both.total).toBeGreaterThan(rings.total)
 
-    const narrowed = await listing({ category: ['rings'], colour: ['clear'] })
+    const narrowed = await listing({ category: ['category-1'], colour: ['clear'] })
     expect(narrowed.total).toBeLessThanOrEqual(rings.total)
   })
 
@@ -68,7 +68,7 @@ describe('getListing', () => {
     const dearest = await listing({ sort: 'price-desc' })
     expect(cheapest.products[0]?.id).not.toBe(dearest.products[0]?.id)
 
-    const ascending = await listing({ sort: 'price-asc', category: ['rings'] })
+    const ascending = await listing({ sort: 'price-asc', category: ['category-1'] })
     const amounts = ascending.products.map((product) => Number(product.price.replace(/[^0-9]/g, '')))
     expect(amounts).toEqual([...amounts].sort((a, b) => a - b))
   })
@@ -81,9 +81,9 @@ describe('getListing', () => {
   })
 
   it('labels the chips from the catalogue, not from the slug', async () => {
-    const result = await listing({ category: ['rings'], inStock: true, maxPrice: 730000 })
+    const result = await listing({ category: ['category-1'], inStock: true, maxPrice: 730000 })
     expect(result.appliedChips).toEqual([
-      { key: 'category', value: 'rings', label: 'Diamond Rings' },
+      { key: 'category', value: 'category-1', label: 'Category 1' },
       { key: 'maxPrice', value: '730000', label: 'Under $7,300' },
       { key: 'inStock', value: '1', label: 'In stock only' },
     ])
@@ -92,7 +92,7 @@ describe('getListing', () => {
   /**
    * Asked over the whole catalogue rather than one category.
    *
-   * It used to name `necklaces`, which passed against the fixtures because that is where their
+   * It used to name `category-4`, which passed against the fixtures because that is where their
    * sold-out piece happened to sit. The rule has nothing to do with necklaces — an assertion that
    * depends on WHICH category holds the empty shelf breaks when the shop is restocked, and reports
    * a filter bug when the only thing that changed was a number in the admin.
@@ -143,7 +143,7 @@ describe('getProductSlugs', () => {
 
 describe('getFilterFacets', () => {
   it('offers every option in a group, whatever the category holds', async () => {
-    const facets = await getFilterFacets('en', 'rings')
+    const facets = await getFilterFacets('en', 'category-1')
     expect(facets.shapes).toHaveLength(7)
     expect(facets.colours).toHaveLength(4)
     expect(facets.price.min).toBeLessThan(facets.price.max)
@@ -152,7 +152,7 @@ describe('getFilterFacets', () => {
   it('offers an option no piece in the category has, rather than hiding it', async () => {
     // Hiding zero-count options makes the drawer change shape as a visitor filters, which loses
     // the option they were reaching for. A zero is the honest answer to "do you have this".
-    const facets = await getFilterFacets('en', 'bracelets')
+    const facets = await getFilterFacets('en', 'category-2')
     const empty = facets.shapes.filter((option) => option.count === 0)
     expect(empty.length, 'no shape is absent from bracelets — pick a sparser group').toBeGreaterThan(
       0,
@@ -161,7 +161,7 @@ describe('getFilterFacets', () => {
   })
 
   it('always counts categories over the whole catalogue', async () => {
-    const withinRings = await getFilterFacets('en', 'rings')
+    const withinRings = await getFilterFacets('en', 'category-1')
     const everywhere = await getFilterFacets('en', 'en')
     expect(withinRings.categories).toEqual(everywhere.categories)
   })
@@ -183,10 +183,10 @@ describe('getRelated', () => {
 describe('the rest', () => {
   it('orders categories the way the owner arranged them', async () => {
     expect((await getCategories('en')).map((category) => category.slug)).toEqual([
-      'rings',
-      'bracelets',
-      'earrings',
-      'necklaces',
+      'category-1',
+      'category-2',
+      'category-3',
+      'category-4',
     ])
   })
 

@@ -10,17 +10,17 @@
 
 @theme {
   /* ---------- Colour ---------- */
-  --color-primary-default: #3b171a;
-  --color-primary-hover: #4f2b2e; /* ⚠ unverified against Figma */
-  --color-primary-transparent: #3b171a33; /* ⚠ unverified against Figma */
-  --color-neutral-primary: #050301;
-  --color-neutral-secondary: #343231;
-  --color-neutral-placeholder: #a7a5a3;
+  --color-primary-default: #1e2a3a;
+  --color-primary-hover: #2c3b50; /* ⚠ unverified against Figma */
+  --color-primary-transparent: #1e2a3a33; /* ⚠ unverified against Figma */
+  --color-neutral-primary: #0f1115;
+  --color-neutral-secondary: #3d4350;
+  --color-neutral-placeholder: #9ca1aa;
   --color-neutral-white: #ffffff;
-  --color-background-bg: #f8f7f6;
+  --color-background-bg: #f8f9fa;
   --color-background-container: #ffffff;
-  --color-background-subtle: #dddddd; /* ⚠ unverified against Figma */
-  --color-background-base: #130000;
+  --color-background-subtle: #dfe2e6; /* ⚠ unverified against Figma */
+  --color-background-base: #0b111a;
   --color-status-error-default: #f75959;
   --color-status-error-transparent: #f759591a;
   --color-status-error-text: #bf2222;
@@ -32,8 +32,8 @@
      Figma stores raw colours with opacity applied at the use site; so do we. */
 
   /* ---------- Typography ---------- */
-  --font-brand-display: var(--font-playfair, 'Playfair Display'), Georgia, serif;
-  --font-brand-body: var(--font-manrope, 'Manrope'), system-ui, -apple-system, sans-serif;
+  --font-brand-display: var(--font-display-face, 'Cormorant Garamond'), Georgia, serif;
+  --font-brand-body: var(--font-body-face, 'Inter'), system-ui, -apple-system, sans-serif;
 
   --text-display: clamp(1.5rem, 1.1892rem + 1.3260vw, 2.25rem);
   --text-display--line-height: 1.4;

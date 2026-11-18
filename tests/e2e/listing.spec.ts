@@ -4,7 +4,7 @@ import { expect, test, type Page } from '@playwright/test'
  * The listing routes (003/T257) — `/all-jewelry` and the four categories.
  *
  * The fixtures put 29 published pieces in the shop and page at twelve, so `/all-jewelry` is three
- * pages and `/rings` is one. Both cases matter: the first proves paging, the second proves the
+ * pages and `/category-1` is one. Both cases matter: the first proves paging, the second proves the
  * control disappears rather than offering a single page.
  */
 const WIDTHS = {
@@ -33,7 +33,7 @@ for (const [name, { width, height, columns }] of Object.entries(WIDTHS)) {
 }
 
 test('a listing is one heading, and each card is one link', async ({ page }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/diamond rings/i)
   expect(await page.getByRole('heading', { level: 1 }).count(), 'more than one h1').toBe(1)
@@ -53,13 +53,13 @@ test('a listing is one heading, and each card is one link', async ({ page }) => 
 
 /**
  * The four categories partition the shop: every piece is in exactly one, and together they are all
- * of it. Counting is what proves that — an earlier fixture put a bracelet in Diamond Rings and
+ * of it. Counting is what proves that — an earlier fixture put a bracelet in Category 1 and
  * every count-only assertion still passed.
  */
 test('the categories partition the shop between them', async ({ page }) => {
   const counts: Record<string, number> = {}
 
-  for (const slug of ['rings', 'bracelets', 'earrings', 'necklaces']) {
+  for (const slug of ['category-1', 'category-2', 'category-3', 'category-4']) {
     await page.goto(`/${slug}`)
     counts[slug] = await page.locator('main article').count()
     expect(counts[slug], `${slug} is empty`).toBeGreaterThan(0)
@@ -108,12 +108,12 @@ test('the desktop card keeps its action until the card is hovered', async ({ pag
 })
 
 test('a category shows the pieces it is named for', async ({ page }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
 
   const names = await page.locator('main article a').allInnerTexts()
   expect(names.length).toBeGreaterThan(0)
 
-  // Development fixtures name a piece after what it is, so a necklace in Diamond Rings is a
+  // Development fixtures name a piece after what it is, so a necklace in Category 1 is a
   // modelling mistake rather than a rendering one — and this is where it shows.
   const strays = names.filter((name) => /bracelet|earring|necklace|pendant/i.test(name))
   expect(strays, 'these are not rings').toEqual([])
@@ -169,7 +169,7 @@ test('LOAD MORE goes when there is nothing more to load', async ({ page }) => {
 })
 
 test('a listing shorter than one set offers no control at all', async ({ page }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
 
   await expect(loadMore(page)).toHaveCount(0)
   // The count stays. "Showing 8 of 8" is the answer to "is that everything?".
@@ -244,15 +244,15 @@ const option = (page: Page, name: string) =>
   page.locator('#filters label').filter({ hasText: new RegExp(`^${name}$`) })
 
 test('the toolbar commits immediately, with no APPLY (FR-023)', async ({ page }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
 
   await page.getByRole('link', { name: 'Oval', exact: true }).click()
-  await expect(page).toHaveURL('/rings?shape=oval')
+  await expect(page).toHaveURL('/category-1?shape=oval')
   await expect(page.getByRole('link', { name: 'Remove Oval filter' })).toBeVisible()
 
   // …and the same for the in-stock toggle, which is a link for exactly this reason.
   await page.getByRole('link', { name: 'In-stock only' }).click()
-  await expect(page).toHaveURL('/rings?shape=oval&inStock=1')
+  await expect(page).toHaveURL('/category-1?shape=oval&inStock=1')
 })
 
 /**
@@ -263,7 +263,7 @@ test('the toolbar commits immediately, with no APPLY (FR-023)', async ({ page })
  * them out of the accessibility tree until it opens.
  */
 test('the price slider commits when it is moved, with no APPLY', async ({ page }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
   // Waits for the scripts to finish arriving before pressing anything. The poll below can survive
   // a slow hydration, but it should not have to spend its budget on a page that has not finished
   // downloading — which is what a full parallel run against a dev server produces.
@@ -312,7 +312,7 @@ test('a filtered URL renders the same listing in a fresh context, drawer pre-tic
   const context = await browser.newContext()
   const page = await context.newPage()
 
-  await page.goto('/rings?colour=clear&shape=round')
+  await page.goto('/category-1?colour=clear&shape=round')
   expect(await page.locator('main article').count()).toBeGreaterThan(0)
 
   await expect(page.getByRole('link', { name: 'Remove Clear filter' })).toBeVisible()
@@ -328,7 +328,7 @@ test('a filtered URL renders the same listing in a fresh context, drawer pre-tic
 })
 
 test('the drawer edits a draft — dismissing discards it, APPLY commits it', async ({ page }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
 
   await filtersTrigger(page).click()
   await option(page, 'Green').click()
@@ -336,7 +336,7 @@ test('the drawer edits a draft — dismissing discards it, APPLY commits it', as
 
   // Scenario 2: ticked, dismissed, and nothing happened.
   await expect(drawer(page)).toBeHidden()
-  await expect(page).toHaveURL('/rings')
+  await expect(page).toHaveURL('/category-1')
 
   await filtersTrigger(page).click()
   await expect(page.getByRole('checkbox', { name: 'Green' })).not.toBeChecked()
@@ -344,36 +344,36 @@ test('the drawer edits a draft — dismissing discards it, APPLY commits it', as
   await option(page, 'Green').click()
   await page.getByRole('button', { name: 'APPLY', exact: true }).click()
 
-  await expect(page).toHaveURL('/rings?colour=green')
+  await expect(page).toHaveURL('/category-1?colour=green')
   await expect(drawer(page)).toBeHidden()
   await expect(page.getByRole('link', { name: 'Remove Green filter' })).toBeVisible()
 })
 
 test('removing a chip drops that filter and no other', async ({ page }) => {
-  await page.goto('/rings?colour=green&shape=oval')
+  await page.goto('/category-1?colour=green&shape=oval')
 
   await page.getByRole('link', { name: 'Remove Oval filter' }).click()
 
-  await expect(page).toHaveURL('/rings?colour=green')
+  await expect(page).toHaveURL('/category-1?colour=green')
   await expect(page.getByRole('link', { name: 'Remove Green filter' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Remove Oval filter' })).toHaveCount(0)
 })
 
 /** The route's category is a chip like any other, and dropping it is the whole shop. */
 test('removing the category chip widens to all jewelry', async ({ page }) => {
-  await page.goto('/rings?colour=green')
+  await page.goto('/category-1?colour=green')
 
-  await page.getByRole('link', { name: 'Remove Diamond Rings filter' }).click()
+  await page.getByRole('link', { name: 'Remove Category 1 filter' }).click()
   await expect(page).toHaveURL('/all-jewelry?colour=green')
 })
 
 test('CLEAR returns to the category it started from', async ({ page }) => {
-  await page.goto('/rings?colour=green&shape=oval&sort=price-asc')
+  await page.goto('/category-1?colour=green&shape=oval&sort=price-asc')
 
   await filtersTrigger(page).click()
   await page.getByRole('link', { name: 'CLEAR', exact: true }).click()
 
-  await expect(page).toHaveURL('/rings')
+  await expect(page).toHaveURL('/category-1')
   await expect(page.getByRole('link', { name: /^Remove/ })).toHaveCount(1) // the category itself
 })
 
@@ -381,7 +381,7 @@ test('below md the drawer covers the screen, traps focus, and Escape gives it ba
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/rings?colour=green')
+  await page.goto('/category-1?colour=green')
 
   // FR-028: the count is drawn on the phone — the category and the colour.
   await expect(filtersTrigger(page)).toContainText('(2)')
@@ -421,17 +421,17 @@ test('the drawer filters without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })
   const page = await context.newPage()
 
-  await page.goto('/rings')
+  await page.goto('/category-1')
   await expect(drawer(page)).toBeHidden()
 
   await filtersTrigger(page).click()
-  await expect(page).toHaveURL('/rings#filters')
+  await expect(page).toHaveURL('/category-1#filters')
   await expect(drawer(page)).toBeVisible()
 
   await option(page, 'Green').click()
   await page.getByRole('button', { name: 'APPLY', exact: true }).click()
 
-  await expect(page).toHaveURL('/rings?colour=green')
+  await expect(page).toHaveURL('/category-1?colour=green')
   await expect(page.getByRole('link', { name: 'Remove Green filter' })).toBeVisible()
   // The untouched price slider submits both of its ends. They span the whole catalogue, so they
   // are not a filter and no chip claims they are.
@@ -441,9 +441,9 @@ test('the drawer filters without JavaScript', async ({ browser }) => {
 })
 
 test('a category in the query is redirected onto its own path', async ({ page }) => {
-  await page.goto('/all-jewelry?category=rings&colour=green')
+  await page.goto('/all-jewelry?category=category-1&colour=green')
 
-  await expect(page).toHaveURL('/rings?colour=green')
+  await expect(page).toHaveURL('/category-1?colour=green')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/diamond rings/i)
 })
 
@@ -463,9 +463,9 @@ test('a category in the query is redirected onto its own path', async ({ page })
  * is what the second assertion guards.
  */
 test('an unknown colour is still reported after the URL canonicalises', async ({ page }) => {
-  await page.goto('/all-jewelry?category=rings&colour=puce')
+  await page.goto('/all-jewelry?category=category-1&colour=puce')
 
-  await expect(page).toHaveURL('/rings?colour=puce')
+  await expect(page).toHaveURL('/category-1?colour=puce')
   await expect(page.getByRole('status').filter({ hasText: /^Ignored/ })).toContainText(/puce/i)
 })
 
@@ -476,7 +476,7 @@ test('an unknown colour is still reported after the URL canonicalises', async ({
 const sortTrigger = (page: Page) => page.getByRole('button', { name: 'Sort by' })
 
 test('the sort menu offers the drawn options and marks the current one', async ({ page }) => {
-  await page.goto('/rings?sort=price-asc')
+  await page.goto('/category-1?sort=price-asc')
 
   await sortTrigger(page).click()
   await expect(page.getByRole('menuitem')).toHaveText([
@@ -512,7 +512,7 @@ test('choosing an ordering reorders the grid, records it, and returns focus', as
 })
 
 test('sorting and filtering hold together (FR-031)', async ({ page }) => {
-  await page.goto('/rings?colour=clear&sort=price-asc')
+  await page.goto('/category-1?colour=clear&sort=price-asc')
 
   const prices = await page.locator('main article').evaluateAll((cards) =>
     cards.map((card) => Number(card.textContent?.replace(/[^\d]/g, '').slice(0, 8) ?? 0)),
@@ -527,7 +527,7 @@ test('sorting and filtering hold together (FR-031)', async ({ page }) => {
 test('the sort menu is driveable from the keyboard, and Escape changes nothing', async ({
   page,
 }) => {
-  await page.goto('/rings')
+  await page.goto('/category-1')
 
   await sortTrigger(page).focus()
   await page.keyboard.press('ArrowDown')
@@ -539,12 +539,12 @@ test('the sort menu is driveable from the keyboard, and Escape changes nothing',
   await page.keyboard.press('Escape')
   await expect(page.getByRole('menu')).toHaveCount(0)
   await expect(sortTrigger(page)).toBeFocused()
-  await expect(page).toHaveURL('/rings')
+  await expect(page).toHaveURL('/category-1')
 
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
-  await expect(page).toHaveURL('/rings?sort=price-asc')
+  await expect(page).toHaveURL('/category-1?sort=price-asc')
 })
 
 /**
@@ -603,7 +603,7 @@ const filterBar = (page: Page) => page.locator('section[aria-label="Filter and s
 for (const width of [1280, 1440, 1600, 1920]) {
   test(`the toolbar folds rather than overflowing at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
-    await page.goto('/rings')
+    await page.goto('/category-1')
 
     const fits = await filterBar(page)
       .locator('> div')
@@ -627,11 +627,11 @@ test('the filter bar is a white strip on a phone and bare on a desktop', async (
     })
 
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/rings')
+  await page.goto('/category-1')
   expect(await paint()).toEqual({ filled: true, top: '1px', bottom: '1px' })
 
   await page.setViewportSize({ width: 1920, height: 900 })
-  await page.goto('/rings')
+  await page.goto('/category-1')
   expect(await paint()).toEqual({ filled: false, top: '0px', bottom: '1px' })
 })
 
@@ -650,7 +650,7 @@ for (const [name, width, size] of [
 ] as const) {
   test(`the two triggers are one control on ${name}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
-    await page.goto('/rings')
+    await page.goto('/category-1')
 
     const filters = filterBar(page).getByRole('link', { name: /^Filters/ })
     const sort = filterBar(page).getByRole('button', { name: 'Sort by' })

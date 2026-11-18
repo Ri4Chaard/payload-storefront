@@ -117,39 +117,39 @@ console.log('› categories')
  * deployment — which means it has to be a Media document like every other photograph in the shop.
  */
 const categoryMedia = {
-  rings: await upsertMedia('category-rings.webp', 'A hand wearing a diamond ring'),
-  bracelets: await upsertMedia('category-bracelets.webp', 'A diamond bracelet on a wrist'),
-  earrings: await upsertMedia('category-earrings.webp', 'Diamond earrings worn'),
-  necklaces: await upsertMedia('category-necklaces.webp', 'A diamond necklace worn'),
+  category1: await upsertMedia('category-1.webp', 'Category 1 image'),
+  category2: await upsertMedia('category-2.webp', 'Category 2 image'),
+  category3: await upsertMedia('category-3.webp', 'Category 3 image'),
+  category4: await upsertMedia('category-4.webp', 'Category 4 image'),
 }
 
 const categories = {
-  rings: await upsert('categories', 'slug', 'rings', {
-    image: categoryMedia.rings.id,
-    title: 'Diamond Rings',
-    slug: 'rings',
-    subtitle: 'Timeless brilliance, made for every moment',
+  'category-1': await upsert('categories', 'slug', 'category-1', {
+    image: categoryMedia.category1.id,
+    title: 'Category 1',
+    slug: 'category-1',
+    subtitle: 'A short description of this category',
     order: 1,
   }),
-  bracelets: await upsert('categories', 'slug', 'bracelets', {
-    image: categoryMedia.bracelets.id,
-    title: 'Diamond Bracelets',
-    slug: 'bracelets',
-    subtitle: 'Timeless brilliance, made for every moment',
+  'category-2': await upsert('categories', 'slug', 'category-2', {
+    image: categoryMedia.category2.id,
+    title: 'Category 2',
+    slug: 'category-2',
+    subtitle: 'A short description of this category',
     order: 2,
   }),
-  earrings: await upsert('categories', 'slug', 'earrings', {
-    image: categoryMedia.earrings.id,
-    title: 'Diamond Earrings',
-    slug: 'earrings',
-    subtitle: 'Timeless brilliance, made for every moment',
+  'category-3': await upsert('categories', 'slug', 'category-3', {
+    image: categoryMedia.category3.id,
+    title: 'Category 3',
+    slug: 'category-3',
+    subtitle: 'A short description of this category',
     order: 3,
   }),
-  necklaces: await upsert('categories', 'slug', 'necklaces', {
-    image: categoryMedia.necklaces.id,
-    title: 'Diamond Necklaces',
-    slug: 'necklaces',
-    subtitle: 'Timeless brilliance, made for every moment',
+  'category-4': await upsert('categories', 'slug', 'category-4', {
+    image: categoryMedia.category4.id,
+    title: 'Category 4',
+    slug: 'category-4',
+    subtitle: 'A short description of this category',
     order: 4,
   }),
 }
@@ -309,7 +309,7 @@ const productSeeds: ProductSeed[] = [
     // fresh (spec Open Question 7).
     slug: 'paragon-emerald-cut-diamond-engagement-ring',
     title: 'Paragon Emerald Cut Diamond Engagement Ring',
-    category: categories.rings,
+    category: categories['category-1'],
     gallery: [
       media.ringPackshot.id,
       media.ringJacket.id,
@@ -335,7 +335,7 @@ const productSeeds: ProductSeed[] = [
     // Sizes but NO stones — the middle case of FR-008's "neither, either, or both".
     slug: 'pave-butterfly-diamond-bracelet',
     title: 'Pavé Butterfly Diamond Bracelet',
-    category: categories.bracelets,
+    category: categories['category-2'],
     gallery: [media.bracelet.id, media.pendant.id],
     price: 37400,
     description: 'Butterflies in pavé diamonds, set along a flexible band.',
@@ -352,7 +352,7 @@ const productSeeds: ProductSeed[] = [
     // NEITHER option type — orderable immediately, no selectors drawn.
     slug: 'butterfly-diamond-pendant',
     title: 'Butterfly Diamond Pendant',
-    category: categories.necklaces,
+    category: categories['category-4'],
     gallery: [media.pendant.id],
     price: 24900,
     description: 'A single butterfly in pavé diamonds on a fine chain.',
@@ -366,7 +366,7 @@ const productSeeds: ProductSeed[] = [
     // Stock tracked, at zero — visible in the listing, unavailable on its page.
     slug: 'butterfly-ruby-pink-sapphire-diamond-ear-climbers',
     title: 'Butterfly Ruby, Pink Sapphire and Diamond Ear Climbers',
-    category: categories.earrings,
+    category: categories['category-3'],
     gallery: [media.earClimbers.id],
     price: 38000,
     description:
@@ -382,7 +382,7 @@ const productSeeds: ProductSeed[] = [
     // Stock tracked with stock — the ordinary case.
     slug: 'butterfly-ruby-pink-sapphire-diamond-mini-pendant',
     title: 'Butterfly Ruby, Pink Sapphire and Diamond Mini Pendant',
-    category: categories.necklaces,
+    category: categories['category-4'],
     gallery: [media.miniPendant.id],
     price: 19000,
     description: 'The butterfly at its smallest, in ruby and pink sapphire.',
@@ -408,7 +408,7 @@ const productSeeds: ProductSeed[] = [
      */
     slug: 'zolotoe-kolco-s-brilliantom',
     title: 'Золотое кольцо с бриллиантом',
-    category: categories.rings,
+    category: categories['category-1'],
     gallery: [media.ringPackshot.id, media.ringPortrait.id],
     price: 21500,
     description: 'Кольцо из белого золота с бриллиантом огранки «принцесса».',
@@ -433,30 +433,30 @@ const productSeeds: ProductSeed[] = [
  * disposable: every one of them is what makes some rule testable.
  */
 const FILLER: { title: string; categorySlug: keyof typeof categories }[] = [
-  { title: 'Halo Solitaire Ring', categorySlug: 'rings' },
-  { title: 'Baguette Eternity Band', categorySlug: 'rings' },
-  { title: 'Marquise Cluster Ring', categorySlug: 'rings' },
-  { title: 'Princess Cut Signet Ring', categorySlug: 'rings' },
-  { title: 'Oval Trilogy Ring', categorySlug: 'rings' },
-  { title: 'Cushion Halo Ring', categorySlug: 'rings' },
-  { title: 'Twisted Pavé Ring', categorySlug: 'rings' },
-  { title: 'Tennis Bracelet', categorySlug: 'bracelets' },
-  { title: 'Bezel Link Bracelet', categorySlug: 'bracelets' },
-  { title: 'Pear Drop Bracelet', categorySlug: 'bracelets' },
-  { title: 'Emerald Bar Bracelet', categorySlug: 'bracelets' },
-  { title: 'Open Cuff Bracelet', categorySlug: 'bracelets' },
-  { title: 'Round Stud Earrings', categorySlug: 'earrings' },
-  { title: 'Baguette Huggie Earrings', categorySlug: 'earrings' },
-  { title: 'Oval Drop Earrings', categorySlug: 'earrings' },
-  { title: 'Marquise Threader Earrings', categorySlug: 'earrings' },
-  { title: 'Princess Halo Earrings', categorySlug: 'earrings' },
-  { title: 'Double Hoop Earrings', categorySlug: 'earrings' },
-  { title: 'Solitaire Necklace', categorySlug: 'necklaces' },
-  { title: 'Riviera Necklace', categorySlug: 'necklaces' },
-  { title: 'Pear Pendant Necklace', categorySlug: 'necklaces' },
-  { title: 'Baguette Bar Necklace', categorySlug: 'necklaces' },
-  { title: 'Emerald Station Necklace', categorySlug: 'necklaces' },
-  { title: 'Layered Chain Necklace', categorySlug: 'necklaces' },
+  { title: 'Halo Solitaire Ring', categorySlug: 'category-1' },
+  { title: 'Baguette Eternity Band', categorySlug: 'category-1' },
+  { title: 'Marquise Cluster Ring', categorySlug: 'category-1' },
+  { title: 'Princess Cut Signet Ring', categorySlug: 'category-1' },
+  { title: 'Oval Trilogy Ring', categorySlug: 'category-1' },
+  { title: 'Cushion Halo Ring', categorySlug: 'category-1' },
+  { title: 'Twisted Pavé Ring', categorySlug: 'category-1' },
+  { title: 'Tennis Bracelet', categorySlug: 'category-2' },
+  { title: 'Bezel Link Bracelet', categorySlug: 'category-2' },
+  { title: 'Pear Drop Bracelet', categorySlug: 'category-2' },
+  { title: 'Emerald Bar Bracelet', categorySlug: 'category-2' },
+  { title: 'Open Cuff Bracelet', categorySlug: 'category-2' },
+  { title: 'Round Stud Earrings', categorySlug: 'category-3' },
+  { title: 'Baguette Huggie Earrings', categorySlug: 'category-3' },
+  { title: 'Oval Drop Earrings', categorySlug: 'category-3' },
+  { title: 'Marquise Threader Earrings', categorySlug: 'category-3' },
+  { title: 'Princess Halo Earrings', categorySlug: 'category-3' },
+  { title: 'Double Hoop Earrings', categorySlug: 'category-3' },
+  { title: 'Solitaire Necklace', categorySlug: 'category-4' },
+  { title: 'Riviera Necklace', categorySlug: 'category-4' },
+  { title: 'Pear Pendant Necklace', categorySlug: 'category-4' },
+  { title: 'Baguette Bar Necklace', categorySlug: 'category-4' },
+  { title: 'Emerald Station Necklace', categorySlug: 'category-4' },
+  { title: 'Layered Chain Necklace', categorySlug: 'category-4' },
 ]
 
 const FILLER_COLOURS = [['clear'], ['black'], ['green'], ['multicolor'], ['clear', 'black']]
@@ -466,10 +466,10 @@ const FILLER_SHAPES = [
 
 /** A piece is photographed as what it is. Rings get the ring, necklaces get a necklace. */
 const GALLERY_FOR: Record<string, (number | string)[]> = {
-  rings: [media.ringPackshot.id, media.ringJacket.id],
-  bracelets: [media.bracelet.id],
-  earrings: [media.earClimbers.id],
-  necklaces: [media.pendant.id, media.miniPendant.id],
+  'category-1': [media.ringPackshot.id, media.ringJacket.id],
+  'category-2': [media.bracelet.id],
+  'category-3': [media.earClimbers.id],
+  'category-4': [media.pendant.id, media.miniPendant.id],
 }
 
 const pick = <T,>(list: readonly T[], index: number): T => {
@@ -515,7 +515,7 @@ for (const [index, { title, categorySlug }] of FILLER.entries()) {
 productSeeds.push({
   slug: 'unreleased-spartan-cuff',
   title: 'Unreleased Spartan Cuff',
-  category: categories.bracelets,
+  category: categories['category-2'],
   gallery: [media.bracelet.id],
   price: 28000,
   description: 'Not yet announced.',

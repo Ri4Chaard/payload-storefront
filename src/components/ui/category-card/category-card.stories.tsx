@@ -15,7 +15,7 @@ const meta = {
   title: 'UI/CategoryCard',
   component: CategoryCard,
   parameters: { layout: 'centered' },
-  args: { title: 'Rings', href: '/rings', image: IMAGE },
+  args: { title: 'Category 1', href: '/category-1', image: IMAGE },
   decorators: [
     (Story) => (
       <div className="w-104 max-w-full">
@@ -50,8 +50,8 @@ export const InAGrid: Story = {
   ],
   render: (args) => (
     <div className="grid grid-cols-2 gap-5">
-      <CategoryCard {...args} title="Rings" href="/rings" />
-      <CategoryCard {...args} title="Bracelets" href="/bracelets" />
+      <CategoryCard {...args} title="Category 1" href="/category-1" />
+      <CategoryCard {...args} title="Category 2" href="/category-2" />
     </div>
   ),
 }

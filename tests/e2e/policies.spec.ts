@@ -213,8 +213,8 @@ test.describe('the catalogue is untouched by this feature', () => {
   // The `/legal/` prefix exists so that policies never share a route segment with the shop
   // (009/research.md R1). This is that claim, asserted rather than assumed.
   test('category listings and the root 404 behave exactly as before', async ({ page }) => {
-    expect((await page.request.get('/rings')).status()).toBe(200)
-    expect((await page.request.get('/rings?colour=black')).status()).toBe(200)
+    expect((await page.request.get('/category-1')).status()).toBe(200)
+    expect((await page.request.get('/category-1?colour=black')).status()).toBe(200)
     expect((await page.request.get('/not-a-real-page')).status()).toBe(404)
 
     // The bare addresses the footer used to publish were never served and still are not. Nothing is

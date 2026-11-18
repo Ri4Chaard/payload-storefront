@@ -15,8 +15,8 @@ import { fontVariables } from '@/styles/fonts'
  * The brand typefaces reach stories the same way they reach the app.
  *
  * next/font exposes each family as a CSS variable set via className, and the app applies it to
- * `<html>`. Storybook has no such element, so without this decorator `--font-playfair` and
- * `--font-manrope` are undefined, every `font-family` referencing them becomes invalid, and the
+ * `<html>`. Storybook has no such element, so without this decorator `--font-display-face` and
+ * `--font-body-face` are undefined, every `font-family` referencing them becomes invalid, and the
  * type specimen silently renders in the browser default — a design system page showing the wrong
  * typeface, authoritatively.
  */
@@ -59,9 +59,9 @@ const preview: Preview = {
     nextjs: { appDirectory: true },
     backgrounds: {
       options: {
-        page: { name: 'Page', value: '#f8f7f6' },
+        page: { name: 'Page', value: '#f8f9fa' },
         container: { name: 'Container', value: '#ffffff' },
-        base: { name: 'Base (dark)', value: '#130000' },
+        base: { name: 'Base (dark)', value: '#0b111a' },
       },
     },
     // Viewports match the project breakpoints so a story cannot be checked at a width the design

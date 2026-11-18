@@ -10,8 +10,8 @@ const meta = {
   args: {
     items: [
       { label: 'Home', href: '/' },
-      { label: 'Rings', href: '/rings' },
-      { label: 'Engagement', href: '/rings/engagement' },
+      { label: 'Category 1', href: '/category-1' },
+      { label: 'Engagement', href: '/category-1/engagement' },
       { label: 'Solitaire in 18ct gold' },
     ],
   },
@@ -24,7 +24,7 @@ export const Default: Story = {}
 
 /** The shortest useful trail. A single crumb is the current page and renders no separators. */
 export const TwoLevels: Story = {
-  args: { items: [{ label: 'Home', href: '/' }, { label: 'Rings' }] },
+  args: { items: [{ label: 'Home', href: '/' }, { label: 'Category 1' }] },
 }
 
 /** Long trails wrap rather than forcing the page to scroll sideways (SC-007). */
@@ -33,7 +33,7 @@ export const Wrapping: Story = {
     items: [
       { label: 'Home', href: '/' },
       { label: 'Fine jewelry', href: '/jewelry' },
-      { label: 'Engagement rings', href: '/rings/engagement' },
+      { label: 'Engagement rings', href: '/category-1/engagement' },
       { label: 'Ceylon sapphire solitaire in eighteen-carat gold' },
     ],
   },

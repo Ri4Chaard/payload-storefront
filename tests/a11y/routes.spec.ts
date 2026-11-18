@@ -17,7 +17,7 @@ const ROUTES = [
   '/',
   // A category listing and the whole shop: the same frame, but only one of them pages, and
   // pagination is a set of controls nothing else on the site has (003/T257).
-  '/rings',
+  '/category-1',
   '/all-jewelry?page=2',
   // The empty state and the branded 404 are both pages a visitor reaches by accident, which is
   // exactly when they can least afford to be unusable.

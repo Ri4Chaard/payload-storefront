@@ -9,8 +9,8 @@ import { Header } from './header'
  */
 const BREADCRUMBS = [
   { label: 'Home', href: '/' },
-  { label: 'Rings', href: '/rings' },
-  { label: 'Engagement', href: '/rings/engagement' },
+  { label: 'Category 1', href: '/category-1' },
+  { label: 'Engagement', href: '/category-1/engagement' },
   { label: 'Solitaire in 18ct gold' },
 ]
 

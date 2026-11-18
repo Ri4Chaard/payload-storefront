@@ -63,9 +63,9 @@ describe('revalidation hooks', () => {
     await change({
       collection: { slug: 'categories' },
       doc: { slug: 'bands' },
-      previousDoc: { slug: 'rings' },
+      previousDoc: { slug: 'category-1' },
     })
-    expect(revalidatePath).not.toHaveBeenCalledWith('/products/rings')
+    expect(revalidatePath).not.toHaveBeenCalledWith('/products/category-1')
   })
 
   it('invalidates a deleted piece, which the catalogue query can no longer name', async () => {

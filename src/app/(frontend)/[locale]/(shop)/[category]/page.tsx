@@ -8,7 +8,7 @@ import { getCategories, getShopContent } from '@/lib/catalog/queries'
 import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
 
 /**
- * A category listing — `/rings`, `/bracelets`, `/earrings`, `/necklaces` (003/T253). Node
+ * A category listing — `/category-1`, `/category-2`, `/category-3`, `/category-4` (003/T253). Node
  * `222:706`.
  *
  * **The segment is validated against the catalogue, not against a list in this file.** A category

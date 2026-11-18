@@ -48,7 +48,7 @@ import { cn } from '@/lib/cn'
  * and nothing else. The design draws no rule under it either.
  *
  * The title is clamped to one line, as drawn. That is a real loss on a name like "Fancy Vivid Pink
- * Heart Lab Grown Diamond Earrings – Rare Shades Collection, 18k Rose Gold, IGI Certified", and it
+ * Heart Lab Grown Category 3 – Rare Shades Collection, 18k Rose Gold, IGI Certified", and it
  * is why the full name stays in the anchor's accessible name rather than being truncated there too.
  */
 export interface ProductCardProps extends Omit<React.ComponentProps<'article'>, 'title'> {

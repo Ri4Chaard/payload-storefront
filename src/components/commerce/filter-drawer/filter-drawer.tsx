@@ -44,7 +44,7 @@ import './filter-drawer.css'
  * scripting rather than a second implementation. Two consequences are worth naming:
  *
  * - The form posts to `/all-jewelry`, because a `<form method="GET">` cannot choose its own path
- *   from what is ticked inside it. `canonicalListing` turns `?category=rings` back into `/rings` on
+ *   from what is ticked inside it. `canonicalListing` turns `?category=category-1` back into `/category-1` on
  *   arrival, so both paths end at the same address.
  * - The MIN and MAX boxes carry no `name`. They are a second view of the slider, which submits the
  *   real integers; without scripting they show the range and the slider is what changes it.
@@ -269,7 +269,7 @@ export function FilterDrawer({
  * One drawn group — a heading, a hairline beneath the one before it, and a column of controls.
  *
  * A `<fieldset>` rather than a `<div>` with a heading: these are groups of controls, and the group
- * name is what a screen reader repeats for each box inside it. "Rings" alone in a panel with four
+ * name is what a screen reader repeats for each box inside it. "Category 1" alone in a panel with four
  * such lists is not an answer to "rings of what".
  */
 function Group({

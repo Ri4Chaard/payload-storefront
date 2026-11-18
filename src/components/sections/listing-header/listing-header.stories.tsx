@@ -8,8 +8,8 @@ const meta = {
   component: ListingHeader,
   parameters: { layout: 'fullscreen' },
   args: {
-    title: 'Diamond Rings',
-    subtitle: 'Timeless brilliance, made for every moment',
+    title: 'Category 1',
+    subtitle: 'A short description of this category',
   },
 } satisfies Meta<typeof ListingHeader>
 

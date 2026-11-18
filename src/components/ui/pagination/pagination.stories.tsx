@@ -15,7 +15,7 @@ const meta = {
   args: {
     page: 1,
     totalPages: 5,
-    hrefFor: (page: number) => (page === 1 ? '/rings' : `/rings?page=${page}`),
+    hrefFor: (page: number) => (page === 1 ? '/category-1' : `/category-1?page=${page}`),
   },
 } satisfies Meta<typeof Pagination>
 

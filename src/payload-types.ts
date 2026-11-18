@@ -947,7 +947,7 @@ export interface Address {
 export interface Category {
   id: number;
   /**
-   * The heading on the category listing, e.g. "Diamond Rings".
+   * The heading on the category listing, e.g. "Category 1".
    */
   title: string;
   /**

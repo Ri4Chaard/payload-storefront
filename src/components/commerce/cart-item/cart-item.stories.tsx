@@ -41,7 +41,7 @@ export const Default: Story = {}
 /** A name long enough to prove it truncates instead of shoving the stepper off the row. */
 export const LongName: Story = {
   args: {
-    name: 'Fancy Vivid Pink Heart Lab Grown Diamond Earrings – Rare Shades Collection, 18k Rose Gold, IGI Certified',
+    name: 'Fancy Vivid Pink Heart Lab Grown Category 3 – Rare Shades Collection, 18k Rose Gold, IGI Certified',
     image: { src: earrings.src },
   },
 }

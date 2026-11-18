@@ -71,20 +71,19 @@ export const colors: ColorToken[] = [
   { name: 'neutral-primary', value: raw['neutral-primary'], provenance: 'figma' },
   {
     name: 'neutral-secondary',
-    // NOT raw['neutral-secondary'] — the export says #a7a5a3, which fails WCAG AA at 2.29:1 on the
-    // page background. The live Figma file says #343231, which passes at 11.92:1.
-    value: '#343231',
+    // Body-copy grey. NOT raw['neutral-secondary'], which is the light placeholder grey and fails
+    // WCAG AA on the page background.
+    value: '#3d4350',
     provenance: 'figma',
-    reason: 'Read from Figma. colors.json is stale and gives a near-inverse light grey (#a7a5a3).',
+    reason: 'colors.json carries the light placeholder grey under this name; body copy needs AA.',
   },
   {
     name: 'neutral-placeholder',
     // The light grey the design actually draws placeholder copy in (node 255:3167). It is the
     // value `colors.json` carries for neutral-secondary, kept here under its own name rather than
-    // reverting that token — everything else using neutral-secondary depends on the corrected
-    // #343231, and a placeholder is the one place the owner has asked for the drawn grey.
+    // reverting that token — everything else using neutral-secondary depends on the darker value, and a placeholder is the one place the owner has asked for the drawn grey.
     //
-    // It is 2.29:1 on the page ground, which fails AA even at the 3:1 large-text threshold. Listed
+    // It fails AA on the page ground, even at the 3:1 large-text threshold. Listed
     // in acceptedExceptions below.
     value: raw['neutral-secondary'],
     provenance: 'supplied',
@@ -189,14 +188,13 @@ export const borderGuidance = {
  * metric-adjusted fallbacks automatically — satisfying FR-014 (readable during load, no layout
  * shift on swap) more reliably than hand-tuned size-adjust values.
  *
- * `--font-display` is a PLACEHOLDER. The design specifies "TT Ramillas Trl" — a TRIAL licence that
- * prohibits commercial use. Playfair Display stands in until the licence is purchased. Swapping is
- * one loader call in src/app/(frontend)/layout.tsx; no component names a family directly.
+ * The faces themselves are loaded in src/styles/fonts.ts (Cormorant Garamond for display, Inter for
+ * body). Swapping is one loader call there; no component names a family directly.
  */
 /**
  * The fallback INSIDE each var() is load-bearing, not belt-and-braces.
  *
- * next/font defines --font-playfair / --font-manrope on the element it is applied to. Anywhere that
+ * next/font defines --font-display-face / --font-body-face on the element it is applied to. Anywhere that
  * element does not exist — Storybook before its decorator runs, an email template, a test harness —
  * an undefined variable makes the whole font-family declaration invalid at computed-value time, so
  * it INHERITS rather than falling through to Georgia. The result is a type specimen rendering in
@@ -204,8 +202,8 @@ export const borderGuidance = {
  * valid no matter where it lands.
  */
 export const fontFamilies = {
-  display: "var(--font-playfair, 'Playfair Display'), Georgia, serif",
-  body: "var(--font-manrope, 'Manrope'), system-ui, -apple-system, sans-serif",
+  display: "var(--font-display-face, 'Cormorant Garamond'), Georgia, serif",
+  body: "var(--font-body-face, 'Inter'), system-ui, -apple-system, sans-serif",
 } as const
 
 const exported = Object.fromEntries(

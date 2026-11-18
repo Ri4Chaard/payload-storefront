@@ -35,7 +35,7 @@ export const WithActiveFilters: Story = {
   render: (args) => (
     <EmptyState {...args}>
       <ul className="flex flex-wrap justify-center gap-2.5">
-        {['Diamond Rings', 'Green', 'Under $2,000'].map((filter) => (
+        {['Category 1', 'Green', 'Under $2,000'].map((filter) => (
           <li key={filter}>
             <Chip>{filter}</Chip>
           </li>

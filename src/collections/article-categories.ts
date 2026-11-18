@@ -9,9 +9,9 @@ import { isAdmin } from '@/lib/access'
  *
  * **Not the shop's `categories`, and the distinction is load-bearing.** That collection answers
  * *what is this piece* — rings, bracelets, earrings, necklaces — and each of its rows drives three
- * things that have nothing to do with writing: a `/rings` route, the eyebrow above a product, and
+ * things that have nothing to do with writing: a `/category-1` route, the eyebrow above a product, and
  * the CATEGORY group in the filter drawer. Adding `Guides` there would give it a product listing at
- * `/guides` and put it in the drawer beside "Bracelets". `src/collections/categories.ts` already
+ * `/guides` and put it in the drawer beside "Category 2". `src/collections/categories.ts` already
  * records the same reasoning from the other direction, in its note about why "All jewelry" is not a
  * row.
  *

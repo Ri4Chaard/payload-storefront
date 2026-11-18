@@ -43,7 +43,7 @@ export default async function AllJewelryPage({
   const query = await searchParams
 
   /**
-   * `?category=rings&minPrice=…&maxPrice=…` is `/rings` (003/T274).
+   * `?category=category-1&minPrice=…&maxPrice=…` is `/category-1` (003/T274).
    *
    * The drawer is a `<form method="GET">`, and a form cannot choose its own path from what is
    * ticked inside it — so without scripting it always posts here, with the category as a parameter

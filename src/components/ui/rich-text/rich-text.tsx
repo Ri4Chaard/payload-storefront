@@ -51,7 +51,7 @@ const PROSE = cn(
     the admin's structure vanished on the way to the page.
 
     **Bold and darker, not bigger**, which is what the design specifies: node `422:10504` sets the
-    section heading to `H3/Bold` — Manrope 700 at 16px — in `neutral/primary`, against a body of
+    section heading to `H3/Bold` — body face 700 at 16px — in `neutral/primary`, against a body of
     `H3/Medium` 500 in `neutral/secondary`. The contrast between them is weight and colour at one
     size, not a step up the scale.
 

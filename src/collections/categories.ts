@@ -8,7 +8,7 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 /**
  * What a piece is: rings, bracelets, earrings, necklaces. Exactly one per product.
  *
- * Drives three things at once — the `/rings` route, the eyebrow above a product's name, and the
+ * Drives three things at once — the `/category-1` route, the eyebrow above a product's name, and the
  * CATEGORY group in the filter drawer.
  *
  * **"All jewelry" is not a row here.** The drawer draws it as a fifth checkbox, but it means "no
@@ -40,7 +40,7 @@ export const Categories: CollectionConfig = {
       localized: true,
       required: true,
       label: 'Title',
-      admin: { description: 'The heading on the category listing, e.g. "Diamond Rings".' },
+      admin: { description: 'The heading on the category listing, e.g. "Category 1".' },
     },
     slugField(),
     {

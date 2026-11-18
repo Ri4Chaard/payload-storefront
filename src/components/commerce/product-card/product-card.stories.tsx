@@ -11,7 +11,7 @@ import { ProductCard } from './product-card'
  * the CTA. Variant3 is the compact size.
  */
 const NAME =
-  'Fancy Vivid Pink Heart Lab Grown Diamond Earrings – Rare Shades Collection, 18k Rose Gold, IGI Certified'
+  'Fancy Vivid Pink Heart Lab Grown Category 3 – Rare Shades Collection, 18k Rose Gold, IGI Certified'
 
 const IMAGES = [{ src: earrings.src }, { src: pendant.src }]
 

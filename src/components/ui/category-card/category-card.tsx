@@ -23,7 +23,7 @@ import { cn } from '@/lib/cn'
  *
  * **The call to action is where the drawing and the typeface disagree.** Below `md` it spans the
  * tile, as drawn — but the drawn 14px does not fit. At 174px wide with a 16px inset there are 142px
- * to work with, and "VIEW COLLECTION" sets to 140px at 14px in Manrope, before any padding at all.
+ * to work with, and "VIEW COLLECTION" sets to 140px at 14px in the body face, before any padding at all.
  * The design renders about 127px for the same string, so it fits there with roughly 7px a side.
  *
  * Rendered at the drawn size the label simply leaves the card, because `Button` is
@@ -71,7 +71,7 @@ export interface CategoryCardProps extends Omit<React.ComponentProps<'a'>, 'href
   /**
    * The photograph. `alt` defaults to empty and should usually stay that way: the card is one link,
    * and anything in `alt` lands in front of the title in the link's accessible name — "A ring on
-   * dark velvet, Rings, view the collection" for a tile whose meaning is "Rings". Inside a link
+   * dark velvet, Rings, view the collection" for a tile whose meaning is "Category 1". Inside a link
    * that carries its own text, the picture is decoration. Fill it in only when the photograph
    * carries something the title does not.
    */

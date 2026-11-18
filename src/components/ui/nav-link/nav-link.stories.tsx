@@ -7,7 +7,7 @@ const meta = {
   title: 'UI/NavLink',
   component: NavLink,
   parameters: { layout: 'padded' },
-  args: { href: '/rings', children: 'Rings' },
+  args: { href: '/category-1', children: 'Category 1' },
 } satisfies Meta<typeof NavLink>
 
 export default meta
@@ -22,15 +22,15 @@ export const InANavigation: Story = {
     <nav aria-label="Primary">
       <ul className="flex items-center gap-6">
         <li>
-          <NavLink href="/rings" current>
+          <NavLink href="/category-1" current>
             Rings
           </NavLink>
         </li>
         <li>
-          <NavLink href="/necklaces">Necklaces</NavLink>
+          <NavLink href="/category-4">Necklaces</NavLink>
         </li>
         <li>
-          <NavLink href="/earrings">Earrings</NavLink>
+          <NavLink href="/category-3">Earrings</NavLink>
         </li>
         <li>
           <NavLink href="/about">About</NavLink>

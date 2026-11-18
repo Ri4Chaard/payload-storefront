@@ -50,7 +50,7 @@ const meta = {
   title: 'Commerce/ProductGrid',
   component: ProductGrid,
   parameters: { layout: 'fullscreen' },
-  args: { products: PRODUCTS, label: 'Diamond Rings' },
+  args: { products: PRODUCTS, label: 'Category 1' },
 } satisfies Meta<typeof ProductGrid>
 
 export default meta

@@ -39,7 +39,7 @@ beforeAll(async () => {
   payload = await getPayload({ config })
 
   const [categories, media] = await Promise.all([
-    payload.find({ collection: 'categories', limit: 1, where: { slug: { equals: 'rings' } } }),
+    payload.find({ collection: 'categories', limit: 1, where: { slug: { equals: 'category-1' } } }),
     payload.find({ collection: 'media', limit: 2 }),
   ])
 

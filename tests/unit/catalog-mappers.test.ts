@@ -88,8 +88,8 @@ describe('availability is decided once', () => {
 
 describe('relationship unions are narrowed, loudly', () => {
   it('reads the populated branch', () => {
-    expect(toProductDetail(RING, 'en').categoryName).toBe('Diamond Rings')
-    expect(toProductDetail(RING, 'en').categorySlug).toBe('rings')
+    expect(toProductDetail(RING, 'en').categoryName).toBe('Category 1')
+    expect(toProductDetail(RING, 'en').categorySlug).toBe('category-1')
   })
 
   it('throws rather than rendering a blank when the query asked for too little depth', () => {
@@ -174,10 +174,10 @@ describe('categories', () => {
     const summary = toCategorySummary(first(categoryFixtures, 'category'))
     expect(summary).toEqual({
       id: 1,
-      slug: 'rings',
-      title: 'Diamond Rings',
-      subtitle: 'Timeless brilliance, made for every moment',
-      href: '/rings',
+      slug: 'category-1',
+      title: 'Category 1',
+      subtitle: 'A short description of this category',
+      href: '/category-1',
       // The home page's tile. `null` here because the fixtures set none, which is the state the
       // band has to survive: an unphotographed category is left out rather than drawn as a hole.
       image: null,
@@ -191,8 +191,8 @@ describe('categories', () => {
       ...category,
       image: {
         id: 99,
-        alt: 'A hand wearing a diamond ring',
-        url: '/api/media/file/category-rings.webp',
+        alt: 'Category 1 image',
+        url: '/api/media/file/category-1.webp',
         width: 960,
         height: 1040,
         updatedAt: category.updatedAt,
@@ -201,10 +201,10 @@ describe('categories', () => {
     })
 
     expect(summary.image).toEqual({
-      src: '/api/media/file/category-rings.webp',
+      src: '/api/media/file/category-1.webp',
       width: 960,
       height: 1040,
-      alt: 'A hand wearing a diamond ring',
+      alt: 'Category 1 image',
     })
   })
 })

@@ -22,21 +22,21 @@ export type Pair = { ru: string; uk: string }
 export type Translated<T extends string> = Record<string, Record<'ru' | 'uk', Record<T, string>>>
 
 export const CATEGORIES: Translated<'subtitle' | 'title'> = {
-  rings: {
-    ru: { title: 'Кольца с бриллиантами', subtitle: 'Вечное сияние для любого момента' },
-    uk: { title: 'Каблучки з діамантами', subtitle: 'Вічне сяйво для будь-якої миті' },
+  'category-1': {
+    ru: { title: 'Категория 1', subtitle: 'Краткое описание категории' },
+    uk: { title: 'Категорія 1', subtitle: 'Короткий опис категорії' },
   },
-  bracelets: {
-    ru: { title: 'Браслеты с бриллиантами', subtitle: 'Вечное сияние для любого момента' },
-    uk: { title: 'Браслети з діамантами', subtitle: 'Вічне сяйво для будь-якої миті' },
+  'category-2': {
+    ru: { title: 'Категория 2', subtitle: 'Краткое описание категории' },
+    uk: { title: 'Категорія 2', subtitle: 'Короткий опис категорії' },
   },
-  earrings: {
-    ru: { title: 'Серьги с бриллиантами', subtitle: 'Вечное сияние для любого момента' },
-    uk: { title: 'Сережки з діамантами', subtitle: 'Вічне сяйво для будь-якої миті' },
+  'category-3': {
+    ru: { title: 'Категория 3', subtitle: 'Краткое описание категории' },
+    uk: { title: 'Категорія 3', subtitle: 'Короткий опис категорії' },
   },
-  necklaces: {
-    ru: { title: 'Колье с бриллиантами', subtitle: 'Вечное сияние для любого момента' },
-    uk: { title: 'Намиста з діамантами', subtitle: 'Вічне сяйво для будь-якої миті' },
+  'category-4': {
+    ru: { title: 'Категория 4', subtitle: 'Краткое описание категории' },
+    uk: { title: 'Категорія 4', subtitle: 'Короткий опис категорії' },
   },
 }
 
@@ -219,7 +219,7 @@ const MADE_TO_ORDER: Record<string, Pair> = {
     uk: 'Намисто з планкою з багетів',
   },
   'emerald-station-necklace': {
-    ru: 'Колье с бриллиантами изумрудной огранки',
+    ru: 'Категория 4 изумрудной огранки',
     uk: 'Намисто з діамантами смарагдової огранки',
   },
   'layered-chain-necklace': {
@@ -365,16 +365,16 @@ export const MEDIA: Record<string, Pair> = {
     ru: 'Кольцо в наборе с другими, рука на джинсовой ткани',
     uk: 'Каблучка в наборі з іншими, рука на джинсовій тканині',
   },
-  'category-rings.webp': {
+  'category-1.webp': {
     ru: 'Рука с бриллиантовым кольцом',
     uk: 'Рука з діамантовою каблучкою',
   },
-  'category-bracelets.webp': {
+  'category-2.webp': {
     ru: 'Бриллиантовый браслет на запястье',
     uk: 'Діамантовий браслет на зап’ясті',
   },
-  'category-earrings.webp': { ru: 'Бриллиантовые серьги', uk: 'Діамантові сережки' },
-  'category-necklaces.webp': { ru: 'Бриллиантовое колье', uk: 'Діамантове намисто' },
+  'category-3.webp': { ru: 'Бриллиантовые серьги', uk: 'Діамантові сережки' },
+  'category-4.webp': { ru: 'Бриллиантовое колье', uk: 'Діамантове намисто' },
   'story-opening-plate.webp': {
     ru: 'Кольцо-солитер на красном шёлке',
     uk: 'Каблучка-солітер на червоному шовку',

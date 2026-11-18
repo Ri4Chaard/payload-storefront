@@ -14,9 +14,9 @@ const meta = {
   parameters: { layout: 'padded' },
   args: {
     filters: [
-      { id: 'category:rings', label: 'Rings', href: '/all-jewelry' },
-      { id: 'maxPrice:730000', label: 'Up to $7,300', href: '/rings' },
-      { id: 'sort:price-asc', label: 'Price Ascending', href: '/rings' },
+      { id: 'category:category-1', label: 'Category 1', href: '/all-jewelry' },
+      { id: 'maxPrice:730000', label: 'Up to $7,300', href: '/category-1' },
+      { id: 'sort:price-asc', label: 'Price Ascending', href: '/category-1' },
     ],
   },
 } satisfies Meta<typeof ActiveFilters>
@@ -39,8 +39,8 @@ export const Single: Story = {
 export const Wrapping: Story = {
   args: {
     filters: [
-      'Rings',
-      'Necklaces',
+      'Category 1',
+      'Category 4',
       'Deia',
       'Molten',
       'Emerald',

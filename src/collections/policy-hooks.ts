@@ -17,11 +17,11 @@ import { ValidationError } from 'payload'
  *
  * **There is no category check and no reserved-route list here**, and their absence is a
  * consequence of the `/legal/` prefix rather than an oversight (009/research.md R2). An earlier
- * design served policies at bare root addresses, where a policy slugged `rings` would have been
+ * design served policies at bare root addresses, where a policy slugged `category-1` would have been
  * permanently shadowed by the catalogue and one slugged `about` would have shadowed a real page —
  * so it needed both checks plus a hardcoded list of every top-level route on the site. That list
  * would have rotted the first time somebody shipped a page and forgot to add it. Under the prefix
- * this collection owns its namespace outright: `/legal/rings` collides with nothing.
+ * this collection owns its namespace outright: `/legal/category-1` collides with nothing.
  */
 export const rejectDuplicateSlug: CollectionBeforeValidateHook = async ({
   data,

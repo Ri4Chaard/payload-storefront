@@ -18,7 +18,7 @@ import { rejectDuplicateSlug } from './policy-hooks'
  *
  * **Served under `/legal/`, and the prefix is load-bearing** (009/research.md R1). Next permits one
  * dynamic segment per path position and the site's root one belongs to `(shop)/[category]` —
- * `/rings`, `/bracelets`, and the 404 for every unrecognised single segment. Putting policies at
+ * `/category-1`, `/category-2`, and the 404 for every unrecognised single segment. Putting policies at
  * bare root addresses would have meant replacing that route with a resolver trying category first
  * and policy second, re-routing the catalogue as a side effect of shipping legal pages. A prefix
  * costs four `href`s in the footer and removes all of it. Nothing under `src/app/(frontend)/(shop)/`

@@ -12,10 +12,10 @@ const option = (value: string, label: string, count = 3) => ({ value, label, cou
 
 export const storyFacets: FilterFacets = {
   categories: [
-    option('rings', 'Rings', 8),
-    option('bracelets', 'Bracelets', 6),
-    option('earrings', 'Earrings', 7),
-    option('necklaces', 'Necklaces', 8),
+    option('category-1', 'Category 1', 8),
+    option('category-2', 'Category 2', 6),
+    option('category-3', 'Category 3', 7),
+    option('category-4', 'Category 4', 8),
   ],
   collections: [
     option('deia', 'Deia'),

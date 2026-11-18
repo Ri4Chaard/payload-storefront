@@ -19,7 +19,7 @@ import type { FilterState } from '@/lib/catalog/types'
  * URL, and they only do if writing and reading are exact inverses.
  */
 const FULL: FilterState = {
-  category: ['rings', 'earrings'],
+  category: ['category-1', 'category-3'],
   collection: ['molten'],
   colour: ['black', 'clear'],
   shape: ['pear', 'round'],
@@ -61,10 +61,10 @@ describe('defaults are absent from the URL', () => {
   })
 
   it('orders keys the same way whatever order the state was assembled in', () => {
-    const a = toQueryString({ ...DEFAULT_FILTERS, colour: ['black'], category: ['rings'] })
-    const b = toQueryString({ ...DEFAULT_FILTERS, category: ['rings'], colour: ['black'] })
+    const a = toQueryString({ ...DEFAULT_FILTERS, colour: ['black'], category: ['category-1'] })
+    const b = toQueryString({ ...DEFAULT_FILTERS, category: ['category-1'], colour: ['black'] })
     expect(a).toBe(b)
-    expect(a).toBe('?category=rings&colour=black')
+    expect(a).toBe('?category=category-1&colour=black')
   })
 })
 
@@ -114,8 +114,8 @@ describe('unknown values are dropped and reported', () => {
   })
 
   it('ignores keys that are not filters at all, silently', () => {
-    const { filters, dropped } = parseFilters({ utm_source: 'newsletter', category: ['rings'] })
-    expect(filters.category).toEqual(['rings'])
+    const { filters, dropped } = parseFilters({ utm_source: 'newsletter', category: ['category-1'] })
+    expect(filters.category).toEqual(['category-1'])
     expect(dropped).toEqual([])
   })
 
@@ -132,7 +132,7 @@ describe('unknown values are dropped and reported', () => {
 
 describe('removeFilter', () => {
   it('strips one value from a group and leaves the rest', () => {
-    expect(removeFilter(FULL, 'category', 'rings').category).toEqual(['earrings'])
+    expect(removeFilter(FULL, 'category', 'category-1').category).toEqual(['category-3'])
   })
 
   it('returns to page one, so widening a search cannot land on an empty page', () => {
@@ -146,7 +146,7 @@ describe('removeFilter', () => {
 
   it('does not mutate the state it was given', () => {
     const before = structuredClone(FULL)
-    removeFilter(FULL, 'category', 'rings')
+    removeFilter(FULL, 'category', 'category-1')
     expect(FULL).toEqual(before)
   })
 })
@@ -172,9 +172,9 @@ describe('toggleFilter', () => {
   })
 
   it('leaves every other group alone', () => {
-    const filters = { ...DEFAULT_FILTERS, category: ['rings'], colour: ['black' as const] }
+    const filters = { ...DEFAULT_FILTERS, category: ['category-1'], colour: ['black' as const] }
     expect(toggleFilter(filters, 'shape', 'oval')).toMatchObject({
-      category: ['rings'],
+      category: ['category-1'],
       colour: ['black'],
       shape: ['oval'],
     })

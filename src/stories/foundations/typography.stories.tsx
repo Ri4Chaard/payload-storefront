@@ -8,8 +8,7 @@ import { typeScale } from '@tokens/mapping'
  *
  * Two things this page is deliberately explicit about:
  *
- * 1. The display face is Playfair Display, a PLACEHOLDER. The design specifies TT Ramillas, whose
- *    supplied file is a trial licence that cannot ship.
+ * 1. The faces are Cormorant Garamond (display) and Inter (body), loaded in src/styles/fonts.ts.
  * 2. The export's names described Figma layers, not typographic roles — `h3-medium` was 16px body
  *    text. Every remapped style shows what it was called before, so a designer reading this page
  *    can find the style they know.
@@ -57,11 +56,6 @@ function Scale() {
         All text uses a named style. Arbitrary font sizes fail lint. Display sizes are fluid — they
         interpolate between the mobile and desktop values with <code>clamp()</code>, so no component
         needs a breakpoint override. Resize this panel to watch them move.
-      </p>
-      <p className="text-body-small mb-8 max-w-prose rounded-md bg-status-error-transparent p-4">
-        <strong>The display face is a placeholder.</strong> The design specifies TT Ramillas, and the
-        supplied file is a trial licence that prohibits commercial use. Playfair Display stands in
-        until the licence is purchased — swapping it is one loader call.
       </p>
       {typeScale.map((token) => (
         <Row key={token.name} token={token} />

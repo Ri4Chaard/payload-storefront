@@ -213,7 +213,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
         >
           <div className="flex flex-col gap-5 p-5 md:p-7.5">
             {/*
-              `text-display` is the design's H1 — 36px TT Ramillas at desktop, fluid down to 24px on
+              `text-display` is the design's H1 — 36px display face at desktop, fluid down to 24px on
               a phone. An `h2` element carrying it, because the page it covers already owns the `h1`:
               the size is the design's, the level is the document's.
             */}

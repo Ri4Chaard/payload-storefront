@@ -21,7 +21,7 @@ import { getPolicyBySlug } from '@/lib/policies/queries'
  *
  * **Under a prefix, and the prefix is the whole routing decision** (009/research.md R1). Next
  * permits one dynamic segment per path position, and the site's root one belongs to
- * `(shop)/[category]` — which matches `/rings` and answers the 404 for every unrecognised single
+ * `(shop)/[category]` — which matches `/category-1` and answers the 404 for every unrecognised single
  * segment. Serving policies at bare root addresses would have meant replacing that route with a
  * resolver trying category first and policy second, re-routing the catalogue as a side effect of
  * shipping legal pages. The prefix costs four `href`s in the footer and nothing else; nothing under

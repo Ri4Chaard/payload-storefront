@@ -34,9 +34,9 @@ import type { DroppedFilter, FilterState } from '@/lib/catalog/types'
  * component beneath receives view models as props. That is the rule from 002 and the mechanism
  * behind SC-010 — spec 004 rewrites `queries.ts` and this file does not change.
  *
- * **The route's category is not a query parameter.** `/rings` seeds `category: ['rings']` from the
- * segment, so the address stays `/rings?colour=black` rather than growing a redundant
- * `?category=rings`. Every URL written from here — the chips, the pagination, everything the
+ * **The route's category is not a query parameter.** `/category-1` seeds `category: ['category-1']` from the
+ * segment, so the address stays `/category-1?colour=black` rather than growing a redundant
+ * `?category=category-1`. Every URL written from here — the chips, the pagination, everything the
  * toolbar commits — goes through `listingHref`, which is the one place that knows a single category
  * belongs in the path. Six callers assembling `basePath + toQueryString(...)` themselves is six
  * chances to write the category twice.
@@ -65,7 +65,7 @@ export async function Listing({
 
   const [categories, facets] = await Promise.all([
     getCategories(locale),
-    // Scoped to the category being looked at, so SIZE offers ring sizes on `/rings`. More than one
+    // Scoped to the category being looked at, so SIZE offers ring sizes on `/category-1`. More than one
     // category applied has no single scope, and the whole catalogue is the honest answer.
     getFilterFacets(locale, seeded.category.length === 1 ? seeded.category[0] : undefined),
   ])
@@ -88,7 +88,7 @@ export async function Listing({
    * Built here rather than in the component for the reason the whole data layer exists: knowing
    * which key to strip and whether the result is a path or a query is catalogue arithmetic, and
    * `ActiveFilters` is a drawing. `removeFilter` returns to page one, and `listingHref` decides
-   * that dropping the last category means `/all-jewelry` rather than `/rings` with nothing on it.
+   * that dropping the last category means `/all-jewelry` rather than `/category-1` with nothing on it.
    */
   const chips: RemovableFilter[] = result.appliedChips.map((chip) => ({
     id: `${chip.key}:${chip.value}`,
@@ -106,8 +106,8 @@ export async function Listing({
         categories={categories}
         clearHref={basePath}
         // Everything the visitor can remove, which is exactly what the chip row beneath draws. The
-        // route's own category counts: on `/rings` it is applied, it is dismissible, and a trigger
-        // reading "Filters" above a chip reading "Rings" would be two answers to one question.
+        // route's own category counts: on `/category-1` it is applied, it is dismissible, and a trigger
+        // reading "Filters" above a chip reading "Category 1" would be two answers to one question.
         appliedCount={chips.length}
       />
 

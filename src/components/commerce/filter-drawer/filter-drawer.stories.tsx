@@ -60,7 +60,7 @@ export const PreTicked: Story = {
   args: {
     filters: {
       ...storyFilters,
-      category: ['rings'],
+      category: ['category-1'],
       colour: ['clear'],
       shape: ['oval', 'emerald'],
       minPrice: 120_000,
