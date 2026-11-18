@@ -14,7 +14,7 @@ const meta = {
   parameters: { layout: 'padded' },
   args: {
     filters: [
-      { id: 'category:category-1', label: 'Category 1', href: '/all-jewelry' },
+      { id: 'category:category-1', label: 'Category 1', href: '/all-products' },
       { id: 'maxPrice:730000', label: 'Up to $7,300', href: '/category-1' },
       { id: 'sort:price-asc', label: 'Price Ascending', href: '/category-1' },
     ],
@@ -29,7 +29,7 @@ export const Default: Story = {}
 
 /** One filter. The row is the same component, and nothing about it is a list of three. */
 export const Single: Story = {
-  args: { filters: [{ id: 'colour:green', label: 'Green', href: '/all-jewelry' }] },
+  args: { filters: [{ id: 'colour:green', label: 'Green', href: '/all-products' }] },
 }
 
 /**

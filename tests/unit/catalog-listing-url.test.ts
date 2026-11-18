@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { DEFAULT_FILTERS } from '@/lib/catalog/filters'
-import { ALL_JEWELRY, canonicalListing, listingHref } from '@/lib/catalog/listing-url'
+import { ALL_PRODUCTS, canonicalListing, listingHref } from '@/lib/catalog/listing-url'
 import type { FilterState } from '@/lib/catalog/types'
 
 /**
@@ -25,13 +25,13 @@ describe('listingHref', () => {
   })
 
   it('is the whole shop when no category is applied', () => {
-    expect(listingHref(state(), CATEGORIES)).toBe(ALL_JEWELRY)
+    expect(listingHref(state(), CATEGORIES)).toBe(ALL_PRODUCTS)
   })
 
   /** There is no route for "rings and bracelets", and inventing one is a page per combination. */
   it('keeps two categories in the query, on the shop-wide route', () => {
     expect(listingHref(state({ category: ['category-1', 'category-2'] }), CATEGORIES)).toBe(
-      '/all-jewelry?category=category-1&category=category-2',
+      '/all-products?category=category-1&category=category-2',
     )
   })
 
@@ -39,7 +39,7 @@ describe('listingHref', () => {
    * and reported (FR-030). */
   it('leaves an unknown category in the query', () => {
     expect(listingHref(state({ category: ['rungs'] }), CATEGORIES)).toBe(
-      '/all-jewelry?category=rungs',
+      '/all-products?category=rungs',
     )
   })
 
@@ -72,7 +72,7 @@ describe('canonicalListing', () => {
   it('drops a price range the route settled away', () => {
     const requested = state({ colour: ['green'], minPrice: 120_000, maxPrice: 3_840_000 })
     const settled = state({ colour: ['green'] })
-    expect(canonicalListing(requested, settled, CATEGORIES, [])).toBe('/all-jewelry?colour=green')
+    expect(canonicalListing(requested, settled, CATEGORIES, [])).toBe('/all-products?colour=green')
   })
 
   /** And once there, it stops: the two states agree and there is nothing left to redirect to. */

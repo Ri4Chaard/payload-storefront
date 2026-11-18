@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * The listing routes (003/T257) — `/all-jewelry` and the four categories.
+ * The listing routes (003/T257) — `/all-products` and the four categories.
  *
- * The fixtures put 29 published pieces in the shop and page at twelve, so `/all-jewelry` is three
+ * The fixtures put 29 published pieces in the shop and page at twelve, so `/all-products` is three
  * pages and `/category-1` is one. Both cases matter: the first proves paging, the second proves the
  * control disappears rather than offering a single page.
  */
@@ -25,7 +25,7 @@ async function columnsOf(page: Page): Promise<number> {
 for (const [name, { width, height, columns }] of Object.entries(WIDTHS)) {
   test(`the grid is ${columns} columns at ${name} width`, async ({ page }) => {
     await page.setViewportSize({ width, height })
-    await page.goto('/all-jewelry')
+    await page.goto('/all-products')
 
     await expect(page.locator('main article').first()).toBeVisible()
     expect(await columnsOf(page), `wrong column count at ${width}px`).toBe(columns)
@@ -66,7 +66,7 @@ test('the categories partition the shop between them', async ({ page }) => {
   }
 
   // Everything, in one address, so the sum can be checked against a whole rather than a first set.
-  await page.goto('/all-jewelry?page=99')
+  await page.goto('/all-products?page=99')
   const everything = await page.locator('main article').count()
 
   expect(Object.values(counts).reduce((sum, count) => sum + count, 0)).toBe(everything)
@@ -81,7 +81,7 @@ test('the categories partition the shop between them', async ({ page }) => {
 test('every card offers its action at tablet and mobile widths', async ({ page }) => {
   for (const width of [768, 375]) {
     await page.setViewportSize({ width, height: 900 })
-    await page.goto('/all-jewelry')
+    await page.goto('/all-products')
 
     const cards = page.locator('main article')
     const actions = page.locator('main article a[aria-hidden="true"]')
@@ -95,7 +95,7 @@ test('every card offers its action at tablet and mobile widths', async ({ page }
 
 test('the desktop card keeps its action until the card is hovered', async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 900 })
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
 
   const card = page.locator('main article').first()
   const action = card.locator('a[aria-hidden="true"]')
@@ -139,7 +139,7 @@ const counter = (page: Page) => page.getByText(/^Showing \d+ of \d+/)
  * the whole reason it travels as `?page=` rather than as client state (FR-018).
  */
 test('LOAD MORE extends the grid, counts what is shown, and survives a reload', async ({ page }) => {
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
 
   const first = await cards(page).count()
   const firstCardHref = await cards(page).first().locator('a').first().getAttribute('href')
@@ -161,7 +161,7 @@ test('LOAD MORE extends the grid, counts what is shown, and survives a reload', 
 
 /** The last press exhausts the listing, and the control goes rather than sitting there inert. */
 test('LOAD MORE goes when there is nothing more to load', async ({ page }) => {
-  await page.goto('/all-jewelry?page=99')
+  await page.goto('/all-products?page=99')
 
   const total = await cards(page).count()
   await expect(counter(page)).toHaveText(`Showing ${total} of ${total} pieces`)
@@ -177,7 +177,7 @@ test('a listing shorter than one set offers no control at all', async ({ page })
 })
 
 test('a filter matching nothing renders the empty state, not an empty grid', async ({ page }) => {
-  await page.goto('/all-jewelry?maxPrice=1')
+  await page.goto('/all-products?maxPrice=1')
 
   await expect(page.locator('main article')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: /nothing matches/i })).toBeVisible()
@@ -187,7 +187,7 @@ test('a filter matching nothing renders the empty state, not an empty grid', asy
 test('a filter the shop does not have is reported rather than silently dropped', async ({
   page,
 }) => {
-  await page.goto('/all-jewelry?colour=purple')
+  await page.goto('/all-products?colour=purple')
 
   await expect(page.getByRole('status').filter({ hasText: /^Ignored/ })).toContainText(/purple/i)
   // Reported, and NOT applied — the grid is the unfiltered one.
@@ -198,7 +198,7 @@ test('the listing renders without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })
   const page = await context.newPage()
 
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
   await expect(page.locator('main article').first()).toBeVisible()
 
   // The control is a link to `?page=2`, so the server renders the longer grid and no scripting is
@@ -217,7 +217,7 @@ test('the listing renders without JavaScript', async ({ browser }) => {
 for (const width of [320, 390, 640]) {
   test(`nothing scrolls sideways at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 })
-    await page.goto('/all-jewelry')
+    await page.goto('/all-products')
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
@@ -364,7 +364,7 @@ test('removing the category chip widens to all jewelry', async ({ page }) => {
   await page.goto('/category-1?colour=green')
 
   await page.getByRole('link', { name: 'Remove Category 1 filter' }).click()
-  await expect(page).toHaveURL('/all-jewelry?colour=green')
+  await expect(page).toHaveURL('/all-products?colour=green')
 })
 
 test('CLEAR returns to the category it started from', async ({ page }) => {
@@ -413,7 +413,7 @@ test('below md the drawer covers the screen, traps focus, and Escape gives it ba
  * FR-029, and the reason the drawer is a `<form method="GET">` rather than a click handler.
  *
  * The panel is opened by the address bar — the trigger is a link to its own id and `:target` is
- * what shows it — and submitted by the browser. The form posts to `/all-jewelry` because a form
+ * what shows it — and submitted by the browser. The form posts to `/all-products` because a form
  * cannot choose its path; the canonical redirect puts the category back where it belongs, so this
  * visitor ends on exactly the address a scripted one would have.
  */
@@ -441,7 +441,7 @@ test('the drawer filters without JavaScript', async ({ browser }) => {
 })
 
 test('a category in the query is redirected onto its own path', async ({ page }) => {
-  await page.goto('/all-jewelry?category=category-1&colour=green')
+  await page.goto('/all-products?category=category-1&colour=green')
 
   await expect(page).toHaveURL('/category-1?colour=green')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/diamond rings/i)
@@ -463,7 +463,7 @@ test('a category in the query is redirected onto its own path', async ({ page })
  * is what the second assertion guards.
  */
 test('an unknown colour is still reported after the URL canonicalises', async ({ page }) => {
-  await page.goto('/all-jewelry?category=category-1&colour=puce')
+  await page.goto('/all-products?category=category-1&colour=puce')
 
   await expect(page).toHaveURL('/category-1?colour=puce')
   await expect(page.getByRole('status').filter({ hasText: /^Ignored/ })).toContainText(/puce/i)
@@ -492,14 +492,14 @@ test('the sort menu offers the drawn options and marks the current one', async (
 })
 
 test('choosing an ordering reorders the grid, records it, and returns focus', async ({ page }) => {
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
 
   const firstUnsorted = await page.locator('main article a').first().getAttribute('href')
 
   await sortTrigger(page).click()
   await page.getByRole('menuitem', { name: 'Price Descending' }).click()
 
-  await expect(page).toHaveURL('/all-jewelry?sort=price-desc')
+  await expect(page).toHaveURL('/all-products?sort=price-desc')
   await expect(sortTrigger(page)).toBeFocused()
   await expect(page.getByRole('menu')).toHaveCount(0)
 
@@ -555,7 +555,7 @@ test('the sort menu is driveable from the keyboard, and Escape changes nothing',
 test('the listing sets names in full and the home row keeps its one line', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
 
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
   const listed = page.locator('main article a').first()
   await expect(listed).toHaveCSS('font-size', '14px')
   await expect(listed).toHaveCSS('white-space', 'normal')
@@ -575,7 +575,7 @@ test('the listing sets names in full and the home row keeps its one line', async
 /** Names of different lengths, actions on one line. The row goes ragged without it. */
 test('every card in a row puts its action on the same line', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 1100 })
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
 
   const tops = await page
     .locator('main article a[aria-hidden="true"]')
@@ -682,7 +682,7 @@ for (const [name, width, size] of [
  */
 test('every photograph below the fold waits its turn', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
   await page.waitForLoadState('networkidle')
 
   const eager = await page.evaluate(() => {

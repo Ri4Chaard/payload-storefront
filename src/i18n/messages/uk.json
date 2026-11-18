@@ -42,7 +42,7 @@
     "primaryNavLabel": "Основна"
   },
   "nav": {
-    "allJewelry": "Усі прикраси",
+    "allProducts": "Усі прикраси",
     "category-1": "Категорія 1",
     "category-2": "Категорія 2",
     "category-3": "Категорія 3",
@@ -115,10 +115,8 @@
     "category": "КАТЕГОРІЯ:",
     "collection": "КОЛЕКЦІЯ:",
     "colour": "КОЛІР:",
-    "diamondShape": "ОГРАНКА:",
     "availability": "НАЯВНІСТЬ:",
     "price": "ЦІНА:",
-    "diamondShapeLabel": "Огранка діаманта",
     "resultCount": "{count, plural, one {# прикраса} few {# прикраси} many {# прикрас} other {# прикраси}}",
     "clear": "СКИНУТИ",
     "apply": "ЗАСТОСУВАТИ",
@@ -135,10 +133,10 @@
     "sortNewest": "Новинки",
     "nothingHereYet": "Тут поки що порожньо",
     "emptyCategoryBody": "У цій категорії поки немає опублікованих виробів. В інших — є.",
-    "seeAllJewelry": "Дивитися всі прикраси",
+    "seeAllProducts": "Дивитися всі прикраси",
     "noResultsBody": "Кожен виріб випускається невеликими партіями, тож вузький пошук може нічого не знайти. Зазвичай допомагає розширити його.",
     "clearAllFilters": "Скинути всі фільтри",
-    "featuredJewelry": "Обрані прикраси",
+    "featuredProducts": "Обрані прикраси",
     "showPrevious": "Показати попередні",
     "showMore": "Показати ще",
     "previousPage": "Попередня сторінка",
@@ -148,8 +146,8 @@
     "viewCollectionShort": "Дивитися колекцію"
   },
   "product": {
-    "chooseDiamond": "Оберіть діамант",
-    "chooseDiamondHeading": "Оберіть свій діамант:",
+    "chooseVariant": "Оберіть діамант",
+    "chooseVariantHeading": "Оберіть свій діамант:",
     "viewPiece": "Переглянути",
     "chooseQuantity": "Оберіть кількість.",
     "addToCart": "ДО КОШИКА",
@@ -160,7 +158,7 @@
     "madeToOrder": "Під замовлення",
     "outOfStock": "Немає в наявності",
     "unavailable": "Ця прикраса зараз недоступна для замовлення.",
-    "diamondUnavailable": "Цього діаманта більше немає. Оберіть інший.",
+    "variantUnavailable": "Цього діаманта більше немає. Оберіть інший.",
     "addFailed": "Не вдалося додати до кошика. Спробуйте ще раз.",
     "sendFailed": "Не вдалося надіслати. Спробуйте ще раз.",
     "previousPhoto": "Показати попередню фотографію",
@@ -179,7 +177,9 @@
     "moreFromCollection": "Ще з цієї колекції",
     "detailsTitleFallback": "ОПИС ВИРОБУ",
     "warrantyTitleFallback": "ГАРАНТІЯ 3 РОКИ + БЕЗКОШТОВНЕ ПОВЕРНЕННЯ",
-    "deliveryTitleFallback": "ДОСТАВКА"
+    "deliveryTitleFallback": "ДОСТАВКА",
+    "chooseVariantBeforeCart": "Оберіть варіант, перш ніж додати товар до кошика.",
+    "chooseVariantBeforeOrder": "Оберіть варіант перед оформленням замовлення."
   },
   "account": {
     "signIn": "Увійти",
@@ -325,15 +325,6 @@
     "onThisPage": "На цій сторінці:",
     "ourBlog": "Наш блог",
     "latestArticles": "Останні статті"
-  },
-  "diamondShape": {
-    "round": "Кругла",
-    "oval": "Овальна",
-    "emerald": "Смарагдова",
-    "pear": "Груша",
-    "marquise": "Маркіз",
-    "princess": "Принцеса",
-    "baguette": "Багет"
   },
   "meta": {
     "siteDescription": "Ювелірні прикраси, створені та дібрані з турботою.",

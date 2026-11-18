@@ -92,7 +92,7 @@ export const FromTheRight: Story = { args: { ...Default.args, side: 'right' } }
  * submission, so the browser builds the filtered URL without any script running.
  */
 export const AsAForm: Story = {
-  args: { ...Default.args, asForm: true, formProps: { method: 'get', action: '/all-jewelry' } },
+  args: { ...Default.args, asForm: true, formProps: { method: 'get', action: '/all-products' } },
 }
 
 /** Closed: `display: none`, so it is out of the tab order and the accessibility tree. */

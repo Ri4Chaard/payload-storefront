@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
 import { currentLocale } from '@/i18n/locale'
-import { AboutBand, CategoryBand, Hero, JewelryCarousel } from '@/components/sections'
+import { AboutBand, CategoryBand, Hero, ProductCarousel } from '@/components/sections'
 import { FeatureStrip } from '@/components/ui'
 import { getCategories, getFeatured } from '@/lib/catalog/queries'
 import { getHomeContent } from '@/lib/home/queries'
@@ -14,7 +14,7 @@ import { shopPromises } from '@/lib/shop-promises'
  *
  * **This file is the only thing on the route that reads content.** Every band below takes what it
  * renders as props — which is what let the featured row swap from fixtures to Payload (003/T290) by
- * changing one prop here, with `JewelryCarousel` untouched. A section that imported the mocks
+ * changing one prop here, with `ProductCarousel` untouched. A section that imported the mocks
  * itself would have made that a rewrite.
  *
  * **Every word on this page now comes from Payload** (spec 010). The hero, the two band headings
@@ -108,14 +108,14 @@ export default async function HomePage() {
       ) : null}
 
       {/*
-        Real pieces, with the band's copy still coming from the fixtures. `JewelryCarousel` takes
+        Real pieces, with the band's copy still coming from the fixtures. `ProductCarousel` takes
         the shape it always did, so nothing about the component changed — the swap is this prop.
 
         Absent rather than empty when the catalogue is: a heading and a "View all" over no pieces
         advertises a shop with nothing in it, which is worse than a page that is one band shorter.
       */}
       {content && pieces.length > 0 ? (
-        <JewelryCarousel
+        <ProductCarousel
           {...content.featured}
           items={pieces.map((piece) => ({
             name: piece.title,

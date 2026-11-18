@@ -67,7 +67,7 @@ sends nothing. The test runners set it themselves; do not set it anywhere expect
 | Route | What it is | Rendering |
 | --- | --- | --- |
 | `/` | Home. The category band and the featured row read the catalogue | Per request |
-| `/all-jewelry` | The whole shop, with filters, sort and LOAD MORE | Per request |
+| `/all-products` | The whole shop, with filters, sort and LOAD MORE | Per request |
 | `/<category>` | One category — `/rings`, `/bracelets`, … | Per request |
 | `/products/<slug>` | One piece: gallery, stones, sizes, the details accordions | Cached, and invalidated on publish |
 | `/admin` | Payload | Per request |

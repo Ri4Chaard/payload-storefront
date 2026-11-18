@@ -18,7 +18,7 @@ import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
  *
  * **This route sits at the root of the site**, so `/[category]` matches any single segment. That is
  * deliberate: every unrecognised one-segment address should 404, and this is where that happens.
- * `/all-jewelry` is a static sibling and Next resolves it first.
+ * `/all-products` is a static sibling and Next resolves it first.
  *
  * **It renders per request, and it has no `generateStaticParams`.** It carried one from T253 until
  * the deployment work, where it turned out to be doing nothing: the page reads `searchParams`, so

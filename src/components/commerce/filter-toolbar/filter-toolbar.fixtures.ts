@@ -29,15 +29,6 @@ export const storyFacets: FilterFacets = {
     option('green', 'Green'),
     option('multicolor', 'Multicolor', 0),
   ],
-  shapes: [
-    option('round', 'Round'),
-    option('oval', 'Oval'),
-    option('emerald', 'Emerald'),
-    option('pear', 'Pear'),
-    option('marquise', 'Marquise'),
-    option('princess', 'Princess'),
-    option('baguette', 'Baguette', 0),
-  ],
   price: { min: 50_000, max: 2_490_000 },
 }
 

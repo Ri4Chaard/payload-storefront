@@ -7,7 +7,7 @@ import type { HomeContent } from './types'
 /**
  * The home page global, as the four bands want it (spec 010).
  *
- * **The addresses are here rather than in the admin.** `/all-jewelry` and `/about` are routes this
+ * **The addresses are here rather than in the admin.** `/all-products` and `/about` are routes this
  * application defines; an editor who could retype them could point the hero at a 404 and would have
  * no way to discover they had. The words beside them are theirs, which is the half that was stuck
  * in a fixture file until now.
@@ -17,13 +17,13 @@ export function toHomeContent(page: HomePage): HomeContent {
     hero: {
       headline: page.hero.headline,
       lede: page.hero.lede,
-      cta: { label: page.hero.ctaLabel, href: '/all-jewelry' },
+      cta: { label: page.hero.ctaLabel, href: '/all-products' },
       image: toCatalogImage(page.hero.photo),
     },
     categoriesHeading: page.categoriesHeading,
     featured: {
       heading: page.featuredHeading,
-      cta: { label: page.featuredCtaLabel, href: '/all-jewelry' },
+      cta: { label: page.featuredCtaLabel, href: '/all-products' },
     },
     about: {
       heading: { lead: page.about.headingLead, emphasis: page.about.headingEmphasis },

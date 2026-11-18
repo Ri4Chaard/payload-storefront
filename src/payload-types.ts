@@ -427,7 +427,7 @@ export interface Banner {
      */
     label?: string | null;
     /**
-     * Where the button goes, e.g. /all-jewelry.
+     * Where the button goes, e.g. /all-products.
      */
     href?: string | null;
   };
@@ -517,7 +517,7 @@ export interface Faq {
      */
     label?: string | null;
     /**
-     * Where the button goes, e.g. /all-jewelry.
+     * Where the button goes, e.g. /all-products.
      */
     href?: string | null;
   };
@@ -1456,10 +1456,6 @@ export interface Product {
    * Filterable, and shown in the product details. Manage the list under Colours.
    */
   colour?: (number | Colour)[] | null;
-  /**
-   * A piece may set more than one.
-   */
-  diamondShape?: ('round' | 'oval' | 'emerald' | 'pear' | 'marquise' | 'princess' | 'baguette')[] | null;
   enableVariants?: boolean | null;
   variantTypes?: (number | VariantType)[] | null;
   variants?: {
@@ -2207,7 +2203,6 @@ export interface ProductsSelect<T extends boolean = true> {
   category?: T;
   collections?: T;
   colour?: T;
-  diamondShape?: T;
   enableVariants?: T;
   variantTypes?: T;
   variants?: T;

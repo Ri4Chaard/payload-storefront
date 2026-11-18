@@ -18,18 +18,18 @@ import {
 const RING: PurchasableProduct = {
   id: 1,
   available: true,
-  diamonds: [
+  variantChoices: [
     { id: 10, available: true },
     { id: 11, available: false },
   ],
 }
 
-const PLAIN_BAND: PurchasableProduct = { id: 2, available: true, diamonds: [] }
+const PLAIN_BAND: PurchasableProduct = { id: 2, available: true, variantChoices: [] }
 
 const good: CartIntent = { productId: 1, variantId: 10, quantity: 1 }
 
 /** Written out rather than destructured off `good`: an optional key has to be ABSENT, not undefined. */
-const withoutStone: CartIntent = { productId: 1, quantity: 1 }
+const withoutVariant: CartIntent = { productId: 1, quantity: 1 }
 
 describe('validateIntent', () => {
   it('accepts an intent with every choice made', () => {
@@ -41,8 +41,8 @@ describe('validateIntent', () => {
   })
 
   it('names the diamond when it has not been chosen', () => {
-    expect(validateIntent(withoutStone, RING)).toEqual({
-      field: 'diamond',
+    expect(validateIntent(withoutVariant, RING)).toEqual({
+      field: 'variant',
       reason: 'missing-option',
     })
   })
@@ -50,7 +50,7 @@ describe('validateIntent', () => {
   /** FR-040 — an unavailable stone is offered, and refused if it is somehow chosen anyway. */
   it('refuses a stone that cannot be bought', () => {
     expect(validateIntent({ ...good, variantId: 11 }, RING)).toEqual({
-      field: 'diamond',
+      field: 'variant',
       reason: 'unavailable',
     })
   })
@@ -61,7 +61,7 @@ describe('validateIntent', () => {
    */
   it('refuses a stone that belongs to no piece', () => {
     expect(validateIntent({ ...good, variantId: 999 }, RING)).toEqual({
-      field: 'diamond',
+      field: 'variant',
       reason: 'unavailable',
     })
   })
@@ -75,7 +75,7 @@ describe('validateIntent', () => {
     const soldOut: PurchasableProduct = {
       ...RING,
       available: false,
-      diamonds: [{ id: 10, available: false }],
+      variantChoices: [{ id: 10, available: false }],
     }
     expect(validateIntent(good, soldOut)).toEqual({ field: 'product', reason: 'unavailable' })
   })
@@ -132,13 +132,13 @@ describe('the intent that crosses the seam', () => {
  */
 describe('intentFrom', () => {
   it('carries the stone id through as it stands', () => {
-    const intent = intentFrom({ productId: 1, quantity: 2, diamondId: 11 })
+    const intent = intentFrom({ productId: 1, quantity: 2, variantChoiceId: 11 })
 
     expect(intent).toEqual({ productId: 1, quantity: 2, variantId: 11 })
   })
 
   it('omits a choice that has not been made rather than sending a placeholder', () => {
-    const intent = intentFrom({ productId: 1, quantity: 1, diamondId: null })
+    const intent = intentFrom({ productId: 1, quantity: 1, variantChoiceId: null })
 
     expect(intent).toEqual({ productId: 1, quantity: 1 })
     expect('variantId' in intent).toBe(false)

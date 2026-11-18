@@ -2,18 +2,18 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 import { featuredFixture } from '../sections.fixtures'
 
-import { JewelryCarousel } from './jewelry-carousel'
+import { ProductCarousel } from './product-carousel'
 
 /**
  * Nodes 144:839, 440:12540, 440:13525. Four cards fill the desktop content width exactly, which is
  * why the drawing parks its scroll control at `hidden` — see `MoreThanFits` for the other case.
  */
 const meta = {
-  title: 'Sections/JewelryCarousel',
-  component: JewelryCarousel,
+  title: 'Sections/ProductCarousel',
+  component: ProductCarousel,
   parameters: { layout: 'fullscreen' },
   args: featuredFixture,
-} satisfies Meta<typeof JewelryCarousel>
+} satisfies Meta<typeof ProductCarousel>
 
 export default meta
 type Story = StoryObj<typeof meta>

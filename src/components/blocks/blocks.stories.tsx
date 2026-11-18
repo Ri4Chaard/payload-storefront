@@ -57,7 +57,7 @@ const standard: StoryBlock = {
   eyebrow: 'THE AURUM STANDARD',
   heading: 'SELECTED FOR BRILLIANCE. CRAFTED WITHOUT COMPROMISE.',
   body: 'Every diamond is carefully considered for its beauty, character, and exceptional quality.',
-  cta: { label: 'EXPLORE THE COLLECTION', href: '/all-jewelry' },
+  cta: { label: 'EXPLORE THE COLLECTION', href: '/all-products' },
   media: photo,
   textSide: 'left',
 }

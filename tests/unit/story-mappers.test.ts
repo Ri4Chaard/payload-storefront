@@ -154,8 +154,8 @@ describe('calls to action (FR-011, FR-013)', () => {
   ]
 
   it('renders a button only when it has both a label and a destination', () => {
-    const [block] = toStoryBlocks(withCta({ label: 'EXPLORE', href: '/all-jewelry' }))
-    expect(block).toMatchObject({ cta: { label: 'EXPLORE', href: '/all-jewelry' } })
+    const [block] = toStoryBlocks(withCta({ label: 'EXPLORE', href: '/all-products' }))
+    expect(block).toMatchObject({ cta: { label: 'EXPLORE', href: '/all-products' } })
   })
 
   it('omits a label with no destination — a control that lies about being one', () => {
@@ -164,7 +164,7 @@ describe('calls to action (FR-011, FR-013)', () => {
   })
 
   it('omits a destination with no label, which would be invisible', () => {
-    const [block] = toStoryBlocks(withCta({ href: '/all-jewelry' }))
+    const [block] = toStoryBlocks(withCta({ href: '/all-products' }))
     expect(block).not.toHaveProperty('cta')
   })
 })

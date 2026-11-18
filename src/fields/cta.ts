@@ -34,7 +34,7 @@ export const ctaField = (): Field => ({
       name: 'href',
       type: 'text',
       label: 'Button link',
-      admin: { description: 'Where the button goes, e.g. /all-jewelry.' },
+      admin: { description: 'Where the button goes, e.g. /all-products.' },
     },
   ],
 })

@@ -42,7 +42,7 @@
     "primaryNavLabel": "Основная"
   },
   "nav": {
-    "allJewelry": "Все украшения",
+    "allProducts": "Все украшения",
     "category-1": "Категория 1",
     "category-2": "Категория 2",
     "category-3": "Категория 3",
@@ -115,10 +115,8 @@
     "category": "КАТЕГОРИЯ:",
     "collection": "КОЛЛЕКЦИЯ:",
     "colour": "ЦВЕТ:",
-    "diamondShape": "ОГРАНКА:",
     "availability": "НАЛИЧИЕ:",
     "price": "ЦЕНА:",
-    "diamondShapeLabel": "Огранка бриллианта",
     "resultCount": "{count, plural, one {# украшение} few {# украшения} many {# украшений} other {# украшения}}",
     "clear": "СБРОСИТЬ",
     "apply": "ПРИМЕНИТЬ",
@@ -135,10 +133,10 @@
     "sortNewest": "Новинки",
     "nothingHereYet": "Здесь пока пусто",
     "emptyCategoryBody": "В этой категории пока нет опубликованных изделий. В других — есть.",
-    "seeAllJewelry": "Смотреть все украшения",
+    "seeAllProducts": "Смотреть все украшения",
     "noResultsBody": "Каждое изделие выпускается небольшими партиями, поэтому узкий поиск может ничего не найти. Обычно помогает расширить его.",
     "clearAllFilters": "Сбросить все фильтры",
-    "featuredJewelry": "Избранные украшения",
+    "featuredProducts": "Избранные украшения",
     "showPrevious": "Показать предыдущие",
     "showMore": "Показать ещё",
     "previousPage": "Предыдущая страница",
@@ -148,8 +146,8 @@
     "viewCollectionShort": "Смотреть коллекцию"
   },
   "product": {
-    "chooseDiamond": "Выберите бриллиант",
-    "chooseDiamondHeading": "Выберите свой бриллиант:",
+    "chooseVariant": "Выберите бриллиант",
+    "chooseVariantHeading": "Выберите свой бриллиант:",
     "viewPiece": "Смотреть",
     "chooseQuantity": "Выберите количество.",
     "addToCart": "В КОРЗИНУ",
@@ -160,7 +158,7 @@
     "madeToOrder": "Под заказ",
     "outOfStock": "Нет в наличии",
     "unavailable": "Это украшение сейчас недоступно для заказа.",
-    "diamondUnavailable": "Этого бриллианта больше нет. Выберите другой.",
+    "variantUnavailable": "Этого бриллианта больше нет. Выберите другой.",
     "addFailed": "Не удалось добавить в корзину. Попробуйте ещё раз.",
     "sendFailed": "Не удалось отправить. Попробуйте ещё раз.",
     "previousPhoto": "Показать предыдущую фотографию",
@@ -179,7 +177,9 @@
     "moreFromCollection": "Ещё из этой коллекции",
     "detailsTitleFallback": "ОПИСАНИЕ ИЗДЕЛИЯ",
     "warrantyTitleFallback": "ГАРАНТИЯ 3 ГОДА + БЕСПЛАТНЫЙ ВОЗВРАТ",
-    "deliveryTitleFallback": "ДОСТАВКА"
+    "deliveryTitleFallback": "ДОСТАВКА",
+    "chooseVariantBeforeCart": "Выберите вариант, прежде чем добавить товар в корзину.",
+    "chooseVariantBeforeOrder": "Выберите вариант перед оформлением заказа."
   },
   "account": {
     "signIn": "Войти",
@@ -325,15 +325,6 @@
     "onThisPage": "На этой странице:",
     "ourBlog": "Наш блог",
     "latestArticles": "Последние статьи"
-  },
-  "diamondShape": {
-    "round": "Круглая",
-    "oval": "Овальная",
-    "emerald": "Изумрудная",
-    "pear": "Груша",
-    "marquise": "Маркиз",
-    "princess": "Принцесса",
-    "baguette": "Багет"
   },
   "meta": {
     "siteDescription": "Ювелирные украшения, созданные и отобранные с заботой.",

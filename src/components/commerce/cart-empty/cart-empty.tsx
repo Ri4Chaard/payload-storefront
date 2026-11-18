@@ -21,7 +21,7 @@ export interface CartEmptyProps extends React.ComponentProps<'div'> {
   browseHref?: string
 }
 
-export function CartEmpty({ browseHref = '/all-jewelry', className, ...props }: CartEmptyProps) {
+export function CartEmpty({ browseHref = '/all-products', className, ...props }: CartEmptyProps) {
   const t_nav = useTranslations('nav')
   const t_cart = useTranslations('cart')
   return (

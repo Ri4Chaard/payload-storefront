@@ -41,7 +41,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   await releaseSharedContent?.()
 })
-const PAGES = ['/all-jewelry', '/products/butterfly-diamond-pendant', '/sign-in', '/cart']
+const PAGES = ['/all-products', '/products/butterfly-diamond-pendant', '/sign-in', '/cart']
 const WIDTHS = [
   { name: 'mobile', width: 375, height: 812 },
   { name: 'desktop', width: 1440, height: 900 },

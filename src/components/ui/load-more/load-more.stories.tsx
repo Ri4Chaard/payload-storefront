@@ -16,7 +16,7 @@ const meta = {
   title: 'UI/LoadMore',
   component: LoadMore,
   parameters: { layout: 'padded', nextjs: { appDirectory: true } },
-  args: { shown: 12, total: 29, moreHref: '/all-jewelry?page=2' },
+  args: { shown: 12, total: 29, moreHref: '/all-products?page=2' },
 } satisfies Meta<typeof LoadMore>
 
 export default meta

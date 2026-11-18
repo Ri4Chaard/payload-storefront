@@ -27,7 +27,7 @@ test.afterAll(async () => {
 
 /** FR-020, SC-006 — the regression that would be most expensive to find in production. */
 test('a link saved before this feature returns the same pieces', async ({ page }) => {
-  await page.goto('/all-jewelry?colour=black&colour=green')
+  await page.goto('/all-products?colour=black&colour=green')
 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
@@ -71,7 +71,7 @@ test('a colour the owner adds filters the live site', async ({ page }) => {
   })
 
   try {
-    await page.goto(`/all-jewelry?colour=${value}`)
+    await page.goto(`/all-products?colour=${value}`)
 
     // The owner's new colour filters, and names itself in the chip from its own label.
     await expect(page.getByRole('link', { name: /Remove Rose gold/i })).toBeVisible()
@@ -110,7 +110,7 @@ test('renaming a label leaves its link working', async ({ page }) => {
   })
   made.push(colour.id)
 
-  await page.goto(`/all-jewelry?colour=${value}`)
+  await page.goto(`/all-products?colour=${value}`)
   await expect(page.getByRole('link', { name: /Remove Before/i })).toBeVisible()
 
   await payload.update({
@@ -122,16 +122,16 @@ test('renaming a label leaves its link working', async ({ page }) => {
   })
 
   // Same URL, new word — which is the whole of FR-018 and FR-019.
-  await page.goto(`/all-jewelry?colour=${value}`)
+  await page.goto(`/all-products?colour=${value}`)
   await expect(page.getByRole('link', { name: /Remove After/i })).toBeVisible()
 })
 
 /** FR-030 — an unrecognised colour is reported rather than silently narrowing the grid. */
 test('an unknown colour is reported and changes nothing', async ({ page }) => {
-  await page.goto('/all-jewelry')
+  await page.goto('/all-products')
   const all = await page.getByRole('link', { name: /^View / }).count()
 
-  await page.goto('/all-jewelry?colour=definitely-not-a-colour')
+  await page.goto('/all-products?colour=definitely-not-a-colour')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   expect(await page.getByRole('link', { name: /^View / }).count()).toBe(all)

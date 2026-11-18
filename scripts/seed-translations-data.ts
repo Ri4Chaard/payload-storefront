@@ -55,7 +55,7 @@ export const COLLECTIONS: Translated<'title'> = {
 }
 
 export const ARTICLE_CATEGORIES: Translated<'title'> = {
-  diamonds: { ru: { title: 'Бриллианты' }, uk: { title: 'Діаманти' } },
+  variantChoices: { ru: { title: 'Бриллианты' }, uk: { title: 'Діаманти' } },
   guides: { ru: { title: 'Руководства' }, uk: { title: 'Посібники' } },
   jewelry: { ru: { title: 'Украшения' }, uk: { title: 'Прикраси' } },
   stories: { ru: { title: 'Истории' }, uk: { title: 'Історії' } },

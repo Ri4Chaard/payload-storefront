@@ -13,7 +13,7 @@ import { ProductPurchase } from './product-purchase'
  * all reachable without one. The live behaviour is covered by the integration suite and by the e2e
  * walk, which have a server to talk to.
  */
-const DIAMONDS = [
+const VARIANTS = [
   { id: 1, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
   {
     id: 2,
@@ -37,7 +37,7 @@ const meta = {
     fromPrice: '$24,900',
     description:
       'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
-    diamonds: DIAMONDS,
+    variantChoices: VARIANTS,
     available: true,
   },
 } satisfies Meta<typeof ProductPurchase>
@@ -50,12 +50,12 @@ export const Default: Story = {}
 
 /** One price for the piece however it is made, so no range and no "from". */
 export const SinglePrice: Story = {
-  args: { fromPrice: null, diamonds: [DIAMONDS[1]!] },
+  args: { fromPrice: null, variantChoices: [VARIANTS[1]!] },
 }
 
 /** A piece with no choices at all — just a price and the two actions. */
 export const NoOptions: Story = {
-  args: { fromPrice: null, diamonds: [] },
+  args: { fromPrice: null, variantChoices: [] },
 }
 
 /** Sold out. The reason is in TEXT, not in colour, and the controls go with it (FR-040). */
@@ -75,6 +75,6 @@ export const NoDescription: Story = {
  */
 export const RefusedByTheServer: Story = {
   args: {
-    onAddToCart: async () => ({ ok: false, reason: 'unavailable', field: 'diamond' }),
+    onAddToCart: async () => ({ ok: false, reason: 'unavailable', field: 'variant' }),
   },
 }

@@ -2,7 +2,7 @@
  * Where a filter state lives (003/T273, contract §4).
  *
  * One rule, in one function: **a single category is a path, and everything else is a query.**
- * `/category-1?colour=black` rather than `/all-jewelry?category=category-1&colour=black`, because the two
+ * `/category-1?colour=black` rather than `/all-products?category=category-1&colour=black`, because the two
  * would otherwise be two addresses for one grid — two cache entries, two things for a crawler to
  * index, and two answers to "what is the canonical URL of the ring listing".
  *
@@ -13,7 +13,7 @@
  * disagree about.
  *
  * **Zero categories, or more than one, is the whole shop.** There is no route for "rings and
- * bracelets" and inventing one would mean a page per combination; `/all-jewelry?category=category-1&
+ * bracelets" and inventing one would mean a page per combination; `/all-products?category=category-1&
  * category=category-2` says exactly what it is.
  */
 
@@ -21,7 +21,7 @@ import { toQueryString } from './filters'
 import type { FilterState } from './types'
 
 /** The listing that has no category of its own. Also the form target — see `canonicalListing`. */
-export const ALL_JEWELRY = '/all-jewelry'
+export const ALL_PRODUCTS = '/all-products'
 
 /** Just enough of a `CategorySummary` to place it. Kept narrow so tests can supply two fields. */
 export interface CategoryRoute {
@@ -38,7 +38,7 @@ export function listingHref(
     filters.category.length === 1 ? categories.find((entry) => entry.slug === only) : undefined
 
   if (route) return `${route.href}${toQueryString({ ...filters, category: [] })}`
-  return `${ALL_JEWELRY}${toQueryString(filters)}`
+  return `${ALL_PRODUCTS}${toQueryString(filters)}`
 }
 
 /**
@@ -46,7 +46,7 @@ export function listingHref(
  *
  * This exists because of the no-JavaScript path. A `<form method="GET">` posts to a fixed `action`
  * and cannot choose a path from what is ticked inside it, so the drawer always submits to
- * `/all-jewelry` — with the category as a query parameter, and with both ends of the price slider
+ * `/all-products` — with the category as a query parameter, and with both ends of the price slider
  * whether or not anyone touched it. Without this, a visitor with scripting off would end up at a
  * different address from everyone else's for the same grid, and FR-029 asks for the same URL rather
  * than merely the same products.
@@ -70,5 +70,5 @@ export function canonicalListing(
   if (dropped.length > 0) return null
 
   const href = listingHref(settled, categories)
-  return href === `${ALL_JEWELRY}${toQueryString(requested)}` ? null : href
+  return href === `${ALL_PRODUCTS}${toQueryString(requested)}` ? null : href
 }

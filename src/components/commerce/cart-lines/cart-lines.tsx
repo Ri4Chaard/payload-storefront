@@ -147,5 +147,5 @@ export function CartLines({
  */
 function optionsLabel(line: CartLineView): string | undefined {
   // Just the stone since spec 011 — size was the other half until it was deprecated.
-  return line.diamond ?? undefined
+  return line.variantChoice ?? undefined
 }

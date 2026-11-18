@@ -71,7 +71,7 @@ export interface HeaderProps {
  * content model with the labels when the time comes.
  */
 const NAV_KEYS = [
-  { key: 'allJewelry', href: '/all-jewelry' },
+  { key: 'allProducts', href: '/all-products' },
   { key: 'category-1', href: '/category-1' },
   { key: 'category-2', href: '/category-2' },
   { key: 'category-3', href: '/category-3' },

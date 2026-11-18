@@ -19,7 +19,7 @@ const line = (over: Partial<CartLineView> = {}): CartLineView => ({
   title: 'BUTTERFLY DIAMOND PENDANT',
   href: '/products/butterfly-diamond-pendant',
   image: { src: pendant.src, width: 800, height: 800 },
-  diamond: null,
+  variantChoice: null,
   unitPrice: '$24,900',
   lineTotal: '$24,900',
   unitMinor: 2490000,
@@ -49,7 +49,7 @@ export const Filled: Story = {
       line({
         id: 'a',
         title: 'PARAGON EMERALD CUT DIAMOND ENGAGEMENT RING',
-        diamond: 'Lab 1.5 ct D VS1',
+        variantChoice: 'Lab 1.5 ct D VS1',
         unitPrice: '$38,320',
         lineTotal: '$76,640',
         quantity: 2,
@@ -59,7 +59,7 @@ export const Filled: Story = {
       line({
         id: 'c',
         title: 'BUTTERFLY RUBY AND DIAMOND EAR CLIMBERS',
-        diamond: 'Ruby and pink sapphire',
+        variantChoice: 'Ruby and pink sapphire',
         unitPrice: '$38,000',
         lineTotal: '$38,000',
         image: { src: earrings.src, width: 800, height: 800 },

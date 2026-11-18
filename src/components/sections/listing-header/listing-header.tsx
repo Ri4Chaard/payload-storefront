@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn'
  * Nodes `222:709` (1920) · `412:7735` (768) · `412:7870` (375).
  *
  * **It carries the page's `h1`.** A listing's subject is its category, so the name is the heading
- * the page is about and there is exactly one of them. `/all-jewelry` is the same block with a
+ * the page is about and there is exactly one of them. `/all-products` is the same block with a
  * different name in it (node `355:7142`), which is why this takes a title rather than a category.
  *
  * **The subtitle is a measure, not a full-width line.** The drawing constrains it to 804px at 1920

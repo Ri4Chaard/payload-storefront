@@ -16,18 +16,15 @@ import {
   DEFAULT_SORT,
   applyChange,
   dropIdlePriceEnds,
-  toggleFilter,
 } from '@/lib/catalog/filters'
-import { ALL_JEWELRY, listingHref, type CategoryRoute } from '@/lib/catalog/listing-url'
+import { ALL_PRODUCTS, listingHref, type CategoryRoute } from '@/lib/catalog/listing-url'
 import { formatPrice } from '@/lib/catalog/price'
 import {
   SORT_ORDERS,
-  type DiamondShape,
   type FilterFacets,
   type FilterState,
   type SortOrder,
 } from '@/lib/catalog/types'
-import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 /**
@@ -35,12 +32,12 @@ import { cn } from '@/lib/cn'
  * `412:7738` (1024), `412:7873` with its two triggers (390).
  *
  * **The toolbar commits immediately and the drawer does not** (FR-023 against FR-022). Nothing here
- * is drawn beside an APPLY, so nothing here waits for one: pressing a shape narrows the grid. The
+ * is drawn beside an APPLY, so nothing here waits for one: a quick control narrows the grid at once. The
  * two behaviours are not an inconsistency — a quick control that needed confirming would be slower
  * than the panel it is meant to shortcut.
  *
  * **The quick controls are links.** A filter lives in the URL, so applying one is an address; that
- * makes the shape row, the in-stock toggle and the chips work identically with scripting and
+ * makes the in-stock toggle and the chips work identically with scripting and
  * without it, and it is why `Switch` gained a drawing-only mode rather than this file putting an
  * `<input>` inside an `<a>`.
  *
@@ -49,7 +46,7 @@ import { cn } from '@/lib/cn'
  * without it the drawer's own price group and APPLY are the path. **Sort** is a popover that React
  * opens, so it needs scripting to reach at all — filtering does not, which is what FR-029 asks for.
  *
- * **What each width carries is what each width draws.** Everything at `xl`; FILTERS, the shapes and
+ * **What each width carries is what each width draws.** Everything at `xl`; FILTERS and
  * SORT BY at `md`; two triggers on a phone, the left one carrying the count of what is applied
  * (FR-028). The controls the narrow widths drop are all in the drawer, which is the whole reason
  * the drawer carries a group Figma did not draw in it.
@@ -63,17 +60,6 @@ export interface FilterToolbarProps {
   clearHref: string
   /** How many applied filters the phone trigger reports. */
   appliedCount: number
-}
-
-/** Exhaustive by construction: a new shape in the schema fails to compile until it has a glyph. */
-const SHAPE_ICONS: Record<DiamondShape, IconName> = {
-  round: 'shape-round',
-  oval: 'shape-oval',
-  emerald: 'shape-emerald',
-  pear: 'shape-pear',
-  marquise: 'shape-marquise',
-  princess: 'shape-princess',
-  baguette: 'shape-baguette',
 }
 
 /**
@@ -103,7 +89,7 @@ const TRIGGER = [
 ].join(' ')
 
 /**
- * The word over the shape row and the price slider. 14px at 1920, 11px at 768 — the nearest steps
+ * The word over the price slider. 14px at 1920, 11px at 768 — the nearest steps
  * on the scale are `body-small` and `caption`, and the 1px is not worth a token nobody else needs.
  *
  * Figma paints it `#343231` at 60% opacity, which mixes to roughly 3.5:1 on white and fails AA for
@@ -220,45 +206,6 @@ export function FilterToolbar({
             {/* Drawn at 1920 only — the 768 and 375 frames carry the word alone. */}
             <Icon name="filter" size="sm" className="ml-2.5 hidden size-5 xl:block" />
           </NextLink>
-
-          {/* Drawn at 1920 only. The 768 frame separates its two groups with a 24px gap and nothing. */}
-          <Rule className="hidden xl:block" />
-
-          <div role="group" aria-label={t_catalog('diamondShapeLabel')} className="hidden md:block">
-            <p className={GROUP_LABEL}>{t_catalog('diamondShapeLabel')}</p>
-            <div className="mt-1 flex items-center gap-1.5 xl:mt-1.5 xl:gap-2.5">
-              {facets.shapes.map((shape) => {
-                const selected = filters.shape.some((entry) => entry === shape.value)
-                return (
-                  <NextLink
-                    key={shape.value}
-                    href={hrefFor(toggleFilter(filters, 'shape', shape.value))}
-                    aria-label={shape.label}
-                    // `aria-current` rather than `aria-pressed`: this is a link, and the applied
-                    // state IS the address it points away from.
-                    aria-current={selected ? 'true' : undefined}
-                    className={cn(
-                      'grid size-7 shrink-0 place-items-center rounded-full xl:size-9',
-                      'ease-standard transition-colors duration-[var(--duration-fast)]',
-                      selected
-                        ? 'bg-primary-transparent text-primary-default'
-                        : 'text-neutral-primary hover:bg-black/5',
-                    )}
-                  >
-                    {/*
-                    The cast is sound in the direction it matters: `getFilterFacets` builds this
-                    list from the same closed set `SHAPE_ICONS` is keyed by, and the record fails
-                    to compile the moment the schema gains a shape without a glyph.
-                  */}
-                    <Icon
-                      name={SHAPE_ICONS[shape.value as DiamondShape]}
-                      className="size-5 xl:size-6.5"
-                    />
-                  </NextLink>
-                )
-              })}
-            </div>
-          </div>
 
           {hasPrice ? (
             <>
@@ -400,7 +347,7 @@ function PriceQuickFilter({
   return (
     <form
       method="get"
-      action={ALL_JEWELRY}
+      action={ALL_PRODUCTS}
       onSubmit={(event) => {
         event.preventDefault()
         commit()
@@ -469,7 +416,6 @@ function HiddenState({ filters }: { filters: FilterState }) {
     ['category', filters.category],
     ['collection', filters.collection],
     ['colour', filters.colour],
-    ['shape', filters.shape],
   ]
 
   return (

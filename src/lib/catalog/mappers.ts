@@ -36,7 +36,7 @@ import { CATALOG_CURRENCY, formatPriceFor } from './price'
 import type {
   CatalogImage,
   CategorySummary,
-  DiamondOption,
+  VariantOption,
   ProductAttribute,
   ProductDetail,
   ProductSummary,
@@ -220,11 +220,11 @@ export function toProductSummary(product: Product, locale: Locale): ProductSumma
   }
 }
 
-function toDiamondOption(
+function toVariantOption(
   variant: Variant,
   locale: Locale,
   availability: Product['availability'],
-): DiamondOption {
+): VariantOption {
   // A variant's label is its options joined — one today, and joined rather than indexed so that a
   // second variant type arriving later reads correctly instead of silently showing the first.
   const label = variant.options
@@ -312,12 +312,12 @@ export function mergeAttributes(
 export function toProductDetail(product: Product, locale: Locale): ProductDetail {
   const summary = toProductSummary(product, locale)
   const category = populated<Category>(product.category, `product "${product.slug}" category`)
-  const diamondOptions = productVariants(product)
-    .map((variant) => toDiamondOption(variant, locale, product.availability))
+  const variantOptions = productVariants(product)
+    .map((variant) => toVariantOption(variant, locale, product.availability))
     // Cheapest first, so the drawn column reads as a price ladder rather than as insertion order.
     .sort((a, b) => a.priceMinor - b.priceMinor)
 
-  const prices = diamondOptions.map((option) => option.priceMinor)
+  const prices = variantOptions.map((option) => option.priceMinor)
   const varies = prices.length > 1 && Math.min(...prices) !== Math.max(...prices)
 
   return {
@@ -328,7 +328,7 @@ export function toProductDetail(product: Product, locale: Locale): ProductDetail
     currency: CATALOG_CURRENCY,
     // Only for a piece with no stones, and only when it is counted. With stones the ceiling belongs
     // to whichever one is chosen, and a product-level number would contradict it.
-    ...(diamondOptions.length === 0 &&
+    ...(variantOptions.length === 0 &&
     product.availability === 'stock-tracked' &&
     ceiling(product.inventory) !== undefined
       ? { maxQuantity: ceiling(product.inventory) }
@@ -337,7 +337,7 @@ export function toProductDetail(product: Product, locale: Locale): ProductDetail
     gallery: summary.images,
     madeToOrder: product.availability === 'made-to-order',
     detailsHtml: html(product.details),
-    diamondOptions,
+    variantOptions,
     attributes: toAttributes(product.attributes),
     fromPrice: varies ? summary.price : null,
     collectionIds: (product.collections ?? []).map((entry) =>

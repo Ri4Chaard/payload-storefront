@@ -83,7 +83,7 @@ const DRAWN_PAGE = [
     eyebrow: 'THE AURUM STANDARD',
     heading: 'SELECTED FOR BRILLIANCE. CRAFTED WITHOUT COMPROMISE.',
     body: 'Every diamond is carefully considered for its beauty, character, and exceptional quality. Because for us, meeting the standard is only the beginning.',
-    cta: { label: 'EXPLORE THE COLLECTION', href: '/all-jewelry' },
+    cta: { label: 'EXPLORE THE COLLECTION', href: '/all-products' },
     media: { kind: 'photo' },
     textSide: 'left',
   },

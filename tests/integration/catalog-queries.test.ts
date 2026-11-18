@@ -117,7 +117,7 @@ describe('getProduct', () => {
   it('returns a piece by slug', async () => {
     const product = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
     expect(product?.title).toBe('Paragon Emerald Cut Diamond Engagement Ring')
-    expect(product?.diamondOptions).toHaveLength(4)
+    expect(product?.variantOptions).toHaveLength(4)
   })
 
   it('returns null for a draft, exactly as it does for a slug that names nothing', async () => {
@@ -144,7 +144,6 @@ describe('getProductSlugs', () => {
 describe('getFilterFacets', () => {
   it('offers every option in a group, whatever the category holds', async () => {
     const facets = await getFilterFacets('en', 'category-1')
-    expect(facets.shapes).toHaveLength(7)
     expect(facets.colours).toHaveLength(4)
     expect(facets.price.min).toBeLessThan(facets.price.max)
   })
@@ -153,11 +152,11 @@ describe('getFilterFacets', () => {
     // Hiding zero-count options makes the drawer change shape as a visitor filters, which loses
     // the option they were reaching for. A zero is the honest answer to "do you have this".
     const facets = await getFilterFacets('en', 'category-2')
-    const empty = facets.shapes.filter((option) => option.count === 0)
-    expect(empty.length, 'no shape is absent from bracelets — pick a sparser group').toBeGreaterThan(
+    const empty = facets.colours.filter((option) => option.count === 0)
+    expect(empty.length, 'no colour is absent from this category — pick a sparser group').toBeGreaterThan(
       0,
     )
-    expect(facets.shapes).toHaveLength(7)
+    expect(facets.colours).toHaveLength(4)
   })
 
   it('always counts categories over the whole catalogue', async () => {

@@ -24,7 +24,7 @@ const pattern = new RegExp(`^${matcher.replace('/:path*', '')}$`)
 
 describe('the proxy matcher', () => {
   it('runs on every storefront page, in every language', () => {
-    for (const path of ['/', '/all-jewelry', '/ru', '/ru/legal/privacy', '/uk/products/x']) {
+    for (const path of ['/', '/all-products', '/ru', '/ru/legal/privacy', '/uk/products/x']) {
       expect(pattern.test(path)).toBe(true)
     }
   })

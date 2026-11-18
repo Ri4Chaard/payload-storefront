@@ -12,42 +12,19 @@
  * same grid looking like two pages to a crawler.
  *
  * **Unknown values are dropped and the drop is reported** (FR-030). This module can only judge the
- * closed sets — colour, shape, sort, and the numbers. Whether `category=rungs` names a real
+ * closed sets — sort and the numbers. Whether `category=rungs` names a real
  * category depends on the catalogue, so `getListing` finishes the job and merges its own drops into
  * the same list.
  */
 
 import {
   SORT_ORDERS,
-  type DiamondShape,
   type DroppedFilter,
   type FilterKey,
   type FilterState,
   type ParsedFilters,
   type SortOrder,
 } from './types'
-
-/**
- * Exhaustive by construction. A plain array typed `readonly DiamondShape[]` catches a value that is
- * not in the schema but not one the schema gained — this catches both, because the record is
- * missing a key the moment the union grows and `tsc` says so.
- *
- * **Colour used to have one of these and no longer does** (spec 011, US3). It became an
- * owner-managed vocabulary, so the valid set is a fact about the database rather than about the
- * schema and this module cannot judge it — see `parseFilters` below. Shape is still an enum, so
- * this still applies to shape.
- */
-const SHAPE_KEYS: Record<DiamondShape, true> = {
-  round: true,
-  oval: true,
-  emerald: true,
-  pear: true,
-  marquise: true,
-  princess: true,
-  baguette: true,
-}
-
-export const SHAPES = Object.keys(SHAPE_KEYS) as DiamondShape[]
 
 export const DEFAULT_SORT: SortOrder = 'recommended'
 
@@ -71,7 +48,6 @@ export const DEFAULT_FILTERS: FilterState = {
   category: [],
   collection: [],
   colour: [],
-  shape: [],
   inStock: false,
   sort: DEFAULT_SORT,
   page: 1,
@@ -94,22 +70,6 @@ function valuesFor(input: SearchParamsInput, key: string): string[] {
 /** Duplicates collapse and order is kept — `?colour=black&colour=black` is one filter. */
 function unique(values: string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))]
-}
-
-function parseClosedSet<T extends string>(
-  input: SearchParamsInput,
-  key: FilterKey,
-  allowed: readonly T[],
-  dropped: DroppedFilter[],
-): T[] {
-  const permitted = new Set<string>(allowed)
-  const kept: T[] = []
-
-  for (const value of unique(valuesFor(input, key))) {
-    if (permitted.has(value)) kept.push(value as T)
-    else dropped.push({ key, value })
-  }
-  return kept
 }
 
 /**
@@ -177,7 +137,6 @@ export function parseFilters(input: SearchParamsInput): ParsedFilters {
       list. Nothing a visitor can observe changes: same key, same repeats, same chips.
     */
     colour: unique(valuesFor(input, 'colour')),
-    shape: parseClosedSet(input, 'shape', SHAPES, dropped),
     inStock,
     sort,
     page,
@@ -205,7 +164,6 @@ const KEY_ORDER: readonly FilterKey[] = [
   'category',
   'collection',
   'colour',
-  'shape',
   'minPrice',
   'maxPrice',
   'inStock',
@@ -221,7 +179,6 @@ export function toSearchParams(filters: FilterState): URLSearchParams {
       case 'category':
       case 'collection':
       case 'colour':
-      case 'shape':
         for (const value of filters[key]) params.append(key, value)
         break
       case 'minPrice':
@@ -267,9 +224,6 @@ export function removeFilter(filters: FilterState, key: FilterKey, value?: strin
     case 'colour':
       next.colour = filters.colour.filter((entry) => entry !== value)
       break
-    case 'shape':
-      next.shape = filters.shape.filter((entry) => entry !== value)
-      break
     case 'minPrice':
     case 'maxPrice':
       // Both ends, whichever one is named. A price range is drawn as ONE chip — "$1,200 – $7,300"
@@ -297,7 +251,6 @@ export function hasActiveFilters(filters: FilterState): boolean {
     filters.category.length > 0 ||
     filters.collection.length > 0 ||
     filters.colour.length > 0 ||
-    filters.shape.length > 0 ||
     filters.minPrice !== undefined ||
     filters.maxPrice !== undefined ||
     filters.inStock
@@ -305,7 +258,7 @@ export function hasActiveFilters(filters: FilterState): boolean {
 }
 
 /** The keys that hold a list. Every one of them is a group of checkboxes somewhere. */
-export type MultiFilterKey = 'category' | 'collection' | 'colour' | 'shape'
+export type MultiFilterKey = 'category' | 'collection' | 'colour'
 
 /**
  * Tick or untick one value in one group.

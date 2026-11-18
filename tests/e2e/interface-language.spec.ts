@@ -123,7 +123,7 @@ const CHROME = Object.entries(en).flatMap(([namespace, entries]) =>
 */
 const PAGES = [
   '/',
-  '/all-jewelry',
+  '/all-products',
   '/category-1',
   '/products/layered-chain-necklace',
   '/blog',
@@ -190,7 +190,7 @@ for (const locale of SECONDARY_LOCALES) {
     }
 
     test(`/${locale} announces the cart in ${locale}`, async ({ page }) => {
-      await page.goto(`/${locale}/all-jewelry`)
+      await page.goto(`/${locale}/all-products`)
       const cart = page.getByRole('link', { name: /Корзина|Кошик/ })
       await expect(cart).toBeVisible()
     })

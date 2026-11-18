@@ -78,7 +78,7 @@ async function view(owner: CartOwner) {
 const intentFor = (product: ProductDetail, quantity = 1) => ({
   productId: product.id,
   quantity,
-  ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
+  ...(product.variantOptions[0] ? { variantId: product.variantOptions[0].id } : {}),
 })
 
 const edit = (id: number, data: Record<string, unknown>) =>

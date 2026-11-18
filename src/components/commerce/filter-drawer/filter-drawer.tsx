@@ -11,7 +11,7 @@ import { RangeSlider } from '@/components/ui/range-slider'
 import { Switch } from '@/components/ui/switch'
 import { TextInput } from '@/components/ui/text-input'
 import { DEFAULT_SORT, applyChange, dropIdlePriceEnds, toggleFilter } from '@/lib/catalog/filters'
-import { ALL_JEWELRY, listingHref, type CategoryRoute } from '@/lib/catalog/listing-url'
+import { ALL_PRODUCTS, listingHref, type CategoryRoute } from '@/lib/catalog/listing-url'
 import { formatPrice, minorUnitDigits } from '@/lib/catalog/price'
 import type { FacetOption, FilterFacets, FilterState } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
@@ -43,7 +43,7 @@ import './filter-drawer.css'
  * `toSearchParams` would have written. That is what makes FR-029 the same code path with less
  * scripting rather than a second implementation. Two consequences are worth naming:
  *
- * - The form posts to `/all-jewelry`, because a `<form method="GET">` cannot choose its own path
+ * - The form posts to `/all-products`, because a `<form method="GET">` cannot choose its own path
  *   from what is ticked inside it. `canonicalListing` turns `?category=category-1` back into `/category-1` on
  *   arrival, so both paths end at the same address.
  * - The MIN and MAX boxes carry no `name`. They are a second view of the slider, which submits the
@@ -151,7 +151,7 @@ export function FilterDrawer({
       closeHref={currentHref}
       triggerRef={triggerRef}
       asForm
-      formProps={{ method: 'get', action: ALL_JEWELRY, onSubmit }}
+      formProps={{ method: 'get', action: ALL_PRODUCTS, onSubmit }}
       footer={
         <>
           <Button variant="outline" href={clearHref} className="flex-1">
@@ -178,7 +178,7 @@ export function FilterDrawer({
           "exactly one", which is wrong for a filter that combines.
         */}
         <Checkbox
-          label={t_nav('allJewelry')}
+          label={t_nav('allProducts')}
           checked={draft.category.length === 0}
           onChange={() => setDraft((current) => applyChange(current, { category: [] }))}
         />
@@ -237,15 +237,6 @@ export function FilterDrawer({
           options={facets.collections}
           selected={draft.collection}
           onToggle={(value) => setDraft((current) => toggleFilter(current, 'collection', value))}
-        />
-      </Group>
-
-      <Group legend={t_catalog('diamondShape')}>
-        <Options
-          name="shape"
-          options={facets.shapes}
-          selected={draft.shape}
-          onToggle={(value) => setDraft((current) => toggleFilter(current, 'shape', value))}
         />
       </Group>
 

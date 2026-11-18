@@ -13,7 +13,7 @@
  * — which was flattering and wrong.
  *
  * Usage:
- *   pnpm measure:js http://localhost:3000 / /all-jewelry /legal/privacy
+ *   pnpm measure:js http://localhost:3000 / /all-products /legal/privacy
  */
 
 import { gzipSync } from 'node:zlib'

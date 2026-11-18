@@ -10,7 +10,7 @@ import { ProductOptions } from './product-options'
  * The stories vary what the CATALOGUE offers: a piece may offer a choice of stone or none at all.
  * Sizes were the second axis until spec 011 deprecated them.
  */
-const DIAMONDS = [
+const VARIANTS = [
   { id: 1, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
   {
     id: 2,
@@ -25,12 +25,12 @@ const DIAMONDS = [
 
 
 function Demo(props: React.ComponentProps<typeof ProductOptions>) {
-  const [diamond, setDiamond] = React.useState<number | null>(null)
+  const [variantChoice, setVariantChoice] = React.useState<number | null>(null)
   return (
     <ProductOptions
       {...props}
-      diamond={diamond}
-      onDiamondChange={setDiamond}
+      variantChoice={variantChoice}
+      onVariantChange={setVariantChoice}
     />
   )
 }
@@ -40,9 +40,9 @@ const meta = {
   component: ProductOptions,
   parameters: { layout: 'padded' },
   args: {
-    diamonds: DIAMONDS,
-    diamond: null,
-    onDiamondChange: () => {},
+    variantChoices: VARIANTS,
+    variantChoice: null,
+    onVariantChange: () => {},
   },
   render: (args) => <Demo {...args} />,
 } satisfies Meta<typeof ProductOptions>

@@ -12,7 +12,7 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
  * CATEGORY group in the filter drawer.
  *
  * **"All jewelry" is not a row here.** The drawer draws it as a fifth checkbox, but it means "no
- * category filter", and it is the `/all-jewelry` route. Storing it would give it a slug, a subtitle
+ * category filter", and it is the `/all-products` route. Storing it would give it a slug, a subtitle
  * and an image it should never have.
  */
 export const Categories: CollectionConfig = {

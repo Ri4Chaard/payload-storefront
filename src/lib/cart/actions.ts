@@ -243,7 +243,7 @@ export async function buyNow(intent: CartIntent, locale: Locale): Promise<Checko
  * catalogue — the intent contributes identifiers and a quantity, nothing else.
  */
 function singleLineCart(product: ProductDetail, intent: CartIntent): CartView {
-  const chosen = product.diamondOptions.find((option) => option.id === intent.variantId)
+  const chosen = product.variantOptions.find((option) => option.id === intent.variantId)
 
   const unitMinor = chosen ? chosen.priceMinor : product.priceMinor
   const total = unitMinor * intent.quantity
@@ -255,7 +255,7 @@ function singleLineCart(product: ProductDetail, intent: CartIntent): CartView {
         title: product.title,
         href: product.href,
         image: product.images[0] ?? null,
-        diamond: chosen?.label ?? null,
+        variantChoice: chosen?.label ?? null,
         unitPrice: formatPrice(unitMinor),
         lineTotal: formatPrice(total),
         unitMinor,

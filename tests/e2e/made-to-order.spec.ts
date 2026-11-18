@@ -73,10 +73,10 @@ async function build(availability: 'made-to-order' | 'stock-tracked', quantities
  * The stone selector is the kit's `Select` — a `role="combobox"` button over a `role="listbox"`,
  * not a native `<select>`, so the options only exist once it is opened.
  */
-const stoneTrigger = (page: Page) => page.getByRole('combobox', { name: /diamond/i })
+const variantTrigger = (page: Page) => page.getByRole('combobox', { name: /diamond/i })
 
 async function stoneOptions(page: Page) {
-  await stoneTrigger(page).click()
+  await variantTrigger(page).click()
   return page.getByRole('option')
 }
 

@@ -16,12 +16,10 @@
  *                and then the availability rule lives in two places. `available` is computed once
  *                in `mappers.ts` and travels as a boolean.
  *
- * `price` is a formatted string everywhere except `DiamondOption.priceMinor`, which exists because
+ * `price` is a formatted string everywhere except `VariantOption.priceMinor`, which exists because
  * the stone selector has to compare stones. That one is an integer count of minor units, never a
  * float and never a parsed display string (Constitution VI).
  */
-
-import type { Product } from '@/payload-types'
 
 /** A photograph, shaped the way an upload comes back — intrinsic dimensions included, so nothing
  * downstream has to guess at an aspect ratio and reserve the wrong box for it. */
@@ -42,7 +40,6 @@ export interface CatalogImage {
  * `getListing` — exactly as it always has been for `category` and `collection` (011/research.md R2).
  */
 export type ColourValue = string
-export type DiamondShape = NonNullable<Product['diamondShape']>[number]
 
 /** The card, the grid, and _Complete the Collection_. */
 export interface ProductSummary {
@@ -57,7 +54,7 @@ export interface ProductSummary {
 }
 
 /** One selectable stone. The only view model carrying a raw amount, and it is an integer. */
-export interface DiamondOption {
+export interface VariantOption {
   id: number
   label: string
   price: string
@@ -100,7 +97,7 @@ export interface ProductDetail extends ProductSummary {
    * The same amount as `price`, before formatting — an integer count of minor units, and the
    * currency it counts.
    *
-   * The one place a raw amount travels outside `DiamondOption`, and it exists for `schema.org`
+   * The one place a raw amount travels outside `VariantOption`, and it exists for `schema.org`
    * rather than for a component: an `Offer` has to carry a machine-readable number, and the only
    * alternative is parsing `"$38,320"` back into money — which is exactly what the rule at the top
    * of this file forbids. Nothing that DRAWS a price should read it.
@@ -108,7 +105,7 @@ export interface ProductDetail extends ProductSummary {
   priceMinor: number
   currency: string
   /**
-   * The ceiling for a piece that has no stones — the same question `DiamondOption.maxQuantity`
+   * The ceiling for a piece that has no stones — the same question `VariantOption.maxQuantity`
    * answers for one that does. Absent where the piece is made to order, which has no ceiling.
    */
   maxQuantity?: number
@@ -125,7 +122,7 @@ export interface ProductDetail extends ProductSummary {
   gallery: CatalogImage[]
   /** Serialised from the `details` rich text. `null` where the owner left it empty. */
   detailsHtml: string | null
-  diamondOptions: DiamondOption[]
+  variantOptions: VariantOption[]
   attributes: ProductAttribute[]
   /**
    * `"From $2,400"`-style prefix money, set only where stones differ in price. `null` means the
@@ -182,7 +179,6 @@ export type FilterKey =
   | 'category'
   | 'collection'
   | 'colour'
-  | 'shape'
   | 'minPrice'
   | 'maxPrice'
   | 'inStock'
@@ -200,7 +196,6 @@ export interface FilterState {
   category: string[]
   collection: string[]
   colour: ColourValue[]
-  shape: DiamondShape[]
   /** Integer minor units, so nothing ever parses a formatted string back into money. */
   minPrice?: number
   maxPrice?: number
@@ -240,7 +235,6 @@ export interface FilterFacets {
   categories: FacetOption[]
   collections: FacetOption[]
   colours: FacetOption[]
-  shapes: FacetOption[]
   /** The slider's ends, in minor units. Equal min and max means one price and no slider. */
   price: { min: number; max: number }
 }

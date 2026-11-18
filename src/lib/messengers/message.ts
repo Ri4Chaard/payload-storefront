@@ -42,7 +42,7 @@ interface ComposeOptions {
 /** "2 × Paragon Emerald Cut Diamond Engagement Ring — Lab 1.5 ct D VS1 — $76,640" */
 function itemLine(line: CartView['lines'][number]): string {
   // The stone, where one was chosen. Size travelled here too until spec 011 deprecated it.
-  const described = line.diamond ? ` — ${line.diamond}` : ''
+  const described = line.variantChoice ? ` — ${line.variantChoice}` : ''
 
   return `${line.quantity} × ${line.title}${described} — ${line.lineTotal}`
 }

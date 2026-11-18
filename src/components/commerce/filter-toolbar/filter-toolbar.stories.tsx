@@ -20,7 +20,7 @@ const meta = {
     filters: storyFilters,
     facets: storyFacets,
     categories: storyCategories,
-    clearHref: '/all-jewelry',
+    clearHref: '/all-products',
     appliedCount: 0,
   },
 } satisfies Meta<typeof FilterToolbar>
@@ -41,7 +41,6 @@ export const WithFiltersApplied: Story = {
     filters: {
       ...storyFilters,
       category: ['category-1'],
-      shape: ['oval'],
       minPrice: 120_000,
       maxPrice: 730_000,
       inStock: true,

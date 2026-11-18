@@ -28,16 +28,14 @@
  */
 
 import config from '@payload-config'
-import { createTranslator } from 'next-intl'
 
-import { loadMessages } from '@/i18n/messages'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import type { Category, Collection, Colour, Product } from '@/payload-types'
 
-import { DEFAULT_SORT, SHAPES, SORT_LABELS } from './filters'
+import { DEFAULT_SORT, SORT_LABELS } from './filters'
 import { formatPriceFor, formatPrice } from './price'
 import {
   isProductAvailable,
@@ -167,9 +165,6 @@ const priceOf = lowestPriceMinor
 // Labels
 // ---------------------------------------------------------------------------------------------
 
-/** `multicolor` → `Multicolor`. The values are single lowercase words in both closed sets. */
-const titleCase = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1)
-
 const categoryTitle = (refs: Reference, slug: string): string | undefined =>
   refs.categories.find((entry) => entry.slug === slug)?.title
 
@@ -180,8 +175,7 @@ const collectionTitle = (refs: Reference, slug: string): string | undefined =>
 /**
  * A colour's customer-facing name, from the catalogue (spec 011, US3).
  *
- * It used to come from the `colour.*` message keys with `titleCase` behind it. A colour is the
- * owner's now, so its name is a localized field on the row and falls back the way every other
+ * A colour is the owner's, so its name is a localized field on the row and falls back the way every other
  * editorial label does — one place to change it rather than three JSON files (011/research.md R3).
  */
 const colourLabel = (refs: Reference, value: string): string | undefined =>
@@ -214,11 +208,6 @@ function matches(product: Product, filters: FilterState): boolean {
       typeof entry === 'number' ? String(entry) : entry.value,
     )
     if (!filters.colour.some((value) => colours.includes(value))) return false
-  }
-
-  if (filters.shape.length > 0) {
-    const shapes = product.diamondShape ?? []
-    if (!filters.shape.some((value) => shapes.includes(value))) return false
   }
 
   const price = priceOf(product)
@@ -267,9 +256,6 @@ function chipsFor(filters: FilterState, refs: Reference, locale: Locale): Applie
   }
   for (const value of filters.colour) {
     chips.push({ key: 'colour', value, label: colourLabel(refs, value) ?? value })
-  }
-  for (const value of filters.shape) {
-    chips.push({ key: 'shape', value, label: titleCase(value) })
   }
 
   // One chip for a range, two for two open ends. "$1,200 – $7,300" is one thing a visitor set and
@@ -500,19 +486,6 @@ export async function getFilterFacets(
 ): Promise<FilterFacets> {
   const [refs, all] = await Promise.all([reference(locale), catalogue(locale)])
 
-  /*
-    `createTranslator` over `loadMessages`, not `getTranslations` (spec 010, R-notes in
-    `src/lib/email/transactional.ts`).
-
-    `getTranslations` resolves through `next-intl/server`, which only exists under Next's
-    `react-server` condition — so it throws "`getTranslations` is not supported in Client
-    Components" under Vitest, where the integration tests call this function directly. The locale is
-    already a parameter here, so there is nothing to read from a request scope anyway: building the
-    translator from it is both the portable form and the honest one.
-  */
-  const messages = loadMessages(locale) as Record<string, Record<string, string>>
-  const t_shape = createTranslator({ locale, messages, namespace: 'diamondShape' })
-
   const within = categorySlug
     ? all.filter(
         (product) => typeof product.category !== 'number' && product.category.slug === categorySlug,
@@ -538,28 +511,11 @@ export async function getFilterFacets(
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((entry) => ({ value: entry.slug, label: entry.title })),
     ),
-    /*
-      **Shape is the last facet whose words live in code** (spec 010).
-
-      Every other facet here labels itself from Payload — a category, a collection and, as of spec
-      011, a colour are documents an editor writes, so their titles are localized fields that fall
-      back on their own. Shape is still an enum, `titleCase('marquise')` is an English sentence built
-      from an identifier, and it is interface chrome by the README's rule: the words come from the
-      message files and the enum stays the key.
-
-      `titleCase` remains the fallback for a value added to the enum before its key exists — an
-      English label is a better failure than a raw `diamondShape.cushion` on the page.
-    */
     colours: facet(
       within,
       (product) =>
         (product.colour ?? []).map((entry) => (typeof entry === 'number' ? String(entry) : entry.value)),
       refs.colours.map((colour) => ({ value: colour.value, label: colour.label })),
-    ),
-    shapes: facet(
-      within,
-      (product) => product.diamondShape ?? [],
-      SHAPES.map((value) => ({ value, label: t_shape.has(value) ? t_shape(value) : titleCase(value) })),
     ),
     price: {
       min: prices.length > 0 ? Math.min(...prices) : 0,

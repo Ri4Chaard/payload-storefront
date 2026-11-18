@@ -5,7 +5,7 @@ import React from 'react'
 import { ProductDetails, type ProductDetailsProps } from './product-details'
 import { useSelectedVariant } from '@/components/commerce/selected-variant'
 import { mergeAttributes } from '@/lib/catalog/mappers'
-import type { DiamondOption } from '@/lib/catalog/types'
+import type { VariantOption } from '@/lib/catalog/types'
 
 /**
  * `ProductDetails`, showing the selected stone's properties (spec 011, US2, FR-010 – FR-013).
@@ -23,12 +23,12 @@ import type { DiamondOption } from '@/lib/catalog/types'
  */
 export interface ProductDetailsForSelectionProps extends ProductDetailsProps {
   /** The stones this piece offers, each with whatever it says about itself. */
-  diamonds: DiamondOption[]
+  variantChoices: VariantOption[]
 }
 
 export function ProductDetailsForSelection({
   attributes,
-  diamonds,
+  variantChoices,
   ...props
 }: ProductDetailsForSelectionProps) {
   const selected = useSelectedVariant()
@@ -37,11 +37,11 @@ export function ProductDetailsForSelection({
     // Before a stone is chosen — the page's initial state — the piece speaks for itself (FR-012).
     if (selected === null) return attributes
 
-    const stone = diamonds.find((option) => option.id === selected)
+    const stone = variantChoices.find((option) => option.id === selected)
     if (!stone) return attributes
 
     return mergeAttributes(attributes, stone.attributes)
-  }, [attributes, diamonds, selected])
+  }, [attributes, variantChoices, selected])
 
   return <ProductDetails {...props} attributes={shown} />
 }

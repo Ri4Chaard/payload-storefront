@@ -77,7 +77,7 @@ test('every call to action leads somewhere', async ({ page }) => {
   }
 
   expect(hrefs).toContain('/category-1')
-  expect(hrefs).toContain('/all-jewelry')
+  expect(hrefs).toContain('/all-products')
   expect(hrefs).toContain('/about')
 })
 

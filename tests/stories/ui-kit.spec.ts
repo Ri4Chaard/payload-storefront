@@ -1329,7 +1329,7 @@ test('a wrapping carousel keeps both arrows and comes back round', async ({ page
 test('the jewelry row keeps the drawn card at every width and pages only when it must', async ({
   page,
 }) => {
-  await page.goto(`${STORYBOOK}/iframe.html?id=sections-jewelrycarousel--desktop&viewMode=story`, {
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-productcarousel--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
 
@@ -1363,7 +1363,7 @@ test('the jewelry row keeps the drawn card at every width and pages only when it
 
 test('the jewelry row is reachable and pageable by keyboard alone', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 })
-  await page.goto(`${STORYBOOK}/iframe.html?id=sections-jewelrycarousel--desktop&viewMode=story`, {
+  await page.goto(`${STORYBOOK}/iframe.html?id=sections-productcarousel--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
 

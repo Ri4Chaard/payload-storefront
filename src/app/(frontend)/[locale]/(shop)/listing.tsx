@@ -23,7 +23,7 @@ import { getCategories, getFilterFacets, getListing } from '@/lib/catalog/querie
 import type { DroppedFilter, FilterState } from '@/lib/catalog/types'
 
 /**
- * The listing, shared by `/[category]` and `/all-jewelry` (003/T253, T254).
+ * The listing, shared by `/[category]` and `/all-products` (003/T253, T254).
  *
  * The two routes differ in exactly two ways — the name in the title block, and whether a category
  * is seeded — so they are one renderer and two thin `page.tsx` files rather than two pages that
@@ -88,7 +88,7 @@ export async function Listing({
    * Built here rather than in the component for the reason the whole data layer exists: knowing
    * which key to strip and whether the result is a path or a query is catalogue arithmetic, and
    * `ActiveFilters` is a drawing. `removeFilter` returns to page one, and `listingHref` decides
-   * that dropping the last category means `/all-jewelry` rather than `/category-1` with nothing on it.
+   * that dropping the last category means `/all-products` rather than `/category-1` with nothing on it.
    */
   const chips: RemovableFilter[] = result.appliedChips.map((chip) => ({
     id: `${chip.key}:${chip.value}`,
@@ -184,7 +184,7 @@ function emptyState(
     return {
       title: t_catalog('nothingHereYet'),
       description: t_catalog('emptyCategoryBody'),
-      action: { href: '/all-jewelry', label: t_catalog('seeAllJewelry') },
+      action: { href: '/all-products', label: t_catalog('seeAllProducts') },
     }
   }
 
@@ -192,7 +192,7 @@ function emptyState(
     title: t_catalog('noResults'),
     description: t_catalog('noResultsBody'),
     action: {
-      href: categorySlug ? basePath : '/all-jewelry',
+      href: categorySlug ? basePath : '/all-products',
       label: t_catalog('clearAllFilters'),
     },
   }

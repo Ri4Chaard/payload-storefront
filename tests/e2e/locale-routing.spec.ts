@@ -32,7 +32,7 @@ test.afterAll(async () => {
 
 const OLD_ADDRESSES = [
   '/',
-  '/all-jewelry',
+  '/all-products',
   '/about',
   '/blog',
   '/contact',

@@ -22,7 +22,7 @@ export interface FixtureImage {
 export const heroFixture = {
   headline: 'The beauty of lab-grown diamonds',
   lede: 'Each diamond is created with care for the future, without compromising on quality or brilliance. Modern luxury that combines flawless craftsmanship, sustainability, and affordability',
-  cta: { label: 'Shop now', href: '/all-jewelry' },
+  cta: { label: 'Shop now', href: '/all-products' },
   // Decorative: a backdrop for the headline that sits on top of it, not a picture of anything the
   // headline does not already say.
   image: { src: '/photography/hero.webp', width: 1699, height: 926 } as FixtureImage,
@@ -78,30 +78,30 @@ export const categoryBandFixture = {
  */
 export const featuredFixture = {
   heading: 'All jewelry',
-  cta: { label: 'View all', href: '/all-jewelry' },
+  cta: { label: 'View all', href: '/all-products' },
   items: [
     {
       name: 'Butterfly diamond pendant',
       price: '$ 24,900',
-      href: '/all-jewelry/butterfly-diamond-pendant',
+      href: '/all-products/butterfly-diamond-pendant',
       images: [{ src: '/photography/product-pendant.webp', width: 830, height: 830 }],
     },
     {
       name: 'Pavé butterfly diamond bracelet',
       price: '$ 37,400',
-      href: '/all-jewelry/pave-butterfly-diamond-bracelet',
+      href: '/all-products/pave-butterfly-diamond-bracelet',
       images: [{ src: '/photography/product-bracelet.webp', width: 830, height: 830 }],
     },
     {
       name: 'Butterfly ruby, pink sapphire and diamond ear climbers',
       price: '$ 38,000',
-      href: '/all-jewelry/butterfly-ruby-pink-sapphire-diamond-ear-climbers',
+      href: '/all-products/butterfly-ruby-pink-sapphire-diamond-ear-climbers',
       images: [{ src: '/photography/product-ear-climbers.webp', width: 830, height: 830 }],
     },
     {
       name: 'Butterfly ruby, pink sapphire and diamond mini pendant',
       price: '$ 19,000',
-      href: '/all-jewelry/butterfly-ruby-pink-sapphire-diamond-mini-pendant',
+      href: '/all-products/butterfly-ruby-pink-sapphire-diamond-mini-pendant',
       images: [{ src: '/photography/product-mini-pendant.webp', width: 830, height: 830 }],
     },
   ],

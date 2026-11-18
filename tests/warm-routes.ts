@@ -17,7 +17,7 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 /** One of each distinct route, not one of each URL: the compiler works per route, not per query. */
 const ROUTES = [
   '/',
-  '/all-jewelry',
+  '/all-products',
   '/category-1',
   '/products/paragon-emerald-cut-diamond-engagement-ring',
   // The account flow (004). Three specs and the a11y sweep all open these, so whichever worker gets

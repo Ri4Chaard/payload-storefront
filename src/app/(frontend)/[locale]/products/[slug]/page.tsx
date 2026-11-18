@@ -12,7 +12,7 @@ import {
   SelectedVariantProvider,
 } from '@/components/commerce'
 import { addToCart, buyNow } from '@/lib/cart/actions'
-import { JewelryCarousel } from '@/components/sections'
+import { ProductCarousel } from '@/components/sections'
 import { Container, FeatureStrip } from '@/components/ui'
 import { minorUnitDigits } from '@/lib/catalog/price'
 import { prerenderable } from '@/lib/catalog/prerender'
@@ -164,7 +164,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 fromPrice={product.fromPrice}
                 description={product.description}
                 madeToOrder={product.madeToOrder}
-                diamonds={product.diamondOptions}
+                variantChoices={product.variantOptions}
                 available={product.available}
                 maxQuantity={product.maxQuantity}
                 onAddToCart={addToCart}
@@ -179,7 +179,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <ProductDetailsForSelection
                 detailsHtml={product.detailsHtml}
                 attributes={product.attributes}
-                diamonds={product.diamondOptions}
+                variantChoices={product.variantOptions}
                 warrantyHtml={shop.warrantyHtml}
                 deliveryHtml={shop.deliveryHtml}
                 // Headings from the shop global since T292a. The component still defaults them to the
@@ -200,7 +200,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         only piece in its collection, gets no strip at all rather than a heading over nothing.
       */}
       {related.length > 0 ? (
-        <JewelryCarousel
+        <ProductCarousel
           heading={t_product('completeCollection')}
           headingId="complete-the-collection"
           trackLabel={t_product('moreFromCollection')}
@@ -235,7 +235,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
  * is noise.
  */
 function ProductSchema({ product }: { product: ProductDetail }) {
-  const prices = product.diamondOptions.map((option) => option.priceMinor)
+  const prices = product.variantOptions.map((option) => option.priceMinor)
   const varies = prices.length > 1 && Math.min(...prices) !== Math.max(...prices)
   const availability = `https://schema.org/${product.available ? 'InStock' : 'OutOfStock'}`
   // Not `/ 100`. The exponent belongs to the currency — two digits for USD, none for JPY, three

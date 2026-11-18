@@ -50,7 +50,7 @@ export interface PurchasableProduct {
   id: number
   available: boolean
   /** Stone ids the piece offers, and whether each can currently be bought. */
-  diamonds: { id: number; available: boolean }[]
+  variantChoices: { id: number; available: boolean }[]
 }
 
 /**
@@ -63,7 +63,7 @@ export interface PurchasableProduct {
  */
 export type UnmetRequirement =
   | { field: 'product'; reason: 'unavailable' }
-  | { field: 'diamond'; reason: 'missing-option' | 'unavailable' }
+  | { field: 'variant'; reason: 'missing-option' | 'unavailable' }
   | { field: 'quantity'; reason: 'error' }
 
 export function validateIntent(
@@ -74,13 +74,13 @@ export function validateIntent(
   // the stone would send the visitor to fix the wrong control.
   if (!product.available) return { field: 'product', reason: 'unavailable' }
 
-  if (product.diamonds.length > 0) {
-    if (intent.variantId === undefined) return { field: 'diamond', reason: 'missing-option' }
+  if (product.variantChoices.length > 0) {
+    if (intent.variantId === undefined) return { field: 'variant', reason: 'missing-option' }
 
-    const chosen = product.diamonds.find((diamond) => diamond.id === intent.variantId)
+    const chosen = product.variantChoices.find((variantChoice) => variantChoice.id === intent.variantId)
     // An id that names no stone of THIS piece is treated exactly as an unavailable one. It can only
     // arrive from a stale page or a hand-edited request, and neither deserves a distinct message.
-    if (!chosen || !chosen.available) return { field: 'diamond', reason: 'unavailable' }
+    if (!chosen || !chosen.available) return { field: 'variant', reason: 'unavailable' }
   }
 
 
@@ -104,13 +104,13 @@ export function validateIntent(
  * than three lines in a component nobody tests.
  */
 export function intentFrom(args: {
-  diamondId: null | number
+  variantChoiceId: null | number
   productId: number
   quantity: number
 }): CartIntent {
   return {
     productId: args.productId,
     quantity: args.quantity,
-    ...(args.diamondId === null ? {} : { variantId: args.diamondId }),
+    ...(args.variantChoiceId === null ? {} : { variantId: args.variantChoiceId }),
   }
 }

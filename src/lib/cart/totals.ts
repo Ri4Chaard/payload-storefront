@@ -1,5 +1,5 @@
 import { CATALOG_CURRENCY, formatPrice } from '@/lib/catalog/price'
-import type { DiamondOption, ProductDetail } from '@/lib/catalog/types'
+import type { VariantOption, ProductDetail } from '@/lib/catalog/types'
 
 import { emptyCart, type CartIssue, type CartLineView, type CartView } from './types'
 
@@ -53,7 +53,7 @@ function orphanLine(row: RawCartLine, quantity: number): CartLineView {
     title: 'This piece is no longer available',
     href: null,
     image: null,
-    diamond: null,
+    variantChoice: null,
     unitPrice: formatPrice(0),
     lineTotal: formatPrice(0),
     unitMinor: 0,
@@ -92,7 +92,7 @@ export function resolveLine(
 
   const variantId = relationId(row.variant)
 
-  const chosen: DiamondOption | undefined = product.diamondOptions.find(
+  const chosen: VariantOption | undefined = product.variantOptions.find(
     (option) => option.id === variantId,
   )
 
@@ -106,7 +106,7 @@ export function resolveLine(
   // exists is treated exactly as an unavailable one — it can only arrive from a stale page or a
   // hand-edited request, and neither deserves a distinct message.
   const available =
-    product.diamondOptions.length > 0 ? Boolean(chosen?.available) : product.available
+    product.variantOptions.length > 0 ? Boolean(chosen?.available) : product.available
 
   if (!available) {
     issues.push({
@@ -137,7 +137,7 @@ export function resolveLine(
       title: product.title,
       href: product.href,
       image: product.images[0] ?? null,
-      diamond: chosen?.label ?? null,
+      variantChoice: chosen?.label ?? null,
       unitPrice: formatPrice(unitMinor),
       lineTotal: formatPrice(lineMinor),
       unitMinor,

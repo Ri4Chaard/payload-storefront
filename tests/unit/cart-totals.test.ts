@@ -31,7 +31,7 @@ const RING: ProductDetail = {
   description: null,
   gallery: [],
   detailsHtml: null,
-  diamondOptions: [
+  variantOptions: [
     { id: 11, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
     { id: 12, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
     {
@@ -58,7 +58,7 @@ const PENDANT: ProductDetail = {
   title: 'Butterfly Diamond Pendant',
   href: '/products/pendant',
   priceMinor: 2490000,
-  diamondOptions: [],
+  variantOptions: [],
 }
 
 const line = (over: Partial<RawCartLine> = {}): RawCartLine => ({
@@ -78,7 +78,7 @@ describe('resolveLine', () => {
 
     expect(resolved.unitMinor).toBe(3832000)
     expect(resolved.unitPrice).toBe('$38,320')
-    expect(resolved.diamond).toBe('Lab 1.5 ct D VS1')
+    expect(resolved.variantChoice).toBe('Lab 1.5 ct D VS1')
   })
 
   it('prices a piece with no stones from the piece itself', () => {
@@ -88,7 +88,7 @@ describe('resolveLine', () => {
     )
 
     expect(resolved.unitMinor).toBe(2490000)
-    expect(resolved.diamond).toBeNull()
+    expect(resolved.variantChoice).toBeNull()
   })
 
   /**

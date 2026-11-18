@@ -5,7 +5,7 @@ import React from 'react'
 
 import { Field } from '@/components/ui/field'
 import { Select, type SelectOption } from '@/components/ui/select'
-import type { DiamondOption } from '@/lib/catalog/types'
+import type { VariantOption } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 /**
@@ -29,34 +29,34 @@ import { cn } from '@/lib/cn'
  * added to a cart in a single action.
  */
 export interface ProductOptionsProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
-  diamonds: DiamondOption[]
+  variantChoices: VariantOption[]
   /** The chosen stone's id. `null` is "not chosen yet". */
-  diamond: number | null
-  onDiamondChange: (id: number) => void
+  variantChoice: number | null
+  onVariantChange: (id: number) => void
   /** Ids, so the page can keep them unique when more than one of these is ever on a page. */
   idPrefix?: string
-  diamondLabel?: string
+  variantLabel?: string
   disabled?: boolean
 }
 
 export function ProductOptions({
-  diamonds,
-  diamond,
-  onDiamondChange,
+  variantChoices,
+  variantChoice,
+  onVariantChange,
   idPrefix = 'product',
-  diamondLabel: diamondLabelProp,
+  variantLabel: variantLabelProp,
   disabled = false,
   className,
   ...props
 }: ProductOptionsProps) {
   const t_product = useTranslations('product')
   // Resolved in the body, not as default parameters: `useTranslations` is a hook (spec 010).
-  const diamondLabel = diamondLabelProp ?? t_product('chooseDiamondHeading')
-  if (diamonds.length === 0) return null
+  const variantLabel = variantLabelProp ?? t_product('chooseVariantHeading')
+  if (variantChoices.length === 0) return null
 
-  const diamondId = `${idPrefix}-diamond`
+  const variantFieldId = `${idPrefix}-variant`
 
-  const stones: SelectOption[] = diamonds.map((option) => ({
+  const stones: SelectOption[] = variantChoices.map((option) => ({
     value: String(option.id),
     label: option.label,
     // The price where it can be bought, the reason it cannot where it cannot. A price beside a
@@ -67,14 +67,14 @@ export function ProductOptions({
 
   return (
     <div className={cn('flex flex-col gap-3 md:gap-4 xl:flex-row xl:gap-5', className)} {...props}>
-      {diamonds.length > 0 ? (
-        <Field id={diamondId} label={diamondLabel} disabled={disabled} className="min-w-0 flex-1">
+      {variantChoices.length > 0 ? (
+        <Field id={variantFieldId} label={variantLabel} disabled={disabled} className="min-w-0 flex-1">
           <Select
-            id={diamondId}
+            id={variantFieldId}
             options={stones}
-            value={diamond === null ? null : String(diamond)}
-            onChange={(value) => onDiamondChange(Number(value))}
-            placeholder={t_product('chooseDiamond')}
+            value={variantChoice === null ? null : String(variantChoice)}
+            onChange={(value) => onVariantChange(Number(value))}
+            placeholder={t_product('chooseVariant')}
             disabled={disabled}
           />
         </Field>

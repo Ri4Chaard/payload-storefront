@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-/** `/all-jewelry` — the same block, a different name. Node 355:7142. */
+/** `/all-products` — the same block, a different name. Node 355:7142. */
 export const AllJewelry: Story = { args: { title: 'All jewelry' } }
 
 /** No sentence set on the category and none in shop settings: the block closes over it. */

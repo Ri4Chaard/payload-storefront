@@ -78,7 +78,7 @@ const intentFor = (
 ) => ({
   productId: product.id,
   quantity: 1,
-  ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
+  ...(product.variantOptions[0] ? { variantId: product.variantOptions[0].id } : {}),
   ...over,
 })
 
@@ -103,7 +103,7 @@ describe('line identity (FR-004)', () => {
 
   it('treats the same ring with two different stones as two lines', async () => {
     const owner = await guest()
-    const [first, second] = ring.diamondOptions
+    const [first, second] = ring.variantOptions
     expect(second).toBeDefined()
 
     await addLine(owner, owner.cartId, intentFor(ring, { variantId: first!.id }))
@@ -151,11 +151,11 @@ describe('what may be added (FR-002, FR-003)', () => {
     is the only choice a piece asks for now, so there is one unmade choice to name rather than two.
   */
   it('names the unmade choice rather than refusing vaguely', async () => {
-    const withoutStone = await checkIntent({ productId: ring.id, quantity: 1 }, 'en')
-    expect(withoutStone).toEqual({ ok: false, reason: 'missing-option', field: 'diamond' })
+    const withoutVariant = await checkIntent({ productId: ring.id, quantity: 1 }, 'en')
+    expect(withoutVariant).toEqual({ ok: false, reason: 'missing-option', field: 'variant' })
 
     const complete = await checkIntent(
-      { productId: ring.id, quantity: 1, variantId: ring.diamondOptions[0]!.id },
+      { productId: ring.id, quantity: 1, variantId: ring.variantOptions[0]!.id },
       'en',
     )
     expect(complete.ok, 'a piece with its one choice made is addable').toBe(true)
@@ -220,8 +220,8 @@ describe('changing and removing (FR-009, FR-010)', () => {
 
   it('removes the line it is given and leaves the rest', async () => {
     const owner = await guest()
-    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[0]!.id }))
-    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[1]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.variantOptions[0]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.variantOptions[1]!.id }))
 
     const rows = await rowsOf(owner)
     await dropLine(owner, owner.cartId, String(rows[0]!.id))
@@ -291,8 +291,8 @@ describe('buy now never touches the cart (FR-020, SC-005)', () => {
   it('leaves an existing cart byte-identical — same lines, quantities and row ids', async () => {
     const owner = await guest()
 
-    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[0]!.id }))
-    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.diamondOptions[1]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.variantOptions[0]!.id }))
+    await addLine(owner, owner.cartId, intentFor(ring, { variantId: ring.variantOptions[1]!.id }))
     await addLine(owner, owner.cartId, intentFor(pendant, { quantity: 2 }))
 
     const before = await rowsOf(owner)

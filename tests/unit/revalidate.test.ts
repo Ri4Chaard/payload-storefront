@@ -44,7 +44,7 @@ describe('revalidation hooks', () => {
     await change()
 
     expect(revalidatePath).not.toHaveBeenCalledWith('/')
-    expect(revalidatePath).not.toHaveBeenCalledWith('/all-jewelry')
+    expect(revalidatePath).not.toHaveBeenCalledWith('/all-products')
   })
 
   it('asks for drafts too, so an unpublished piece stops being served', async () => {

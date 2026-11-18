@@ -13,7 +13,7 @@ import { announceCartCount } from '@/components/layout/cart-count'
 import type { CheckoutResult } from '@/lib/cart/actions-types'
 import type { CartActionResult } from '@/lib/cart/types'
 import { intentFrom, type CartIntent } from '@/lib/catalog/cart-intent'
-import type { DiamondOption } from '@/lib/catalog/types'
+import type { VariantOption } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 import { ProductOptions } from '../product-options'
@@ -69,7 +69,7 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
   description: string | null
   /** FR-007. Whether to say so under the price — a fact about the piece, never a count. */
   madeToOrder?: boolean
-  diamonds: DiamondOption[]
+  variantChoices: VariantOption[]
   /** The piece as a whole. An unavailable one says so in text, not in colour (FR-040). */
   available: boolean
   /** The ceiling for a piece with no stones. With stones, each stone carries its own. */
@@ -97,7 +97,7 @@ export function ProductPurchase({
   fromPrice,
   description,
   madeToOrder = false,
-  diamonds,
+  variantChoices,
   available,
   maxQuantity,
   onAddToCart,
@@ -107,7 +107,7 @@ export function ProductPurchase({
 }: ProductPurchaseProps) {
   const t_product = useTranslations('product')
   const locale = useLocale() as Locale
-  const [diamond, setDiamond] = React.useState<number | null>(null)
+  const [variantChoice, setVariantChoice] = React.useState<number | null>(null)
   /*
     The details beside this column show the selected stone's own properties (spec 011, FR-013), and
     they are a sibling in the server-rendered page rather than a child. Publishing the id is the
@@ -122,7 +122,7 @@ export function ProductPurchase({
     null,
   )
 
-  const chosen = diamonds.find((option) => option.id === diamond) ?? null
+  const chosen = variantChoices.find((option) => option.id === variantChoice) ?? null
   const shown = chosen ? chosen.price : fromPrice ? `From ${fromPrice}` : price
 
   /**
@@ -155,14 +155,13 @@ export function ProductPurchase({
     action: 'buy' | 'cart' = 'cart',
   ): string => {
     // The two buttons do different things, so an unmade choice is worded for the one that was
-    // pressed. BUY NOW telling somebody to choose a size "before adding this piece to your cart"
+    // pressed. BUY NOW telling somebody to choose an option "before adding this item to your cart"
     // describes an action they did not take.
-    const before = action === 'cart' ? 'before adding this piece to your cart' : 'before ordering'
-
-    if (field === 'diamond') {
-      return reason === 'missing-option'
-        ? `Choose a diamond ${before}.`
-        : t_product('diamondUnavailable')
+    if (field === 'variant') {
+      if (reason !== 'missing-option') return t_product('variantUnavailable')
+      return action === 'cart'
+        ? t_product('chooseVariantBeforeCart')
+        : t_product('chooseVariantBeforeOrder')
     }
     if (field === 'product') return t_product('unavailable')
     if (field === 'quantity') return t_product('chooseQuantity')
@@ -174,7 +173,7 @@ export function ProductPurchase({
     setStatus(null)
     startTransition(async () => {
       const result = await onAddToCart(
-        intentFrom({ productId, quantity, diamondId: diamond,  }),
+        intentFrom({ productId, quantity, variantChoiceId: variantChoice,  }),
         locale,
       )
 
@@ -206,7 +205,7 @@ export function ProductPurchase({
     setStatus(null)
     startTransition(async () => {
       const result = await onBuyNow(
-        intentFrom({ productId, quantity, diamondId: diamond,  }),
+        intentFrom({ productId, quantity, variantChoiceId: variantChoice,  }),
         locale,
       )
 
@@ -225,7 +224,7 @@ export function ProductPurchase({
    * The server checks it again — this one can be skipped by anybody posting to the action directly.
    */
   function missingChoice(): null | string {
-    if (diamonds.length > 0 && diamond === null) return refusal('diamond', 'missing-option', 'buy')
+    if (variantChoices.length > 0 && variantChoice === null) return refusal('variant', 'missing-option', 'buy')
     return null
   }
 
@@ -263,10 +262,10 @@ export function ProductPurchase({
       <hr className="mt-5 border-black/10 xl:hidden" />
 
       <ProductOptions
-        diamonds={diamonds}
-        diamond={diamond}
-        onDiamondChange={(id) => {
-          setDiamond(id)
+        variantChoices={variantChoices}
+        variantChoice={variantChoice}
+        onVariantChange={(id) => {
+          setVariantChoice(id)
           publishSelection(id)
         }}
         disabled={!available}

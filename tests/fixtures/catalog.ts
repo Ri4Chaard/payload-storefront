@@ -201,7 +201,7 @@ const attribute = (name: string): Attribute => {
 // ---------------------------------------------------------------------------------------------
 
 export const variantTypeFixtures: VariantType[] = [
-  { id: 1, name: 'diamond', label: 'Choose Your Diamond:', ...STAMPS },
+  { id: 1, name: 'variant', label: 'Choose Your Diamond:', ...STAMPS },
 ]
 
 /** `surcharge` is dollars ON TOP of the piece's base price — the same arithmetic the seed does. */
@@ -236,11 +236,10 @@ interface Piece {
   description?: string
   collectionSlugs?: string[]
   colour?: string[]
-  diamondShape?: Product['diamondShape']
   availability?: Product['availability']
   inventory?: number
   attributes?: { name: string; value: string }[]
-  withStones?: boolean
+  withVariants?: boolean
   status?: 'draft' | 'published'
 }
 
@@ -251,7 +250,7 @@ function build(piece: Piece): Product {
   const base = usd(piece.price)
   const stocked = piece.availability === 'stock-tracked'
 
-  const own: Variant[] = piece.withStones
+  const own: Variant[] = piece.withVariants
     ? STONES.map((stone, index) => {
         const option = variantOptionFixtures[index]
         if (!option) throw new Error(`no stone at index ${index}`)
@@ -294,9 +293,8 @@ function build(piece: Piece): Product {
     category: category(piece.categorySlug),
     collections: (piece.collectionSlugs ?? []).map(collection),
     colour: (piece.colour ?? []).map(colour),
-    diamondShape: piece.diamondShape ?? [],
-    enableVariants: Boolean(piece.withStones),
-    variantTypes: piece.withStones ? variantTypeFixtures : [],
+    enableVariants: Boolean(piece.withVariants),
+    variantTypes: piece.withVariants ? variantTypeFixtures : [],
     variants: { docs: own, hasNextPage: false, totalDocs: own.length },
     priceInUSDEnabled: true,
     priceInUSD: base,
@@ -320,9 +318,8 @@ const DRAWN: Piece[] = [
       'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
     collectionSlugs: ['deia'],
     colour: ['clear'],
-    diamondShape: ['emerald', 'round'],
     availability: 'made-to-order',
-    withStones: true,
+    withVariants: true,
     attributes: [
       { name: 'metal', value: '18k white gold' },
       { name: 'carat', value: '1.5 ct centre stone' },
@@ -340,7 +337,6 @@ const DRAWN: Piece[] = [
     description: 'Butterflies in pavé diamonds, set along a flexible band.',
     collectionSlugs: ['molten'],
     colour: ['clear'],
-    diamondShape: ['round', 'oval'],
     attributes: [
       { name: 'metal', value: '18k white gold' },
       { name: 'carat', value: '4.2 ct total' },
@@ -357,7 +353,6 @@ const DRAWN: Piece[] = [
     description: 'A single butterfly, pavé set, on a fine chain.',
     collectionSlugs: ['marvel'],
     colour: ['clear'],
-    diamondShape: ['round'],
     availability: 'stock-tracked',
     inventory: 3,
     attributes: [{ name: 'metal', value: '18k white gold' }],
@@ -372,7 +367,6 @@ const DRAWN: Piece[] = [
     description: 'Ruby and pink sapphire butterflies that climb the ear.',
     collectionSlugs: ['spartan'],
     colour: ['multicolor'],
-    diamondShape: ['round', 'marquise'],
     attributes: [{ name: 'metal', value: '18k rose gold' }],
   },
   {
@@ -386,7 +380,6 @@ const DRAWN: Piece[] = [
     description: 'The mini butterfly, in ruby and pink sapphire.',
     collectionSlugs: ['spartan'],
     colour: ['multicolor'],
-    diamondShape: ['pear'],
     availability: 'stock-tracked',
     inventory: 0,
     attributes: [{ name: 'metal', value: '18k rose gold' }],
@@ -443,16 +436,6 @@ const FILLER_COLOURS: string[][] = [
   ['multicolor'],
   ['clear', 'black'],
 ]
-const FILLER_SHAPES: NonNullable<Product['diamondShape']>[] = [
-  ['round'],
-  ['oval'],
-  ['emerald'],
-  ['pear'],
-  ['marquise'],
-  ['princess'],
-  ['baguette'],
-]
-
 /** A piece is photographed as what it is. Rings get the ring, necklaces get a necklace. */
 const GALLERY_FOR: Record<string, Media[]> = {
   'category-1': [image(0), image(1)],
@@ -481,7 +464,6 @@ const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
     description: `${title}, made to order in our atelier.`,
     collectionSlugs: [pick(['deia', 'marvel', 'molten', 'spartan'], index)],
     colour: pick(FILLER_COLOURS, index),
-    diamondShape: pick(FILLER_SHAPES, index),
     availability: stocked ? 'stock-tracked' : 'made-to-order',
     // Every fourth is tracked, and one of those is empty — the IN-STOCK ONLY filter needs both.
     inventory: index === 7 ? 0 : 2,
@@ -504,7 +486,6 @@ const UNPUBLISHED: Piece = {
   description: 'Not yet announced.',
   collectionSlugs: ['spartan'],
   colour: ['clear'],
-  diamondShape: ['baguette'],
   status: 'draft',
 }
 

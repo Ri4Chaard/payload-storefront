@@ -44,8 +44,8 @@ const meta = {
     filters: storyFilters,
     facets: storyFacets,
     categories: storyCategories,
-    clearHref: '/all-jewelry',
-    currentHref: '/all-jewelry',
+    clearHref: '/all-products',
+    currentHref: '/all-products',
   },
 } satisfies Meta<typeof FilterDrawer>
 
@@ -62,7 +62,6 @@ export const PreTicked: Story = {
       ...storyFilters,
       category: ['category-1'],
       colour: ['clear'],
-      shape: ['oval', 'emerald'],
       minPrice: 120_000,
       maxPrice: 730_000,
       inStock: true,

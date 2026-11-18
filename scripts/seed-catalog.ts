@@ -203,18 +203,18 @@ const attributes = {
 console.log('› the diamond variant type and its stones')
 const existingType = await payload.find({
   collection: 'variantTypes',
-  where: { name: { equals: 'diamond' } },
+  where: { name: { equals: 'variant' } },
   limit: 1,
 })
-const diamondType =
+const optionType =
   existingType.docs[0] ??
   (await payload.create({
     collection: 'variantTypes',
-    data: { name: 'diamond', label: 'Choose Your Diamond:' },
+    data: { name: 'variant', label: 'Choose Your Diamond:' },
     context: skipRevalidation,
   }))
 
-const stoneSpecs = [
+const variantSpecs = [
   { label: 'Lab 1.0 ct D VS1', value: 'lab-1-0-d-vs1', price: 0, inventory: 4 },
   {
     label: 'Lab 1.5 ct each D VS1 With Halo',
@@ -228,7 +228,7 @@ const stoneSpecs = [
 ]
 
 const stones: Record<string, { id: number | string }> = {}
-for (const spec of stoneSpecs) {
+for (const spec of variantSpecs) {
   const found = await payload.find({
     collection: 'variantOptions',
     where: { value: { equals: spec.value } },
@@ -238,7 +238,7 @@ for (const spec of stoneSpecs) {
     found.docs[0] ??
     (await payload.create({
       collection: 'variantOptions',
-      data: { variantType: diamondType.id, label: spec.label, value: spec.value },
+      data: { variantType: optionType.id, label: spec.label, value: spec.value },
       context: skipRevalidation,
     }))
 }
@@ -289,10 +289,9 @@ type ProductSeed = {
   description: string
   collections?: (number | string)[]
   colour?: string[]
-  diamondShape?: string[]
   availability: 'made-to-order' | 'stock-tracked'
   inventory?: number
-  withStones?: boolean
+  withVariants?: boolean
   attributes?: { attribute: number | string; value: string }[]
   /** Published unless it says otherwise. One draft exists so FR-009 is exercised, not assumed. */
   status?: 'draft' | 'published'
@@ -322,9 +321,8 @@ const productSeeds: ProductSeed[] = [
       'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
     collections: [need(collections, 'deia', 'collection').id],
     colour: ['clear'],
-    diamondShape: ['emerald', 'round'],
     availability: 'made-to-order',
-    withStones: true,
+    withVariants: true,
     attributes: [
       { attribute: attributes.metal.id, value: '18k white gold' },
       { attribute: attributes.carat.id, value: '1.5 ct centre stone' },
@@ -341,7 +339,6 @@ const productSeeds: ProductSeed[] = [
     description: 'Butterflies in pavé diamonds, set along a flexible band.',
     collections: [need(collections, 'molten', 'collection').id],
     colour: ['clear'],
-    diamondShape: ['round', 'oval'],
     availability: 'made-to-order',
     attributes: [
       { attribute: attributes.metal.id, value: '18k white gold' },
@@ -358,7 +355,6 @@ const productSeeds: ProductSeed[] = [
     description: 'A single butterfly in pavé diamonds on a fine chain.',
     collections: [need(collections, 'deia', 'collection').id],
     colour: ['clear'],
-    diamondShape: ['round'],
     availability: 'made-to-order',
     attributes: [{ attribute: attributes.metal.id, value: '18k white gold' }],
   },
@@ -373,7 +369,6 @@ const productSeeds: ProductSeed[] = [
       'Rubies and pink sapphires graduate along the ear in a climbing butterfly setting.',
     collections: [need(collections, 'marvel', 'collection').id],
     colour: ['multicolor'],
-    diamondShape: ['pear', 'marquise'],
     availability: 'stock-tracked',
     inventory: 0,
     attributes: [{ attribute: attributes.metal.id, value: '18k rose gold' }],
@@ -388,7 +383,6 @@ const productSeeds: ProductSeed[] = [
     description: 'The butterfly at its smallest, in ruby and pink sapphire.',
     collections: [need(collections, 'spartan', 'collection').id],
     colour: ['multicolor'],
-    diamondShape: ['round'],
     availability: 'stock-tracked',
     inventory: 3,
     attributes: [{ attribute: attributes.metal.id, value: '18k rose gold' }],
@@ -414,7 +408,6 @@ const productSeeds: ProductSeed[] = [
     description: 'Кольцо из белого золота с бриллиантом огранки «принцесса».',
     collections: [need(collections, 'deia', 'collection').id],
     colour: ['clear'],
-    diamondShape: ['princess'],
     availability: 'made-to-order',
     attributes: [{ attribute: attributes.metal.id, value: '18k white gold' }],
   },
@@ -460,10 +453,6 @@ const FILLER: { title: string; categorySlug: keyof typeof categories }[] = [
 ]
 
 const FILLER_COLOURS = [['clear'], ['black'], ['green'], ['multicolor'], ['clear', 'black']]
-const FILLER_SHAPES = [
-  ['round'], ['oval'], ['emerald'], ['pear'], ['marquise'], ['princess'], ['baguette'],
-]
-
 /** A piece is photographed as what it is. Rings get the ring, necklaces get a necklace. */
 const GALLERY_FOR: Record<string, (number | string)[]> = {
   'category-1': [media.ringPackshot.id, media.ringJacket.id],
@@ -498,7 +487,6 @@ for (const [index, { title, categorySlug }] of FILLER.entries()) {
     description: `${title}, made to order in our atelier.`,
     collections: [need(collections, pick(['deia', 'marvel', 'molten', 'spartan'], index), 'collection').id],
     colour: pick(FILLER_COLOURS, index),
-    diamondShape: pick(FILLER_SHAPES, index),
     availability: stocked ? 'stock-tracked' : 'made-to-order',
     inventory: index === 7 ? 0 : 2,
     attributes: [
@@ -521,7 +509,6 @@ productSeeds.push({
   description: 'Not yet announced.',
   collections: [need(collections, 'spartan', 'collection').id],
   colour: ['clear'],
-  diamondShape: ['baguette'],
   availability: 'made-to-order',
   status: 'draft',
 })
@@ -536,14 +523,13 @@ for (const seed of productSeeds) {
     category: seed.category.id,
     collections: seed.collections ?? [],
     colour: (seed.colour ?? []).map((value) => need(colours, value, 'colour').id),
-    diamondShape: seed.diamondShape ?? [],
     attributes: seed.attributes ?? [],
     availability: seed.availability,
     ...(seed.availability === 'stock-tracked' ? { inventory: seed.inventory ?? 0 } : {}),
     priceInUSDEnabled: true,
     priceInUSD: usd(seed.price),
-    enableVariants: Boolean(seed.withStones),
-    ...(seed.withStones ? { variantTypes: [diamondType.id] } : {}),
+    enableVariants: Boolean(seed.withVariants),
+    ...(seed.withVariants ? { variantTypes: [optionType.id] } : {}),
     _status: seed.status ?? ('published' as const),
   }
 
@@ -568,7 +554,7 @@ for (const seed of productSeeds) {
 
   console.log(`  · ${seed.title}`)
 
-  if (!seed.withStones) {
+  if (!seed.withVariants) {
     // Re-running after moving the stones elsewhere must not leave orphans behind.
     const orphans = await payload.find({
       collection: 'variants',
@@ -584,7 +570,7 @@ for (const seed of productSeeds) {
 
   // Variants are created after the product, because `validateOptions` checks that each option's
   // variant type is actually enabled on the parent.
-  for (const spec of stoneSpecs) {
+  for (const spec of variantSpecs) {
     const stone = need(stones, spec.value, 'stone')
     const existing = await payload.find({
       collection: 'variants',
@@ -741,7 +727,7 @@ await payload.updateGlobal({
         eyebrow: 'THE AURUM STANDARD',
         heading: 'SELECTED FOR BRILLIANCE. CRAFTED WITHOUT COMPROMISE.',
         body: 'Every diamond is carefully considered for its beauty, character, and exceptional quality. Because for us, meeting the standard is only the beginning.',
-        cta: { label: 'EXPLORE THE COLLECTION', href: '/all-jewelry' },
+        cta: { label: 'EXPLORE THE COLLECTION', href: '/all-products' },
         media: photo(storyMedia.standard.id),
         textSide: 'left',
       },

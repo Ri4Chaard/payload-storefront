@@ -115,7 +115,7 @@ describe('prices', () => {
   })
 
   it('orders the stones cheapest first and keeps the one with no count', () => {
-    const options = toProductDetail(RING, 'en').diamondOptions
+    const options = toProductDetail(RING, 'en').variantOptions
     expect(options.map((option) => option.priceMinor)).toEqual([3832000, 4252000, 4792000, 5672000])
     expect(options.at(-1)?.label).toBe('Natural 1.5 ct E VS2')
 
@@ -130,7 +130,7 @@ describe('prices', () => {
     expect(options.at(-1)?.maxQuantity).toBeUndefined()
 
     const tracked = toProductDetail({ ...RING, availability: 'stock-tracked' }, 'en')
-    expect(tracked.diamondOptions.at(-1)?.available).toBe(false)
+    expect(tracked.variantOptions.at(-1)?.available).toBe(false)
   })
 })
 

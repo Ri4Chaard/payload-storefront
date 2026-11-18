@@ -4,7 +4,7 @@ import type { CatalogImage } from '@/lib/catalog/types'
  * What the home page renders, with no Payload document in sight (spec 010).
  *
  * **The shapes are the components' props, not the global's fields.** `Hero`, `CategoryBand`,
- * `JewelryCarousel` and `AboutBand` were built against `src/mocks/home.ts` and are unchanged by this
+ * `ProductCarousel` and `AboutBand` were built against `src/mocks/home.ts` and are unchanged by this
  * move — which is the point of a mapper. A view model that mirrored the global would have made
  * replacing the fixtures a rewrite of four components rather than a rewrite of one file.
  *

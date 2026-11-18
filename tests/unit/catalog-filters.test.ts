@@ -22,7 +22,6 @@ const FULL: FilterState = {
   category: ['category-1', 'category-3'],
   collection: ['molten'],
   colour: ['black', 'clear'],
-  shape: ['pear', 'round'],
   minPrice: 120000,
   maxPrice: 730000,
   inStock: true,
@@ -85,12 +84,6 @@ describe('unknown values are dropped and reported', () => {
     const { filters, dropped } = parseFilters({ colour: ['black', 'purple'] })
     expect(filters.colour).toEqual(['black', 'purple'])
     expect(dropped).toEqual([])
-  })
-
-  it('still judges shape, which is still an enum', () => {
-    const { filters, dropped } = parseFilters({ shape: ['round', 'trillion'] })
-    expect(filters.shape).toEqual(['round'])
-    expect(dropped).toEqual([{ key: 'shape', value: 'trillion' }])
   })
 
   it('drops an unknown sort rather than sorting by nothing', () => {
@@ -162,9 +155,9 @@ describe('hasActiveFilters', () => {
 
 describe('toggleFilter', () => {
   it('adds a value that is absent and removes one that is present', () => {
-    const on = toggleFilter(DEFAULT_FILTERS, 'shape', 'oval')
-    expect(on.shape).toEqual(['oval'])
-    expect(toggleFilter(on, 'shape', 'oval').shape).toEqual([])
+    const on = toggleFilter(DEFAULT_FILTERS, 'colour', 'black')
+    expect(on.colour).toEqual(['black'])
+    expect(toggleFilter(on, 'colour', 'black').colour).toEqual([])
   })
 
   it('returns to page one, because a narrower grid may not have the page you are standing on', () => {
@@ -173,10 +166,10 @@ describe('toggleFilter', () => {
 
   it('leaves every other group alone', () => {
     const filters = { ...DEFAULT_FILTERS, category: ['category-1'], colour: ['black' as const] }
-    expect(toggleFilter(filters, 'shape', 'oval')).toMatchObject({
+    expect(toggleFilter(filters, 'collection', 'molten')).toMatchObject({
       category: ['category-1'],
       colour: ['black'],
-      shape: ['oval'],
+      collection: ['molten'],
     })
   })
 })

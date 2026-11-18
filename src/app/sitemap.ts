@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { getEnabledLocales } from '@/lib/i18n/enabled'
 import { BLOG_ROOT, articleHref } from '@/lib/blog/blog-url'
 import { getArticleSlugs } from '@/lib/blog/queries'
-import { ALL_JEWELRY } from '@/lib/catalog/listing-url'
+import { ALL_PRODUCTS } from '@/lib/catalog/listing-url'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 import { getCategories, getProductSlugs } from '@/lib/catalog/queries'
 import { policyHref } from '@/lib/policies/policy-url'
@@ -78,7 +78,7 @@ const STATIC_ROUTES: {
   priority: number
 }[] = [
   { path: '/', changeFrequency: 'weekly', priority: 1 },
-  { path: ALL_JEWELRY, changeFrequency: 'daily', priority: 0.9 },
+  { path: ALL_PRODUCTS, changeFrequency: 'daily', priority: 0.9 },
   { path: BLOG_ROOT, changeFrequency: 'weekly', priority: 0.8 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.6 },
   /*

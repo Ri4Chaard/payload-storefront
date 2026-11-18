@@ -86,7 +86,7 @@ const COMPONENTS = [
   'Sections/AboutBand',
   'Sections/CategoryBand',
   'Sections/Hero',
-  'Sections/JewelryCarousel',
+  'Sections/ProductCarousel',
   'Sections/ListingHeader',
   'Sections/SectionHeading',
   'Layout/ContactBanner',
@@ -236,8 +236,8 @@ const RESPONSIVE_STORIES: {
     widths: ['mobile', 'tablet'],
   },
   {
-    title: 'Sections/JewelryCarousel',
-    id: 'sections-jewelrycarousel--desktop',
+    title: 'Sections/ProductCarousel',
+    id: 'sections-productcarousel--desktop',
     widths: ['mobile', 'tablet'],
   },
 ]

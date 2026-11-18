@@ -32,7 +32,7 @@ export default async function NotFound() {
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-2.5">
-        <Button variant="primary" href="/all-jewelry">
+        <Button variant="primary" href="/all-products">
           {t_nav('browseAll')}
         </Button>
         <Button variant="outline" href="/">

@@ -11,7 +11,7 @@
  * cached since spec 003; `/blog/[slug]` joins it in spec 007, for the same reason — many pages,
  * each a pure function of one document, changing rarely and read often.
  *
- * The absent ones are absent because they are not cached. `/[category]` and `/all-jewelry` read
+ * The absent ones are absent because they are not cached. `/[category]` and `/all-products` read
  * `searchParams` — a filtered grid is a function of the query string — and `/`, `/about` and
  * `/blog` are `force-dynamic` because a page prerendered from a database the container build cannot
  * reach would bake empty and stay empty. `/cart` (spec 005) is the sixth: it reads the session and

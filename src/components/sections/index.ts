@@ -23,7 +23,7 @@ export { CategoryBand, type CategoryBandProps } from './category-band'
 export { Hero, type HeroProps } from './hero'
 export { ListingHeader, type ListingHeaderProps } from './listing-header'
 export {
-  JewelryCarousel,
-  type JewelryCarouselProps,
-} from './jewelry-carousel'
+  ProductCarousel,
+  type ProductCarouselProps,
+} from './product-carousel'
 export { SectionHeading, type SectionHeadingProps } from './section-heading'

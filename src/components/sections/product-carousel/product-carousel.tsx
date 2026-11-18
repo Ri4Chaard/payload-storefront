@@ -27,7 +27,7 @@ import { SectionHeading } from '../section-heading'
  * the gap does not silently break the arithmetic. Hardcoding 415px would be correct at exactly
  * 1920 and wrong at every other desktop width.
  */
-export interface JewelryCarouselProps extends React.ComponentProps<'section'> {
+export interface ProductCarouselProps extends React.ComponentProps<'section'> {
   heading: string
   items: {
     name: string
@@ -59,7 +59,7 @@ export interface JewelryCarouselProps extends React.ComponentProps<'section'> {
   autoAdvance?: number
 }
 
-export function JewelryCarousel({
+export function ProductCarousel({
   heading,
   items,
   cta,
@@ -68,14 +68,14 @@ export function JewelryCarousel({
   autoAdvance,
   className,
   ...props
-}: JewelryCarouselProps) {
+}: ProductCarouselProps) {
   const t_catalog = useTranslations('catalog')
   /*
     Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */
-  const trackLabel = trackLabelProp ?? t_catalog('featuredJewelry')
+  const trackLabel = trackLabelProp ?? t_catalog('featuredProducts')
   return (
     <Container
       as="section"

@@ -18,10 +18,10 @@ const ROUTES = [
   // A category listing and the whole shop: the same frame, but only one of them pages, and
   // pagination is a set of controls nothing else on the site has (003/T257).
   '/category-1',
-  '/all-jewelry?page=2',
+  '/all-products?page=2',
   // The empty state and the branded 404 are both pages a visitor reaches by accident, which is
   // exactly when they can least afford to be unusable.
-  '/all-jewelry?maxPrice=1',
+  '/all-products?maxPrice=1',
   '/rungs',
   // A piece with stones and sizes, and one with neither: the selectors, the quantity stepper and
   // the two actions only exist on the first, and the second is what proves the column closes over
@@ -160,7 +160,7 @@ for (const { name, width, height } of [
     page,
   }) => {
     await page.setViewportSize({ width, height })
-    await page.goto('/all-jewelry')
+    await page.goto('/all-products')
     await page.waitForLoadState('networkidle')
 
     await page.getByRole('link', { name: /^Filters/ }).click()
@@ -379,7 +379,7 @@ for (const { name, width, height } of [
     await page.setViewportSize({ width, height })
 
     await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
-    await page.getByRole('combobox', { name: /diamond/i }).click()
+    await page.getByRole('combobox', { name: /variantChoice/i }).click()
     await page.getByRole('option').first().click()
     await page.getByRole('button', { name: /add to cart/i }).click()
     await expect(page.getByText(/added to your cart/i)).toBeVisible()

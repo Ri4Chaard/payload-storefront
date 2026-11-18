@@ -88,7 +88,7 @@ const intentFor = (
 ) => ({
   productId: product.id,
   quantity: 1,
-  ...(product.diamondOptions[0] ? { variantId: product.diamondOptions[0].id } : {}),
+  ...(product.variantOptions[0] ? { variantId: product.variantOptions[0].id } : {}),
   ...over,
 })
 
@@ -103,7 +103,7 @@ describe('mergeGuestCart', () => {
   it('keeps two stones of one ring rather than collapsing them into a quantity of two', async () => {
     const alice = await customer()
     const anon = await guest()
-    const [first, second] = ring.diamondOptions
+    const [first, second] = ring.variantOptions
     expect(second, 'the seeded ring needs two stones').toBeDefined()
 
     const accountCart = (await createCartFor(alice)).cartId

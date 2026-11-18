@@ -14,11 +14,11 @@ import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
  * The whole shop (003/T254). Node `355:7139` — the same frame as a category listing with a
  * different name in the title block and no category applied.
  *
- * A static sibling of `/[category]`, so Next resolves it first and "all-jewelry" is never mistaken
+ * A static sibling of `/[category]`, so Next resolves it first and "all-products" is never mistaken
  * for a category slug.
  */
 
-const BASE = '/all-jewelry'
+const BASE = '/all-products'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await currentLocale()
@@ -27,13 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return listingMetadata({
     locale,
-    title: t_nav('allJewelry'),
+    title: t_nav('allProducts'),
     subtitle: shop.listingSubtitle,
     basePath: BASE,
   })
 }
 
-export default async function AllJewelryPage({
+export default async function AllProductsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -67,10 +67,10 @@ export default async function AllJewelryPage({
 
   return (
     <>
-      <ListingBreadcrumbs title={t_nav('allJewelry')} basePath={BASE} />
+      <ListingBreadcrumbs title={t_nav('allProducts')} basePath={BASE} />
       <Listing
         categorySlug={null}
-        title={t_nav('allJewelry')}
+        title={t_nav('allProducts')}
         subtitle={shop.listingSubtitle}
         basePath={BASE}
         searchParams={query}

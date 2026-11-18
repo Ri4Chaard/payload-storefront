@@ -27,7 +27,7 @@ function purchasable(product: ProductDetail): PurchasableProduct {
   return {
     id: product.id,
     available: product.available,
-    diamonds: product.diamondOptions.map((option) => ({
+    variantChoices: product.variantOptions.map((option) => ({
       id: option.id,
       available: option.available,
     })),

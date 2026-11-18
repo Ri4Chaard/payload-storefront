@@ -115,7 +115,7 @@ test.describe('what gets stored', () => {
 
   test('nothing is stored before a decision is made (FR-037)', async ({ page }) => {
     await page.goto('/')
-    await page.goto('/all-jewelry')
+    await page.goto('/all-products')
 
     expect(await consentCookie(page)).toBeUndefined()
 
@@ -285,7 +285,7 @@ test.describe('nothing optional is stored or contacted', () => {
         await expect(banner(page)).toBeHidden()
       }
 
-      for (const route of ['/all-jewelry', '/legal/cookies', '/faq']) {
+      for (const route of ['/all-products', '/legal/cookies', '/faq']) {
         await page.goto(route)
       }
 

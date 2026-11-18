@@ -176,7 +176,7 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
   })
 
   // …and it filters the live site, which is the half the admin cannot show on its own.
-  await page.goto(`/all-jewelry?colour=${value}`)
+  await page.goto(`/all-products?colour=${value}`)
   await expect(page.getByRole('link', { name: /Remove Admin added/i })).toBeVisible()
   await expect(page.getByRole('article')).toHaveCount(1)
 })

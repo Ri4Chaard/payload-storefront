@@ -29,7 +29,7 @@ const line = (over: Partial<CartLineView> = {}): CartLineView => ({
   title: 'Butterfly Diamond Pendant',
   href: '/products/butterfly-diamond-pendant',
   image: null,
-  diamond: null,
+  variantChoice: null,
   unitPrice: '$24,900',
   lineTotal: '$24,900',
   unitMinor: 2490000,
@@ -56,7 +56,7 @@ describe('what the seller is told (SC-002)', () => {
         line({
           id: 'a',
           title: 'Paragon Emerald Cut Diamond Engagement Ring',
-          diamond: 'Lab 1.5 ct D VS1',
+          variantChoice: 'Lab 1.5 ct D VS1',
           quantity: 2,
           lineTotal: '$76,640',
         }),
@@ -73,12 +73,12 @@ describe('what the seller is told (SC-002)', () => {
   })
 
   it('works for a piece with one option and for one with neither', () => {
-    const stoneOnly = composeMessage(
-      cart([line({ diamond: 'Lab 1.0 ct D VS1' })]),
+    const variantOnly = composeMessage(
+      cart([line({ variantChoice: 'Lab 1.0 ct D VS1' })]),
       TEMPLATE,
       null,
     )
-    expect(stoneOnly).toContain('— Lab 1.0 ct D VS1 —')
+    expect(variantOnly).toContain('— Lab 1.0 ct D VS1 —')
 
     const neither = composeMessage(cart([line()]), TEMPLATE, null)
     expect(neither).toContain('1 × Butterfly Diamond Pendant — $24,900')
@@ -211,7 +211,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
 
 describe('composing is deterministic (FR-026, SC-004)', () => {
   it('produces the same message every time from the same cart', () => {
-    const one = cart([line({ diamond: 'Lab 1.5 ct D VS1' })])
+    const one = cart([line({ variantChoice: 'Lab 1.5 ct D VS1' })])
     const customer = { name: 'Aisha Karimova', address: 'Astana' }
 
     const first = composeMessage(one, TEMPLATE, customer)
@@ -234,7 +234,7 @@ describe('a single-piece message', () => {
         [
           line({
             title: 'Paragon Emerald Cut Diamond Engagement Ring',
-            diamond: 'Lab 1.5 ct D VS1',
+            variantChoice: 'Lab 1.5 ct D VS1',
             quantity: 1,
             lineTotal: '$38,320',
           }),
