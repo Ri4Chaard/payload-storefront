@@ -9,11 +9,12 @@ grocery, a bicycle shop or a jewelry store by editing data in the admin — not 
 
 ## Features
 
-- **Catalogue** — categories (one route each), collections, colours, owner-defined attributes,
+- **Catalogue** — categories (one route each, header links chosen in the admin), owner-defined
+  attributes and values (any of them a filter, a product-details row or a "related" link),
   product options (variants with their own price, stock and photo), made-to-order vs stock-tracked
   availability, filters + sort + LOAD MORE with shareable URLs that work without JavaScript.
 - **Product page** — gallery and lightbox, option picker, quantity limits from stock, details /
-  warranty / delivery accordions, "complete the collection", schema.org `Product`/`Offer`.
+  warranty / delivery accordions, "you may also like", schema.org `Product`/`Offer`.
 - **Cart and checkout** — server-side cart for guests and customers (merged on sign-in) and a
   **messenger hand-off**: the order goes to the seller via WhatsApp, Telegram or Instagram with every
   line and total pre-written.
@@ -74,8 +75,9 @@ The full walkthrough is **[docs/customizing.md](./docs/customizing.md)**. In sho
 1. **Name, icon, wordmark** — `NEXT_PUBLIC_SITE_NAME`, `src/app/icon.svg`, `src/components/layout/logo/`.
 2. **Palette and fonts** — `design/tokens/*.json` → `pnpm build:tokens && pnpm check:contrast`;
    typefaces in `src/styles/fonts.ts`.
-3. **Catalogue model, in the admin** — categories, collections, attributes, variant types/options,
-   colours. A clothing shop gets *Size → S/M/L*; a grocery *Pack → 500 g / 1 kg*; nothing in code.
+3. **Catalogue model, in the admin** — categories, attributes and their values (colour, shape,
+   frame size…), variant types/options. A clothing shop gets *Size → S/M/L*; a grocery
+   *Pack → 500 g / 1 kg*; nothing in code.
 4. **Content, in the admin** — products and photos, home/about/FAQ/blog/contact pages, legal pages,
    messengers for checkout — in every language you keep.
 5. **Header navigation** — point the category links at your slugs.

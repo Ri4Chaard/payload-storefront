@@ -79,9 +79,8 @@ export interface Config {
     customers: Customer;
     media: Media;
     categories: Category;
-    collections: Collection;
-    colours: Colour;
     attributes: Attribute;
+    'attribute-values': AttributeValue;
     'verification-codes': VerificationCode;
     questions: Question;
     'article-categories': ArticleCategory;
@@ -116,9 +115,8 @@ export interface Config {
     customers: CustomersSelect<false> | CustomersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    collections: CollectionsSelect<false> | CollectionsSelect<true>;
-    colours: ColoursSelect<false> | ColoursSelect<true>;
     attributes: AttributesSelect<false> | AttributesSelect<true>;
+    'attribute-values': AttributeValuesSelect<false> | AttributeValuesSelect<true>;
     'verification-codes': VerificationCodesSelect<false> | VerificationCodesSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
     'article-categories': ArticleCategoriesSelect<false> | ArticleCategoriesSelect<true>;
@@ -967,6 +965,10 @@ export interface Category {
    */
   order?: number | null;
   /**
+   * Adds a link to this category to the site header and the mobile menu, between "All products" and "About us". Links appear in Order, lowest first.
+   */
+  showInHeader?: boolean | null;
+  /**
    * Overrides for search engines and social previews. Leave empty to use the title, description and first photograph.
    */
   seo?: {
@@ -987,55 +989,7 @@ export interface Category {
   createdAt: string;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections".
- */
-export interface Collection {
-  id: number;
-  /**
-   * The collection’s name, e.g. "Collection A".
-   */
-  title: string;
-  /**
-   * The address this appears at. Filled in from the title when first saved. Changing it later breaks existing links — do it deliberately.
-   */
-  slug: string;
-  /**
-   * Optional. Not shown on the listing today.
-   */
-  description?: string | null;
-  /**
-   * Lowest first in the filter drawer.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * The colours a product can be filtered by. Renaming a label never changes its link.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "colours".
- */
-export interface Colour {
-  id: number;
-  /**
-   * What the customer reads in the filter, e.g. "Black".
-   */
-  label: string;
-  /**
-   * What appears in the address bar when this colour is filtered on. Keep it lowercase and hyphenated — "light-blue". Changing it breaks links that already exist.
-   */
-  value: string;
-  /**
-   * Lowest first in the filter drawer.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Descriptive properties shown in a product’s details. Not filters.
+ * Every property a product can have — colour, material, shape, size. A "list" attribute has its values under Attribute values and can be a filter; a text or number attribute is typed on each product.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "attributes".
@@ -1043,30 +997,64 @@ export interface Colour {
 export interface Attribute {
   id: number;
   /**
-   * What the customer reads, e.g. "Material".
+   * What the customer reads — the filter heading and the row label in the product details, e.g. "Colour".
    */
   label: string;
   /**
-   * A short machine-readable key, e.g. "material". Renaming it is safe; deleting it is not.
+   * The key in the address bar when this attribute is filtered on — "colour" in ?colour=black. Lowercase and hyphenated. Changing it breaks filter links that already exist.
    */
   name: string;
   /**
-   * How the value is entered on a product.
+   * List: the values are defined once under Attribute values and picked on each product (Categorisation tab) — only a list can be a filter. Text or number: typed on each product (Details tab), and an option can override it.
    */
-  type: 'text' | 'number' | 'select';
+  type: 'list' | 'text' | 'number';
   /**
-   * The values a product may choose from.
+   * Adds a group of checkboxes to the catalogue filters, one per value. Groups appear in this attribute’s order.
    */
-  options?:
-    | {
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
+  filterable?: boolean | null;
   /**
-   * Lowest first within the product details.
+   * Lists this attribute and the product’s value(s) in the "Product details" section of the product page.
+   */
+  showInDetails?: boolean | null;
+  /**
+   * Products sharing a value of this attribute are suggested under "You may also like" on each other’s pages. When a product shares none, products from its category are suggested instead.
+   */
+  relatesProducts?: boolean | null;
+  /**
+   * Lowest first — among the filters and among the rows in the product details.
    */
   order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * The values of each list attribute — Black, Green, Collection A. Products pick them in their Categorisation tab; a filterable attribute offers every value as a checkbox.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attribute-values".
+ */
+export interface AttributeValue {
+  id: number;
+  /**
+   * Which property this is a value of. Only "list" attributes are offered.
+   */
+  attribute: number | Attribute;
+  /**
+   * What the customer reads, e.g. "Black".
+   */
+  label: string;
+  /**
+   * What appears in the address bar when this value is filtered on — "black" in ?colour=black. Lowercase and hyphenated, unique within its attribute. Changing it breaks links that already exist.
+   */
+  value: string;
+  /**
+   * Lowest first among this attribute’s values.
+   */
+  order?: number | null;
+  /**
+   * Filled in on save — "Attribute: Label" — so pickers can tell values apart.
+   */
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1435,7 +1423,7 @@ export interface Product {
     [k: string]: unknown;
   } | null;
   /**
-   * Material, weight, origin. Define new ones under Attributes and they appear here with no deployment.
+   * Typed properties — material, weight, origin. Define new text or number attributes under Attributes and they appear here with no deployment. List attributes (colour, collection…) are picked in the Categorisation tab instead.
    */
   attributes?:
     | {
@@ -1449,13 +1437,9 @@ export interface Product {
    */
   category: number | Category;
   /**
-   * Zero or more. Drives "Complete the Collection".
+   * Pick every value that describes this product — e.g. "Colour: Black", "Collection: Collection A". Each attribute’s settings decide whether its values are filters, are listed in the product details, or suggest related products. Manage the lists under Attributes and Attribute values.
    */
-  collections?: (number | Collection)[] | null;
-  /**
-   * Filterable, and shown in the product details. Manage the list under Colours.
-   */
-  colour?: (number | Colour)[] | null;
+  values?: (number | AttributeValue)[] | null;
   enableVariants?: boolean | null;
   variantTypes?: (number | VariantType)[] | null;
   variants?: {
@@ -1683,16 +1667,12 @@ export interface PayloadLockedDocument {
         value: number | Category;
       } | null)
     | ({
-        relationTo: 'collections';
-        value: number | Collection;
-      } | null)
-    | ({
-        relationTo: 'colours';
-        value: number | Colour;
-      } | null)
-    | ({
         relationTo: 'attributes';
         value: number | Attribute;
+      } | null)
+    | ({
+        relationTo: 'attribute-values';
+        value: number | AttributeValue;
       } | null)
     | ({
         relationTo: 'verification-codes';
@@ -1941,6 +1921,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   subtitle?: T;
   image?: T;
   order?: T;
+  showInHeader?: T;
   seo?:
     | T
     | {
@@ -1953,42 +1934,29 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_select".
- */
-export interface CollectionsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  description?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "colours_select".
- */
-export interface ColoursSelect<T extends boolean = true> {
-  label?: T;
-  value?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "attributes_select".
  */
 export interface AttributesSelect<T extends boolean = true> {
   label?: T;
   name?: T;
   type?: T;
-  options?:
-    | T
-    | {
-        value?: T;
-        id?: T;
-      };
+  filterable?: T;
+  showInDetails?: T;
+  relatesProducts?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "attribute-values_select".
+ */
+export interface AttributeValuesSelect<T extends boolean = true> {
+  attribute?: T;
+  label?: T;
+  value?: T;
+  order?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2201,8 +2169,7 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   category?: T;
-  collections?: T;
-  colour?: T;
+  values?: T;
   enableVariants?: T;
   variantTypes?: T;
   variants?: T;

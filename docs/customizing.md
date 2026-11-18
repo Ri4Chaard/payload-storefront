@@ -45,24 +45,37 @@ No component names a colour or a font family directly, so nothing else changes.
 
 Model what you sell with data. Open `/admin`:
 
-| You sell… | Categories | Collections | Attributes (product details) | Variant type → options | Colours |
-| --- | --- | --- | --- | --- | --- |
-| Clothing | Women, Men, Kids | Summer, Basics | Material, Care, Fit | Size → XS…XL | the palette you stock |
-| Groceries | Fruit, Dairy, Bakery | Organic, Local | Origin, Weight, Allergens | Pack → 500 g / 1 kg | usually unused |
-| Bicycles | Road, Gravel, City | Bestsellers | Frame, Groupset, Weight | Frame size → 52/54/56 | frame colours |
-| Jewelry | Rings, Earrings | Bridal | Metal, Stone, Certificate | Stone → … | metals |
+| You sell… | Categories | List attributes (filters, details, relations) | Text attributes (details) | Variant type → options |
+| --- | --- | --- | --- | --- |
+| Clothing | Women, Men, Kids | Colour, Season, Fit | Material, Care | Size → XS…XL |
+| Groceries | Fruit, Dairy, Bakery | Diet (Organic, Vegan), Origin | Weight, Allergens | Pack → 500 g / 1 kg |
+| Bicycles | Road, Gravel, City | Frame size, Colour, Range | Groupset, Weight | Frame size → 52/54/56 |
+| Glasses | Optical, Sun | Shape, Frame colour, Collection | Lens width | Lens → … |
 
 - **Categories** (`Shop → Categories`): each one becomes a route, `/<slug>`, and a tile on the home
-  page with its image. The header navigation lists them (see step 6).
-- **Collections**: cross-cutting groups, used by the collection filter and "complete the
-  collection" on the product page.
-- **Attributes**: define a name once ("Material"), then add `attribute → value` rows to each
-  product. An option can override a product's attribute (e.g. a different weight per pack size).
+  page with its image. Tick **Show in the header** to add a link to it in the header and the mobile
+  menu, between "All products" and "About us"; the links follow the categories' **Order**.
+- **Attributes** (`Catalogue properties → Attributes`): every property a product can have. Each has
+  a **Label** (what customers read, translated), a **Name** (the URL key — `colour` in
+  `?colour=black`; lowercase, hyphenated, and not one of `category`, `minPrice`, `maxPrice`,
+  `inStock`, `sort`, `page`, `q`), a **Type** and an **Order** (lowest first in the filters and in
+  the product details).
+  - **List** attributes have a closed set of values, defined under
+    `Catalogue properties → Attribute values` (label, URL value, order). Products pick them in the
+    **Categorisation** tab's *Attribute values* field. Three switches decide what a list does:
+    **Show as a filter** (a checkbox group in the catalogue filters — values within one group are
+    OR, groups are AND), **Show in product details** (a "Colour: Black, Green" row), and
+    **Relates products** (products sharing a value are suggested under "You may also like"; with
+    none, the same category is suggested).
+  - **Text** and **number** attributes are typed on each product in the **Details** tab and shown
+    in the product details. An option (variant) can override one, e.g. a different weight per pack
+    size.
+  - A shop with Shape and Frame size and no Collections needs no code: create those attributes,
+    their values, and tick the switches. Adding a value makes it a filter option at once; a value
+    still used by a product, or an attribute that still has values, cannot be deleted.
 - **Variant types and options**: the plugin's option axes. Enable variants on a product, pick the
   variant type, then create one variant per option with its own price, stock and photograph. The
   product page shows the picker automatically; the cart and the order message name the option.
-- **Colours**: an owner-managed list; the colour filter reads it. Delete them all and the filter
-  group simply has nothing to show.
 - **Availability** per product: *made to order* (always orderable, no stock) or *stock tracked*
   (orderable while quantity > 0; the in-stock filter uses it).
 
@@ -100,15 +113,14 @@ Want online payment instead? That is a feature to build on the cart (`src/lib/ca
 Constitution VI (server-side totals, idempotent webhooks, no card data on your servers), ideally
 through Spec Kit (step 9).
 
-## 6. Interface copy and navigation — *code (small)*
+## 6. Interface copy — *code (small)*
 
 - Interface strings (buttons, labels, errors, promise cards) are in
   `src/i18n/messages/{en,ru,uk}.json`. Keep the three files' keys identical — `pnpm test` fails
   otherwise.
-- The header's category links are a short list in `src/components/layout/header/header.tsx`
-  (`category-1` … `category-4` with labels from `nav.*` messages). Point them at your category slugs
-  and rename the message keys/labels. Category pages themselves are data-driven — any published
-  category slug works.
+- The header's category links are not code: tick **Show in the header** on a category in the
+  admin (step 3). "All products", "About us" and "Contact us" around them are interface strings
+  (`nav.*` messages).
 - The four promise cards under every page (shipping, warranty, support, payments) are
   `src/lib/shop-promises.ts` (icons) + `product.*` messages (words).
 
@@ -129,8 +141,8 @@ through Spec Kit (step 9).
 Payload's Local API, idempotently (looked up by slug, updated in place). To ship your own starter
 content — for a client demo or a staging environment — edit:
 
-- `scripts/seed-catalog.ts` — categories, collections, colours, attributes, variant type and
-  options, products, FAQ, story/home/contact pages, blog.
+- `scripts/seed-catalog.ts` — categories (and which are in the header), attributes and their
+  values, variant type and options, products, FAQ, story/home/contact pages, blog.
 - `scripts/seed-translations-data.ts` — the Russian and Ukrainian versions, keyed by slug or by the
   exact English string.
 - `scripts/seed-policies.ts` — legal pages (placeholders that are **not legal advice**).
@@ -156,11 +168,11 @@ container start; seed once by hand if you want the starter content.
 
 - [ ] `NEXT_PUBLIC_SITE_NAME`, icon, wordmark
 - [ ] Palette and typefaces, `pnpm build:tokens && pnpm check:contrast`
-- [ ] Categories, collections, attributes, variant types/options, colours
+- [ ] Categories, attributes and their values, variant types/options
 - [ ] Products with real photographs
 - [ ] Home, About, FAQ, Blog, Contact pages; contact settings and messengers
 - [ ] Legal pages reviewed by someone qualified
-- [ ] Header navigation points at your categories
+- [ ] Categories you want in the header have **Show in the header** ticked
 - [ ] Languages: keep, switch off, or add
 - [ ] `pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration`
 - [ ] Deploy

@@ -5,7 +5,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
    CREATE TYPE "public"."_locales" AS ENUM('en', 'ru', 'uk');
   CREATE TYPE "public"."enum_customers_locale" AS ENUM('en', 'ru', 'uk');
   CREATE TYPE "public"."enum_customers_marketing_email_source" AS ENUM('registration', 'profile');
-  CREATE TYPE "public"."enum_attributes_type" AS ENUM('text', 'number', 'select');
+  CREATE TYPE "public"."enum_attributes_type" AS ENUM('list', 'text', 'number');
   CREATE TYPE "public"."enum_verification_codes_purpose" AS ENUM('verify-email', 'reset-password');
   CREATE TYPE "public"."enum_questions_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__questions_v_version_status" AS ENUM('draft', 'published');
@@ -183,6 +183,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"slug" varchar NOT NULL,
   	"image_id" integer,
   	"order" numeric DEFAULT 0,
+  	"show_in_header" boolean DEFAULT false,
   	"seo_image_id" integer,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -198,48 +199,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_parent_id" integer NOT NULL
   );
   
-  CREATE TABLE "collections" (
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"slug" varchar NOT NULL,
-  	"order" numeric DEFAULT 0,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-  );
-  
-  CREATE TABLE "collections_locales" (
-  	"title" varchar NOT NULL,
-  	"description" varchar,
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"_locale" "_locales" NOT NULL,
-  	"_parent_id" integer NOT NULL
-  );
-  
-  CREATE TABLE "colours" (
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"value" varchar NOT NULL,
-  	"order" numeric DEFAULT 0,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
-  );
-  
-  CREATE TABLE "colours_locales" (
-  	"label" varchar NOT NULL,
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"_locale" "_locales" NOT NULL,
-  	"_parent_id" integer NOT NULL
-  );
-  
-  CREATE TABLE "attributes_options" (
-  	"_order" integer NOT NULL,
-  	"_parent_id" integer NOT NULL,
-  	"id" varchar PRIMARY KEY NOT NULL,
-  	"value" varchar
-  );
-  
   CREATE TABLE "attributes" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"name" varchar NOT NULL,
   	"type" "enum_attributes_type" DEFAULT 'text' NOT NULL,
+  	"filterable" boolean DEFAULT false,
+  	"show_in_details" boolean DEFAULT true,
+  	"relates_products" boolean DEFAULT false,
   	"order" numeric DEFAULT 0,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -247,6 +213,23 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   CREATE TABLE "attributes_locales" (
   	"label" varchar NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" integer NOT NULL
+  );
+  
+  CREATE TABLE "attribute_values" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"attribute_id" integer NOT NULL,
+  	"value" varchar NOT NULL,
+  	"order" numeric DEFAULT 0,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  );
+  
+  CREATE TABLE "attribute_values_locales" (
+  	"label" varchar NOT NULL,
+  	"title" varchar,
   	"id" serial PRIMARY KEY NOT NULL,
   	"_locale" "_locales" NOT NULL,
   	"_parent_id" integer NOT NULL
@@ -645,8 +628,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"parent_id" integer NOT NULL,
   	"path" varchar NOT NULL,
   	"media_id" integer,
-  	"collections_id" integer,
-  	"colours_id" integer,
+  	"attribute_values_id" integer,
   	"variant_types_id" integer
   );
   
@@ -705,8 +687,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"parent_id" integer NOT NULL,
   	"path" varchar NOT NULL,
   	"media_id" integer,
-  	"collections_id" integer,
-  	"colours_id" integer,
+  	"attribute_values_id" integer,
   	"variant_types_id" integer
   );
   
@@ -782,9 +763,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"customers_id" integer,
   	"media_id" integer,
   	"categories_id" integer,
-  	"collections_id" integer,
-  	"colours_id" integer,
   	"attributes_id" integer,
+  	"attribute_values_id" integer,
   	"verification_codes_id" integer,
   	"questions_id" integer,
   	"article_categories_id" integer,
@@ -1601,10 +1581,9 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "categories" ADD CONSTRAINT "categories_image_id_media_id_fk" FOREIGN KEY ("image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "categories" ADD CONSTRAINT "categories_seo_image_id_media_id_fk" FOREIGN KEY ("seo_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "categories_locales" ADD CONSTRAINT "categories_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "collections_locales" ADD CONSTRAINT "collections_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."collections"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "colours_locales" ADD CONSTRAINT "colours_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."colours"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "attributes_options" ADD CONSTRAINT "attributes_options_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."attributes"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "attributes_locales" ADD CONSTRAINT "attributes_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."attributes"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "attribute_values" ADD CONSTRAINT "attribute_values_attribute_id_attributes_id_fk" FOREIGN KEY ("attribute_id") REFERENCES "public"."attributes"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "attribute_values_locales" ADD CONSTRAINT "attribute_values_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."attribute_values"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "verification_codes" ADD CONSTRAINT "verification_codes_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "questions_locales" ADD CONSTRAINT "questions_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."questions"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_questions_v" ADD CONSTRAINT "_questions_v_parent_id_questions_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."questions"("id") ON DELETE set null ON UPDATE no action;
@@ -1657,8 +1636,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "products_locales" ADD CONSTRAINT "products_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_collections_fk" FOREIGN KEY ("collections_id") REFERENCES "public"."collections"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_colours_fk" FOREIGN KEY ("colours_id") REFERENCES "public"."colours"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_attribute_values_fk" FOREIGN KEY ("attribute_values_id") REFERENCES "public"."attribute_values"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "products_rels" ADD CONSTRAINT "products_rels_variant_types_fk" FOREIGN KEY ("variant_types_id") REFERENCES "public"."variant_types"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_products_v_version_attributes" ADD CONSTRAINT "_products_v_version_attributes_attribute_id_attributes_id_fk" FOREIGN KEY ("attribute_id") REFERENCES "public"."attributes"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "_products_v_version_attributes" ADD CONSTRAINT "_products_v_version_attributes_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_products_v"("id") ON DELETE cascade ON UPDATE no action;
@@ -1669,8 +1647,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "_products_v_locales" ADD CONSTRAINT "_products_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_products_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_products_v_rels" ADD CONSTRAINT "_products_v_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."_products_v"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_products_v_rels" ADD CONSTRAINT "_products_v_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "_products_v_rels" ADD CONSTRAINT "_products_v_rels_collections_fk" FOREIGN KEY ("collections_id") REFERENCES "public"."collections"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "_products_v_rels" ADD CONSTRAINT "_products_v_rels_colours_fk" FOREIGN KEY ("colours_id") REFERENCES "public"."colours"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_products_v_rels" ADD CONSTRAINT "_products_v_rels_attribute_values_fk" FOREIGN KEY ("attribute_values_id") REFERENCES "public"."attribute_values"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "_products_v_rels" ADD CONSTRAINT "_products_v_rels_variant_types_fk" FOREIGN KEY ("variant_types_id") REFERENCES "public"."variant_types"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "carts_items" ADD CONSTRAINT "carts_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "carts_items" ADD CONSTRAINT "carts_items_variant_id_variants_id_fk" FOREIGN KEY ("variant_id") REFERENCES "public"."variants"("id") ON DELETE set null ON UPDATE no action;
@@ -1682,9 +1659,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_customers_fk" FOREIGN KEY ("customers_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_categories_fk" FOREIGN KEY ("categories_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_collections_fk" FOREIGN KEY ("collections_id") REFERENCES "public"."collections"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_colours_fk" FOREIGN KEY ("colours_id") REFERENCES "public"."colours"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_attributes_fk" FOREIGN KEY ("attributes_id") REFERENCES "public"."attributes"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_attribute_values_fk" FOREIGN KEY ("attribute_values_id") REFERENCES "public"."attribute_values"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_verification_codes_fk" FOREIGN KEY ("verification_codes_id") REFERENCES "public"."verification_codes"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_questions_fk" FOREIGN KEY ("questions_id") REFERENCES "public"."questions"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_article_categories_fk" FOREIGN KEY ("article_categories_id") REFERENCES "public"."article_categories"("id") ON DELETE cascade ON UPDATE no action;
@@ -1834,20 +1810,16 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "categories_updated_at_idx" ON "categories" USING btree ("updated_at");
   CREATE INDEX "categories_created_at_idx" ON "categories" USING btree ("created_at");
   CREATE UNIQUE INDEX "categories_locales_locale_parent_id_unique" ON "categories_locales" USING btree ("_locale","_parent_id");
-  CREATE UNIQUE INDEX "collections_slug_idx" ON "collections" USING btree ("slug");
-  CREATE INDEX "collections_updated_at_idx" ON "collections" USING btree ("updated_at");
-  CREATE INDEX "collections_created_at_idx" ON "collections" USING btree ("created_at");
-  CREATE UNIQUE INDEX "collections_locales_locale_parent_id_unique" ON "collections_locales" USING btree ("_locale","_parent_id");
-  CREATE UNIQUE INDEX "colours_value_idx" ON "colours" USING btree ("value");
-  CREATE INDEX "colours_updated_at_idx" ON "colours" USING btree ("updated_at");
-  CREATE INDEX "colours_created_at_idx" ON "colours" USING btree ("created_at");
-  CREATE UNIQUE INDEX "colours_locales_locale_parent_id_unique" ON "colours_locales" USING btree ("_locale","_parent_id");
-  CREATE INDEX "attributes_options_order_idx" ON "attributes_options" USING btree ("_order");
-  CREATE INDEX "attributes_options_parent_id_idx" ON "attributes_options" USING btree ("_parent_id");
   CREATE UNIQUE INDEX "attributes_name_idx" ON "attributes" USING btree ("name");
   CREATE INDEX "attributes_updated_at_idx" ON "attributes" USING btree ("updated_at");
   CREATE INDEX "attributes_created_at_idx" ON "attributes" USING btree ("created_at");
   CREATE UNIQUE INDEX "attributes_locales_locale_parent_id_unique" ON "attributes_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX "attribute_values_attribute_idx" ON "attribute_values" USING btree ("attribute_id");
+  CREATE INDEX "attribute_values_value_idx" ON "attribute_values" USING btree ("value");
+  CREATE INDEX "attribute_values_updated_at_idx" ON "attribute_values" USING btree ("updated_at");
+  CREATE INDEX "attribute_values_created_at_idx" ON "attribute_values" USING btree ("created_at");
+  CREATE UNIQUE INDEX "attribute_value_idx" ON "attribute_values" USING btree ("attribute_id","value");
+  CREATE UNIQUE INDEX "attribute_values_locales_locale_parent_id_unique" ON "attribute_values_locales" USING btree ("_locale","_parent_id");
   CREATE INDEX "verification_codes_email_idx" ON "verification_codes" USING btree ("email");
   CREATE INDEX "verification_codes_customer_idx" ON "verification_codes" USING btree ("customer_id");
   CREATE INDEX "verification_codes_purpose_idx" ON "verification_codes" USING btree ("purpose");
@@ -1989,8 +1961,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "products_rels_parent_idx" ON "products_rels" USING btree ("parent_id");
   CREATE INDEX "products_rels_path_idx" ON "products_rels" USING btree ("path");
   CREATE INDEX "products_rels_media_id_idx" ON "products_rels" USING btree ("media_id");
-  CREATE INDEX "products_rels_collections_id_idx" ON "products_rels" USING btree ("collections_id");
-  CREATE INDEX "products_rels_colours_id_idx" ON "products_rels" USING btree ("colours_id");
+  CREATE INDEX "products_rels_attribute_values_id_idx" ON "products_rels" USING btree ("attribute_values_id");
   CREATE INDEX "products_rels_variant_types_id_idx" ON "products_rels" USING btree ("variant_types_id");
   CREATE INDEX "_products_v_version_attributes_order_idx" ON "_products_v_version_attributes" USING btree ("_order");
   CREATE INDEX "_products_v_version_attributes_parent_id_idx" ON "_products_v_version_attributes" USING btree ("_parent_id");
@@ -2016,8 +1987,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "_products_v_rels_parent_idx" ON "_products_v_rels" USING btree ("parent_id");
   CREATE INDEX "_products_v_rels_path_idx" ON "_products_v_rels" USING btree ("path");
   CREATE INDEX "_products_v_rels_media_id_idx" ON "_products_v_rels" USING btree ("media_id");
-  CREATE INDEX "_products_v_rels_collections_id_idx" ON "_products_v_rels" USING btree ("collections_id");
-  CREATE INDEX "_products_v_rels_colours_id_idx" ON "_products_v_rels" USING btree ("colours_id");
+  CREATE INDEX "_products_v_rels_attribute_values_id_idx" ON "_products_v_rels" USING btree ("attribute_values_id");
   CREATE INDEX "_products_v_rels_variant_types_id_idx" ON "_products_v_rels" USING btree ("variant_types_id");
   CREATE INDEX "carts_items_order_idx" ON "carts_items" USING btree ("_order");
   CREATE INDEX "carts_items_parent_id_idx" ON "carts_items" USING btree ("_parent_id");
@@ -2049,9 +2019,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_customers_id_idx" ON "payload_locked_documents_rels" USING btree ("customers_id");
   CREATE INDEX "payload_locked_documents_rels_media_id_idx" ON "payload_locked_documents_rels" USING btree ("media_id");
   CREATE INDEX "payload_locked_documents_rels_categories_id_idx" ON "payload_locked_documents_rels" USING btree ("categories_id");
-  CREATE INDEX "payload_locked_documents_rels_collections_id_idx" ON "payload_locked_documents_rels" USING btree ("collections_id");
-  CREATE INDEX "payload_locked_documents_rels_colours_id_idx" ON "payload_locked_documents_rels" USING btree ("colours_id");
   CREATE INDEX "payload_locked_documents_rels_attributes_id_idx" ON "payload_locked_documents_rels" USING btree ("attributes_id");
+  CREATE INDEX "payload_locked_documents_rels_attribute_values_id_idx" ON "payload_locked_documents_rels" USING btree ("attribute_values_id");
   CREATE INDEX "payload_locked_documents_rels_verification_codes_id_idx" ON "payload_locked_documents_rels" USING btree ("verification_codes_id");
   CREATE INDEX "payload_locked_documents_rels_questions_id_idx" ON "payload_locked_documents_rels" USING btree ("questions_id");
   CREATE INDEX "payload_locked_documents_rels_article_categories_id_idx" ON "payload_locked_documents_rels" USING btree ("article_categories_id");
@@ -2280,13 +2249,10 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "media_locales" CASCADE;
   DROP TABLE "categories" CASCADE;
   DROP TABLE "categories_locales" CASCADE;
-  DROP TABLE "collections" CASCADE;
-  DROP TABLE "collections_locales" CASCADE;
-  DROP TABLE "colours" CASCADE;
-  DROP TABLE "colours_locales" CASCADE;
-  DROP TABLE "attributes_options" CASCADE;
   DROP TABLE "attributes" CASCADE;
   DROP TABLE "attributes_locales" CASCADE;
+  DROP TABLE "attribute_values" CASCADE;
+  DROP TABLE "attribute_values_locales" CASCADE;
   DROP TABLE "verification_codes" CASCADE;
   DROP TABLE "questions" CASCADE;
   DROP TABLE "questions_locales" CASCADE;

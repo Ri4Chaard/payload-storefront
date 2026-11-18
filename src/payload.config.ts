@@ -12,11 +12,10 @@ import { blocks } from './blocks'
 import { Admins } from './collections/admins'
 import { ArticleCategories } from './collections/article-categories'
 import { Articles } from './collections/articles'
+import { AttributeValues } from './collections/attribute-values'
 import { Attributes } from './collections/attributes'
 import { Categories } from './collections/categories'
 import { cartsCollectionOverride } from './collections/carts'
-import { Collections } from './collections/collections'
-import { Colours } from './collections/colours'
 import { Customers } from './collections/customers'
 import { Media } from './collections/media'
 import { Policies } from './collections/policies'
@@ -70,8 +69,8 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
  * catalogue's shape would be decided with real screens to judge it against rather than guessed at
  * from a brief. This is that decision.
  *
- * Seven collections are ours: the four above plus `categories`, `collections`, `sizes`,
- * `attributes`, and the minimal `customers` the plugin requires. Four more arrive from
+ * Ours: the four above plus `categories`, `attributes` and `attribute-values` (every
+ * owner-defined product property and its vocabulary), and the minimal `customers` the plugin requires. Four more arrive from
  * `@payloadcms/plugin-ecommerce`: `products`, `variants`, `variantTypes`, `variantOptions`, and
  * `carts`.
  *
@@ -96,9 +95,8 @@ export default buildConfig({
     Customers,
     Media,
     Categories,
-    Collections,
-    Colours,
     Attributes,
+    AttributeValues,
     VerificationCodes,
     Questions,
     ArticleCategories,

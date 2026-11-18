@@ -10,7 +10,13 @@ import { Drawer } from '@/components/ui/drawer'
 import { RangeSlider } from '@/components/ui/range-slider'
 import { Switch } from '@/components/ui/switch'
 import { TextInput } from '@/components/ui/text-input'
-import { DEFAULT_SORT, applyChange, dropIdlePriceEnds, toggleFilter } from '@/lib/catalog/filters'
+import {
+  DEFAULT_SORT,
+  applyChange,
+  dropIdlePriceEnds,
+  selectedValues,
+  toggleFilter,
+} from '@/lib/catalog/filters'
 import { ALL_PRODUCTS, listingHref, type CategoryRoute } from '@/lib/catalog/listing-url'
 import { formatPrice, minorUnitDigits } from '@/lib/catalog/price'
 import type { FacetOption, FilterFacets, FilterState } from '@/lib/catalog/types'
@@ -33,9 +39,12 @@ import './filter-drawer.css'
  * The contract says the same. So it points at the bare route and the draft is rebuilt from the URL
  * the next time the panel opens.
  *
- * **The seventh group is not drawn.** Figma draws six — CATEGORY, COLOR, PRICE, SIZE, COLLECTION,
- * SHAPE — and puts IN-STOCK ONLY in the toolbar instead. But the toolbar only carries it at
- * `xl`; below that width the drawing drops it, and a filter that exists on a desktop and nowhere
+ * **The groups between CATEGORY and PRICE are the owner's.** One per attribute marked "Show as a
+ * filter", in the attributes' order — a shop with Shape and Frame size gets those, a shop with
+ * neither gets none, and no code changes either way.
+ *
+ * **The availability group is not drawn.** Figma puts IN-STOCK ONLY in the toolbar instead. But
+ * the toolbar only carries it at `xl`; below that width the drawing drops it, and a filter that exists on a desktop and nowhere
  * else is a filter a phone cannot turn off. It is here, hidden at `xl` where the toolbar owns it.
  * `display: none` still submits, so the state survives either way.
  *
@@ -191,14 +200,23 @@ export function FilterDrawer({
         />
       </Group>
 
-      <Group legend={t_catalog('colour')}>
-        <Options
-          name="colour"
-          options={facets.colours}
-          selected={draft.colour}
-          onToggle={(value) => setDraft((current) => toggleFilter(current, 'colour', value))}
-        />
-      </Group>
+      {/*
+        One group per filterable attribute, in the owner's order, headed with the attribute's own
+        label. The checkboxes are named for the attribute, so a no-JavaScript submit writes
+        `?colour=black` exactly as `toSearchParams` would.
+      */}
+      {facets.attributes.map((attribute) => (
+        <Group key={attribute.name} legend={`${attribute.label}:`} legendClassName="uppercase">
+          <Options
+            name={attribute.name}
+            options={attribute.options}
+            selected={selectedValues(draft, attribute.name)}
+            onToggle={(value) =>
+              setDraft((current) => toggleFilter(current, attribute.name, value))
+            }
+          />
+        </Group>
+      ))}
 
       {hasPrice ? (
         <Group legend={t_catalog('price')}>
@@ -231,16 +249,6 @@ export function FilterDrawer({
         </Group>
       ) : null}
 
-
-      <Group legend={t_catalog('collection')}>
-        <Options
-          name="collection"
-          options={facets.collections}
-          selected={draft.collection}
-          onToggle={(value) => setDraft((current) => toggleFilter(current, 'collection', value))}
-        />
-      </Group>
-
       {/* Hidden where the toolbar draws it, and the only copy of it below that width. */}
       <Group legend={t_catalog('availability')} className="xl:hidden">
         <Switch
@@ -266,10 +274,13 @@ export function FilterDrawer({
  */
 function Group({
   legend,
+  legendClassName,
   className,
   children,
 }: {
   legend: string
+  /** An owner's label arrives as typed ("Colour"); the drawn headings are capitals. */
+  legendClassName?: string
   className?: string
   children: React.ReactNode
 }) {
@@ -277,7 +288,9 @@ function Group({
     // `min-w-0` is load-bearing: a `<fieldset>` defaults to `min-inline-size: min-content`, so the
     // price row refused to shrink and pushed the MAX box and the slider past the panel's 350px.
     <fieldset className={cn('min-w-0 border-b border-black/10 py-5 last:border-b-0', className)}>
-      <legend className="text-body-strong text-neutral-primary pt-4">{legend}</legend>
+      <legend className={cn('text-body-strong text-neutral-primary pt-4', legendClassName)}>
+        {legend}
+      </legend>
       <div className="flex flex-col gap-2.5">{children}</div>
     </fieldset>
   )

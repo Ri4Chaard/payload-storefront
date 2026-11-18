@@ -1,6 +1,10 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 3.0.0 -> 3.0.1
+Bump rationale: PATCH. Principle VII's examples follow the attribute model (colours and collections
+                are now admin-defined attributes; header categories are chosen in the admin).
+
 Version change: 2.2.0 -> 3.0.0
 Bump rationale: MAJOR. The project is redefined from one specific shop into a domain-neutral store
                 template that can be turned into any kind of shop. A new principle (VII. Domain-
@@ -186,9 +190,11 @@ The core sells "products". It never knows what they are.
 - The core MUST NOT contain vocabulary, fields, filters, icons, or logic specific to one kind of
   shop. Rings, sizes, ISBNs, frame geometries and expiry dates are all *some* shop's concepts, not
   the template's.
-- What differs between shops is modeled as **data**, not schema: categories, collections, colours,
-  attributes (name/value pairs editors define), and variant types with their options (each option
-  with its own price, stock and photograph). A new kind of shop SHOULD need only admin work and
+- What differs between shops is modeled as **data**, not schema: categories (and which of them
+  the header shows), attributes defined in the admin — free text, numbers, or lists of values that
+  can be filters, product details and the basis for related products (colour, shape, collection,
+  frame size…) — and variant types with their options (each option with its own price, stock and
+  photograph). The core MUST NOT hardcode any particular attribute or filter. A new kind of shop SHOULD need only admin work and
   seed changes.
 - When a shop genuinely needs a new structural concept (a filter facet, a field with behaviour), it
   MUST be added generically — named for what it does ("option", "attribute", "facet"), not for the
@@ -305,4 +311,4 @@ section; undocumented deviation is a defect.
 for agents and contributors — Codex reads it directly and `CLAUDE.md` imports it for Claude Code.
 It MUST remain consistent with this constitution; on conflict, this constitution governs.
 
-**Version**: 3.0.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-11-18
+**Version**: 3.0.1 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-11-18

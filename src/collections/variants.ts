@@ -115,6 +115,8 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
               relationTo: 'attributes',
               required: true,
               label: 'Attribute',
+              // The typed attributes only — a list attribute's values belong to the product.
+              filterOptions: { type: { not_equals: 'list' } },
             },
       /*
         **Required, but not in every language** — the same trap as on the product,

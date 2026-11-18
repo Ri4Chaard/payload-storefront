@@ -8,8 +8,8 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 /**
  * What kind of product something is. Exactly one per product.
  *
- * Drives three things at once — the `/category-1` route, the eyebrow above a product's name, and the
- * CATEGORY group in the filter drawer.
+ * Drives four things at once — the `/category-1` route, the eyebrow above a product's name, the
+ * CATEGORY group in the filter drawer, and (when `showInHeader` is ticked) a link in the header.
  *
  * **"All products" is not a row here.** The drawer draws it as a fifth checkbox, but it means "no
  * category filter", and it is the `/all-products` route. Storing it would give it a slug, a subtitle
@@ -19,7 +19,7 @@ export const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'order'],
+    defaultColumns: ['title', 'slug', 'showInHeader', 'order'],
     group: 'Shop',
   },
   access: {
@@ -28,7 +28,8 @@ export const Categories: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  // Publishing invalidates the cached routes. A category is the band on the home page and the eyebrow above every product in it.
+  // Publishing invalidates the cached routes. A category is the band on the home page, the eyebrow
+  // above every product in it, and — when `showInHeader` is ticked — a link in every page's header.
   hooks: {
     afterChange: [revalidateOnChange],
     afterDelete: [revalidateOnDelete],
@@ -68,6 +69,17 @@ export const Categories: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: 'Lowest first, in navigation and in the filter drawer.',
+      },
+    },
+    {
+      name: 'showInHeader',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Show in the header',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Adds a link to this category to the site header and the mobile menu, between "All products" and "About us". Links appear in Order, lowest first.',
       },
     },
     seoField(),

@@ -208,3 +208,70 @@ describe('categories', () => {
     })
   })
 })
+
+/**
+ * The details rows: list attributes marked "show in product details" (their value labels joined)
+ * together with the typed rows, in the attributes' own order — whatever order the product lists
+ * them in.
+ */
+describe('attribute rows', () => {
+  it('shows a list attribute’s values beside the typed rows, in attribute order', () => {
+    const detail = toProductDetail(OPTIONED, 'en')
+    expect(detail.attributes.map((row) => [row.label, row.value])).toEqual([
+      ['Colour', 'Clear'],
+      ['Material', 'Sample material'],
+      ['Weight', '1.0 kg'],
+      ['Origin', 'Sample origin'],
+    ])
+
+    // Listed backwards on the product, drawn in the attributes' order all the same.
+    const reversed = toProductDetail(
+      { ...OPTIONED, attributes: [...(OPTIONED.attributes ?? [])].reverse() },
+      'en',
+    )
+    expect(reversed.attributes.map((row) => row.name)).toEqual([
+      'colour',
+      'material',
+      'weight',
+      'origin',
+    ])
+  })
+
+  it('leaves out a list attribute the owner keeps out of the details', () => {
+    const detail = toProductDetail(OPTIONED, 'en')
+    expect(detail.attributes.map((row) => row.name)).not.toContain('collection')
+  })
+
+  it('joins several values of one attribute into one row, in the values’ order', () => {
+    const [black, , green] = productFixtures
+      .flatMap((product) =>
+        (product.values ?? []).filter(
+          (value): value is Exclude<typeof value, number> =>
+            typeof value === 'object' &&
+            typeof value.attribute === 'object' &&
+            value.attribute.name === 'colour',
+        ),
+      )
+      .filter((value, index, all) => all.findIndex((other) => other.id === value.id) === index)
+      .sort((a, b) => a.id - b.id)
+    expect(black?.value).toBe('black')
+    expect(green?.value).toBe('green')
+
+    const detail = toProductDetail({ ...PLAIN, values: [green!, black!] }, 'en')
+    expect(detail.attributes.find((row) => row.name === 'colour')?.value).toBe('Black, Green')
+  })
+
+  it('names the values that relate products — those of a "relates products" attribute only', () => {
+    const detail = toProductDetail(OPTIONED, 'en')
+    const relating = (OPTIONED.values ?? []).filter(
+      (value) =>
+        typeof value === 'object' &&
+        typeof value.attribute === 'object' &&
+        value.attribute.relatesProducts === true,
+    )
+    expect(relating).toHaveLength(1)
+    expect(detail.relatedValueIds).toEqual(
+      relating.map((value) => (typeof value === 'object' ? value.id : value)),
+    )
+  })
+})

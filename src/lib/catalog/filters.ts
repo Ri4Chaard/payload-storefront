@@ -12,15 +12,20 @@
  * same grid looking like two pages to a crawler.
  *
  * **Unknown values are dropped and the drop is reported**. This module can only judge the
- * closed sets — sort and the numbers. Whether `category=rungs` names a real
- * category depends on the catalogue, so `getListing` finishes the job and merges its own drops into
- * the same list.
+ * closed sets — sort and the numbers. Whether `category=rungs` names a real category, or whether
+ * `?shape=round` names a real attribute and value, depends on the catalogue, so `getListing`
+ * finishes the job and merges its own drops into the same list.
+ *
+ * **Every key the listing does not own is an attribute.** `?colour=black&shape=round` is
+ * `{ attributes: { colour: ['black'], shape: ['round'] } }` — the owner names the keys in the admin,
+ * so this module cannot list them. A key that is not kebab-case cannot be an attribute's name
+ * (the admin refuses one), so `utm_source` and friends are not mistaken for filters.
  */
 
+import { KEBAB_CASE, RESERVED_FILTER_KEYS } from './reserved-keys'
 import {
   SORT_ORDERS,
   type DroppedFilter,
-  type FilterKey,
   type FilterState,
   type ParsedFilters,
   type SortOrder,
@@ -46,8 +51,7 @@ export const SORT_LABELS: Record<SortOrder, string> = {
 /** The empty listing — every key at its default, which is also the state that writes no query. */
 export const DEFAULT_FILTERS: FilterState = {
   category: [],
-  collection: [],
-  colour: [],
+  attributes: {},
   inStock: false,
   sort: DEFAULT_SORT,
   page: 1,
@@ -59,6 +63,16 @@ export const DEFAULT_FILTERS: FilterState = {
  * server render and the drawer.
  */
 export type SearchParamsInput = URLSearchParams | Record<string, string | string[] | undefined>
+
+function keysOf(input: SearchParamsInput): string[] {
+  if (input instanceof URLSearchParams) return [...new Set(input.keys())]
+  return Object.keys(input).filter((key) => input[key] !== undefined)
+}
+
+const isReserved = (key: string): boolean => (RESERVED_FILTER_KEYS as readonly string[]).includes(key)
+
+/** Whether a query key could be an attribute's name at all. Whether it IS one is the catalogue's call. */
+export const isAttributeKey = (key: string): boolean => !isReserved(key) && KEBAB_CASE.test(key)
 
 function valuesFor(input: SearchParamsInput, key: string): string[] {
   if (input instanceof URLSearchParams) return input.getAll(key)
@@ -128,15 +142,21 @@ export function parseFilters(input: SearchParamsInput): ParsedFilters {
     else dropped.push({ key: 'page', value: rawPage })
   }
 
+  /*
+    An OPEN set: whether `colour=navy` names a real attribute value depends on the catalogue, which
+    this pure module has never seen, so `getListing` finishes the job and merges its own drops into
+    the same list. A key with no non-empty value is no filter at all and is not kept.
+  */
+  const attributes: Record<string, string[]> = {}
+  for (const key of keysOf(input)) {
+    if (!isAttributeKey(key)) continue
+    const values = unique(valuesFor(input, key))
+    if (values.length > 0) attributes[key] = values
+  }
+
   const filters: FilterState = {
     category: unique(valuesFor(input, 'category')),
-    collection: unique(valuesFor(input, 'collection')),
-    /*
-      An OPEN set as of spec 011 — the same treatment `category` and `collection` already get. Whether `colour=navy` names a real colour depends on the catalogue, which this pure
-      module has never seen, so `getListing` finishes the job and merges its own drops into the same
-      list. Nothing a visitor can observe changes: same key, same repeats, same chips.
-    */
-    colour: unique(valuesFor(input, 'colour')),
+    attributes,
     inStock,
     sort,
     page,
@@ -159,45 +179,25 @@ export function parseFilters(input: SearchParamsInput): ParsedFilters {
  * Keys are written in a fixed order so that two routes arriving at the same state produce the same
  * string. A `URLSearchParams` built in whatever order the caller happened to set things in is a
  * different cache entry for an identical grid.
+ *
+ * The order: category, then every attribute **alphabetically by name**, then price, stock, sort and
+ * page. Alphabetical rather than the owner's `order`, because this module is pure and has never seen
+ * the catalogue — and a URL's stability must not depend on a setting the owner can change.
  */
-const KEY_ORDER: readonly FilterKey[] = [
-  'category',
-  'collection',
-  'colour',
-  'minPrice',
-  'maxPrice',
-  'inStock',
-  'sort',
-  'page',
-]
-
 export function toSearchParams(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams()
 
-  for (const key of KEY_ORDER) {
-    switch (key) {
-      case 'category':
-      case 'collection':
-      case 'colour':
-        for (const value of filters[key]) params.append(key, value)
-        break
-      case 'minPrice':
-      case 'maxPrice': {
-        const amount = filters[key]
-        if (amount !== undefined) params.set(key, String(amount))
-        break
-      }
-      case 'inStock':
-        if (filters.inStock) params.set('inStock', '1')
-        break
-      case 'sort':
-        if (filters.sort !== DEFAULT_SORT) params.set('sort', filters.sort)
-        break
-      case 'page':
-        if (filters.page > 1) params.set('page', String(filters.page))
-        break
-    }
+  for (const value of filters.category) params.append('category', value)
+
+  for (const name of Object.keys(filters.attributes).sort()) {
+    for (const value of filters.attributes[name] ?? []) params.append(name, value)
   }
+
+  if (filters.minPrice !== undefined) params.set('minPrice', String(filters.minPrice))
+  if (filters.maxPrice !== undefined) params.set('maxPrice', String(filters.maxPrice))
+  if (filters.inStock) params.set('inStock', '1')
+  if (filters.sort !== DEFAULT_SORT) params.set('sort', filters.sort)
+  if (filters.page > 1) params.set('page', String(filters.page))
 
   return params
 }
@@ -209,21 +209,40 @@ export function toQueryString(filters: FilterState): string {
 }
 
 /**
+ * A list-valued key: `'category'`, or an attribute's name. Every one of them is a group of
+ * checkboxes somewhere.
+ */
+export type MultiFilterKey = string
+
+/** The values ticked under one list-valued key. */
+export function selectedValues(filters: FilterState, key: MultiFilterKey): readonly string[] {
+  return key === 'category' ? filters.category : (filters.attributes[key] ?? [])
+}
+
+/**
+ * `filters` with one list-valued key replaced. An emptied attribute is removed rather than kept as
+ * `[]`, so two states that mean the same thing are the same object shape — and round-trip equal.
+ */
+function withValues(filters: FilterState, key: MultiFilterKey, values: string[]): FilterState {
+  if (key === 'category') return { ...filters, category: values }
+
+  const attributes = { ...filters.attributes }
+  if (values.length > 0) attributes[key] = values
+  else delete attributes[key]
+  return { ...filters, attributes }
+}
+
+/**
  * What a chip's dismiss link points at. Removing any filter returns to page one — staying on page
  * four of a grid that just got shorter is how a visitor lands on "no results" after widening their
  * own search.
+ *
+ * `key` is a reserved key or an attribute name, exactly as a chip carries it.
  */
-export function removeFilter(filters: FilterState, key: FilterKey, value?: string): FilterState {
+export function removeFilter(filters: FilterState, key: string, value?: string): FilterState {
   const next: FilterState = { ...filters, page: 1 }
 
   switch (key) {
-    case 'category':
-    case 'collection':
-      next[key] = filters[key].filter((entry) => entry !== value)
-      break
-    case 'colour':
-      next.colour = filters.colour.filter((entry) => entry !== value)
-      break
     case 'minPrice':
     case 'maxPrice':
       // Both ends, whichever one is named. A price range is drawn as ONE chip — "$1,200 – $7,300"
@@ -231,51 +250,52 @@ export function removeFilter(filters: FilterState, key: FilterKey, value?: strin
       // half a filter the visitor believes they just removed.
       delete next.minPrice
       delete next.maxPrice
-      break
+      return next
     case 'inStock':
       next.inStock = false
-      break
+      return next
     case 'sort':
       next.sort = DEFAULT_SORT
-      break
+      return next
     case 'page':
-      break
+    case 'q':
+      return next
+    default:
+      // `category`, or an attribute.
+      return withValues(
+        next,
+        key,
+        selectedValues(filters, key).filter((entry) => entry !== value),
+      )
   }
-
-  return next
 }
 
 /** True when nothing is filtered — the state that renders the bare route with no chips above it. */
 export function hasActiveFilters(filters: FilterState): boolean {
   return (
     filters.category.length > 0 ||
-    filters.collection.length > 0 ||
-    filters.colour.length > 0 ||
+    Object.values(filters.attributes).some((values) => values.length > 0) ||
     filters.minPrice !== undefined ||
     filters.maxPrice !== undefined ||
     filters.inStock
   )
 }
 
-/** The keys that hold a list. Every one of them is a group of checkboxes somewhere. */
-export type MultiFilterKey = 'category' | 'collection' | 'colour'
-
 /**
- * Tick or untick one value in one group.
+ * Tick or untick one value in one group — `'category'` or an attribute's name.
  *
- * `value` is a plain string rather than the key's own union, because every caller has one: a
- * `FacetOption.value`, a checkbox's `value` attribute, a segment of a URL. Narrowing at the call
- * site would put a cast in seven components instead of one function. It is safe in the direction
- * that matters — `parseFilters` drops anything the closed sets do not contain, so a bad value
- * cannot survive a round trip through the URL even if one reached here.
+ * `value` is a plain string because every caller has one: a `FacetOption.value`, a checkbox's
+ * `value` attribute, a segment of a URL. It is safe in the direction that matters — `getListing`
+ * drops anything the catalogue does not contain, so a bad value cannot narrow the grid even if one
+ * reached here.
  */
 export function toggleFilter(filters: FilterState, key: MultiFilterKey, value: string): FilterState {
-  const current: readonly string[] = filters[key]
+  const current = selectedValues(filters, key)
   const next = current.includes(value)
     ? current.filter((entry) => entry !== value)
     : [...current, value]
 
-  return { ...filters, [key]: next, page: 1 } as FilterState
+  return { ...withValues(filters, key, next), page: 1 }
 }
 
 /**

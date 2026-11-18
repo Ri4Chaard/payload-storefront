@@ -2,9 +2,7 @@
  * The view models — what a component is allowed to see.
  *
  * Derived from the generated collection types rather than restated beside them, so a schema change
- * surfaces here as a type error rather than as a screen that quietly renders nothing. Where a union
- * is enumerated below it is `NonNullable<Product['colour']>[number]` and not four string literals,
- * for exactly that reason: the literals would still compile after the field changed.
+ * surfaces here as a type error rather than as a screen that quietly renders nothing.
  *
  * Deliberately NARROWER than the documents they come from. No `_status`, no `inventory` count, no
  * `deletedAt`, no draft metadata. Two of those omissions are load-bearing:
@@ -21,6 +19,8 @@
  * float and never a parsed display string.
  */
 
+import type { ReservedFilterKey } from './reserved-keys'
+
 /** A photograph, shaped the way an upload comes back — intrinsic dimensions included, so nothing
  * downstream has to guess at an aspect ratio and reserve the wrong box for it. */
 export interface CatalogImage {
@@ -31,17 +31,7 @@ export interface CatalogImage {
   alt?: string
 }
 
-/**
- * A colour's stable identifier — `black`, `navy` — as it appears in `?colour=`.
- *
- * **A string as of spec 011, where it used to be a union derived from the enum.** Colour is an
- * owner-managed vocabulary now, so the set is a fact about the database rather than about the
- * schema, and no type can enumerate it. Validity is checked where the catalogue is in scope —
- * `getListing` — exactly as it always has been for `category` and `collection`.
- */
-export type ColourValue = string
-
-/** The card, the grid, and _Complete the Collection_. */
+/** The card, the grid, and _You may also like_. */
 export interface ProductSummary {
   id: number
   slug: string
@@ -83,11 +73,18 @@ export interface VariantOption {
 }
 
 
-/** A descriptive property from the owner-defined `attributes` collection. Not a filter. */
+/**
+ * One row of the product details: an owner-defined attribute and what this product says for it.
+ *
+ * For a list attribute `value` is its value labels joined ("Black, Green"); for a text or number
+ * attribute it is what the owner typed. `order` is the attribute's, carried so the rows can be
+ * sorted and a variant's override can slot into the same place.
+ */
 export interface ProductAttribute {
   name: string
   label: string
   value: string
+  order: number
 }
 
 export interface ProductDetail extends ProductSummary {
@@ -129,7 +126,11 @@ export interface ProductDetail extends ProductSummary {
    * product has one price and the label above it should not say "from".
    */
   fromPrice: string | null
-  collectionIds: number[]
+  /**
+   * The values that make another product "related" — those of attributes marked `relatesProducts`.
+   * Empty means the related band falls back to the product's category.
+   */
+  relatedValueIds: number[]
   seo: { title: string | null; description: string | null; image: CatalogImage | null }
 }
 
@@ -172,18 +173,11 @@ export const SORT_ORDERS: readonly SortOrder[] = [
 ]
 
 /**
- * Every key that may appear in a listing URL. `sort` and `page` are here with the filters because
- * they share the encoder, the round-trip test and the "absent means default" rule.
+ * The keys the listing itself owns. Every other key in a listing URL is an attribute's `name`.
+ * `sort` and `page` are here with the filters because they share the encoder, the round-trip test
+ * and the "absent means default" rule.
  */
-export type FilterKey =
-  | 'category'
-  | 'collection'
-  | 'colour'
-  | 'minPrice'
-  | 'maxPrice'
-  | 'inStock'
-  | 'sort'
-  | 'page'
+export type FilterKey = ReservedFilterKey
 
 /**
  * Values within one key are OR; separate keys are AND.
@@ -191,11 +185,13 @@ export type FilterKey =
  * The multi-value fields are always arrays, never `string | string[]`, and never optional. A single
  * shape is what lets the drawer, the chips and the query all treat them the same way, and an empty
  * array is a perfectly good "no filter" — an optional array only adds a second one.
+ *
+ * `attributes` is keyed by attribute `name` (the query key) and holds attribute-value `value`s.
+ * A key with an empty array is the same state as an absent key.
  */
 export interface FilterState {
   category: string[]
-  collection: string[]
-  colour: ColourValue[]
+  attributes: Record<string, string[]>
   /** Integer minor units, so nothing ever parses a formatted string back into money. */
   minPrice?: number
   maxPrice?: number
@@ -205,9 +201,12 @@ export interface FilterState {
   page: number
 }
 
-/** A value the URL asked for that the catalogue does not have. Reported, not silently swallowed. */
+/**
+ * A value the URL asked for that the catalogue does not have. Reported, not silently swallowed.
+ * `key` is a reserved key or an attribute name.
+ */
 export interface DroppedFilter {
-  key: FilterKey
+  key: string
   value: string
 }
 
@@ -216,9 +215,12 @@ export interface ParsedFilters {
   dropped: DroppedFilter[]
 }
 
-/** One removable filter, as drawn above the grid. `value` identifies what to strip from the URL. */
+/**
+ * One removable filter, as drawn above the grid. `key` is a reserved key or an attribute name, and
+ * `value` identifies what to strip from the URL.
+ */
 export interface AppliedFilterChip {
-  key: FilterKey
+  key: string
   value: string
   label: string
 }
@@ -230,11 +232,18 @@ export interface FacetOption {
   count: number
 }
 
+/** One filterable attribute's checkbox group. `name` is its query key; `label` its heading. */
+export interface AttributeFacet {
+  name: string
+  label: string
+  options: FacetOption[]
+}
+
 /** The drawer's option lists, read from the catalogue rather than hardcoded beside the drawing. */
 export interface FilterFacets {
   categories: FacetOption[]
-  collections: FacetOption[]
-  colours: FacetOption[]
+  /** One group per filterable list attribute, in the attribute's `order`. */
+  attributes: AttributeFacet[]
   /** The slider's ends, in minor units. Equal min and max means one price and no slider. */
   price: { min: number; max: number }
 }

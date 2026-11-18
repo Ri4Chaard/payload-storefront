@@ -20,9 +20,10 @@ const meta = {
   args: {
     detailsHtml: DETAILS,
     attributes: [
-      { name: 'material', label: 'Material', value: 'Material A' },
-      { name: 'weight', label: 'Weight', value: '1.2 kg' },
-      { name: 'origin', label: 'Origin', value: 'Country A' },
+      { name: 'colour', label: 'Colour', value: 'Black, Green', order: 1 },
+      { name: 'material', label: 'Material', value: 'Material A', order: 3 },
+      { name: 'weight', label: 'Weight', value: '1.2 kg', order: 4 },
+      { name: 'origin', label: 'Origin', value: 'Country A', order: 5 },
     ],
     warrantyHtml: WARRANTY,
     deliveryHtml: DELIVERY,

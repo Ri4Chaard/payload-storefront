@@ -28,7 +28,7 @@ test('the name is the page’s only first-level heading', async ({ page }) => {
 })
 
 /**
- * The outline may not skip a level. The accordions and _Complete the Collection_ are both `h2`
+ * The outline may not skip a level. The accordions and _You may also like_ are both `h2`
  * under the name, and the promises strip's cards are `h3` under those.
  */
 test('the heading outline descends one level at a time', async ({ page }) => {
@@ -229,14 +229,17 @@ test('the accordions open one at a time and their copy comes from the catalogue'
   await expect(page.getByRole('button', { name: 'DELIVERY' })).toBeVisible()
 })
 
-/** FR-037 — the band is the home page's, populated from the product's own collection. */
-test('Complete the Collection shows other products and never the product itself', async ({ page }) => {
+/**
+ * FR-037 — the band is the home page's, populated from products sharing a value of a "relates
+ * products" attribute (the seed's collection).
+ */
+test('You may also like shows other products and never the product itself', async ({ page }) => {
   await page.goto(PRODUCT)
 
-  const band = page.getByRole('region', { name: 'Complete the Collection' })
+  const band = page.getByRole('region', { name: 'You may also like' })
   const links = band.getByRole('link')
   const count = await links.count()
-  expect(count, 'an empty collection band was drawn').toBeGreaterThan(0)
+  expect(count, 'an empty related band was drawn').toBeGreaterThan(0)
 
   for (let index = 0; index < count; index += 1) {
     await expect(links.nth(index)).not.toHaveAttribute('href', PRODUCT)
@@ -542,7 +545,7 @@ test('the gallery neither advances by itself nor travels when asked for less mot
   await expect(first, 'the gallery advanced on its own').toHaveAttribute('aria-current', 'true')
 
   // And the visitor's own press lands immediately rather than gliding. `.first()` because
-  // _Complete the Collection_ puts a gallery on every card beneath this one.
+  // _You may also like_ puts a gallery on every card beneath this one.
   const track = page.getByRole('list', { name: /^Photographs of / }).first()
   await expect(track).toHaveCSS('scroll-behavior', 'auto')
 

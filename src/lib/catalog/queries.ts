@@ -33,13 +33,17 @@ import { getPayload } from 'payload'
 import { cache } from 'react'
 
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
-import type { Category, Collection, Colour, Product } from '@/payload-types'
+import type { Attribute, AttributeValue, Category, Product } from '@/payload-types'
 
 import { DEFAULT_SORT, SORT_LABELS } from './filters'
+import { isDatabaseUnreachable } from './prerender'
 import { formatPriceFor, formatPrice } from './price'
 import {
+  categoryHref,
   isProductAvailable,
   lowestPriceMinor,
+  populatedValues,
+  relatedValueIds,
   toCategorySummary,
   toProductDetail,
   toProductSummary,
@@ -47,6 +51,7 @@ import {
 } from './mappers'
 import type {
   AppliedFilterChip,
+  AttributeFacet,
   CategorySummary,
   DroppedFilter,
   FacetOption,
@@ -78,10 +83,10 @@ const client = cache(async () => getPayload({ config }))
  * an array has no access control; there is deliberately no equivalent line here, because asking
  * twice would hide the day the access rule stops working.
  *
- * **`depth: 2` is chosen, not defaulted.** The mappers read `category.slug`, `collections[].slug`,
- * `sizes[].value`, `gallery[]` as media, `attributes[].attribute.label` and `variants.docs[].options[].label`
- * — that last one is two hops from the product, and depth 1 would leave it as a number and the
- * variant selector empty.
+ * **`depth: 2` is chosen, not defaulted.** The mappers read `category.slug`, `values[].attribute`,
+ * `gallery[]` as media, `attributes[].attribute.label` and `variants.docs[].options[].label` — the
+ * second and last are two hops from the product, and depth 1 would leave them as numbers, the
+ * details without their colour row and the variant selector empty.
  *
  * **The narrowing happens in JavaScript, and that is a considered trade rather than an oversight.**
  * The two things every listing sorts and filters on — the price and the availability — are derived
@@ -111,21 +116,25 @@ const catalogue = cache(async (locale: Locale): Promise<Product[]> => {
 })
 
 /**
- * The three reference collections the chips, the facets and the dropped-value check all read.
+ * The reference collections the chips, the facets and the dropped-value check all read: the
+ * categories, every attribute, and every attribute value.
  *
- * Fetched together and passed down rather than looked up one at a time: the fixture bodies could
- * close over module-level arrays for free, and a query cannot. One round trip each per request,
- * deduplicated by `cache`.
+ * Fetched together and passed down rather than looked up one at a time. One round trip each per
+ * request, deduplicated by `cache`. Values are read at depth 0 — their attribute is matched by id
+ * against the attributes already in hand.
  */
 interface Reference {
   categories: Category[]
-  collections: Collection[]
-  colours: Colour[]
+  attributes: Attribute[]
+  values: AttributeValue[]
 }
+
+const byOrder = <T extends { id: number; order?: number | null }>(a: T, b: T): number =>
+  (a.order ?? 0) - (b.order ?? 0) || a.id - b.id
 
 const reference = cache(async (locale: Locale): Promise<Reference> => {
   const payload = await client()
-  const [categories, collections, colours] = await Promise.all([
+  const [categories, attributes, values] = await Promise.all([
     payload.find({
       locale,
       fallbackLocale: DEFAULT_LOCALE,
@@ -137,7 +146,7 @@ const reference = cache(async (locale: Locale): Promise<Reference> => {
     payload.find({
       locale,
       fallbackLocale: DEFAULT_LOCALE,
-      collection: 'collections',
+      collection: 'attributes',
       limit: 0,
       sort: 'order',
       overrideAccess: false,
@@ -145,7 +154,8 @@ const reference = cache(async (locale: Locale): Promise<Reference> => {
     payload.find({
       locale,
       fallbackLocale: DEFAULT_LOCALE,
-      collection: 'colours',
+      collection: 'attribute-values',
+      depth: 0,
       limit: 0,
       sort: 'order',
       overrideAccess: false,
@@ -153,13 +163,18 @@ const reference = cache(async (locale: Locale): Promise<Reference> => {
   ])
   return {
     categories: categories.docs,
-    collections: collections.docs,
-    colours: colours.docs,
+    attributes: [...attributes.docs].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name),
+    ),
+    values: [...values.docs].sort(byOrder),
   }
 })
 
 /** What the listing sorts and filters on — the price the card advertises. */
 const priceOf = lowestPriceMinor
+
+const idOf = (entry: number | { id: number }): number =>
+  typeof entry === 'number' ? entry : entry.id
 
 // ---------------------------------------------------------------------------------------------
 // Labels
@@ -168,46 +183,51 @@ const priceOf = lowestPriceMinor
 const categoryTitle = (refs: Reference, slug: string): string | undefined =>
   refs.categories.find((entry) => entry.slug === slug)?.title
 
-const collectionTitle = (refs: Reference, slug: string): string | undefined =>
-  refs.collections.find((entry) => entry.slug === slug)?.title
+/**
+ * The attribute a filter key names, when it is one a visitor may filter by: a LIST attribute marked
+ * `filterable`. Anything else in the URL — a typed attribute, a list the owner keeps out of the
+ * filters, a name nobody defined — is not a filter this shop offers.
+ */
+const filterAttribute = (refs: Reference, name: string): Attribute | undefined =>
+  refs.attributes.find(
+    (entry) => entry.name === name && entry.type === 'list' && entry.filterable === true,
+  )
 
+const valuesOf = (refs: Reference, attribute: Attribute): AttributeValue[] =>
+  refs.values.filter((entry) => idOf(entry.attribute) === attribute.id)
 
 /**
- * A colour's customer-facing name, from the catalogue.
- *
- * A colour is the owner's, so its name is a localized field on the row and falls back the way every other
- * editorial label does — one place to change it rather than three JSON files.
+ * A value's customer-facing label, from the catalogue. Localized on the row, so it falls back the way
+ * every other editorial label does.
  */
-const colourLabel = (refs: Reference, value: string): string | undefined =>
-  refs.colours.find((entry) => entry.value === value)?.label
+const valueLabel = (refs: Reference, name: string, value: string): string | undefined => {
+  const attribute = filterAttribute(refs, name)
+  if (!attribute) return undefined
+  return valuesOf(refs, attribute).find((entry) => entry.value === value)?.label
+}
 
 // ---------------------------------------------------------------------------------------------
 // getListing
 // ---------------------------------------------------------------------------------------------
 
-function slugsOf(product: Product, key: 'collections'): string[] {
-  return (product[key] ?? []).map((entry) =>
-    typeof entry === 'number' ? String(entry) : entry.slug,
-  )
+/** The `value`s a product carries for one attribute. */
+function productValues(product: Product, attributeId: number): string[] {
+  return populatedValues(product)
+    .filter(({ attribute }) => attribute.id === attributeId)
+    .map(({ value }) => value.value)
 }
 
-function matches(product: Product, filters: FilterState): boolean {
+function matches(product: Product, filters: FilterState, refs: Reference): boolean {
   const category = typeof product.category === 'number' ? '' : product.category.slug
   if (filters.category.length > 0 && !filters.category.includes(category)) return false
 
-  if (filters.collection.length > 0) {
-    const collections = slugsOf(product, 'collections')
-    if (!filters.collection.some((slug) => collections.includes(slug))) return false
-  }
-
-
-  if (filters.colour.length > 0) {
-    // Relationship rows as of spec 011, so this reads a `value` off each the way `slugsOf` does for
-    // collections rather than comparing enum strings.
-    const colours = (product.colour ?? []).map((entry) =>
-      typeof entry === 'number' ? String(entry) : entry.value,
-    )
-    if (!filters.colour.some((value) => colours.includes(value))) return false
+  // Within one attribute, any ticked value will do; across attributes, every one must hold.
+  for (const [name, wanted] of Object.entries(filters.attributes)) {
+    if (wanted.length === 0) continue
+    const attribute = filterAttribute(refs, name)
+    if (!attribute) continue
+    const carried = productValues(product, attribute.id)
+    if (!wanted.some((value) => carried.includes(value))) return false
   }
 
   const price = priceOf(product)
@@ -240,6 +260,12 @@ function sorted(products: Product[], sort: FilterState['sort']): Product[] {
   }
 }
 
+/** The applied attribute names, in the drawer's own order — the attributes' `order`. */
+const appliedAttributeNames = (filters: FilterState, refs: Reference): string[] =>
+  refs.attributes
+    .map((attribute) => attribute.name)
+    .filter((name) => (filters.attributes[name] ?? []).length > 0)
+
 /**
  * The chips drawn above the grid, in the drawer's own group order so that the row reads the same
  * way as the panel that produced it. Labels come from the catalogue, which is why they are built
@@ -251,11 +277,10 @@ function chipsFor(filters: FilterState, refs: Reference, locale: Locale): Applie
   for (const slug of filters.category) {
     chips.push({ key: 'category', value: slug, label: categoryTitle(refs, slug) ?? slug })
   }
-  for (const slug of filters.collection) {
-    chips.push({ key: 'collection', value: slug, label: collectionTitle(refs, slug) ?? slug })
-  }
-  for (const value of filters.colour) {
-    chips.push({ key: 'colour', value, label: colourLabel(refs, value) ?? value })
+  for (const name of appliedAttributeNames(filters, refs)) {
+    for (const value of filters.attributes[name] ?? []) {
+      chips.push({ key: name, value, label: valueLabel(refs, name, value) ?? value })
+    }
   }
 
   // One chip for a range, two for two open ends. "$1,200 – $7,300" is one thing a visitor set and
@@ -296,6 +321,9 @@ function chipsFor(filters: FilterState, refs: Reference, locale: Locale): Applie
  * Values `filters.ts` could not judge, because judging them needs the catalogue. A slug that names
  * nothing would otherwise return an empty grid with no explanation, which reads as "we sell none of
  * these" rather than "that link is stale".
+ *
+ * An attribute the shop does not filter by is reported value by value under its own key, exactly
+ * like a value the attribute does not have — from the visitor's side the two are the same stale link.
  */
 function unknownValues(filters: FilterState, refs: Reference): DroppedFilter[] {
   const dropped: DroppedFilter[] = []
@@ -303,15 +331,28 @@ function unknownValues(filters: FilterState, refs: Reference): DroppedFilter[] {
   for (const slug of filters.category) {
     if (!categoryTitle(refs, slug)) dropped.push({ key: 'category', value: slug })
   }
-  for (const slug of filters.collection) {
-    if (!collectionTitle(refs, slug)) dropped.push({ key: 'collection', value: slug })
-  }
-  // Colour joined this list in spec 011, when it stopped being an enum the parser could judge.
-  for (const value of filters.colour) {
-    if (!colourLabel(refs, value)) dropped.push({ key: 'colour', value })
+  for (const [name, values] of Object.entries(filters.attributes)) {
+    for (const value of values) {
+      if (!valueLabel(refs, name, value)) dropped.push({ key: name, value })
+    }
   }
 
   return dropped
+}
+
+/** `filters` with everything the catalogue does not have taken out. */
+function knownOnly(filters: FilterState, refs: Reference): FilterState {
+  const attributes: Record<string, string[]> = {}
+  for (const [name, values] of Object.entries(filters.attributes)) {
+    const known = values.filter((value) => Boolean(valueLabel(refs, name, value)))
+    if (known.length > 0) attributes[name] = known
+  }
+
+  return {
+    ...filters,
+    category: filters.category.filter((slug) => Boolean(categoryTitle(refs, slug))),
+    attributes,
+  }
 }
 
 export async function getListing(filters: FilterState, locale: Locale): Promise<ListingResult> {
@@ -320,15 +361,10 @@ export async function getListing(filters: FilterState, locale: Locale): Promise<
 
   // A dropped value must not narrow the result — the grid shows what WAS applied, and the notice
   // above it names what was not.
-  const applied: FilterState = {
-    ...filters,
-    category: filters.category.filter((slug) => Boolean(categoryTitle(refs, slug))),
-    collection: filters.collection.filter((slug) => Boolean(collectionTitle(refs, slug))),
-    colour: filters.colour.filter((value) => Boolean(colourLabel(refs, value))),
-  }
+  const applied = knownOnly(filters, refs)
 
   const found = sorted(
-    all.filter((product) => matches(product, applied)),
+    all.filter((product) => matches(product, applied, refs)),
     applied.sort,
   )
 
@@ -457,10 +493,47 @@ export async function getCategories(locale: Locale): Promise<CategorySummary[]> 
   const { categories } = await reference(locale)
   // `order` is the column the owner drags in the admin; ties fall back to id so that two
   // categories sharing an order do not swap places between requests.
-  return [...categories]
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id)
-    .map(toCategorySummary)
+  return [...categories].sort(byOrder).map(toCategorySummary)
 }
+
+/**
+ * The categories the owner ticked "Show in the header", in their `order`, titled in `locale`.
+ *
+ * Read by the root layout and handed to the header and the mobile menu as props, on the same terms
+ * as the contact settings beside it: a Local API read is not a request-time API, so the prerendered
+ * catalogue stays prerendered. Saving a category runs `revalidateOnChange`, which invalidates every
+ * cached page — so ticking or unticking one reaches the header on the next visit.
+ *
+ * An empty list is an ordinary answer: the header then carries its fixed links alone. A query of
+ * its own rather than `reference(locale)`, because every page's layout runs it and has no use for
+ * the attributes and values that one also reads.
+ */
+export const getHeaderCategories = cache(
+  async (locale: Locale): Promise<{ label: string; href: string }[]> => {
+    try {
+      const payload = await client()
+      const { docs } = await payload.find({
+        locale,
+        fallbackLocale: DEFAULT_LOCALE,
+        collection: 'categories',
+        where: { showInHeader: { equals: true } },
+        sort: 'order',
+        depth: 0,
+        limit: 0,
+        overrideAccess: false,
+        select: { title: true, slug: true, order: true },
+      })
+      return [...docs]
+        .sort(byOrder)
+        .map((category) => ({ label: category.title, href: categoryHref(category.slug) }))
+    } catch (error) {
+      if (!isDatabaseUnreachable(error)) throw error
+      // The container build has no database; the header renders its fixed links and the first real
+      // request reads the categories — the same arrangement as the footer's policy links.
+      return []
+    }
+  },
+)
 
 function facet(
   products: Product[],
@@ -475,6 +548,10 @@ function facet(
 
 /**
  * The drawer's option lists, read from the catalogue rather than hardcoded beside the drawing.
+ *
+ * One group per LIST attribute marked `filterable`, in the attributes' `order`, each offering every
+ * one of its values in theirs. A value the owner has just added is offered at once — the facets are
+ * read per request.
  *
  * Zero-count options are still offered. Hiding them makes the panel change shape as a visitor
  * filters, which loses the option they were about to press; showing a zero is the honest answer to
@@ -494,29 +571,28 @@ export async function getFilterFacets(
 
   const prices = within.map(priceOf)
 
+  const attributes: AttributeFacet[] = refs.attributes
+    .filter((attribute) => attribute.type === 'list' && attribute.filterable === true)
+    .map((attribute) => ({
+      name: attribute.name,
+      label: attribute.label,
+      options: facet(
+        within,
+        (product) => productValues(product, attribute.id),
+        valuesOf(refs, attribute).map((entry) => ({ value: entry.value, label: entry.label })),
+      ),
+    }))
+
   return {
     categories: facet(
       all,
       (product) => (typeof product.category === 'number' ? [] : [product.category.slug]),
       refs.categories
         .slice()
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .sort(byOrder)
         .map((entry) => ({ value: entry.slug, label: entry.title })),
     ),
-    collections: facet(
-      within,
-      (product) => slugsOf(product, 'collections'),
-      refs.collections
-        .slice()
-        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((entry) => ({ value: entry.slug, label: entry.title })),
-    ),
-    colours: facet(
-      within,
-      (product) =>
-        (product.colour ?? []).map((entry) => (typeof entry === 'number' ? String(entry) : entry.value)),
-      refs.colours.map((colour) => ({ value: colour.value, label: colour.label })),
-    ),
+    attributes,
     price: {
       min: prices.length > 0 ? Math.min(...prices) : 0,
       max: prices.length > 0 ? Math.max(...prices) : 0,
@@ -525,8 +601,13 @@ export async function getFilterFacets(
 }
 
 /**
- * _Complete the Collection_. An empty array means the band does not render — a "related"
- * strip padded out with whatever else is in the shop is worse than no strip.
+ * _You may also like_ — the products related to this one.
+ *
+ * Related means sharing a value of an attribute the owner marked `relatesProducts` (a collection, a
+ * range, a designer). Where that finds nothing — the product carries no such value, or is the only
+ * one carrying it — the same category stands in, which is still a better suggestion than none.
+ * Published products only (the catalogue is read through the access rule), never the product
+ * itself. An empty array means the band does not render.
  */
 export async function getRelated(
   productId: number,
@@ -537,14 +618,21 @@ export async function getRelated(
   const product = all.find((entry) => entry.id === productId)
   if (!product) return []
 
-  const collections = slugsOf(product, 'collections')
-  if (collections.length === 0) return []
+  const others = all.filter((entry) => entry.id !== productId)
+  const relating = relatedValueIds(product)
 
-  return all
-    .filter((entry) => entry.id !== productId)
-    .filter((entry) => slugsOf(entry, 'collections').some((slug) => collections.includes(slug)))
-    .slice(0, limit)
-    .map((product) => toProductSummary(product, locale))
+  const sharing =
+    relating.length > 0
+      ? others.filter((entry) =>
+          relatedValueIds(entry).some((id) => relating.includes(id)),
+        )
+      : []
+
+  const categoryId = idOf(product.category)
+  const chosen =
+    sharing.length > 0 ? sharing : others.filter((entry) => idOf(entry.category) === categoryId)
+
+  return chosen.slice(0, limit).map((entry) => toProductSummary(entry, locale))
 }
 
 /**

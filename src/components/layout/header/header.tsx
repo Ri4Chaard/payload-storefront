@@ -38,7 +38,17 @@ import { cn } from '@/lib/cn'
  * flush-left at large ones without rendering it twice.
  */
 export interface HeaderProps {
+  /**
+   * Replaces the whole navigation. Stories and fixed renderings only — the storefront passes
+   * `categories` and lets the header compose the rest.
+   */
   navItems?: { label: string; href: string }[]
+  /**
+   * The categories the owner ticked "Show in the header", in their order and already titled in the
+   * visitor's language — read by the layout (`getHeaderCategories`). Drawn between "All products"
+   * and "About us". Empty or absent, the header carries the fixed links alone.
+   */
+  categories?: { label: string; href: string }[]
   /**
    * Stick to the top and step out of the way while the visitor is reading downward, coming back
    * the moment they scroll up. `false` pins it in the flow, which is what a story that wants to
@@ -63,19 +73,12 @@ export interface HeaderProps {
 }
 
 /**
- * Placeholder navigation. Later specs replace this with Payload-managed content.
- *
- * **Translated through the message files in the meantime.** Constitution I puts
- * navigation in Payload, and it will go there — but leaving these English on a Russian page until
- * that spec lands would be the most visible untranslated thing on the site. The keys move to the
- * content model with the labels when the time comes.
+ * The links that are not categories: "All products" first, "About us" and "Contact us" last.
+ * Their words are interface chrome, translated through the message files; the categories between
+ * them are the owner's (see `categories` on the props).
  */
-const NAV_KEYS = [
-  { key: 'allProducts', href: '/all-products' },
-  { key: 'category-1', href: '/category-1' },
-  { key: 'category-2', href: '/category-2' },
-  { key: 'category-3', href: '/category-3' },
-  { key: 'category-4', href: '/category-4' },
+const LEADING_NAV = [{ key: 'allProducts', href: '/all-products' }] as const
+const TRAILING_NAV = [
   { key: 'about', href: '/about' },
   { key: 'contact', href: '/contact' },
 ] as const
@@ -104,6 +107,7 @@ const DEFAULT_LOCALES: Locale[] = LOCALES.map((locale) => LOCALE_LABELS[locale])
 
 export function Header({
   navItems: navItemsProp,
+  categories = [],
   breadcrumbs,
   cartCount,
   social,
@@ -131,8 +135,11 @@ export function Header({
   */
   const t = useTranslations('header')
   const t_nav = useTranslations('nav')
-  const navItems =
-    navItemsProp ?? NAV_KEYS.map(({ key, href }) => ({ label: t_nav(key), href }))
+  const navItems = navItemsProp ?? [
+    ...LEADING_NAV.map(({ key, href }) => ({ label: t_nav(key), href })),
+    ...categories,
+    ...TRAILING_NAV.map(({ key, href }) => ({ label: t_nav(key), href })),
+  ]
   const activeLocale = useLocale()
   const locale = activeLocale.toUpperCase()
   const setLocale = (code: string) => {

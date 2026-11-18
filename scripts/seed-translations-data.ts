@@ -36,30 +36,34 @@ export const CATEGORIES: Translated<'subtitle' | 'title'> = Object.fromEntries(
   ]),
 )
 
-export const COLLECTIONS: Translated<'title'> = Object.fromEntries(
-  ['A', 'B', 'C', 'D'].map((letter) => [
-    `collection-${letter.toLowerCase()}`,
-    { ru: { title: `Коллекция ${letter}` }, uk: { title: `Колекція ${letter}` } },
-  ]),
-)
-
 export const ARTICLE_CATEGORIES: Translated<'title'> = Object.fromEntries(
   numbered(4).map((n) => [`topic-${n}`, { ru: { title: `Тема ${n}` }, uk: { title: `Тема ${n}` } }]),
 )
 
-/** Keyed by the colour's `value`, which is what the English seed and every saved link use. */
-export const COLOURS: Translated<'label'> = {
-  black: { ru: { label: 'Чёрный' }, uk: { label: 'Чорний' } },
-  clear: { ru: { label: 'Прозрачный' }, uk: { label: 'Прозорий' } },
-  green: { ru: { label: 'Зелёный' }, uk: { label: 'Зелений' } },
-  multicolor: { ru: { label: 'Разноцветный' }, uk: { label: 'Різнокольоровий' } },
-}
-
 /** Keyed by the attribute's `name`, which is what the English seed calls it. */
 export const ATTRIBUTES: Translated<'label'> = {
+  colour: { ru: { label: 'Цвет' }, uk: { label: 'Колір' } },
+  collection: { ru: { label: 'Коллекция' }, uk: { label: 'Колекція' } },
   material: { ru: { label: 'Материал' }, uk: { label: 'Матеріал' } },
   weight: { ru: { label: 'Вес' }, uk: { label: 'Вага' } },
   origin: { ru: { label: 'Происхождение' }, uk: { label: 'Походження' } },
+}
+
+/**
+ * The values of the list attributes, keyed `attribute/value` — a value is unique only within its
+ * attribute, so the pair is what finds it.
+ */
+export const ATTRIBUTE_VALUES: Translated<'label'> = {
+  'colour/black': { ru: { label: 'Чёрный' }, uk: { label: 'Чорний' } },
+  'colour/clear': { ru: { label: 'Прозрачный' }, uk: { label: 'Прозорий' } },
+  'colour/green': { ru: { label: 'Зелёный' }, uk: { label: 'Зелений' } },
+  'colour/multicolor': { ru: { label: 'Разноцветный' }, uk: { label: 'Різнокольоровий' } },
+  ...Object.fromEntries(
+    ['A', 'B', 'C', 'D'].map((letter) => [
+      `collection/collection-${letter.toLowerCase()}`,
+      { ru: { label: `Коллекция ${letter}` }, uk: { label: `Колекція ${letter}` } },
+    ]),
+  ),
 }
 
 /** Every product's description — the English seed gives them all the same placeholder sentence. */

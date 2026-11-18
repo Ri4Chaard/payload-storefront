@@ -9,6 +9,7 @@ import { ContactBanner } from '@/components/layout/contact-banner'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { CookieBanner, CookieSettingsButton } from '@/components/ui'
+import { getHeaderCategories } from '@/lib/catalog/queries'
 import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 import { getCookieSettings, getFooterPolicies } from '@/lib/policies/queries'
 import { asLocale } from '@/i18n/locale'
@@ -144,7 +145,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
     which the build output confirms. `revalidateGlobalOnChange` on the global is what makes a saved
     change reach those cached pages.
   */
-  const [social, contact, policies, cookies] = await Promise.all([
+  const [social, contact, policies, cookies, headerCategories] = await Promise.all([
     getSocialLinks(),
     getContactDetails(),
     /*
@@ -160,6 +161,12 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
       already had.
     */
     getCookieSettings(locale),
+    /*
+      The categories the owner ticked "Show in the header", titled in this language. Read here, on
+      the same terms as the reads above, and handed down: the header is a client component. Saving
+      a category runs `revalidateOnChange`, which invalidates every cached page that draws it.
+    */
+    getHeaderCategories(locale),
   ])
 
   // Each surface gets what it draws, rather than the whole record spread at it: the strip and the
@@ -184,6 +191,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
             this line's output and nothing else.
           */}
             <Header
+              categories={headerCategories}
               social={social}
               {...reach}
               locales={enabled.map((code) => LOCALE_LABELS[code])}

@@ -19,7 +19,7 @@ const state = (patch: Partial<FilterState> = {}): FilterState => ({ ...DEFAULT_F
 describe('listingHref', () => {
   it('puts a single category in the path and leaves it out of the query', () => {
     expect(listingHref(state({ category: ['category-1'] }), CATEGORIES)).toBe('/category-1')
-    expect(listingHref(state({ category: ['category-1'], colour: ['black'] }), CATEGORIES)).toBe(
+    expect(listingHref(state({ category: ['category-1'], attributes: { colour: ['black'] } }), CATEGORIES)).toBe(
       '/category-1?colour=black',
     )
   })
@@ -61,7 +61,7 @@ describe('canonicalListing', () => {
   it('is null when the address is already right', () => {
     expect(asked(state())).toBeNull()
     expect(asked(state({ category: ['category-1', 'category-2'] }))).toBeNull()
-    expect(asked(state({ colour: ['green'] }))).toBeNull()
+    expect(asked(state({ attributes: { colour: ['green'] } }))).toBeNull()
   })
 
   /**
@@ -70,14 +70,14 @@ describe('canonicalListing', () => {
    * visitor would have produced.
    */
   it('drops a price range the route settled away', () => {
-    const requested = state({ colour: ['green'], minPrice: 120_000, maxPrice: 3_840_000 })
-    const settled = state({ colour: ['green'] })
+    const requested = state({ attributes: { colour: ['green'] }, minPrice: 120_000, maxPrice: 3_840_000 })
+    const settled = state({ attributes: { colour: ['green'] } })
     expect(canonicalListing(requested, settled, CATEGORIES, [])).toBe('/all-products?colour=green')
   })
 
   /** And once there, it stops: the two states agree and there is nothing left to redirect to. */
   it('does not cycle', () => {
-    const settled = state({ colour: ['green'] })
+    const settled = state({ attributes: { colour: ['green'] } })
     expect(canonicalListing(settled, settled, CATEGORIES, [])).toBeNull()
   })
 

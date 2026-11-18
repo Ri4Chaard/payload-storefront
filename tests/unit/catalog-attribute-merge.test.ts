@@ -13,10 +13,11 @@ import type { ProductAttribute } from '@/lib/catalog/types'
  * than showing neither. Every assertion below is really about that.
  */
 
-const row = (name: string, value: string): ProductAttribute => ({
+const row = (name: string, value: string, order = 0): ProductAttribute => ({
   name,
   label: name.charAt(0).toUpperCase() + name.slice(1),
   value,
+  order,
 })
 
 const PRODUCT = [
@@ -61,6 +62,13 @@ describe('an option laid over its product', () => {
 
     expect(merged.map((entry) => entry.name)).toEqual(['material', 'weight', 'finish'])
     expect(merged[0]!.value).toBe('Other material')
+  })
+
+  it('slots an option-only row into its attribute’s order', () => {
+    const product = [row('colour', 'Black', 1), row('material', 'Sample', 3), row('origin', 'A', 5)]
+    const merged = mergeAttributes(product, [row('weight', '1.5 kg', 4)])
+
+    expect(merged.map((entry) => entry.name)).toEqual(['colour', 'material', 'weight', 'origin'])
   })
 
   it('leaves the product untouched when the option carries nothing', () => {

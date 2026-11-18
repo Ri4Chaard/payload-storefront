@@ -414,8 +414,7 @@ function PriceReadout({ amount }: { amount: number }) {
 function HiddenState({ filters }: { filters: FilterState }) {
   const lists: [string, readonly string[]][] = [
     ['category', filters.category],
-    ['collection', filters.collection],
-    ['colour', filters.colour],
+    ...Object.entries(filters.attributes),
   ]
 
   return (

@@ -82,9 +82,10 @@ export function localised(path: string): string[] {
  * invalidated almost nothing.
  *
  * **Every product page, rather than only the one that changed.** A product page draws its own
- * product, the shop settings, the category name in its eyebrow, and its collection-mates in _Complete
- * the Collection_ — so editing one product changes its mates' pages, editing a category changes the
- * eyebrow on every product in it, and re-uploading a photograph can change any of them. One cheap
+ * product, the shop settings, the category name in its eyebrow, the related products in _You may
+ * also like_, and — through the root layout — the header's categories. So editing one product
+ * changes its neighbours' pages, editing a category changes the eyebrow on every product in it and
+ * the header on every page, and re-uploading a photograph can change any of them. One cheap
  * query for the slugs is honest about that; working out exactly which pages are affected would take
  * several.
  *

@@ -195,15 +195,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </Container>
 
       {/*
-        _Complete the Collection_ — the home page's band, consumed unchanged apart from
-        the button it does not draw here. Absent rather than empty: a product in no collection, or the
-        only product in its collection, gets no strip at all rather than a heading over nothing.
+        _You may also like_ — the home page's band, consumed unchanged apart from the button it does
+        not draw here. `getRelated` picks products sharing a value of a "relates products" attribute,
+        or failing that the same category. Absent rather than empty: a product with nothing related
+        gets no strip at all rather than a heading over nothing.
       */}
       {related.length > 0 ? (
         <ProductCarousel
-          heading={t_product('completeCollection')}
-          headingId="complete-the-collection"
-          trackLabel={t_product('moreFromCollection')}
+          heading={t_product('relatedHeading')}
+          headingId="you-may-also-like"
+          trackLabel={t_product('relatedTrack')}
           // Five seconds. The row is a shop window beside a product the visitor is already reading
           // about, so it offers rather than demands: it never starts for someone who asked for
           // reduced motion, holds while it is hovered or focused, and stops for good the moment

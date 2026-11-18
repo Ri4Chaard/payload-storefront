@@ -32,17 +32,26 @@ const SOCIAL = [
   { icon: 'telegram' as const, label: 'Telegram', href: 'https://t.me/aurum' },
 ]
 
+/**
+ * The categories the owner ticked "Show in the header". The storefront's layout reads them from
+ * Payload; a story supplies placeholders.
+ */
+const CATEGORIES = [1, 2, 3, 4].map((n) => ({ label: `Category ${n}`, href: `/category-${n}` }))
+
 const meta = {
   title: 'Layout/Header',
   component: Header,
   parameters: { layout: 'fullscreen' },
-  args: { social: SOCIAL, ...CONTACT },
+  args: { social: SOCIAL, categories: CATEGORIES, ...CONTACT },
 } satisfies Meta<typeof Header>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Desktop: Story = {}
+
+/** A shop that has ticked no category for the header: the fixed links alone. */
+export const WithoutCategories: Story = { args: { categories: [] } }
 
 export const WithBreadcrumbs: Story = { args: { breadcrumbs: BREADCRUMBS } }
 

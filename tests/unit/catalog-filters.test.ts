@@ -20,8 +20,7 @@ import type { FilterState } from '@/lib/catalog/types'
  */
 const FULL: FilterState = {
   category: ['category-1', 'category-3'],
-  collection: ['collection-c'],
-  colour: ['black', 'clear'],
+  attributes: { colour: ['black', 'clear'], collection: ['collection-c'], shape: ['round'] },
   minPrice: 120000,
   maxPrice: 730000,
   inStock: true,
@@ -41,7 +40,7 @@ describe('the filter URL round-trips', () => {
 
   it('reads the record shape a route receives as well as URLSearchParams', () => {
     const { filters } = parseFilters({ colour: ['black', 'clear'], sort: 'newest', page: '2' })
-    expect(filters.colour).toEqual(['black', 'clear'])
+    expect(filters.attributes).toEqual({ colour: ['black', 'clear'] })
     expect(filters.sort).toBe('newest')
     expect(filters.page).toBe(2)
   })
@@ -60,30 +59,51 @@ describe('defaults are absent from the URL', () => {
   })
 
   it('orders keys the same way whatever order the state was assembled in', () => {
-    const a = toQueryString({ ...DEFAULT_FILTERS, colour: ['black'], category: ['category-1'] })
-    const b = toQueryString({ ...DEFAULT_FILTERS, category: ['category-1'], colour: ['black'] })
+    const a = toQueryString({
+      ...DEFAULT_FILTERS,
+      attributes: { shape: ['round'], colour: ['black'] },
+      category: ['category-1'],
+      inStock: true,
+    })
+    const b = toQueryString({
+      ...DEFAULT_FILTERS,
+      inStock: true,
+      category: ['category-1'],
+      attributes: { colour: ['black'], shape: ['round'] },
+    })
     expect(a).toBe(b)
-    expect(a).toBe('?category=category-1&colour=black')
+    // Category first, then the attributes alphabetically, then the listing's own keys.
+    expect(a).toBe('?category=category-1&colour=black&shape=round&inStock=1')
+  })
+
+  it('writes nothing for an attribute with no values', () => {
+    expect(toQueryString({ ...DEFAULT_FILTERS, attributes: { colour: [] } })).toBe('')
   })
 })
 
 describe('unknown values are dropped and reported', () => {
   /**
-   * **Colour left this list in spec 011**, and the assertion is reversed rather than deleted.
-   *
-   * It used to be a closed set this module could judge, and the test asserted `purple` was dropped
-   * here. Colour is an owner-managed vocabulary now, so the valid set is a fact about the database
-   * that a pure URL module has never seen — exactly the position `category`, `collection` and
-   * `size` have always been in. The value is carried through and `getListing` decides, reporting
-   * the drop into the same list the visitor is shown.
-   *
-   * `tests/integration/colours.test.ts` is where "purple is dropped" is now proved, because that is
-   * where a catalogue exists to contradict it.
+   * Attributes are the owner's, so which names and values exist is a fact about the database that
+   * a pure URL module has never seen — the position `category` has always been in. The value is
+   * carried through and `getListing` decides, reporting the drop into the same list the visitor is
+   * shown. `tests/integration/attribute-filters.test.ts` is where "purple is dropped" is proved,
+   * because that is where a catalogue exists to contradict it.
    */
-  it('carries an unrecognised colour through for the catalogue to judge', () => {
+  it('carries an unrecognised attribute value through for the catalogue to judge', () => {
     const { filters, dropped } = parseFilters({ colour: ['black', 'purple'] })
-    expect(filters.colour).toEqual(['black', 'purple'])
+    expect(filters.attributes.colour).toEqual(['black', 'purple'])
     expect(dropped).toEqual([])
+  })
+
+  it('reads every key the listing does not own as a candidate attribute', () => {
+    const { filters } = parseFilters(
+      new URLSearchParams('frame-size=large&collection=collection-a&category=category-1'),
+    )
+    expect(filters.category).toEqual(['category-1'])
+    expect(filters.attributes).toEqual({
+      'frame-size': ['large'],
+      collection: ['collection-a'],
+    })
   })
 
   it('drops an unknown sort rather than sorting by nothing', () => {
@@ -106,14 +126,25 @@ describe('unknown values are dropped and reported', () => {
     expect(dropped.map((entry) => entry.key)).toEqual(['minPrice', 'maxPrice'])
   })
 
-  it('ignores keys that are not filters at all, silently', () => {
-    const { filters, dropped } = parseFilters({ utm_source: 'newsletter', category: ['category-1'] })
+  it('ignores keys that could never be an attribute name, silently', () => {
+    const { filters, dropped } = parseFilters({
+      utm_source: 'newsletter',
+      Colour: 'black',
+      category: ['category-1'],
+    })
     expect(filters.category).toEqual(['category-1'])
+    expect(filters.attributes).toEqual({})
     expect(dropped).toEqual([])
   })
 
   it('collapses a repeated value to one filter', () => {
-    expect(parseFilters({ colour: ['black', 'black'] }).filters.colour).toEqual(['black'])
+    expect(parseFilters({ colour: ['black', 'black'] }).filters.attributes.colour).toEqual([
+      'black',
+    ])
+  })
+
+  it('keeps no attribute whose every value is empty', () => {
+    expect(parseFilters({ colour: '' }).filters.attributes).toEqual({})
   })
 
   it('keeps an unknown category — only the catalogue can judge that one', () => {
@@ -130,6 +161,11 @@ describe('removeFilter', () => {
 
   it('returns to page one, so widening a search cannot land on an empty page', () => {
     expect(removeFilter(FULL, 'colour', 'black').page).toBe(1)
+  })
+
+  it('strips one value of an attribute, and the attribute itself once it is empty', () => {
+    expect(removeFilter(FULL, 'colour', 'black').attributes.colour).toEqual(['clear'])
+    expect(removeFilter(FULL, 'shape', 'round').attributes).not.toHaveProperty('shape')
   })
 
   it('clears a price end and the stock toggle outright', () => {
@@ -150,14 +186,17 @@ describe('hasActiveFilters', () => {
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, sort: 'newest', page: 4 })).toBe(false)
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, inStock: true })).toBe(true)
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, minPrice: 1 })).toBe(true)
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, attributes: { shape: ['round'] } })).toBe(true)
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, attributes: { shape: [] } })).toBe(false)
   })
 })
 
 describe('toggleFilter', () => {
   it('adds a value that is absent and removes one that is present', () => {
     const on = toggleFilter(DEFAULT_FILTERS, 'colour', 'black')
-    expect(on.colour).toEqual(['black'])
-    expect(toggleFilter(on, 'colour', 'black').colour).toEqual([])
+    expect(on.attributes).toEqual({ colour: ['black'] })
+    // Emptied, the attribute goes — the same state as never having ticked it.
+    expect(toggleFilter(on, 'colour', 'black')).toEqual(DEFAULT_FILTERS)
   })
 
   it('returns to page one, because a narrower grid may not have the page you are standing on', () => {
@@ -165,11 +204,13 @@ describe('toggleFilter', () => {
   })
 
   it('leaves every other group alone', () => {
-    const filters = { ...DEFAULT_FILTERS, category: ['category-1'], colour: ['black' as const] }
+    const filters = { ...DEFAULT_FILTERS, category: ['category-1'], attributes: { colour: ['black'] } }
     expect(toggleFilter(filters, 'collection', 'collection-c')).toMatchObject({
       category: ['category-1'],
+      attributes: { colour: ['black'], collection: ['collection-c'] },
+    })
+    expect(toggleFilter(filters, 'category', 'category-2').attributes).toEqual({
       colour: ['black'],
-      collection: ['collection-c'],
     })
   })
 })

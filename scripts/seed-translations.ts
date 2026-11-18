@@ -1,5 +1,5 @@
 import config from '@payload-config'
-import { getPayload, type Payload } from 'payload'
+import { getPayload, type Payload, type Where } from 'payload'
 
 import { SECONDARY_LOCALES, type Locale } from '@/i18n/routing'
 import { skipRevalidation } from '@/lib/revalidate'
@@ -8,10 +8,9 @@ import {
   ARTICLES,
   ARTICLE_CATEGORIES,
   ATTRIBUTES,
-  COLOURS,
+  ATTRIBUTE_VALUES,
   BLOG_PAGE,
   CATEGORIES,
-  COLLECTIONS,
   CONTACT_FORM,
   CONTACT_PAGE,
   FAQ_PAGE,
@@ -140,7 +139,8 @@ const report = (label: string, locale: Locale, counts: Tally): void => {
  *
  * `field` is `slug` for almost everything; `media` has no slug and is found by `filename`, and
  * `questions` and `attributes` by the English text itself. Passing the lookup field in is what lets
- * one function serve all six collections.
+ * one function serve every collection. Where one field does not identify a document — an attribute
+ * value is unique only within its attribute — `field` is a function from the key to a `where`.
  *
  * `deep` names fields copied from the English document through `translateDeep` — the arrays, blocks
  * and rich text that have no key of their own to translate by.
@@ -148,7 +148,7 @@ const report = (label: string, locale: Locale, counts: Tally): void => {
 async function translateCollection(
   payload: Payload,
   collection: string,
-  field: string,
+  field: string | ((key: string) => Where),
   locale: Locale,
   entries: Record<string, Record<string, unknown>>,
   label: string,
@@ -159,7 +159,7 @@ async function translateCollection(
   for (const [key, data] of Object.entries(entries)) {
     const { docs } = await payload.find({
       collection: collection as never,
-      where: { [field]: { equals: key } },
+      where: typeof field === 'function' ? field(key) : { [field]: { equals: key } },
       limit: 1,
       overrideAccess: true,
     })
@@ -238,6 +238,12 @@ const forLocale = <T extends Record<string, unknown>>(
 ): Record<string, T> =>
   Object.fromEntries(Object.entries(entries).map(([key, value]) => [key, value[locale]]))
 
+/** `colour/black` → the value `black` of the attribute named `colour`. */
+const byAttributeAndValue = (key: string): Where => {
+  const [attribute = '', value = ''] = key.split('/')
+  return { and: [{ 'attribute.name': { equals: attribute } }, { value: { equals: value } }] }
+}
+
 async function seed(): Promise<void> {
   const payload = await getPayload({ config })
 
@@ -245,10 +251,9 @@ async function seed(): Promise<void> {
 
   for (const locale of SECONDARY_LOCALES) {
     await translateCollection(payload, 'categories', 'slug', locale, forLocale(CATEGORIES, locale), 'categories')
-    await translateCollection(payload, 'collections', 'slug', locale, forLocale(COLLECTIONS, locale), 'collections')
     await translateCollection(payload, 'article-categories', 'slug', locale, forLocale(ARTICLE_CATEGORIES, locale), 'article categories')
     await translateCollection(payload, 'attributes', 'name', locale, forLocale(ATTRIBUTES, locale), 'attributes')
-    await translateCollection(payload, 'colours', 'value', locale, forLocale(COLOURS, locale), 'colours')
+    await translateCollection(payload, 'attribute-values', byAttributeAndValue, locale, forLocale(ATTRIBUTE_VALUES, locale), 'attribute values')
     await translateCollection(payload, 'products', 'slug', locale, forLocale(PRODUCTS, locale), 'products', ['details', 'attributes'])
     await translateCollection(payload, 'articles', 'slug', locale, forLocale(ARTICLES, locale), 'articles', ['chapters'])
 

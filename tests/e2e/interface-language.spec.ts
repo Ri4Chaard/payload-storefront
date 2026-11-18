@@ -29,8 +29,8 @@ import { acquireSharedContentLock } from '../shared-content-lock'
  * **And why it compares WHOLE strings rather than searching for substrings.** A chrome string is a
  * complete label: a button's text, a heading, an accessible name. Editorial content that happens to
  * contain the same letters is not the chrome leaking — the article chapter "COLOR: FINDING THE
- * RIGHT BALANCE" contains `catalog.colour`, the category "Category 1" contains `nav.category-1`, and
- * both are Payload content correctly falling back. Substring matching reported all three as
+ * RIGHT BALANCE" once contained a `catalog.colour` key, and both are Payload content correctly
+ * falling back. Substring matching reported them as
  * failures; whole-string matching reports none of them and still catches every real leak, because a
  * component that forgets to translate renders the English value *as the entire label*.
  *

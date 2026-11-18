@@ -61,7 +61,7 @@ export const PreTicked: Story = {
     filters: {
       ...storyFilters,
       category: ['category-1'],
-      colour: ['clear'],
+      attributes: { colour: ['clear'] },
       minPrice: 120_000,
       maxPrice: 730_000,
       inStock: true,

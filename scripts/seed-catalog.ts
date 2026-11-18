@@ -64,8 +64,6 @@ const payload = await getPayload({ config })
 async function upsert<
   T extends
     | 'categories'
-    | 'collections'
-    | 'colours'
     | 'attributes'
     | 'article-categories'
     | 'articles',
@@ -141,6 +139,7 @@ const categories = {
     slug: 'category-1',
     subtitle: 'A short description of this category',
     order: 1,
+    showInHeader: true,
   }),
   'category-2': await upsert('categories', 'slug', 'category-2', {
     image: categoryMedia.category2.id,
@@ -148,6 +147,7 @@ const categories = {
     slug: 'category-2',
     subtitle: 'A short description of this category',
     order: 2,
+    showInHeader: true,
   }),
   'category-3': await upsert('categories', 'slug', 'category-3', {
     image: categoryMedia.category3.id,
@@ -155,6 +155,7 @@ const categories = {
     slug: 'category-3',
     subtitle: 'A short description of this category',
     order: 3,
+    showInHeader: true,
   }),
   'category-4': await upsert('categories', 'slug', 'category-4', {
     image: categoryMedia.category4.id,
@@ -162,29 +163,85 @@ const categories = {
     slug: 'category-4',
     subtitle: 'A short description of this category',
     order: 4,
+    showInHeader: true,
   }),
 }
 
-console.log('› collections')
-const collections: Record<string, { id: number | string }> = {}
-for (const [index, [title, slug]] of (
-  [
-    ['Collection A', 'collection-a'],
-    ['Collection B', 'collection-b'],
-    ['Collection C', 'collection-c'],
-    ['Collection D', 'collection-d'],
-  ] as const
-).entries()) {
-  // The slug is written out: deriving it from a title with a space in it would not be a slug.
-  collections[slug] = await upsert('collections', 'slug', slug, { title, slug, order: index + 1 })
+console.log('› attributes')
+/*
+  Every property a product has is an attribute the owner defines. Two LIST attributes — their values
+  are documents of their own below — and three typed ones written on each product.
+
+  The two list attributes keep the query keys and values the shop has always used, so a link to
+  `?colour=black` or `?collection=collection-a` still filters.
+*/
+const attributes = {
+  colour: await upsert('attributes', 'name', 'colour', {
+    label: 'Colour',
+    name: 'colour',
+    type: 'list',
+    filterable: true,
+    showInDetails: true,
+    relatesProducts: false,
+    order: 1,
+  }),
+  collection: await upsert('attributes', 'name', 'collection', {
+    label: 'Collection',
+    name: 'collection',
+    type: 'list',
+    filterable: true,
+    showInDetails: false,
+    relatesProducts: true,
+    order: 2,
+  }),
+  material: await upsert('attributes', 'name', 'material', {
+    label: 'Material',
+    name: 'material',
+    type: 'text',
+    showInDetails: true,
+    order: 3,
+  }),
+  weight: await upsert('attributes', 'name', 'weight', {
+    label: 'Weight',
+    name: 'weight',
+    type: 'text',
+    showInDetails: true,
+    order: 4,
+  }),
+  origin: await upsert('attributes', 'name', 'origin', {
+    label: 'Origin',
+    name: 'origin',
+    type: 'text',
+    showInDetails: true,
+    order: 5,
+  }),
 }
 
-console.log('› colours')
-/*
-  The owner's vocabulary as of spec 011, seeded with the four values that used to be an enum and
-  KEEPING those values — every link bookmarked or indexed before 011 filters on this string.
-*/
-const colours: Record<string, { id: number | string }> = {}
+console.log('› attribute values')
+/** Find-or-create one value of one list attribute — unique by the pair, not by `value` alone. */
+async function upsertValue(
+  attribute: { id: number },
+  value: string,
+  data: { label: string; order: number },
+) {
+  const existing = await payload.find({
+    collection: 'attribute-values',
+    where: { and: [{ attribute: { equals: attribute.id } }, { value: { equals: value } }] },
+    limit: 1,
+  })
+  const doc = { attribute: attribute.id, value, ...data }
+  if (existing.docs[0]) {
+    return payload.update({
+      collection: 'attribute-values',
+      id: existing.docs[0].id,
+      data: doc,
+      context: skipRevalidation,
+    })
+  }
+  return payload.create({ collection: 'attribute-values', data: doc, context: skipRevalidation })
+}
+
+const colours: Record<string, { id: number }> = {}
 for (const [index, [value, label]] of (
   [
     ['black', 'Black'],
@@ -193,29 +250,16 @@ for (const [index, [value, label]] of (
     ['multicolor', 'Multicolor'],
   ] as const
 ).entries()) {
-  colours[value] = await upsert('colours', 'value', value, { label, value, order: index })
+  colours[value] = await upsertValue(attributes.colour, value, { label, order: index + 1 })
 }
 
-console.log('› attributes')
-const attributes = {
-  material: await upsert('attributes', 'name', 'material', {
-    label: 'Material',
-    name: 'material',
-    type: 'text',
-    order: 1,
-  }),
-  weight: await upsert('attributes', 'name', 'weight', {
-    label: 'Weight',
-    name: 'weight',
-    type: 'text',
-    order: 2,
-  }),
-  origin: await upsert('attributes', 'name', 'origin', {
-    label: 'Origin',
-    name: 'origin',
-    type: 'text',
-    order: 3,
-  }),
+const collections: Record<string, { id: number }> = {}
+for (const [index, letter] of (['A', 'B', 'C', 'D'] as const).entries()) {
+  const value = `collection-${letter.toLowerCase()}`
+  collections[value] = await upsertValue(attributes.collection, value, {
+    label: `Collection ${letter}`,
+    order: index + 1,
+  })
 }
 
 console.log('› the option variant type and its options')
@@ -294,7 +338,9 @@ type ProductSeed = {
   gallery: (number | string)[]
   price: number
   description: string
-  collections?: (number | string)[]
+  /** Collection values, by `value`. */
+  collections?: string[]
+  /** Colour values, by `value`. */
   colour?: string[]
   availability: 'made-to-order' | 'stock-tracked'
   inventory?: number
@@ -320,7 +366,7 @@ const productSeeds: ProductSeed[] = [
     ],
     price: 38320,
     description: DESCRIPTION,
-    collections: [need(collections, 'collection-a', 'collection').id],
+    collections: ['collection-a'],
     colour: ['clear'],
     availability: 'made-to-order',
     withVariants: true,
@@ -338,7 +384,7 @@ const productSeeds: ProductSeed[] = [
     gallery: [media.product2.id, media.product3.id],
     price: 37400,
     description: DESCRIPTION,
-    collections: [need(collections, 'collection-c', 'collection').id],
+    collections: ['collection-c'],
     colour: ['clear'],
     availability: 'made-to-order',
     attributes: [
@@ -354,7 +400,7 @@ const productSeeds: ProductSeed[] = [
     gallery: [media.product3.id],
     price: 24900,
     description: DESCRIPTION,
-    collections: [need(collections, 'collection-a', 'collection').id],
+    collections: ['collection-a'],
     colour: ['clear'],
     availability: 'made-to-order',
     attributes: [{ attribute: attributes.material.id, value: MATERIAL[0] }],
@@ -367,7 +413,7 @@ const productSeeds: ProductSeed[] = [
     gallery: [media.product4.id],
     price: 38000,
     description: DESCRIPTION,
-    collections: [need(collections, 'collection-b', 'collection').id],
+    collections: ['collection-b'],
     colour: ['multicolor'],
     availability: 'stock-tracked',
     inventory: 0,
@@ -381,7 +427,7 @@ const productSeeds: ProductSeed[] = [
     gallery: [media.product5.id],
     price: 19000,
     description: DESCRIPTION,
-    collections: [need(collections, 'collection-d', 'collection').id],
+    collections: ['collection-d'],
     colour: ['multicolor'],
     availability: 'stock-tracked',
     inventory: 3,
@@ -405,7 +451,7 @@ const productSeeds: ProductSeed[] = [
     gallery: [media.product1a.id, media.product1d.id],
     price: 21500,
     description: 'Краткое описание товара. Замените его своим текстом.',
-    collections: [need(collections, 'collection-a', 'collection').id],
+    collections: ['collection-a'],
     colour: ['clear'],
     availability: 'made-to-order',
     attributes: [{ attribute: attributes.material.id, value: MATERIAL[0] }],
@@ -484,13 +530,7 @@ for (const [index, { title, categorySlug }] of FILLER.entries()) {
     // 1,200 → 46,050 in even steps, so a price filter always has something on each side of it.
     price: 1200 + index * 1950,
     description: DESCRIPTION,
-    collections: [
-      need(
-        collections,
-        pick(['collection-a', 'collection-b', 'collection-c', 'collection-d'], index),
-        'collection',
-      ).id,
-    ],
+    collections: [pick(['collection-a', 'collection-b', 'collection-c', 'collection-d'], index)],
     colour: pick(FILLER_COLOURS, index),
     availability: stocked ? 'stock-tracked' : 'made-to-order',
     inventory: index === 7 ? 0 : 2,
@@ -512,7 +552,7 @@ productSeeds.push({
   gallery: [media.product2.id],
   price: 28000,
   description: 'Not yet announced.',
-  collections: [need(collections, 'collection-d', 'collection').id],
+  collections: ['collection-d'],
   colour: ['clear'],
   availability: 'made-to-order',
   status: 'draft',
@@ -526,8 +566,11 @@ for (const seed of productSeeds) {
     gallery: seed.gallery,
     details: richText([seed.description, DETAILS_NOTE]),
     category: seed.category.id,
-    collections: seed.collections ?? [],
-    colour: (seed.colour ?? []).map((value) => need(colours, value, 'colour').id),
+    // Every list-attribute value the product carries, in one field: its colours, then its collection.
+    values: [
+      ...(seed.colour ?? []).map((value) => need(colours, value, 'colour').id),
+      ...(seed.collections ?? []).map((value) => need(collections, value, 'collection').id),
+    ],
     attributes: seed.attributes ?? [],
     availability: seed.availability,
     ...(seed.availability === 'stock-tracked' ? { inventory: seed.inventory ?? 0 } : {}),

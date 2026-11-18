@@ -46,7 +46,7 @@ const OPTIONED: ProductDetail = {
   ],
   attributes: [],
   fromPrice: null,
-  collectionIds: [],
+  relatedValueIds: [],
   seo: { title: null, description: null, image: null },
 }
 

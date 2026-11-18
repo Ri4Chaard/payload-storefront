@@ -30,7 +30,7 @@ import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import type { Locale } from '@/i18n/routing'
-import type { Category, Media, Product, Shop,  Variant } from '@/payload-types'
+import type { Attribute, AttributeValue, Category, Media, Product, Shop, Variant } from '@/payload-types'
 
 import { CATALOG_CURRENCY, formatPriceFor } from './price'
 import type {
@@ -251,20 +251,27 @@ function toVariantOption(
     available: isVariantAvailable(variant, availability),
     // What this variant says about itself, where it differs from its product. Empty for a
     // variant carrying none, which is every variant until an owner fills one in.
-    attributes: toAttributes(variant.attributes),
+    attributes: toTypedAttributes(variant.attributes),
     ...(image ? { image } : {}),
   }
 }
 
 
+/** Lowest `order` first, then by name, so two attributes sharing an order never swap places. */
+const byAttributeOrder = (a: ProductAttribute, b: ProductAttribute): number =>
+  a.order - b.order || a.name.localeCompare(b.name)
+
+/** Hidden from the details only when the owner unticked it; an unset flag means "show". */
+const shownInDetails = (attribute: Attribute): boolean => attribute.showInDetails !== false
+
 /**
- * The owner-defined rows on a product or on a variant.
+ * The typed (text or number) rows on a product or on a variant.
  *
- * Takes the array rather than the document, because as of 011 a variant carries an identically
- * shaped one and the two must be read the same way. A second reader would be a second place for the
- * dropped-row rule below to drift.
+ * Takes the array rather than the document, because a variant carries an identically shaped one and
+ * the two must be read the same way. A second reader would be a second place for the dropped-row
+ * rule below to drift.
  */
-function toAttributes(
+function toTypedAttributes(
   rows: Product['attributes'] | Variant['attributes'],
 ): ProductAttribute[] {
   /*
@@ -273,15 +280,75 @@ function toAttributes(
     `attributes[].value` stopped being `required` when it became localized: a row is shared across
     all three languages, so a required localized child would have forced every translation to be
     complete before a document could be saved in any of them. The cost is that a value can be absent
-    here, and an attribute row reading "Metal:" with nothing after it is worse than one that is not
+    here, and an attribute row reading "Material:" with nothing after it is worse than one that is not
     drawn at all.
   */
   return (rows ?? []).flatMap((entry) => {
     const definition = populated(entry.attribute, 'a product attribute')
     const value = entry.value
+    if (!shownInDetails(definition)) return []
     if (typeof value !== 'string' || value.trim() === '') return []
-    return [{ name: definition.name, label: definition.label, value }]
+    return [
+      { name: definition.name, label: definition.label, value, order: definition.order ?? 0 },
+    ]
   })
+}
+
+/** The product's attribute values that arrived populated, each with its populated attribute. */
+export function populatedValues(
+  product: Product,
+): { value: AttributeValue; attribute: Attribute }[] {
+  return (product.values ?? []).flatMap((entry) => {
+    const value = optional(entry)
+    const attribute = value ? optional(value.attribute) : null
+    return value && attribute ? [{ value, attribute }] : []
+  })
+}
+
+/**
+ * The list-attribute rows: one per attribute marked `showInDetails`, its values' labels joined in
+ * the values' own order — "Colour: Black, Green".
+ */
+function toListAttributes(product: Product): ProductAttribute[] {
+  const groups = new Map<number, { attribute: Attribute; values: AttributeValue[] }>()
+
+  for (const { value, attribute } of populatedValues(product)) {
+    if (!shownInDetails(attribute)) continue
+    const group = groups.get(attribute.id) ?? { attribute, values: [] }
+    group.values.push(value)
+    groups.set(attribute.id, group)
+  }
+
+  return [...groups.values()].map(({ attribute, values }) => ({
+    name: attribute.name,
+    label: attribute.label,
+    value: values
+      .slice()
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id)
+      .map((entry) => entry.label)
+      .join(', '),
+    order: attribute.order ?? 0,
+  }))
+}
+
+/**
+ * Every row of a product's details, in attribute order: its list values and its typed rows
+ * together. The owner orders them on the attributes, not on the product.
+ */
+function toProductAttributes(product: Product): ProductAttribute[] {
+  return [...toListAttributes(product), ...toTypedAttributes(product.attributes)].sort(
+    byAttributeOrder,
+  )
+}
+
+/**
+ * The values that make another product related to this one: those of attributes marked
+ * `relatesProducts`. See `getRelated`.
+ */
+export function relatedValueIds(product: Product): number[] {
+  return populatedValues(product)
+    .filter(({ attribute }) => attribute.type === 'list' && attribute.relatesProducts === true)
+    .map(({ value }) => value.id)
 }
 
 /**
@@ -293,8 +360,9 @@ function toAttributes(
  *
  * **Order is the attribute's, not the row's.** A value must not jump up the list because it happened
  * to come from the variant rather than from the product; the customer is comparing two variants, and a
- * list that reshuffles between them is a list they have to re-read rather than scan. The product's
- * order is kept for everything it defines, and anything only the variant carries follows it.
+ * list that reshuffles between them is a list they have to re-read rather than scan. So the merged
+ * rows are sorted by the attribute's `order` — stably, so among equal orders the product's rows keep
+ * their place and anything only the variant carries follows them.
  */
 export function mergeAttributes(
   base: ProductAttribute[],
@@ -306,7 +374,9 @@ export function mergeAttributes(
   const merged = base.map((row) => overrides.get(row.name) ?? row)
   const seen = new Set(base.map((row) => row.name))
 
-  return [...merged, ...override.filter((row) => !seen.has(row.name))]
+  return [...merged, ...override.filter((row) => !seen.has(row.name))].sort(
+    (a, b) => a.order - b.order,
+  )
 }
 
 export function toProductDetail(product: Product, locale: Locale): ProductDetail {
@@ -338,11 +408,9 @@ export function toProductDetail(product: Product, locale: Locale): ProductDetail
     madeToOrder: product.availability === 'made-to-order',
     detailsHtml: html(product.details),
     variantOptions,
-    attributes: toAttributes(product.attributes),
+    attributes: toProductAttributes(product),
     fromPrice: varies ? summary.price : null,
-    collectionIds: (product.collections ?? []).map((entry) =>
-      typeof entry === 'number' ? entry : entry.id,
-    ),
+    relatedValueIds: relatedValueIds(product),
     seo: {
       title: product.seo?.title ?? null,
       description: product.seo?.description ?? null,

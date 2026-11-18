@@ -38,7 +38,7 @@ export interface ProductCarouselProps extends React.ComponentProps<'section'> {
   /**
    * The route to the full catalogue, drawn beneath the row on the home page (node 144:839).
    *
-   * Optional because the product page reuses this band for _Complete the Collection_ and
+   * Optional because the product page reuses this band for _You may also like_ and
    * draws no button there (node `242:2585`): the products in the row already ARE the destinations,
    * and "view all" would point at a listing the visitor did not ask for.
    */
@@ -52,7 +52,7 @@ export interface ProductCarouselProps extends React.ComponentProps<'section'> {
   /**
    * Milliseconds between automatic pages, passed straight to `Carousel`. Off by default.
    *
-   * On for _Complete the Collection_ on the product page, where the row is a shop window beside a
+   * On for _You may also like_ on the product page, where the row is a shop window beside a
    * product someone is already looking at, and off on the home page, where the same band is the
    * visitor's first sight of the catalogue and moving it under them is not a welcome.
    */

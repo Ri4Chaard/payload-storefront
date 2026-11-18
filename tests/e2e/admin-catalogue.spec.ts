@@ -24,7 +24,7 @@ const context = { disableRevalidate: true }
 
 const staff: string[] = []
 const products: number[] = []
-const colours: number[] = []
+const values: number[] = []
 
 test.afterAll(async () => {
   const payload = await getPayload({ config })
@@ -37,12 +37,12 @@ test.afterAll(async () => {
       where: { id: { in: products } },
     })
   }
-  if (colours.length > 0) {
+  if (values.length > 0) {
     await payload.delete({
-      collection: 'colours',
+      collection: 'attribute-values',
       context,
       overrideAccess: true,
-      where: { id: { in: colours } },
+      where: { id: { in: values } },
     })
   }
   if (staff.length > 0) {
@@ -119,10 +119,11 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
   // instantly without signing anybody in.
   await page.waitForURL((url) => !url.pathname.includes('/admin/login'), { timeout: 120_000 })
 
-  /** US3 — the owner's vocabulary is in the navigation, and sizes are not. */
-  await expect(page.locator('nav').getByText('Colours', { exact: true })).toBeVisible({
+  /** The owner's vocabulary is in the navigation — attributes and their values — and sizes are not. */
+  await expect(page.locator('nav').getByText('Attribute values', { exact: true })).toBeVisible({
     timeout: 120_000,
   })
+  await expect(page.locator('nav').getByText('Colours', { exact: true })).toHaveCount(0)
   await expect(page.locator('nav').getByText('Sizes', { exact: true })).toHaveCount(0)
 
   /** FR-027 — no size field survives on a product. */
@@ -143,13 +144,16 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
   await expect(page.locator('#field-inventory')).toBeVisible({ timeout: 120_000 })
 
   /**
-   * FR-017, SC-005 — a colour the owner adds reaches the storefront with no deployment.
+   * A value the owner adds to an attribute reaches the storefront with no deployment.
    *
-   * Created through the panel rather than the API, because "the owner can do this" is the claim.
+   * Created through the panel rather than the API, because "the owner can do this" is the claim —
+   * including picking which attribute it belongs to, where only list attributes are offered.
    */
   const value = `admin-added-${Date.now()}`
-  await page.goto('/admin/collections/colours/create')
-  await page.locator('#field-label').fill('Admin added', { timeout: 120_000 })
+  await page.goto('/admin/collections/attribute-values/create')
+  await page.locator('#field-attribute').click({ timeout: 120_000 })
+  await page.locator('.rs__option', { hasText: /^Colour$/ }).click()
+  await page.locator('#field-label').fill('Admin added')
   await page.locator('#field-value').fill(value)
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   await expect(page.getByText('successfully', { exact: false }).first()).toBeVisible({
@@ -158,19 +162,21 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
 
   const [saved] = (
     await payload.find({
-      collection: 'colours',
+      collection: 'attribute-values',
+      depth: 1,
       limit: 1,
       overrideAccess: true,
       where: { value: { equals: value } },
     })
   ).docs
-  expect(saved, 'the colour the owner just typed is not in the catalogue').toBeDefined()
-  colours.push(saved!.id)
+  expect(saved, 'the value the owner just typed is not in the catalogue').toBeDefined()
+  values.push(saved!.id)
+  expect(saved!.title).toBe('Colour: Admin added')
 
   await payload.update({
     collection: 'products',
     context,
-    data: { colour: [saved!.id] },
+    data: { values: [saved!.id] },
     id: madeToOrder.product.id,
     overrideAccess: true,
   })

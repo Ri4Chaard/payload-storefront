@@ -28,9 +28,8 @@
 
 import type {
   Attribute,
+  AttributeValue,
   Category,
-  Collection,
-  Colour,
   Media,
   Product,
   Shop,
@@ -152,47 +151,80 @@ const category = (slug: string): Category => {
   return found
 }
 
-export const collectionFixtures: Collection[] = [
-  { id: 1, title: 'Collection A', slug: 'collection-a', order: 1, ...STAMPS },
-  { id: 2, title: 'Collection B', slug: 'collection-b', order: 2, ...STAMPS },
-  { id: 3, title: 'Collection C', slug: 'collection-c', order: 3, ...STAMPS },
-  { id: 4, title: 'Collection D', slug: 'collection-d', order: 4, ...STAMPS },
-]
-
-const collection = (slug: string): Collection => {
-  const found = collectionFixtures.find((entry) => entry.slug === slug)
-  if (!found) throw new Error(`no collection "${slug}"`)
-  return found
-}
-
-
-
 /**
- * The owner-managed colours. `label` is what the drawer shows; `value` is what travels
- * in the URL and is what a link bookmarked before 011 still carries.
+ * The owner-defined attributes, mirroring the seed: two LIST attributes whose values are documents
+ * of their own (colour is a filter shown in the details; collection is a filter that relates
+ * products and is not shown), and three typed ones written on each product.
  */
-export const colourFixtures: Colour[] = [
-  { id: 1, label: 'Black', value: 'black', order: 0, ...STAMPS },
-  { id: 2, label: 'Clear', value: 'clear', order: 1, ...STAMPS },
-  { id: 3, label: 'Green', value: 'green', order: 2, ...STAMPS },
-  { id: 4, label: 'Multicolor', value: 'multicolor', order: 3, ...STAMPS },
-]
-
-const colour = (value: string): Colour => {
-  const found = colourFixtures.find((entry) => entry.value === value)
-  if (!found) throw new Error(`no colour "${value}"`)
-  return found
-}
-
 export const attributeFixtures: Attribute[] = [
-  { id: 1, label: 'Material', name: 'material', type: 'text', order: 1, ...STAMPS },
-  { id: 2, label: 'Weight', name: 'weight', type: 'text', order: 2, ...STAMPS },
-  { id: 3, label: 'Origin', name: 'origin', type: 'text', order: 3, ...STAMPS },
+  {
+    id: 1,
+    label: 'Colour',
+    name: 'colour',
+    type: 'list',
+    filterable: true,
+    showInDetails: true,
+    relatesProducts: false,
+    order: 1,
+    ...STAMPS,
+  },
+  {
+    id: 2,
+    label: 'Collection',
+    name: 'collection',
+    type: 'list',
+    filterable: true,
+    showInDetails: false,
+    relatesProducts: true,
+    order: 2,
+    ...STAMPS,
+  },
+  { id: 3, label: 'Material', name: 'material', type: 'text', showInDetails: true, order: 3, ...STAMPS },
+  { id: 4, label: 'Weight', name: 'weight', type: 'text', showInDetails: true, order: 4, ...STAMPS },
+  { id: 5, label: 'Origin', name: 'origin', type: 'text', showInDetails: true, order: 5, ...STAMPS },
 ]
 
 const attribute = (name: string): Attribute => {
   const found = attributeFixtures.find((entry) => entry.name === name)
   if (!found) throw new Error(`no attribute "${name}"`)
+  return found
+}
+
+/** The list attributes' values, populated down to their attribute — what `depth: 2` returns. */
+export const attributeValueFixtures: AttributeValue[] = [
+  ...(
+    [
+      ['black', 'Black'],
+      ['clear', 'Clear'],
+      ['green', 'Green'],
+      ['multicolor', 'Multicolor'],
+    ] as const
+  ).map(([value, label], index) => ({
+    id: index + 1,
+    attribute: attribute('colour'),
+    label,
+    value,
+    title: `Colour: ${label}`,
+    order: index + 1,
+    ...STAMPS,
+  })),
+  ...(['A', 'B', 'C', 'D'] as const).map((letter, index) => ({
+    id: index + 5,
+    attribute: attribute('collection'),
+    label: `Collection ${letter}`,
+    value: `collection-${letter.toLowerCase()}`,
+    title: `Collection: Collection ${letter}`,
+    order: index + 1,
+    ...STAMPS,
+  })),
+]
+
+/** One value of one attribute, by the strings a URL carries. */
+const attributeValue = (name: string, value: string): AttributeValue => {
+  const found = attributeValueFixtures.find(
+    (entry) => typeof entry.attribute === 'object' && entry.attribute.name === name && entry.value === value,
+  )
+  if (!found) throw new Error(`no value "${value}" of attribute "${name}"`)
   return found
 }
 
@@ -291,8 +323,10 @@ function build(seed: ProductSeed): Product {
         value: entry.value,
       })) ?? [],
     category: category(seed.categorySlug),
-    collections: (seed.collectionSlugs ?? []).map(collection),
-    colour: (seed.colour ?? []).map(colour),
+    values: [
+      ...(seed.colour ?? []).map((value) => attributeValue('colour', value)),
+      ...(seed.collectionSlugs ?? []).map((value) => attributeValue('collection', value)),
+    ],
     enableVariants: Boolean(seed.withVariants),
     variantTypes: seed.withVariants ? variantTypeFixtures : [],
     variants: { docs: own, hasNextPage: false, totalDocs: own.length },

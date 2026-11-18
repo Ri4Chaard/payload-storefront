@@ -1028,6 +1028,13 @@
           "notNull": false,
           "default": 0
         },
+        "show_in_header": {
+          "name": "show_in_header",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "seo_image_id": {
           "name": "seo_image_id",
           "type": "integer",
@@ -1252,426 +1259,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.collections": {
-      "name": "collections",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "slug": {
-          "name": "slug",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order": {
-          "name": "order",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "collections_slug_idx": {
-          "name": "collections_slug_idx",
-          "columns": [
-            {
-              "expression": "slug",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "collections_updated_at_idx": {
-          "name": "collections_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "collections_created_at_idx": {
-          "name": "collections_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.collections_locales": {
-      "name": "collections_locales",
-      "schema": "",
-      "columns": {
-        "title": {
-          "name": "title",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "_locale": {
-          "name": "_locale",
-          "type": "_locales",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "collections_locales_locale_parent_id_unique": {
-          "name": "collections_locales_locale_parent_id_unique",
-          "columns": [
-            {
-              "expression": "_locale",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "collections_locales_parent_id_fk": {
-          "name": "collections_locales_parent_id_fk",
-          "tableFrom": "collections_locales",
-          "tableTo": "collections",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.colours": {
-      "name": "colours",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order": {
-          "name": "order",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "colours_value_idx": {
-          "name": "colours_value_idx",
-          "columns": [
-            {
-              "expression": "value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "colours_updated_at_idx": {
-          "name": "colours_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "colours_created_at_idx": {
-          "name": "colours_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.colours_locales": {
-      "name": "colours_locales",
-      "schema": "",
-      "columns": {
-        "label": {
-          "name": "label",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "_locale": {
-          "name": "_locale",
-          "type": "_locales",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "colours_locales_locale_parent_id_unique": {
-          "name": "colours_locales_locale_parent_id_unique",
-          "columns": [
-            {
-              "expression": "_locale",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "colours_locales_parent_id_fk": {
-          "name": "colours_locales_parent_id_fk",
-          "tableFrom": "colours_locales",
-          "tableTo": "colours",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.attributes_options": {
-      "name": "attributes_options",
-      "schema": "",
-      "columns": {
-        "_order": {
-          "name": "_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "attributes_options_order_idx": {
-          "name": "attributes_options_order_idx",
-          "columns": [
-            {
-              "expression": "_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "attributes_options_parent_id_idx": {
-          "name": "attributes_options_parent_id_idx",
-          "columns": [
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "attributes_options_parent_id_fk": {
-          "name": "attributes_options_parent_id_fk",
-          "tableFrom": "attributes_options",
-          "tableTo": "attributes",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.attributes": {
       "name": "attributes",
       "schema": "",
@@ -1695,6 +1282,27 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'text'"
+        },
+        "filterable": {
+          "name": "filterable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "show_in_details": {
+          "name": "show_in_details",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "relates_products": {
+          "name": "relates_products",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "order": {
           "name": "order",
@@ -1830,6 +1438,234 @@
           "name": "attributes_locales_parent_id_fk",
           "tableFrom": "attributes_locales",
           "tableTo": "attributes",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.attribute_values": {
+      "name": "attribute_values",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "attribute_id": {
+          "name": "attribute_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "attribute_values_attribute_idx": {
+          "name": "attribute_values_attribute_idx",
+          "columns": [
+            {
+              "expression": "attribute_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "attribute_values_value_idx": {
+          "name": "attribute_values_value_idx",
+          "columns": [
+            {
+              "expression": "value",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "attribute_values_updated_at_idx": {
+          "name": "attribute_values_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "attribute_values_created_at_idx": {
+          "name": "attribute_values_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "attribute_value_idx": {
+          "name": "attribute_value_idx",
+          "columns": [
+            {
+              "expression": "attribute_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "value",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "attribute_values_attribute_id_attributes_id_fk": {
+          "name": "attribute_values_attribute_id_attributes_id_fk",
+          "tableFrom": "attribute_values",
+          "tableTo": "attributes",
+          "columnsFrom": [
+            "attribute_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.attribute_values_locales": {
+      "name": "attribute_values_locales",
+      "schema": "",
+      "columns": {
+        "label": {
+          "name": "label",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "attribute_values_locales_locale_parent_id_unique": {
+          "name": "attribute_values_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "attribute_values_locales_parent_id_fk": {
+          "name": "attribute_values_locales_parent_id_fk",
+          "tableFrom": "attribute_values_locales",
+          "tableTo": "attribute_values",
           "columnsFrom": [
             "_parent_id"
           ],
@@ -6969,14 +6805,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "collections_id": {
-          "name": "collections_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "colours_id": {
-          "name": "colours_id",
+        "attribute_values_id": {
+          "name": "attribute_values_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -7049,26 +6879,11 @@
           "method": "btree",
           "with": {}
         },
-        "products_rels_collections_id_idx": {
-          "name": "products_rels_collections_id_idx",
+        "products_rels_attribute_values_id_idx": {
+          "name": "products_rels_attribute_values_id_idx",
           "columns": [
             {
-              "expression": "collections_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "products_rels_colours_id_idx": {
-          "name": "products_rels_colours_id_idx",
-          "columns": [
-            {
-              "expression": "colours_id",
+              "expression": "attribute_values_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -7122,25 +6937,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "products_rels_collections_fk": {
-          "name": "products_rels_collections_fk",
+        "products_rels_attribute_values_fk": {
+          "name": "products_rels_attribute_values_fk",
           "tableFrom": "products_rels",
-          "tableTo": "collections",
+          "tableTo": "attribute_values",
           "columnsFrom": [
-            "collections_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "products_rels_colours_fk": {
-          "name": "products_rels_colours_fk",
-          "tableFrom": "products_rels",
-          "tableTo": "colours",
-          "columnsFrom": [
-            "colours_id"
+            "attribute_values_id"
           ],
           "columnsTo": [
             "id"
@@ -7897,14 +7699,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "collections_id": {
-          "name": "collections_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "colours_id": {
-          "name": "colours_id",
+        "attribute_values_id": {
+          "name": "attribute_values_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -7977,26 +7773,11 @@
           "method": "btree",
           "with": {}
         },
-        "_products_v_rels_collections_id_idx": {
-          "name": "_products_v_rels_collections_id_idx",
+        "_products_v_rels_attribute_values_id_idx": {
+          "name": "_products_v_rels_attribute_values_id_idx",
           "columns": [
             {
-              "expression": "collections_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_products_v_rels_colours_id_idx": {
-          "name": "_products_v_rels_colours_id_idx",
-          "columns": [
-            {
-              "expression": "colours_id",
+              "expression": "attribute_values_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -8050,25 +7831,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "_products_v_rels_collections_fk": {
-          "name": "_products_v_rels_collections_fk",
+        "_products_v_rels_attribute_values_fk": {
+          "name": "_products_v_rels_attribute_values_fk",
           "tableFrom": "_products_v_rels",
-          "tableTo": "collections",
+          "tableTo": "attribute_values",
           "columnsFrom": [
-            "collections_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "_products_v_rels_colours_fk": {
-          "name": "_products_v_rels_colours_fk",
-          "tableFrom": "_products_v_rels",
-          "tableTo": "colours",
-          "columnsFrom": [
-            "colours_id"
+            "attribute_values_id"
           ],
           "columnsTo": [
             "id"
@@ -8931,20 +8699,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "collections_id": {
-          "name": "collections_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "colours_id": {
-          "name": "colours_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "attributes_id": {
           "name": "attributes_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attribute_values_id": {
+          "name": "attribute_values_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -9128,41 +8890,26 @@
           "method": "btree",
           "with": {}
         },
-        "payload_locked_documents_rels_collections_id_idx": {
-          "name": "payload_locked_documents_rels_collections_id_idx",
-          "columns": [
-            {
-              "expression": "collections_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_colours_id_idx": {
-          "name": "payload_locked_documents_rels_colours_id_idx",
-          "columns": [
-            {
-              "expression": "colours_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "payload_locked_documents_rels_attributes_id_idx": {
           "name": "payload_locked_documents_rels_attributes_id_idx",
           "columns": [
             {
               "expression": "attributes_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "payload_locked_documents_rels_attribute_values_id_idx": {
+          "name": "payload_locked_documents_rels_attribute_values_id_idx",
+          "columns": [
+            {
+              "expression": "attribute_values_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -9420,38 +9167,25 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payload_locked_documents_rels_collections_fk": {
-          "name": "payload_locked_documents_rels_collections_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "collections",
-          "columnsFrom": [
-            "collections_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_colours_fk": {
-          "name": "payload_locked_documents_rels_colours_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "colours",
-          "columnsFrom": [
-            "colours_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "payload_locked_documents_rels_attributes_fk": {
           "name": "payload_locked_documents_rels_attributes_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "attributes",
           "columnsFrom": [
             "attributes_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_attribute_values_fk": {
+          "name": "payload_locked_documents_rels_attribute_values_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "attribute_values",
+          "columnsFrom": [
+            "attribute_values_id"
           ],
           "columnsTo": [
             "id"
@@ -19024,9 +18758,9 @@
       "name": "enum_attributes_type",
       "schema": "public",
       "values": [
+        "list",
         "text",
-        "number",
-        "select"
+        "number"
       ]
     },
     "public.enum_verification_codes_purpose": {
@@ -20296,6 +20030,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "e4504d03-5582-4c02-8e08-f6af79cc9cef",
+  "id": "ca3e44d6-94cb-4198-a0e9-7947f9720c74",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

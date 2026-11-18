@@ -22,7 +22,7 @@ const VARIANTS = [
     priceMinor: 3832000,
     available: true,
     // What an option says about itself, where it differs from its product.
-    attributes: [{ name: 'weight', label: 'Weight', value: '1.5 kg' }],
+    attributes: [{ name: 'weight', label: 'Weight', value: '1.5 kg', order: 4 }],
   },
   { id: 3, label: 'Option C', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
 ]

@@ -11,8 +11,8 @@ specific shop.
 | Area | What is there |
 | --- | --- |
 | Home | Hero, category band, featured products, about band, promises strip — all editable |
-| Catalogue | `/all-products` and one route per category (`/<category-slug>`): filters (category, collection, colour, price range, in stock), sort, LOAD MORE, shareable filter URLs that work without JavaScript |
-| Product page | Gallery with lightbox, option picker (each option with its own price, stock and photo), quantity, attributes, details/warranty/delivery accordions, "complete the collection", schema.org `Product` |
+| Catalogue | `/all-products` and one route per category (`/<category-slug>`): filters (category, every owner-defined filterable attribute — e.g. colour, collection, shape — price range, in stock), sort, LOAD MORE, shareable filter URLs that work without JavaScript |
+| Product page | Gallery with lightbox, option picker (each option with its own price, stock and photo), quantity, details/warranty/delivery accordions with the attributes the owner chose to show, "you may also like" (products sharing a related attribute value, else the category), schema.org `Product` |
 | Cart & checkout | Server-side cart (guest and signed-in, merged on sign-in), **messenger hand-off**: the order is sent to the seller over WhatsApp, Telegram or Instagram with every line and total pre-written. No payment provider is wired in. |
 | Accounts | Registration with emailed verification codes, sign-in, password reset/change, profile, addresses, marketing consent (mirrored to Resend audiences), automatic purge of unverified accounts |
 | Content | Blog with topics and long-form chapter articles, About/Story page composed from blocks, FAQ, Contact page with an enquiry form, legal pages, cookie consent with categories |
@@ -48,13 +48,12 @@ Admin ───► Payload admin  src/app/(payload)/admin
 
 | Collection | Purpose |
 | --- | --- |
-| `products` | Title, description, gallery, details (rich text), attributes, category, collections, colours, availability (`made-to-order` / `stock-tracked`), price, SEO. Extends the Payload e-commerce plugin's product. |
+| `products` | Title, description, gallery, details (rich text), typed attribute rows, category, attribute `values` (list attributes), availability (`made-to-order` / `stock-tracked`), price, SEO. Extends the Payload e-commerce plugin's product. |
 | `variants` | One purchasable option of a product (plugin collection): own price, inventory, photograph and attribute overrides |
 | `variantTypes` / `variantOptions` | The option axes (plugin): e.g. "Size" with S/M/L, "Flavour" with … |
-| `categories` | Top-level shelves; each gets its own route |
-| `collections` | Cross-cutting groupings ("Summer", "Bestsellers"); drive "complete the collection" |
-| `colours` | Owner-managed colour vocabulary used by the colour filter |
-| `attributes` | Owner-defined name/value properties shown in product details (Material, Weight, Origin…) |
+| `categories` | Top-level shelves; each gets its own route. `showInHeader` puts it in the header navigation, in `order` |
+| `attributes` | Every owner-defined product property. `name` is its URL query key; `type` is `list` (values in `attribute-values`), `text` or `number` (typed per product, overridable per variant). Flags: `filterable` (a filter group), `showInDetails` (a product-details row), `relatesProducts` (drives "you may also like") |
+| `attribute-values` | The values of each list attribute ("Colour: Black", "Collection: Collection A"): localized `label`, kebab-case `value` unique within its attribute, `order` |
 | `media` | Uploads with localized alt text |
 | `articles`, `article-categories` | Blog |
 | `questions` | FAQ entries, reused by the FAQ page and story blocks |

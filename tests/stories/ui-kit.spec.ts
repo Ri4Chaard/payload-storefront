@@ -157,6 +157,33 @@ test('mobile navigation opens, closes on Escape, and returns focus', async ({ pa
   await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused()
 })
 
+/**
+ * The categories between "All products" and "About us" are whatever the layout hands the header —
+ * the ones the owner ticked "Show in the header", in their order. With none, the fixed links stand
+ * alone rather than leaving a gap.
+ */
+test('header draws the categories it is given between its fixed links', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-header--desktop&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  const nav = page.locator('header nav[aria-label="Primary"]').filter({ visible: true })
+  await expect(nav.getByRole('link')).toHaveText([
+    'All products',
+    'Category 1',
+    'Category 2',
+    'Category 3',
+    'Category 4',
+    'About us',
+    'Contact us',
+  ])
+
+  await page.goto(`${STORYBOOK}/iframe.html?id=layout-header--without-categories&viewMode=story`, {
+    waitUntil: 'load',
+  })
+  await expect(nav.getByRole('link')).toHaveText(['All products', 'About us', 'Contact us'])
+})
+
 test('language menu is operable by keyboard', async ({ page }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=layout-header--desktop&viewMode=story`, {
     waitUntil: 'load',

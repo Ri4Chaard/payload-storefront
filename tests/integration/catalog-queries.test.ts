@@ -49,9 +49,7 @@ describe('getListing', () => {
   it('never contains a draft', async () => {
     const everything = await listing({ page: 99 })
     expect(everything.products).toHaveLength(everything.total)
-    expect(everything.products.map((product) => product.slug)).not.toContain(
-      'unreleased-product',
-    )
+    expect(everything.products.map((product) => product.slug)).not.toContain('unreleased-product')
   })
 
   it('combines groups with AND and values within a group with OR', async () => {
@@ -59,8 +57,18 @@ describe('getListing', () => {
     const both = await listing({ category: ['category-1', 'category-2'] })
     expect(both.total).toBeGreaterThan(firstCategory.total)
 
-    const narrowed = await listing({ category: ['category-1'], colour: ['clear'] })
+    const narrowed = await listing({ category: ['category-1'], attributes: { colour: ['clear'] } })
     expect(narrowed.total).toBeLessThanOrEqual(firstCategory.total)
+
+    // Two values of one attribute widen; a second attribute narrows.
+    const clear = await listing({ attributes: { colour: ['clear'] } })
+    const clearOrBlack = await listing({ attributes: { colour: ['clear', 'black'] } })
+    const clearInA = await listing({
+      attributes: { colour: ['clear'], collection: ['collection-a'] },
+    })
+    expect(clearOrBlack.total).toBeGreaterThan(clear.total)
+    expect(clearInA.total).toBeLessThan(clear.total)
+    expect(clearInA.total).toBeGreaterThan(0)
   })
 
   it('sorts by price in both directions, across the whole result and not just the page', async () => {
@@ -69,7 +77,9 @@ describe('getListing', () => {
     expect(cheapest.products[0]?.id).not.toBe(dearest.products[0]?.id)
 
     const ascending = await listing({ sort: 'price-asc', category: ['category-1'] })
-    const amounts = ascending.products.map((product) => Number(product.price.replace(/[^0-9]/g, '')))
+    const amounts = ascending.products.map((product) =>
+      Number(product.price.replace(/[^0-9]/g, '')),
+    )
     expect(amounts).toEqual([...amounts].sort((a, b) => a - b))
   })
 
@@ -144,7 +154,8 @@ describe('getProductSlugs', () => {
 describe('getFilterFacets', () => {
   it('offers every option in a group, whatever the category holds', async () => {
     const facets = await getFilterFacets('en', 'category-1')
-    expect(facets.colours).toHaveLength(4)
+    expect(facets.attributes.map((attribute) => attribute.name)).toEqual(['colour', 'collection'])
+    expect(facets.attributes[0]?.options).toHaveLength(4)
     expect(facets.price.min).toBeLessThan(facets.price.max)
   })
 
@@ -156,13 +167,19 @@ describe('getFilterFacets', () => {
 })
 
 describe('getRelated', () => {
-  it('returns products sharing a collection, never the product itself', async () => {
-    const related = await getRelated(1, 'en')
+  it('returns products sharing a value of a "relates products" attribute, never the product itself', async () => {
+    const product = await getProduct('product-1', 'en')
+    const related = await getRelated(product!.id, 'en')
     expect(related.length).toBeGreaterThan(0)
-    expect(related.map((product) => product.id)).not.toContain(1)
+    expect(related.map((entry) => entry.id)).not.toContain(product!.id)
+
+    // Every one of them is in the same collection — Collection A, by the seed.
+    const inCollectionA = await listing({ attributes: { collection: ['collection-a'] }, page: 99 })
+    const ids = inCollectionA.products.map((entry) => entry.id)
+    for (const entry of related) expect(ids).toContain(entry.id)
   })
 
-  it('returns nothing for a product in no collection, so the band does not render', async () => {
+  it('returns nothing for a product that does not exist, so the band does not render', async () => {
     expect(await getRelated(999, 'en')).toEqual([])
     expect(await getRelated(-1, 'en')).toEqual([])
   })

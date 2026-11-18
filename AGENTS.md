@@ -18,8 +18,8 @@ The short version:
   in a component. Interface chrome lives in `src/i18n/messages/{en,ru,uk}.json` — add every key to
   all three files.
 - **Keep the core neutral.** No shop-specific vocabulary, fields or logic (sizes, stones, ISBNs…) in
-  the core; model differences as data — categories, collections, colours, attributes, variant types
-  and options. Seeds, stories and fixtures use placeholders ("Product 1", "Option A").
+  the core; model differences as data — categories, attributes and their values (colour,
+  collection, shape…), variant types and options. Seeds, stories and fixtures use placeholders ("Product 1", "Option A").
 - **Reuse before creating.** Search `src/components/ui` and the other component folders first;
   extend with props or variants rather than copying. Every UI-kit component ships with a story.
 - **Tokens, not magic values.** Colours, spacing, type come from `src/styles/tokens.css`, generated

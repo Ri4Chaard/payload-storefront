@@ -88,7 +88,7 @@ const adjustVariantsJoin = (field: Field): Field => {
  *
  * The four tabs follow the storefront rather than the schema, because that is what an editor is
  * looking at while they fill the form in: **Content** is everything above the fold, **Details** is
- * the accordion beneath it, **Categorisation** is every filter the product answers to, and
+ * the accordion beneath it, **Categorisation** is its category and every attribute value it carries, and
  * **Price & options** is the two selectors and what they cost.
  *
  * Three fields stay outside the tabs, in the sidebar, because they are the document's status rather
@@ -212,7 +212,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
               labels: { singular: 'Attribute', plural: 'Attributes' },
               admin: {
                 description:
-                  'Material, weight, origin. Define new ones under Attributes and they appear here with no deployment.',
+                  'Typed properties — material, weight, origin. Define new text or number attributes under Attributes and they appear here with no deployment. List attributes (colour, collection…) are picked in the Categorisation tab instead.',
               },
               fields: [
                 {
@@ -224,6 +224,9 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                       relationTo: 'attributes',
                       required: true,
                       label: 'Attribute',
+                      // List attributes are picked as values in the Categorisation tab; a row here
+                      // is for the typed ones only.
+                      filterOptions: { type: { not_equals: 'list' } },
                     },
       /*
         **Required, but not in every language**.
@@ -248,67 +251,37 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
 
         {
           label: 'Categorisation',
-          description: 'Everything the product can be filtered by.',
+          description: 'Where the product is shelved, and every value it can be filtered by.',
           fields: [
             {
-              type: 'row',
-              fields: [
-                {
-                  name: 'category',
-                  type: 'relationship',
-                  relationTo: 'categories',
-                  required: true,
-                  index: true,
-                  label: 'Category',
-                  admin: {
-                    description:
-                      'Exactly one. Decides which listing the product appears on and the label above its name.',
-                  },
-                },
-                {
-                  name: 'collections',
-                  type: 'relationship',
-                  relationTo: 'collections',
-                  hasMany: true,
-                  label: 'Collections',
-                  admin: {
-                    description: 'Zero or more. Drives "Complete the Collection".',
-                  },
-                },
-              ],
+              name: 'category',
+              type: 'relationship',
+              relationTo: 'categories',
+              required: true,
+              index: true,
+              label: 'Category',
+              admin: {
+                description:
+                  'Exactly one. Decides which listing the product appears on and the label above its name.',
+              },
             },
             {
-              type: 'row',
-              fields: [
-                {
-                  /*
-                    **The owner's list as of spec 011, not four values in this file.**
-
-                    It was a `select` whose options were written here, which made adding navy a
-                    developer task and a deployment — the one arrangement every other descriptive
-                    vocabulary in this shop avoids. A relationship gets the picker, the localized
-                    labels and referential integrity for free.
-
-                    Modelled on `category` above rather than on the departing `sizes`: what made
-                    sizes heavy was its ROLE on the product — a required selector, part of cart-line
-                    identity — and colour has none of that and must never acquire it
-                   .
-
-                    The link a customer bookmarked still works, because the four rows the migration
-                    seeds keep `black`, `clear`, `green` and `multicolor` as their `value`.
-                  */
-                  name: 'colour',
-                  type: 'relationship',
-                  relationTo: 'colours',
-                  hasMany: true,
-                  index: true,
-                  label: 'Colour',
-                  admin: {
-                    description:
-                      'Filterable, and shown in the product details. Manage the list under Colours.',
-                  },
-                },
-              ],
+              /*
+                Every value of every LIST attribute the product has, in one field: its colours, its
+                collection, its shape. The attribute each value belongs to is on the value itself, so
+                the core never learns which properties a shop has (Constitution VII). Free-text
+                properties (weight, origin) stay in the Details tab's rows instead.
+              */
+              name: 'values',
+              type: 'relationship',
+              relationTo: 'attribute-values',
+              hasMany: true,
+              index: true,
+              label: 'Attribute values',
+              admin: {
+                description:
+                  'Pick every value that describes this product — e.g. "Colour: Black", "Collection: Collection A". Each attribute’s settings decide whether its values are filters, are listed in the product details, or suggest related products. Manage the lists under Attributes and Attribute values.',
+              },
             },
           ],
         },
