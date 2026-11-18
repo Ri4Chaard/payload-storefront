@@ -6,15 +6,15 @@ import { DEFAULT_FILTERS } from '@/lib/catalog/filters'
 import { getFilterFacets, getListing } from '@/lib/catalog/queries'
 
 /**
- * Colour as an owner-managed vocabulary (spec 011, US3).
+ * Colour as an owner-managed vocabulary.
  *
  * **This is where "an unknown colour is dropped" now lives.** It used to be a unit test against
  * `parseFilters`, which could judge a closed set written in the same file. Colour is the owner's
  * now, so only a catalogue can say whether `purple` is a colour — which means the assertion needs a
- * database, and belongs here (011/research.md R2).
+ * database, and belongs here.
  *
  * The other half is the promise the whole migration rests on: the four values that were an enum
- * still filter, so every link bookmarked or indexed before this feature still resolves (FR-020).
+ * still filter, so every link bookmarked or indexed before this feature still resolves.
  */
 
 const payload = await getPayload({ config })
@@ -32,7 +32,7 @@ afterAll(async () => {
   })
 })
 
-describe('the four colours that were an enum (FR-020)', () => {
+describe('the four colours that were an enum', () => {
   it('are rows, keeping the values every existing link carries', async () => {
     const { docs } = await payload.find({
       collection: 'colours',
@@ -70,7 +70,7 @@ describe('the four colours that were an enum (FR-020)', () => {
   })
 })
 
-describe('an unknown colour (FR-030)', () => {
+describe('an unknown colour', () => {
   it('is reported and does not narrow the grid', async () => {
     const all = await getListing({ ...DEFAULT_FILTERS }, 'en')
     const bogus = await getListing({ ...DEFAULT_FILTERS, colour: ['purple'] }, 'en')
@@ -81,7 +81,7 @@ describe('an unknown colour (FR-030)', () => {
   })
 })
 
-describe('the facets read from the catalogue (FR-022)', () => {
+describe('the facets read from the catalogue', () => {
   /**
    * **A colour nothing uses is offered, with a count of zero — and that is deliberate.**
    *
@@ -115,7 +115,7 @@ describe('the facets read from the catalogue (FR-022)', () => {
   })
 })
 
-describe('a colour still in use cannot be deleted (FR-023)', () => {
+describe('a colour still in use cannot be deleted', () => {
   it('refuses, and says how many products are in the way', async () => {
     const [clear] = (
       await payload.find({

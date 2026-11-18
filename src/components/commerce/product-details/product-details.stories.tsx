@@ -6,7 +6,7 @@ import { ProductDetails } from './product-details'
  * Nodes `242:2478` (1920), `410:7377` (1024), `410:7709` (390).
  *
  * `Accordion` from the kit with three rows whose copy comes from Payload — the product's own rich
- * text, then two fields of the `shop` global (FR-036). The stories vary what the owner has filled
+ * text, then two fields of the `shop` global. The stories vary what the owner has filled
  * in, because that is the only thing about this component that varies.
  */
 const DETAILS = `<p>Short product description.</p><ul><li>Detail one</li><li>Detail two</li></ul>`

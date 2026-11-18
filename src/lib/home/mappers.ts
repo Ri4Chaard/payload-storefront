@@ -5,7 +5,7 @@ import { toCatalogImage } from '@/lib/catalog/mappers'
 import type { HomeContent } from './types'
 
 /**
- * The home page global, as the four bands want it (spec 010).
+ * The home page global, as the four bands want it.
  *
  * **The addresses are here rather than in the admin.** `/all-products` and `/about` are routes this
  * application defines; an editor who could retype them could point the hero at a 404 and would have

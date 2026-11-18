@@ -11,7 +11,7 @@ import type { ProductDetail } from '@/lib/catalog/types'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * Revalidation against the live catalogue — [cart-loader.md §4](../../specs/005-checkout-handoff/contracts/cart-loader.md).
+ * Revalidation against the live catalogue.
  * FR-014.
  *
  * **These change the catalogue underneath a cart that already exists**, which is the only honest
@@ -106,7 +106,7 @@ async function whileChanged(
   }
 }
 
-describe('a line whose product is withdrawn (FR-014)', () => {
+describe('a line whose product is withdrawn', () => {
   it('keeps the row, names it, gives it nowhere to go, and drops it from the total', async () => {
     const owner = await guest()
     await addLine(owner, owner.cartId, intentFor(plain, 2))
@@ -129,7 +129,7 @@ describe('a line whose product is withdrawn (FR-014)', () => {
   })
 })
 
-describe('a line whose stock has gone (FR-014)', () => {
+describe('a line whose stock has gone', () => {
   it('is excluded from the total but still rendered, with the reason in words', async () => {
     const owner = await guest()
     const soldOut = await getProduct('product-5', 'en')
@@ -149,7 +149,7 @@ describe('a line whose stock has gone (FR-014)', () => {
   })
 })
 
-describe('a line priced differently than when it was added (FR-014)', () => {
+describe('a line priced differently than when it was added', () => {
   it('uses the current price, not the one the cart was built at', async () => {
     const owner = await guest()
     await addLine(owner, owner.cartId, intentFor(plain, 1))
@@ -170,7 +170,7 @@ describe('a line priced differently than when it was added (FR-014)', () => {
   })
 })
 
-describe('a line asking for more than is left (FR-014)', () => {
+describe('a line asking for more than is left', () => {
   it('clamps the quantity to what remains and says by how much', async () => {
     const owner = await guest()
     const stocked = await getProduct('product-5', 'en')

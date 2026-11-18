@@ -12,22 +12,22 @@ import type { MessengerLink } from '@/lib/messengers/links'
 import { cn } from '@/lib/cn'
 
 /**
- * YOUR SELECTION IS IN THE CART (spec 005, T059 – T062). Nodes `590:13108` (1920),
+ * YOUR SELECTION IS IN THE CART. Nodes `590:13108` (1920),
  * `590:13775` (1024), `590:13875` (390).
  *
  * The last screen of the feature, and the one that has to be honest about what just happened.
  *
- * **Nothing has been submitted, and the modal must not imply otherwise** (FR-025, FR-030). No order
+ * **Nothing has been submitted, and the modal must not imply otherwise**. No order
  * exists, no reference was issued, nobody is waiting for a reply. The order is completed by the
  * customer sending the message this opens — so the words say that, and say that the site takes no
  * payment and that the seller confirms availability, price and delivery in the conversation.
  *
- * **The copy affordance is always here** (FR-024, SC-017), not only when no messenger can be
+ * **The copy affordance is always here**, not only when no messenger can be
  * reached. A web page cannot tell whether tapping `wa.me` lands in WhatsApp or on an error, so a
  * fallback that waits to detect failure never appears for the one customer who needed it — they
  * have already left. Showing it always costs a line of the modal and removes the detection problem.
  *
- * **A row that cannot carry the message says so** (FR-021). Instagram has no documented way to
+ * **A row that cannot carry the message says so**. Instagram has no documented way to
  * pre-fill a direct message; its row notes that and copying happens on the way out, so nobody
  * arrives at an empty chat believing their selection travelled with them.
  */
@@ -123,7 +123,7 @@ export function HandoffModal({
       </div>
 
       {/*
-        Always present (FR-024, SC-017) — alongside the rows, not instead of them.
+        Always present — alongside the rows, not instead of them.
       */}
       <div className="mt-5 border-t border-black/10 pt-5 pb-7.5">
         <p className="text-body-small text-neutral-primary">

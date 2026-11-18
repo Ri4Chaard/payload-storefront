@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn'
 import { useAutoAdvance } from './use-auto-advance'
 
 /**
- * A scroll-snap track with arrows (002/T119), extracted from `ImageCarousel`.
+ * A scroll-snap track with arrows, extracted from `ImageCarousel`.
  *
  * The home page's product row needs the same mechanism over different children — cards instead of
  * photographs. Copying it would be the near-duplicate Constitution II exists to prevent, so the

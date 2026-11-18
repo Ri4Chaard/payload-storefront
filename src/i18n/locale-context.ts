@@ -3,7 +3,7 @@ import type { RequestContext } from 'payload'
 import { DEFAULT_LOCALE, LOCALES, type Locale } from './routing'
 
 /**
- * Getting the language into mail that PAYLOAD sends (spec 010, FR-042).
+ * Getting the language into mail that PAYLOAD sends.
  *
  * Registration and password reset are the two messages this codebase does not send itself: Payload
  * sends them, through `verify.generateEmailHTML` and `forgotPassword.generateEmailHTML`. Those hooks

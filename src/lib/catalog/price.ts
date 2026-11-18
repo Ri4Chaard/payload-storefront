@@ -6,7 +6,7 @@
  * has always taken a `string` and why it keeps taking one after spec 004 swaps the data source.
  *
  * **Amounts are integer counts of minor units.** `$24,900` is `2490000`. The plugin stores them
- * that way (Constitution VI) and nothing here converts them any earlier than it has to, because a
+ * that way and nothing here converts them any earlier than it has to, because a
  * price that spends time as a float is a price that eventually renders as `$24,899.999999999996`.
  *
  * **The exponent is asked for, not assumed.** Dividing by 100 is correct for USD and wrong for JPY
@@ -56,14 +56,14 @@ export function minorUnitDigits(currency: string = DEFAULT_CURRENCY, locale?: st
  * than be rounded into something plausible.
  */
 /**
- * The same formatter, addressed by the app's own locale code (spec 010, FR-038).
+ * The same formatter, addressed by the app's own locale code.
  *
  * `formatPrice` takes a BCP 47 tag because `Intl` does; the rest of the codebase deals in `en`,
  * `ru`, `uk`. One mapping, in `src/i18n/routing.ts`, rather than a `locale === 'ru' ? 'ru-RU'`
  * scattered through the mappers.
  *
  * **The amount and the currency do not change — only how they are written.** `$24,900` and
- * `24 900,00 $` are the same money (FR-038, Constitution VI); one currency, integer minor units,
+ * `24 900,00 $` are the same money; one currency, integer minor units,
  * unchanged.
  */
 export function formatPriceFor(locale: Locale, minorUnits: number, currency?: string): string {

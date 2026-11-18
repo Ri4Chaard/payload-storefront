@@ -4,7 +4,7 @@ import { loadMessages } from '@/i18n/messages'
 import { BCP47, DEFAULT_LOCALE, LOCALES, LOCALE_LABELS, SECONDARY_LOCALES } from '@/i18n/routing'
 
 /**
- * Locale narrowing and the English fallback (spec 010, T010 — FR-037, FR-046).
+ * Locale narrowing and the English fallback.
  *
  * **`asLocale` is imported through a mock of `next/root-params`.** The module it lives in imports
  * that framework module at the top level, and `next/root-params` only resolves inside a Next render

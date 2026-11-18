@@ -6,7 +6,7 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * The way back to the cookie chooser, in the footer's legal row (spec 009, T039, FR-032).
+ * The way back to the cookie chooser, in the footer's legal row.
  *
  * **The design draws no re-entry point at all** — once a visitor presses one of the three buttons,
  * the drawn banner is gone for good. That is not a consent mechanism: withdrawal has to be as

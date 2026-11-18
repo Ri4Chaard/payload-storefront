@@ -6,10 +6,10 @@ import type { ArticleCard as ArticleCardModel } from '@/lib/blog/types'
 import { cn } from '@/lib/cn'
 
 /**
- * One article in the mosaic (007/T038 — T040), from nodes `312:7397`, `312:7425`, `415:7934`,
+ * One article in the mosaic, from nodes `312:7397`, `312:7425`, `415:7934`,
  * `415:7944`, `415:8040`.
  *
- * **One component with two emphasis flags, not four cards** (FR-051). The design draws this at five
+ * **One component with two emphasis flags, not four cards**. The design draws this at five
  * sizes and the temptation is five components; what actually differs between them is the width of
  * the cell and the height of the photograph, both of which are properties of WHERE the card landed
  * rather than of what is in it. `emphasis` carries that, computed once in the mapper.
@@ -18,7 +18,7 @@ import { cn } from '@/lib/cn'
  * leads the tablet grid and is narrow on desktop — so a single boolean, or a stored `featured`
  * checkbox, cannot express the drawing. 007/research.md R4 has the table.
  *
- * **The card IS the link** (FR-005). The drawing shows a photograph, a badge, a title and a date,
+ * **The card IS the link**. The drawing shows a photograph, a badge, a title and a date,
  * all of which lead to the same article; as three separate anchors that is three tab stops and
  * three announcements where the visitor sees one destination. So the root element is the anchor,
  * and the badge inside it is a `<span>` — a label, never a control, because pressing it does

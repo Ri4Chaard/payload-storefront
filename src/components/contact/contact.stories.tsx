@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { ChannelGrid } from './channel-grid'
 
 /**
- * The ways to reach the shop (008/T039), from nodes `312:8535`, `419:10765`, `419:10847`.
+ * The ways to reach the shop, from nodes `312:8535`, `419:10765`, `419:10847`.
  *
  * **The counts are what these stories are for.** The drawing shows exactly four cards, which is
  * layout fill rather than a rule — an owner may save one messenger or six, and FR-014 requires the

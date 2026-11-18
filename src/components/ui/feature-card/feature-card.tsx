@@ -34,7 +34,7 @@ import { cn } from '@/lib/cn'
  * at 30px it reads lighter than its neighbours. Reproduced as drawn; worth a designer's eye.
  */
 /**
- * **Two additions for the contact page's channel cards** (008/T012), both defaulting to what this
+ * **Two additions for the contact page's channel cards**, both defaulting to what this
  * card already did, so every existing caller renders byte-identically.
  *
  * `href` makes the description a link — the drawing underlines it in `primary/default` where a
@@ -141,7 +141,7 @@ export function FeatureStrip({
 }: FeatureStripProps) {
   const t_product = useTranslations('product')
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

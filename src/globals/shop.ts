@@ -21,14 +21,14 @@ export const Shop: GlobalConfig = {
     read: () => true,
     update: isAdmin,
   },
-  // Publishing invalidates the cached routes (003/T294). These words are on every product
+  // Publishing invalidates the cached routes. These words are on every product
   // page, so a change here is a change to all of them.
   hooks: {
     afterChange: [revalidateGlobalOnChange],
   },
   fields: [
     /**
-     * The three accordion HEADINGS (003/T292a).
+     * The three accordion HEADINGS.
      *
      * This global originally modelled the bodies and not the headings, on the reasoning that the
      * headings never move. "3 year warranty + free returns" is a claim about how the shop

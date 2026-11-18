@@ -17,7 +17,7 @@ import { FilterDrawer } from './filter-drawer'
  * `xl`, where the toolbar owns it — widen the preview past 1280 and the last group goes.
  *
  * Ticking a box edits a DRAFT. Nothing commits until APPLY, and closing the panel throws the draft
- * away (FR-022).
+ * away.
  */
 const meta = {
   title: 'Commerce/FilterDrawer',
@@ -71,7 +71,7 @@ export const PreTicked: Story = {
 
 /**
  * Closed. It stays in the document with `display: none` rather than unmounting, because the form
- * inside it has to be server-rendered for a visitor with no scripting (FR-029).
+ * inside it has to be server-rendered for a visitor with no scripting.
  */
 export const Closed: Story = {
   args: { open: false },

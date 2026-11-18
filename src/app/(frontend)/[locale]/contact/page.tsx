@@ -12,7 +12,7 @@ import { getContactPage } from '@/lib/contact/queries'
 import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
 
 /**
- * The contact page (008/T034), from Figma section `312:7498`.
+ * The contact page, from Figma section `312:7498`.
  *
  * **This route closes three of the site's four dead links.** The header's "Contact us", the
  * footer's "Contact Us" and the CONTACT US button spec 006 shipped at the foot of `/about` have all
@@ -28,7 +28,7 @@ import { getContactDetails, getSocialLinks } from '@/lib/messengers/settings'
  * It also avoids a staleness bug rather than solving one: `src/lib/revalidate.ts` invalidates by
  * walking every product slug, so hooking this page into it would evict the entire catalogue because
  * somebody fixed a typo in the form's footnote. Nothing is cached here, so a publish is visible to
- * the next visitor with no invalidation at all (FR-044).
+ * the next visitor with no invalidation at all.
  *
  * **The three reads are cheaper than they look**, and two are shared with the chrome: the root
  * layout already calls `getContactDetails()` and `getSocialLinks()`, and both are `cache()`-wrapped,
@@ -40,7 +40,7 @@ export const dynamic = 'force-dynamic'
 const HREF = '/contact'
 
 /**
- * Editor-controlled metadata, falling back to what the page itself says (FR-048, FR-049).
+ * Editor-controlled metadata, falling back to what the page itself says.
  *
  * Constitution V requires the owner rather than a developer to decide how this appears in a search
  * result, and requires a canonical URL. Every SEO field is optional, so the fallbacks are what an
@@ -108,10 +108,10 @@ export default async function ContactPage() {
 
   /*
     The messengers first, in the admin's arrangement, then the email — always last, and always
-    present, because the shop always has an address even when the field is empty (FR-011).
+    present, because the shop always has an address even when the field is empty.
 
-    `getSocialLinks()` has already dropped rows with no usable destination (FR-013) and has already
-    decided that a messenger not offered at checkout still belongs here (FR-012). Neither rule is
+    `getSocialLinks()` has already dropped rows with no usable destination and has already
+    decided that a messenger not offered at checkout still belongs here. Neither rule is
     restated here: both live in that reader, which is where the footer gets them too.
   */
   const channels: ChannelGridItem[] = [
@@ -150,14 +150,14 @@ export default async function ContactPage() {
         form={page.form}
       />
       {/*
-        The centred variant of the band `/about` already uses (FR-034) — a heading over a single
+        The centred variant of the band `/about` already uses — a heading over a single
         column, no intro and no button, exactly as `312:8689` draws it. One band with two
         arrangements, never a second component.
 
         **Absent entirely when the editor has chosen no questions**, or when every question they
         chose has been unpublished. That decision is the mapper's: `ContactPage.faq` is `undefined`
         rather than an empty list, so this component cannot forget it and the rule is testable
-        without rendering anything (FR-032).
+        without rendering anything.
       */}
       {page.faq ? (
         <FaqBandBlock

@@ -8,15 +8,15 @@ import { adminOrPublishedStatus, isAdmin } from '@/lib/access'
 import { rejectDuplicateSlug } from './policy-hooks'
 
 /**
- * The site's legal and informational pages (spec 009, FR-001 – FR-016).
+ * The site's legal and informational pages.
  *
- * **A list, not four fixed pages** (FR-015). The footer has linked *Privacy Policy*,
+ * **A list, not four fixed pages**. The footer has linked *Privacy Policy*,
  * *Terms & Conditions*, *Cookie Policy* and *Shipping & Returns* since spec 001 and all four were
  * 404s until this collection existed — but modelling exactly those four as four globals would have
  * been four copies of one shape, and would have made a fifth policy a deployment. The owner can
  * create one here and it gets an address, a footer slot and a sitemap row with nobody's help.
  *
- * **Served under `/legal/`, and the prefix is load-bearing** (009/research.md R1). Next permits one
+ * **Served under `/legal/`, and the prefix is load-bearing**. Next permits one
  * dynamic segment per path position and the site's root one belongs to `(shop)/[category]` —
  * `/category-1`, `/category-2`, and the 404 for every unrecognised single segment. Putting policies at
  * bare root addresses would have meant replacing that route with a resolver trying category first
@@ -26,11 +26,11 @@ import { rejectDuplicateSlug } from './policy-hooks'
  *
  * **No revalidation hooks, and that is deliberate rather than forgotten.** `/legal/[slug]` is
  * `force-dynamic`, so no policy page is cached and there is nothing to invalidate — publishing is
- * visible to the very next visitor (FR-056). The shared `invalidate()` in `src/lib/revalidate.ts`
+ * visible to the very next visitor. The shared `invalidate()` in `src/lib/revalidate.ts`
  * walks every product slug, so attaching it here would evict the entire catalogue because somebody
  * fixed a typo in a paragraph. `questions.ts` and `articles.ts` both record the same trap.
  *
- * **`effectiveDate` is never written by a hook** (FR-008). A policy's effective date is a legal
+ * **`effectiveDate` is never written by a hook**. A policy's effective date is a legal
  * claim the owner makes on purpose; a `beforeChange` that bumped it on save would silently restate
  * that claim every time somebody corrected a comma.
  */
@@ -114,7 +114,7 @@ export const Policies: CollectionConfig = {
     },
     {
       /*
-       * Free text rather than a formatted date, and the design is why (FR-007): three of the four
+       * Free text rather than a formatted date, and the design is why: three of the four
        * drawn pages read `Last Updated: August 2026` here and Shipping & Returns reads
        * `Enjoy complimentary shipping and returns on all orders`. A date field would render one of
        * those four correctly.
@@ -140,7 +140,7 @@ export const Policies: CollectionConfig = {
        * so a chapter body cannot hide a section from the contents rail. A policy has no rail and
        * its whole structure is headed sections — INFORMATION WE COLLECT, HOW WE USE IT, YOUR
        * PRIVACY RIGHTS — so copying that filter would strip the one feature this content needs
-       * most (009/research.md R8).
+       * most.
        *
        * **Narrowed to `h2` and `h3`**, because the page already owns its `h1`: the title above the
        * body is the document's only top-level heading, and a second one typed into a policy would

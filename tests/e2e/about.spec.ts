@@ -7,7 +7,7 @@ import { getPayload } from 'payload'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * The story page, end to end (006/T038, T041, T042, T052, T059).
+ * The story page, end to end.
  *
  * **Almost everything here is a consequence of the page being COMPOSED rather than fixed.** When
  * the bands were going to be seven named fields in a known order, most of these assertions were not
@@ -106,7 +106,7 @@ async function outline(page: import('@playwright/test').Page): Promise<string[]>
   )
 }
 
-test.describe('the page a visitor reads (US1)', () => {
+test.describe('the page a visitor reads', () => {
   test('is reachable from all three links that already pointed at it', async ({ page }) => {
     await compose([PAGE_HEADER, BANNER])
 
@@ -178,7 +178,7 @@ test.describe('the page a visitor reads (US1)', () => {
   })
 })
 
-test.describe('the page an owner composes (US2)', () => {
+test.describe('the page an owner composes', () => {
   test('follows a reorder with no code change', async ({ page }) => {
     await compose([PAGE_HEADER, BANNER, STEPS])
     await page.goto('/about')
@@ -242,7 +242,7 @@ test.describe('the page an owner composes (US2)', () => {
   })
 })
 
-test.describe('the heading outline survives any arrangement (FR-051)', () => {
+test.describe('the heading outline survives any arrangement', () => {
   test('keeps one h1 when a banner is dragged above the page header', async ({ page }) => {
     await compose([BANNER, PAGE_HEADER, STEPS])
     await page.goto('/about')
@@ -282,7 +282,7 @@ test.describe('the heading outline survives any arrangement (FR-051)', () => {
   })
 })
 
-test.describe('the questions band (US4)', () => {
+test.describe('the questions band', () => {
   async function question(text: string, body: string, status: 'draft' | 'published' = 'published') {
     const doc = await payload.create({
       collection: 'questions',
@@ -415,7 +415,7 @@ test.describe('the questions band (US4)', () => {
   })
 })
 
-test.describe('how the page presents itself (US5)', () => {
+test.describe('how the page presents itself', () => {
   test('falls back to what the page says when the editor sets no metadata', async ({ page }) => {
     await compose([PAGE_HEADER, BANNER])
     await page.goto('/about')
@@ -460,7 +460,7 @@ test.describe('how the page presents itself (US5)', () => {
   })
 })
 
-test.describe('a video where a photograph was drawn (US3)', () => {
+test.describe('a video where a photograph was drawn', () => {
   const FIXTURES = resolve(import.meta.dirname, '../fixtures')
   const uploaded: number[] = []
 
@@ -543,7 +543,7 @@ test.describe('a video where a photograph was drawn (US3)', () => {
     await expect.poll(() => requested.length, { timeout: 10_000 }).toBeGreaterThan(0)
   })
 
-  test('never fetches the video, and never plays it, under reduced motion (FR-024)', async ({
+  test('never fetches the video, and never plays it, under reduced motion', async ({
     browser,
   }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' })
@@ -614,7 +614,7 @@ test.describe('a video where a photograph was drawn (US3)', () => {
     await page.goto('/about')
     const asVideo = await page.locator('main img').last().boundingBox()
 
-    // A band changes what fills it, never how big it is (FR-019, SC-004).
+    // A band changes what fills it, never how big it is.
     expect(asVideo?.width).toBe(asPhoto?.width)
     expect(asVideo?.height).toBe(asPhoto?.height)
   })

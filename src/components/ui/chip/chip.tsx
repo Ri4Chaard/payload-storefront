@@ -16,7 +16,7 @@ import { cn } from '@/lib/cn'
  * fill and text colour, which is exactly the kind of distinction that does not survive a screen
  * reader or a monochrome display.
  *
- * Deliberately NOT `Badge` (T062). A badge is a non-interactive label; this is a toggle. Merging
+ * Deliberately NOT `Badge`. A badge is a non-interactive label; this is a toggle. Merging
  * them would give the kit one component with a `clickable` prop, which is how a primitive stops
  * being one.
  */
@@ -28,7 +28,7 @@ export interface ChipProps extends Omit<React.ComponentProps<'button'>, 'type'> 
    * The listing's applied filters are drawn as this pill and they NAVIGATE — every filter lives in
    * the URL, so removing one is a different address rather than a state change. A button would have
    * been a control that needs scripting to do anything, on a page whose whole filtering path is
-   * required to work without it (FR-029).
+   * required to work without it.
    *
    * `aria-pressed` is dropped on this branch. A link is not a toggle, and a pressed link is a
    * contradiction a screen reader has to resolve on the visitor's behalf. Selection on a link is
@@ -36,7 +36,7 @@ export interface ChipProps extends Omit<React.ComponentProps<'button'>, 'type'> 
    */
   href?: string
   /**
-   * `'span'` renders a plain label instead of a control (006/T030).
+   * `'span'` renders a plain label instead of a control.
    *
    * The detail band on the story page draws these pills as subject labels — "Materials",
    * "Craftsmanship" — and pressing one does nothing. A `<button>` that does nothing is a control a

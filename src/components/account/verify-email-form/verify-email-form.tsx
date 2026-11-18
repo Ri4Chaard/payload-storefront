@@ -16,7 +16,7 @@ import { verifyCodeSchema, type VerifyCodeValues } from '@/lib/auth/schemas'
  *
  * The customer pastes the code out of their email rather than reading and retyping it, which is
  * what `OtpInput` handles at the group; `onComplete` then submits without them having to find the
- * button (contracts/ui-kit-additions.md O3).
+ * button.
  *
  * **`OtpInput` is driven through `Controller`, not `register`.** It is six inputs presenting one
  * value, so there is no single element for a ref to point at — which is exactly the case

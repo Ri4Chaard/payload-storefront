@@ -4,7 +4,7 @@ import { normaliseDestination } from '@/lib/messengers/normalise'
 
 /**
  * What an owner types becomes what we store —
- * [messenger-handoff.md §1](../../specs/005-checkout-handoff/contracts/messenger-handoff.md).
+ *.
  * FR-035, FR-036, SC-007.
  *
  * **The first test is the one that justifies the whole module.** WhatsApp's click-to-chat format
@@ -17,7 +17,7 @@ import { normaliseDestination } from '@/lib/messengers/normalise'
 const value = (result: ReturnType<typeof normaliseDestination>) =>
   result.ok ? result.value : `REFUSED: ${result.error}`
 
-describe('WhatsApp destinations (FR-035)', () => {
+describe('WhatsApp destinations', () => {
   it("reduces the shop's own number, as anyone would write it, to what wa.me accepts", () => {
     expect(value(normaliseDestination('whatsapp', '+1 (555) 010 20-30'))).toBe('15550102030')
   })
@@ -50,7 +50,7 @@ describe('WhatsApp destinations (FR-035)', () => {
   })
 })
 
-describe('Telegram and Instagram usernames (FR-036)', () => {
+describe('Telegram and Instagram usernames', () => {
   it('accepts a bare username, an @ handle and a pasted profile link identically', () => {
     for (const written of [
       'aurum',

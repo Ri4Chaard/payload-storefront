@@ -1,7 +1,7 @@
 /**
  * What a chosen product is, and whether it may be bought (003/T284, contract §6).
  *
- * **The seam this file opened has been consumed** (spec 005, T011). Spec 003 left `addToCart`,
+ * **The seam this file opened has been consumed**. Spec 003 left `addToCart`,
  * `buyNow` and an empty `submit` here, holding a shape for the cart to arrive into. The cart has
  * arrived, and the body went to `src/lib/cart/actions.ts` rather than into those wrappers, for a
  * reason worth recording:
@@ -92,7 +92,7 @@ export function validateIntent(
 }
 
 /**
- * What the product page holds, turned into an intent (spec 005, T020, research R16).
+ * What the product page holds, turned into an intent.
  *
  * **It used to earn its keep by catching a size trap, and spec 011 removed the trap with the
  * sizes.** The two selects beside each other used opposite conventions — the variant's options were

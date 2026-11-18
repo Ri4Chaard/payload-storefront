@@ -6,7 +6,7 @@ import type { CustomerAddress } from '@/lib/addresses/types'
 import { requireCustomerUser } from '@/lib/auth/dal'
 
 /**
- * Reading a customer's saved delivery addresses (spec 004, US5, FR-027, FR-032).
+ * Reading a customer's saved delivery addresses.
  *
  * **Server only.** It imports `@payload-config`; a `'use client'` module that reaches it pulls the
  * entire Payload configuration into the browser bundle, where it fails on Node built-ins with an

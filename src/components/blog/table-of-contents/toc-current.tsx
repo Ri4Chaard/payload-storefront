@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 /**
- * Which chapter the reader is on (007/T030).
+ * Which chapter the reader is on.
  *
  * **This is the only client JavaScript in the whole feature**, and it does exactly one thing: set
  * `aria-current` on one link. It renders nothing. The list itself is server-rendered by

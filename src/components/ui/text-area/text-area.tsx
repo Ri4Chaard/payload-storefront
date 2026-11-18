@@ -4,7 +4,7 @@ import { Field } from '@/components/ui/field'
 import { cn } from '@/lib/cn'
 
 /**
- * A multi-line control, drawn at `312:8666` / `419:10799` / `419:10879` (008/T059).
+ * A multi-line control, drawn at `312:8666` / `419:10799` / `419:10879`.
  *
  * **In the kit rather than beside the contact form, and that is a deliberate reading of
  * Constitution II.** The rule says a feature directory may hold only components with a single

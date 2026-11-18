@@ -3,7 +3,7 @@
 import React from 'react'
 
 /**
- * Which option the customer is looking at (spec 011, US2, FR-013; research R8).
+ * Which option the customer is looking at.
  *
  * **It exists because two siblings need one answer.** `ProductPurchase` already owns the selection —
  * FR-039 makes the price follow the chosen option — and `ProductDetails` renders beside it in the

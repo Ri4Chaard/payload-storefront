@@ -7,7 +7,7 @@ import { findCartId, ownerRequest, type CartOwner } from '@/lib/cart/session'
 import type { CustomerUser } from '@/lib/auth/dal'
 
 /**
- * Who may open a cart — [cart-actions.md §2](../../specs/005-checkout-handoff/contracts/cart-actions.md).
+ * Who may open a cart.
  * FR-006, FR-007, SC-010.
  *
  * **This file opens with the T004 spike, which blocks the rest of Phase 2.** Research R3 reads the
@@ -85,7 +85,7 @@ describe('guest cart access (T004 spike)', () => {
       req: { context: { cartSecret: secret } },
     })
 
-    // The field's own access is `read: () => false`; the creation response is the single exception,
+    // The field's own access is `read:  => false`; the creation response is the single exception,
     // which is why R2 puts the value in a cookie the moment it arrives.
     expect((read as { secret?: unknown }).secret).toBeUndefined()
   })
@@ -126,11 +126,11 @@ describe('guest cart access (T004 spike)', () => {
 })
 
 /**
- * Whose cart is whose (T014) — FR-006, FR-007, SC-010.
+ * Whose cart is whose — FR-006, FR-007, SC-010.
  *
  * Constitution VI puts this among the rules that do not move for schedule: one customer must never
  * be able to read or change another's. It is asserted at the operations layer rather than through
- * the actions, because an action reads cookies and `cookies()` needs a request scope a test runner
+ * the actions, because an action reads cookies and `cookies` needs a request scope a test runner
  * does not have — the seam `src/lib/cart/operations.ts` exists to make this reachable.
  */
 describe('cart ownership', () => {

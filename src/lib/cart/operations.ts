@@ -9,7 +9,7 @@ import { ownerLocalReq, ownerRequest, payloadClient, type CartOwner } from './se
 import type { CartOpResult } from './types'
 
 /**
- * Everything a cart mutation does, *given* an owner and a cart (spec 005, T009).
+ * Everything a cart mutation does, *given* an owner and a cart.
  *
  * **The seam this file exists to be** is the one `src/lib/auth/login.ts` already established for
  * spec 004: the action above it reads cookies and headers, and everything below it takes what it
@@ -141,7 +141,7 @@ export async function changeQuantity(
     // A direct value rather than `{ $inc }`, so two rapid clicks converge on what the customer can
     // see instead of compounding into a number nobody asked for.
     quantity,
-    // Removal has its own confirmation (FR-010) and must not be reachable by holding the minus key.
+    // Removal has its own confirmation and must not be reachable by holding the minus key.
     removeOnZero: false,
     req: await ownerLocalReq(owner),
   })

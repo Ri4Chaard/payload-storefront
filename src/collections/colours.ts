@@ -4,13 +4,13 @@ import { isAdmin } from '@/lib/access'
 import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
- * A colour a product can be, and a customer can filter by (spec 011, US3, FR-017).
+ * A colour a product can be, and a customer can filter by.
  *
  * **This used to be four values in a `select`**, which meant adding navy was a developer task
  * and a deployment — the one arrangement every other descriptive vocabulary in this shop avoids.
  * Now it is the owner's.
  *
- * **Modelled on `categories`, deliberately NOT on the departing `sizes`** (011/research.md R1).
+ * **Modelled on `categories`, deliberately NOT on the departing `sizes`**.
  * `sizes` had two halves this codebase never separated: a small owner-managed vocabulary, and a
  * load-bearing role on the product — a required selector before add-to-cart, and part of cart-line
  * identity. Colour needs the first half and must never acquire the second. What it copies is
@@ -18,12 +18,12 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
  * through `Reference` in `queries.ts` and matched on a stable slug.
  *
  * **Not an `attributes` row**, for one word in that file: attributes are deliberately NOT
- * filterable (003/research.md R4), because making every attribute a filter is a join per active
+ * filterable, because making every attribute a filter is a join per active
  * filter on the query that runs on every listing view. Colour is a filter and stays one.
  */
 
 /**
- * A colour still in use cannot be deleted (FR-023).
+ * A colour still in use cannot be deleted.
  *
  * The two alternatives are both worse. Letting it go leaves published products pointing at a row that
  * no longer exists — the exact state a relationship is here to prevent, and one that would show as
@@ -63,7 +63,7 @@ export const Colours: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  // Publishing invalidates the cached routes (003/T294). A colour is a filter option and a chip
+  // Publishing invalidates the cached routes. A colour is a filter option and a chip
   // label on every listing.
   hooks: {
     afterChange: [revalidateOnChange],

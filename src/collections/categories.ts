@@ -28,7 +28,7 @@ export const Categories: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  // Publishing invalidates the cached routes (003/T294). A category is the band on the home page and the eyebrow above every product in it.
+  // Publishing invalidates the cached routes. A category is the band on the home page and the eyebrow above every product in it.
   hooks: {
     afterChange: [revalidateOnChange],
     afterDelete: [revalidateOnDelete],

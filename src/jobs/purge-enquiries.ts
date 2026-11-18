@@ -3,7 +3,7 @@ import type { TaskConfig, Where } from 'payload'
 import { ENQUIRY_RETENTION_DAYS, ENQUIRY_RETENTION_MS } from '@/lib/contact/config'
 
 /**
- * Forgetting enquiries once there is no longer a reason to keep them (spec 008, T092, FR-029d).
+ * Forgetting enquiries once there is no longer a reason to keep them.
  *
  * **Its own task rather than a third deletion inside `purgeAccounts`.** That one exists because two
  * account-shaped cleanups wanted the same slot and splitting them "would double the scheduling
@@ -13,7 +13,7 @@ import { ENQUIRY_RETENTION_DAYS, ENQUIRY_RETENTION_MS } from '@/lib/contact/conf
  *
  * **A hard delete, deliberately.** Enquiries carry no drafts and nothing references them, so there
  * is nothing for a soft delete to protect — and a "deleted" row that still holds a visitor's name,
- * address and message is not an erasure path (FR-029e). The `senderHash` the throttle counts on
+ * address and message is not an erasure path. The `senderHash` the throttle counts on
  * dies with its row, which is why that pseudonymous key needs no policy of its own.
  *
  * **`overrideAccess: true`, and it has to be.** `enquiries` refuses `create` and `update` to

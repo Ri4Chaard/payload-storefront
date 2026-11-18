@@ -13,7 +13,7 @@ import { getPolicySlugs } from '@/lib/policies/queries'
 import { env } from '@/env'
 
 /**
- * The site's machine-readable list of addresses (007/T074, T075 — FR-044, Constitution V).
+ * The site's machine-readable list of addresses.
  *
  * **New work this spec had to do, because the site had none.** FR-044 requires published articles
  * to appear in "the site's list of addresses", and there was no such list. It covers the whole
@@ -44,7 +44,7 @@ export const dynamic = 'force-dynamic'
 const absolute = (path: string): string => new URL(path, env.NEXT_PUBLIC_SERVER_URL).toString()
 
 /**
- * One address becomes one entry per language it is offered in (spec 010, FR-017, research R12).
+ * One address becomes one entry per language it is offered in.
  *
  * **`alternates.languages` on every entry, which is the half a crawler actually reads.** A sitemap
  * that lists three unrelated URLs says three pages exist; one that lists three URLs each naming the
@@ -52,7 +52,7 @@ const absolute = (path: string): string => new URL(path, env.NEXT_PUBLIC_SERVER_
  * each other in search results.
  *
  * **Filtered by the enabled set**, so a language the owner has switched off disappears from here as
- * well as from the site (FR-027). And iterated explicitly rather than resolved: `sitemap.ts` is a
+ * well as from the site. And iterated explicitly rather than resolved: `sitemap.ts` is a
  * special Route Handler, and `next/root-params` does not reach one.
  */
 function localisedEntries(
@@ -82,7 +82,7 @@ const STATIC_ROUTES: {
   { path: BLOG_ROOT, changeFrequency: 'weekly', priority: 0.8 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.6 },
   /*
-      Contact and FAQ (008/T088). Both exist whether or not anything is published — `/faq` renders
+      Contact and FAQ. Both exist whether or not anything is published — `/faq` renders
       a heading and a message rather than a 404 when no question is — so they belong in the static
       list beside `/about` rather than among the rows built from content below.
     */
@@ -107,7 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [categories, products, articles, policies] = await Promise.all([
       /*
         The default language. A sitemap lists ADDRESSES, and a category's address is its slug, which
-        is shared across languages (spec 010, R7) — so the language here only decides which words
+        is shared across languages — so the language here only decides which words
         are read and thrown away. It is named rather than inferred because `sitemap.ts` is a Route
         Handler, and `next/root-params` does not reach one.
       */
@@ -115,7 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getProductSlugs(),
       getArticleSlugs(),
       /*
-        Policy pages (009/T058). Built from content rather than listed in `STATIC_ROUTES` above,
+        Policy pages. Built from content rather than listed in `STATIC_ROUTES` above,
         unlike `/contact` and `/faq`: those two exist whether or not anything is published, and a
         policy address does not. Unpublishing one removes it from here, which is the same rule the
         footer follows.

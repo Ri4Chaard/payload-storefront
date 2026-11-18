@@ -64,12 +64,12 @@ export default {
     'no-raw-color': {
       meta: {
         type: 'problem',
-        docs: { description: 'Colours must reference design tokens, never raw values (FR-010).' },
+        docs: { description: 'Colours must reference design tokens, never raw values.' },
         schema: [],
       },
       create(context) {
         const msg =
-          'Raw colour value. Use a design token (e.g. text-primary-default, bg-background-bg) — see contracts/design-tokens.md.'
+          'Raw colour value. Use a design token (e.g. text-primary-default, bg-background-bg) — see design/tokens/mapping.ts.'
         return {
           ...stringVisitor(context, RAW_COLOR, msg),
           ...stylePropVisitor(context, STYLE_PROPS_COLOR, RAW_COLOR, msg),
@@ -80,7 +80,7 @@ export default {
     'no-arbitrary-font-size': {
       meta: {
         type: 'problem',
-        docs: { description: 'Text must use a named type style, never an arbitrary size (FR-016).' },
+        docs: { description: 'Text must use a named type style, never an arbitrary size.' },
         schema: [],
       },
       create(context) {
@@ -96,7 +96,7 @@ export default {
     'no-arbitrary-spacing': {
       meta: {
         type: 'problem',
-        docs: { description: 'Spacing must come from the scale, never arbitrary values (FR-018).' },
+        docs: { description: 'Spacing must come from the scale, never arbitrary values.' },
         schema: [],
       },
       create(context) {

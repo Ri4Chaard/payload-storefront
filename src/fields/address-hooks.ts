@@ -5,7 +5,7 @@ import type {
 } from 'payload'
 
 /**
- * "Exactly one address is the default" (spec 004, FR-031).
+ * "Exactly one address is the default".
  *
  * **Why hooks and not the form.** The obvious place to put this is the Add address modal, and that
  * is the version that holds right up until the second writer appears — and there are already three

@@ -14,7 +14,7 @@ import { applyActionErrors, errorText } from '@/lib/auth/form-errors'
 import { requestResetSchema, type RequestResetValues } from '@/lib/auth/schemas'
 
 /**
- * Node `429:12087` — one field and one button (spec 004, US3, FR-017).
+ * Node `429:12087` — one field and one button.
  *
  * **It always goes to the next screen.** Not a convenience: this form is the easiest place in any
  * application to ask the shop which of a list of addresses has an account here, and the only defence
@@ -29,7 +29,7 @@ import { requestResetSchema, type RequestResetValues } from '@/lib/auth/schemas'
 export function ForgotPasswordForm() {
   const t_errors = useTranslations('errors')
   const t_forms = useTranslations('forms')
-  // Sent to the action, which sends it to the mail (spec 010, FR-042).
+  // Sent to the action, which sends it to the mail.
   const locale = useLocale() as Locale
 
   const ERRORS: Record<string, string> = {

@@ -6,7 +6,7 @@ import { ENQUIRY_RATE_LIMIT, ENQUIRY_RETENTION_DAYS } from '@/lib/contact/config
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * The enquiry pipeline — [enquiry-action.md](../../specs/008-contact-faq-pages/contracts/enquiry-action.md)
+ * The enquiry pipeline
  * §5, §9. FR-021, FR-024a, FR-027, FR-029, FR-029a, FR-029b.
  *
  * **The claim these exist to support is §5's ordering**: the record is the receipt and the email is
@@ -134,7 +134,7 @@ describe('a valid submission', () => {
 })
 
 /**
- * **The regression test for the whole design** (contracts/enquiry-action.md §5).
+ * **The regression test for the whole design**.
  *
  * If this ever inverts, a mail outage starts telling visitors their message failed while the shop
  * is holding it. The record is the receipt; the email is how the owner finds out.
@@ -311,7 +311,7 @@ describe('access', () => {
 })
 
 /**
- * Retention and erasure (008/T090, FR-029d, FR-029e, SC-013).
+ * Retention and erasure.
  *
  * **Constitution VI attaches both to any point that collects personal data**, and storing enquiries
  * created one. The purge is what bounds how long the shop holds a stranger's name, address and

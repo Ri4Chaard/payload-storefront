@@ -28,7 +28,7 @@ import { cn } from '@/lib/cn'
  * modal that knew about submission would be four slightly different components within a month.
  *
  * **Full-bleed below `sm`.** An 800px box on a 390px phone is a horizontal scrollbar; the design
- * has no frames below 1920, so the small widths are derived rather than transcribed (FR-042).
+ * has no frames below 1920, so the small widths are derived rather than transcribed.
  */
 export interface ModalProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   open: boolean

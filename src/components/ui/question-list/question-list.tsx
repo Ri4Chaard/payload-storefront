@@ -4,7 +4,7 @@ import { Accordion } from '@/components/ui/accordion'
 import { RichText } from '@/components/ui/rich-text'
 
 /**
- * A column of expandable questions (spec 008, T010).
+ * A column of expandable questions.
  *
  * **Promoted out of `FaqBandBlock` on its third consumer.** `/about` draws these beside a column of
  * copy, `/contact` draws them centred under a heading, and `/faq` is nothing else. Constitution II
@@ -12,7 +12,7 @@ import { RichText } from '@/components/ui/rich-text'
  * every rule below is one a second caller would otherwise have had to re-derive.
  *
  * **`Accordion` is used as it ships, and its default is the behaviour these need.** `single` is off,
- * so opening one question does not close another (FR-035) — a visitor comparing delivery against
+ * so opening one question does not close another — a visitor comparing delivery against
  * returns should not have to hold one of them in their head.
  *
  * **`icon={null}` — no leading glyph.** `Accordion` defaults to the dash it was drawn with on the

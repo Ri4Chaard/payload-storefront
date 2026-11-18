@@ -4,7 +4,7 @@ import { Chip, Container, Media } from '@/components/ui'
 import type { StoryBlock } from '@/lib/story/types'
 
 /**
- * The band that says what the shop is about (006/T030), from nodes `205:1870`, `413:7680`,
+ * The band that says what the shop is about, from nodes `205:1870`, `413:7680`,
  * `413:7985`.
  *
  * Copy on the left and a picture on the right at desktop; stacked on a phone, with the picture

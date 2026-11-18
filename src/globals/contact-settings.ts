@@ -6,7 +6,7 @@ import { normaliseDestination, PLATFORM_LABELS, PLATFORMS, type Platform } from 
 import { revalidateGlobalOnChange } from '@/lib/revalidate'
 
 /**
- * Where the shop's own messenger accounts live (spec 005, T045 – T047, FR-033 – FR-042).
+ * Where the shop's own messenger accounts live.
  *
  * **The one schema change this feature makes.** The cart table, its `size` column and its foreign
  * key were landed by spec 003 and are already migrated; everything else spec 005 needs is code.
@@ -22,7 +22,7 @@ import { revalidateGlobalOnChange } from '@/lib/revalidate'
  * there is no `position` number two rows could share, and therefore no way for the list to
  * disagree with itself.
  *
- * **The destination is the raw account, never a built link** (FR-035, FR-036). An owner types the
+ * **The destination is the raw account, never a built link**. An owner types the
  * phone number they say out loud and `src/lib/messengers/normalise.ts` reduces it to what `wa.me`
  * accepts. Storing a URL instead would move the formatting rules out of tested code and into a
  * text field somebody has to get right, which is the failure FR-039 exists to make impossible.
@@ -42,10 +42,10 @@ const platformOptions = PLATFORMS.map((platform) => ({
 /**
  * The shipped wording. `{{items}}` is required; the other two are optional.
  *
- * Written as a request rather than an order, because that is what it is (FR-025): the site takes no
+ * Written as a request rather than an order, because that is what it is: the site takes no
  * money and the seller confirms availability and price in the conversation this message opens.
  */
-export const DEFAULT_MESSAGE_TEMPLATE = `Hello Aurum, I would like to order:
+export const DEFAULT_MESSAGE_TEMPLATE = `Hello, I would like to order:
 
 {{items}}
 
@@ -62,18 +62,18 @@ export const ContactSettings: GlobalConfig = {
       'How customers reach the shop: the email and phone shown across the site, the messengers offered when they finish an order, and what their message says. Changes appear on the storefront immediately — no deployment.',
   },
   /**
-   * Stated explicitly, never left to the default (Constitution IV).
+   * Stated explicitly, never left to the default.
    *
    * `read` is public because these values are shown to every visitor who opens the handoff modal
    * and, after the chrome migration, in the footer of every page. `update` is admin-only: a
-   * customer session must never be able to redirect the shop's own orders (FR-041).
+   * customer session must never be able to redirect the shop's own orders.
    */
   access: {
     read: () => true,
     update: isAdmin,
   },
   hooks: {
-    // A saved change has to reach cached pages without a deployment (FR-042) — and after the chrome
+    // A saved change has to reach cached pages without a deployment — and after the chrome
     // reads these too, that includes every prerendered product page.
     afterChange: [revalidateGlobalOnChange],
   },
@@ -96,7 +96,7 @@ export const ContactSettings: GlobalConfig = {
       },
     },
     /**
-     * Where the contact form's messages go (spec 008, FR-024).
+     * Where the contact form's messages go.
      *
      * **Here rather than on `contact-page`**, beside the address it falls back to, because it is an
      * address the shop uses and this global is where the shop's addresses live. Keeping the two
@@ -203,7 +203,7 @@ export const ContactSettings: GlobalConfig = {
               'WhatsApp: the phone number, written however you like — “+1 (555) 010 20-30” is fine. Telegram and Instagram: the username, with or without the @.',
           },
           /**
-           * The save is refused and the field is named (FR-039), so the modal can never draw a row
+           * The save is refused and the field is named, so the modal can never draw a row
            * that leads nowhere.
            *
            * **Only when the row is offered.** An owner may park a half-filled messenger with the
@@ -274,7 +274,7 @@ export const ContactSettings: GlobalConfig = {
       },
       /**
        * A template without `{{items}}` produces a message naming nothing the customer wanted
-       * (FR-040). Refused rather than repaired: silently appending the items would leave the owner
+       *. Refused rather than repaired: silently appending the items would leave the owner
        * believing the wording they wrote is the wording being sent.
        */
       validate: (value: unknown) => {

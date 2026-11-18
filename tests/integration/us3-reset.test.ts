@@ -11,7 +11,7 @@ import { RESET_HANDLE_TTL_MS } from '@/lib/auth/config'
 import type { CreateAccountValues } from '@/lib/auth/schemas'
 
 /**
- * US3 — recover a forgotten password (spec 004, FR-017 – FR-021).
+ * US3 — recover a forgotten password.
  *
  * **`completePasswordReset` rather than the `resetPassword` action**, for the same reason US2 tests
  * `authenticateCustomer`: the action writes a session cookie, and `cookies()` needs a request that

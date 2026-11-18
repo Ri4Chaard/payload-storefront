@@ -5,7 +5,7 @@ import { emptyCart, type CartIssue, type CartLineView, type CartView } from './t
 
 /**
  * What the cart says, given what the catalogue currently says (spec 005, T008,
- * [cart-loader.md](../../../specs/005-checkout-handoff/contracts/cart-loader.md)).
+ *).
  *
  * **Split from `./loader.ts` so that this half needs no database.** The loader's job is to fetch —
  * the cart row, and the products those lines point at. This module's job is to decide, and every
@@ -28,7 +28,7 @@ export interface RawCartLine {
   variant?: number | { id: number } | null
 }
 
-/** Nothing computes delivery; it is arranged with the seller (FR-011). */
+/** Nothing computes delivery; it is arranged with the seller. */
 const SHIPPING_MINOR = 0
 
 export const relationId = (value: unknown): number | undefined => {
@@ -97,7 +97,7 @@ export function resolveLine(
   )
 
   // The variant's price where the product has variants, the product's own where it does not. `carts_items`
-  // carries no price of its own by design (research R6) — FR-012 wants the current one, and a
+  // carries no price of its own by design — FR-012 wants the current one, and a
   // stored one would be a snapshot of a kind FR-029 has ruled out.
   const unitMinor = chosen ? chosen.priceMinor : product.priceMinor
   const maxQuantity = chosen ? chosen.maxQuantity : product.maxQuantity

@@ -3,7 +3,7 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * The centred band heading (002/T107), drawn at nodes 138:456, 144:840 and their responsive twins —
+ * The centred band heading, drawn at nodes 138:456, 144:840 and their responsive twins —
  * 36px at 1920 and 1024, 34px at 390, centred, in the display face, in ink.
  *
  * There is no per-breakpoint sizing here because there does not need to be: `text-display` is a

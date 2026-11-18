@@ -88,7 +88,7 @@ export const WithoutActions: Story = {}
 export const FromTheRight: Story = { args: { ...Default.args, side: 'right' } }
 
 /**
- * The no-JavaScript path (FR-029). As a form, the panel's controls and its `APPLY` are one
+ * The no-JavaScript path. As a form, the panel's controls and its `APPLY` are one
  * submission, so the browser builds the filtered URL without any script running.
  */
 export const AsAForm: Story = {

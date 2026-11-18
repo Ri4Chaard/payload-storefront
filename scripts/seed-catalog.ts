@@ -6,7 +6,7 @@
  * nothing about the model.
  *
  * **Idempotent.** Everything is looked up by its slug or name and updated in place, so it can be
- * re-run after the photography lands (T292) without duplicating a catalogue.
+ * re-run after the photography lands without duplicating a catalogue.
  *
  * **Every write passes `context: skipRevalidation`.** Seeding is not publishing: this runs in its
  * own process, where `revalidatePath` has no request scope to reach and throws rather than doing
@@ -389,7 +389,7 @@ const productSeeds: ProductSeed[] = [
   },
   {
     /**
-     * A product titled in Cyrillic (spec 005, FR-028a).
+     * A product titled in Cyrillic.
      *
      * Not decoration. The messenger message is carried in a URL, and the budget that governs it is
      * measured AFTER percent-encoding — where one Cyrillic character costs six, because it is two
@@ -636,7 +636,7 @@ console.log('› the FAQ')
 /**
  * The questions drawn at the bottom of the story page.
  *
- * They live in their own collection rather than on the page (FR-031), so this seeds them first and
+ * They live in their own collection rather than on the page, so this seeds them first and
  * the story page below refers to them. That indirection is the whole point of the model: the
  * standalone `/faq` page will read these same rows with nothing to migrate.
  */
@@ -672,7 +672,7 @@ for (const [index, [question, paragraphs]] of SEED_QUESTIONS.entries()) {
 
 console.log('› the story page')
 /**
- * The seven photographs the Our Story page is drawn with (006/T062, FR-052).
+ * The seven photographs the Our Story page is drawn with.
  *
  * **The copy ships as the blocks field's `defaultValue`; the pictures cannot.** A media slot holds a
  * relationship to a document, and a default cannot conjure one — so an install that never runs this
@@ -782,7 +782,7 @@ console.log(`      seven bands, seven photographs, ${questionIds.length} questio
 
 console.log('\n› the blog')
 /**
- * The blog, as Figma section `312:7335` draws it (007/T060).
+ * The blog, as Figma section `312:7335` draws it.
  *
  * **Seven articles, because seven is one complete mosaic cycle.** The drawn index shows exactly one
  * — wide, narrow / narrow, narrow, narrow / narrow, wide — and seeding six or eight would leave a
@@ -969,7 +969,7 @@ console.log(
 
 console.log('› the home page')
 /**
- * The home page's photographs and words (spec 010).
+ * The home page's photographs and words.
  *
  * The words are written out here as well as being the global's field defaults, so that a database
  * which already saved the page once is brought back to the placeholder copy, and so that the
@@ -1007,7 +1007,7 @@ await payload.updateGlobal({
 console.log('      2 photographs on the home page')
 
 /*
-  The contact page (008/T096): its photograph, and its words for the same reason the home page has
+  The contact page: its photograph, and its words for the same reason the home page has
   them above.
 
   The questions band is deliberately left unselected: FR-032 means it does not appear until an

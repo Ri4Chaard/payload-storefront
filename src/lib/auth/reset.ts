@@ -10,7 +10,7 @@ import { sendPasswordChangedNotice } from '@/lib/email/transactional'
 
 /**
  * Setting a customer's password — by reset, or by changing it while signed in — with no reference
- * to cookies or to Next (spec 004, US3 and US7).
+ * to cookies or to Next.
  *
  * **Deliberately not inside `'use server'`**, exactly as `./login.ts` is not. Two reasons, and the
  * second is the load-bearing one. Every export of a `'use server'` module is a public RPC endpoint,
@@ -54,7 +54,7 @@ export interface ResetInput {
  *     so the one that counts is the one on the account being changed.
  *  4. **Reset**, which retires the token as it uses it — so neither the code nor the handle can be
  *     replayed.
- *  5. **Revoke the other sessions** (FR-021), then tell the customer (FR-035).
+ *  5. **Revoke the other sessions**, then tell the customer.
  */
 export async function completePasswordReset(
   { handle, password }: ResetInput,
@@ -96,7 +96,7 @@ export async function completePasswordReset(
 
   await endOtherSessions(customer.id, issued)
 
-  // Never gated on the marketing preference (FR-035) — it is how somebody finds out their account
+  // Never gated on the marketing preference — it is how somebody finds out their account
   // was taken. A failed send is logged rather than thrown: the password HAS changed by now, and
   // reporting failure to the person who just changed it would be a lie.
   await sendPasswordChangedNotice(customer.email, locale)
@@ -111,7 +111,7 @@ export async function completePasswordReset(
 }
 
 /**
- * Revoke every session except the one just minted (FR-021).
+ * Revoke every session except the one just minted.
  *
  * A password reset is what somebody does after losing control of their account, so leaving the
  * other party's session live would defeat the entire exercise. Payload does not do this itself:
@@ -172,7 +172,7 @@ export type ChangeResult =
   | { ok: false; reason: 'locked' | 'weak' | 'wrong-password' }
 
 /**
- * Change the password of a customer who is already signed in (FR-020, FR-021).
+ * Change the password of a customer who is already signed in.
  *
  * **The current password is proved by signing in with it**, because Payload offers no "is this the
  * password?" call and hand-rolling one would mean reaching past its export map for the hashing

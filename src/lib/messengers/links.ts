@@ -2,7 +2,7 @@ import { PLATFORM_LABELS, type Platform } from './normalise'
 
 /**
  * Identifier plus text becomes a URL (spec 005, T044,
- * [messenger-handoff.md §2](../../../specs/005-checkout-handoff/contracts/messenger-handoff.md)).
+ *).
  * FR-021, FR-022.
  *
  * **Both pre-fill formats are verified against primary sources, not recalled.** Telegram's own API
@@ -25,7 +25,7 @@ export interface MessengerLink {
   platform: Platform
   /** 'WhatsApp' — the platform name as the modal draws it. */
   label: string
-  /** '@aurum' — the displayed handle, which is not the destination (FR-037). */
+  /** '@aurum' — the displayed handle, which is not the destination. */
   handle: string
   href: string
   /** Whether the composed message travels with the customer, or has to be pasted. */
@@ -38,7 +38,7 @@ export interface BuiltLink {
 }
 
 /**
- * The practical ceiling a URL can be relied on to survive (FR-028).
+ * The practical ceiling a URL can be relied on to survive.
  *
  * Measured on the **finished, percent-encoded link** rather than on the message. A Cyrillic
  * character costs six characters of budget — two UTF-8 bytes, each becoming a `%XX` escape — so a
@@ -84,7 +84,7 @@ export function messengerLink(
 }
 
 /**
- * The same account, as a plain profile link (spec 005, T072, FR-052).
+ * The same account, as a plain profile link.
  *
  * **Not `buildLink`.** The chrome's social marks are an invitation to follow the shop, not a
  * handoff: a footer icon that opened WhatsApp with somebody's cart pre-typed would be startling.

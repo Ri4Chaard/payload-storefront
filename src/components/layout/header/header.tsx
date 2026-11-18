@@ -17,7 +17,7 @@ import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 /**
- * The site header (T073, FR-035), from the five variants at node 327:7956 plus the page reference
+ * The site header, from the five variants at node 327:7956 plus the page reference
  * at node 440:13435.
  *
  * **Those five variants are three breakpoints, not five components.** Figma has to draw a frame per
@@ -49,7 +49,7 @@ export interface HeaderProps {
   breadcrumbs?: BreadcrumbItem[]
   /**
    * Overrides the live count. Stories and the odd fixed rendering want a number they control;
-   * everything else leaves it alone and takes what `CartCountProvider` knows (spec 005, T025).
+   * everything else leaves it alone and takes what `CartCountProvider` knows.
    */
   cartCount?: number
   /** The shop's accounts, from `contact-settings`. Passed through to the mobile navigation. */
@@ -63,9 +63,9 @@ export interface HeaderProps {
 }
 
 /**
- * Placeholder navigation (T073). Later specs replace this with Payload-managed content.
+ * Placeholder navigation. Later specs replace this with Payload-managed content.
  *
- * **Translated through the message files in the meantime (spec 010, FR-033).** Constitution I puts
+ * **Translated through the message files in the meantime.** Constitution I puts
  * navigation in Payload, and it will go there — but leaving these English on a Russian page until
  * that spec lands would be the most visible untranslated thing on the site. The keys move to the
  * content model with the labels when the time comes.
@@ -81,7 +81,7 @@ const NAV_KEYS = [
 ] as const
 
 /**
- * The languages on offer (spec 010, FR-005).
+ * The languages on offer.
  *
  * A default rather than a requirement, so Storybook and any fixed rendering still work — but the
  * layout passes the real list, filtered to what the owner has switched on. Before spec 010 this was
@@ -97,7 +97,7 @@ const DEFAULT_LOCALES: Locale[] = LOCALES.map((locale) => LOCALE_LABELS[locale])
  * The count belongs in the accessible name, not only in the badge — the badge is `aria-hidden`
  * because "Cart 2" read as two unrelated things tells nobody what the two counts.
  *
- * **The plural is the message file's job now (spec 010, FR-036).** `count === 1 ? 'item' : 'items'`
+ * **The plural is the message file's job now.** `count === 1 ? 'item' : 'items'`
  * is correct English and wrong Russian and Ukrainian, which have three plural categories: 1 товар,
  * 2 товара, 5 товаров. ICU knows the rules; a ternary cannot.
  */
@@ -116,7 +116,7 @@ export function Header({
 }: HeaderProps) {
   // The prop wins where one is given — stories and fixed renderings — otherwise the live count
   // from `CartCountProvider`. Reading it here rather than in the layout is what keeps `cookies()`
-  // out of the root layout and the catalogue prerendered (spec 005, research R8).
+  // out of the root layout and the catalogue prerendered.
   const liveCount = useCartCount()
   const count = cartCount ?? liveCount
 
@@ -235,7 +235,7 @@ export function Header({
             className="hidden md:block"
           />
           {/*
-            The badge counted the cart and nothing opened it (spec 005, T024, FR-016). `IconButton`
+            The badge counted the cart and nothing opened it. `IconButton`
             has always taken an `href` — the account control beside this one uses it — so this is
             the one line that was missing, not a new capability.
           */}
@@ -248,7 +248,7 @@ export function Header({
             className={iconChrome}
           />
           {/*
-            One href for both states (spec 004, FR-016). An anonymous visitor is sent to sign-in by
+            One href for both states. An anonymous visitor is sent to sign-in by
             `src/proxy.ts`, which already guards `/account` and carries `next` so they land back
             here afterwards.
 

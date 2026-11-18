@@ -38,7 +38,7 @@ type Story = StoryObj<typeof meta>
  *
  * **Scroll it out of view and reload to see the rule that matters.** The file is not requested
  * until the frame intersects the viewport, so a band a visitor never reaches costs them nothing
- * (FR-024a). The network panel is where this story is actually read.
+ *. The network panel is where this story is actually read.
  */
 export const Default: Story = {}
 
@@ -60,7 +60,7 @@ export const StepTile: Story = {
 }
 
 /**
- * With `prefers-reduced-motion: reduce`, nothing plays and the file is never fetched (FR-024).
+ * With `prefers-reduced-motion: reduce`, nothing plays and the file is never fetched.
  *
  * The poster is not a fallback here — it is the whole rendering, permanently, for that visitor.
  * Toggle the OS setting and reload; the `<video>` element never enters the DOM.

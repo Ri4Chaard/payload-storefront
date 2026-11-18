@@ -5,7 +5,7 @@ import { CATALOG_CURRENCY, formatPriceFor } from '@/lib/catalog/price'
 import { countryName } from '@/lib/countries'
 
 /**
- * Money, dates and country names in three languages (spec 010, T072 — FR-038, FR-039, FR-040).
+ * Money, dates and country names in three languages.
  *
  * **The assertion that matters is that the AMOUNT never changes.** Localisation moves the currency
  * symbol, the group separator and the decimal mark; it must not touch what is owed. Constitution VI

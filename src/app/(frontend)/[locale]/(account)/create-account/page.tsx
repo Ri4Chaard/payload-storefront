@@ -9,7 +9,7 @@ import { Link } from '@/components/ui/link'
 import { getCustomer } from '@/lib/auth/dal'
 
 /**
- * Node `428:11594` (spec 004, US1).
+ * Node `428:11594`.
  *
  * `noindex` on every auth route. A sign-in or sign-up page in search results is not a feature —
  * it competes with the pages that sell things, and a create-account form is not a landing page.

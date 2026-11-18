@@ -5,10 +5,9 @@ import type { Chapter } from '@/lib/blog/types'
 import { cn } from '@/lib/cn'
 
 /**
- * The article itself (007/T027, T028), from nodes `312:8491`, `418:8639`, `418:8948`.
+ * The article itself, from nodes `312:8491`, `418:8639`, `418:8948`.
  *
- * One chapter renders in one order, and the order is a contract rather than a preference — see
- * `specs/007-blog-articles/contracts/article-content.md` §4:
+ * One chapter renders in one order, and the order is a contract rather than a preference:
  *
  *     h2          heading
  *     p           lede            (optional, emphasised)

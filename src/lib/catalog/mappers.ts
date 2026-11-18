@@ -20,7 +20,7 @@
  *                    unavailable is what the owner asked for, not hidden.
  *   with variants    available when any variant is. A variant's own `inventory` decides it, whatever
  *                    the parent's mode says: made-to-order describes the product, not the variant,
- *                    and a variant at zero is one somebody already bought (FR-040).
+ *                    and a variant at zero is one somebody already bought.
  *
  * A component never sees an `inventory` number, so it is never in a position to answer this
  * differently somewhere else.
@@ -125,7 +125,7 @@ function html(value: Product['details'] | Shop['warranty']): string | null {
 // ---------------------------------------------------------------------------------------------
 
 /**
- * A variant is available if its product is made to order, or if it has one left (spec 011, FR-002).
+ * A variant is available if its product is made to order, or if it has one left.
  *
  * **This used to read "above its own zero, whatever the parent's availability mode says", and that
  * comment was the defect.** It is the honest rule for a stock-tracked product and the wrong one for a
@@ -137,7 +137,7 @@ function html(value: Product['details'] | Shop['warranty']): string | null {
  * The product's mode is passed rather than read from a parent pointer because every caller already
  * has the product in hand. That is also what keeps `variants.availability` — the denormalised column
  * the admin form needs — out of the storefront's path entirely: a mirror that fell out of step can
- * misdraw a form, and can never sell what should not be sold (011/research.md R5, R6).
+ * misdraw a form, and can never sell what should not be sold.
  */
 export function isVariantAvailable(
   variant: Variant,
@@ -172,7 +172,7 @@ export function isProductAvailable(product: Product): boolean {
 
   /*
     No variants left to offer — which covers a product that never had any, AND a made-to-order product
-    whose every variant has been taken off sale (FR-008). Unpublished variants never reach this mapper,
+    whose every variant has been taken off sale. Unpublished variants never reach this mapper,
     so by the time the question is asked the two are indistinguishable, and falling back to the
     product's own mode is right for both: a selector with nothing in it is not a thing to draw.
   */
@@ -240,8 +240,8 @@ function toVariantOption(
     label: label === '' ? (variant.title ?? `Option ${variant.id}`) : label,
     price: formatPriceFor(locale, priceMinor),
     /*
-      No ceiling on a made-to-order variant (FR-003). A count stored from when the product was stock
-      tracked is deliberately still there — switching modes does not erase it (FR-004) — so the mode
+      No ceiling on a made-to-order variant. A count stored from when the product was stock
+      tracked is deliberately still there — switching modes does not erase it — so the mode
       has to be consulted here rather than the number trusted.
     */
     ...(availability === 'made-to-order' || ceiling(variant.inventory) === undefined
@@ -249,7 +249,7 @@ function toVariantOption(
       : { maxQuantity: ceiling(variant.inventory) }),
     priceMinor,
     available: isVariantAvailable(variant, availability),
-    // What this variant says about itself, where it differs from its product (FR-009). Empty for a
+    // What this variant says about itself, where it differs from its product. Empty for a
     // variant carrying none, which is every variant until an owner fills one in.
     attributes: toAttributes(variant.attributes),
     ...(image ? { image } : {}),
@@ -258,7 +258,7 @@ function toVariantOption(
 
 
 /**
- * The owner-defined rows on a product or on a variant (spec 011, FR-009).
+ * The owner-defined rows on a product or on a variant.
  *
  * Takes the array rather than the document, because as of 011 a variant carries an identically
  * shaped one and the two must be read the same way. A second reader would be a second place for the
@@ -268,7 +268,7 @@ function toAttributes(
   rows: Product['attributes'] | Variant['attributes'],
 ): ProductAttribute[] {
   /*
-    A row with no value in this language is dropped rather than rendered empty (spec 010, FR-047).
+    A row with no value in this language is dropped rather than rendered empty.
 
     `attributes[].value` stopped being `required` when it became localized: a row is shared across
     all three languages, so a required localized child would have forced every translation to be
@@ -285,7 +285,7 @@ function toAttributes(
 }
 
 /**
- * The product's rows, with the selected variant's laid over them (spec 011, FR-010, FR-011, FR-016).
+ * The product's rows, with the selected variant's laid over them.
  *
  * **By attribute, never by position.** Two rows for one attribute is the outcome to avoid — a variant
  * showing two weights is worse than one showing neither — and matching on the attribute's own

@@ -38,7 +38,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** As drawn. Press CHECKOUT without ticking the agreement to see the refusal (FR-018). */
+/** As drawn. Press CHECKOUT without ticking the agreement to see the refusal. */
 export const Default: Story = {}
 
 /** One product, so the row reads "1 item" rather than "1 items". */
@@ -47,7 +47,7 @@ export const SingleItem: Story = {
 }
 
 /**
- * Lines changed underneath the customer (FR-014). The first press of CHECKOUT is refused and says
+ * Lines changed underneath the customer. The first press of CHECKOUT is refused and says
  * what happened; the second is the acknowledgement and proceeds.
  */
 export const BlockedByChanges: Story = {

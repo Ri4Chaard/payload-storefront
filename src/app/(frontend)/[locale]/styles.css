@@ -27,13 +27,13 @@
 @layer base {
   /*
    * The viewer paints its own ground behind the page, so body background is explicit.
-   * Single committed light appearance — no dark-mode variants (FR-013).
+   * Single committed light appearance — no dark-mode variants.
    */
   html {
     -webkit-text-size-adjust: 100%;
 
     /*
-     * Fragment links glide rather than jump (007/T031).
+     * Fragment links glide rather than jump.
      *
      * Added for the article's contents rail, where a jump across two thousand pixels with no
      * transition leaves a reader with no idea whether the page moved or was replaced. It applies to
@@ -55,7 +55,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Visible focus is not optional (FR-043). */
+  /* Visible focus is not optional. */
   :focus-visible {
     outline: 2px solid var(--color-primary-default);
     outline-offset: 2px;

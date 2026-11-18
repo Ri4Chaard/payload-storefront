@@ -8,7 +8,7 @@ import { adminOrPublishedStatus, isAdmin } from '@/lib/access'
 import { revalidateArticleOnChange, revalidateArticleOnDelete } from '@/lib/revalidate'
 
 /**
- * The blog (spec 007, FR-021 – FR-038).
+ * The blog.
  *
  * **The admin tab says "Blog"; the slug says `articles`.** The requester asked for "blogs and blog
  * page", and Payload renders a collection's plural label in its navigation — so the word an editor
@@ -19,7 +19,7 @@ import { revalidateArticleOnChange, revalidateArticleOnDelete } from '@/lib/reva
  * **This is the first collection on this site whose documents are pages.** Products have pages, but
  * a product is a thing that happens to be shown; an article is nothing except its page. Two
  * consequences follow and both are visible below: the slug is a permanent address rather than a
- * convenience (FR-035), and the draft state has to be *unreachable* rather than hidden (FR-037),
+ * convenience, and the draft state has to be *unreachable* rather than hidden,
  * because a page nobody has published must not be readable through the API either.
  *
  * **Chapters are an array, not blocks.** The drawn chapters are prose, a bold summary line, and
@@ -47,7 +47,7 @@ export const Articles: CollectionConfig = {
   access: {
     /*
       A draft is unreachable rather than hidden: the constraint is part of the query, so a direct
-      API request for an unpublished article finds nothing (FR-037). A route-level `notFound()`
+      API request for an unpublished article finds nothing. A route-level `notFound()`
       cannot give this — `/api/articles` never reaches the route.
     */
     read: adminOrPublishedStatus,
@@ -134,7 +134,7 @@ export const Articles: CollectionConfig = {
               },
               fields: [
               /*
-                **`heading` and `body` are required in English only** (spec 010, T110).
+                **`heading` and `body` are required in English only**.
 
                 Same rule as `closerLook` and `processSteps`: a chapter row is shared across all
                 three locales — the array is not localized, the words inside it are — so a

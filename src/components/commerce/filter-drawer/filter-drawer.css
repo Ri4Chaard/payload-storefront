@@ -1,5 +1,5 @@
 /*
- * Opening the filter panel without JavaScript (003/T274, FR-029).
+ * Opening the filter panel without JavaScript.
  *
  * `Drawer` is always in the document and toggles `display`, which is what lets its form be
  * server-rendered for a visitor with scripting off. It does not make the panel OPENABLE for them:

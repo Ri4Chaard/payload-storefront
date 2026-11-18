@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getFooterPolicies, getPolicyBySlug } from '@/lib/policies/queries'
 
 /**
- * The policies collection's refusals, and the footer's view of it (spec 009, T015).
+ * The policies collection's refusals, and the footer's view of it.
  *
  * Most of these are claims about what CANNOT happen, so they are tested by attempting the forbidden
  * thing and asserting the refusal. A draft that is merely *filtered* from a page would pass a
@@ -128,7 +128,7 @@ describe('an address belongs to one policy', () => {
   })
 
   it('accepts a slug that matches a catalogue category — the /legal/ prefix owns its namespace', async () => {
-    // The check an earlier design needed, deliberately absent (009/research.md R2). `/legal/category-1`
+    // The check an earlier design needed, deliberately absent. `/legal/category-1`
     // shadows nothing, so this must be allowed rather than rejected by a stale reserved-word list.
     const document = await make({ slug: `care-${Date.now()}`, title: 'Category 1 Care Guide' })
     expect(document.id).toBeTruthy()
@@ -160,7 +160,7 @@ describe('the footer follows what is published', () => {
     expect(all).not.toContain('Deliberately Unlisted')
   })
 
-  it('omits an unpublished policy, so unpublishing removes its link (FR-015c)', async () => {
+  it('omits an unpublished policy, so unpublishing removes its link', async () => {
     const stamp = Date.now()
     await make({
       slug: `t-unpub-${stamp}`,

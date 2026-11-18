@@ -16,7 +16,7 @@ import { isAdmin } from '@/lib/access'
 /**
  * What the banner says when the owner has not written anything.
  *
- * **It may not assert anything about the cookie set** (FR-025a). The categories in the chooser and
+ * **It may not assert anything about the cookie set**. The categories in the chooser and
  * the text of the Cookie Policy are both editable, so a default that enumerated categories or
  * claimed what the site does and does not track could be silently contradicted by an edit neither
  * of us would see. It says what the banner is for and points at the policy; the policy carries the
@@ -26,7 +26,7 @@ import { isAdmin } from '@/lib/access'
  * cookies, pixels, and similar technologies", uses "various Google services", and sends
  * "advertising materials in line with the preferences shown while browsing". None of that is true
  * of this site, so shipping it as the default would be publishing a false statement about data
- * processing (FR-016).
+ * processing.
  */
 export const DEFAULT_BANNER_BODY =
   'We use cookies on this website. Our Cookie Policy explains which ones and why, and you can change your mind at any time from the link in the footer.'
@@ -73,7 +73,7 @@ const DEFAULT_BANNER_BODY_DOCUMENT = {
 }
 
 /**
- * What the cookie banner asks, and when (spec 009, FR-026, FR-042, FR-045 – FR-051).
+ * What the cookie banner asks, and when.
  *
  * **One copy field, and the split is deliberate.** `bannerBody` is the sentence that actually says
  * something about this site's data processing, so it belongs to the owner. The heading and the
@@ -87,7 +87,7 @@ const DEFAULT_BANNER_BODY_DOCUMENT = {
  * on this site that the owner could not correct themselves.
  *
  * **There is no script field, no snippet field and no measurement ID field, and none may be added**
- * (FR-048). This site runs no analytics, no tag manager and no third-party script of any kind, and
+ *. This site runs no analytics, no tag manager and no third-party script of any kind, and
  * this feature deliberately does not build the machinery to gate one — a gate built before the
  * thing it gates is code with no consumer. An admin field accepting a script is also a stored-XSS
  * vector by design on a site with customer accounts and addresses, which is why it is refused
@@ -96,7 +96,7 @@ const DEFAULT_BANNER_BODY_DOCUMENT = {
  * `isAllowed()` in `src/lib/consent/record.ts`.
  *
  * **Categories are content, not machinery.** Nothing here loads or blocks anything. They exist so
- * that what the chooser offers and what the Cookie Policy describes cannot drift apart (FR-050),
+ * that what the chooser offers and what the Cookie Policy describes cannot drift apart,
  * and so that the consent record can be keyed per category — which is what makes adding a category
  * later ask everybody again instead of inheriting an old *Agree* (FR-040, and see `categories.key`).
  */

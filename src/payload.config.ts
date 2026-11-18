@@ -59,6 +59,7 @@ import {
 } from './lib/access'
 import { countryOptions } from './lib/countries'
 import { withPrunedEcommerceTypes } from './lib/ecommerce-schema'
+import { SITE_NAME } from '@/lib/site'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -67,7 +68,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
  *
  * Spec 001 shipped Payload deliberately empty — `admins` and `media`, nothing more — so that the
  * catalogue's shape would be decided with real screens to judge it against rather than guessed at
- * from a brief (001/research.md R9). This is that decision.
+ * from a brief. This is that decision.
  *
  * Seven collections are ours: the four above plus `categories`, `collections`, `sizes`,
  * `attributes`, and the minimal `customers` the plugin requires. Four more arrive from
@@ -84,7 +85,7 @@ export default buildConfig({
     user: Admins.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: {
-      titleSuffix: '— Aurum',
+      titleSuffix: `— ${SITE_NAME}`,
     },
     // Admin CSS is applied by the import in src/app/(payload)/layout.tsx — Payload 3 has no
     // config key for it. That stylesheet loads Tailwind WITHOUT preflight; see it for why.
@@ -141,7 +142,7 @@ export default buildConfig({
           publicAccess,
           // The addresses collection asks for this by name. Omitted until 004, which left its
           // `create` resolving to undefined and falling through to Payload's default — the access
-          // by omission Constitution IV forbids (R7).
+          // by omission Constitution IV forbids.
           isAuthenticated,
         },
 
@@ -170,7 +171,7 @@ export default buildConfig({
         // Off until spec 004. The plugin's orders are created when a TRANSACTION succeeds and its
         // transactions are payment records; an Aurum order is a request handed to WhatsApp or
         // Telegram, with no payment anywhere. Landing a model we already know is wrong is worse than
-        // a second migration, and enabling these later is purely additive (001/research.md R9).
+        // a second migration, and enabling these later is purely additive.
         orders: false,
         transactions: false,
         /**
@@ -180,11 +181,11 @@ export default buildConfig({
          * and its consequence was larger than it read: `sanitizePluginConfig` rewrites any
          * non-`true` value into an object of address fields, so the collection has existed —
          * modelled, access-controlled and migrated — since 003. The profile page does not create
-         * it, it configures it (004/research.md R5).
+         * it, it configures it.
          *
          * `supportedCountries` is replaced because the plugin's default list has forty entries and
          * leaves out many countries a customer may live in, including the one in the sample address the
-         * design draws (R6).
+         * design draws.
          */
         addresses: {
           addressFields,
@@ -215,7 +216,7 @@ export default buildConfig({
   ],
 
   /**
-   * Three languages (spec 010, FR-001, research R5).
+   * Three languages.
    *
    * **The list comes from `src/i18n/routing.ts` rather than being repeated here.** The storefront's
    * router, the `language-settings` checkboxes and this config all have to agree about what a locale
@@ -233,7 +234,7 @@ export default buildConfig({
    *
    * **Every locale is always configured here, whatever the owner has switched off.** Visibility is
    * `language-settings`' business, and keeping the two lists separate is what lets a translation be
-   * finished in the admin before anybody can read it (FR-030).
+   * finished in the admin before anybody can read it.
    */
   localization: {
     locales: LOCALES.map((code) => ({ code, label: LOCALE_LABELS[code].label })),
@@ -247,7 +248,7 @@ export default buildConfig({
   serverURL: env.NEXT_PUBLIC_SERVER_URL,
 
   /**
-   * Transactional mail (spec 004, research R1).
+   * Transactional mail.
    *
    * Payload's own auth operations send through whatever adapter is configured here — so without
    * one, `verify` and `forgotPassword` cannot send at all, and registration has no way to finish.
@@ -280,7 +281,7 @@ export default buildConfig({
         }),
 
   /**
-   * The nightly cleanup (spec 004, FR-040, FR-041, research R15).
+   * The nightly cleanup.
    *
    * **`autoRun` makes this process the scheduler**, which is the whole reason no cron container is
    * needed — and the reason the `@remark` on `autoRun` in Payload's own types matters here: it says
@@ -319,7 +320,7 @@ export default buildConfig({
   }),
 
   /**
-   * The ceiling on an upload (spec 006, FR-021b).
+   * The ceiling on an upload.
    *
    * Videos made this necessary. A photograph that is too large is a slow page; a 200MB video master
    * is a page nobody can load at all, and there is no transcoding step here to rescue it — a video

@@ -1,5 +1,5 @@
 /**
- * Every duration and limit the accounts feature turns on (spec 004, research R14).
+ * Every duration and limit the accounts feature turns on.
  *
  * These are gathered here rather than written at their call sites for two reasons. The spec states
  * them as testable values — a test that asserts "expired after ten minutes" and an implementation

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * The listing routes (003/T257) — `/all-products` and the four categories.
+ * The listing routes — `/all-products` and the four categories.
  *
  * The fixtures put 30 published products in the shop and page at twelve, so `/all-products` is
  * three pages and `/category-1` is one. Both cases matter: the first proves paging, the second proves the
@@ -148,7 +148,7 @@ const counter = (page: Page) => page.getByText(/^Showing \d+ of \d+/)
 /**
  * The listing EXTENDS. Pressing LOAD MORE must add to what is on screen rather than replace it —
  * the first card must still be the first card — and the position has to survive a reload, which is
- * the whole reason it travels as `?page=` rather than as client state (FR-018).
+ * the whole reason it travels as `?page=` rather than as client state.
  */
 test('LOAD MORE extends the grid, counts what is shown, and survives a reload', async ({ page }) => {
   await page.goto('/all-products')
@@ -239,7 +239,7 @@ for (const width of [320, 390, 640]) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Filtering — US4 (003/T277)
+// Filtering — US4
 // ---------------------------------------------------------------------------------------------
 
 const drawer = (page: Page) => page.locator('#filters')
@@ -255,7 +255,7 @@ const filtersTrigger = (page: Page) => page.getByRole('link', { name: /^Filters/
 const option = (page: Page, name: string) =>
   page.locator('#filters label').filter({ hasText: new RegExp(`^${name}$`) })
 
-test('the toolbar commits immediately, with no APPLY (FR-023)', async ({ page }) => {
+test('the toolbar commits immediately, with no APPLY', async ({ page }) => {
   await page.goto('/category-1')
 
   // The in-stock toggle is a link for exactly this reason: pressing it is the new address.
@@ -484,7 +484,7 @@ test('an unknown colour is still reported after the URL canonicalises', async ({
 })
 
 // ---------------------------------------------------------------------------------------------
-// Sorting — US5 (003/T280, T281)
+// Sorting — US5
 // ---------------------------------------------------------------------------------------------
 
 const sortTrigger = (page: Page) => page.getByRole('button', { name: 'Sort by' })
@@ -525,7 +525,7 @@ test('choosing an ordering reorders the grid, records it, and returns focus', as
   await expect(page.getByRole('link', { name: 'Remove Price Descending filter' })).toBeVisible()
 })
 
-test('sorting and filtering hold together (FR-031)', async ({ page }) => {
+test('sorting and filtering hold together', async ({ page }) => {
   await page.goto('/category-1?colour=clear&sort=price-asc')
 
   // The price is the dollar figure. A name now carries digits of its own ("Product 12"), so the

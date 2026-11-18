@@ -10,7 +10,7 @@ import { toCookieSettings, toPolicy, toPolicyLink } from './mappers'
 import type { CookieSettings, FooterPolicies, Policy } from './types'
 
 /**
- * Reading policies and the cookie settings (spec 009, T013).
+ * Reading policies and the cookie settings.
  *
  * **Server-only, cached per request.** The root layout asks for the footer's policies and the
  * cookie settings on every page; `cache()` collapses a repeat ask within one request.
@@ -18,7 +18,7 @@ import type { CookieSettings, FooterPolicies, Policy } from './types'
  * **A Local API read is not a request-time API**, which is the property this whole feature leans on.
  * `src/lib/messengers/settings.ts` records it: unlike `cookies()`, calling these from the root
  * layout does not opt every route into dynamic rendering, so the prerendered catalogue survives the
- * banner being added to the chrome (009/research.md R3, R5).
+ * banner being added to the chrome.
  *
  * **Every read tolerates an unreachable database.** That is not defensive padding — the production
  * image runs `next build` before the migrations, so the database genuinely does not exist during a
@@ -58,7 +58,7 @@ export const getPolicyBySlug = cache(
 )
 
 /**
- * The footer's policy links, split by where they belong (FR-015b, FR-015c).
+ * The footer's policy links, split by where they belong.
  *
  * Unpublishing removes a policy from this result, and therefore from the footer, with nothing else
  * to remember — which is the whole point of the footer reading content instead of a constant.
@@ -104,7 +104,7 @@ export const getFooterPolicies = cache(async (locale: Locale): Promise<FooterPol
 export const getPolicySlugs = cache(async (): Promise<string[]> => {
   const payload = await client()
   const found = await payload.find({
-    /* No locale: `slug` is shared across languages (spec 010, R7), so this read is language-free. */
+    /* No locale: `slug` is shared across languages, so this read is language-free. */
     collection: 'policies',
     limit: 0,
     depth: 0,
@@ -122,7 +122,7 @@ export const getPolicySlugs = cache(async (): Promise<string[]> => {
  * **`depth: 1` so the linked Cookie Policy resolves to a document** — the banner needs its slug to
  * build a link, and an unresolved id would leave it linking nowhere. An unpublished target does not
  * resolve, which is exactly right: the banner renders without a link rather than pointing at a 404
- * (FR-022).
+ *.
  *
  * A failure returns the disabled shape rather than throwing. A site that cannot read its cookie
  * settings must not show a consent banner it cannot describe.

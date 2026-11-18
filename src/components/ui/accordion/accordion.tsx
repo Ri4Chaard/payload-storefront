@@ -15,7 +15,7 @@ import './accordion.css'
  *
  * Named `Accordion` rather than after the Figma frame because that is what it is, and a kit
  * component filed under a name nobody searches for gets rebuilt by the next person who needs one
- * (Constitution II). The Figma name is recorded here so a designer can still find it.
+ *. The Figma name is recorded here so a designer can still find it.
  *
  * Figma draws three variants and they are two states plus a hover:
  *
@@ -146,7 +146,7 @@ export function AccordionItem({
         aria-labelledby={`${id}-header`}
         className={cn(
           // `accordion-panel` is not a style — it is the handle `accordion.css` needs to open every
-          // row when there is no scripting to open them with (SC-004).
+          // row when there is no scripting to open them with.
           'accordion-panel',
           'ease-standard grid transition-[grid-template-rows] duration-[var(--duration-base)]',
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',

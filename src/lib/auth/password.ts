@@ -1,7 +1,7 @@
 import { PASSWORD_MIN_LENGTH } from '@/lib/auth/config'
 
 /**
- * What counts as a password we are willing to store (spec 004, FR-003).
+ * What counts as a password we are willing to store.
  *
  * **Length and uniqueness, not composition.** No "one uppercase, one digit, one symbol" rule:
  * those reliably produce `Password1!`, push people towards reuse, and buy nothing against the only

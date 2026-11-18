@@ -7,7 +7,7 @@ import { Carousel } from '@/components/ui/carousel'
  * The image strip inside a product card (node 144:948) — arrows at the left and right edges of the
  * photograph, 14px, appearing on hover.
  *
- * This is now a thin caller of `Carousel` (002/T121). The scroll-snap machinery it used to own —
+ * This is now a thin caller of `Carousel`. The scroll-snap machinery it used to own —
  * the hidden scrollbar, `tabIndex` on the track, the arrows, the reasoning about why there is no
  * carousel library here — moved into the primitive when the home page's product row needed the same
  * mechanism over different children. Two copies of that logic is what Constitution II forbids.

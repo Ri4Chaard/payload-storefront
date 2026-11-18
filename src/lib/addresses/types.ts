@@ -3,7 +3,7 @@ import { countryName, type CountryCode } from '@/lib/countries'
 
 /**
  * The view model for a saved delivery address, and the one line the profile draws it as
- * (spec 004, US5, FR-027).
+ *.
  *
  * **Pure, and separate from `./queries.ts` for a reason that cost a test run to learn.** Both live
  * in `src/lib/catalog`'s shape — types beside queries — because a client component needs the shape
@@ -36,7 +36,7 @@ export interface CustomerAddress {
 export function formatAddress(address: CustomerAddress, locale: Locale = DEFAULT_LOCALE): string {
   return [
     // `countries.ts` has resolved names through `Intl.DisplayNames` since spec 004 and has
-    // always taken this argument; spec 010 is simply the first caller to pass one (FR-040).
+    // always taken this argument; spec 010 is simply the first caller to pass one.
     countryName(address.country, locale),
     address.city,
     address.addressLine1,
@@ -48,7 +48,7 @@ export function formatAddress(address: CustomerAddress, locale: Locale = DEFAULT
 }
 
 /**
- * The same address, for somebody who has to post an order to it (spec 005, T054, research R18).
+ * The same address, for somebody who has to post an order to it.
  *
  * **Not `formatAddress`, and the difference is the postcode.** That one drops it deliberately, and
  * its reasoning is sound for the profile: the postcode distinguishes nothing a customer looks at,
@@ -72,7 +72,7 @@ export function formatPostalAddress(
     address.city,
     address.postalCode,
     // `countries.ts` has resolved names through `Intl.DisplayNames` since spec 004 and has
-    // always taken this argument; spec 010 is simply the first caller to pass one (FR-040).
+    // always taken this argument; spec 010 is simply the first caller to pass one.
     countryName(address.country, locale),
   ]
     .filter(Boolean)

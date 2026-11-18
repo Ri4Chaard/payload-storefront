@@ -3,18 +3,18 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * US5 end to end (spec 004, FR-027 – FR-031) — saved delivery addresses.
+ * US5 end to end — saved delivery addresses.
  *
  * **Kazakhstan is the point of the first test.** The e-commerce plugin ships a forty-entry country
  * list containing neither KZ nor AE, and the sample address the profile design draws is in Astana —
  * so with the plugin's default list the design's own example is unsaveable. `supportedCountries` in
- * `payload.config.ts` replaces it (research R6), and choosing Kazakhstan through the real dropdown
+ * `payload.config.ts` replaces it, and choosing Kazakhstan through the real dropdown
  * is the regression test for that. It fails loudly if anyone reverts the list.
  *
  * What else needs a browser: that Save stays disabled until the four required fields have something
- * in them (FR-030), that editing updates the row rather than adding a second (scenario 4), that the
+ * in them, that editing updates the row rather than adding a second (scenario 4), that the
  * default moves when another address is marked (scenario 5), and that deleting asks first
- * (FR-029). The invariant itself is proved in `tests/integration/us5-addresses.test.ts`, where it
+ *. The invariant itself is proved in `tests/integration/us5-addresses.test.ts`, where it
  * belongs — this asserts the screen tells the truth about it.
  *
  * Its own subdomain and its own `created` list, for the reason `profile.spec.ts` sets out at
@@ -199,7 +199,7 @@ test('editing an address updates it in place', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^Edit address:/ })).toHaveCount(1)
 })
 
-/** US5 scenario 5 — exactly one default, and marking another moves it (FR-031). */
+/** US5 scenario 5 — exactly one default, and marking another moves it. */
 test('marking a second address as default clears the first', async ({ page }) => {
   await signedIn(page)
 

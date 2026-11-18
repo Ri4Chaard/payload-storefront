@@ -1,6 +1,6 @@
 /**
  * What an owner types becomes what we store (spec 005, T043,
- * [messenger-handoff.md §1](../../../specs/005-checkout-handoff/contracts/messenger-handoff.md)).
+ *).
  * FR-035, FR-036.
  *
  * **This normalisation is the feature, not a nicety.** WhatsApp's click-to-chat format requires the
@@ -10,7 +10,7 @@
  * owner typing the number they say out loud produces a working one. That gap is the whole reason
  * the destination is stored as a raw account identifier and the link is built from it.
  *
- * Pure: no Payload, no network, no `Intl`. Run as Payload field validation on save (FR-039) and
+ * Pure: no Payload, no network, no `Intl`. Run as Payload field validation on save and
  * unit-tested on its own.
  */
 

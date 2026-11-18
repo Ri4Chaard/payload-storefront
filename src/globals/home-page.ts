@@ -145,9 +145,9 @@ export const HomePage: GlobalConfig = {
           type: 'text',
           localized: true,
           required: true,
-          defaultValue: 'Aurum',
+          defaultValue: 'us',
           label: 'Heading, highlighted part',
-          admin: { description: 'Drawn in the brand colour, e.g. “Aurum”.' },
+          admin: { description: 'Drawn in the brand colour, e.g. “us” or your shop’s name.' },
         },
         {
           /*

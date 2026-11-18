@@ -1,7 +1,7 @@
 import type { Block } from 'payload'
 
 /**
- * The page's opening statement — an eyebrow over a headline (spec 006, FR-009).
+ * The page's opening statement — an eyebrow over a headline.
  *
  * Drawn at nodes `310:6501` / `413:7676` / `413:7981`: `OUR STORY` in small caps above
  * `IMMORTALIZING MEMORIES AND EMOTIONS IN EXTRAORDINARY, TIMELESS CREATIONS`, centred at desktop
@@ -35,7 +35,7 @@ export const pageHeader: Block = {
       admin: { description: 'The page’s main statement. Drawn over two lines.' },
     },
     /**
-     * The intro paragraph beneath the headline (008/FR-007), drawn at `312:7502` on the contact
+     * The intro paragraph beneath the headline, drawn at `312:7502` on the contact
      * page — `Questions, custom requests, or styling advice…`.
      *
      * **Added to this band rather than given one of its own.** The spec requires it to be an

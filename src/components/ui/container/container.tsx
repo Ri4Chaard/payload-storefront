@@ -30,7 +30,7 @@ import { cn } from '@/lib/cn'
  * as a leading inset; wrapping it would clip the scroller at the gutter instead, which is a worse
  * phone. Same classes, different jobs.
  *
- * `MobileNav` was a third until its menu was drawn (002/T139). A dropdown's inset was its own
+ * `MobileNav` was a third until its menu was drawn. A dropdown's inset was its own
  * business; a full-screen menu has to line up with the header above it, which is this measure. The
  * `xl` step it never reaches is inert rather than wrong — the whole component is hidden by then,
  * exactly as the contact strip's phone step is.

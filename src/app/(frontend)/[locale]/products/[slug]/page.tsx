@@ -21,7 +21,7 @@ import type { ProductDetail } from '@/lib/catalog/types'
 import { shopPromises } from '@/lib/shop-promises'
 
 /**
- * One product (003/T264, T266–T268). Nodes `231:1901` (1920), `410:7283` (1024), `410:7626` (390).
+ * One product. Nodes `231:1901` (1920), `410:7283` (1024), `410:7626` (390).
  *
  * **The information column is composed here, not in a component.** Everything on it that repeats —
  * the gallery, the accordions, the related row — is a component with its own stories; what is left
@@ -30,7 +30,7 @@ import { shopPromises } from '@/lib/shop-promises'
  * put the page's only `h1` somewhere other than the page.
  *
  * The selectors and the two actions belong between the price and the accordions. They are spec 003
- * Phase 8 (US6) and are deliberately absent rather than stubbed: a disabled ADD TO CART that hands
+ * Phase 8 and are deliberately absent rather than stubbed: a disabled ADD TO CART that hands
  * nothing anywhere is worse than no button, and FR-041's seam is what makes it real.
  *
  * **`null` from `getProduct` is the branded 404 and says nothing else.** A missing slug and a draft
@@ -39,9 +39,9 @@ import { shopPromises } from '@/lib/shop-promises'
  * decision is made, not this file.
  */
 /**
- * **Every published product is prerendered** (003/T294), and stays fresh because publishing says so.
+ * **Every published product is prerendered**, and stays fresh because publishing says so.
  *
- * This is the route the performance budget is written about (SC-008): the photograph above the
+ * This is the route the performance budget is written about: the photograph above the
  * fold is the LCP element, and prerendering means it is already in the HTML that the first byte
  * carries rather than waiting on a query. The catalogue is tens of products, so the whole set costs
  * a few seconds of build.
@@ -143,7 +143,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {product.categoryName}
             </p>
 
-            {/* The page's only first-level heading (FR-035). */}
+            {/* The page's only first-level heading. */}
             <h1 className="text-heading-1 text-neutral-primary mt-1.5 uppercase md:mt-2 xl:mt-5">
               {product.title}
             </h1>
@@ -172,7 +172,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               />
 
               {/*
-              The details follow the selected option (spec 011, FR-013). The provider wraps both
+              The details follow the selected option. The provider wraps both
               because the selection is made in one and read in the other; `ProductDetails` itself is
               untouched, and the wrapper only decides which attribute list it is handed.
             */}
@@ -195,7 +195,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </Container>
 
       {/*
-        _Complete the Collection_ (FR-037) — the home page's band, consumed unchanged apart from
+        _Complete the Collection_ — the home page's band, consumed unchanged apart from
         the button it does not draw here. Absent rather than empty: a product in no collection, or the
         only product in its collection, gets no strip at all rather than a heading over nothing.
       */}
@@ -224,7 +224,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 }
 
 /**
- * `Product` and its `Offer` (Constitution V), plus the trail back to the category.
+ * `Product` and its `Offer`, plus the trail back to the category.
  *
  * The amount is `priceMinor` divided by its own currency's exponent rather than the drawn string:
  * `"$38,320"` is not a number, and a crawler quoting a parsed one is how a shop ends up advertising

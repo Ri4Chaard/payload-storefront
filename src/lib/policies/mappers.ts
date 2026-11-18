@@ -9,7 +9,7 @@ import { policyHref } from './policy-url'
 import type { CookieCategory, CookieSettings, Policy, PolicyLink } from './types'
 
 /**
- * Policy documents to view models (spec 009, T012).
+ * Policy documents to view models.
  *
  * The seam between Payload's shapes and what a route draws. `eslint-rules/catalog-boundary.mjs`
  * makes this directory the last place in the feature that may name a document type.
@@ -126,7 +126,7 @@ export const toCookieSettings = (document: CookieSetting | null | undefined): Co
   /*
     The relationship resolves to a document at depth, and to a bare id otherwise. An unresolved id
     means it points at a policy this read could not see — an unpublished one, most likely — and the
-    banner has to cope with that (FR-022): it renders with no link rather than linking to a 404.
+    banner has to cope with that: it renders with no link rather than linking to a 404.
   */
   const policy = document.policy && typeof document.policy === 'object' ? document.policy : null
 
@@ -134,7 +134,7 @@ export const toCookieSettings = (document: CookieSetting | null | undefined): Co
     enabled: Boolean(document.enabled),
     consentVersion: document.consentVersion,
     /*
-      An empty field falls back to the built-in sentence rather than rendering a gap (FR-025). The
+      An empty field falls back to the built-in sentence rather than rendering a gap. The
       field is optional precisely so this path exists — see the note on it in the global.
 
       `bodyHtml` is the same serialiser the policy pages use, so a bold run or a link an owner

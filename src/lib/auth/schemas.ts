@@ -5,7 +5,7 @@ import { checkPassword } from '@/lib/auth/password'
 import { COUNTRY_CODES } from '@/lib/countries'
 
 /**
- * The shape of every account form, defined once and checked twice (spec 004).
+ * The shape of every account form, defined once and checked twice.
  *
  * **This module exists to be imported from both sides.** The browser runs it through
  * `zodResolver` so a mismatched password is caught before a request is made; the server action runs
@@ -100,7 +100,7 @@ export const resendCodeSchema = z.object({
   purpose: z.enum(['reset-password', 'verify-email']),
 })
 
-/** Forgot password, step one. One field, and the response never varies (FR-017). */
+/** Forgot password, step one. One field, and the response never varies. */
 export const requestResetSchema = z.object({
   email: emailField('resetEmailInvalid'),
 })
@@ -123,7 +123,7 @@ export const resetPasswordSchema = z
   .superRefine(passwordPair('resetPasswordMismatch', 'resetPasswordTooWeak'))
 
 /**
- * The profile's Full name modal (FR-024).
+ * The profile's Full name modal.
  *
  * **Both halves are optional, and that is the requirement rather than laxity.** A customer who has
  * only ever given one name should be able to save it, and one who wants to remove what they typed
@@ -137,7 +137,7 @@ export const nameSchema = z.object({
 })
 
 /**
- * The Change password modal — node `426:11616` (FR-020).
+ * The Change password modal — node `426:11616`.
  *
  * **Its refinement is written out rather than sharing `passwordPair`.** Two reasons, and the first
  * alone would be enough: the fields are named `newPassword`/`confirmPassword`, not
@@ -166,7 +166,7 @@ export const changePasswordSchema = z
   })
 
 /**
- * The Add address modal — node `583:12968` (FR-027, FR-028, FR-030).
+ * The Add address modal — node `583:12968`.
  *
  * **The four required fields are required in three places, and that is deliberate.** The modal
  * keeps Save disabled while any of them is empty, this schema refuses the submission, and
@@ -197,12 +197,12 @@ export const addressSchema = z.object({
 })
 
 /**
- * The same fields plus the row being edited — absent when creating (FR-029).
+ * The same fields plus the row being edited — absent when creating.
  *
  * **Separate from `addressSchema` because the form has no id field.** The modal knows which address
  * it was opened on; folding that into the resolver's value type would mean a hidden input whose
  * only purpose is to be tampered with. The id is validated here, on the server, where it arrives —
- * and `saveAddress` re-reads the row it names before writing anything to it (FR-032).
+ * and `saveAddress` re-reads the row it names before writing anything to it.
  */
 export const saveAddressSchema = addressSchema.extend({
   id: z.number().int().positive().optional(),
@@ -214,7 +214,7 @@ export const deleteAddressSchema = z.object({
 })
 
 /**
- * The marketing switch (FR-033, FR-034).
+ * The marketing switch.
  *
  * One boolean, and a schema for it anyway. `z.boolean()` is not decoration here: a server action is
  * a public endpoint reached by a POST that can carry `"false"`, `0`, `null` or nothing at all, and
@@ -244,7 +244,7 @@ export type SaveAddressValues = z.infer<typeof saveAddressSchema>
 export type VerifyCodeValues = z.infer<typeof verifyCodeSchema>
 
 /**
- * Where signing in should land, given whatever the URL asked for (FR-016).
+ * Where signing in should land, given whatever the URL asked for.
  *
  * **An unchecked `next` is how a sign-in form becomes an open redirect** — the attacker mails
  * `/sign-in?next=https://aurum-login.example`, the customer signs in on the real site, and the

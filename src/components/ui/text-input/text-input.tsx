@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn'
 import { type IconName } from '@/lib/icon-registry'
 
 /**
- * FR-022 (T049) — the single-line text control, from Figma node 196:1344, which draws six states:
+ * FR-022 — the single-line text control, from Figma node 196:1344, which draws six states:
  * normal, hover, focus, filled, error, and error-with-message.
  *
  * Two places this departs from the drawing, both deliberate:

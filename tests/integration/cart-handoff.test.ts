@@ -11,11 +11,11 @@ import { getMessageTemplate } from '@/lib/messengers/settings'
 
 /**
  * Composing for whoever is at the keyboard —
- * [messenger-handoff.md §3](../../specs/005-checkout-handoff/contracts/messenger-handoff.md).
+ *.
  * FR-029, FR-044, FR-046, research R18.
  *
  * **`messageCustomerFor` rather than `getMessageCustomer`**, because the latter reads the session
- * and `headers()` needs a request scope a test runner does not have — the same seam
+ * and `headers` needs a request scope a test runner does not have — the same seam
  * `src/lib/cart/operations.ts` draws, for the same reason.
  */
 
@@ -77,7 +77,7 @@ const address = (customerId: number, over: Record<string, unknown> = {}) =>
     overrideAccess: true,
   })
 
-describe('which address the seller is given (FR-044)', () => {
+describe('which address the seller is given', () => {
   it('chooses the one marked default, not the first or the newest', async () => {
     const alice = await customer({ firstName: 'Aisha', lastName: 'Karimova' })
 
@@ -116,7 +116,7 @@ describe('which address the seller is given (FR-044)', () => {
   })
 })
 
-describe('degrading per field, not per auth state (FR-045)', () => {
+describe('degrading per field, not per auth state', () => {
   it('gives a name with no address when nothing is saved', async () => {
     const alice = await customer({ firstName: 'Aisha', lastName: 'Karimova' })
 
@@ -139,7 +139,7 @@ describe('degrading per field, not per auth state (FR-045)', () => {
   })
 })
 
-describe('the handoff records nothing (FR-029)', () => {
+describe('the handoff records nothing', () => {
   it('leaves orders and transactions disabled, so there is no table to write to', () => {
     // The plugin creates these collections only when enabled. Asserting on the running config is
     // what keeps FR-029 true as the plugin's options change under us.
@@ -157,7 +157,7 @@ describe('the handoff records nothing (FR-029)', () => {
  * "this module does not redirect" that does not need a request scope, so the import is what is
  * checked: it is the one line that would cause it.
  */
-describe('composing never sends an anonymous visitor to sign in (FR-046)', () => {
+describe('composing never sends an anonymous visitor to sign in', () => {
   it('resolves the session with getCustomer, never with a redirecting accessor', () => {
     const source = readFileSync('src/lib/cart/message-customer.ts', 'utf8')
 

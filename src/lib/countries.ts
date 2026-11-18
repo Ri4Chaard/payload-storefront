@@ -1,5 +1,5 @@
 /**
- * Every country, as ISO 3166-1 alpha-2 codes (spec 004, research R6).
+ * Every country, as ISO 3166-1 alpha-2 codes.
  *
  * **Why this file exists at all.** The e-commerce plugin ships `defaultCountries`, and it has forty
  * entries and leaves out many countries a customer may live in — including the one in the sample
@@ -316,7 +316,7 @@ export function countryOptions(locale = 'en'): CountryOption[] {
 }
 
 /**
- * The fallback pre-selection for the address form (spec 004, FR-030).
+ * The fallback pre-selection for the address form.
  *
  * The design draws “United Kingdom”, which is placeholder content. The owner
  * can change it in **Account settings**; this is what the form uses before anyone has, and it lives

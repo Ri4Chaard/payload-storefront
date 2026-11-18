@@ -2,7 +2,7 @@ import { localeFromContext } from '@/i18n/locale-context'
 import type { PayloadRequest } from 'payload'
 
 /**
- * Turning Payload's verification link into our six-digit code (spec 004, research R3).
+ * Turning Payload's verification link into our six-digit code.
  *
  * Payload's email verification is link-based: it mints a token and hands `generateEmailHTML` the
  * job of wrapping it in a URL. This is the single point where that becomes a code instead — the

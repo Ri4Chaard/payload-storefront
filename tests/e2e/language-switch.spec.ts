@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * US1 — a visitor switches language and stays switched (spec 010, T022, T023).
+ * US1 — a visitor switches language and stays switched.
  *
  * Everything here is behaviour a unit test cannot reach: the cookie is written by the client router
  * on a soft navigation, the redirect happens in the proxy before the render, and "stays switched"
@@ -112,7 +112,7 @@ test.describe('switching language', () => {
     await page.goto('/')
 
     /*
-      The consent banner is full-bleed and flush to the bottom edge below `xl` (spec 009), so at
+      The consent banner is full-bleed and flush to the bottom edge below `xl`, so at
       phone width it sits over the controls this test needs. A visitor answers it before they do
       anything else; so does this.
     */
@@ -132,7 +132,7 @@ test.describe('switching language', () => {
     await expect(panel).toBeVisible()
 
     // The header's own switcher is `hidden md:block`, so at this width the visible one is the
-    // panel's. Both are the same component with the same props (FR-009).
+    // panel's. Both are the same component with the same props.
     await page.getByRole('button', { name: /^Language: / }).click()
     await page.getByRole('menuitem', { name: 'RU' }).click()
 

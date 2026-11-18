@@ -2,7 +2,7 @@ import { localeFromContext } from '@/i18n/locale-context'
 import type { PayloadRequest } from 'payload'
 
 /**
- * Turning Payload's password-reset link into our six-digit code (spec 004, FR-018, research R3).
+ * Turning Payload's password-reset link into our six-digit code.
  *
  * The sibling of `./verification-email.ts`, and the same trick: Payload mints the reset token and
  * owns every state transition; `generateEmailHTML` is the one hook that sees the token at send
@@ -21,7 +21,7 @@ import type { PayloadRequest } from 'payload'
  * committed — and a rotated token orphans the code the customer is holding from the email that
  * arrived a minute ago, so the digits they type would be refused for reasons no message could
  * explain. Throwing rolls the rotation back with it. `requestPasswordReset` catches it and answers
- * exactly as it answers everything else (FR-017).
+ * exactly as it answers everything else.
  */
 
 /**

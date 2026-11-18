@@ -3,7 +3,7 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * FR-022 (T046) — the wrapper every form control shares: label, description, error, required,
+ * FR-022 — the wrapper every form control shares: label, description, error, required,
  * disabled, and the ARIA wiring between them.
  *
  * It takes ids rather than generating them. The control owns its id (it needs one for `htmlFor`

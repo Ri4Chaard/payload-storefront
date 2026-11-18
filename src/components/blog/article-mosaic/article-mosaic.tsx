@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn'
 import { ArticleCard } from '../article-card'
 
 /**
- * The blog's grid (007/T041), from nodes `312:7367`, `415:7933`, `415:8039`.
+ * The blog's grid, from nodes `312:7367`, `415:7933`, `415:8039`.
  *
  * **Three equal columns with a 20px gutter reproduces the drawing exactly.** The desktop container
  * is 1720 wide, a narrow cell is 560 and a wide one 1140 — which is two narrows plus the gutter. So
@@ -18,7 +18,7 @@ import { ArticleCard } from '../article-card'
  * chronological. A visitor who reads the third card expects the third newest article, not whichever
  * one happened to fit. The gap is the correct rendering.
  *
- * **A partial final row falls out for free** (FR-009). Spans are assigned left to right from the
+ * **A partial final row falls out for free**. Spans are assigned left to right from the
  * card's index, and every full cycle sums to a whole number of rows, so any article count from one
  * upward ends short rather than holed. There is no arrangement that leaves a hole in the middle,
  * which is why there is no special case for one here.
@@ -51,7 +51,7 @@ export function ArticleMosaic({ articles, label, className, ...props }: ArticleM
               is load-bearing rather than noise. Tailwind breakpoints are min-width, so a card that
               leads the tablet grid keeps `md:col-span-2` at 1280 unless something at `xl` says
               otherwise — which put card 5 across two columns on the desktop grid, where the design
-              draws it narrow. The two rhythms disagree by construction (007/research.md R4), so the
+              draws it narrow. The two rhythms disagree by construction, so the
               wider one has to answer for every card rather than only for its own emphasis.
             */
             article.emphasis.desktopWide ? 'xl:col-span-2' : 'xl:col-span-1',

@@ -9,7 +9,7 @@ import { toHomeContent } from './mappers'
 import type { HomeContent } from './types'
 
 /**
- * Reading the home page's copy (spec 010).
+ * Reading the home page's copy.
  *
  * **`null` when there is no database, never a thrown build.** `/` is `force-dynamic`, so this is
  * not reached during the container build — but `generateMetadata` is, and the same rule the story
@@ -17,7 +17,7 @@ import type { HomeContent } from './types'
  * renders its bands from the catalogue and omits the ones this would have supplied.
  *
  * **`fallbackLocale: DEFAULT_LOCALE`**, so a headline translated only into English still renders on
- * `/ru` rather than leaving the first screen blank (FR-046).
+ * `/ru` rather than leaving the first screen blank.
  */
 export const getHomeContent = cache(async (locale: Locale): Promise<HomeContent | null> => {
   try {

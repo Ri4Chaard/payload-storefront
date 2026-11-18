@@ -4,7 +4,7 @@ import { ProductPurchase } from './product-purchase'
 
 /**
  * Node `301:5028` — the price, the description, the two choices and the two actions, which share a
- * state because the price follows the chosen option (FR-039).
+ * state because the price follows the chosen option.
  *
  * **No `onAddToCart` here, so ADD TO CART is inert.** The action is a Server Action handed down by
  * the route; there is no server behind a story, and a stub that always succeeded would document a
@@ -21,7 +21,7 @@ const VARIANTS = [
     price: '$38,320',
     priceMinor: 3832000,
     available: true,
-    // What an option says about itself, where it differs from its product (spec 011, FR-009).
+    // What an option says about itself, where it differs from its product.
     attributes: [{ name: 'weight', label: 'Weight', value: '1.5 kg' }],
   },
   { id: 3, label: 'Option C', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
@@ -58,7 +58,7 @@ export const NoOptions: Story = {
   args: { fromPrice: null, variantChoices: [] },
 }
 
-/** Sold out. The reason is in TEXT, not in colour, and the controls go with it (FR-040). */
+/** Sold out. The reason is in TEXT, not in colour, and the controls go with it. */
 export const Unavailable: Story = {
   args: { available: false },
 }
@@ -70,7 +70,7 @@ export const NoDescription: Story = {
 
 /**
  * With an action wired, which is what the route does. Resolves as a refusal so the message row
- * (T022) is visible in the guide without a server: it is the state most easily got wrong and least
+ * is visible in the guide without a server: it is the state most easily got wrong and least
  * often seen.
  */
 export const RefusedByTheServer: Story = {

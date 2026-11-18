@@ -6,12 +6,12 @@ import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/routing'
 import { isDatabaseUnreachable } from '@/lib/catalog/prerender'
 
 /**
- * Which languages visitors are offered, right now (spec 010, FR-004, FR-027).
+ * Which languages visitors are offered, right now.
  *
  * **Read in the render, never in `src/proxy.ts`.** Next's proxy documentation says that file
  * "should not attempt relying on shared modules or globals", and it may run at a CDN edge with no
  * database within reach. So the proxy routes all three languages and the render decides which of
- * them are actually offered — which is also why `/language/reset` exists (research R6).
+ * them are actually offered — which is also why `/language/reset` exists.
  *
  * **A Local API global read is not a request-time API**, so calling this from the root layout does
  * not opt every route into dynamic rendering. `src/lib/policies/queries.ts` records the same

@@ -1,7 +1,7 @@
 import type { PayloadEmailAdapter } from 'payload'
 
 /**
- * An email adapter that writes the message to the log instead of sending it (spec 004).
+ * An email adapter that writes the message to the log instead of sending it.
  *
  * **Why this exists: the test suites were mailing real people.** Every registration and every reset
  * request in `tests/integration` and `tests/e2e` went out through Resend, against a real account

@@ -3,12 +3,12 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * Colour as the owner's vocabulary (spec 011, US3).
+ * Colour as the owner's vocabulary.
  *
  * **The first test is the one that matters, and it is not about the new capability.** It is about
  * the links that already exist: `?colour=black` was an enum value and is now a row's `value`, and
  * every bookmark, every share and every indexed page rests on that string surviving the move
- * (FR-020, SC-006). Adding rose gold is the feature; not breaking the four is the promise.
+ *. Adding rose gold is the feature; not breaking the four is the promise.
  */
 const context = { disableRevalidate: true }
 

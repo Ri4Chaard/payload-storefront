@@ -5,7 +5,7 @@ import { localeContext, localeFromContext } from '@/i18n/locale-context'
 import { buildResetEmail, buildVerificationEmail } from '@/lib/email/transactional'
 
 /**
- * Transactional mail in the language the request was made in (spec 010, T093 — FR-042, FR-045).
+ * Transactional mail in the language the request was made in.
  *
  * Integration rather than unit, because `getTranslations({ locale })` reaches next-intl's request
  * configuration — the same path a real send takes. A unit test with a stubbed translator would

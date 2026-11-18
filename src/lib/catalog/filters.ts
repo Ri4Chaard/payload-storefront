@@ -11,7 +11,7 @@
  * listing therefore has one URL, which is what makes it cacheable and what stops two links to the
  * same grid looking like two pages to a crawler.
  *
- * **Unknown values are dropped and the drop is reported** (FR-030). This module can only judge the
+ * **Unknown values are dropped and the drop is reported**. This module can only judge the
  * closed sets — sort and the numbers. Whether `category=rungs` names a real
  * category depends on the catalogue, so `getListing` finishes the job and merges its own drops into
  * the same list.
@@ -293,7 +293,7 @@ export function applyChange(filters: FilterState, patch: Partial<FilterState>): 
  * Drop whichever end of the price range is sitting where the catalogue already ends.
  *
  * Both ends are always submitted — the slider is a pair of native inputs inside a
- * `<form method="GET">`, which is what makes the price reachable without scripting (FR-029). So a
+ * `<form method="GET">`, which is what makes the price reachable without scripting. So a
  * visitor who never touched it sends the catalogue's own minimum and maximum, and one who pulled
  * only the top handle down still sends the minimum. Neither of those removes a single product from
  * the grid, and a chip claiming otherwise is a filter the visitor did not apply.

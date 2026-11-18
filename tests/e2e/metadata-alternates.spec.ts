@@ -5,7 +5,7 @@ import { LOCALES } from '@/i18n/routing'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * Three indexable pages, not one page with two duplicates (spec 010, T087 — FR-016, SC-005).
+ * Three indexable pages, not one page with two duplicates.
  *
  * **The assertion that carries this file is "each page names ITSELF canonical".** Pointing all three
  * at the English address is the easy mistake and it is invisible to a human tester — the pages look

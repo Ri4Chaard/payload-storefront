@@ -19,10 +19,10 @@ import { cn } from '@/lib/cn'
 import './filter-drawer.css'
 
 /**
- * The filter panel (003/T270, T274, T275). Node `532:12507`, in context at `225:1431`, footer at
+ * The filter panel. Node `532:12507`, in context at `225:1431`, footer at
  * `231:2322`.
  *
- * **It edits a draft** (FR-022). Ticking a box changes nothing that is on screen behind it; APPLY
+ * **It edits a draft**. Ticking a box changes nothing that is on screen behind it; APPLY
  * commits the draft to the URL and closes; dismissing discards it. That is the drawn arrangement —
  * a footer with two buttons is a footer that is meant to be pressed — and it is also the only one
  * that works, because a panel that applied on every tick would re-render the grid underneath five
@@ -317,7 +317,7 @@ function Options({
 }
 
 /**
- * One end of the price range, as a box a visitor can type in (FR-026).
+ * One end of the price range, as a box a visitor can type in.
  *
  * It holds its own text while it is being edited, because a controlled field that reformatted on
  * every keystroke would fight the person typing — `$5` becoming `$5.00` before they reach the

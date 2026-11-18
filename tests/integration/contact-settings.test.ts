@@ -10,7 +10,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 
 /**
  * The seller's destinations, and what the admin refuses to save —
- * [messenger-handoff.md §4](../../specs/005-checkout-handoff/contracts/messenger-handoff.md).
+ *.
  * FR-034, FR-037 – FR-041, SC-012.
  *
  * **SC-012 is the claim these exist to support**: no configuration reachable through the admin can
@@ -89,7 +89,7 @@ afterAll(async () => {
   })
 })
 
-describe('what cannot be saved (FR-039, SC-012)', () => {
+describe('what cannot be saved', () => {
   it('refuses an enabled messenger with no destination', async () => {
     await expect(
       save({
@@ -132,7 +132,7 @@ describe('what cannot be saved (FR-039, SC-012)', () => {
     expect(await getMessengers()).toEqual([])
   })
 
-  it('refuses a message template with no {{items}} in it (FR-040)', async () => {
+  it('refuses a message template with no {{items}} in it', async () => {
     await expect(
       save({ messengers: GOOD, messageTemplate: 'Hello, I would like to order something.' }),
     ).rejects.toThrow()
@@ -145,7 +145,7 @@ describe('what cannot be saved (FR-039, SC-012)', () => {
   })
 })
 
-describe('what is stored (FR-035 – FR-037)', () => {
+describe('what is stored', () => {
   it('normalises a phone number on the way in, so the stored value is the one that gets used', async () => {
     await save({
       messengers: [
@@ -180,7 +180,7 @@ describe('what is stored (FR-035 – FR-037)', () => {
   })
 })
 
-describe('what customers see (FR-038)', () => {
+describe('what customers see', () => {
   it('returns enabled rows in the order the owner arranged them', async () => {
     await save({ messengers: [GOOD[2]!, GOOD[0]!, GOOD[1]!] })
     expect((await getMessengers()).map((row) => row.platform)).toEqual([
@@ -201,7 +201,7 @@ describe('what customers see (FR-038)', () => {
   })
 })
 
-describe('who may change them (FR-041)', () => {
+describe('who may change them', () => {
   it('refuses a customer session', async () => {
     const customer = await payload.create({
       collection: 'customers',

@@ -43,7 +43,7 @@ export interface CartItemProps extends Omit<React.ComponentProps<'li'>, 'onChang
   price: string
   /**
    * `null` where the product is gone and there is no photograph to show — a withdrawn product keeps
-   * its row (FR-014) and the row still needs a box where the picture was. Passing `{ src: '' }`
+   * its row and the row still needs a box where the picture was. Passing `{ src: '' }`
    * instead makes `next/image` request the current page as an image; the story sweep caught it.
    */
   image: { src: string; alt?: string } | null
@@ -62,7 +62,7 @@ export interface CartItemProps extends Omit<React.ComponentProps<'li'>, 'onChang
   /** A Server Action is in flight for this row: controls are blocked, the row dims. */
   busy?: boolean
   /**
-   * Something changed under this line — sold out, withdrawn, repriced (FR-014).
+   * Something changed under this line — sold out, withdrawn, repriced.
    *
    * Rendered as text beneath the price, never as colour alone, and it does not remove the row: a
    * cart that quietly loses a product is one the customer cannot reason about.

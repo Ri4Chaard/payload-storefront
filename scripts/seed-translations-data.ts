@@ -1,5 +1,5 @@
 /**
- * The Russian and Ukrainian words the seed writes (spec 010, T110).
+ * The Russian and Ukrainian words the seed writes.
  *
  * **Separate from `seed-translations.ts` on purpose.** That file is the mechanism — find each
  * document, write each locale, stay idempotent — and this one is the content. Keeping them apart

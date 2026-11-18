@@ -13,7 +13,7 @@ import {
 import { env } from '@/env'
 
 /**
- * The six digits a customer types, and the Payload token they stand for (spec 004, research R3).
+ * The six digits a customer types, and the Payload token they stand for.
  *
  * **The code is an alias, never a credential of its own.** Payload mints the verification or reset
  * token, owns the cryptography, and performs the state transition. A row in `verification-codes`
@@ -78,7 +78,7 @@ function normalizeEmail(email: string): string {
 /**
  * Mint a code for a token, retiring anything live for the same address and purpose.
  *
- * Throttled per address (research R8): a cooldown between sends, and an hourly ceiling. Both are
+ * Throttled per address: a cooldown between sends, and an hourly ceiling. Both are
  * database state rather than in-process counters, so they survive a redeploy and hold across
  * instances — an in-memory limiter on a horizontally scaled app limits nothing.
  */
@@ -124,7 +124,7 @@ export async function issueCode(
    * The account-creation path skips the throttle, and only that path may.
    *
    * It is reached exactly once per new account, and creating an account is itself the rate limit —
-   * a second attempt on the same address does not create a second account (FR-009), so there is no
+   * a second attempt on the same address does not create a second account, so there is no
    * loop here to abuse. Without the bypass a customer whose address had a code minutes earlier (a
    * purged registration, say) would be handed an email with no code in it, which is the one outcome
    * worse than being asked to wait.
@@ -141,7 +141,7 @@ export async function issueCode(
   }
 
   // Retire live codes for this address and purpose BEFORE writing the new one, so there is never a
-  // window in which two codes would both be accepted (FR-005).
+  // window in which two codes would both be accepted.
   await payload.update({
     collection: 'verification-codes',
     data: { supersededAt: new Date(now).toISOString() },

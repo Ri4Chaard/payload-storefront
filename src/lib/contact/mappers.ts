@@ -5,14 +5,14 @@ import type { ContactPage as ContactPageDocument } from '@/payload-types'
 import type { ContactFaq, ContactForm, ContactPage, ContactSeo } from './types'
 
 /**
- * The contact page document to its view model (spec 008, T025).
+ * The contact page document to its view model.
  *
  * **The only file in this feature that names a `ContactPage` document.** Everything above it sees
  * `./types.ts` — the seam `catalog/no-document-types` enforces.
  *
  * Two rules run through it, and both exist so no component downstream has to think about them:
  *
- * 1. **A band with nothing to show is absent, not rendered empty** (FR-032). Here that is the FAQ:
+ * 1. **A band with nothing to show is absent, not rendered empty**. Here that is the FAQ:
  *    `faq` comes back `undefined` when the editor chose no questions, or when every question they
  *    chose has since been unpublished. A renderer that also checked would be a second place for the
  *    rule to live, and the two would drift.
@@ -67,10 +67,10 @@ const form = (document: ContactPageDocument): ContactForm => {
 }
 
 /**
- * The questions band, or nothing (FR-032).
+ * The questions band, or nothing.
  *
  * The questions arrive already resolved — the loader reads the global at `depth: 2`, so there is no
- * second query here and no `getSelectedQuestions` anywhere (008/T009). `toQuestions` de-duplicates
+ * second query here and no `getSelectedQuestions` anywhere. `toQuestions` de-duplicates
  * and drops anything unpublished; if that empties the list, the band goes with it.
  */
 const faq = (document: ContactPageDocument): ContactFaq | undefined => {

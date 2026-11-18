@@ -6,7 +6,7 @@ import type { Question as QuestionDocument } from '@/payload-types'
 import type { Question } from './types'
 
 /**
- * Question documents to view models (spec 008, T008).
+ * Question documents to view models.
  *
  * **Moved here from `src/lib/story/mappers.ts` rather than rewritten.** The rules below were worked
  * out for the FAQ band on `/about` and are now shared by three pages; a second copy would be two
@@ -58,12 +58,12 @@ export const toQuestion = (document: QuestionDocument | null): Question | null =
 /**
  * A list of question documents or ids, mapped and de-duplicated.
  *
- * **De-duplicated by id, keeping the first position** (FR-031). Payload will happily let an editor
+ * **De-duplicated by id, keeping the first position**. Payload will happily let an editor
  * pick the same question twice; the page shows it once, where they first put it.
  *
  * Unpublished questions never arrive here at all — every loader reads with `overrideAccess: false`
  * and `adminOrPublishedStatus` constrains the query, so a draft is absent rather than filtered
- * (FR-033). There is deliberately no status check in this file: the rule lives in the access
+ *. There is deliberately no status check in this file: the rule lives in the access
  * function, and repeating it here would put it in two places.
  */
 export const toQuestions = (

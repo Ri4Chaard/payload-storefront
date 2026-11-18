@@ -7,7 +7,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 
 /**
  * The articles collection: access, drafts, field-level refusals, and what a deleted category does
- * to the articles that referenced it (007/T056 — T058).
+ * to the articles that referenced it.
  *
  * **These are claims about what CANNOT happen**, so they are tested by attempting the forbidden
  * thing and asserting the refusal — not by checking that the permitted thing works.
@@ -85,7 +85,7 @@ afterAll(async () => {
   }
 })
 
-describe('drafts are unreachable, not hidden (FR-037)', () => {
+describe('drafts are unreachable, not hidden', () => {
   it('keeps an unpublished article out of a listing', async () => {
     const category = await makeCategory('drafts')
     const draft = await makeArticle({
@@ -136,7 +136,7 @@ describe('drafts are unreachable, not hidden (FR-037)', () => {
   })
 })
 
-describe('the fields refuse invalid content (FR-034, FR-036)', () => {
+describe('the fields refuse invalid content', () => {
   it('refuses an article with no title', async () => {
     const category = await makeCategory('no-title')
 
@@ -201,7 +201,7 @@ describe('the fields refuse invalid content (FR-034, FR-036)', () => {
   })
 })
 
-describe('the address is permanent (FR-035)', () => {
+describe('the address is permanent', () => {
   it('derives the slug from the title on create and leaves it alone on rename', async () => {
     const category = await makeCategory('slugs')
 
@@ -234,7 +234,7 @@ describe('the address is permanent (FR-035)', () => {
   })
 })
 
-describe('a deleted category (FR-041)', () => {
+describe('a deleted category', () => {
   /**
    * The behaviour most likely to be asserted in a docstring and never checked. Cascading would
    * delete published writing because somebody tidied a taxonomy; blocking the delete would leave an

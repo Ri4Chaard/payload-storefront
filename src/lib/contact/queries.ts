@@ -9,7 +9,7 @@ import { toContactPage } from './mappers'
 import type { ContactPage } from './types'
 
 /**
- * Reading the contact page (spec 008, T026, contracts/contact-loader.md).
+ * Reading the contact page.
  *
  * **One function, and it does not return the channel cards.** WhatsApp, Telegram, Instagram and the
  * shop's email come from `src/lib/messengers/settings.ts` — `getSocialLinks()` and
@@ -20,12 +20,12 @@ import type { ContactPage } from './types'
  * **`depth: 2` is the number the shape needs, not Payload's default arriving by luck.** The form's
  * photograph and the FAQ band's questions relationship both resolve at depth 1; a question's own
  * fields are plain and a media document's are too, so nothing needs a third hop. This is also what
- * makes a separate question query unnecessary — the selection arrives resolved (008/T009).
+ * makes a separate question query unnecessary — the selection arrives resolved.
  *
  * **Deduplicated per request, not cached across requests.** `cache()` collapses the two reads a
  * single render makes — the page body and `generateMetadata` — into one. Anything longer-lived
  * would need an invalidation story, and this route deliberately has none: it is `force-dynamic`
- * (008/research.md R8), so a publish is visible to the next visitor because nothing was stored.
+ *, so a publish is visible to the next visitor because nothing was stored.
  */
 
 const client = cache(async () => getPayload({ config }))

@@ -6,8 +6,7 @@ import { getPayload } from 'payload'
 import { ENQUIRY_RATE_LIMIT, ENQUIRY_RATE_WINDOW_MS } from './config'
 
 /**
- * Keeping the contact form from being a megaphone (spec 008, T051,
- * contracts/enquiry-action.md §4).
+ * Keeping the contact form from being a megaphone.
  *
  * **Counted over stored enquiries, with no table of its own.** FR-027 asks for a limit that
  * "survives a redeploy and holds across instances", which rules out an in-process counter —
@@ -36,7 +35,7 @@ const client = () => getPayload({ config })
  * *keyed* digest is the property worth having, not a slow one.
  *
  * It is still personal data, pseudonymised rather than anonymised, which is why it lives on the
- * enquiry row and dies with it (FR-029d) rather than in a store with a lifetime of its own.
+ * enquiry row and dies with it rather than in a store with a lifetime of its own.
  *
  * Returns `undefined` where no address can be determined, and the caller then throttles on the
  * email alone rather than on a constant that would bucket every anonymous visitor together.
@@ -70,7 +69,7 @@ export function clientIp(headers: Headers): string | undefined {
 export type ThrottleResult = { allowed: true } | { allowed: false; key: 'email' | 'sender' }
 
 /**
- * Whether this sender may send another (FR-027).
+ * Whether this sender may send another.
  *
  * Two `count` queries rather than one `or`, so the caller can log which limit was reached without
  * a second round trip — and so a missing `senderHash` skips its query entirely instead of matching

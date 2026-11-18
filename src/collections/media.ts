@@ -6,7 +6,7 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
  * Uploads.
  *
  * The image sizes below are not arbitrary — the `Image` primitive's responsive `sizes` contract
- * depends on them, and the performance budget (FR-045) depends on the primitive. Changing a size
+ * depends on them, and the performance budget depends on the primitive. Changing a size
  * here without updating `src/components/ui/Image` breaks that contract silently.
  *
  * Widths track the breakpoint set in the token contract: 640 / 768 / 1024 / 1280, plus a thumbnail
@@ -27,7 +27,7 @@ export const Media: CollectionConfig = {
   },
   upload: {
     /**
-     * Photographs and video, in one library (spec 006, FR-021).
+     * Photographs and video, in one library.
      *
      * **Video was added without a second collection, and the reason is in Payload's own upload
      * code.** `generateFileData.js` gates resizing on `fileSupportsResize || isImage(mimetype)`, so
@@ -38,7 +38,7 @@ export const Media: CollectionConfig = {
      * **The two video types are named rather than `video/*`, deliberately.** A wildcard accepts
      * `.mov` and `.avi`, which the CMS would take happily and no browser would play: the refusal
      * would move from the upload dialog to the live page, where the editor is not looking. MP4 and
-     * WebM are what `<video>` plays everywhere, so they are what the picker offers (FR-021b).
+     * WebM are what `<video>` plays everywhere, so they are what the picker offers.
      *
      * A video document has no `sizes`, so anything reaching for `sizes.md.url` must branch on
      * mimetype first. That branch lives in `src/lib/story/mappers.ts`, once.
@@ -54,7 +54,7 @@ export const Media: CollectionConfig = {
       { name: 'full', width: 1920, withoutEnlargement: true },
     ],
   },
-  // Publishing invalidates the cached routes (003/T294). A photograph is on both cached routes — the featured row and the gallery.
+  // Publishing invalidates the cached routes. A photograph is on both cached routes — the featured row and the gallery.
   hooks: {
     afterChange: [revalidateOnChange],
     afterDelete: [revalidateOnDelete],

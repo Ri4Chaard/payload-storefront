@@ -9,16 +9,16 @@ import type { VariantOption } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 /**
- * The two choices a product can offer (003/T282). Nodes `301:5008` (1920), `410:7314` (1024),
+ * The two choices a product can offer. Nodes `301:5008` (1920), `410:7314` (1024),
  * `410:7647` (390).
  *
  * Two `Select`s in two `Field`s, side by side at 1920 and stacked below it, exactly as drawn. What
  * this component adds is the catalogue's rules about what may be chosen:
  *
- * - **An option carries its price** (T282). The whole reason to choose one is that it changes what
+ * - **An option carries its price**. The whole reason to choose one is that it changes what
  *   the product costs, and a list of names that all look the same is a list that has to be tried one
  *   at a time to find out.
- * - **An unavailable option is drawn and not selectable** (FR-040), and says so where its price
+ * - **An unavailable option is drawn and not selectable**, and says so where its price
  *   would be. Hiding it would turn a temporary shortage into a catalogue that looks smaller than
  *   it is, and the visitor would never learn the product comes in that option at all.
  * - **A group with nothing in it is not drawn.** A product with no options offers no choice, so it
@@ -50,7 +50,7 @@ export function ProductOptions({
   ...props
 }: ProductOptionsProps) {
   const t_product = useTranslations('product')
-  // Resolved in the body, not as default parameters: `useTranslations` is a hook (spec 010).
+  // Resolved in the body, not as default parameters: `useTranslations` is a hook.
   const variantLabel = variantLabelProp ?? t_product('chooseVariantHeading')
   if (variantChoices.length === 0) return null
 

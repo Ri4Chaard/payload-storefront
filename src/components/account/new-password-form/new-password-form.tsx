@@ -13,7 +13,7 @@ import { applyActionErrors, errorText } from '@/lib/auth/form-errors'
 import { resetPasswordSchema, type ResetPasswordValues } from '@/lib/auth/schemas'
 
 /**
- * Node `429:12884` — the new password and its confirmation (spec 004, US3, FR-018, FR-021).
+ * Node `429:12884` — the new password and its confirmation.
  *
  * **The drawn labels are Russian and the button says `СОХРАНИТЬ`** (design defect 1). They are
  * replaced with English here, which is what FR-047 asks for; the rest of the frame is transcribed.

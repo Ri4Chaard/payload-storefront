@@ -5,7 +5,7 @@ import { Button } from '@/components/ui'
 import { cn } from '@/lib/cn'
 
 /**
- * The first band (002/T103–T105), from Figma nodes 138:309, 440:12503 and 440:13458 — a full-bleed
+ * The first band, from Figma nodes 138:309, 440:12503 and 440:13458 — a full-bleed
  * photograph with the headline, a sentence and one way in stacked against its lower edge.
  *
  * **The headline is real text, and that is the whole point of the task.** It would have been
@@ -32,7 +32,7 @@ import { cn } from '@/lib/cn'
  * dark photograph and rescues a light one. `scrim={false}` opts out when the image is known.
  *
  * The photograph is `priority` because it is unambiguously this route's largest contentful paint
- * element (FR-007). It is also decorative: it sits behind a headline that already says what it
+ * element. It is also decorative: it sits behind a headline that already says what it
  * shows, so an `alt` here would be a second copy of the headline read out first.
  */
 export interface HeroProps extends React.ComponentProps<'section'> {

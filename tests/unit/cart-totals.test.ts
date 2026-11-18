@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/catalog/price'
 import type { ProductDetail } from '@/lib/catalog/types'
 
 /**
- * The cart's arithmetic — [cart-loader.md §5](../../specs/005-checkout-handoff/contracts/cart-loader.md).
+ * The cart's arithmetic.
  * FR-012, FR-013, FR-015, SC-006.
  *
  * These run without a database on purpose. `src/lib/cart/totals.ts` was split out of the loader so

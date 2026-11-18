@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { slugField } from '@/fields/slug'
 
 /**
- * A Cyrillic title must produce an address (spec 010, T033 — FR-014).
+ * A Cyrillic title must produce an address.
  *
  * **This is a regression test for a defect that did not exist yet.** Before spec 010, `slugify`
  * stripped everything outside `a-z0-9`, so a Russian title reduced to the empty string against a

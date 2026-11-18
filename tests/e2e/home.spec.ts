@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /**
- * The home page as a PAGE (002/T128–T134).
+ * The home page as a PAGE.
  *
  * The story tests cover each band on its own; these cover the things only a whole route can show —
  * a heading outline, landmark structure, behaviour with JavaScript switched off, reflow at 320px
@@ -254,7 +254,7 @@ for (const { name, width, gutter } of [
 }
 
 /**
- * The menu on a real page (002/T139–T144).
+ * The menu on a real page.
  *
  * The story tests cover its measurements against the two frames. These cover what only the route
  * shows: that it sits under the real header with the real contact strip above it, that its links
@@ -362,7 +362,7 @@ test('a small movement near the top of the page does not take the header away', 
 })
 
 /**
- * The featured row is the catalogue, not a fixture (003/T290).
+ * The featured row is the catalogue, not a fixture.
  *
  * Asserted through the links rather than the names: a product's title is content the owner may change
  * at any moment, but every card on this band must point at a real product page, and that page must

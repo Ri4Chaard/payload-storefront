@@ -5,7 +5,7 @@ import { localeHref, rememberedRedirect, splitLocale } from '@/i18n/prefix'
 import { LOCALE_COOKIE, routing } from '@/i18n/routing'
 
 /**
- * **`proxy.ts`, not `middleware.ts`** (spec 004, research R9; spec 010, research R3).
+ * **`proxy.ts`, not `middleware.ts`**.
  *
  * Next.js 16 renamed Middleware to Proxy — "the functionality remains the same", but the filename
  * does not: a `middleware.ts` in this project would sit there and never run, and the failure is
@@ -14,13 +14,13 @@ import { LOCALE_COOKIE, routing } from '@/i18n/routing'
  *
  * Two jobs now live here, in this order:
  *
- * 1. **The account guard** (spec 004). A courtesy, not a security boundary: it checks for the
+ * 1. **The account guard**. A courtesy, not a security boundary: it checks for the
  *    presence of a cookie and nothing else — no database read, no signature check. A forged or
  *    expired cookie passes this file and is refused by `src/lib/auth/dal.ts`, which is where FR-015
  *    is actually met. Next's own guidance says Proxy runs on every route including prefetches, so
  *    its checks must stay optimistic and it "should not be used as a full session management or
  *    authorization solution".
- * 2. **Locale routing** (spec 010). next-intl resolves the prefix; the remembered-choice rule below
+ * 2. **Locale routing**. next-intl resolves the prefix; the remembered-choice rule below
  *    is ours, because the library's own detection is off.
  *
  * **No Payload import, no database read.** Next's proxy documentation says this file "should not
@@ -38,7 +38,7 @@ export function proxy(request: NextRequest): NextResponse {
   const { locale, path } = splitLocale(request.nextUrl.pathname)
 
   /*
-    The remembered choice (spec 010, T024 — FR-008). Unprefixed paths only, and before the account
+    The remembered choice. Unprefixed paths only, and before the account
     guard so that a returning Russian visitor arriving at `/account` is redirected once, into their
     own language, rather than being bounced to the English sign-in page and prefixed afterwards.
   */
@@ -53,7 +53,7 @@ export function proxy(request: NextRequest): NextResponse {
   }
 
   /*
-    The account guard, made locale-aware (spec 010, T016a). Before this feature it matched
+    The account guard, made locale-aware. Before this feature it matched
     `/account/:path*` and redirected to a hardcoded `/sign-in`; a Russian visitor clicking "account"
     would have been bounced onto the English sign-in page, which is a language switch nobody asked
     for.

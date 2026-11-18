@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 import { generateExpiredPayloadCookie, generatePayloadCookie } from 'payload/shared'
 
 /**
- * Putting a customer into a session, and taking them out of one (spec 004, FR-012, FR-013).
+ * Putting a customer into a session, and taking them out of one.
  *
  * Payload's REST login sets its own cookie on the response it controls. A Server Action does not go
  * through that path, so the token has to be turned into a cookie here — but with Payload's own
@@ -45,7 +45,7 @@ export async function establishSession(token: string): Promise<void> {
 }
 
 /**
- * Ends it immediately (FR-013).
+ * Ends it immediately.
  *
  * An expired cookie rather than a deletion, which is what `generateExpiredPayloadCookie` is for:
  * the two are equivalent to a compliant browser, and the explicit expiry is the form that survives

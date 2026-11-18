@@ -23,7 +23,7 @@ import { cn } from '@/lib/cn'
  * The knob's drawn shadow is an untokenised `0 0 3.1px rgb(0 0 0 / 0.11)`; `shadow-sm` stands in.
  */
 export interface SwitchProps extends Omit<React.ComponentProps<'input'>, 'type' | 'size'> {
-  /** Required — a control without a label is a defect (contracts/ui-kit.md). */
+  /** Required — a control without a label is a defect. */
   label: React.ReactNode
   /** Keeps the label in the accessibility tree but out of the layout. */
   hideLabel?: boolean

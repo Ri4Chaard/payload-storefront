@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 
 /**
  * Editorial verification for the story page, as a test rather than an afternoon in the panel
- * (006/T044, T053).
+ *.
  *
  * The Constitution makes this a merge gate: "Any change to a block or content model MUST be
  * verified in the Payload admin by actually creating and previewing content before merge. Shipping

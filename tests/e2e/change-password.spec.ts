@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * US7 end to end (spec 004, FR-020, FR-021) — the Change password modal.
+ * US7 end to end — the Change password modal.
  *
  * The browser is needed for the things the action cannot show: that the modal is reachable from the
  * Security row, that a wrong current password is refused against the field it concerns rather than

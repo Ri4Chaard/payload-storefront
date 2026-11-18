@@ -36,7 +36,7 @@ describe('the mock content boundary', () => {
   it('has no mock content directory left to guard', () => {
     expect(
       existsSync(resolve(ROOT, 'src/mocks')),
-      'src/mocks is back — content the application serves belongs in Payload (Constitution I)',
+      'src/mocks is back — content the application serves belongs in Payload',
     ).toBe(false)
   })
 

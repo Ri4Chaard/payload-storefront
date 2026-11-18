@@ -10,11 +10,11 @@ import { getAllPublishedQuestions, getFaqPage } from '@/lib/questions/queries'
 import type { Question } from '@/lib/questions/types'
 
 /**
- * The FAQ page (008/T070 – T072), from Figma section `266:4856`.
+ * The FAQ page, from Figma section `266:4856`.
  *
  * **This route closes the last dead link in the site chrome.** The footer has carried
  * *FAQ → /faq* under CUSTOMER CARE since spec 001, and until now it was a 404 in production. With
- * it, every navigation item, footer link and call to action on this site resolves (SC-001).
+ * it, every navigation item, footer link and call to action on this site resolves.
  *
  * **One band over the chrome, and that is the whole page.** It is this small because
  * `src/collections/questions.ts` was written in spec 006 to carry this page's content before the
@@ -24,7 +24,7 @@ import type { Question } from '@/lib/questions/types'
  * **Rendered per request**, for the reason `/`, `/about`, `/blog` and `/contact` all record: the
  * production image is built with no database, so a prerendered page would bake empty on a first
  * deploy and stay that way until somebody happened to edit something. Nothing is cached, so
- * publishing a question is visible to the next visitor with no invalidation at all (FR-044).
+ * publishing a question is visible to the next visitor with no invalidation at all.
  */
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * `schema.org/FAQPage` (FR-052).
+ * `schema.org/FAQPage`.
  *
  * **Built from the view models, never from documents**, so it cannot disagree with what is drawn
  * and cannot leak a draft — the rows here are the rows rendered below.

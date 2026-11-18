@@ -12,7 +12,7 @@ import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 /**
- * The product page's photography (003/T260–T263). Nodes `297:4567` (1920), `410:7300` (1024),
+ * The product page's photography. Nodes `297:4567` (1920), `410:7300` (1024),
  * `410:7635` (390).
  *
  * **One gallery, drawn three ways.** The design looks like three components and is not:
@@ -34,7 +34,7 @@ import { cn } from '@/lib/cn'
  * in the document twice: two downloads, two alt texts, and a screen reader that reads the set out
  * from the top a second time.
  *
- * **Both arrangements are keyboard-operable** (FR-033). The thumbnails and the dots are buttons,
+ * **Both arrangements are keyboard-operable**. The thumbnails and the dots are buttons,
  * the track is focusable and answers the arrow keys, and the photograph itself is a button that
  * opens the viewer.
  *

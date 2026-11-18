@@ -6,7 +6,7 @@ import type { ContactForm as ContactFormContent } from '@/lib/contact/types'
 import { ContactForm } from '../contact-form'
 
 /**
- * "Send us a message" (008/T062), from nodes `312:8649`, `419:10792`, `419:10872`.
+ * "Send us a message", from nodes `312:8649`, `419:10792`, `419:10872`.
  *
  * **Full-bleed by construction rather than by a `Container` with negative margins.** The drawing
  * splits the viewport in half at desktop — 960 of copy beside 960 of photograph — and at tablet
@@ -18,7 +18,7 @@ import { ContactForm } from '../contact-form'
  * in this band, and a decorative half-screen picture ahead of it is a long scroll past nothing.
  * `md:order-*` is deliberately not used — the DOM order already matches every drawn arrangement.
  *
- * **The frame reserves its box before anything loads** (FR-023). `aspect-*` on the wrapper plus the
+ * **The frame reserves its box before anything loads**. `aspect-*` on the wrapper plus the
  * intrinsic width and height `Media` passes to the image pipeline means the band's height is known
  * from the first paint, so the form below it on a phone never jumps.
  *
@@ -69,7 +69,7 @@ export function MessageBand({ heading, body, form }: MessageBandProps) {
               and `priority` cannot be conditional on viewport. This is the right side of that
               trade: it is the only image on the page, and a phone spends the bytes on the one
               picture it was going to load a moment later anyway, where a desktop visitor gets an
-              LCP that is not waiting on a lazy fetch (Constitution V).
+              LCP that is not waiting on a lazy fetch.
             */
             priority
             className="h-full w-full"

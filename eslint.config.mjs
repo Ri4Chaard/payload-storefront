@@ -76,7 +76,7 @@ export default tseslint.config(
             {
               name: 'next/headers',
               message:
-                'The consent record is read in the browser. `cookies()` is a request-time API and the banner is in the root layout, so a server read opts EVERY route into dynamic rendering — see specs/009-policy-pages-cookie-consent/research.md R3.',
+                'The consent record is read in the browser. `cookies()` is a request-time API and the banner is in the root layout, so a server read opts EVERY route into dynamic rendering.',
             },
           ],
         },

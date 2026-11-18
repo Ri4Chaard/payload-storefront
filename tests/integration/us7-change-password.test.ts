@@ -7,7 +7,7 @@ import { changeCustomerPassword } from '@/lib/auth/reset'
 import { changePasswordSchema } from '@/lib/auth/schemas'
 
 /**
- * US7 — change the password while signed in (spec 004, FR-020, FR-021).
+ * US7 — change the password while signed in.
  *
  * `changeCustomerPassword` rather than the `changePassword` action, for the reason US2, US3 and US4
  * all record: the action writes a session cookie, and `cookies()` needs a request that does not

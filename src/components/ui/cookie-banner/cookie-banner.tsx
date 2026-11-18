@@ -15,7 +15,7 @@ import { cn } from '@/lib/cn'
 import { OPEN_COOKIE_SETTINGS } from './cookie-settings-button'
 
 /**
- * The cookie consent banner (spec 009, T031, T035, T037, T038), from Figma `255:3381` and its
+ * The cookie consent banner, from Figma `255:3381` and its
  * tablet and mobile frames `544:16179` / `544:16200`.
  *
  * **It renders nothing on the server, and it must not.** The server cannot know what this visitor
@@ -29,14 +29,14 @@ import { OPEN_COOKIE_SETTINGS } from './cookie-settings-button'
  * rather than displacing it, so appearing late costs no layout shift at all. It is also why the page
  * behind stays readable and scrollable — the design draws it over the hero, not across it.
  *
- * **No focus trap** (FR-024). A modal dialog would be wrong here: the visitor may browse while
+ * **No focus trap**. A modal dialog would be wrong here: the visitor may browse while
  * deciding, and trapping them in a banner they cannot dismiss without answering would be coercive
  * rather than merely insistent. The chooser IS modal, because it is a task. What this uses instead
  * is `role="region"` with a name, placed early in the DOM so a keyboard reaches it within a few tabs
- * (FR-023), and `aria-live="polite"` so a screen reader is told it appeared without being dragged
+ *, and `aria-live="polite"` so a screen reader is told it appeared without being dragged
  * out of the sentence it was reading.
  *
- * **The chooser is loaded on demand** (research R9, Constitution V). This component sits in the root
+ * **The chooser is loaded on demand**. This component sits in the root
  * layout and is therefore charged to every route on the site; the chooser is the expensive half and
  * most visitors press one of the other two buttons and never see it. `React.lazy` keeps it out of
  * the initial bundle.
@@ -98,7 +98,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
   }, [consentVersion, categories])
 
   /*
-    The footer's re-entry point (FR-032). It dispatches rather than calling in, so that this
+    The footer's re-entry point. It dispatches rather than calling in, so that this
     component stays the single owner of consent state — see `./cookie-settings-button.tsx` for why
     that is an event and not a context.
 
@@ -117,7 +117,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
   }, [consentVersion, categories])
 
   /*
-    Stand down while a modal dialog owns the screen (FR-024).
+    Stand down while a modal dialog owns the screen.
 
     **Found by the accessibility sweep, not by reading the code.** `/account` opens dialogs, and a
     dialog's scrim is 40% black drawn over everything behind it — including this banner, which is
@@ -176,7 +176,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
   )
 
   /*
-    Off means off (FR-026): no banner, and — because `isAllowed()` treats anything other than a
+    Off means off: no banner, and — because `isAllowed()` treats anything other than a
     settled decision as "necessary only" — nothing optional is treated as consented while it is off.
     An existing decision is left untouched, so turning it back on does not re-ask anybody.
   */
@@ -230,7 +230,7 @@ export function CookieBanner({ settings, className }: CookieBannerProps) {
             />
 
             {/*
-              A guaranteed way to the Cookie Policy (FR-022) — but only when the owner has not
+              A guaranteed way to the Cookie Policy — but only when the owner has not
               written their own link.
 
               The toolbar offers links now, so the sensible thing for an owner to do is put one in

@@ -20,7 +20,7 @@ import { serialise } from './record'
  * enforced by the browser, which is FR-035 for free, while `localStorage` has no expiry and would
  * need a hand-rolled timestamp check that silently does nothing the day somebody forgets it.
  *
- * **This cookie is itself strictly necessary** (FR-036) and is named in the Cookie Policy. It is the
+ * **This cookie is itself strictly necessary** and is named in the Cookie Policy. It is the
  * answer to the cookie question; there is nowhere else to keep it.
  *
  * **Every operation is wrapped.** A browser with cookies blocked must get a working banner that

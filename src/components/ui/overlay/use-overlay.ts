@@ -3,7 +3,7 @@
 import React from 'react'
 
 /**
- * The behaviour every overlay in this app shares (003/T240).
+ * The behaviour every overlay in this app shares.
  *
  * Extracted from `MobileNav`, which built all of it in spec 002 and is now the third consumer.
  * `Drawer` and `Lightbox` need the same five things, and a focus trap written twice is a focus trap

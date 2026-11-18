@@ -3,7 +3,7 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * One labelled row of the profile card — node `266:5096` (spec 004, US4, FR-022, FR-025).
+ * One labelled row of the profile card — node `266:5096`.
  *
  * Five of them on one page: a label, a bordered box holding the value, and sometimes a control at
  * the right edge. Written once because five near-identical blocks is how a card ends up with four

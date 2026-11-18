@@ -23,7 +23,7 @@ import { getCategories, getFilterFacets, getListing } from '@/lib/catalog/querie
 import type { DroppedFilter, FilterState } from '@/lib/catalog/types'
 
 /**
- * The listing, shared by `/[category]` and `/all-products` (003/T253, T254).
+ * The listing, shared by `/[category]` and `/all-products`.
  *
  * The two routes differ in exactly two ways — the name in the title block, and whether a category
  * is seeded — so they are one renderer and two thin `page.tsx` files rather than two pages that
@@ -83,7 +83,7 @@ export async function Listing({
   const ignored: DroppedFilter[] = [...dropped, ...result.ignored]
 
   /**
-   * Each chip, with the address that drops it (FR-025).
+   * Each chip, with the address that drops it.
    *
    * Built here rather than in the component for the reason the whole data layer exists: knowing
    * which key to strip and whether the result is a path or a query is catalogue arithmetic, and
@@ -170,7 +170,7 @@ export async function Listing({
  * nothing would change nothing — so that one says so plainly and offers the rest of the shop.
  *
  * **Both strings used to be defaults inside the component** and moved here when `ListingEmpty`
- * became the kit's `EmptyState` (007/T007). That is the right side of the line: the copy is this
+ * became the kit's `EmptyState`. That is the right side of the line: the copy is this
  * page's, and a kit component holding a sentence about the catalogue is user-visible copy in a
  * component, which Constitution I permits only for developer-facing errors.
  */
@@ -199,7 +199,7 @@ function emptyState(
 }
 
 /**
- * Per-route metadata (003/T256, Constitution V).
+ * Per-route metadata.
  *
  * **The canonical URL is the bare route.** A filtered listing is a view of a catalogue rather than
  * a page of its own, and letting every combination of five filter groups become its own indexable

@@ -8,7 +8,7 @@ import type {
 import { syncMarketingContact } from '@/lib/email/marketing'
 
 /**
- * Hooks for `customers` (spec 004).
+ * Hooks for `customers`.
  */
 
 /**
@@ -17,7 +17,7 @@ import { syncMarketingContact } from '@/lib/email/marketing'
  * The design splits the name in two; `name` predates it and is what `useAsTitle`, `defaultColumns`
  * and the seller's view of a customer are built on. Recomposing it here means the split is additive
  * — nothing that already reads `name` has to change, and no migration has to guess where to put a
- * space in the existing data (004/data-model.md).
+ * space in the existing data.
  *
  * Partial updates only carry the fields that changed, so the missing half comes from `originalDoc`
  * rather than being blanked.
@@ -44,7 +44,7 @@ export const composeCustomerName: CollectionBeforeChangeHook = ({ data, original
 }
 
 /**
- * Record WHEN the marketing choice was made, and where (FR-034).
+ * Record WHEN the marketing choice was made, and where.
  *
  * **This hook is the only writer, and it overwrites rather than defers.** Whatever
  * `marketingEmailUpdatedAt` and `marketingEmailSource` arrive with is discarded and recomputed from
@@ -87,7 +87,7 @@ export const stampMarketingConsent: CollectionBeforeChangeHook = ({
 }
 
 /**
- * Mirror a consent change into the Resend audience (FR-033, T537).
+ * Mirror a consent change into the Resend audience.
  *
  * **In the collection rather than in the action**, for the reason every hook in this feature is:
  * the storefront toggle is not the only writer. A seller correcting a preference in the admin panel
@@ -144,7 +144,7 @@ export const syncMarketingChoice: CollectionAfterChangeHook = async ({
 }
 
 /**
- * A deleted customer leaves no cart behind (spec 005, T076, FR-049).
+ * A deleted customer leaves no cart behind.
  *
  * Constitution VI asks every data collection point for a working deletion path, and a cart is one:
  * it records what somebody wanted, by name, for as long as it exists. An erasure request that left

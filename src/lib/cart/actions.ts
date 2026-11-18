@@ -23,7 +23,7 @@ import type { CartActionResult, CartView } from './types'
 
 /**
  * The whole mutation surface of the cart (spec 005, T009, T010,
- * [cart-actions.md](../../../specs/005-checkout-handoff/contracts/cart-actions.md)).
+ *).
  *
  * **Every export here is a public POST endpoint.** Next's own documentation says so plainly: Server
  * Functions are reachable by direct request, not only through the UI, so authorisation is checked
@@ -34,7 +34,7 @@ import type { CartActionResult, CartView } from './types'
  * **This file is deliberately thin.** It reads cookies, resolves who is asking, and settles the
  * badge afterwards. Every rule about what may go in a cart lives one layer down in
  * `./operations.ts`, which takes its owner as an argument — the same seam `src/lib/auth/login.ts`
- * draws under `src/lib/auth/actions.ts`, and for the same reason: `cookies()` needs a request scope
+ * draws under `src/lib/auth/actions.ts`, and for the same reason: `cookies` needs a request scope
  * that a test runner does not have, so the rules have to be reachable without it.
  *
  * **Failures are returned, never thrown.** A thrown error in a Server Action reaches the client as
@@ -42,9 +42,9 @@ import type { CartActionResult, CartView } from './types'
  * wrong. The `field` travels; the sentence belongs to whatever interface has to say it, in whatever
  * language it is speaking.
  *
- * **`refresh()`, never `revalidatePath`.** A cart is per-visitor. `revalidatePath` invalidates a
+ * **`refresh`, never `revalidatePath`.** A cart is per-visitor. `revalidatePath` invalidates a
  * cache entry shared by everyone, so calling it here would evict catalogue pages for the whole world
- * because one person changed a quantity. `refresh()` refreshes the calling client's router and
+ * because one person changed a quantity. `refresh` refreshes the calling client's router and
  * nothing else, and may only be called from a Server Action — which is why all of these are one.
  */
 
@@ -67,7 +67,7 @@ async function ensureCart(owner: CartOwner): Promise<{ cartId: number; owner: Ca
   return { cartId, owner: { kind: 'guest', cartId, secret } }
 }
 
-/** Written after every mutation so the header badge follows without a second round trip (R8). */
+/** Written after every mutation so the header badge follows without a second round trip. */
 async function settle(): Promise<number> {
   const count = await getCartCount()
   await writeCartCount(count)
@@ -76,7 +76,7 @@ async function settle(): Promise<number> {
 }
 
 /**
- * Put a chosen product in the cart (FR-001 – FR-004).
+ * Put a chosen product in the cart.
  *
  * The intent carries identifiers and nothing else — no price, no title, no formatted string. That
  * is not defensive style, it is what stops a displayed price from becoming a charged one:
@@ -101,7 +101,7 @@ export async function addToCart(intent: CartIntent, locale: Locale): Promise<Car
 }
 
 /**
- * Change how many of a line the customer wants (FR-009).
+ * Change how many of a line the customer wants.
  *
  * The ceiling is enforced by the loader, which clamps what it shows against current stock; this
  * refuses only what is structurally wrong. A quantity below one is refused rather than removing the
@@ -126,7 +126,7 @@ export async function setLineQuantity(
 }
 
 /**
- * Take a line out (FR-010).
+ * Take a line out.
  *
  * Unconditional by design. The confirmation happens in the interface; a `confirmed: true` crossing
  * the wire would be the caller authorising itself, which is not authorisation.
@@ -149,11 +149,11 @@ export async function removeLine(lineId: string): Promise<CartActionResult> {
 }
 
 /**
- * Open the handoff (FR-019, FR-021, FR-022, FR-026, FR-027).
+ * Open the handoff.
  *
  * **Reads, composes, and writes nothing.** No order, no reference, no record — FR-029 removed all
  * three, and the conversation the customer is about to open is the record. The cart is not cleared
- * either (FR-027): the site cannot know whether the message was actually sent, and clearing on a
+ * either: the site cannot know whether the message was actually sent, and clearing on a
  * guess destroys work that is not recoverable.
  *
  * **Composed once, here.** The message is built from one read of the cart and held by the modal for
@@ -162,7 +162,7 @@ export async function removeLine(lineId: string): Promise<CartActionResult> {
  * between, so the customer sees one total and the seller receives another.
  *
  * **`no-messengers` is not a failure.** An owner who has configured none still leaves the customer a
- * copyable message and the shop's contact details — the modal always offers that (FR-024), so an
+ * copyable message and the shop's contact details — the modal always offers that, so an
  * empty messenger list is an ordinary success with an empty array.
  */
 export async function beginCheckout(locale: Locale): Promise<CheckoutResult> {
@@ -176,7 +176,7 @@ export async function beginCheckout(locale: Locale): Promise<CheckoutResult> {
     const [template, messengers, customer, contact] = await Promise.all([
       getMessageTemplate(locale),
       getMessengers(),
-      // Optional by construction: `null` for an anonymous visitor, and never a redirect (FR-046).
+      // Optional by construction: `null` for an anonymous visitor, and never a redirect.
       getMessageCustomer(),
       getContactDetails(),
     ])
@@ -195,7 +195,7 @@ export async function beginCheckout(locale: Locale): Promise<CheckoutResult> {
 }
 
 /**
- * One product, straight to the seller, without touching the cart (FR-019, FR-020, T068).
+ * One product, straight to the seller, without touching the cart.
  *
  * **FR-020 is a property of this code path, not a check inside one.** The cart is never read and
  * never written here: no `resolveCartOwner`, no `ensureCart`, no `addLine`, no `settle`. That is
@@ -274,7 +274,7 @@ function singleLineCart(product: ProductDetail, intent: CartIntent): CartView {
 }
 
 /**
- * Carry a guest cart into the account being signed into (FR-005, T019).
+ * Carry a guest cart into the account being signed into.
  *
  * Called by `src/lib/auth/actions.ts` immediately after the session is established. It cannot use
  * `resolveCartOwner`: that reads the *incoming* request's headers, which do not carry the cookie

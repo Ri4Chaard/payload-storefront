@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn'
  * The six-digit code control from nodes `428:11924` and `429:12404`.
  *
  * **One component, one size.** The design draws 60px boxes for registration and 56px for the reset
- * flow. That is a drafting artefact, not two controls (FR-048).
+ * flow. That is a drafting artefact, not two controls.
  *
  * **Paste is handled at the group, and that is the whole point.** Six separate inputs is what
  * customers expect and what the design draws, but it is also the arrangement that usually breaks

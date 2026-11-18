@@ -23,7 +23,7 @@ const listing = (overrides: Partial<FilterState> = {}) =>
 
 describe('getListing', () => {
   /**
-   * `page` counts how many sets are shown, not which one — the listing EXTENDS (FR-018). Page three
+   * `page` counts how many sets are shown, not which one — the listing EXTENDS. Page three
    * therefore opens with page one's twelve rather than replacing them, which is the property the
    * whole LOAD MORE arrangement rests on: pressing it must never move a card the visitor was
    * already looking at.
@@ -128,7 +128,7 @@ describe('getProduct', () => {
 
 describe('getProductSlugs', () => {
   /**
-   * What the product route prerenders (003/T294). A draft in this list would get a prerendered page
+   * What the product route prerenders. A draft in this list would get a prerendered page
    * and become reachable by URL — FR-009's leak, arriving through the build rather than a query —
    * so the access rule has to hold on this path too, not only on the one that draws a page.
    */

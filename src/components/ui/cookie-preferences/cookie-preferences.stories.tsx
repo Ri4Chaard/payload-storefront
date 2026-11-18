@@ -74,7 +74,7 @@ export const NothingOptional: Story = {}
 export const NothingOptionalMobile: Story = { globals: { viewport: { value: 'mobile' } } }
 
 /**
- * The day analytics arrives: a switch appears, off until somebody turns it on (FR-030).
+ * The day analytics arrives: a switch appears, off until somebody turns it on.
  *
  * Note that the necessary row still has no switch. A control that refuses to move is worse than no
  * control — it invites a press, ignores it, and explains nothing.

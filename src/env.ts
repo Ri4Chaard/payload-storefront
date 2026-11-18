@@ -1,8 +1,10 @@
+import { SITE_NAME } from './lib/site'
+
 /**
- * Runtime environment validation (FR-006).
+ * Runtime environment validation.
  *
  * A missing variable must fail startup with a message naming it — not with an obscure error three
- * layers down. Secrets are injected at runtime and never committed (Constitution VI).
+ * layers down. Secrets are injected at runtime and never committed.
  */
 
 const REQUIRED = [
@@ -60,4 +62,4 @@ export const emailOverrideRecipient = process.env.EMAIL_OVERRIDE_RECIPIENT?.trim
  * before any global can be read — and env rather than a constant so staging can say so in the
  * sender name rather than impersonating production.
  */
-export const emailFromName = process.env.EMAIL_FROM_NAME?.trim() || 'Aurum'
+export const emailFromName = process.env.EMAIL_FROM_NAME?.trim() || SITE_NAME

@@ -45,7 +45,7 @@ import { syncMarketingContact } from '@/lib/email/marketing'
 import { sendVerificationCode } from '@/lib/email/transactional'
 
 /**
- * The server actions behind the account forms (spec 004, contracts/auth-actions.md).
+ * The server actions behind the account forms.
  *
  * Every message below is a KEY, never a sentence — the words live in the component that renders
  * them. That keeps these functions assertable: the integration tests compare two responses to each
@@ -82,7 +82,7 @@ const CODE_FAILURE_KEYS: Record<CodeFailure, string> = {
 }
 
 /**
- * Create an account (FR-001 – FR-004, FR-009).
+ * Create an account.
  *
  * **The response is identical whether or not the address is already registered**, and that is the
  * requirement rather than a shortcut: a create form that says "this email is taken" is a way to ask
@@ -91,7 +91,7 @@ const CODE_FAILURE_KEYS: Record<CodeFailure, string> = {
  * it; a verified one gets nothing at all. From outside, the three cases are indistinguishable.
  */
 /*
-  The language the request was made in (spec 010, FR-042).
+  The language the request was made in.
 
   A second argument rather than a field on the value type: the value types are shared with the zod
   schemas the forms validate against, and a language is not something a customer types. It cannot be
@@ -178,9 +178,9 @@ export interface SignInOutcome {
 }
 
 /**
- * Sign in (FR-010 – FR-012, FR-014).
+ * Sign in.
  *
- * **One message for a wrong password and for an address with no account** (FR-011). They are
+ * **One message for a wrong password and for an address with no account**. They are
  * genuinely different events and the customer is told the same thing, because a form that
  * distinguishes them answers "does this person shop here?" for anyone willing to submit a list.
  * `authenticateCustomer` reports the difference; this is the line that throws it away, and it is
@@ -217,7 +217,7 @@ export async function signIn(
 
   await establishSession(outcome.token)
 
-  // Their guest cart follows them into the account (spec 005, FR-005). Before the redirect, so the
+  // Their guest cart follows them into the account. Before the redirect, so the
   // page they land on already shows the merged cart — and swallowing its own failures, so a merge
   // can never be the reason a sign-in does not work.
   await mergeCartOnSignIn(outcome.customerId)
@@ -230,7 +230,7 @@ export async function signIn(
 }
 
 /**
- * Sign out (FR-013).
+ * Sign out.
  *
  * `revalidatePath` is not decoration. The session cookie is gone the moment this returns, but the
  * client router keeps rendered segments in memory — so without invalidating them, the back button
@@ -245,7 +245,7 @@ export async function signOutCustomer(): Promise<ActionResult> {
 }
 
 /**
- * Ask for another code (FR-006).
+ * Ask for another code.
  *
  * Returns success for an unknown address as well, for the same reason registration does.
  */
@@ -343,7 +343,7 @@ async function enrolIfConsented(email: string): Promise<void> {
 }
 
 /**
- * Enter the code, become verified, and be signed in (FR-007).
+ * Enter the code, become verified, and be signed in.
  *
  * `payload.verifyEmail` is what flips `_verified`; the code only decides whether we call it. That
  * split is the whole of research R3 — Payload keeps the token and the state transition, and we own
@@ -386,7 +386,7 @@ export async function verifyEmailCode(input: VerifyCodeValues): Promise<ActionRe
 }
 
 /**
- * Ask for a reset code (FR-017).
+ * Ask for a reset code.
  *
  * **Success, always, and this is the requirement rather than a simplification.** The forgot-password
  * form is the easiest place in any application to enumerate registered addresses: submit a list,
@@ -442,7 +442,7 @@ export interface ResetHandleOutcome {
 }
 
 /**
- * Step two: the code is right, so issue a handle for the screen that sets the password (FR-018).
+ * Step two: the code is right, so issue a handle for the screen that sets the password.
  *
  * **Two actions rather than one, because the design is two screens** — and the handle is what makes
  * that safe. Payload's reset token is resolved here and stays here; what crosses to the browser is
@@ -471,7 +471,7 @@ export interface ResetOutcome {
 }
 
 /**
- * Step three: set the new password (FR-018, FR-021).
+ * Step three: set the new password.
  *
  * Schema, session, revalidation and routing. Everything that decides whether the password actually
  * changes is in `completePasswordReset` — see that module for why the two are separated.
@@ -517,7 +517,7 @@ export async function resetPassword(
 }
 
 /**
- * Set the customer's first and last name (FR-024, FR-026).
+ * Set the customer's first and last name.
  *
  * **It begins with `requireCustomer()`, and every mutating action after it does the same.** Not a
  * convention for its own sake: this is a public RPC endpoint, so "who is this?" cannot come from
@@ -563,7 +563,7 @@ export async function updateName(input: NameValues): Promise<ActionResult> {
 }
 
 /**
- * Change the password while signed in (FR-020, FR-021).
+ * Change the password while signed in.
  *
  * Schema, session and revalidation; everything that decides whether the password changes is in
  * `changeCustomerPassword`, for the same reason the reset flow is split that way.
@@ -605,7 +605,7 @@ export async function changePassword(input: ChangePasswordValues): Promise<Actio
 }
 
 /**
- * The customer's own addresses, and the two checks that keep them theirs (FR-032, SC-007).
+ * The customer's own addresses, and the two checks that keep them theirs.
  *
  * Every write below carries a client-supplied id, which is the whole reason this reads the way it
  * does. Two things stand between that id and another customer's row:
@@ -635,7 +635,7 @@ async function ownedAddress(user: CustomerUser, id: number): Promise<null | { id
 }
 
 /**
- * Blank optional fields are stored as null, not as `''` (FR-027).
+ * Blank optional fields are stored as null, not as `''`.
  *
  * The form always renders both optional boxes, so an untouched one submits an empty string. Letting
  * that through would fill the column with values that are neither absent nor present, and every
@@ -645,7 +645,7 @@ async function ownedAddress(user: CustomerUser, id: number): Promise<null | { id
 const blankToNull = (value: string): null | string => (value === '' ? null : value)
 
 /**
- * Create or update one address (FR-027 – FR-031).
+ * Create or update one address.
  *
  * **`isDefault` is passed through and then overruled by the collection.** `src/fields/address-hooks.ts`
  * owns FR-031, because a form is only one of the writers — the admin panel and a future checkout
@@ -691,7 +691,7 @@ export async function saveAddress(input: SaveAddressValues): Promise<ActionResul
 }
 
 /**
- * Remove one address (FR-029, FR-031).
+ * Remove one address.
  *
  * The confirmation the requirement asks for is the modal's, not this function's. An action that
  * demanded a second "yes, really" parameter would be a confirmation an attacker sends twice, and it
@@ -721,7 +721,7 @@ export async function deleteAddress(input: DeleteAddressValues): Promise<ActionR
 }
 
 /**
- * Turn marketing email on or off (FR-033, FR-034, FR-036).
+ * Turn marketing email on or off.
  *
  * **It writes one field, and that is the whole of the action.** The timestamp and the source are
  * `stampMarketingConsent`'s, computed from the change actually being made; the mirror into Resend is

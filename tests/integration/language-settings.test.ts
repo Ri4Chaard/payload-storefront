@@ -7,7 +7,7 @@ import { LanguageSettings } from '@/globals/language-settings'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * Which languages visitors are offered (spec 010, T060 — FR-026 – FR-031).
+ * Which languages visitors are offered.
  *
  * **`getEnabledLocales` is `cache()`-wrapped**, which memoises per request and therefore, in a test
  * process, for the lifetime of the module. So these assert against the global and the field
@@ -96,7 +96,7 @@ describe('the language settings global', () => {
 
   it('is readable by anyone and writable only by an administrator', async () => {
     // The storefront reads it on every page to build the switcher, so `read` is public; it holds
-    // two switches and no personal data. Stated explicitly, never by omission (Constitution IV).
+    // two switches and no personal data. Stated explicitly, never by omission.
     expect(LanguageSettings.access?.read?.({} as never)).toBe(true)
     expect(typeof LanguageSettings.access?.update).toBe('function')
   })

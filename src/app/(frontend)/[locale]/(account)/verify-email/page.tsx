@@ -5,7 +5,7 @@ import React from 'react'
 
 import { VerifyEmailScreen } from './verify-email-screen'
 
-/** Nodes `428:11869` and `432:13049` (spec 004, US1). */
+/** Nodes `428:11869` and `432:13049`. */
 export async function generateMetadata(): Promise<Metadata> {
   const t_account = await getTranslations('account')
   return { title: t_account('metaVerifyEmail'), robots: { follow: false, index: false } }

@@ -5,7 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { addressSchema, saveAddressSchema } from '@/lib/auth/schemas'
 
 /**
- * US5 — saved delivery addresses (spec 004, FR-027 – FR-032; SC-007).
+ * US5 — saved delivery addresses.
  *
  * **`saveAddress` and `deleteAddress` are not called here**, for the seam US2, US3 and US4 all
  * record: both open with `requireCustomerUser()`, which reads `next/headers`, and there is no
@@ -106,7 +106,7 @@ afterAll(async () => {
 })
 
 describe('the id that arrives from the browser', () => {
-  it('finds nothing when it names another customer’s address (FR-032, SC-007)', async () => {
+  it('finds nothing when it names another customer’s address', async () => {
     const hers = await addAddress(alice)
 
     // Exactly the query `ownedAddress` runs before a save or a delete. An empty result is what
@@ -135,7 +135,7 @@ describe('the id that arrives from the browser', () => {
   })
 })
 
-describe('exactly one default (FR-031)', () => {
+describe('exactly one default', () => {
   it('makes the first address the default, whatever the box said', async () => {
     const first = await addAddress(alice, { isDefault: false })
 
@@ -239,7 +239,7 @@ describe('the admin panel’s view of a customer', () => {
     expect(ids).toContain(first.id)
     expect(ids).toContain(second.id)
 
-    // Default first (FR-031), so the address that will actually be used is the one at the top.
+    // Default first, so the address that will actually be used is the one at the top.
     expect(ids[0]).toBe(first.id)
     await clear(alice.id)
   })
@@ -255,7 +255,7 @@ describe('the admin panel’s view of a customer', () => {
   })
 })
 
-describe('the columns the form insists on (FR-030)', () => {
+describe('the columns the form insists on', () => {
   it('refuses a row with no city, whoever is writing', async () => {
     await expect(addAddress(alice, { city: undefined })).rejects.toThrow()
     await clear(alice.id)

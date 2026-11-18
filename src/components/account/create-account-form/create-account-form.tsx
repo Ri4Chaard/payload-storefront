@@ -19,7 +19,7 @@ import { createAccountSchema, type CreateAccountValues } from '@/lib/auth/schema
  *
  * **Plus a marketing-consent control the design does not draw.** Marketing email is opt-in, so
  * consent has to be asked for rather than assumed; the box is unticked and registration succeeds
- * whether or not it is touched (FR-036, FR-036a). Recorded as design defect 5 in the spec.
+ * whether or not it is touched. Recorded as design defect 5 in the spec.
  *
  * **It is always drawn.** An Account settings switch used to hide it, and it is gone: the only
  * correct setting of that switch was on. Turning it off cost the shop nothing visible and quietly
@@ -41,7 +41,7 @@ export function CreateAccountForm() {
   const t_errors = useTranslations('errors')
   const t_forms = useTranslations('forms')
   const t_account = useTranslations('account')
-  // Sent to the action, which sends it to the mail (spec 010, FR-042).
+  // Sent to the action, which sends it to the mail.
   const locale = useLocale() as Locale
 
   const ERRORS: Record<string, string> = {

@@ -1,14 +1,14 @@
 import type { Field } from 'payload'
 
 /**
- * An optional call to action — a label and where it goes (spec 006, FR-011, FR-013).
+ * An optional call to action — a label and where it goes.
  *
  * Shared rather than repeated. Constitution II names repeated field groups as the thing that must
  * become a reusable config, and two blocks need this one: the banner's "EXPLORE THE COLLECTION"
  * and the FAQ band's "CONTACT US".
  *
  * **Both halves are optional, and both empty means no button.** The design draws a button on the
- * Standard banner and none on "Crafted to last" — one block, two uses (FR-048) — so absence has to
+ * Standard banner and none on "Crafted to last" — one block, two uses — so absence has to
  * be expressible rather than worked around with an empty label that renders an empty control.
  *
  * **The destination is the editor's, including when it is wrong.** A CTA pointing at a page that

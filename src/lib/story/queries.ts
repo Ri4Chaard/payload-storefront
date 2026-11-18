@@ -9,7 +9,7 @@ import { toStoryPage } from './mappers'
 import type { StoryPage } from './types'
 
 /**
- * Reading the story page (spec 006, T022, contracts/story-loader.md).
+ * Reading the story page.
  *
  * **The only module that knows this page came from Payload.** Everything above it sees the view
  * models in `./types.ts` — the same seam `src/lib/catalog/queries.ts` is for the catalogue, and the
@@ -20,7 +20,7 @@ import type { StoryPage } from './types'
  * their own — a second entry point would let a future caller show questions the editor did not
  * choose.
  *
- * **`/faq` did not add its function to this file** (008/T009), which is what this comment used to
+ * **`/faq` did not add its function to this file**, which is what this comment used to
  * predict. It reads every published question rather than a chosen subset, so it needs a query this
  * page must never have; and by then the questions were shared by three pages, so the view model and
  * its mapper had moved to `@/lib/questions/` and the loader followed them there. The prediction was
@@ -34,7 +34,7 @@ import type { StoryPage } from './types'
  * **Deduplicated per request, not cached across requests.** `cache()` collapses the two reads a
  * single render makes — the page body and `generateMetadata` — into one. Anything longer-lived
  * would need an invalidation story, and this route deliberately has none: it is `force-dynamic`
- * (006/research.md R6), so a publish is visible to the next visitor because nothing was stored.
+ *, so a publish is visible to the next visitor because nothing was stored.
  */
 
 const client = cache(async () => getPayload({ config }))

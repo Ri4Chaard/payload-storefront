@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 /**
- * The six digits a customer types, and the Payload token they stand for (spec 004, research R3/R4).
+ * The six digits a customer types, and the Payload token they stand for.
  *
  * **Why this exists.** Payload's email verification and password reset are link-based: it mints a
  * token and mails a URL containing it. The brief and the design both want a code. The tempting move

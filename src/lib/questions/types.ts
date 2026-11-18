@@ -1,7 +1,7 @@
 import type { CatalogImage } from '@/lib/catalog/types'
 
 /**
- * The shop's questions, as three pages draw them (spec 008, T008).
+ * The shop's questions, as three pages draw them.
  *
  * **Promoted out of `src/lib/story/`, where this lived as `StoryQuestion`.** That was the right home
  * when the FAQ band on `/about` was the only consumer. It is now one of three — `/about`, `/contact`
@@ -34,7 +34,7 @@ export interface FaqPageSeo {
 }
 
 /**
- * The `/faq` page's own copy (spec 008, FR-039, FR-040).
+ * The `/faq` page's own copy.
  *
  * Deliberately tiny: the page's content is the questions themselves, and everything here is what
  * wraps them. The empty pair is not an afterthought — FR-039 requires a heading and a plain message

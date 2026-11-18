@@ -36,7 +36,7 @@ describe('listingHref', () => {
   })
 
   /** A slug the catalogue does not have has no path to move into, so it stays where it can be seen
-   * and reported (FR-030). */
+   * and reported. */
   it('leaves an unknown category in the query', () => {
     expect(listingHref(state({ category: ['rungs'] }), CATEGORIES)).toBe(
       '/all-products?category=rungs',

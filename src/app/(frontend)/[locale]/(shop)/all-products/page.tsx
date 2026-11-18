@@ -11,7 +11,7 @@ import { getCategories, getFilterFacets, getShopContent } from '@/lib/catalog/qu
 import { Listing, ListingBreadcrumbs, listingMetadata } from '../listing'
 
 /**
- * The whole shop (003/T254). Node `355:7139` — the same frame as a category listing with a
+ * The whole shop. Node `355:7139` — the same frame as a category listing with a
  * different name in the title block and no category applied.
  *
  * A static sibling of `/[category]`, so Next resolves it first and "all-products" is never mistaken
@@ -43,7 +43,7 @@ export default async function AllProductsPage({
   const query = await searchParams
 
   /**
-   * `?category=category-1&minPrice=…&maxPrice=…` is `/category-1` (003/T274).
+   * `?category=category-1&minPrice=…&maxPrice=…` is `/category-1`.
    *
    * The drawer is a `<form method="GET">`, and a form cannot choose its own path from what is
    * ticked inside it — so without scripting it always posts here, with the category as a parameter

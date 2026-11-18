@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * US4 end to end (spec 004, FR-022 – FR-026) — the profile card and its one working control.
+ * US4 end to end — the profile card and its one working control.
  *
  * The assertions a browser is genuinely needed for are the three about the modal: that Cancel keeps
  * the stored name AND discards the draft, that Save updates the row without a reload, and that the
@@ -157,7 +157,7 @@ test('cancel keeps the stored name and discards the draft', async ({ page }) => 
 })
 
 /**
- * The regression the Addresses row found (US5), asserted on the row that shares the mechanism.
+ * The regression the Addresses row found, asserted on the row that shares the mechanism.
  *
  * Saving revalidates `/account`, and applying that server tree while a dialog is open replaces the
  * inputs underneath the customer: the next keystroke reaches a DOM node React is no longer
@@ -190,7 +190,7 @@ test('a second edit straight after the first is not discarded', async ({ page })
 /**
  * The dialog is a keyboard trap by design, and Escape is the way out of it. Checked here rather
  * than trusted from `Modal`'s own stories, because focus returning to the pencil is a property of
- * how this screen wires `triggerRef` (FR-046).
+ * how this screen wires `triggerRef`.
  */
 test('escape closes the modal and returns focus to the control that opened it', async ({ page }) => {
   await signedIn(page)

@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn'
 import { SectionHeading } from '../section-heading'
 
 /**
- * The featured-products band (002/T123), from Figma nodes 144:839, 440:12540 and 440:13525 — a
+ * The featured-products band, from Figma nodes 144:839, 440:12540 and 440:13525 — a
  * heading, a row of product cards, and a route to the full catalogue.
  *
  * **The drawing says "carousel" without saying it.** The desktop frame parks a 50px "scroll right"
@@ -38,7 +38,7 @@ export interface ProductCarouselProps extends React.ComponentProps<'section'> {
   /**
    * The route to the full catalogue, drawn beneath the row on the home page (node 144:839).
    *
-   * Optional because the product page reuses this band for _Complete the Collection_ (FR-037) and
+   * Optional because the product page reuses this band for _Complete the Collection_ and
    * draws no button there (node `242:2585`): the products in the row already ARE the destinations,
    * and "view all" would point at a listing the visitor did not ask for.
    */
@@ -71,7 +71,7 @@ export function ProductCarousel({
 }: ProductCarouselProps) {
   const t_catalog = useTranslations('catalog')
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

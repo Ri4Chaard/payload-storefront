@@ -13,7 +13,7 @@ import { BLOG_ROOT, blogHref, parseCategory, parsePage } from '@/lib/blog/blog-u
 import { getBlogIndex } from '@/lib/blog/queries'
 
 /**
- * The blog (007/T042 — T045, T065 — T067), from Figma nodes `312:6976`, `415:7900`, `415:8018`.
+ * The blog, from Figma nodes `312:6976`, `415:7900`, `415:8018`.
  *
  * **This route closes the last dead link in the site chrome.** The footer has carried
  * *Our Blog → /blog* under ABOUT since spec 001, and until now it was a 404 in production.
@@ -35,7 +35,7 @@ import { getBlogIndex } from '@/lib/blog/queries'
 export const dynamic = 'force-dynamic'
 
 /**
- * The blog's own metadata (007/T071, FR-043).
+ * The blog's own metadata.
  *
  * **The canonical is the bare `/blog`, always.** A narrowed or paged view is a view of the blog
  * rather than a page of its own, and letting `?category=guides&page=3` become its own indexable
@@ -107,7 +107,7 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
 
   /*
     A category slug nobody has ever used is a claim about content, and the honest answer to a claim
-    about content that is false is the same answer any unknown address gets (FR-016). This check
+    about content that is false is the same answer any unknown address gets. This check
     lives here rather than in the loader because deciding what an address MEANS is the route's job —
     the loader only reads.
   */
@@ -140,7 +140,7 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
             A tab with nothing in it has somewhere useful to send a visitor; a blog with nothing
             published does not, and a button offering to clear a filter nobody applied would be a
             control that admits it cannot help. This is the case `EmptyState.action` was made
-            optional for (007/T007).
+            optional for.
           */
           {...(active ? { action: { href: BLOG_ROOT, label: t_blog('allArticles') } } : {})}
         />

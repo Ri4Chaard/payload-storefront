@@ -13,9 +13,10 @@ import { BLOG_ROOT } from '@/lib/blog/blog-url'
 import type { ArticleView } from '@/lib/blog/types'
 import { getArticle, getArticleSlugs } from '@/lib/blog/queries'
 import { prerenderable } from '@/lib/catalog/prerender'
+import { SITE_NAME } from '@/lib/site'
 
 /**
- * One article (007/T032, T033), from Figma nodes `312:8140`, `418:8580`, `418:8881`.
+ * One article, from Figma nodes `312:8140`, `418:8580`, `418:8881`.
  *
  * **The two-column arrangement is a grid, and the rail is second in the DOM.** The design puts the
  * contents rail beside the article from tablet up — 220px at 768 (`418:8674`), 500px at 1920
@@ -41,7 +42,7 @@ import { prerenderable } from '@/lib/catalog/prerender'
  * app returns a fragment for the same reason.
  */
 /**
- * The articles that are ready before the first visitor (007/T054).
+ * The articles that are ready before the first visitor.
  *
  * **`dynamicParams` is left at its default**, so an article published after the build still renders
  * on demand and is cached from then on. This list decides what is ready in advance, not what
@@ -59,7 +60,7 @@ export async function generateStaticParams() {
 }
 
 /**
- * Editor-controlled metadata, falling back to what the article itself says (007/T070, FR-043).
+ * Editor-controlled metadata, falling back to what the article itself says.
  *
  * Constitution V requires the owner rather than a developer to decide how this appears in a search
  * result, and requires a canonical URL. Every SEO field is optional, so the fallbacks are what an
@@ -167,7 +168,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 }
 
 /**
- * `schema.org/Article` and `BreadcrumbList` (007/T072, T073 — Constitution V).
+ * `schema.org/Article` and `BreadcrumbList`.
  *
  * Constitution V names both by name for an article page. The shape follows
  * `src/app/(frontend)/products/[slug]/page.tsx` so the site emits structured data one way rather
@@ -186,7 +187,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
  * asked to keep a "last updated" date honest will not, and a wrong one is worse than none.
  */
 /**
- * The breadcrumb's two fixed names arrive as props (spec 010).
+ * The breadcrumb's two fixed names arrive as props.
  *
  * This component is synchronous, and `getTranslations` is not — so rather than make the schema
  * async for two words, the page that already holds the translators hands them down. Structured data
@@ -213,7 +214,7 @@ function ArticleSchema({
       dateModified: article.updatedOn,
       ...(article.category ? { articleSection: article.category.title } : {}),
       mainEntityOfPage: { '@type': 'WebPage', '@id': article.href },
-      publisher: { '@type': 'Organization', name: 'Aurum' },
+      publisher: { '@type': 'Organization', name: SITE_NAME },
     },
     {
       '@context': 'https://schema.org',

@@ -19,12 +19,12 @@ import { cn } from '@/lib/cn'
 import { ProductOptions } from '../product-options'
 
 /**
- * Everything on the product page that depends on what the visitor has chosen (003/T283). Nodes
+ * Everything on the product page that depends on what the visitor has chosen. Nodes
  * `301:5028` (1920), `410:7314`–`410:7371` (1024), `410:7647`–`410:7703` (390).
  *
  * **It spans the price as well as the controls, and that is the point.** FR-039 says the displayed
  * price follows the selected option, so the price and the selector have to share a state — and the
- * description sits between them in the drawn order (FR-035). Splitting them would mean lifting the
+ * description sits between them in the drawn order. Splitting them would mean lifting the
  * choice into the route, which is a server component, or duplicating it. So this owns the whole
  * run from the price down to BUY NOW, and takes the description as copy to render in its place.
  *
@@ -35,7 +35,7 @@ import { ProductOptions } from '../product-options'
  * label says so; after one is picked it has a price, and continuing to say "from" would be quoting
  * a range the visitor has already resolved.
  *
- * **Both actions are live** (spec 005, T021, T069). Each builds a `CartIntent` — identifiers only,
+ * **Both actions are live**. Each builds a `CartIntent` — identifiers only,
  * never a price — and hands it to a Server Action, which re-reads the product from the published
  * catalogue and validates the choice again before doing anything. Nothing here is trusted: this
  * component's only job is to say what was chosen and to render whatever comes back.
@@ -54,7 +54,7 @@ import { ProductOptions } from '../product-options'
  * down from the route — a Server Component — costs one prop and keeps this component renderable in
  * a browser, which is what its stories depend on.
  *
- * **BUY NOW never touches the cart** (FR-020). It validates the same choices and opens the same
+ * **BUY NOW never touches the cart**. It validates the same choices and opens the same
  * handoff modal for this one product; a customer with a basket already assembled finds it exactly as
  * they left it. That is a property of the action's code path rather than a check inside it — see
  * `buyNow` in `src/lib/cart/actions.ts`.
@@ -70,7 +70,7 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
   /** FR-007. Whether to say so under the price — a fact about the product, never a count. */
   madeToOrder?: boolean
   variantChoices: VariantOption[]
-  /** The product as a whole. An unavailable one says so in text, not in colour (FR-040). */
+  /** The product as a whole. An unavailable one says so in text, not in colour. */
   available: boolean
   /** The ceiling for a product with no options. With options, each option carries its own. */
   maxQuantity?: number
@@ -87,7 +87,7 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
     language, so the page says.
   */
   onAddToCart?: (intent: CartIntent, locale: Locale) => Promise<CartActionResult>
-  /** Opens the handoff for this product alone, leaving the cart untouched (FR-020). */
+  /** Opens the handoff for this product alone, leaving the cart untouched. */
   onBuyNow?: (intent: CartIntent, locale: Locale) => Promise<CheckoutResult>
 }
 
@@ -109,7 +109,7 @@ export function ProductPurchase({
   const locale = useLocale() as Locale
   const [variantChoice, setVariantChoice] = React.useState<number | null>(null)
   /*
-    The details beside this column show the selected option's own properties (spec 011, FR-013), and
+    The details beside this column show the selected option's own properties, and
     they are a sibling in the server-rendered page rather than a child. Publishing the id is the
     whole of the coupling — see `SelectedVariantProvider` for why it is not a bigger one.
   */
@@ -143,7 +143,7 @@ export function ProductPurchase({
   const quantity = ceiling === undefined ? wanted : Math.min(wanted, ceiling)
 
   /**
-   * What to say when the action refuses (FR-002, FR-003).
+   * What to say when the action refuses.
    *
    * The action returns the FIELD, never a sentence — the words belong here, where they can be
    * reworded and one day translated. Each names the control the visitor has to go and fix, which is
@@ -274,7 +274,7 @@ export function ProductPurchase({
 
       {/*
         The stepper and ADD TO CART share a line, and below the narrowest drawn frame they stop
-        sharing it (003/T298).
+        sharing it.
 
         `flex-wrap` is the whole of that. The button's label does not wrap — no button's does — so
         the row's minimum width is the stepper plus the words "ADD TO CART" laid end to end, which
@@ -334,7 +334,7 @@ export function ProductPurchase({
       ) : null}
 
       {/*
-        The reason in TEXT, never in colour alone (FR-040). Only for a product that genuinely cannot
+        The reason in TEXT, never in colour alone. Only for a product that genuinely cannot
         be bought — BUY NOW being disabled while the handoff is still being built is a fact about
         this deployment, not about the product, and saying so on the page would be noise.
       */}
@@ -345,7 +345,7 @@ export function ProductPurchase({
       ) : null}
 
       {/*
-        One live region for both outcomes (FR-002, FR-003, T022).
+        One live region for both outcomes.
         `role="status"` rather than `alert`: this is the consequence of something the visitor just
         did, announced politely, in the same way the price above announces itself when an option
         changes. A refusal names the control to go and fix rather than saying the action failed.

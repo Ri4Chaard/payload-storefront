@@ -9,7 +9,7 @@ import { HandoffModal } from './handoff-modal'
 /**
  * Nodes `590:13108` (1920), `590:13775` (1024), `590:13875` (390).
  *
- * The copy affordance is in every story because it is in every handoff (FR-024, SC-017) — a page
+ * The copy affordance is in every story because it is in every handoff — a page
  * cannot detect whether a messenger will open, so a fallback that waits for failure never reaches
  * the customer who needed it.
  */

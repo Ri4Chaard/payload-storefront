@@ -5,7 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * Publishing one language does not publish another's draft (spec 010, T034 — FR-023).
+ * Publishing one language does not publish another's draft.
  *
  * **`defaultLocalePublishOption: 'active'` is NOT Payload's default**, and that is the whole point
  * of this file. The shipped value is `'all'`, where pressing Publish while editing Russian pushes

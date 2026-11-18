@@ -5,7 +5,7 @@ import { isAdmin } from '@/lib/access'
 import { ENQUIRY_MAX, ENQUIRY_RETENTION_DAYS } from '@/lib/contact/config'
 
 /**
- * What a visitor wrote in the contact form (spec 008, FR-029 – FR-029f).
+ * What a visitor wrote in the contact form.
  *
  * **The site's first public data-collection point**, which is why almost every decision below is a
  * Constitution VI decision rather than a modelling one.
@@ -22,7 +22,7 @@ import { ENQUIRY_MAX, ENQUIRY_RETENTION_DAYS } from '@/lib/contact/config'
  * and the one nobody looks at is always the one that drifts.
  *
  * **Nothing here is editable, including by an administrator.** `update` is refused outright and
- * every field is `admin.readOnly` (FR-029b). What the visitor wrote is a record of what they wrote;
+ * every field is `admin.readOnly`. What the visitor wrote is a record of what they wrote;
  * a correspondence log an owner can rewrite is not a log. The two writes this collection does take
  * — the create, and the notification outcome immediately after — go through the Local API with
  * `overrideAccess: true`, the construction `src/collections/verification-codes.ts` uses and
@@ -34,7 +34,7 @@ import { ENQUIRY_MAX, ENQUIRY_RETENTION_DAYS } from '@/lib/contact/config'
  * submitting the contact form. This is the same reasoning `src/collections/questions.ts` records,
  * with a sharper edge: there, a typo fix cost the catalogue; here, an anonymous request would.
  *
- * **Never joined to a customer account** (FR-029f), even where the address matches one. An enquiry
+ * **Never joined to a customer account**, even where the address matches one. An enquiry
  * is correspondence, not profile data, and a relationship would widen who can see it the moment
  * anything renders a customer's own record.
  */
@@ -60,7 +60,7 @@ export const Enquiries: CollectionConfig = {
       Refused to everyone, in both directions that create data. The form's server action is the only
       writer and it uses `overrideAccess: true`, so "an enquiry can only arrive through the contact
       form" is a property of the architecture rather than a rule somebody has to enforce on a
-      public endpoint (FR-029a).
+      public endpoint.
     */
     create: () => false,
     update: () => false,
@@ -70,7 +70,7 @@ export const Enquiries: CollectionConfig = {
       address into a way to read whatever was written from it.
     */
     read: isAdmin,
-    // The erasure path (FR-029e). Reachable by a person, not only by the nightly purge.
+    // The erasure path. Reachable by a person, not only by the nightly purge.
     delete: isAdmin,
   },
   fields: [
@@ -103,7 +103,7 @@ export const Enquiries: CollectionConfig = {
     },
     {
       /*
-        The language the enquiry arrived in (spec 010, FR-043).
+        The language the enquiry arrived in.
 
         Recorded rather than inferred, and NOT localized — it is a fact about one submission, like
         the sender's address. The acknowledgement is sent in it and the messenger handoff carries it,

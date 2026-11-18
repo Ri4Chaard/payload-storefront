@@ -1,9 +1,10 @@
 import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { SITE_NAME } from '@/lib/site'
 
 /**
- * Telling the shop somebody wrote (spec 008, T052, contracts/enquiry-action.md §6).
+ * Telling the shop somebody wrote.
  *
  * **This is a notification, not a receipt.** The enquiry is already in the database by the time
  * anything here runs, and whether this succeeds decides nothing about what the visitor is told —
@@ -61,7 +62,7 @@ function paragraphs(value: string): string {
  * message a mail client is most likely to render somewhere unexpected. The name is in the body,
  * where the whole message already is.
  */
-const SUBJECT = 'New enquiry from the Aurum contact form'
+const SUBJECT = `New enquiry from the ${SITE_NAME} contact form`
 
 export interface EnquiryNotification {
   name: string
@@ -88,7 +89,7 @@ function render({ name, email, message }: EnquiryNotification): string {
  *
  * **Throws rather than swallowing**, unlike `sendPasswordChangedNotice`, and the difference is
  * deliberate: there, nothing could be done with the failure, so logging it was the end of it. Here
- * the outcome is stored on the enquiry and shown in the admin (FR-029c), so the caller needs to
+ * the outcome is stored on the enquiry and shown in the admin, so the caller needs to
  * know — an owner who can see "we never told you about this one" can act on it.
  *
  * `replyTo` is a real header, not a convention about the body:

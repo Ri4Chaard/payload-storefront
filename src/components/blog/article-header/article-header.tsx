@@ -3,7 +3,7 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * An article's opening (007/T026), from nodes `312:8484`, `418:8632`, `418:8933`.
+ * An article's opening, from nodes `312:8484`, `418:8632`, `418:8933`.
  *
  * An eyebrow, the page's only `h1`, and the standfirst — the sentence that tells a visitor whether
  * this is the article they wanted before they commit to the scroll.

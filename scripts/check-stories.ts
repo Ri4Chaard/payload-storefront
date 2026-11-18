@@ -1,5 +1,5 @@
 /**
- * Every UI-kit component must have stories (FR-032).
+ * Every UI-kit component must have stories.
  *
  * The style guide is only "living" if adding a component to the kit forces adding it to the guide.
  * Left to review, this is the rule people forget first — an undocumented kit gets bypassed and
@@ -45,7 +45,7 @@ if (missing.length > 0) {
     console.error(`  ${relative(root, file)}`)
     console.error(`    expected ${relative(root, file.replace(/\.tsx$/, '.stories.tsx'))}`)
   }
-  console.error('\n  Every component ships with its stories in the SAME change (FR-032).')
+  console.error('\n  Every component ships with its stories in the SAME change.')
   process.exit(1)
 }
 

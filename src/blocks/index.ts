@@ -8,7 +8,7 @@ import { pageHeader } from './page-header'
 import { processSteps } from './process-steps'
 
 /**
- * The block registry (spec 006, FR-047, FR-050).
+ * The block registry.
  *
  * Registered once on `config.blocks` and referenced BY SLUG from the pages that use them —
  * `blockReferences: ['banner', …]` rather than the definitions inline. Payload 3.88 supports this
@@ -17,7 +17,7 @@ import { processSteps } from './process-steps'
  * blog with no redefinition and no second copy to drift.
  *
  * Adding a block type is six steps, and stopping early fails quietly in two different ways — see
- * `specs/006-our-story-faq/contracts/blocks.md` §2 before adding one.
+ * "Adding a block type" in `docs/overview.md` before adding one.
  */
 export const blocks: Block[] = [pageHeader, mediaPlate, closerLook, banner, processSteps, faq]
 

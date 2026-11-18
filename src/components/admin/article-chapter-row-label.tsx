@@ -4,7 +4,7 @@ import { useRowLabel } from '@payloadcms/ui'
 import React from 'react'
 
 /**
- * What a collapsed chapter row says in the admin (007/T011).
+ * What a collapsed chapter row says in the admin.
  *
  * Payload labels array rows by their position — `Chapter 01`, `Chapter 02` — which is unreadable
  * the moment an article has eight of them and the whole point of the list is to drag them into a

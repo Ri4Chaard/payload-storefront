@@ -130,7 +130,7 @@ describe('readState', () => {
     expect(readState(raw, config(TODAY, 4)).status).toBe('decided')
   })
 
-  it('ignores a key in the record that is no longer configured (FR-041)', () => {
+  it('ignores a key in the record that is no longer configured', () => {
     const raw = stored(decide({ kind: 'all' }, LATER, 1))
     // Analytics has since been removed. The stale key is not an error and not a reason to re-ask.
     expect(readState(raw, config(TODAY)).status).toBe('decided')
@@ -219,7 +219,7 @@ describe('isAllowed', () => {
 })
 
 describe('startingSelection', () => {
-  it('starts a first-time visitor with necessary only, everything optional off (FR-030)', () => {
+  it('starts a first-time visitor with necessary only, everything optional off', () => {
     expect(startingSelection({ status: 'ask' }, LATER)).toEqual(['necessary'])
   })
 

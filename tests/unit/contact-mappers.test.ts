@@ -4,7 +4,7 @@ import { toContactPage } from '@/lib/contact/mappers'
 import type { ContactPage as ContactPageDocument, Question as QuestionDocument } from '@/payload-types'
 
 /**
- * The contact page's mapper (008/T027, contracts/contact-loader.md §6).
+ * The contact page's mapper.
  *
  * The rules pinned down here are the ones a component must never have to re-derive — above all
  * FR-032's "the band is absent when there is nothing to show", which is a property of the view
@@ -116,7 +116,7 @@ describe('toContactPage', () => {
     expect(view.form.footnote).toBeUndefined()
   })
 
-  describe('the questions band (FR-032)', () => {
+  describe('the questions band', () => {
     it('keeps the editor’s chosen order, not the collection’s', () => {
       const view = toContactPage(
         page({
@@ -136,7 +136,7 @@ describe('toContactPage', () => {
 
     /*
       The loader reads with `overrideAccess: false`, so an unpublished question never arrives — it
-      is absent rather than filtered. If that empties the list, the band goes with it (FR-033).
+      is absent rather than filtered. If that empties the list, the band goes with it.
     */
     it('is absent when every chosen question has been unpublished', () => {
       const view = toContactPage(
@@ -149,7 +149,7 @@ describe('toContactPage', () => {
     })
   })
 
-  describe('metadata fallbacks (FR-048)', () => {
+  describe('metadata fallbacks', () => {
     it('derive from what the page actually says', () => {
       const view = toContactPage(page({ form: { ...page().form, photo: photo() } } as Partial<ContactPageDocument>))
 

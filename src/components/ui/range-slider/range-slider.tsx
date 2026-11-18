@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn'
  * back into agreement with the rest of the kit. The native element already brings what is expensive
  * to write: arrow and Home/End keys, page steps, touch, `aria-valuenow` maintained by the browser,
  * and a control a screen reader recognises without being told what it is. What it does NOT bring is
- * a second handle — so there are two of them, stacked, each owning one end (research R7).
+ * a second handle — so there are two of them, stacked, each owning one end.
  *
  * **The inputs are transparent; everything visible is drawn underneath them.** A native range's
  * track cannot be styled to this drawing across browsers, so the rail, the ticks and the selected
@@ -43,7 +43,7 @@ import { cn } from '@/lib/cn'
  *
  * **It submits without JavaScript.** Give it `nameMin` and `nameMax` and the two inputs are ordinary
  * form controls, so the drawer's `<form method="GET">` produces the same URL the interactive path
- * produces (FR-029). That is the reason this is two real inputs rather than two divs and a
+ * produces. That is the reason this is two real inputs rather than two divs and a
  * `pointerdown` handler.
  *
  * **The value is the model's, not the browser's** — amounts here are integer minor units, which is

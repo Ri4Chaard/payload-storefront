@@ -1,5 +1,5 @@
 /**
- * Where a blog view lives (spec 007, T018, contracts/blog-url.md).
+ * Where a blog view lives.
  *
  * **One module writes every `/blog` address**, which is `src/lib/catalog/listing-url.ts`'s lesson
  * restated rather than rediscovered: six callers assembling `basePath + query` themselves is six

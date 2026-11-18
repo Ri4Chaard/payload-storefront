@@ -14,18 +14,18 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
  * **Size is deliberately not a variant type.** Making it one would multiply every option by every
  * size — five options and fifteen sizes is seventy-five documents the owner creates by hand, in
  * a Payload version with no bulk generator, for an axis that never changes the price
- * (003/research.md R3). Size is a field on the product instead.
+ *. Size is a field on the product instead.
  *
  * Only one field is added. The plugin already supplies `title`, `product`, `options`, `inventory`
  * and the price group, along with drafts, trash and published-only public reads.
  */
 /**
- * The plugin's `inventory` field, shown only where a number means something (spec 011, FR-001).
+ * The plugin's `inventory` field, shown only where a number means something.
  *
  * A made-to-order variant has no quantity to hold, and an editable field whose value is ignored is
  * worse than no field: it invites the owner to type a number and believe it matters. The condition
  * reads the variant's OWN `availability` — mirrored from the parent by `stampAvailability` — because
- * `admin.condition` is synchronous and cannot fetch the parent to ask (011/research.md R5).
+ * `admin.condition` is synchronous and cannot fetch the parent to ask.
  *
  * The same narrowing `adjustInventory` does on products, and for the same reason: `Field` is a union
  * of sixty-odd shapes, and spreading one without narrowing produces a type assignable to none of
@@ -63,7 +63,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
    */
 
   /**
-   * Publishing invalidates the cached routes (003/T294).
+   * Publishing invalidates the cached routes.
    *
    * **Appended to the plugin's own hooks rather than replacing them.** `defaultCollection.hooks`
    * is where the e-commerce plugin keeps its inventory and price bookkeeping; spreading it and
@@ -72,7 +72,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
   hooks: {
     ...defaultCollection.hooks,
     // Stamps this variant with its parent's availability as it is created, so one added to a product
-    // that is already made to order is right immediately (spec 011, FR-001).
+    // that is already made to order is right immediately.
     beforeChange: [...(defaultCollection.hooks?.beforeChange ?? []), stampAvailability],
     afterChange: [...(defaultCollection.hooks?.afterChange ?? []), revalidateOnChange],
     afterDelete: [...(defaultCollection.hooks?.afterDelete ?? []), revalidateOnDelete],
@@ -82,7 +82,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
     ...defaultCollection.fields.map(adjustInventory),
 
     /**
-     * What this variant is, where it differs from the product it belongs to (spec 011, US2, FR-009).
+     * What this variant is, where it differs from the product it belongs to.
      *
      * **The product's own array, copied rather than reinvented.** Two variants of one product can have
      * different weights and different certificates — properties that describe the variant, not
@@ -92,7 +92,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
      * appended.
      *
      * The product's own "Product details" prose and its short description stay on the product and do
-     * NOT vary by variant (011/spec.md FR-009a). A variant differs from its siblings in weight, grade
+     * NOT vary by variant. A variant differs from its siblings in weight, grade
      * and certificate; prose that changed underneath a customer comparing two variants would make
      * them harder to compare, not easier.
      */
@@ -117,7 +117,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
               label: 'Attribute',
             },
       /*
-        **Required, but not in every language** (spec 010, T110) — the same trap as on the product,
+        **Required, but not in every language** — the same trap as on the product,
         and the reason this is copied verbatim rather than tightened.
 
         A row in this array is shared across all three locales — arrays are not localized, the words
@@ -136,7 +136,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
     },
 
     /**
-     * The product's availability, mirrored (spec 011, US1, FR-001; research R5).
+     * The product's availability, mirrored.
      *
      * **This exists for the admin form and for nothing else.** `admin.condition` is synchronous and
      * receives only the document being edited (`payload/dist/fields/config/types.d.ts:111`), so a

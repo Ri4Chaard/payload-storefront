@@ -2,7 +2,7 @@ import type { CollectionBeforeValidateHook } from 'payload'
 import { ValidationError } from 'payload'
 
 /**
- * Two policies may not share an address (spec 009, FR-015a).
+ * Two policies may not share an address.
  *
  * **The `unique` constraint on `slugField` already enforces this.** What it cannot do is say
  * anything useful when it fires: Postgres reports a violated index by name, which tells an editor
@@ -16,7 +16,7 @@ import { ValidationError } from 'payload'
  * one.
  *
  * **There is no category check and no reserved-route list here**, and their absence is a
- * consequence of the `/legal/` prefix rather than an oversight (009/research.md R2). An earlier
+ * consequence of the `/legal/` prefix rather than an oversight. An earlier
  * design served policies at bare root addresses, where a policy slugged `category-1` would have been
  * permanently shadowed by the catalogue and one slugged `about` would have shadowed a real page —
  * so it needed both checks plus a hardcoded list of every top-level route on the site. That list

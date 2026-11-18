@@ -4,14 +4,14 @@ import { seoField } from '@/fields/seo'
 import { isAdmin } from '@/lib/access'
 
 /**
- * The `/faq` page's own copy (spec 008, FR-039, FR-040).
+ * The `/faq` page's own copy.
  *
  * **Deliberately tiny, and that is the design.** The page's content is the questions themselves —
  * everything here is what wraps them. Four fields for a whole page looks thin next to
  * `contact-page`; it is thin because `src/collections/questions.ts` was written in spec 006 to
  * carry this page's content before the page existed, and it does.
  *
- * **There is no question-selection field, and there must not be** (FR-038). `/about` and `/contact`
+ * **There is no question-selection field, and there must not be**. `/about` and `/contact`
  * each pick a subset because a band of five questions is part of a longer page; `/faq` is the list.
  * Publishing a question is the only action needed for it to appear here, which is what the
  * collection's `order` field description has promised since spec 006: "Lowest first, in this list

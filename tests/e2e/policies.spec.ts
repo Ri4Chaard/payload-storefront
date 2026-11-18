@@ -5,7 +5,7 @@ import { getPayload } from 'payload'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * The policy pages, end to end (spec 009, T017).
+ * The policy pages, end to end.
  *
  * **The first assertion is the whole point of User Story 1**: four links the footer has published
  * since spec 001 answered "not found" in production, on every page of this site. Everything else
@@ -132,14 +132,14 @@ test.describe('what the page draws', () => {
 
   test('the subtitle is free text, not a formatted date', async ({ page }) => {
     // Three pages use it for "Last Updated: …"; this one uses it for a sentence. A date field would
-    // have rendered one of the four correctly (FR-007).
+    // have rendered one of the four correctly.
     await page.goto('/legal/shipping')
     await expect(
       page.getByText('Enjoy complimentary shipping and returns on all orders'),
     ).toBeVisible()
   })
 
-  test('a published policy with an empty body shows a placeholder, never a 404 (FR-006)', async ({
+  test('a published policy with an empty body shows a placeholder, never a 404', async ({
     page,
   }) => {
     const slug = `e2e-empty-${Date.now()}`
@@ -159,7 +159,7 @@ test.describe('what the page draws', () => {
 })
 
 test.describe('publishing controls what exists', () => {
-  test('an unpublished policy 404s and carries no footer link (FR-015c)', async ({ page }) => {
+  test('an unpublished policy 404s and carries no footer link', async ({ page }) => {
     const slug = `e2e-draft-${Date.now()}`
     await make({
       slug,
@@ -211,7 +211,7 @@ test.describe('publishing controls what exists', () => {
 
 test.describe('the catalogue is untouched by this feature', () => {
   // The `/legal/` prefix exists so that policies never share a route segment with the shop
-  // (009/research.md R1). This is that claim, asserted rather than assumed.
+  //. This is that claim, asserted rather than assumed.
   test('category listings and the root 404 behave exactly as before', async ({ page }) => {
     expect((await page.request.get('/category-1')).status()).toBe(200)
     expect((await page.request.get('/category-1?colour=black')).status()).toBe(200)
@@ -223,7 +223,7 @@ test.describe('the catalogue is untouched by this feature', () => {
   })
 })
 
-test.describe('found and shared (US6)', () => {
+test.describe('found and shared', () => {
   test('each page emits an owner-controllable title, a canonical and social tags', async ({ page }) => {
     await page.goto('/legal/privacy')
 

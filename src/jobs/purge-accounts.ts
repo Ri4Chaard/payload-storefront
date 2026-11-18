@@ -3,7 +3,7 @@ import type { TaskConfig, Where } from 'payload'
 import { CODE_RETENTION_MS, UNVERIFIED_ACCOUNT_TTL_MS } from '@/lib/auth/config'
 
 /**
- * The scheduled cleanup behind FR-040 and FR-041 (spec 004, research R15).
+ * The scheduled cleanup behind FR-040 and FR-041.
  *
  * Two deletions that have nothing in common except when they run, which is why they are one task
  * rather than two: both are "forget what we no longer have a reason to keep", both want the same
@@ -21,7 +21,7 @@ import { CODE_RETENTION_MS, UNVERIFIED_ACCOUNT_TTL_MS } from '@/lib/auth/config'
  * the `where` clauses below are the whole of what this can touch.
  *
  * **It logs counts and never addresses.** A purge that prints who it deleted turns the log into the
- * copy of the personal data the purge existed to remove (FR-038).
+ * copy of the personal data the purge existed to remove.
  */
 
 /**

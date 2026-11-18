@@ -11,7 +11,7 @@ import { toQuestion } from './mappers'
 import type { FaqPage, Question } from './types'
 
 /**
- * Reading the questions, and the page that is nothing but them (spec 008, T068, T069).
+ * Reading the questions, and the page that is nothing but them.
  *
  * **There is no `getSelectedQuestions` here, and that is a correction rather than an omission.**
  * The plan assumed `/about` loaded its chosen questions through a query it could share. It does
@@ -26,7 +26,7 @@ import type { FaqPage, Question } from './types'
 const client = cache(async () => getPayload({ config }))
 
 /**
- * Every published question, in the collection's own order (FR-037).
+ * Every published question, in the collection's own order.
  *
  * **`order` ascending is the field spec 006 reserved for this page.** Its admin description has
  * read "Lowest first, in this list and on the FAQ page. A page that picks its own questions uses
@@ -34,7 +34,7 @@ const client = cache(async () => getPayload({ config }))
  * made executable.
  *
  * **No status filter, deliberately.** `adminOrPublishedStatus` on the collection makes a draft
- * unreachable rather than filtered (FR-033), so a second check here would put the publication rule
+ * unreachable rather than filtered, so a second check here would put the publication rule
  * in two places — and the one nobody looks at is where it drifts.
  *
  * `limit: 0` — every question, not a page of them. The shop has tens of these at most, and a page

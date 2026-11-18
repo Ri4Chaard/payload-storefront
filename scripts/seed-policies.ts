@@ -1,5 +1,5 @@
 /**
- * Seeds the four policy pages and the one cookie category this site actually has (spec 009, T014).
+ * Seeds the four policy pages and the one cookie category this site actually has.
  *
  * Run with `pnpm seed:policies`. Through Payload's Local API, so every hook, default and access
  * rule a real editor would hit applies here too.
@@ -9,7 +9,7 @@
  * difference matters: this is the owner's legal text, and a second run of a seed script must not
  * silently revert a lawyer's edit.
  *
- * **The content here is a truthful sample, not the Figma copy** (FR-016). The drawn banner
+ * **The content here is a truthful sample, not the Figma copy**. The drawn banner
  * and Cookie Policy describe a site using "third-party cookies, pixels", "various Google services"
  * and sending "advertising materials" — none of which is true of this site, and shipping it would
  * be publishing a false statement about data processing. What is seeded below describes the three

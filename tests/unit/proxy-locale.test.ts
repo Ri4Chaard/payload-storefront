@@ -11,7 +11,7 @@ vi.mock('next/server', () => ({ NextResponse: { redirect: () => undefined, next:
 const { config } = await import('@/proxy')
 
 /**
- * What the proxy is allowed to run on (spec 010, T016, T067 — research R3).
+ * What the proxy is allowed to run on.
  *
  * The behaviour of the proxy itself is proved end to end in `tests/e2e/locale-routing.spec.ts`
  * against a real server, because a `NextRequest` faithful enough to drive next-intl's middleware is
@@ -38,7 +38,7 @@ describe('the proxy matcher', () => {
 
   it('never runs on the cookie-reset handler', () => {
     // If the proxy acted on `/language/reset`, the redirect loop that route exists to break would
-    // simply move into this file. See contracts/routing.md §3.
+    // simply move into this file.
     expect(pattern.test('/language/reset')).toBe(false)
   })
 

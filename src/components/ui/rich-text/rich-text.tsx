@@ -3,7 +3,7 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * Rich text an owner wrote in the admin (006/T024).
+ * Rich text an owner wrote in the admin.
  *
  * **Promoted out of `product-details.tsx` rather than copied.** It lived there as a private helper
  * from spec 003, when the product page's warranty and delivery accordions were the only rich text
@@ -44,7 +44,7 @@ const PROSE = cn(
   '[&_li]:text-body-medium [&_li]:text-neutral-primary/80 [&_li]:mt-1',
   '[&_strong]:font-bold [&_a]:underline [&_a]:underline-offset-2',
   /*
-    Headings (spec 009). The policy pages are the FIRST consumer to have any: the product
+    Headings. The policy pages are the FIRST consumer to have any: the product
     accordions and FAQ answers have none, and `articles` removes headings from its toolbar
     altogether so a chapter cannot hide a section from the contents rail. So until now nothing
     restored them after the reset, and an `h2` an owner wrote rendered identically to a `p` —

@@ -39,7 +39,7 @@ export const Telegram: Story = {
  *
  * Instagram has no documented way to pre-fill a direct message, and the note is how the row admits
  * it — a customer who arrives at an empty chat believing their order travelled has been misled by
- * the interface, not by Instagram (FR-021).
+ * the interface, not by Instagram.
  */
 export const CannotCarryTheMessage: Story = {
   args: {

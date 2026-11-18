@@ -1,5 +1,5 @@
 /*
- * Every row is open when there is no scripting (003/T297, SC-004).
+ * Every row is open when there is no scripting.
  *
  * A row is a button that flips React state, so with scripting off the button does nothing and two
  * of a product page's three sections stay collapsed. Collapsed here is not merely invisible: the

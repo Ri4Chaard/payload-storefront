@@ -2,6 +2,7 @@ import { Link as NextLink } from '@/i18n/navigation'
 import React from 'react'
 
 import { cn } from '@/lib/cn'
+import { SITE_NAME } from '@/lib/site'
 
 /**
  * The brand wordmark, linking home.
@@ -27,7 +28,7 @@ export function Logo({ className, ...props }: Omit<React.ComponentProps<typeof N
       )}
       {...props}
     >
-      Aurum
+      {SITE_NAME}
     </NextLink>
   )
 }

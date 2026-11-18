@@ -10396,7 +10396,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Hello Aurum, I would like to order:\n\n{{items}}\n\nTotal: {{total}}\n\n{{customer}}'"
+          "default": "'Hello, I would like to order:\n\n{{items}}\n\nTotal: {{total}}\n\n{{customer}}'"
         },
         "id": {
           "name": "id",
@@ -10828,7 +10828,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Aurum'"
+          "default": "'us'"
         },
         "about_cta_label": {
           "name": "about_cta_label",
@@ -11393,7 +11393,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Aurum'"
+          "default": "'us'"
         },
         "version_about_cta_label": {
           "name": "version_about_cta_label",
@@ -20296,6 +20296,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "cce1e4e7-703b-4072-ab74-214f703dae52",
+  "id": "e4504d03-5582-4c02-8e08-f6af79cc9cef",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

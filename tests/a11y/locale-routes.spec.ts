@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { LOCALES } from '@/i18n/routing'
 
 /**
- * The same pages, in the other two languages (spec 010, T105 — FR-054, SC-008).
+ * The same pages, in the other two languages.
  *
  * **A separate file from `routes.spec.ts` rather than a third dimension on it.** That suite already
  * multiplies its routes by three breakpoints, and multiplying again by three languages would turn a

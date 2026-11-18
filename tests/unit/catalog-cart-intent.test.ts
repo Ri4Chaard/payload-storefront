@@ -121,7 +121,7 @@ describe('the intent that crosses the seam', () => {
 /**
  * The intent that crosses the seam.
  *
- * **This block used to be about the size trap** (spec 005, T015, research R16), and the trap went
+ * **This block used to be about the size trap**, and the trap went
  * with the sizes in spec 011. Two selects sat beside each other on the product page using opposite
  * conventions — the option select's entries carried `String(option.id)` with a handler doing
  * `Number(value)`, the size's carried `option.value`, a label — so `Number("6.5")` produced `6.5`:

@@ -8,7 +8,7 @@ import type { CustomerUser } from '@/lib/auth/dal'
 import { readCartCookie } from './cookie'
 
 /**
- * Whose cart is this? (spec 005, T007, [cart-actions.md §2](../../../specs/005-checkout-handoff/contracts/cart-actions.md))
+ * Whose cart is this? (spec 005, T007)
  *
  * Called first by every action and by the loader, because **ownership is re-derived on every call
  * and never taken from an argument.** Next's own documentation is blunt about why: a Server Action
@@ -43,7 +43,7 @@ const client = cache(async () => getPayload({ config }))
 export const resolveCartOwner = cache(async (): Promise<CartOwner> => {
   // `getCustomer` returns null rather than redirecting. That distinction is load-bearing all the
   // way through this feature: an anonymous visitor completes the entire flow, and a guard that
-  // redirected here would put a sign-in gate in the middle of checkout (FR-031, FR-046).
+  // redirected here would put a sign-in gate in the middle of checkout.
   const customer = await getCustomer()
   if (customer) {
     const payload = await client()

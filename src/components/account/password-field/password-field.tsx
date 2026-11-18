@@ -7,7 +7,7 @@ import { Icon } from '@/components/ui/icon'
 import { TextInput, type TextInputProps } from '@/components/ui/text-input'
 
 /**
- * A password box with a show/hide control (spec 004, FR-044).
+ * A password box with a show/hide control.
  *
  * Node `408:7412` draws the eye inside the field on sign-in, and `426:11616` does the same in the
  * change-password modal. It is one control repeated, so it is one component.

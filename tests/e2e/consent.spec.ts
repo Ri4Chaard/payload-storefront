@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * The cookie consent journey, end to end (spec 009, T026, T046).
+ * The cookie consent journey, end to end.
  *
  * **Every test starts from a browser that has never decided.** Playwright gives each test its own
  * context, so that is the default rather than something to arrange — which matters, because almost
@@ -113,7 +113,7 @@ test.describe('what gets stored', () => {
     expect(days).toBeLessThan(181)
   })
 
-  test('nothing is stored before a decision is made (FR-037)', async ({ page }) => {
+  test('nothing is stored before a decision is made', async ({ page }) => {
     await page.goto('/')
     await page.goto('/all-products')
 
@@ -138,7 +138,7 @@ test.describe('the chooser', () => {
     await expect(chooser(page).getByText('Always on')).toBeVisible()
   })
 
-  test('says plainly that nothing optional is in use (FR-047, T052)', async ({ page }) => {
+  test('says plainly that nothing optional is in use', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Configure All Cookies' }).click()
 
@@ -169,7 +169,7 @@ test.describe('the chooser', () => {
 })
 
 test.describe('changing your mind', () => {
-  test('the footer reopens the chooser after a decision (FR-032)', async ({ page }) => {
+  test('the footer reopens the chooser after a decision', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Agree' }).click()
     await expect(banner(page)).toBeHidden()
@@ -190,7 +190,7 @@ test.describe('changing your mind', () => {
 })
 
 test.describe('the page stays usable while the banner is up', () => {
-  test('the banner does not trap focus or block the page (FR-024)', async ({ page }) => {
+  test('the banner does not trap focus or block the page', async ({ page }) => {
     await page.goto('/')
     await expect(banner(page)).toBeVisible()
 
@@ -210,7 +210,7 @@ test.describe('the page stays usable while the banner is up', () => {
     }
   })
 
-  test('it stands down while a modal dialog owns the screen (FR-024)', async ({ page }) => {
+  test('it stands down while a modal dialog owns the screen', async ({ page }) => {
     /*
       Found by the accessibility sweep on `/account`, not by review. A dialog's scrim is drawn over
       everything behind it, and the banner is `position: fixed` — so it is not covered by the

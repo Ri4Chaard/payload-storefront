@@ -90,7 +90,7 @@ const DOCUMENT_TYPE_READERS = [
   // `/about`, `/contact` and `/faq` all draw the same rows, and a `/faq` page reading its content
   // out of a module named `story` is the coupling spec 007 had to undo on `PageHeaderBlock`.
   /^src\/lib\/questions\//,
-  // The home page's data tier (spec 010), which exists because the page stopped reading fixtures.
+  // The home page's data tier, which exists because the page stopped reading fixtures.
   // Same job as the four above: `home-page` goes in, the four bands' props come out, and this is
   // the last file that may name a document.
   /^src\/lib\/home\//,
@@ -138,7 +138,7 @@ export default {
             node,
             message:
               'Mock content belongs behind src/lib/catalog/queries.ts. Importing it here hardcodes ' +
-              'the content and turns the swap to Payload from one file into a rewrite (Constitution I).',
+              'the content and turns the swap to Payload from one file into a rewrite.',
           })
         })
       },

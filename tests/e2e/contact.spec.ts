@@ -8,7 +8,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * The contact page, end to end (008/T031 – T033).
+ * The contact page, end to end.
  *
  * **The channel cards are what this file is mostly about**, and every assertion below exists
  * because those four cards are *derived* rather than written. Nothing on `/contact` names WhatsApp
@@ -81,7 +81,7 @@ test('the four channels come from the admin, in the admin’s order', async ({ p
   await expect(cards.nth(1)).toContainText('Telegram')
   await expect(cards.nth(2)).toContainText('Instagram')
 
-  // The email card is last, always — it is the one channel that is not a messenger row (FR-011).
+  // The email card is last, always — it is the one channel that is not a messenger row.
   await expect(cards.nth(3)).toContainText('hello@aurum.example')
   await expect(cards.nth(3).getByRole('link')).toHaveAttribute('href', 'mailto:hello@aurum.example')
 })
@@ -205,12 +205,12 @@ test('the page header comes from the admin', async ({ page }) => {
   await expect(page.getByText('REACH US')).toBeVisible()
   await expect(page.getByText('However you prefer.')).toBeVisible()
 
-  // Exactly one top-level heading (FR-004).
+  // Exactly one top-level heading.
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
 })
 
 /**
- * The message form (008/T047 – T049).
+ * The message form.
  *
  * Enquiries are cleaned up after each test rather than before, so a failure leaves the row it wrote
  * behind for inspection.
@@ -238,7 +238,7 @@ test.describe('the message form', () => {
     await fill(page, email)
     await page.getByRole('button', { name: /send message/i }).click()
 
-    // The confirmation replaces the form (FR-021), and it is the editor's wording.
+    // The confirmation replaces the form, and it is the editor's wording.
     await expect(page.getByRole('status')).toContainText(/your message has reached us/i)
     await expect(page.getByRole('button', { name: /send message/i })).toBeHidden()
 
@@ -270,7 +270,7 @@ test.describe('the message form', () => {
   })
 
   /**
-   * FR-019's "announce the failure", not merely render it (008/T102).
+   * FR-019's "announce the failure", not merely render it.
    *
    * **An automated scan cannot catch this**, which is why it is asserted here: `axe` sees a page
    * with an error message on it and is satisfied. What matters is that the message reaches a screen
@@ -306,7 +306,7 @@ test.describe('the message form', () => {
 })
 
 /**
- * **The form without JavaScript** (008/T049, FR-018).
+ * **The form without JavaScript**.
  *
  * The requirement most likely to regress silently: with JavaScript on, React preserves the DOM
  * across a failed submit, so the re-population bug this catches is invisible. `javaScriptEnabled`
@@ -382,7 +382,7 @@ test.describe('with JavaScript disabled', () => {
 })
 
 /**
- * How the page presents itself (008/T084, T085 — FR-048, FR-049).
+ * How the page presents itself.
  */
 test.describe('metadata', () => {
   /*

@@ -7,7 +7,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * US3 — the owner decides which languages the site offers (spec 010, T061).
+ * US3 — the owner decides which languages the site offers.
  *
  * **The scenario worth the whole file is the last one.** A visitor holding a cookie for a language
  * that has just been switched off would otherwise loop forever: the proxy honours the cookie and

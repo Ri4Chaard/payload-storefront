@@ -62,7 +62,7 @@ export const Scrolling: Story = {
 
 /**
  * Options that cannot be chosen are DRAWN and skipped — by the pointer and by the arrow keys
- * (FR-040). Hiding them would turn a temporary shortage into a shorter catalogue.
+ *. Hiding them would turn a temporary shortage into a shorter catalogue.
  */
 export const WithUnavailableOptions: Story = {
   args: {

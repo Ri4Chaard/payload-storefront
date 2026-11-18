@@ -18,7 +18,7 @@ import { addressSchema, type AddressValues } from '@/lib/auth/schemas'
 import type { CountryCode, CountryOption } from '@/lib/countries'
 
 /**
- * Add address — node `583:12968`, its error state `525:12889` (spec 004, US5, FR-027 – FR-031).
+ * Add address — node `583:12968`, its error state `525:12889`.
  *
  * **Controlled, unlike `NameRow`.** That component owns its own trigger, and says why: keeping
  * the two together means `triggerRef` never leaves the file. It cannot work here — a customer with
@@ -32,7 +32,7 @@ import type { CountryCode, CountryOption } from '@/lib/countries'
  * fill in the wrong order. Six boxes that say `City`, `Postcode` and `Apartment, suite, etc` are
  * not that.
  *
- * **Save is disabled until the four required fields have something in them** (FR-030), which is a
+ * **Save is disabled until the four required fields have something in them**, which is a
  * courtesy on top of the schema rather than instead of it — `saveAddress` re-validates, because a
  * disabled button is not a check.
  */
@@ -40,10 +40,10 @@ import type { CountryCode, CountryOption } from '@/lib/countries'
 export interface AddressModalProps {
   /** The row being edited, or `null` to create a new one. */
   address: CustomerAddress | null
-  /** How many the customer already has — the first one is always the default (FR-031). */
+  /** How many the customer already has — the first one is always the default. */
   addressCount: number
   countries: CountryOption[]
-  /** Pre-selected on a new address, from Account settings (FR-030). */
+  /** Pre-selected on a new address, from Account settings. */
   defaultCountry: CountryCode
   onClose: () => void
   open: boolean

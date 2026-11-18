@@ -15,11 +15,11 @@ import { getProduct, getProductsByIds } from '@/lib/catalog/queries'
 import type { ProductDetail } from '@/lib/catalog/types'
 
 /**
- * Adding, changing and removing lines — [cart-actions.md §3](../../specs/005-checkout-handoff/contracts/cart-actions.md).
+ * Adding, changing and removing lines.
  * FR-001 – FR-004, FR-009.
  *
  * **`operations.ts` rather than the actions themselves**, because an action reads cookies and
- * `cookies()` needs a request that does not exist here. The seam exists precisely so these
+ * `cookies` needs a request that does not exist here. The seam exists precisely so these
  * assertions have somewhere to live — the same decision `tests/integration/us2-sign-in.test.ts`
  * records for `authenticateCustomer`.
  *
@@ -82,7 +82,7 @@ const intentFor = (
   ...over,
 })
 
-describe('line identity (FR-004)', () => {
+describe('line identity', () => {
   /*
     **The two-sizes case left with sizes in spec 011.** It used to be the reason this shop passed a
     custom `cartItemMatcher` at all: one product in a size 6 and a size 7 merging into a quantity of
@@ -120,7 +120,7 @@ describe('line identity (FR-004)', () => {
   */
 })
 
-describe('what may be added (FR-002, FR-003)', () => {
+describe('what may be added', () => {
   it('refuses a draft, which the published catalogue cannot even see', async () => {
     const draft = await payload.find({
       collection: 'products',
@@ -194,7 +194,7 @@ describe('what may be added (FR-002, FR-003)', () => {
   })
 })
 
-describe('changing and removing (FR-009, FR-010)', () => {
+describe('changing and removing', () => {
   it('sets a quantity outright rather than incrementing it', async () => {
     const owner = await guest()
     await addLine(owner, owner.cartId, intentFor(optioned, { quantity: 2 }))
@@ -288,14 +288,14 @@ describe('the displayed total is computed here, not read from the cart row', () 
 })
 
 /**
- * BUY NOW leaves the cart exactly where it was (FR-020, SC-005, T066).
+ * BUY NOW leaves the cart exactly where it was.
  *
  * **The sharpest failure mode in this feature.** A visitor who has assembled three products and then
  * uses BUY NOW on a fourth must find their three untouched — a shortcut that quietly submits or
  * empties the basket destroys work they never offered up. The guarantee is structural: `buyNow`
  * contains no call that reads or writes a cart. This asserts the consequence.
  */
-describe('buy now never touches the cart (FR-020, SC-005)', () => {
+describe('buy now never touches the cart', () => {
   it('leaves an existing cart byte-identical — same lines, quantities and row ids', async () => {
     const owner = await guest()
 

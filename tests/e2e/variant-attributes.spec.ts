@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * Properties that differ per option (spec 011, US2, FR-010 – FR-013).
+ * Properties that differ per option.
  *
  * **The claim only a browser can check is that the list CHANGES under the customer.** That an option
  * can carry a value is the collection's business, and that two lists merge correctly is
@@ -56,7 +56,7 @@ async function build() {
     context,
     data: {
       availability: 'made-to-order',
-      // The product speaks for itself until an option is chosen (FR-012).
+      // The product speaks for itself until an option is chosen.
       attributes: [
         { attribute: material.id, value: 'Material A' },
         { attribute: weight.id, value: '1.0 kg' },

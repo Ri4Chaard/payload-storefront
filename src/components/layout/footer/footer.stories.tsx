@@ -9,7 +9,7 @@ import { Footer } from './footer'
  * build.
  */
 /**
- * The shop's accounts now come from the `contact-settings` global (spec 005, FR-052), so a story
+ * The shop's accounts now come from the `contact-settings` global, so a story
  * supplies them rather than the component defaulting to a hardcoded list. The list it used to
  * default to pointed at bare `wa.me/` and `instagram.com/` roots on every page of the site.
  */
@@ -24,7 +24,7 @@ const CONTACT = {
 }
 
 /**
- * Policy links, as the layout now supplies them from published content (spec 009, FR-015b).
+ * Policy links, as the layout now supplies them from published content.
  *
  * A story rather than a component default, for the same reason `SOCIAL` is: a default that renders
  * plausible-looking links is what made an unconfigured site look configured. The component ships

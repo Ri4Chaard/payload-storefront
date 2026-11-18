@@ -1,7 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payload'
 
 /**
- * Hooks for `products` and `variants` (spec 011, US1).
+ * Hooks for `products` and `variants`.
  *
  * Both exist for one reason: a variant cannot see its parent. `admin.condition` is synchronous and
  * receives only the document being edited (`payload/dist/fields/config/types.d.ts:111`), so a variant
@@ -9,7 +9,7 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payl
  * quantity field must not be offered on a made-to-order product.
  *
  * So the parent tells it. `variants.availability` is a mirror of the product's own value, written
- * here and read only by the admin form (011/research.md R5).
+ * here and read only by the admin form.
  *
  * **The storefront never reads that mirror.** `src/lib/catalog/mappers.ts` has the parent product in
  * hand when it maps its variants and takes availability from there, so a mirror that somehow fell

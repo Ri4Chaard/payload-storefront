@@ -4,14 +4,14 @@ import { ctaField } from '@/fields/cta'
 import { mediaSlot } from '@/fields/media-slot'
 
 /**
- * A full-bleed plate with a column of text laid over it (spec 006, FR-011, FR-048).
+ * A full-bleed plate with a column of text laid over it.
  *
  * **One block, drawn twice.** "THE AURUM STANDARD" (`312:6926`) and "CRAFTED TO LAST"
  * (`312:6967`) look like two bands and are one construction. Read side by side they differ in
  * exactly three properties: whether an eyebrow renders, whether the band ends in a button, and
  * which side the text column sits on. Three optional properties is a variant set, not a second
  * block — Constitution II's rule about `ProductCard` / `ProductCardNew` applies to blocks as
- * directly as to components, and a third banner is now composition rather than code (FR-049).
+ * directly as to components, and a third banner is now composition rather than code.
  *
  * **`textSide` is a desktop-only property, and the design is why.** At 1920 the Standard banner
  * puts its text left and Crafted-to-last puts it right. At 768 and at 390 both put it left — there

@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { adminOrPublishedStatus, isAdmin } from '@/lib/access'
 
 /**
- * The shop's frequently asked questions (spec 006, FR-028 – FR-038).
+ * The shop's frequently asked questions.
  *
  * **Its own collection, and that is the whole point of it.** The questions are drawn at the bottom
  * of the Our Story page, and modelling them as fields on that page would have been the shorter
@@ -25,7 +25,7 @@ import { adminOrPublishedStatus, isAdmin } from '@/lib/access'
  *
  * **`order` is for the list and for the page that does not exist yet.** The Our Story page does NOT
  * sort by it — the FAQ block holds a relationship to the questions it shows, and that relationship's
- * row order is the display order (FR-032), the same reasoning `contact-settings.ts` records for the
+ * row order is the display order, the same reasoning `contact-settings.ts` records for the
  * messenger array. This field is the default sort in the admin and the order the standalone `/faq`
  * page will take when it arrives. Payload 3.88 does offer `orderable: true` with drag handles, but
  * it is annotated experimental with "frequent breaking changes", which is not a foundation to put an
@@ -33,7 +33,7 @@ import { adminOrPublishedStatus, isAdmin } from '@/lib/access'
  *
  * **No revalidation hook, deliberately.** Every other content collection here carries
  * `revalidateOnChange`, and copying it would have been the unthinking move. `/about` is
- * `force-dynamic` (006/research.md R6), so there is nothing cached to invalidate — and
+ * `force-dynamic`, so there is nothing cached to invalidate — and
  * `invalidate()` walks every product slug, so a hook here would evict the entire catalogue because
  * somebody fixed a typo in an answer.
  */
@@ -49,7 +49,7 @@ export const Questions: CollectionConfig = {
   versions: { drafts: true },
   access: {
     // A draft is unreachable rather than hidden: the constraint is part of the query, so a direct
-    // API request for an unpublished question finds nothing (FR-033).
+    // API request for an unpublished question finds nothing.
     read: adminOrPublishedStatus,
     create: isAdmin,
     update: isAdmin,

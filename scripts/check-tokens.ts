@@ -1,5 +1,5 @@
 /**
- * Fails when the committed token file is stale (research.md R6).
+ * Fails when the committed token file is stale.
  *
  * The generated CSS is committed so the build never depends on the generator running. That is only
  * safe if the commit is guaranteed to match its source — which is what this check guarantees.

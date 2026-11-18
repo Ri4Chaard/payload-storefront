@@ -11,7 +11,7 @@ import { ENQUIRY_MAX } from '@/lib/contact/config'
 import type { ContactForm as ContactFormContent } from '@/lib/contact/types'
 
 /**
- * The message form (008/T058 – T061), drawn at `312:8662` / `419:10796` / `419:10876`.
+ * The message form, drawn at `312:8662` / `419:10796` / `419:10876`.
  *
  * **`useActionState` over a plain `<form action>`, and deliberately NOT react-hook-form.** Every
  * other form on this site is RHF with a typed server action, and `src/lib/auth/actions.ts` explains
@@ -26,7 +26,7 @@ import type { ContactForm as ContactFormContent } from '@/lib/contact/types'
  * so the action hands back what the visitor typed and the inputs read it. The buy is that somebody
  * on a phone with a blocked script still reaches the shop.
  *
- * **Every string is the editor's** (FR-042) — the labels, the button, the footnote and both
+ * **Every string is the editor's** — the labels, the button, the footnote and both
  * outcome messages arrive as props from `contact-page`. Nothing user-visible is written here.
  */
 export interface ContactFormProps {
@@ -82,7 +82,7 @@ export function ContactForm({ content }: ContactFormProps) {
   const locale = useLocale()
 
   /*
-    Focus moves to the first control at fault (FR-019) — the ENHANCED path only. Without JavaScript
+    Focus moves to the first control at fault — the ENHANCED path only. Without JavaScript
     the browser lands at the top of the re-rendered page, which is acceptable because the error
     summary is there and each control carries its own message.
   */
@@ -95,7 +95,7 @@ export function ContactForm({ content }: ContactFormProps) {
   }, [failure])
 
   /*
-    The confirmation replaces the form (FR-021). It is a live region so a screen reader is told
+    The confirmation replaces the form. It is a live region so a screen reader is told
     without having to go looking, and it is `role="status"` rather than an alert because a message
     arriving safely is not an emergency.
   */
@@ -178,7 +178,7 @@ export function ContactForm({ content }: ContactFormProps) {
         />
 
         {/*
-          The honeypot (FR-027).
+          The honeypot.
 
           `sr-only` rather than `hidden` or `display: none`: the input stays in the DOM and in the
           submitted form, which is what a naive form-filler finds and completes, and a rule against
@@ -190,7 +190,7 @@ export function ContactForm({ content }: ContactFormProps) {
           would refuse a real person.
         */}
         {/*
-          The language the visitor is reading in (spec 010, FR-043).
+          The language the visitor is reading in.
 
           A hidden input rather than a cookie read on the server: somebody who arrived on
           `/ru/contact` from a link and never touched the switcher has no cookie, and their

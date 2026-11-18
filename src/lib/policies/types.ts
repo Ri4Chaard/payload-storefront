@@ -1,5 +1,5 @@
 /**
- * What a route and the footer see of a policy (spec 009).
+ * What a route and the footer see of a policy.
  *
  * The view models, deliberately not the generated document types. `eslint-rules/catalog-boundary.mjs`
  * enforces the split site-wide: `src/lib/policies/` is the last place in this feature that may name
@@ -38,7 +38,7 @@ export interface PolicyLink {
   href: string
 }
 
-/** Published policies, already split by where the footer puts them (FR-015b). */
+/** Published policies, already split by where the footer puts them. */
 export interface FooterPolicies {
   legal: PolicyLink[]
   customerCare: PolicyLink[]

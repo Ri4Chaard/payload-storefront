@@ -50,7 +50,7 @@ export function SearchField({
   ...props
 }: SearchFieldProps) {
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { QuestionList } from './question-list'
 
 /**
- * The shop's questions, as `/about`, `/contact` and `/faq` all draw them (008/T029).
+ * The shop's questions, as `/about`, `/contact` and `/faq` all draw them.
  *
  * Every state below is one a real page reaches: a collapsed list is `/contact` on arrival, one open
  * is what `/faq` is drawn with, and the long answer is the case that proves a row expands in place
@@ -50,7 +50,7 @@ export const OneOpen: Story = {
 }
 
 /**
- * `single` is off, deliberately (FR-035) — a visitor comparing delivery against returns should not
+ * `single` is off, deliberately — a visitor comparing delivery against returns should not
  * have to hold one of them in their head.
  */
 export const SeveralOpen: Story = {

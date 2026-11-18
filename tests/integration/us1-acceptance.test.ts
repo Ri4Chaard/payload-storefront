@@ -8,7 +8,7 @@ import { getListing, getProduct } from '@/lib/catalog/queries'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * The US1 acceptance, walked end to end against Postgres (003/T295).
+ * The US1 acceptance, walked end to end against Postgres.
  *
  * **This is the story the whole spec rests on** — the owner runs the shop without a developer — and
  * it is the one that could not be tested while the loaders read fixtures: every scenario below is a

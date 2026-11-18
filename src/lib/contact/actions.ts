@@ -11,7 +11,7 @@ import { enquirySchema, readEnquiryForm, type EnquiryFieldError } from './enquir
 import { checkEnquiryThrottle, clientIp, senderHash } from './throttle'
 
 /**
- * The contact form's server action (spec 008, T053 – T056, contracts/enquiry-action.md).
+ * The contact form's server action.
  *
  * **The one public write surface this feature adds.** It is reachable by anything that can make an
  * HTTP request, so every rule below is enforced here rather than in the form.
@@ -24,7 +24,7 @@ import { checkEnquiryThrottle, clientIp, senderHash } from './throttle'
  * oversight, and should not be "corrected" back.
  *
  * **Message strings are KEYS, never sentences.** The words come from `contact-page.form`, which is
- * the editor's (FR-042), and keys keep the tests assertable — `toBe('throttled')` does not break
+ * the editor's, and keys keep the tests assertable — `toBe('throttled')` does not break
  * when somebody rewords the copy. Same convention as the account actions.
  */
 
@@ -47,7 +47,7 @@ const failure = (
 ): EnquiryState => ({ status: 'error', message, values, ...(fieldErrors ? { fieldErrors } : {}) })
 
 /**
- * Where the notification goes (FR-024).
+ * Where the notification goes.
  *
  * Resolved at send time from the global, never from a constant — an address written in code is
  * exactly what that requirement forbids. The override wins, then the shop's own address; the
@@ -71,7 +71,7 @@ async function enquiryRecipient(): Promise<string> {
 /**
  * Receive an enquiry.
  *
- * **The ordering is the contract** (contracts/enquiry-action.md §5, FR-021, FR-024a):
+ * **The ordering is the contract**:
  *
  *     validate            fail → 'invalid'    | nothing written, nothing sent
  *     honeypot + throttle fail → 'throttled'  | nothing written, nothing sent
@@ -165,7 +165,7 @@ export async function submitEnquiry(
     From here the visitor is getting `'success'` whatever happens: the shop has their message.
 
     The log lines carry the enquiry's own id as the correlation handle and never the message text or
-    the address (FR-028) — those live in an access-controlled collection, and a log line is not
+    the address — those live in an access-controlled collection, and a log line is not
     access-controlled and is frequently shipped somewhere else.
   */
   try {

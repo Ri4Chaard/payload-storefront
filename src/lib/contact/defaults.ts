@@ -3,7 +3,7 @@
  *
  * The contact strip, the footer and the menu each show the same address, the same number and the
  * same three social marks — three copies of one fact, which is three chances for the number to be
- * updated in two of them. The menu (002/T140) would have been the third copy, which is what forced
+ * updated in two of them. The menu would have been the third copy, which is what forced
  * this out into a module rather than leaving it as a default beside each component.
  *
  * The design writes the address as `hello@aurum.exampIe` — a capital I where "example" has an l.
@@ -56,7 +56,7 @@ export function telHref(phone: string): string {
 }
 
 /**
- * **`SOCIAL_LINKS` lived here and has been removed** (spec 005, T071, FR-052).
+ * **`SOCIAL_LINKS` lived here and has been removed**.
  *
  * It held three placeholder destinations — `https://wa.me/` and friends — under a comment saying
  * they needed the real accounts before launch. They still did: an owner who set their real WhatsApp

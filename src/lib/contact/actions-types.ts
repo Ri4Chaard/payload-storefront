@@ -1,7 +1,7 @@
 import type { EnquiryFieldError } from './enquiry-schema'
 
 /**
- * What `submitEnquiry` answers with (spec 008, T053).
+ * What `submitEnquiry` answers with.
  *
  * **Here rather than beside the action, and Next enforces it.** A `'use server'` module may export
  * **only async functions** — `initialEnquiryState` is an object, so exporting it from `actions.ts`
@@ -21,7 +21,7 @@ export interface EnquiryValues {
 
 /**
  * **`message` is a KEY, never a sentence.** The words come from `contact-page.form`, which is the
- * editor's (FR-042), and keys keep the tests assertable — `toBe('throttled')` does not break when
+ * editor's, and keys keep the tests assertable — `toBe('throttled')` does not break when
  * somebody rewords the copy. Same convention as `src/lib/auth/actions.ts`.
  */
 export type EnquiryState =

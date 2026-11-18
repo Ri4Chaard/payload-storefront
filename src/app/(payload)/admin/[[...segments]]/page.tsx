@@ -17,7 +17,7 @@ export const generateMetadata = ({ params, searchParams }: Args): Promise<Metada
 
 /**
  * Payload's admin panel, with one addition: a signed-in CUSTOMER is sent to their own account
- * instead of into a dead end (spec 004).
+ * instead of into a dead end.
  *
  * **The dead end is real, and it has no exit.** Payload names its session cookie from the config's
  * `cookiePrefix`, so both collections share `payload-token` — one session at a time, by design. A

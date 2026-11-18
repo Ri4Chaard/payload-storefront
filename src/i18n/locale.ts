@@ -3,7 +3,7 @@ import { locale as localeParam } from 'next/root-params'
 import { DEFAULT_LOCALE, LOCALES, type Locale } from './routing'
 
 /**
- * Narrowing the locale, in one place (spec 010, research R2).
+ * Narrowing the locale, in one place.
  *
  * **`await localeParam()` is `string | undefined` here, not `string`, and that is not a mistake in
  * the type.** `next/root-params` widens a getter to include `undefined` when the parameter is absent

@@ -2,7 +2,7 @@ import type { CatalogImage } from '@/lib/catalog/types'
 import type { Question } from '@/lib/questions/types'
 
 /**
- * The view models for `/contact` (spec 008, T024) — what the route and its components are allowed
+ * The view models for `/contact` — what the route and its components are allowed
  * to see.
  *
  * The same tier `src/lib/catalog/types.ts` is for the catalogue and `src/lib/story/types.ts` is for
@@ -58,7 +58,7 @@ export interface ContactSeo {
 }
 
 /**
- * What the page would say about itself if the editor set no metadata (FR-048).
+ * What the page would say about itself if the editor set no metadata.
  *
  * Computed here from the page's own heading, intro and photograph, so `generateMetadata` never
  * reaches back into a document to work it out.

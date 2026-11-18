@@ -6,7 +6,7 @@ import { Container } from '@/components/ui/container'
 import { cn } from '@/lib/cn'
 
 /**
- * A cart with nothing in it (spec 005, T033, FR-015).
+ * A cart with nothing in it.
  *
  * **Nothing is drawn for this**, the same gap `ListingEmpty` records and the same reason it is
  * worth building on purpose: an empty card with an ORDER SUMMARY beside it reading `$0` looks like

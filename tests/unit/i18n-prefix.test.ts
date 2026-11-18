@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { localeHref, rememberedRedirect, splitLocale } from '@/i18n/prefix'
 
 /**
- * The prefix rules (spec 010, T021 — FR-006, FR-008, FR-010, FR-013).
+ * The prefix rules.
  *
  * These are the decisions `src/proxy.ts` makes on every request, lifted into a pure module so they
  * can be asserted without a `NextRequest`. The proxy itself is exercised against a real server in

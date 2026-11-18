@@ -1,5 +1,5 @@
 /**
- * The kit's single entry point (T066).
+ * The kit's single entry point.
  *
  * Spec 002 onward composes from here. An import that reaches past this file into a component's
  * folder is a signal that something is being used in a way the kit does not support — which is the

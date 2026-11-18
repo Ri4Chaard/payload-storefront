@@ -28,7 +28,7 @@ import {
 import { cn } from '@/lib/cn'
 
 /**
- * The listing's control strip (003/T271, T275, T280). Nodes `225:1437` / `355:7627` (1920),
+ * The listing's control strip. Nodes `225:1437` / `355:7627` (1920),
  * `412:7738` (1024), `412:7873` with its two triggers (390).
  *
  * **The toolbar commits immediately and the drawer does not** (FR-023 against FR-022). Nothing here
@@ -48,7 +48,7 @@ import { cn } from '@/lib/cn'
  *
  * **What each width carries is what each width draws.** Everything at `xl`; FILTERS and
  * SORT BY at `md`; two triggers on a phone, the left one carrying the count of what is applied
- * (FR-028). The controls the narrow widths drop are all in the drawer, which is the whole reason
+ *. The controls the narrow widths drop are all in the drawer, which is the whole reason
  * the drawer carries a group Figma did not draw in it.
  */
 export interface FilterToolbarProps {
@@ -104,7 +104,7 @@ const floorTo = (amount: number, step: number) => Math.floor(amount / step) * st
 const ceilTo = (amount: number, step: number) => Math.ceil(amount / step) * step
 
 /**
- * The sort orders, as message keys rather than as words (spec 010).
+ * The sort orders, as message keys rather than as words.
  *
  * `SORT_LABELS` in `@/lib/catalog/filters` is still the English wording and still what the no-JS
  * `<option>` list and the tests read. This map exists because a `Record<SortOrder, string>` of

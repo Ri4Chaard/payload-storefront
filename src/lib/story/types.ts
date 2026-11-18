@@ -3,7 +3,7 @@ import type { StoryPage as StoryPageDocument } from '@/payload-types'
 import type { Question as StoryQuestion } from '@/lib/questions/types'
 
 /**
- * The view models for the story page (spec 006, T020) — what a block renderer is allowed to see.
+ * The view models for the story page — what a block renderer is allowed to see.
  *
  * The same tier `src/lib/catalog/types.ts` is for the catalogue, and it exists for the same
  * enforced reason: `catalog/no-document-types` forbids components from importing
@@ -27,7 +27,7 @@ export type BlockType = BlockDocument['blockType']
  * **`src`, `width` and `height` are always a STILL image** — the photograph itself, or the video's
  * poster. This is the single load-bearing decision in the shape: it means a consumer reserves the
  * right box before anything loads, whatever the slot holds, so layout shift is structurally
- * impossible rather than carefully avoided (FR-024b).
+ * impossible rather than carefully avoided.
  *
  * A slot with no still is not represented — the mapper drops it — because a frame with nothing to
  * put in it must collapse rather than reserve blank space.
@@ -38,7 +38,7 @@ export type StoryMedia = CatalogImage & {
   videoSrc?: string
 }
 
-/** A button. The whole object is absent when the editor left it empty (FR-011, FR-013). */
+/** A button. The whole object is absent when the editor left it empty. */
 export interface Cta {
   label: string
   href: string
@@ -50,7 +50,7 @@ export interface Figure {
   caption: string
 }
 
-/** A tile in the numbered sequence. The ordinal is its index, never a stored field (FR-012). */
+/** A tile in the numbered sequence. The ordinal is its index, never a stored field. */
 export interface Step {
   title: string
   caption?: string
@@ -60,7 +60,7 @@ export interface Step {
 /**
  * One question, with its answer already serialised out of lexical.
  *
- * **Re-exported, not defined here** (008/T008). It was `StoryQuestion` until `/contact` and `/faq`
+ * **Re-exported, not defined here**. It was `StoryQuestion` until `/contact` and `/faq`
  * became the second and third pages to draw the same rows; it now lives in `@/lib/questions/types`,
  * which is the tier three features share. The alias stays so this module's own `StoryBlock` union
  * reads as it did.
@@ -70,7 +70,7 @@ export type { StoryQuestion }
 /**
  * Which heading level a band's own heading renders at.
  *
- * Assigned by the mapper and never chosen by a component (006/research.md R7). An editor can
+ * Assigned by the mapper and never chosen by a component. An editor can
  * reorder the page, delete the page header or add a second one, so "am I the top heading?" is a
  * question about the composition rather than about any one band — and answering it in one function
  * over an array is what keeps FR-006 true in arrangements nobody drew.
@@ -117,7 +117,7 @@ export interface StorySeo {
 }
 
 /**
- * What the page would say about itself if the editor set no metadata (FR-039).
+ * What the page would say about itself if the editor set no metadata.
  *
  * Derived from the composition rather than guessed at by the route: the title is whichever block
  * ended up owning the top heading, the description is the first paragraph on the page, and the

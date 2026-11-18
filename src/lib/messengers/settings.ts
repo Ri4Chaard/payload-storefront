@@ -12,7 +12,7 @@ import { profileHref } from './links'
 import { PLATFORM_LABELS, type Platform } from './normalise'
 
 /**
- * Reading the seller's destinations (spec 005, T050, FR-023, FR-038).
+ * Reading the seller's destinations.
  *
  * **Server-only, and cached per request.** A page may ask for these twice — the handoff modal and,
  * after the chrome migration, the footer — and this collapses that into one read.
@@ -20,9 +20,9 @@ import { PLATFORM_LABELS, type Platform } from './normalise'
  * **A Local API global read is not a request-time API**, which is the property that matters: unlike
  * `cookies()`, calling this from the root layout does not opt every route into dynamic rendering.
  * That is what makes the chrome migration in Phase 8 free rather than a trade against the
- * prerendered catalogue (research R8, R11).
+ * prerendered catalogue.
  *
- * **Only enabled rows, in array order.** Order is the array's own (FR-038) — there is no position
+ * **Only enabled rows, in array order.** Order is the array's own — there is no position
  * field to sort by, and therefore nothing that can disagree with what the admin shows.
  */
 
@@ -30,7 +30,7 @@ export interface SellerMessenger {
   platform: Platform
   /** The raw account identifier: a phone number for WhatsApp, a username for the others. */
   destination: string
-  /** What the modal displays beneath the platform name. Separate from the destination (FR-037). */
+  /** What the modal displays beneath the platform name. Separate from the destination. */
   handle: string
 }
 
@@ -84,7 +84,7 @@ export const getMessengers = cache(async (): Promise<SellerMessenger[]> => {
   return (doc?.messengers ?? [])
     .filter((row) => row.enabled !== false)
     // A row can only be half-filled while it is unticked — the field validation refuses an enabled
-    // one with no destination (FR-039). This is the belt to that braces: a row that somehow arrives
+    // one with no destination. This is the belt to that braces: a row that somehow arrives
     // incomplete is dropped rather than rendered as a link to nowhere.
     .filter((row): row is typeof row & { destination: string; handle: string; platform: Platform } =>
       Boolean(row.platform && row.destination && row.handle),
@@ -97,7 +97,7 @@ export const getMessengers = cache(async (): Promise<SellerMessenger[]> => {
 })
 
 /**
- * The message the shop receives, in the language the enquiry was written in (spec 010, FR-043).
+ * The message the shop receives, in the language the enquiry was written in.
  *
  * `messageTemplate` is localized, so this is the one reader here that genuinely needs a language:
  * a Ukrainian visitor's order should reach WhatsApp in Ukrainian, or the shop answers in the wrong
@@ -123,7 +123,7 @@ export const getMessageTemplate = cache(async (locale: Locale = DEFAULT_LOCALE):
 const FALLBACK_TEMPLATE = DEFAULT_MESSAGE_TEMPLATE
 
 /**
- * The shop's accounts as the chrome draws them (spec 005, T072, FR-052).
+ * The shop's accounts as the chrome draws them.
  *
  * **This is the whole of "one set of accounts".** Before it, `src/lib/contact/defaults.ts` carried a second
  * copy — three links whose own comment admitted "these need the real accounts before launch" — and
@@ -142,12 +142,12 @@ export interface SocialLink {
   href: string
   /**
    * What the owner set as the displayed handle — `@aurum`, or a phone number written as they say
-   * it (008/T038).
+   * it.
    *
    * **Added rather than fetched separately.** The footer draws these as bare marks and ignores it;
    * the contact page's channel cards print it under the platform name. A second reader for one
    * field already in this row would be the duplication this module exists to prevent, and it is the
-   * field `getMessengers()` calls "separate from the destination (FR-037)" — a label, which may
+   * field `getMessengers()` calls "separate from the destination" — a label, which may
    * differ from the account it opens.
    *
    * Falls back to the destination where an owner has not set one, so a card is never blank.

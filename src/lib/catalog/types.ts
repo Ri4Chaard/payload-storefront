@@ -1,5 +1,5 @@
 /**
- * The view models (003/T230) — what a component is allowed to see.
+ * The view models — what a component is allowed to see.
  *
  * Derived from the generated collection types rather than restated beside them, so a schema change
  * surfaces here as a type error rather than as a screen that quietly renders nothing. Where a union
@@ -18,7 +18,7 @@
  *
  * `price` is a formatted string everywhere except `VariantOption.priceMinor`, which exists because
  * the variant selector has to compare variants. That one is an integer count of minor units, never a
- * float and never a parsed display string (Constitution VI).
+ * float and never a parsed display string.
  */
 
 /** A photograph, shaped the way an upload comes back — intrinsic dimensions included, so nothing
@@ -37,7 +37,7 @@ export interface CatalogImage {
  * **A string as of spec 011, where it used to be a union derived from the enum.** Colour is an
  * owner-managed vocabulary now, so the set is a fact about the database rather than about the
  * schema, and no type can enumerate it. Validity is checked where the catalogue is in scope —
- * `getListing` — exactly as it always has been for `category` and `collection` (011/research.md R2).
+ * `getListing` — exactly as it always has been for `category` and `collection`.
  */
 export type ColourValue = string
 
@@ -61,7 +61,7 @@ export interface VariantOption {
   priceMinor: number
   available: boolean
   /**
-   * What this variant says about itself (spec 011, FR-009).
+   * What this variant says about itself.
    *
    * Only what DIFFERS from the product — weight, certificate. The product page lays these over
    * the product's own rows when the variant is selected; see `mergeAttributes`. Empty is the ordinary
@@ -111,7 +111,7 @@ export interface ProductDetail extends ProductSummary {
   maxQuantity?: number
   description: string | null
   /**
-   * Whether the product is made to order (spec 011, FR-007).
+   * Whether the product is made to order.
    *
    * A boolean about the product's MODE, not a count — the rule at the top of this file still holds,
    * and a component still has no way to learn how many of anything exist. It is here so the page can
@@ -186,7 +186,7 @@ export type FilterKey =
   | 'page'
 
 /**
- * Values within one key are OR; separate keys are AND (FR-024).
+ * Values within one key are OR; separate keys are AND.
  *
  * The multi-value fields are always arrays, never `string | string[]`, and never optional. A single
  * shape is what lets the drawer, the chips and the query all treat them the same way, and an empty
@@ -245,6 +245,6 @@ export interface ListingResult {
   page: number
   hasMore: boolean
   appliedChips: AppliedFilterChip[]
-  /** What the URL asked for and the catalogue could not honour (FR-030). */
+  /** What the URL asked for and the catalogue could not honour. */
   ignored: DroppedFilter[]
 }

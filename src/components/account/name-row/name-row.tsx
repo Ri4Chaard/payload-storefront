@@ -15,7 +15,7 @@ import { applyActionErrors, errorText } from '@/lib/auth/form-errors'
 import { nameSchema, type NameValues } from '@/lib/auth/schemas'
 
 /**
- * The Full name row and the modal behind it — node `525:13319` (spec 004, US4, FR-024).
+ * The Full name row and the modal behind it — node `525:13319`.
  *
  * Figma names that frame "Add address"; it draws the FULL NAME modal. The spec records the names as
  * unreliable and the contents as governing.
@@ -95,7 +95,7 @@ interface NameDialogProps extends NameRowProps {
 function NameDialog({ firstName, lastName, onClose, open, triggerRef }: NameDialogProps) {
   const t_account = useTranslations('account')
   const t_common = useTranslations('common')
-  // Resolved here rather than at module scope: `useTranslations` is a hook (spec 010).
+  // Resolved here rather than at module scope: `useTranslations` is a hook.
   const ERRORS: Record<string, string> = { nameTooLong: useTranslations('errors')('nameTooLong') }
   /**
    * **Mounted fresh for each opening, so these are the only values it ever loads.**

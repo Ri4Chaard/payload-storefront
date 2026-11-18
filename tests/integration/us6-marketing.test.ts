@@ -5,7 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { marketingEmailSchema } from '@/lib/auth/schemas'
 
 /**
- * US6 — the marketing preference and the evidence behind it (spec 004, FR-033 – FR-036).
+ * US6 — the marketing preference and the evidence behind it.
  *
  * **What is actually at risk here is not the checkbox.** Whether a boolean round-trips is the least
  * interesting thing about consent. The two claims worth a test are that the record of WHEN consent

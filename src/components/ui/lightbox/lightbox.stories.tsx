@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Lightbox } from './lightbox'
 
 /**
- * Node 308:6392 — the product gallery opened full screen, on PhotoSwipe (003/R11).
+ * Node 308:6392 — the product gallery opened full screen, on PhotoSwipe.
  *
  * Controlled on both `open` and `index`, so the gallery underneath stays on whatever photograph the
  * viewer was closed on. The viewer renders into the document rather than into the story, which is

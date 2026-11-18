@@ -879,7 +879,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "contact_settings_locales" (
   	"address" varchar DEFAULT '12 Market Street, Old Town, Example City',
   	"opening_hours" varchar DEFAULT 'Daily · 10:00 AM–9:00 PM',
-  	"message_template" varchar DEFAULT 'Hello Aurum, I would like to order:
+  	"message_template" varchar DEFAULT 'Hello, I would like to order:
   
   {{items}}
   
@@ -922,7 +922,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"featured_heading" varchar DEFAULT 'All products',
   	"featured_cta_label" varchar DEFAULT 'View all',
   	"about_heading_lead" varchar DEFAULT 'About',
-  	"about_heading_emphasis" varchar DEFAULT 'Aurum',
+  	"about_heading_emphasis" varchar DEFAULT 'us',
   	"about_cta_label" varchar DEFAULT 'Discover our story',
   	"seo_title" varchar,
   	"seo_description" varchar,
@@ -968,7 +968,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_featured_heading" varchar DEFAULT 'All products',
   	"version_featured_cta_label" varchar DEFAULT 'View all',
   	"version_about_heading_lead" varchar DEFAULT 'About',
-  	"version_about_heading_emphasis" varchar DEFAULT 'Aurum',
+  	"version_about_heading_emphasis" varchar DEFAULT 'us',
   	"version_about_cta_label" varchar DEFAULT 'Discover our story',
   	"version_seo_title" varchar,
   	"version_seo_description" varchar,

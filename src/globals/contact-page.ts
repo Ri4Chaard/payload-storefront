@@ -4,7 +4,7 @@ import { seoField } from '@/fields/seo'
 import { isAdmin } from '@/lib/access'
 
 /**
- * The `/contact` page (spec 008, FR-042, FR-046).
+ * The `/contact` page.
  *
  * **Flat grouped fields, not a blocks body — and that is a deliberate departure from `/about`.**
  * `story-page` is `blockReferences` because that page is seven bands whose order is genuinely the
@@ -141,7 +141,7 @@ export const ContactPage: GlobalConfig = {
           localized: true,
           /*
             The drawing reads “We’ll get back to you ass soon as possible.” — a typo, corrected here
-            (FR-046). The drawing and the site now disagree by one letter, which is the right way
+           . The drawing and the site now disagree by one letter, which is the right way
             round; T105 tells the designer.
           */
           defaultValue: 'We’ll get back to you as soon as possible.',
@@ -185,7 +185,7 @@ export const ContactPage: GlobalConfig = {
           },
           /*
             A plain upload rather than `mediaSlot()`, which is the shared photo-or-video config
-            (008/research.md R11). A video slot requires a poster still, so `mediaSlot` would ask
+           . A video slot requires a poster still, so `mediaSlot` would ask
             the editor for two assets to place one photograph — and the drawing shows no video here.
             This is not a near-copy of that field: it is the simpler field `mediaSlot` is built on.
           */
@@ -224,7 +224,7 @@ export const ContactPage: GlobalConfig = {
 
             **Row order is display order.** A `hasMany` relationship preserves the arrangement, so
             there is no position number two rows could share and nothing that can disagree with what
-            the admin shows (FR-031) — the same reasoning `contact-settings.messengers` records.
+            the admin shows — the same reasoning `contact-settings.messengers` records.
 
             No default: the band ships absent, and appears once somebody chooses questions. That is
             FR-032 working rather than a gap.

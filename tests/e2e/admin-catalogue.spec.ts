@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * Editorial verification, as a test rather than an afternoon in the panel (spec 011, T060).
+ * Editorial verification, as a test rather than an afternoon in the panel.
  *
  * The Constitution asks for a person to confirm the editable surface actually behaves. These are the
  * claims from that checklist that can be pinned down, and pinning them down is worth more than a
@@ -11,7 +11,7 @@ import { getPayload } from 'payload'
  * owner — is what the human pass is still for.
  *
  * **The quantity field is the one that matters.** It is hidden by an `admin.condition` reading a
- * column a hook maintains, because a variant cannot reach its parent to ask (011/research.md R5).
+ * column a hook maintains, because a variant cannot reach its parent to ask.
  * Every other test in this feature exercises the storefront, which deliberately reads the parent
  * instead — so this is the only place the mirror is checked at all, and a mirror nothing checks is
  * a mirror that drifts.

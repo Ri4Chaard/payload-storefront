@@ -5,7 +5,7 @@ import type { StoryBlock } from '@/lib/story/types'
 import { cn } from '@/lib/cn'
 
 /**
- * A plate with a column of text laid over it (006/T031).
+ * A plate with a column of text laid over it.
  *
  * **One component, drawn twice.** "THE AURUM STANDARD" (`312:6926`) and "CRAFTED TO LAST"
  * (`312:6967`) read as two bands and are one construction differing in three optional properties:

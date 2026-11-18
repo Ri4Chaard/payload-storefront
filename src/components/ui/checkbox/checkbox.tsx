@@ -29,7 +29,7 @@ import { cn } from '@/lib/cn'
 export type CheckboxShape = 'square' | 'round'
 
 export interface CheckboxProps extends Omit<React.ComponentProps<'input'>, 'type' | 'size'> {
-  /** Required — a control without a label is a defect (contracts/ui-kit.md). */
+  /** Required — a control without a label is a defect. */
   label: React.ReactNode
   /** Keeps the label in the accessibility tree but out of the layout. */
   hideLabel?: boolean

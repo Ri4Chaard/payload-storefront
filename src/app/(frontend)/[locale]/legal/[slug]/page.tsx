@@ -19,7 +19,7 @@ import { getPolicyBySlug } from '@/lib/policies/queries'
  * made every link on this site resolve; that was true of the chrome above the footer's bottom rail
  * and false of the rail itself.
  *
- * **Under a prefix, and the prefix is the whole routing decision** (009/research.md R1). Next
+ * **Under a prefix, and the prefix is the whole routing decision**. Next
  * permits one dynamic segment per path position, and the site's root one belongs to
  * `(shop)/[category]` — which matches `/category-1` and answers the 404 for every unrecognised single
  * segment. Serving policies at bare root addresses would have meant replacing that route with a
@@ -36,7 +36,7 @@ import { getPolicyBySlug } from '@/lib/policies/queries'
  * **Rendered per request.** The reason `/`, `/about`, `/blog`, `/contact` and `/faq` all record: the
  * production image is built with no database, so a prerendered page would bake empty on a first
  * deploy and stay that way until somebody happened to edit something. Two things follow and both are
- * wanted — publishing is visible to the very next visitor with no revalidation at all (FR-056), and
+ * wanted — publishing is visible to the very next visitor with no revalidation at all, and
  * there is no hook here to reach for the shared `invalidate()`, which walks every product slug and
  * would evict the entire catalogue because somebody fixed a typo in a paragraph.
  */
@@ -118,7 +118,7 @@ export default async function PolicyPage({ params }: Params) {
       ) : (
         /*
           A published policy with nothing written in it yet renders its title and this, never a 404
-          (FR-006). The site links to these pages from every page it serves, and answering a link the
+         . The site links to these pages from every page it serves, and answering a link the
           site itself publishes with "not found" is worse than a thin page. `/faq` and `/blog` both
           reached the same conclusion.
 

@@ -9,7 +9,7 @@ import { safeNextPath } from '@/lib/auth/schemas'
 import type { CreateAccountValues } from '@/lib/auth/schemas'
 
 /**
- * US2 — sign in (spec 004, FR-010 – FR-014).
+ * US2 — sign in.
  *
  * **`authenticateCustomer` rather than the `signIn` action**, because `signIn` writes a session
  * cookie and `cookies()` needs a request that does not exist here. The seam exists precisely so

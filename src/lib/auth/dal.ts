@@ -5,7 +5,7 @@ import { cache } from 'react'
 import { getPayload, type Payload } from 'payload'
 
 /**
- * Where "is this customer signed in?" is actually decided (spec 004, research R9).
+ * Where "is this customer signed in?" is actually decided.
  *
  * **Not in a layout.** The obvious place to guard `/account` is its layout, and Next's own
  * documentation for this version says not to: layouts do not re-render on client-side navigation
@@ -54,7 +54,7 @@ export type CustomerUser = Extract<AuthenticatedUser, { collection: 'customers' 
  * handful of server actions must act *as* the customer instead of merely knowing who they are:
  * Payload's local API runs collection access control only when it is handed a `user`, and the
  * addresses collection's `isDocumentOwner` rule is a check we want to keep running in production
- * rather than route around with `overrideAccess` (spec 004, FR-032).
+ * rather than route around with `overrideAccess`.
  */
 const authenticate = cache(async (): Promise<CustomerUser | null> => {
   // **These two lines are in this order on purpose, and swapping them breaks the container build.**
@@ -72,7 +72,7 @@ const authenticate = cache(async (): Promise<CustomerUser | null> => {
   // this is the storefront side of that boundary.
   if (!user || user.collection !== 'customers') return null
 
-  // Unverified is not signed in (FR-008). Payload's login already refuses these, but a session
+  // Unverified is not signed in. Payload's login already refuses these, but a session
   // could predate verification being switched on, and the profile is not reachable without it.
   if (user._verified !== true) return null
 

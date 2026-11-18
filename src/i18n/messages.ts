@@ -4,7 +4,7 @@ import uk from './messages/uk.json' with { type: 'json' }
 import { DEFAULT_LOCALE, type Locale } from './routing'
 
 /**
- * The messages for one locale (spec 010, FR-037, research R10).
+ * The messages for one locale.
  *
  * **Split from `request.ts` so it can be imported outside a Next render.** `request.ts` reaches
  * `next/root-params`, which is a compiler placeholder — importing it from a Payload hook or a test

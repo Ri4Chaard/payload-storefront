@@ -9,14 +9,14 @@ import { cn } from '@/lib/cn'
  * A collection tile, from Figma node 138:509 — a photograph with the collection name at the top and
  * a white call to action at the bottom, drawn at 415x480 with a 30px inset.
  *
- * **The tile changes shape, not just size** (002/T111). The home page draws it at 415x480, then
+ * **The tile changes shape, not just size**. The home page draws it at 415x480, then
  * 478x350, then 174x242 — portrait, LANDSCAPE, portrait. The proportion is therefore responsive
  * here rather than fixed, and it lives in the component rather than in a prop because a prop cannot
  * change at a breakpoint without rendering the card twice. A caller who needs a different
  * proportion passes `aspect-*` through `className`, which `tailwind-merge` resolves over the
  * defaults; there is a story for exactly that.
  *
- * **The title needed no breakpoint work at all** (002/T112). The design steps it 30px → 30px → 20px
+ * **The title needed no breakpoint work at all**. The design steps it 30px → 30px → 20px
  * and `text-heading-1` is already a clamp from 20 to 30, landing on both endpoints exactly. It
  * reads 27px rather than 30px at the 1024 frame, which is the fluid scale doing its job; stacking
  * `md:` overrides on top of a clamp would be two systems arguing over one number.
@@ -100,7 +100,7 @@ export function CategoryCard({
 }: CategoryCardProps) {
   const t_catalog = useTranslations('catalog')
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

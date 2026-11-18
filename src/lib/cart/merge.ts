@@ -4,7 +4,7 @@ import { findCartId, ownerRequest, payloadClient, type CartOwner } from './sessi
 import { relationId, type RawCartLine } from './totals'
 
 /**
- * A guest cart meeting an account cart at sign-in (spec 005, T018, FR-005).
+ * A guest cart meeting an account cart at sign-in.
  *
  * **The plugin ships a merge and it is wrong for this schema**, which is why this exists.
  * `createCartsCollection` registers `mergeCartEndpoint({ cartsSlug })` — note the absent

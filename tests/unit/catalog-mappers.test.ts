@@ -71,10 +71,10 @@ describe('availability is decided once', () => {
       },
     })
 
-    // Made to order: every option is offered however empty its quantity (011/FR-002).
+    // Made to order: every option is offered however empty its quantity.
     expect(isProductAvailable(emptied(OPTIONED))).toBe(true)
 
-    // Stock tracked: the counts govern again, exactly as before (011/FR-005).
+    // Stock tracked: the counts govern again, exactly as before.
     const tracked: Product = { ...OPTIONED, availability: 'stock-tracked' }
     expect(isProductAvailable(tracked)).toBe(true)
     expect(isProductAvailable(emptied(tracked))).toBe(false)
@@ -120,8 +120,8 @@ describe('prices', () => {
     expect(options.at(-1)?.label).toBe('Option D')
 
     /*
-      Product 1 is made to order, so the option at zero is offered like every other (011/FR-002) and
-      carries no ceiling (011/FR-003). It used to read as sold out here — see the availability block
+      Product 1 is made to order, so the option at zero is offered like every other and
+      carries no ceiling. It used to read as sold out here — see the availability block
       above for why that reversed. The claim this test still makes is about ORDER: an option nobody
       can order today is still listed, in its place in the price ladder, rather than disappearing
       and making the ladder move between two page loads.

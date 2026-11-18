@@ -5,7 +5,7 @@ import type { Locale } from '@/i18n/routing'
 import { env } from '@/env'
 
 /**
- * Marketing consent, mirrored into Resend (spec 004, research R2).
+ * Marketing consent, mirrored into Resend.
  *
  * **This module cannot send a message.** It only moves a contact's subscribed state into the Resend
  * audience that campaigns are sent against. Marketing mail is composed and sent from Resend, by a
@@ -53,7 +53,7 @@ interface SyncArgs {
   firstName?: null | string
   lastName?: null | string
   /**
-   * The language this subscriber reads the site in (spec 010, FR-044).
+   * The language this subscriber reads the site in.
    *
    * **Logged, not sent — and that is a limitation worth stating rather than hiding.** Resend's
    * contacts endpoint accepts `email`, `first_name`, `last_name` and `unsubscribed`, and nothing

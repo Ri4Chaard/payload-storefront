@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { setMarketingEmail } from '@/lib/auth/actions'
 
 /**
- * The Marketing preferences row — node row `I266:5096;266:4954` (spec 004, US6, FR-033).
+ * The Marketing preferences row — node row `I266:5096;266:4954`.
  *
  * **The row moved into a client component, and the switch is the only reason.** The page is a
  * Server Component; a control that flips in place needs state, so whoever owns the state owns the
@@ -34,7 +34,7 @@ export interface MarketingToggleProps {
 export function MarketingToggle({ subscribed }: MarketingToggleProps) {
   const t_account = useTranslations('account')
   const t_common = useTranslations('common')
-  // Resolved here rather than at module scope: `useTranslations` is a hook (spec 010).
+  // Resolved here rather than at module scope: `useTranslations` is a hook.
   const FAILED = useTranslations('errors')('marketingNotSaved')
   const LABEL = t_account('marketingOptIn')
   const [checked, setChecked] = React.useState(subscribed)

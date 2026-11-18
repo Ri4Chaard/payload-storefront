@@ -3,14 +3,14 @@ import type { Block } from 'payload'
 import { mediaSlot } from '@/fields/media-slot'
 
 /**
- * A numbered sequence — how raw material becomes a product (spec 006, FR-012).
+ * A numbered sequence — how raw material becomes a product.
  *
  * Drawn at nodes `312:6940` / `413:7725` / `413:8024`: a centred heading over three tiles, each a
  * picture with an ordinal, a title and a caption. Three across at desktop and tablet, stacked on a
  * phone.
  *
  * **There is no ordinal field, on purpose.** The `01` / `02` / `03` is the row's position, not
- * something an editor types (FR-012). A number field here would eventually hold a list running
+ * something an editor types. A number field here would eventually hold a list running
  * 1, 2, 2 — and the fix for that is to not offer the mistake.
  *
  * The drawing shows three steps and the model caps nothing. Two is a shorter band; five wraps to a
@@ -40,7 +40,7 @@ export const processSteps: Block = {
       fields: [
         mediaSlot({ label: 'Picture', description: 'The tile above the step’s title.' }),
       /*
-        **Required, but not in every language** (spec 010, T110).
+        **Required, but not in every language**.
 
         A row in this array is shared across all three locales — arrays are not localized, the words
         inside them are — so a `required` localized child has to be filled in EVERY language before

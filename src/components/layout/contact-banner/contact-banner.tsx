@@ -48,7 +48,7 @@ export interface ContactBannerProps {
   phone: string
   phoneHref: string
   /**
-   * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
+   * The shop's accounts, from the `contact-settings` global via the layout.
    *
    * Empty by default rather than falling back to a hardcoded list: a placeholder that renders
    * looks like a working link, and the one this replaced pointed at a bare `wa.me/` on every page

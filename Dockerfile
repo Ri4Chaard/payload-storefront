@@ -39,7 +39,9 @@ FROM base AS build
 # `next build` inlines NEXT_PUBLIC_* into the client bundle, so the public origin is a build input.
 # Changing it requires a rebuild, not a restart.
 ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+ARG NEXT_PUBLIC_SITE_NAME=
+ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL \
+    NEXT_PUBLIC_SITE_NAME=$NEXT_PUBLIC_SITE_NAME
 
 # src/env.ts throws on any missing REQUIRED variable at import time, and payload.config.ts imports
 # it. Nothing connects, encrypts or sends mail during the build, so placeholders are enough. They

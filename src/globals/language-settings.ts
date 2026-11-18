@@ -5,11 +5,11 @@ import { isAdmin } from '@/lib/access'
 import { revalidateGlobalOnChange } from '@/lib/revalidate'
 
 /**
- * Which languages visitors are offered (spec 010, FR-026 – FR-032).
+ * Which languages visitors are offered.
  *
  * **This is not the list of languages the site has.** Payload always knows all three, and that
  * separation is the feature: Ukrainian can be translated in the admin for weeks before anybody can
- * read it, and switching it off later hides it without touching a word of it (FR-030, FR-028).
+ * read it, and switching it off later hides it without touching a word of it.
  *
  * **English has no field, and that is deliberate.** FR-029 says disabling the default language must
  * be refused with an explanation; a control that does not exist is a stronger guarantee than a

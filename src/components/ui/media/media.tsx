@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn'
 import { VideoMedia } from './video-media'
 
 /**
- * A photograph or a video, in one frame (006/T026, T049).
+ * A photograph or a video, in one frame.
  *
  * Every band that shows imagery renders through this, so the seven slots the design draws behave
  * identically: the same crop, the same box reserved before anything loads, the same fallback.

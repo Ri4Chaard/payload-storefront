@@ -157,7 +157,7 @@ export function Lightbox({
        * anyway, so saying so up front keeps the two paths honest.
        *
        * **`none` under reduced motion, and this is the one place that has to be said in
-       * JavaScript** (003/T299). The global rule in `styles.css` collapses every CSS transition on
+       * JavaScript**. The global rule in `styles.css` collapses every CSS transition on
        * the page, which is what covers the drawer and the gallery — but this animation is not CSS.
        * PhotoSwipe drives the open and close itself, frame by frame, and a declaration cannot reach
        * it. A viewer that flies up out of a thumbnail is exactly the whole-screen movement the

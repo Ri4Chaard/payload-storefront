@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn'
 import { SectionHeading } from '../section-heading'
 
 /**
- * The collection band (002/T115), from Figma nodes 144:835, 440:12512 and 440:13487 — a heading
+ * The collection band, from Figma nodes 144:835, 440:12512 and 440:13487 — a heading
  * over four photographic tiles.
  *
  * Four across at 1280 and up, two-by-two below it. The tiles themselves carry the shape change

@@ -6,18 +6,18 @@ import React from 'react'
 import { cn } from '@/lib/cn'
 
 /**
- * A video that behaves (006/T048) — the only client component this feature adds.
+ * A video that behaves — the only client component this feature adds.
  *
  * Everything a background video needs is native: `poster`, `muted`, `loop`, `playsInline` and
  * `preload` are all `<video>` attributes, and a server-rendered element would satisfy most of the
  * design. Two rules are not expressible that way, and each of them is a requirement rather than a
  * refinement:
  *
- *   **Reduced motion (FR-024).** CSS cannot suppress autoplay. `@media (prefers-reduced-motion)`
+ *   **Reduced motion.** CSS cannot suppress autoplay. `@media (prefers-reduced-motion)`
  *   can hide the element, but it would still play and still download — invisible, not stopped.
  *   Only `matchMedia` can answer the question before the file is requested.
  *
- *   **Deferred download (FR-024a).** `preload="none"` does not survive `autoPlay`: setting autoplay
+ *   **Deferred download.** `preload="none"` does not survive `autoPlay`: setting autoplay
  *   makes the browser fetch immediately regardless. So the attribute cannot be the mechanism.
  *
  * **Both are solved the same way: the `src` is withheld.** No `<source>` exists until the slot has

@@ -46,7 +46,7 @@ test('a visitor fills a cart and reads it back at every width', async ({ page })
 
     await expect(page.getByRole('heading', { name: /shopping cart/i })).toBeVisible()
     await expect(cartRows(page)).toHaveCount(2)
-    // The chosen option travels onto the line (FR-008). Size did too until spec 011 removed it.
+    // The chosen option travels onto the line. Size did too until spec 011 removed it.
     await expect(cartRows(page).first()).toContainText(/Option A/)
 
     const overflow = await page.evaluate(
@@ -92,7 +92,7 @@ test('checkout is refused until the terms are agreed', async ({ page }) => {
 })
 
 /**
- * The handoff (spec 005, US3 — T064). FR-021, FR-024, FR-025, FR-027, SC-017.
+ * The handoff. FR-021, FR-024, FR-025, FR-027, SC-017.
  *
  * **The assertion that matters is the last one.** FR-027 says the cart survives the handoff, and
  * that is the requirement most easily broken by a well-meaning "clear the cart on success" — the
@@ -143,7 +143,7 @@ test('checkout hands the cart to the seller and leaves it alone', async ({ page 
 })
 
 /**
- * BUY NOW (spec 005, US4 — T069). FR-019, FR-020, SC-005.
+ * BUY NOW. FR-019, FR-020, SC-005.
  *
  * **The last assertion is the requirement.** A visitor who has assembled a cart and then uses BUY
  * NOW on a different product must find that cart exactly as they left it — a shortcut that quietly
@@ -192,7 +192,7 @@ test('buy now names an unmade choice rather than refusing vaguely', async ({ pag
 })
 
 /**
- * One set of accounts (spec 005, T073, FR-052, SC-016).
+ * One set of accounts.
  *
  * **This is the defect the migration exists to prevent**, and it was live until Phase 8: the owner
  * sets their real WhatsApp number in the admin, the handoff modal uses it, and the footer on every
@@ -216,7 +216,7 @@ test('the chrome points at the configured accounts, not a placeholder root', asy
 })
 
 /**
- * Reordering in the admin reorders the modal (spec 005, T080, FR-038).
+ * Reordering in the admin reorders the modal.
  *
  * Row order *is* display order — there is no position field two rows could disagree about — so this
  * asserts the consequence: the owner drags, and the customer's modal follows.
@@ -265,7 +265,7 @@ test('the messenger order the owner set is the order customers see', async ({ pa
 })
 
 /**
- * The whole flow by keyboard alone (spec 005, T082, FR-017, SC-008).
+ * The whole flow by keyboard alone.
  *
  * The axe sweep in `tests/a11y/routes.spec.ts` checks the static properties; this checks the ones
  * only an interaction can show — that a dialog traps focus, that Escape closes it, and that focus

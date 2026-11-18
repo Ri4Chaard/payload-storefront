@@ -7,7 +7,7 @@ import { CookieSettingsButton } from './cookie-settings-button'
  *
  * **The design draws no re-entry point anywhere** — once the drawn banner is answered it is gone
  * for good. This exists because a decision somebody cannot revisit is a decision they cannot
- * revoke, and withdrawal has to be as available as consent was (FR-032).
+ * revoke, and withdrawal has to be as available as consent was.
  *
  * It sits in the footer's legal row beside the policy links, so the stories render it on the
  * footer's own dark surface — on a light background its `inverse` colouring would be invisible and

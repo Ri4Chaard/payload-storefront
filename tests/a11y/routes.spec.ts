@@ -4,19 +4,19 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * Automated accessibility over the storefront routes (FR-044). Storybook's a11y addon covers
+ * Automated accessibility over the storefront routes. Storybook's a11y addon covers
  * components in isolation; this covers them composed into real pages, with the COMPLETE rule set —
  * including the document-level rules the component sweep deliberately excludes, because a document
  * is the only place they mean anything.
  *
- * Three widths, because a responsive layout is three layouts (002/T132). A band that reflows into
+ * Three widths, because a responsive layout is three layouts. A band that reflows into
  * an unreachable scroller, or a control that only overlaps its neighbour on a phone, is invisible
  * to a single-width sweep.
  */
 const ROUTES = [
   '/',
   // A category listing and the whole shop: the same frame, but only one of them pages, and
-  // pagination is a set of controls nothing else on the site has (003/T257).
+  // pagination is a set of controls nothing else on the site has.
   '/category-1',
   '/all-products?page=2',
   // The empty state and the branded 404 are both pages a visitor reaches by accident, which is
@@ -25,33 +25,33 @@ const ROUTES = [
   '/no-such-category',
   // A product with options, and one with none: the selectors, the quantity stepper and
   // the two actions only exist on the first, and the second is what proves the column closes over
-  // them rather than leaving labelled controls behind (003/T296).
+  // them rather than leaving labelled controls behind.
   '/products/product-1',
   '/products/product-3',
-  // The account flow (004/T459). A form is where a keyboard or a screen reader has the most to
+  // The account flow. A form is where a keyboard or a screen reader has the most to
   // lose — an unlabelled field or an error nobody announces is the difference between registering
   // and giving up — and these two are the only pages on the site a visitor MUST complete.
   '/create-account',
   '/verify-email?email=a11y%40aurum-testing.dev',
-  // Sign-in (004/T476). The password reveal is the control most likely to fail here: it is an
+  // Sign-in. The password reveal is the control most likely to fail here: it is an
   // icon-only button whose accessible name has to change with its state, and getting that wrong
   // leaves a screen-reader user unable to tell whether their password is on screen.
   '/sign-in',
-  // The reset flow (004/T492). `/reset-password` renders its code step, which is the second place
+  // The reset flow. `/reset-password` renders its code step, which is the second place
   // in the feature where six inputs have to present themselves as one labelled control — FR-046
   // asks for the invalid-code message to be announced, and a group that is not named has nothing to
   // announce it against.
   '/forgot-password',
   '/reset-password?email=a11y%40aurum-testing.dev',
   /**
-   * The story page (006/T036). Composed of blocks an editor arranged, which is what makes it worth
+   * The story page. Composed of blocks an editor arranged, which is what makes it worth
    * scanning here rather than only in Storybook: the heading outline is a property of the whole
    * page and of the ORDER somebody put the bands in, and no component sweep can see it. The FAQ
    * band also puts several expandable regions on one page for the first time outside a product.
    */
   '/about',
   /**
-   * The blog (007/T036, T049, T069). Three addresses, because each puts something on the page the
+   * The blog. Three addresses, because each puts something on the page the
    * others do not:
    *
    *   `/blog`                   the mosaic and the tab strip — a set of links where exactly one is
@@ -73,7 +73,7 @@ const ROUTES = [
   '/contact',
   '/faq',
   /**
-   * The policy pages (009/T016). Four addresses would be three too many for a scan — they are the
+   * The policy pages. Four addresses would be three too many for a scan — they are the
    * same layout with different prose — so two are listed, chosen for what differs:
    *
    *   `/legal/privacy`    the longest body, and the one whose heading outline is entirely
@@ -141,7 +141,7 @@ for (const { name, width, height } of [
 }
 
 /**
- * The filter drawer, open (003/T296).
+ * The filter drawer, open.
  *
  * Like the menu below it, this is a state no component sweep can reach: `FilterDrawer` has stories,
  * but a story renders the panel beside a page rather than OVER one, and the obligations that come
@@ -175,7 +175,7 @@ for (const { name, width, height } of [
 }
 
 /**
- * The lightbox, open (003/T296).
+ * The lightbox, open.
  *
  * The fourth state, and the one furthest from anything a story can show: PhotoSwipe builds its own
  * dialog outside the React tree, so what axe audits here is markup this repository does not write.
@@ -205,7 +205,7 @@ for (const { name, width, height } of [
 
 
 /**
- * The profile, and the modal over it (004/T507).
+ * The profile, and the modal over it.
  *
  * **It cannot go in `ROUTES` above**, because `/account` is the one page on the site that requires a
  * session: an anonymous sweep would audit the sign-in redirect and report a clean profile it never
@@ -280,7 +280,7 @@ for (const { name, width } of WIDTHS) {
     expect(password.violations, JSON.stringify(password.violations, null, 2)).toEqual([])
 
     /*
-      …and that modal's SECOND state, the confirmation it becomes on save (004/T566, FR-045). A
+      …and that modal's SECOND state, the confirmation it becomes on save. A
       dialog that swaps its own contents while open is the shape most likely to strand focus and
       leave the change unannounced, so it is scanned as its own document rather than assumed to
       inherit the pass above.
@@ -300,7 +300,7 @@ for (const { name, width } of WIDTHS) {
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(page.getByRole('dialog')).toBeHidden()
 
-    // …and the Add address modal (004/T523), the largest form on the site behind a dialog: seven
+    // …and the Add address modal, the largest form on the site behind a dialog: seven
     // controls with no visible labels, a listbox of every country, and a checkbox that is disabled
     // and checked at once — the combination most likely to leave something unnamed.
     await page.getByRole('button', { name: 'Add address' }).click()
@@ -313,7 +313,7 @@ for (const { name, width } of WIDTHS) {
     expect(address.violations, JSON.stringify(address.violations, null, 2)).toEqual([])
 
     /**
-     * …and the fourth modal, the delete confirmation (004/T566).
+     * …and the fourth modal, the delete confirmation.
      *
      * It is the smallest of the four and was the one missing from this sweep, which is the usual
      * shape of the gap: a dialog with two buttons and one sentence looks like it cannot be got
@@ -358,7 +358,7 @@ for (const { name, width } of WIDTHS) {
 }
 
 /**
- * The cart and its two dialogs (spec 005, T081, SC-008).
+ * The cart and its two dialogs.
  *
  * **Not in `ROUTES` above**, because an empty `/cart` is a heading and a link — the page worth
  * sweeping is one with rows in it, a removal confirmation over it, and a handoff modal over that.

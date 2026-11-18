@@ -4,7 +4,7 @@ import { ENQUIRY_MAX } from '@/lib/contact/config'
 import { enquirySchema, readEnquiryForm } from '@/lib/contact/enquiry-schema'
 
 /**
- * The contact form's one shape (008/T042, contracts/enquiry-action.md §9).
+ * The contact form's one shape.
  *
  * **The point of this file is that the schema and the collection cannot disagree.** Both read
  * `ENQUIRY_MAX`, so a value this accepts is a value Payload will store — the alternative is a form
@@ -121,7 +121,7 @@ describe('readEnquiryForm', () => {
     data.set('email', 'yara@example.com')
     data.set('message', 'Hello.')
     data.set('website', '')
-    // The hidden language field spec 010 added (FR-043) — the page knows which language it is.
+    // The hidden language field spec 010 added — the page knows which language it is.
     data.set('locale', 'ru')
 
     expect(readEnquiryForm(data)).toEqual({

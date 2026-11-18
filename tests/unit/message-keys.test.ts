@@ -6,7 +6,7 @@ import uk from '@/i18n/messages/uk.json' with { type: 'json' }
 import { LOCALES } from '@/i18n/routing'
 
 /**
- * The message files agree with each other (spec 010, T070 — FR-034, FR-036, FR-037).
+ * The message files agree with each other.
  *
  * A key present in English and missing elsewhere is *handled* — `loadMessages` merges English
  * underneath every locale, so it renders the English sentence rather than the raw key. This file is

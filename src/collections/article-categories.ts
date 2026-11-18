@@ -24,7 +24,7 @@ import { isAdmin } from '@/lib/access'
  * "Guides" is written but not ready.
  *
  * **No revalidation hook.** The only page that draws these is `/blog`, which is `force-dynamic`
- * (007/research.md R6), so there is nothing cached to invalidate. Copying `revalidateOnChange` from
+ *, so there is nothing cached to invalidate. Copying `revalidateOnChange` from
  * `categories.ts` would have been the unthinking move and would evict the entire product catalogue
  * because somebody renamed a blog tab.
  */

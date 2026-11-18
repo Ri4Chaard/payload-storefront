@@ -8,7 +8,7 @@ import { mergeAttributes } from '@/lib/catalog/mappers'
 import type { VariantOption } from '@/lib/catalog/types'
 
 /**
- * `ProductDetails`, showing the selected option's properties (spec 011, US2, FR-010 – FR-013).
+ * `ProductDetails`, showing the selected option's properties.
  *
  * **A wrapper rather than a change to `ProductDetails` itself.** That component takes an attribute
  * list and draws it; it has stories, it renders in a Storybook with no Payload behind it, and it
@@ -34,7 +34,7 @@ export function ProductDetailsForSelection({
   const selected = useSelectedVariant()
 
   const shown = React.useMemo(() => {
-    // Before an option is chosen — the page's initial state — the product speaks for itself (FR-012).
+    // Before an option is chosen — the page's initial state — the product speaks for itself.
     if (selected === null) return attributes
 
     const choice = variantChoices.find((option) => option.id === selected)

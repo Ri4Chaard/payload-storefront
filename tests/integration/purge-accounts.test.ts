@@ -5,7 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { CODE_RETENTION_MS, UNVERIFIED_ACCOUNT_TTL_MS } from '@/lib/auth/config'
 
 /**
- * The nightly purge (spec 004, FR-040, FR-041, T560).
+ * The nightly purge.
  *
  * **This is the one job in the system that deletes customer rows**, so what needs proving is not
  * that it deletes — it is where it STOPS. A `where` clause that is one operator too broad here does
@@ -135,7 +135,7 @@ afterAll(async () => {
   }
 })
 
-describe('unverified accounts (FR-041)', () => {
+describe('unverified accounts', () => {
   it('deletes one past the retention age and keeps a younger one', async () => {
     const stale = await customerAged('stale', UNVERIFIED_ACCOUNT_TTL_MS + 60_000, false)
     const recent = await customerAged('recent', UNVERIFIED_ACCOUNT_TTL_MS - 60_000, false)
@@ -162,7 +162,7 @@ describe('unverified accounts (FR-041)', () => {
   })
 })
 
-describe('spent codes (FR-040)', () => {
+describe('spent codes', () => {
   it('deletes a consumed code past retention', async () => {
     const old = await codeRow({ consumedAt: ago(CODE_RETENTION_MS + 60_000) })
     const recent = await codeRow({ consumedAt: ago(CODE_RETENTION_MS - 60_000) })

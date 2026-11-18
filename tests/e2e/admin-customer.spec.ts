@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * The seller's view of a customer, in the admin panel (spec 004, FR-027).
+ * The seller's view of a customer, in the admin panel.
  *
  * **The only test in this suite that opens `/admin`**, and it earns that on the strength of what it
  * guards. An order at this shop is a conversation on WhatsApp or Telegram, and the person fulfilling
@@ -114,7 +114,7 @@ test('a customer’s saved addresses are visible to staff', async ({ page }) => 
 })
 
 /**
- * Editorial verification, as a test rather than an afternoon in the panel (spec 004, T570).
+ * Editorial verification, as a test rather than an afternoon in the panel.
  *
  * The Constitution asks for a person to confirm the editable surface actually behaves; the four
  * claims below are the ones from that checklist that can be pinned down, and pinning them down is
@@ -180,7 +180,7 @@ test('the editable surface behaves as the spec says', async ({ page }) => {
   const account = await page.request.get('/api/globals/account')
   expect(account.status()).toBe(404)
 
-  /** The customer row shows what a seller needs, with the consent evidence read-only (FR-034). */
+  /** The customer row shows what a seller needs, with the consent evidence read-only. */
   await page.goto(`/admin/collections/customers/${customer.id}`)
   await expect(page.locator('#field-firstName')).toHaveValue('Ada', { timeout: 120_000 })
   await expect(page.locator('#field-lastName')).toHaveValue('Lovelace')

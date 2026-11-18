@@ -72,7 +72,7 @@ const adjustVariantsJoin = (field: Field): Field => {
  * The e-commerce plugin's own `products` collection is **nearly empty** — it contributes
  * `inventory`, `enableVariants`, `variantTypes`, a `variants` join, and one price group per
  * currency, and nothing else. No title, no slug, no photographs, no description. Every content
- * field below is ours (003/research.md R1).
+ * field below is ours.
  *
  * That is the whole shape of the bargain: the plugin handles money in integer minor units, variant
  * resolution and inventory; the content model is designed here.
@@ -98,7 +98,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
   ...defaultCollection,
 
   /**
-   * Publishing invalidates the cached routes (003/T294).
+   * Publishing invalidates the cached routes.
    *
    * **Appended to the plugin's own hooks rather than replacing them.** `defaultCollection.hooks`
    * is where the e-commerce plugin keeps its own bookkeeping; spreading it and adding to the two
@@ -110,7 +110,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
       ...(defaultCollection.hooks?.afterChange ?? []),
       revalidateOnChange,
       // Carries `availability` down to every variant, so the quantity field can hide itself on one
-      // (spec 011, FR-001). See `./product-hooks.ts` for why a variant cannot just ask its parent.
+      //. See `./product-hooks.ts` for why a variant cannot just ask its parent.
       cascadeAvailability,
     ],
     afterDelete: [...(defaultCollection.hooks?.afterDelete ?? []), revalidateOnDelete],
@@ -226,7 +226,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                       label: 'Attribute',
                     },
       /*
-        **Required, but not in every language** (spec 010, T110).
+        **Required, but not in every language**.
 
         A row in this array is shared across all three locales — arrays are not localized, the words
         inside them are — so a `required` localized child has to be filled in EVERY language before
@@ -292,10 +292,10 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                     Modelled on `category` above rather than on the departing `sizes`: what made
                     sizes heavy was its ROLE on the product — a required selector, part of cart-line
                     identity — and colour has none of that and must never acquire it
-                    (011/research.md R1).
+                   .
 
                     The link a customer bookmarked still works, because the four rows the migration
-                    seeds keep `black`, `clear`, `green` and `multicolor` as their `value` (FR-020).
+                    seeds keep `black`, `clear`, `green` and `multicolor` as their `value`.
                   */
                   name: 'colour',
                   type: 'relationship',

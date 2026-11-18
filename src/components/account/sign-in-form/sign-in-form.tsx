@@ -24,7 +24,7 @@ import { signInSchema, type SignInValues } from '@/lib/auth/schemas'
  * reading order with room to breathe.
  *
  * **Every failure lands in one place, and says one thing.** A wrong password and an address with no
- * account are the same message by requirement (FR-011); it is rendered as a form-level error rather
+ * account are the same message by requirement; it is rendered as a form-level error rather
  * than against the email field, because pointing at a control would itself suggest which half was
  * wrong.
  */
@@ -32,7 +32,7 @@ import { signInSchema, type SignInValues } from '@/lib/auth/schemas'
  * The action returns a key; these are the sentences.
  *
  * `signInFailed` is shown for a wrong password AND for an address with no account. Do not split it.
- * Saying "we don't know that email" turns this form into a way to enumerate customers (FR-011), and
+ * Saying "we don't know that email" turns this form into a way to enumerate customers, and
  * the action deliberately hands back one key for both.
  */
 

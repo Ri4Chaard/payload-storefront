@@ -6,7 +6,7 @@ import type { Platform } from './normalise'
 
 /**
  * The cart becomes text (spec 005, T056,
- * [messenger-handoff.md §3](../../../specs/005-checkout-handoff/contracts/messenger-handoff.md)).
+ *).
  * FR-022, FR-028, FR-028a, FR-043 – FR-045.
  *
  * **The budget is measured on the finished, percent-encoded link — not on the message.** This is
@@ -20,7 +20,7 @@ import type { Platform } from './normalise'
  * **Truncation cuts at a line boundary and says what it dropped.** A message that quietly loses its
  * last three lines is worse than one that is visibly shorter: the seller cannot know to ask.
  *
- * **Composed once per checkout** (FR-026). `beginCheckout` calls this a single time and holds the
+ * **Composed once per checkout**. `beginCheckout` calls this a single time and holds the
  * result for the life of the modal, so a double-click cannot produce two messages built from two
  * reads of a cart whose price changed in between.
  */
@@ -50,7 +50,7 @@ function itemLine(line: CartView['lines'][number]): string {
 /**
  * The customer block, or nothing at all.
  *
- * Each half is independent (FR-045): a saved name with no address yields the name alone, and an
+ * Each half is independent: a saved name with no address yields the name alone, and an
  * empty result must be indistinguishable from an anonymous visitor's.
  */
 function customerBlock(customer: MessageCustomer | null): string {

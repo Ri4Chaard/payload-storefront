@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/container'
 import { cn } from '@/lib/cn'
 
 /**
- * The block above every listing (003/T250) — the category's name and the sentence under it.
+ * The block above every listing — the category's name and the sentence under it.
  * Nodes `222:709` (1920) · `412:7735` (768) · `412:7870` (375).
  *
  * **It carries the page's `h1`.** A listing's subject is its category, so the name is the heading

@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * US6 end to end (spec 004, FR-033, FR-034) — the one switch on the profile.
+ * US6 end to end — the one switch on the profile.
  *
  * **What needs a browser here is persistence, not the toggle.** That a boolean can be written is
  * `tests/integration/us6-marketing.test.ts`'s job. What only a browser can show is that the switch

@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { getEnabledLocales } from '@/lib/i18n/enabled'
 
 /**
- * The cross-language links every page carries (spec 010, FR-016, research R12).
+ * The cross-language links every page carries.
  *
  * **Three indexable pages, not one page with two duplicates.** Each language names ITSELF canonical
  * — pointing all three at the English address would ask Google to drop the other two, which is the

@@ -6,7 +6,7 @@ import { composeMessage } from '@/lib/messengers/message'
 
 /**
  * The cart becomes text —
- * [messenger-handoff.md §3](../../specs/005-checkout-handoff/contracts/messenger-handoff.md).
+ *.
  * FR-022, FR-026, FR-028, FR-028a, FR-043 – FR-045. SC-002, SC-004, SC-013, SC-015.
  *
  * **The Cyrillic block near the bottom is the reason this file is worth reading.** The budget is
@@ -49,7 +49,7 @@ const cart = (lines: CartLineView[], subtotal = '$24,900'): CartView => ({
   empty: lines.length === 0,
 })
 
-describe('what the seller is told (SC-002)', () => {
+describe('what the seller is told', () => {
   it('names every product, its option and how many', () => {
     const message = composeMessage(
       cart([
@@ -103,7 +103,7 @@ describe('what the seller is told (SC-002)', () => {
   })
 })
 
-describe('the customer block (FR-043 – FR-045, SC-013)', () => {
+describe('the customer block', () => {
   const one = cart([line()])
 
   it('carries a saved name and delivery address', () => {
@@ -151,7 +151,7 @@ describe('the customer block (FR-043 – FR-045, SC-013)', () => {
   })
 })
 
-describe('the length budget (FR-028, FR-028a, SC-015)', () => {
+describe('the length budget', () => {
   const longCart = (title: string, count: number) =>
     cart(Array.from({ length: count }, (_, i) => line({ id: `row-${i}`, title })))
 
@@ -209,7 +209,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
   })
 })
 
-describe('composing is deterministic (FR-026, SC-004)', () => {
+describe('composing is deterministic', () => {
   it('produces the same message every time from the same cart', () => {
     const one = cart([line({ variantChoice: 'Option B' })])
     const customer = { name: 'Aisha Karimova', address: 'Astana' }
@@ -222,7 +222,7 @@ describe('composing is deterministic (FR-026, SC-004)', () => {
 })
 
 /**
- * A BUY NOW message (T067).
+ * A BUY NOW message.
  *
  * One product, its chosen options, and the total for that product alone — never whatever else the
  * customer happens to be holding.

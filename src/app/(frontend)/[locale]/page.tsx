@@ -8,16 +8,17 @@ import { FeatureStrip } from '@/components/ui'
 import { getCategories, getFeatured } from '@/lib/catalog/queries'
 import { getHomeContent } from '@/lib/home/queries'
 import { shopPromises } from '@/lib/shop-promises'
+import { SITE_NAME } from '@/lib/site'
 
 /**
- * The home page (002/T108), from Figma node 255:3353.
+ * The home page, from Figma node 255:3353.
  *
  * **This file is the only thing on the route that reads content.** Every band below takes what it
- * renders as props — which is what let the featured row swap from fixtures to Payload (003/T290) by
+ * renders as props — which is what let the featured row swap from fixtures to Payload by
  * changing one prop here, with `ProductCarousel` untouched. A section that imported the mocks
  * itself would have made that a rewrite.
  *
- * **Every word on this page now comes from Payload** (spec 010). The hero, the two band headings
+ * **Every word on this page now comes from Payload**. The hero, the two band headings
  * and the about band read `home-page`; the tiles and the products read the catalogue. `src/mocks/`
  * is gone, and with it the last of the fixture content spec 002 opened — `payload.config.ts`,
  * `story-page.ts` and the catalogue-boundary lint rule each named it as the outstanding one.
@@ -31,7 +32,7 @@ import { shopPromises } from '@/lib/shop-promises'
  * rule the catalogue bands already followed.
  *
  * The heading hierarchy is decided here rather than inside the bands, because it is a property of
- * the page: the hero owns the only `h1`, and every band heading is an `h2` beneath it (FR-026).
+ * the page: the hero owns the only `h1`, and every band heading is an `h2` beneath it.
  */
 /**
  * **Rendered per request, deliberately** — this page reads the catalogue, and the container image is
@@ -53,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t_meta = await getTranslations('meta')
   return {
     // Not the layout's `%s | Aurum` template: on the home page that would read "Aurum | Aurum".
-    title: { absolute: t_meta('homeTitle') },
+    title: { absolute: t_meta('homeTitle', { siteName: SITE_NAME }) },
     description: t_meta('homeDescription'),
   }
 }
@@ -64,7 +65,7 @@ export default async function HomePage() {
   /*
     Per-tile copy the schema does not hold. One sentence, identical on every tile, drawn at node
     138:492 — a field for it would be four copies of the same words for an owner to keep in step.
-    It moved out of a module constant when it became a translation (spec 010).
+    It moved out of a module constant when it became a translation.
   */
   const CATEGORY_CTA = (await getTranslations('catalog'))('viewCollectionShort')
   const [content, featured, shopCategories] = await Promise.all([
@@ -135,7 +136,7 @@ export default async function HomePage() {
 
         Its position is load-bearing, not incidental. The strip is a labelled region whose cards are
         `h3`, so placing it above the about band's `h2` — as an earlier revision did — produced an
-        outline that jumped h1 → h3 and skipped a level (FR-026). The drawn order puts it here
+        outline that jumped h1 → h3 and skipped a level. The drawn order puts it here
         anyway; the heading hierarchy is the reason to keep it here.
       */}
       <FeatureStrip items={shopPromises(t_product)} label={t_product('whyShopWithUs')} />

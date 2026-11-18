@@ -6,10 +6,10 @@ import type { BlogCategory } from '@/lib/blog/types'
 import { cn } from '@/lib/cn'
 
 /**
- * Narrowing the blog to one subject (007/T062 — T064), from nodes `312:7365`, `415:7921`,
+ * Narrowing the blog to one subject, from nodes `312:7365`, `415:7921`,
  * `415:8027`.
  *
- * **Links with `aria-current`, NOT an ARIA `tablist`** (007/research.md R5). Every tab is a real
+ * **Links with `aria-current`, NOT an ARIA `tablist`**. Every tab is a real
  * address, so every tab is a link. The `tablist` pattern describes panels swapped in place without
  * navigation, and adopting it here would promise a screen-reader user keyboard semantics — roving
  * arrow-key focus, `aria-selected` — that a set of links does not have and should not have.

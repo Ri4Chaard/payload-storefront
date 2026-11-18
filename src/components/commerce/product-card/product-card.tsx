@@ -134,7 +134,7 @@ export function ProductCard({
         'group relative flex flex-col items-start',
         // The default card takes the compact spacing on a phone too. `size` cannot do this: a prop
         // is one value for every viewport, and the home page's row is 174px wide at 390 and 415px
-        // at 1920 (002/T124). `compact` still means "compact at every width", for a caller that
+        // at 1920. `compact` still means "compact at every width", for a caller that
         // wants the small card on a desktop.
         compact ? 'gap-2.5' : 'gap-2.5 md:gap-5',
         className,

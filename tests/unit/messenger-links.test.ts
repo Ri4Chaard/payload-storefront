@@ -4,7 +4,7 @@ import { LINK_BUDGET, buildLink, messengerLink } from '@/lib/messengers/links'
 
 /**
  * Identifier plus text becomes a URL —
- * [messenger-handoff.md §2](../../specs/005-checkout-handoff/contracts/messenger-handoff.md).
+ *.
  * FR-021, FR-022, research R10.
  *
  * The formats are asserted literally, against the forms verified in the research from Telegram's
@@ -28,7 +28,7 @@ describe('buildLink', () => {
   /**
    * Instagram has no documented way to pre-fill a direct message. The flag is how that fact reaches
    * the modal, which has to say so rather than let a customer arrive at an empty chat believing
-   * their selection travelled (FR-021).
+   * their selection travelled.
    */
   it('opens Instagram without a message, and says the message did not travel', () => {
     const { href, carriesMessage } = buildLink('instagram', 'aurum', 'Hello Aurum')

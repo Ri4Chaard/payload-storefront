@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/cn'
 
 /**
- * The row of applied filters beneath the toolbar (003/T272, FR-025). Nodes `225:1482` and
+ * The row of applied filters beneath the toolbar. Nodes `225:1482` and
  * `I355:7627;355:7602` — `Category 1 ×`, `Up to $7,300 ×`, `Best selling ×`.
  *
  * **Every chip is a link, and the whole pill is the control.** A filter lives in the URL, so

@@ -15,7 +15,7 @@ const BREADCRUMBS = [
 ]
 
 /**
- * The shop's accounts come from the `contact-settings` global (spec 005, FR-052), so the story
+ * The shop's accounts come from the `contact-settings` global, so the story
  * supplies them. The component no longer falls back to a hardcoded list: the one it used to fall
  * back to pointed at a bare `wa.me/` on every page of the site, which looks like a working link.
  */

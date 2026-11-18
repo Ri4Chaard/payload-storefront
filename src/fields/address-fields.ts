@@ -17,13 +17,13 @@ type AddressesConfig = Extract<
 type FieldsOverride = NonNullable<AddressesConfig['addressFields']>
 
 /**
- * The shape of a saved delivery address (spec 004, FR-027 – FR-031).
+ * The shape of a saved delivery address.
  *
  * **This does not create a collection.** `@payloadcms/plugin-ecommerce` already generates
  * `addresses` — with a `customer` relationship, admin-or-owner access on read, update and delete,
  * a `beforeChange` hook that assigns ownership from the request, and `country` promoted from text
  * to a select. All of it was already in `payload-types.ts` and already migrated before this spec
- * started, because `addresses: false` never disabled anything (004/research.md R5). Writing our own
+ * started, because `addresses: false` never disabled anything. Writing our own
  * would be the duplicate Principle II calls the most expensive mistake, one tier above components.
  *
  * So this file does two things: adds the two fields the design needs and the plugin lacks, and

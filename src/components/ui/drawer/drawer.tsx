@@ -17,7 +17,7 @@ import { cn } from '@/lib/cn'
  * **It is always in the document, and `display` is what changes.** The same decision `MobileNav`
  * documented in 002, for two reasons that both still hold. An exit animation needs the element to
  * exist while it plays, which `{open ? … : null}` cannot give it. And the filter panel is a
- * `<form method="GET">` that has to work with JavaScript disabled (FR-029) — a panel that is
+ * `<form method="GET">` that has to work with JavaScript disabled — a panel that is
  * mounted by a click handler is a panel that never renders for that visitor. `display: none` takes
  * it out of the accessibility tree and the tab order exactly as unmounting did.
  *
@@ -38,7 +38,7 @@ export interface DrawerProps extends Omit<React.ComponentProps<'div'>, 'title'> 
   /**
    * The close control's accessible name.
    *
-   * **Composed from `title` only as a fallback, and that fallback is English-shaped** (spec 010).
+   * **Composed from `title` only as a fallback, and that fallback is English-shaped**.
    * `Close ${title.toLowerCase()}` is a sentence built in code, so a translated title produces half
    * a sentence — "Close фильтры" — and lowercasing is itself a language-specific operation. A caller
    * that has a translator passes the whole phrase instead.
@@ -58,7 +58,7 @@ export interface DrawerProps extends Omit<React.ComponentProps<'div'>, 'title'> 
    *
    * A panel opened by the address bar has to be closable by the address bar. `FilterDrawer` makes
    * its trigger a link to this panel's own id so that `:target` can open it without JavaScript
-   * (FR-029); the same visitor then needs a way back, and `onClose` is a handler that will never
+   *; the same visitor then needs a way back, and `onClose` is a handler that will never
    * run for them. Give it the listing's current address — following it re-renders the page with no
    * fragment, which is the panel closed.
    *

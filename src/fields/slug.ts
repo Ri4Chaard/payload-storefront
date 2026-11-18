@@ -1,7 +1,7 @@
 import type { Field } from 'payload'
 
 /**
- * Cyrillic → Latin, so a Russian or Ukrainian title produces an address (spec 010, FR-014, R7).
+ * Cyrillic → Latin, so a Russian or Ukrainian title produces an address.
  *
  * **Without this the field is a trap.** `slugify` strips everything outside `a-z0-9`, so
  * "Зимова куртка" reduced to the empty string — against a field that is `required` AND

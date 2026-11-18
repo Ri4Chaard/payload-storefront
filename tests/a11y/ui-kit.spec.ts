@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * FR-044 (T068) — axe over every kit story in isolation, before anything composes it.
+ * FR-044 — axe over every kit story in isolation, before anything composes it.
  *
  * Composed pages are covered by routes.spec.ts. This catches the failures that belong to the
  * component rather than the page: a variant whose text does not meet contrast on its own surface, a
@@ -30,7 +30,7 @@ const COMPONENTS = [
   'UI/Checkbox',
   'UI/Chip',
   'UI/Container',
-  // The consent surfaces (009/T027). The banner is the one component on this site that appears
+  // The consent surfaces. The banner is the one component on this site that appears
   // unbidden over whatever somebody was reading, so its landmark, its name and its focus order are
   // load-bearing rather than decorative. The chooser is a dialog nothing in Figma draws.
   'UI/CookieBanner',

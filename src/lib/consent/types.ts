@@ -1,7 +1,7 @@
 /**
- * The visitor's cookie decision (spec 009, `contracts/consent-record.md`).
+ * The visitor's cookie decision.
  *
- * **Nothing in this directory may import `next/headers`.** `cookies()` is a request-time API, and
+ * **Nothing in this directory may import `next/headers`.** `cookies` is a request-time API, and
  * the banner lives in the root layout — reading the decision on the server would opt every route on
  * this site into dynamic rendering and cost the prerendered catalogue. The codebase already refused
  * that trade once, for the cart badge. A lint rule in `eslint.config.mjs` enforces it so the

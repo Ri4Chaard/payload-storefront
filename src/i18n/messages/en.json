@@ -303,13 +303,13 @@
     "marketingNotSaved": "That did not save. Your preference is unchanged — please try again."
   },
   "email": {
-    "verifySubject": "Your Aurum verification code",
-    "verifyBody": "Use this code to confirm your email address. It expires in 10 minutes. If you didn’t create an Aurum account, you can ignore this message.",
-    "resetSubject": "Your Aurum password reset code",
+    "verifySubject": "Your {siteName} verification code",
+    "verifyBody": "Use this code to confirm your email address. It expires in 10 minutes. If you didn’t create an {siteName} account, you can ignore this message.",
+    "resetSubject": "Your {siteName} password reset code",
     "resetBody": "Use this code to set a new password. It expires in 10 minutes. If you didn’t ask to reset your password, you can ignore this message — nothing has changed.",
-    "passwordChangedSubject": "Your Aurum password was changed",
-    "passwordChangedBody": "The password on your Aurum account has just been changed, and you have been signed out everywhere else. If this wasn’t you, reset your password immediately and contact us.",
-    "enquirySubject": "New enquiry from the Aurum website"
+    "passwordChangedSubject": "Your {siteName} password was changed",
+    "passwordChangedBody": "The password on your {siteName} account has just been changed, and you have been signed out everywhere else. If this wasn’t you, reset your password immediately and contact us.",
+    "enquirySubject": "New enquiry from the {siteName} website"
   },
   "legal": {
     "lastUpdated": "Last Updated: {date}",
@@ -328,7 +328,7 @@
   },
   "meta": {
     "siteDescription": "A short description of your store.",
-    "homeTitle": "Aurum | Online store",
+    "homeTitle": "{siteName} | Online store",
     "homeDescription": "A short description of your store for search engines and link previews.",
     "contactUs": "Contact Us",
     "ourStory": "Our Story",

@@ -5,7 +5,7 @@ import { SectionHeading } from '@/components/sections/section-heading'
 import type { StoryBlock } from '@/lib/story/types'
 
 /**
- * A numbered sequence (006/T032), from nodes `312:6940`, `413:7725`, `413:8024`.
+ * A numbered sequence, from nodes `312:6940`, `413:7725`, `413:8024`.
  *
  * Three across at desktop and tablet, stacked on a phone.
  *

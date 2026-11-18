@@ -1,7 +1,7 @@
 import type en from '@/i18n/messages/en.json'
 
 /**
- * English is the type source for every message key (spec 010, T075, FR-037).
+ * English is the type source for every message key.
  *
  * With this declared, `t('catalog.appliedFilters')` is checked at compile time and a key that exists
  * only in `ru.json` is an error rather than a string that renders as itself on two of the three

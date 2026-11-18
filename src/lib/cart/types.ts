@@ -2,7 +2,7 @@ import { CATALOG_CURRENCY, formatPrice } from '@/lib/catalog/price'
 import type { CatalogImage } from '@/lib/catalog/types'
 
 /**
- * What a component is allowed to see of a cart (spec 005, T005).
+ * What a component is allowed to see of a cart.
  *
  * The same boundary `src/lib/catalog/types.ts` draws, for the same reasons, and one more that is
  * specific to money: **no raw amount crosses into a component except where arithmetic demands it**.
@@ -52,7 +52,7 @@ export interface CartLineView {
 }
 
 /**
- * Something changed underneath the cart since the line was added (FR-014).
+ * Something changed underneath the cart since the line was added.
  *
  * Reported per line and surfaced on it. A cart that quietly loses a product is a cart the customer
  * cannot reason about, so nothing here is a reason to drop a line — only a reason to exclude it
@@ -70,12 +70,12 @@ export interface CartView {
   lines: CartLineView[]
   /** Total quantity across available lines — "Products, N items", and the header badge. */
   itemCount: number
-  /** Formatted, computed here from `unitMinor` (FR-012). Never `cart.subtotal`. */
+  /** Formatted, computed here from `unitMinor`. Never `cart.subtotal`. */
   subtotal: string
   /** Always `"$0"`. Nothing computes delivery; it is arranged with the seller. */
   shipping: string
   currency: string
-  /** Non-empty blocks checkout until the customer acknowledges it (FR-014). */
+  /** Non-empty blocks checkout until the customer acknowledges it. */
   issues: CartIssue[]
   empty: boolean
 }
@@ -83,7 +83,7 @@ export interface CartView {
 /**
  * What an empty cart looks like, so "no cart at all" and "a cart with nothing in it" render
  * identically — which is what lets the loader return a view rather than a null the caller has to
- * remember to handle (FR-015).
+ * remember to handle.
  *
  * A function rather than a frozen constant: `CartView` holds arrays, and a shared instance is one
  * accidental `push` away from leaking between requests.

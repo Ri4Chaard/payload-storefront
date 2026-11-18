@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn'
 import { TocCurrent } from './toc-current'
 
 /**
- * On this page (007/T029, T031), from nodes `312:8409`, `418:8674`, `418:8938`.
+ * On this page, from nodes `312:8409`, `418:8674`, `418:8938`.
  *
  * A server component. The list, the card and every link are rendered on the server; the only client
  * code is `TocCurrent`, which sets `aria-current` and nothing else.
@@ -48,13 +48,13 @@ export function TableOfContents({
 }: TableOfContentsProps) {
   const t_blog = useTranslations('blog')
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */
   const label = labelProp ?? t_blog('onThisPage')
   // Below two chapters the list points at what is already on screen. The mapper has usually already
-  // dropped it (FR-028); this is the renderer refusing to draw an empty card if it has not.
+  // dropped it; this is the renderer refusing to draw an empty card if it has not.
   if (entries.length < 2) return null
 
   const hiddenOnPhone = Math.max(entries.length - PHONE_LIMIT, 0)

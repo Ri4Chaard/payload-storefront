@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import { LockedAuth, UnverifiedEmail } from 'payload'
 
 /**
- * Checking a password, and nothing else (spec 004, US2).
+ * Checking a password, and nothing else.
  *
  * **Deliberately not in `actions.ts`.** Every export of a `'use server'` module is a public RPC
  * endpoint, so putting this beside the actions would publish a second, undocumented way to trade
@@ -46,7 +46,7 @@ export async function authenticateCustomer({ email, password }: Credentials): Pr
     return { customerId: result.user.id, ok: true, token: result.token }
   } catch (error) {
     /**
-     * `LockedAuth` after `maxLoginAttempts` (FR-014). Payload counts and locks; we only report.
+     * `LockedAuth` after `maxLoginAttempts`. Payload counts and locks; we only report.
      */
     if (error instanceof LockedAuth) return { ok: false, reason: 'locked' }
 

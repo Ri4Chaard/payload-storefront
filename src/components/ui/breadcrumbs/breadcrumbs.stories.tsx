@@ -27,7 +27,7 @@ export const TwoLevels: Story = {
   args: { items: [{ label: 'Home', href: '/' }, { label: 'Category 1' }] },
 }
 
-/** Long trails wrap rather than forcing the page to scroll sideways (SC-007). */
+/** Long trails wrap rather than forcing the page to scroll sideways. */
 export const Wrapping: Story = {
   args: {
     items: [

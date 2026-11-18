@@ -3,7 +3,7 @@ import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { afterAll, describe, expect, it } from 'vitest'
 
 /**
- * The FAQ collection's access rules and its refusals (006/T058, FR-030, FR-033, FR-036).
+ * The FAQ collection's access rules and its refusals.
  *
  * **These are claims about what CANNOT happen**, so they are tested by attempting the forbidden
  * thing and asserting the refusal — not by checking that the permitted thing works. A draft that is
@@ -63,7 +63,7 @@ afterAll(async () => {
   }
 })
 
-describe('what the collection refuses to store (FR-030)', () => {
+describe('what the collection refuses to store', () => {
   it('will not save a question with no question', async () => {
     await expect(
       write({ answer: answer('Yes, worldwide.'), _status: 'published' }),
@@ -75,7 +75,7 @@ describe('what the collection refuses to store (FR-030)', () => {
   })
 })
 
-describe('drafts are unreachable, not merely hidden (FR-033)', () => {
+describe('drafts are unreachable, not merely hidden', () => {
   it('does not return an unpublished question to an anonymous read', async () => {
     const draft = await write({
       question: 'Is this draft visible?',
@@ -118,7 +118,7 @@ describe('drafts are unreachable, not merely hidden (FR-033)', () => {
   })
 })
 
-describe('only staff may write (FR-036)', () => {
+describe('only staff may write', () => {
   it('refuses a create from an anonymous caller', async () => {
     await expect(
       payload.create({

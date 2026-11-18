@@ -1,5 +1,5 @@
 /**
- * Page bands — compositions of the kit, one tier above it (002/T102).
+ * Page bands — compositions of the kit, one tier above it.
  *
  * Three tiers, and the boundaries are not stylistic:
  *

@@ -4,7 +4,7 @@ import { toStoryBlocks } from '@/lib/story/mappers'
 import type { StoryPage } from '@/payload-types'
 
 /**
- * The story page's mapper (006/T023).
+ * The story page's mapper.
  *
  * Everything here is a rule that exists BECAUSE the page is composed rather than fixed. When the
  * bands were named fields in a known order, "exactly one h1" held by construction and an empty band
@@ -61,7 +61,7 @@ const steps = (): Block => ({
 const levels = (body: Body): number[] =>
   toStoryBlocks(body).map((block) => ('headingLevel' in block ? block.headingLevel : 0))
 
-describe('heading ownership (FR-006, FR-051)', () => {
+describe('heading ownership', () => {
   it('gives the page header the top level and everything else one below', () => {
     expect(levels([pageHeader(), banner(), steps()])).toEqual([1, 2, 2])
   })
@@ -100,7 +100,7 @@ describe('heading ownership (FR-006, FR-051)', () => {
   })
 })
 
-describe('empty bands are dropped, not rendered empty (FR-004)', () => {
+describe('empty bands are dropped, not rendered empty', () => {
   it('drops a band whose copy is blank', () => {
     expect(
       toStoryBlocks([{ blockType: 'banner', heading: '  ', textSide: 'left', media: emptySlot }]),
@@ -117,7 +117,7 @@ describe('empty bands are dropped, not rendered empty (FR-004)', () => {
     const blocks = toStoryBlocks([{ blockType: 'media-plate', media: photo() }])
 
     expect(blocks).toHaveLength(1)
-    // Width and height travel with it, so the box is reserved before the file arrives (FR-024b).
+    // Width and height travel with it, so the box is reserved before the file arrives.
     expect(blocks[0]).toMatchObject({ media: { kind: 'photo', width: 1920, height: 530 } })
   })
 
@@ -126,12 +126,12 @@ describe('empty bands are dropped, not rendered empty (FR-004)', () => {
     expect(toStoryBlocks(body)).toEqual([])
   })
 
-  it('drops a FAQ band when nothing it would show is published (FR-034)', () => {
+  it('drops a FAQ band when nothing it would show is published', () => {
     const body: Body = [{ blockType: 'faq', heading: 'EVERY DETAIL, ANSWERED', questions: [] }]
     expect(toStoryBlocks(body)).toEqual([])
   })
 
-  it('returns an empty composition rather than throwing (FR-053)', () => {
+  it('returns an empty composition rather than throwing', () => {
     expect(toStoryBlocks([])).toEqual([])
     expect(toStoryBlocks(null)).toEqual([])
     expect(toStoryBlocks(undefined)).toEqual([])
@@ -148,7 +148,7 @@ describe('content that outlived its code', () => {
   })
 })
 
-describe('calls to action (FR-011, FR-013)', () => {
+describe('calls to action', () => {
   const withCta = (cta: { label?: string; href?: string }): Body => [
     { blockType: 'banner', heading: 'CRAFTED TO LAST', textSide: 'left', media: emptySlot, cta },
   ]

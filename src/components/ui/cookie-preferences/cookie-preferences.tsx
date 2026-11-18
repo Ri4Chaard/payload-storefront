@@ -11,7 +11,7 @@ import { breakpoints } from '@tokens/mapping'
 import type { CookieCategory } from '@/lib/policies/types'
 
 /**
- * The per-category chooser behind *Configure All Cookies* (spec 009, T033, T052; FR-028 – FR-033).
+ * The per-category chooser behind *Configure All Cookies*.
  *
  * **Nothing in Figma draws this.** The button is drawn at `255:3381`; its destination is not. The
  * spec says so rather than pretending the design settled it, and this is the invention — built from
@@ -24,14 +24,14 @@ import type { CookieCategory } from '@/lib/policies/types'
  *
  * **The switch renders only for optional categories.** A strictly necessary one is drawn as text
  * reading "Always on" with its reason beneath, because a switch that refuses to move is a worse
- * answer than no switch — it invites a press, ignores it, and explains nothing (FR-029).
+ * answer than no switch — it invites a press, ignores it, and explains nothing.
  *
- * **Everything optional starts off** unless the visitor previously agreed to it (FR-030); the
+ * **Everything optional starts off** unless the visitor previously agreed to it; the
  * starting set is computed by `startingSelection()` in the consent library so that this component
  * never has to know the difference between "never asked", "asked before a category existed" and
  * "already decided".
  *
- * **The one-category case is not an edge case** (T052). It is what every visitor sees on the day
+ * **The one-category case is not an edge case**. It is what every visitor sees on the day
  * this ships, because the site sets nothing optional — so it gets a real message saying exactly
  * that, rather than an empty panel under a heading.
  */
@@ -52,7 +52,7 @@ const labels = (t_common: ReturnType<typeof useTranslations<'common'>>) =>
     alwaysOn: t_common('cookieAlwaysOn'),
     /**
      * Shown when nothing optional is configured — the state on the day this ships, and therefore
-     * the sentence most visitors will actually read (FR-047).
+     * the sentence most visitors will actually read.
      */
     noOptional: t_common('cookieNoOptional'),
   }) as const

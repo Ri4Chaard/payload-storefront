@@ -7,7 +7,7 @@ import type { ProductAttribute } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 /**
- * The three rows beneath the actions (003/T265). Nodes `242:2478` (1920), `410:7377` (1024),
+ * The three rows beneath the actions. Nodes `242:2478` (1920), `410:7377` (1024),
  * `410:7709` (390).
  *
  * `Accordion` from the kit, consumed unchanged — including its glyphs, which is why 001 gave
@@ -68,7 +68,7 @@ export function ProductDetails({
   ...props
 }: ProductDetailsProps) {
   /*
-    Resolved in the body, not as default parameters: `useTranslations` is a hook (spec 010).
+    Resolved in the body, not as default parameters: `useTranslations` is a hook.
 
     These three are the developer's fallback for headings the SHOP GLOBAL owns — the caller passes
     the owner's words whenever there are any, and only an empty global reaches these. Translating

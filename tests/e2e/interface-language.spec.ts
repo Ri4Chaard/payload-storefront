@@ -6,7 +6,7 @@ import { SECONDARY_LOCALES } from '@/i18n/routing'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * No English left on a translated page (spec 010, T073 — FR-033, SC-002).
+ * No English left on a translated page.
  *
  * **The forbidden list is DERIVED from `en.json`, and that is the whole point of this rewrite.**
  * The first version of this file listed eight phrases by hand and passed for months while the entire
@@ -19,7 +19,7 @@ import { acquireSharedContentLock } from '../shared-content-lock'
  * **What it can and cannot assert.** It checks the INTERFACE — chrome, buttons, accessible names —
  * because those come from the message files and are translated for all three languages today. It
  * does NOT assert that a product title is Russian: titles are Payload content, and an untranslated
- * one correctly falls back to English (FR-046). A test that failed on that would be failing on an
+ * one correctly falls back to English. A test that failed on that would be failing on an
  * editor's to-do list rather than on the code.
  *
  * That distinction is also why the comparison is against VISIBLE TEXT rather than the HTML source.
@@ -76,7 +76,7 @@ const COLLIDES_WITH_EDITORIAL_TITLES = new Set<string>([
   /*
     Both of these are word-for-word the title of a document an editor owns, so the string on the
     page is Payload's and not ours, and an untranslated one is the editor's to-do list rather than a
-    bug in the code (FR-046).
+    bug in the code.
 
       `common.cookiePolicy`      the banner's link label, and the title of the `policies` document
                                  the footer links to — the footer's link text comes from the

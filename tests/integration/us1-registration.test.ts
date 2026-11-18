@@ -6,7 +6,7 @@ import { registerCustomer, resendCode, verifyEmailCode } from '@/lib/auth/action
 import type { CreateAccountValues } from '@/lib/auth/schemas'
 
 /**
- * US1 — create an account and verify the address (spec 004, FR-001 – FR-009).
+ * US1 — create an account and verify the address.
  *
  * The assertions worth the most here are the ones about what the system does NOT say. FR-009 turns
  * the create form into an oracle for "does this person shop here?" the moment its response varies,

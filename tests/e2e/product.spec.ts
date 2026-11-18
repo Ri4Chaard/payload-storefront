@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * The product route (003/T269) — `/products/[slug]`.
+ * The product route — `/products/[slug]`.
  *
  * The fixtures give Product 1 five photographs and Product 3 one, which is the split
  * every assertion about controls turns on: a control that pages a set of one is a lie, and the
@@ -250,7 +250,7 @@ test('an unknown slug is the branded 404', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 })
 
-/** A draft is indistinguishable from a slug that does not exist (FR-009). */
+/** A draft is indistinguishable from a slug that does not exist. */
 test('a draft is unreachable by its own URL', async ({ page }) => {
   const response = await page.goto('/products/unreleased-product')
   expect(response?.status()).toBe(404)
@@ -419,7 +419,7 @@ test('a made-to-order product counts past any stock number', async ({ page }) =>
  * This used to be asserted against Product 1, which is MADE TO ORDER. That passed only
  * because of the defect spec 011/US1 fixes: a made-to-order option was gated on a count it has no
  * business having, so picking the scarcest one clamped the quantity to 1. A made-to-order product has
- * nothing to run out of and now has no ceiling at all (011/FR-003) — which the test above this one
+ * nothing to run out of and now has no ceiling at all — which the test above this one
  * has always said, and the two contradicted each other.
  *
  * The claim itself still holds and still matters, so it moves to a product where a count means
@@ -444,7 +444,7 @@ test('a made-to-order product keeps no ceiling whichever option is chosen', asyn
 })
 
 // ---------------------------------------------------------------------------------------------
-// However a visitor arrives — US7 (003/T297–T299)
+// However a visitor arrives — US7
 // ---------------------------------------------------------------------------------------------
 
 /**
@@ -517,7 +517,7 @@ test('the page reflows at 320px and at 200% zoom without scrolling sideways', as
 })
 
 /**
- * The gallery under `prefers-reduced-motion` (003/T299).
+ * The gallery under `prefers-reduced-motion`.
  *
  * Two different mechanisms have to hold at once, which is why this is one test and not two: the
  * page carries a five-second auto-advance, and paging by hand scrolls the track. A visitor who
@@ -550,7 +550,7 @@ test('the gallery neither advances by itself nor travels when asked for less mot
 })
 
 /**
- * The viewer under `prefers-reduced-motion` (003/T299).
+ * The viewer under `prefers-reduced-motion`.
  *
  * This is the one animation on the site a stylesheet cannot reach. The global rule in `styles.css`
  * collapses every CSS transition, which covers the drawer and the gallery — but PhotoSwipe drives

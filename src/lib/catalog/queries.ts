@@ -173,10 +173,10 @@ const collectionTitle = (refs: Reference, slug: string): string | undefined =>
 
 
 /**
- * A colour's customer-facing name, from the catalogue (spec 011, US3).
+ * A colour's customer-facing name, from the catalogue.
  *
  * A colour is the owner's, so its name is a localized field on the row and falls back the way every other
- * editorial label does — one place to change it rather than three JSON files (011/research.md R3).
+ * editorial label does — one place to change it rather than three JSON files.
  */
 const colourLabel = (refs: Reference, value: string): string | undefined =>
   refs.colours.find((entry) => entry.value === value)?.label
@@ -282,7 +282,7 @@ function chipsFor(filters: FilterState, refs: Reference, locale: Locale): Applie
 
   if (filters.inStock) chips.push({ key: 'inStock', value: '1', label: 'In stock only' })
 
-  // The ordering is a chip too (T281). It is not a filter — it removes nothing from the grid — but
+  // The ordering is a chip too. It is not a filter — it removes nothing from the grid — but
   // it is a thing the visitor chose and therefore a thing they must be able to undo without
   // reopening the menu to find which of the four is current. Dismissing it restores the default.
   if (filters.sort !== DEFAULT_SORT) {
@@ -295,7 +295,7 @@ function chipsFor(filters: FilterState, refs: Reference, locale: Locale): Applie
 /**
  * Values `filters.ts` could not judge, because judging them needs the catalogue. A slug that names
  * nothing would otherwise return an empty grid with no explanation, which reads as "we sell none of
- * these" rather than "that link is stale" (FR-030).
+ * these" rather than "that link is stale".
  */
 function unknownValues(filters: FilterState, refs: Reference): DroppedFilter[] {
   const dropped: DroppedFilter[] = []
@@ -393,7 +393,7 @@ export async function getProduct(slug: string, locale: Locale): Promise<ProductD
 }
 
 /**
- * The same read, by id, for a set of products at once (spec 005, T008).
+ * The same read, by id, for a set of products at once.
  *
  * The cart stores product ids, not slugs, and it needs the resolved detail — the variants with their
  * prices and stock, the sizes with their labels — to say what a line costs and whether it can still
@@ -402,7 +402,7 @@ export async function getProduct(slug: string, locale: Locale): Promise<ProductD
  *
  * **`overrideAccess: false` is doing the same work here as everywhere else in this file, and it
  * matters more.** A product unpublished after it was added to somebody's cart must come back missing
- * rather than resolved, because the cart page's whole staleness story (FR-014) is built on the
+ * rather than resolved, because the cart page's whole staleness story is built on the
  * difference between "this id resolved" and "this id did not". Reading with access overridden would
  * quietly keep selling a product the owner had withdrawn.
  *
@@ -430,7 +430,7 @@ export async function getProductsByIds(
 }
 
 /**
- * Every published slug, for the product route's `generateStaticParams` (003/T294).
+ * Every published slug, for the product route's `generateStaticParams`.
  *
  * **Not `catalogue(locale)`.** That cache holds fully resolved documents because a page draws them;
  * a list of strings has no business filling it, and `depth: 0` with `select` is the difference
@@ -443,7 +443,7 @@ export async function getProductsByIds(
 export async function getProductSlugs(): Promise<string[]> {
   const payload = await client()
   const { docs } = await payload.find({
-    /* No locale: `slug` is shared across languages (spec 010, R7), so this read is language-free. */
+    /* No locale: `slug` is shared across languages, so this read is language-free. */
     collection: 'products',
     depth: 0,
     limit: 0,
@@ -525,7 +525,7 @@ export async function getFilterFacets(
 }
 
 /**
- * _Complete the Collection_. An empty array means the band does not render (FR-037) — a "related"
+ * _Complete the Collection_. An empty array means the band does not render — a "related"
  * strip padded out with whatever else is in the shop is worse than no strip.
  */
 export async function getRelated(

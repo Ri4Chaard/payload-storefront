@@ -13,7 +13,7 @@ import type { CartView } from '@/lib/cart/types'
 import { cn } from '@/lib/cn'
 
 /**
- * ORDER SUMMARY (spec 005, T031, T032). Nodes `255:3868` (1920), `425:11228` (768),
+ * ORDER SUMMARY. Nodes `255:3868` (1920), `425:11228` (768),
  * `425:11327` (390).
  *
  * Three rows, a button, and the agreement — in that order, as drawn.
@@ -26,7 +26,7 @@ import { cn } from '@/lib/cn'
  * **`Shipping` is always nothing**, and says so rather than being hidden. Delivery is arranged with
  * the seller, and a summary that silently omits a line the customer expects reads as an oversight.
  *
- * **CHECKOUT is refused until the agreement is ticked (FR-018)**, and the refusal names the
+ * **CHECKOUT is refused until the agreement is ticked**, and the refusal names the
  * agreement. Disabling the button instead was the alternative and is worse: a disabled control
  * gives no reason, and a visitor who has not noticed the checkbox has nothing to read. So it stays
  * enabled and answers.
@@ -44,7 +44,7 @@ export interface OrderSummaryProps extends React.ComponentProps<'section'> {
   /* The language, for the same reason as `product-purchase` — see its note. */
   onCheckout?: (locale: Locale) => Promise<CheckoutResult>
   /**
-   * Lines have changed underneath the customer since they were added (FR-014).
+   * Lines have changed underneath the customer since they were added.
    *
    * The first press of CHECKOUT is refused and says so; the second proceeds. **That second press is
    * the acknowledgement** the requirement asks for — the changes are already on the rows above in
@@ -91,7 +91,7 @@ export function OrderSummary({
     setRefusal(null)
 
     /**
-     * Composed once, and the trigger is blocked while the modal is open (FR-026).
+     * Composed once, and the trigger is blocked while the modal is open.
      *
      * With no order record to be idempotent about, this is what "no duplicates" means: a
      * double-click must not produce two messages built from two reads of a cart whose price could
@@ -171,7 +171,7 @@ export function OrderSummary({
         }}
         className="mt-5"
         /*
-          `t.rich` rather than a sentence split around two links (spec 010).
+          `t.rich` rather than a sentence split around two links.
 
           The obvious translation is three strings — "I agree to the", "and", and the two link
           labels — assembled in this order. That order is English. Russian and Ukrainian put the

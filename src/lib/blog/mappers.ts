@@ -19,7 +19,7 @@ import type {
 } from './types'
 
 /**
- * Documents to view models for the blog (spec 007, T019 – T022).
+ * Documents to view models for the blog.
  *
  * Four derivations live here, and each is here rather than in a component because each is a rule
  * the design implies and nothing stores:
@@ -70,7 +70,7 @@ const slugify = (value: string): string =>
  *
  * `August 08, 2026`, as drawn: a two-digit day, so a column of dates lines up.
  *
- * **One formatter per language, built once (spec 010, FR-039).** The tag was fixed at `en-US`, which
+ * **One formatter per language, built once.** The tag was fixed at `en-US`, which
  * printed an English month name on a Russian article. It is now the requested language's — and
  * still explicit rather than the runtime default, for the reason the paragraph above gives: Node
  * takes its default from `LANG` and the browser from the user, so an implicit locale is a hydration
@@ -161,7 +161,7 @@ export const toBlogCategory = (
 }
 
 /**
- * Where a card sits in the drawn rhythm (FR-006 – FR-008).
+ * Where a card sits in the drawn rhythm.
  *
  * Read straight off the design, which draws the same arrangement regardless of what is in the
  * cells:
@@ -178,10 +178,10 @@ export const toBlogCategory = (
  *
  * **Two flags, not one**, because the two rhythms disagree: card 5 leads the tablet grid and is
  * narrow on desktop. That disagreement is the whole reason this is computed rather than stored —
- * a `featured` checkbox on the article cannot be true at 1920 and false at 768 (007/research.md R4).
+ * a `featured` checkbox on the article cannot be true at 1920 and false at 768.
  *
  * A partial final row falls out for free. Spans are assigned left to right and always sum to a
- * whole number of rows, so any article count from one upward ends short rather than holed (FR-009).
+ * whole number of rows, so any article count from one upward ends short rather than holed.
  */
 export const emphasisFor = (index: number): CardEmphasis => ({
   tabletLead: index % 5 === 0,
@@ -205,7 +205,7 @@ export function toArticleCard(document: Article, index: number, locale: Locale):
 }
 
 /**
- * The chapters, each with an anchor that is unique within the article (FR-026).
+ * The chapters, each with an anchor that is unique within the article.
  *
  * **Two chapters can legitimately share a heading** — "Summary" twice in a long article — and a
  * visitor choosing the second entry in the contents list must not land on the first. So a repeated
@@ -248,14 +248,14 @@ export function toChapters(rows: Article['chapters']): Chapter[] {
 }
 
 /**
- * The contents list, generated from the chapters and never authored beside them (FR-027).
+ * The contents list, generated from the chapters and never authored beside them.
  *
  * The design draws ten entries against four chapters, with four labels that are not the headings
  * they point at — read as a drafting placeholder rather than as a second data source (007 spec,
  * design inconsistency 2). `tocLabel` is what absorbs the real version of that problem: a heading
  * too long for the rail gets a short form, and the rail and the chapter still cannot drift apart.
  *
- * **Empty below two chapters** (FR-028). A contents list of one entry is a control that points at
+ * **Empty below two chapters**. A contents list of one entry is a control that points at
  * the thing already on screen.
  */
 export function toContents(chapters: Chapter[], rows: Article['chapters']): ContentsEntry[] {
@@ -298,7 +298,7 @@ export function toArticleView(document: Article, locale: Locale): ArticleView {
     contents: toContents(chapters, document.chapters),
     seo: seoOf(document.seo),
     /*
-      What the page would say about itself with no overrides (FR-043). Computed from the article
+      What the page would say about itself with no overrides. Computed from the article
       rather than hardcoded in the route, so it follows an edit instead of naming a field that has
       moved. The hero doubles as the social image — for a video slot that is its poster, which is
       the only frame of it a link preview could show anyway.
@@ -328,7 +328,7 @@ export function toBlogCategories(documents: ArticleCategory[]): BlogCategory[] {
 }
 
 export interface BlogIndexInput {
-  /** The language the cards' dates are written in (spec 010, FR-039). */
+  /** The language the cards' dates are written in. */
   locale: Locale
 
   page: BlogPage

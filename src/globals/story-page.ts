@@ -4,7 +4,7 @@ import { seoField } from '@/fields/seo'
 import { isAdmin } from '@/lib/access'
 
 /**
- * The `/about` page (spec 006).
+ * The `/about` page.
  *
  * **The first page on this site whose COMPOSITION comes out of Payload.** Spec 002 shipped the home
  * page reading `src/mocks/home.ts` for its hero and about band, and named that as the last of the
@@ -32,7 +32,7 @@ import { isAdmin } from '@/lib/access'
  * product page in the shop over a paragraph edit.
  */
 /**
- * The page as Figma draws it (006/T039, FR-052).
+ * The page as Figma draws it.
  *
  * **Copy, but no photographs.** A `defaultValue` applies until the global is first saved, which is
  * exactly what "an untouched install" means — so a fresh database renders the drawn page rather
@@ -50,7 +50,7 @@ import { isAdmin } from '@/lib/access'
  * `/about` is linked from the header, the footer and the home page, so a page that cannot go blank
  * is worth more than the ability to blank it. An editor who wants less simply keeps fewer bands.
  *
- * The empty composition is still a rendering path the code handles (FR-053) — it is reached by a
+ * The empty composition is still a rendering path the code handles — it is reached by a
  * global that has never been saved, and it is covered in `tests/unit/story-mappers.test.ts`.
  */
 const DRAWN_PAGE = [

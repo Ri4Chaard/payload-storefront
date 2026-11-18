@@ -6,7 +6,7 @@
  * Preflight is a global element reset. Payload's admin panel ships its own complete styling, and a
  * global reset loaded into it visibly breaks the UI — collapsed spacing, stripped form controls,
  * reset borders. This is the single most common Payload + Tailwind integration failure, and no
- * automated check in this repository will catch it (research.md R4).
+ * automated check in this repository will catch it.
  *
  * Importing theme and utilities but not preflight gives custom admin components the brand tokens
  * and the full utility vocabulary while leaving Payload's own chrome untouched.

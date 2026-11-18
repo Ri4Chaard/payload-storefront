@@ -11,7 +11,7 @@ import {
 } from '@/lib/countries'
 
 /**
- * The `account-settings` global — how the accounts feature behaves (spec 004, R11).
+ * The `account-settings` global — how the accounts feature behaves.
  *
  * The copy that used to sit beside these values is gone — it lives in the screens that render it.
  * What remains is the handful of decisions that belong to the shop owner rather than to the code.
@@ -22,7 +22,7 @@ import {
  * disagreeing about the default. The fallbacks are resolved once, in `resolveAccountSettings`.
  */
 export interface AccountSettings {
-  /** Pre-selected in the address form. Falls back to the code default when unset (FR-030). */
+  /** Pre-selected in the address form. Falls back to the code default when unset. */
   defaultCountry: CountryCode
   /** Empty means every country. Never excludes the default, which would be unofferable. */
   shippingCountries: CountryCode[]
@@ -60,7 +60,7 @@ export function resolveAccountSettings(doc: RawSettings): AccountSettings {
 }
 
 /**
- * The countries the address form may offer (FR-028, FR-030).
+ * The countries the address form may offer.
  *
  * An empty `shippingCountries` means every country rather than none — the global's own description
  * says so, and a shop that has never opened the settings page must still be able to take an

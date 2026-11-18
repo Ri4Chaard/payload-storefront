@@ -7,13 +7,13 @@ import { cn } from '@/lib/cn'
 import { SectionHeading } from '../section-heading'
 
 /**
- * The brand band (002/T106), from Figma nodes 158:402, 440:12764 and 440:13678 — a photograph
+ * The brand band, from Figma nodes 158:402, 440:12764 and 440:13678 — a photograph
  * beside the company's own paragraph, side by side above `md` and stacked below it.
  *
  * **The heading is two-tone but one name.** The drawing puts "ABOUT" in ink and "AURUM" in the
  * brand colour. Colour is the only difference, so it is a `<span>` inside one heading rather than
  * two headings or two text nodes: an assistive technology reads "About Aurum" as a single string,
- * which is what it is, and the split leaves no trace in the accessible name (FR-021).
+ * which is what it is, and the split leaves no trace in the accessible name.
  *
  * **Heights are minima, not fixed.** The drawn 750 and 567 are what this exact paragraph happens to
  * need; a translation, or a second sentence, must push the band taller instead of overflowing it —

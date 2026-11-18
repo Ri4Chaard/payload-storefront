@@ -8,7 +8,7 @@ import { CategoryTabs } from './category-tabs'
 import { TableOfContents } from './table-of-contents'
 
 /**
- * The blog's four new components (007/T078).
+ * The blog's four new components.
  *
  * **One stories file for all four, rather than four files**, the same call `blocks.stories.tsx`
  * makes for the story page's bands: these are not independent kit primitives, they are the parts of
@@ -107,7 +107,7 @@ export const MissingPhotograph: Story = {
 }
 
 /**
- * A card whose category was deleted out from under it (FR-041).
+ * A card whose category was deleted out from under it.
  *
  * The article stays published and loses its badge rather than its page — the visual half of the
  * assertion in `tests/integration/blog-articles.test.ts`.
@@ -158,7 +158,7 @@ export const Contents: StoryObj<typeof TableOfContents> = {
   render: () => <TableOfContents entries={CONTENTS} className="max-w-125" />,
 }
 
-/** Two chapters is the minimum at which a contents list says anything (FR-028). */
+/** Two chapters is the minimum at which a contents list says anything. */
 export const ContentsMinimum: StoryObj<typeof TableOfContents> = {
   render: () => <TableOfContents entries={CONTENTS.slice(0, 2)} className="max-w-125" />,
 }

@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * A made-to-order product is orderable without inventing stock (spec 011, US1).
+ * A made-to-order product is orderable without inventing stock.
  *
  * **This is the journey that was broken.** The owner marks a product always-available, adds the options
  * a customer chooses between, and types no quantity — because a made-to-order option has none. Before

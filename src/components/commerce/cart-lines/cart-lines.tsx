@@ -11,14 +11,14 @@ import type { CartActionResult, CartIssue, CartLineView } from '@/lib/cart/types
 import { cn } from '@/lib/cn'
 
 /**
- * The rows of the cart, in the card the design draws them in (spec 005, T029, T030, T036).
+ * The rows of the cart, in the card the design draws them in.
  * Nodes `258:3930` (1920), `425:11175` (768), `425:11276` (390).
  *
  * **A `<ul>`, because a basket is a list of things.** A screen reader saying "list, 3 items" before
  * reading them is the difference between knowing how much is in the basket and finding out by
  * arrowing to the end. `CartItem` already renders as an `<li>` by default for exactly this.
  *
- * **Removal asks first (FR-010).** The confirmation is `Modal` at the drawn 500px with a centred
+ * **Removal asks first.** The confirmation is `Modal` at the drawn 500px with a centred
  * heading, and it is dismissible by the close mark, the backdrop and Escape — all three leave the
  * line alone. Nothing is removed until the primary is pressed.
  *
@@ -29,7 +29,7 @@ import { cn } from '@/lib/cn'
 
 export interface CartLinesProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
   lines: CartLineView[]
-  /** What changed underneath the cart, per line (FR-014). Rendered on the row it belongs to. */
+  /** What changed underneath the cart, per line. Rendered on the row it belongs to. */
   issues?: CartIssue[]
   /** The Server Actions, from the route. Omitted in a story, where the controls go inert. */
   onSetQuantity?: (lineId: string, quantity: number) => Promise<CartActionResult>

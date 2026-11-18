@@ -20,9 +20,10 @@ import { getEnabledLocales } from '@/lib/i18n/enabled'
 import { fontVariables } from '@/styles/fonts'
 
 import './styles.css'
+import { SITE_NAME } from '@/lib/site'
 
 /**
- * The site's own metadata, in the language being read (spec 010, T090, FR-018).
+ * The site's own metadata, in the language being read.
  *
  * **A function rather than a constant, because the description is a sentence.** It is what a search
  * result shows for any page whose own SEO description is empty — so leaving it English put an
@@ -38,8 +39,8 @@ export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Pr
 
   return {
     title: {
-      default: 'Aurum',
-      template: '%s | Aurum',
+      default: SITE_NAME,
+      template: `%s | ${SITE_NAME}`,
     },
     description: t('siteDescription'),
     metadataBase: process.env.NEXT_PUBLIC_SERVER_URL
@@ -55,7 +56,7 @@ export const viewport: Viewport = {
 }
 
 /**
- * The three languages are prerendered (spec 010, FR-012).
+ * The three languages are prerendered.
  *
  * Each of these multiplies every prerendered route family below it — `/products/[slug]`,
  * `/blog/[slug]`, `/legal/[slug]` — by three. That is the intended cost: a visitor reading Russian
@@ -66,7 +67,7 @@ export function generateStaticParams() {
 }
 
 /**
- * Only the namespaces a Client Component actually reads (spec 010, research R11).
+ * Only the namespaces a Client Component actually reads.
  *
  * Everything the server renders uses `getTranslations` and never touches this provider, so shipping
  * the whole message file would put every string into the flight payload of every page for no reader.
@@ -113,7 +114,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
     proxy must not read one. A disabled language is sent to `/language/reset`, which clears the
     cookie and returns the visitor to the English equivalent — the hop exists because a Server
     Component cannot clear a cookie, and without clearing it the proxy would send them straight back
-    (research R6).
+   .
   */
   const enabled = await getEnabledLocales()
   if (!enabled.includes(locale)) {
@@ -136,24 +137,24 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
   )
 
   /*
-    One read, three consumers (spec 005, T072, FR-052).
+    One read, three consumers.
 
     Safe here in a way `cookies()` is not: a Local API global read is not a request-time API, so
     this does not opt every route into dynamic rendering — the prerendered catalogue survives it,
     which the build output confirms. `revalidateGlobalOnChange` on the global is what makes a saved
-    change reach those cached pages (FR-042).
+    change reach those cached pages.
   */
   const [social, contact, policies, cookies] = await Promise.all([
     getSocialLinks(),
     getContactDetails(),
     /*
-      The footer's policy links (spec 009, FR-015b). A third read on the same terms as the two
+      The footer's policy links. A third read on the same terms as the two
       beside it: a Local API read is not a request-time API, so this does not opt any route into
       dynamic rendering, and it tolerates the database being absent during a container build.
     */
     getFooterPolicies(locale),
     /*
-      The banner's configuration (spec 009, FR-045). A fourth read on the same terms — and the same
+      The banner's configuration. A fourth read on the same terms — and the same
       reason it is read HERE rather than in the banner: the banner is a client component, and having
       it fetch its own categories would cost a request per page view to render something the server
       already had.
@@ -169,7 +170,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
     <html lang={locale} className={fontVariables}>
       <body>
         {/*
-          The badge's count lives in a client provider, not in this layout (spec 005, T025, R8).
+          The badge's count lives in a client provider, not in this layout.
           Reading the cart cookie here would make `cookies()` a dependency of every route and opt
           the whole site into dynamic rendering — including `/products/[slug]`, which is
           prerendered. A number in a badge is not worth the prerendered catalogue.
@@ -188,7 +189,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
               locales={enabled.map((code) => LOCALE_LABELS[code])}
             />
             {/*
-          `<main>` is the landmark the skip link (T072) will target. The skip link is still its own
+          `<main>` is the landmark the skip link will target. The skip link is still its own
           task; header and footer are wired up here so they are exercised by a real page rather than
           only by Storybook.
         */}
@@ -202,7 +203,7 @@ export default async function FrontendLayout({ children, params }: LayoutProps<'
             />
 
             {/*
-            The consent banner (spec 009, FR-017). Last in the body on purpose: it is fixed to the
+            The consent banner. Last in the body on purpose: it is fixed to the
             viewport, so its position in the DOM decides only where a keyboard meets it — and after
             the footer is wrong. See the note below.
 

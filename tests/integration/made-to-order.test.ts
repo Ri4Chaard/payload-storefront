@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import { afterAll, describe, expect, it } from 'vitest'
 
 /**
- * The availability mirror (spec 011, US1, FR-001, FR-004; research R5).
+ * The availability mirror.
  *
  * **What is being tested is a denormalised column, which is the thing worth testing.**
  * `variants.availability` duplicates the parent's value and exists for one reason: `admin.condition`
@@ -123,7 +123,7 @@ describe('a variant is stamped with its parent’s mode', () => {
   })
 })
 
-describe('the product carries its mode down (FR-001)', () => {
+describe('the product carries its mode down', () => {
   it('reaches variants that already existed', async () => {
     const product = await makeProduct('stock-tracked')
     const a = await makeVariant(product.id, 2, 0)

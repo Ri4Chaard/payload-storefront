@@ -5,12 +5,12 @@ import { getPayload } from 'payload'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * The editorial lifecycle (007/T059).
+ * The editorial lifecycle.
  *
  * The Constitution's *Editorial verification* gate says a block or content model that is unusable
- * in the admin is a defect regardless of how well it renders. Most of that gate is a human walking
- * `specs/007-blog-articles/quickstart.md` §4; what is automated here is the part a human would get
- * bored of repeating.
+ * in the admin is a defect regardless of how well it renders. Most of that gate is a human creating
+ * and previewing content in the admin; what is automated here is the part a human would get bored
+ * of repeating.
  *
  * **Two halves, split by what each can actually prove.**
  *
@@ -147,7 +147,7 @@ test('a draft is invisible, publishing shows it, and an edit reaches the cached 
   const slug = `lifecycle-draft-${suffix}`
   const href = `/blog/${slug}`
 
-  // 1. A draft. Absent from the index and unreachable at its own address (FR-037).
+  // 1. A draft. Absent from the index and unreachable at its own address.
   const draft = await payload.create({
     collection: 'articles',
     data: {
@@ -209,7 +209,7 @@ test('a draft is invisible, publishing shows it, and an edit reaches the cached 
   await page.goto(href)
   await expect(page.getByRole('heading', { level: 1 })).toContainText(`Renamed ${suffix}`)
 
-  // The address did not move with the title (FR-035), so every link ever shared still works.
+  // The address did not move with the title, so every link ever shared still works.
   expect(page.url()).toContain(href)
 })
 

@@ -14,7 +14,7 @@ import { cn } from '@/lib/cn'
 import type { CountryCode, CountryOption } from '@/lib/countries'
 
 /**
- * The profile's Addresses row — node `266:5096`, empty state in `266:5259` (spec 004, US5).
+ * The profile's Addresses row — node `266:5096`, empty state in `266:5259`.
  *
  * **One row, however many addresses.** The design draws a customer with exactly one, and a pencil
  * at the right edge of the box. That does not survive a second address: a single pencil beside a

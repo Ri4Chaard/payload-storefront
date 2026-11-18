@@ -8,7 +8,7 @@ import { relationId, resolveCart, type RawCartLine } from './totals'
 import { emptyCart, type CartView } from './types'
 
 /**
- * The read side (spec 005, T008, [cart-loader.md](../../../specs/005-checkout-handoff/contracts/cart-loader.md)).
+ * The read side (spec 005, T008).
  *
  * Fetches; `./totals.ts` decides. The split is what lets every rule about staleness and money be
  * unit-tested without a database.
@@ -57,11 +57,11 @@ async function readRows(owner: CartOwner): Promise<null | RawCartLine[]> {
 /**
  * The cart, revalidated against the published catalogue.
  *
- * `cache()`d so a render asking twice — the page and the summary card — reads once. Per request
- * only; nothing about a cart is cached across requests (research R12).
+ * `cache`d so a render asking twice — the page and the summary card — reads once. Per request
+ * only; nothing about a cart is cached across requests.
  *
  * Returns an empty view rather than `null` for "no cart", so a caller cannot forget the null and
- * the empty state is an ordinary render rather than a branch (FR-015).
+ * the empty state is an ordinary render rather than a branch.
  */
 export const getCart = cache(async (locale: Locale): Promise<CartView> => {
   const owner = await resolveCartOwner()
@@ -80,8 +80,8 @@ export const getCart = cache(async (locale: Locale): Promise<CartView> => {
  *
  * **Deliberately does not revalidate.** The badge is a hint; making the header pay for a catalogue
  * re-read on every route would be a poor trade, and the cart page is the authority. Its callers are
- * the mutation actions, which return the fresh count — never a layout, because reading `cookies()`
- * there would opt every route into dynamic rendering and cost the prerendered catalogue (R8).
+ * the mutation actions, which return the fresh count — never a layout, because reading `cookies`
+ * there would opt every route into dynamic rendering and cost the prerendered catalogue.
  */
 export async function getCartCount(): Promise<number> {
   const owner = await resolveCartOwner()

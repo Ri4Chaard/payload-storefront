@@ -94,7 +94,7 @@ const intentFor = (
 
 describe('mergeGuestCart', () => {
   /**
-   * **Two OPTIONS, where this used to say two sizes** (spec 011).
+   * **Two OPTIONS, where this used to say two sizes**.
    *
    * The claim is the same and the axis moved: a merge must not collapse two lines a customer
    * deliberately made distinct. Size was that axis until it was deprecated, and the option is what

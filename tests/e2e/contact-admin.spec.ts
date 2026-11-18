@@ -7,7 +7,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * Both pages as their owner sees them (008/T075 – T079, T091).
+ * Both pages as their owner sees them.
  *
  * **Constitution I is what this file exists to enforce.** Every visible word on `/contact` and
  * `/faq` has to be changeable without a deployment, and the way that requirement fails is quietly:
@@ -17,7 +17,7 @@ import { acquireSharedContentLock } from '../shared-content-lock'
  * The content is driven through the Local API rather than the admin UI. Filling Payload's forms in
  * a browser would test Payload rather than this feature — the exception is the enquiry list at the
  * foot of this file, where what an administrator can *see without opening a record* is the
- * requirement (FR-029c).
+ * requirement.
  */
 
 test.describe.configure({ mode: 'serial' })
@@ -302,7 +302,7 @@ test('a draft is not what a visitor sees', async ({ page }) => {
 })
 
 /**
- * The enquiry list as an administrator meets it (008/T091, FR-029c).
+ * The enquiry list as an administrator meets it.
  *
  * **This is the one place in this file that drives the real admin panel**, and it has to be: the
  * requirement is about what an owner can see *without opening a record*. Asserting the collection's
@@ -378,7 +378,7 @@ test.describe('the enquiry list', () => {
     await expect(table).toContainText('Silent Visitor')
 
     /*
-      The two outcomes are distinguishable at a glance (FR-029c). This is what lets an owner find
+      The two outcomes are distinguishable at a glance. This is what lets an owner find
       the enquiries they were never emailed about, which is the whole reason the outcome is stored
       rather than only logged.
     */

@@ -8,7 +8,7 @@ import { MenuOption } from '@/components/ui/menu-option'
 import { cn } from '@/lib/cn'
 
 /**
- * The value picker the product page draws twice (003/T282) — closed at node `301:4990`, open at
+ * The value picker the product page draws twice — closed at node `301:4990`, open at
  * `301:5845`, its rows at `301:5920`.
  *
  * **Why this is not `Menu`.** `Menu`'s docblock names this list as its next consumer, and the
@@ -30,12 +30,12 @@ import { cn } from '@/lib/cn'
  * already a button. `aria-activedescendant` is the alternative and would mean keeping the rows
  * unfocusable and tracking a virtual cursor, for no gain here.
  *
- * **A disabled option is rendered and skipped, never hidden** (FR-040). An option that cannot be
+ * **A disabled option is rendered and skipped, never hidden**. An option that cannot be
  * bought is information — it tells the visitor the product exists in that option — and removing it
  * turns a temporary shortage into a catalogue that looks smaller than it is.
  *
  * **Nothing here works without scripting**, and that is the accepted cost of the drawn panel. The
- * product page stays fully readable without it (FR-029): the price, the description and the
+ * product page stays fully readable without it: the price, the description and the
  * accordions are all server-rendered, and only the choosing needs JavaScript.
  */
 export interface SelectOption {
@@ -73,7 +73,7 @@ export function Select({
   ...props
 }: SelectProps) {
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

@@ -7,7 +7,7 @@ import { skipRevalidation } from '@/lib/revalidate'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * The FAQ page, end to end (008/T065 – T067).
+ * The FAQ page, end to end.
  *
  * **What this file is really testing is that the collection is shared.** `/faq` shows every
  * published question in the collection's own `order`; `/about` and `/contact` each show a subset in

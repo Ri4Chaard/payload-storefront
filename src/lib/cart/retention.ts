@@ -1,11 +1,11 @@
 /**
- * How long a cart is kept (spec 005, T074, FR-047, FR-048, FR-051).
+ * How long a cart is kept.
  *
  * A cart is a record of what somebody wants, tied either to their account or to their device. It is
  * a data collection point, and it therefore needs a stated life and a working deletion path — the
  * one part of this feature that "no payment" does not simplify away.
  *
- * **Configuration, not constants** (FR-051). A retention period that exists only in a source file
+ * **Configuration, not constants**. A retention period that exists only in a source file
  * is one nobody outside this repository can read or change, which is most of the point of stating
  * one. The environment is the smallest surface that satisfies it without inventing an admin screen
  * nobody asked for; the defaults below are what ships.

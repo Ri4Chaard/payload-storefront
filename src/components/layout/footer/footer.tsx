@@ -8,9 +8,10 @@ import { type IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 import { NewsletterForm } from './newsletter-form'
+import { SITE_NAME } from '@/lib/site'
 
 /**
- * The site footer (T075, FR-037), from the three variants at node 440:12864.
+ * The site footer, from the three variants at node 440:12864.
  *
  * Like the header, those variants are breakpoints rather than components:
  *
@@ -46,7 +47,7 @@ export interface FooterLinkGroup {
 export interface FooterProps {
   groups?: FooterLinkGroup[]
   /**
-   * The bottom rail, from published policies (spec 009, FR-015b).
+   * The bottom rail, from published policies.
    *
    * **Empty by default rather than falling back to a hardcoded trio.** An unconfigured site showing
    * three legal links that go nowhere is worse than a site showing none — the same reasoning
@@ -54,12 +55,12 @@ export interface FooterProps {
    * real request fills it.
    */
   legalLinks?: { label: string; href: string }[]
-  /** Policies the owner filed under Customer Care — *Shipping & Returns* by default (FR-015b). */
+  /** Policies the owner filed under Customer Care — *Shipping & Returns* by default. */
   customerCareLinks?: { label: string; href: string }[]
-  /** Opens the cookie chooser (spec 009, FR-032). Rendered in the legal row when supplied. */
+  /** Opens the cookie chooser. Rendered in the legal row when supplied. */
   cookieSettings?: React.ReactNode
   /**
-   * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
+   * The shop's accounts, from the `contact-settings` global via the layout.
    *
    * Empty by default rather than falling back to a hardcoded list: a placeholder that renders
    * looks like a working link, and the one this replaced pointed at a bare `wa.me/` on every page
@@ -87,12 +88,12 @@ export interface FooterProps {
 }
 
 /**
- * The groups' own links (T075). Still code, and deliberately so — spec 009 put the footer's
+ * The groups' own links. Still code, and deliberately so — spec 009 put the footer's
  * navigation out of scope and moved only the POLICY links into content.
  *
  * *Shipping & Returns* used to be hardcoded here beside these. It is gone: it is a policy now, and
  * it arrives through `customerCareLinks` below. That is not tidying — a hardcoded link to a policy
- * the owner can unpublish is a link to a 404 (spec 009, FR-015c).
+ * the owner can unpublish is a link to a 404.
  */
 const defaultGroups = (t_nav: ReturnType<typeof useTranslations<'nav'>>): FooterLinkGroup[] => [
   {
@@ -133,7 +134,7 @@ const LIST = 'flex flex-col items-center gap-2.5 md:items-start md:gap-3.5'
  * Explicit width and height are what stop them shifting the layout as they load, which is the part
  * of FR-027 that actually matters for a fixed-size vector.
  *
- * `next/image` is suppressed rather than used, and should stay that way when `Image` (T056) lands:
+ * `next/image` is suppressed rather than used, and should stay that way when `Image` lands:
  * it has nothing to offer a fixed-size SVG — no format to convert, no density to choose, no size to
  * resample — and routing one through it requires opening `dangerouslyAllowSVG`, which lets
  * arbitrary SVG reach the optimiser. That is a real risk for a gain of zero.
@@ -198,9 +199,9 @@ export function Footer({
           {/* Brand. Spans both rows on tablet so the four groups fill the 2x2 beside it. */}
           <div className="flex flex-col items-center gap-2.5 md:row-span-2 md:items-start xl:row-span-1 xl:gap-16">
             <div className="flex flex-col items-center gap-2.5 md:items-start xl:gap-5">
-              <p className="text-display">Aurum</p>
+              <p className="text-display">{SITE_NAME}</p>
               <p className="text-body-small text-neutral-white/80 text-center md:text-left">
-                © {year} Aurum. All rights reserved.
+                © {year} {SITE_NAME}. All rights reserved.
               </p>
             </div>
             <Certifications />
@@ -292,7 +293,7 @@ export function Footer({
             </Link>
           ))}
           {/*
-            The way back to the cookie chooser (spec 009, FR-032). Withdrawal has to be as available
+            The way back to the cookie chooser. Withdrawal has to be as available
             as consent was, and the design draws no re-entry point anywhere — so it goes here, beside
             the policy it relates to. A node rather than a link: what it opens is a client dialog,
             and the footer stays a server component.

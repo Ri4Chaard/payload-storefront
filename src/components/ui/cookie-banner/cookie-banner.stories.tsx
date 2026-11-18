@@ -117,7 +117,7 @@ export const WithOwnerWrittenBody: Story = {
 /**
  * No Cookie Policy linked, or the linked one unpublished.
  *
- * The banner must still be usable and must not render a dead link (FR-022). Worth a story because
+ * The banner must still be usable and must not render a dead link. Worth a story because
  * the failure is silent: a link to a 404 looks exactly like a link.
  */
 export const WithoutAPolicyLink: Story = {
@@ -146,7 +146,7 @@ export const WithTheOwnersOwnLink: Story = {
 }
 
 /**
- * Switched off in the admin (FR-026).
+ * Switched off in the admin.
  *
  * Renders nothing at all. The story exists so that "nothing" is a checked outcome rather than an
  * assumption — and note that nothing optional is treated as consented while it is off, which is a

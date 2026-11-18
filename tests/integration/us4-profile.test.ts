@@ -5,7 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import { nameSchema } from '@/lib/auth/schemas'
 
 /**
- * US4 — the profile (spec 004, FR-022 – FR-026).
+ * US4 — the profile.
  *
  * **`updateName` is not called here, and the reason is the same seam US2 and US3 record.** The
  * action opens with `requireCustomer()`, which reads `next/headers`; there is no request in a test

@@ -3,7 +3,7 @@ import type { TaskConfig, Where } from 'payload'
 import { CUSTOMER_CART_TTL_MS, GUEST_CART_TTL_MS } from '@/lib/cart/retention'
 
 /**
- * The cart's stated life, enforced (spec 005, T075, FR-047, FR-048, SC-014).
+ * The cart's stated life, enforced.
  *
  * A cart holds what somebody wants, tied to their account or to their device. That is a data
  * collection point, and Constitution VI requires every one of them to have a documented retention

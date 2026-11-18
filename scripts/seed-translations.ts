@@ -25,7 +25,7 @@ import {
 } from './seed-translations-data'
 
 /**
- * Russian and Ukrainian for everything the English seeds create (spec 010, T110).
+ * Russian and Ukrainian for everything the English seeds create.
  *
  * **Run it after `pnpm seed` and `pnpm seed:policies`, never instead of them.** Those two write the
  * documents; this one writes the other two languages into documents that already exist. A document

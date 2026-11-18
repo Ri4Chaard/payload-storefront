@@ -1,5 +1,5 @@
 /**
- * Where a policy lives (spec 009, FR-001).
+ * Where a policy lives.
  *
  * One function, because the address is assembled in four places — the route's canonical tag, the
  * footer's links, the sitemap, and the banner's link to the Cookie Policy — and four copies of
@@ -8,7 +8,7 @@
  *
  * **The prefix is not cosmetic.** Next permits one dynamic segment per path position and the site's
  * root one belongs to `(shop)/[category]`; serving policies at bare root addresses would have meant
- * replacing the catalogue's route with a shared resolver. See `specs/009-.../research.md` R1.
+ * replacing the catalogue's route with a shared resolver.
  */
 
 /** The segment policies live under. Nothing else is served from here. */

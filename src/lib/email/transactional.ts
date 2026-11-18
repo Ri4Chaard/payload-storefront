@@ -6,9 +6,10 @@ import { DEFAULT_LOCALE, type Locale } from '@/i18n/routing'
 import { colorValue } from '@tokens/mapping'
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { SITE_NAME } from '@/lib/site'
 
 /**
- * Mail a customer must receive regardless of what they think of our marketing (spec 004, R2).
+ * Mail a customer must receive regardless of what they think of our marketing.
  *
  * **This module cannot see `marketingEmail`, and that is the design.** FR-035 requires that turning
  * marketing off never suppresses a verification code or a password-change notice. Written as one
@@ -73,7 +74,7 @@ function escapeHtml(value: string): string {
 }
 
 /**
- * The words, in the language the request was made in (spec 010, FR-042).
+ * The words, in the language the request was made in.
  *
  * **The locale is an ARGUMENT, never inferred here.** `getTranslations({ locale })` is the one
  * place in this codebase that passes next-intl an explicit locale, and it is passed because this
@@ -105,7 +106,7 @@ function escapeHtml(value: string): string {
 function copy(locale: Locale): (key: string) => string {
   const messages = loadMessages(locale) as Record<string, Record<string, string>>
   const t = createTranslator({ locale, messages, namespace: 'email' })
-  return (key: string) => t(key as Parameters<typeof t>[0])
+  return (key: string) => t(key as Parameters<typeof t>[0], { siteName: SITE_NAME })
 }
 
 export interface BuiltEmail {

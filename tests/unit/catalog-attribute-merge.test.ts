@@ -26,14 +26,14 @@ const PRODUCT = [
 ]
 
 describe('an option laid over its product', () => {
-  it('replaces the product’s value for the same attribute (FR-010)', () => {
+  it('replaces the product’s value for the same attribute', () => {
     const merged = mergeAttributes(PRODUCT, [row('weight', '1.5 kg')])
 
     expect(merged.map((entry) => entry.value)).toEqual(['Sample material', '1.5 kg', 'matte'])
     expect(merged.filter((entry) => entry.name === 'weight')).toHaveLength(1)
   })
 
-  it('appends an attribute the product does not carry (FR-011)', () => {
+  it('appends an attribute the product does not carry', () => {
     const merged = mergeAttributes(PRODUCT, [row('warranty', '2 years')])
 
     expect(merged.map((entry) => entry.name)).toEqual(['material', 'weight', 'finish', 'warranty'])

@@ -55,7 +55,7 @@ export const EmptyCategory: Story = {
 }
 
 /**
- * A blog with nothing published (007/FR-012). No action, because there is nowhere to send anybody —
+ * A blog with nothing published. No action, because there is nowhere to send anybody —
  * a button here would be a control that admits it cannot help.
  */
 export const NoActionAvailable: Story = {

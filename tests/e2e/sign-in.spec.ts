@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * US2 end to end (spec 004, FR-010 – FR-016).
+ * US2 end to end.
  *
  * The two assertions a browser is genuinely needed for are the session surviving a **fresh browser
  * context** — a cookie with the right expiry is not the same claim as a customer still being signed
@@ -221,7 +221,7 @@ test('a signed-in customer is sent away from sign-in and create-account', async 
 })
 
 /**
- * The admin panel, reached with a CUSTOMER session (spec 004).
+ * The admin panel, reached with a CUSTOMER session.
  *
  * Payload names its cookie from the config's `cookiePrefix`, so both collections share
  * `payload-token`. A customer opening `/admin` therefore arrives authenticated as the wrong kind of

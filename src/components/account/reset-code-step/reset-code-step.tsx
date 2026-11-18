@@ -12,7 +12,7 @@ import { applyActionErrors, errorText } from '@/lib/auth/form-errors'
 import { verifyCodeSchema, type VerifyCodeValues } from '@/lib/auth/schemas'
 
 /**
- * Nodes `429:12348` and `429:12615` — the reset flow's six boxes (spec 004, US3, FR-018, FR-019).
+ * Nodes `429:12348` and `429:12615` — the reset flow's six boxes.
  *
  * **The same control as the registration code screen, not a second one.** Figma draws these boxes
  * at 56px and the registration ones at 60px; FR-048 records that as a drafting artefact rather than

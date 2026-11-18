@@ -2382,7 +2382,7 @@ export interface Shop {
 export interface AccountSetting {
   id: number;
   /**
-   * Pre-selected when a customer adds an address (FR-030). The design draws “United Kingdom”, which is placeholder content. Consumed by the address form in US5.
+   * Pre-selected when a customer adds an address. The design draws “United Kingdom”, which is placeholder content. Consumed by the address form in US5.
    */
   defaultCountry:
     | 'AF'
@@ -3006,7 +3006,7 @@ export interface HomePage {
      */
     headingLead: string;
     /**
-     * Drawn in the brand colour, e.g. “Aurum”.
+     * Drawn in the brand colour, e.g. “us” or your shop’s name.
      */
     headingEmphasis: string;
     /**

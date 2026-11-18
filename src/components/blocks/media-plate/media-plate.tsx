@@ -4,7 +4,7 @@ import { Media } from '@/components/ui'
 import type { StoryBlock } from '@/lib/story/types'
 
 /**
- * A full-bleed photograph or video (006/T029), from nodes `310:6772`, `413:7679`, `413:7984`.
+ * A full-bleed photograph or video, from nodes `310:6772`, `413:7679`, `413:7984`.
  *
  * Edge to edge with no gutter — the one band that deliberately ignores `Container`, because the
  * drawing runs it the full width at every breakpoint.

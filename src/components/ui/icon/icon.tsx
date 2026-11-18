@@ -4,11 +4,11 @@ import { cn } from '@/lib/cn'
 import { iconRegistry, type IconName } from '@/lib/icon-registry'
 
 /**
- * FR-022 (T057) — the icon primitive. `name` is a fixed set: the union comes from the generated
+ * FR-022 — the icon primitive. `name` is a fixed set: the union comes from the generated
  * registry, so a typo is a type error rather than a blank square in production.
  *
  * Colour is never a prop. Every glyph paints with `currentColor`, so an icon takes the colour of
- * the text around it and there is no way to hardcode a fill (contracts/ui-kit.md).
+ * the text around it and there is no way to hardcode a fill.
  *
  * Accessibility follows the label: without one the icon is decoration and is hidden from assistive
  * tech; with one it becomes a graphic with an accessible name. That default matters, because the

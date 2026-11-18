@@ -7,13 +7,13 @@ import type { ProductSummary } from '@/lib/catalog/types'
 import { cn } from '@/lib/cn'
 
 /**
- * The listing grid (003/T251). Nodes `222:982` (1920) · `412:7764` (768) · `412:7881` (375).
+ * The listing grid. Nodes `222:982` (1920) · `412:7764` (768) · `412:7881` (375).
  *
  * **Four, three and two columns**, from the drawn widths rather than from a guess: 1720 ÷ 4 cards
  * of 415 with 20px between them at 1920; 688 ÷ 3 of 218 with 16 at 768; 343 ÷ 2 of 163 with 16 at
  * 375. The card width is therefore never set here — the columns are, and the card fills one.
  *
- * **`ProductCard` is consumed unchanged** (FR-017). It takes a name, a price already formatted, an
+ * **`ProductCard` is consumed unchanged**. It takes a name, a price already formatted, an
  * href and photographs, which is exactly what `ProductSummary` carries; the mapping below is a
  * rename and nothing else. If this file ever needs to reach past the card's props, FR-017 says the
  * card is what gets fixed.

@@ -1,5 +1,5 @@
 /**
- * The catalogue's development content (003/T231).
+ * The catalogue's development content.
  *
  * **Every array here is annotated with the GENERATED collection type.** Not a hand-written
  * interface that resembles it — the real `Product`, `Variant`, `Category` from `payload-types.ts`.
@@ -168,7 +168,7 @@ const collection = (slug: string): Collection => {
 
 
 /**
- * The owner-managed colours (spec 011). `label` is what the drawer shows; `value` is what travels
+ * The owner-managed colours. `label` is what the drawer shows; `value` is what travels
  * in the URL and is what a link bookmarked before 011 still carries.
  */
 export const colourFixtures: Colour[] = [
@@ -370,7 +370,7 @@ const DRAWN: ProductSeed[] = [
     attributes: [{ name: 'material', value: 'Sample material' }],
   },
   {
-    // Stock-tracked AT ZERO — visible, priced, and not orderable (FR-039).
+    // Stock-tracked AT ZERO — visible, priced, and not orderable.
     id: 5,
     slug: 'product-5',
     title: 'Product 5',

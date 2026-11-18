@@ -7,12 +7,12 @@ import { skipRevalidation } from '@/lib/revalidate'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * The editorial lifecycle for policies and cookie categories (spec 009, T041, T051).
+ * The editorial lifecycle for policies and cookie categories.
  *
  * The Constitution's *Editorial verification* gate says a content model that renders correctly but
- * is unusable in the admin is a defect. Most of that gate is a person walking
- * `specs/009-policy-pages-cookie-consent/quickstart.md` §2, §3 and §7; what is automated here is the
- * part a person would get bored of repeating.
+ * is unusable in the admin is a defect. Most of that gate is a person creating
+ * and previewing policies in the admin; what is automated here is the part a person would get bored
+ * of repeating.
  *
  * **The category tests hold the shared content lock, and the policy tests do not.** A policy is a
  * self-contained page created at a timestamped address, so parallel workers cannot collide over one.
@@ -148,7 +148,7 @@ test('the banner text is a real editor, with formatting controls', async ({ page
   }
 })
 
-test('a draft is invisible, and publishing shows it (FR-011)', async ({ page }) => {
+test('a draft is invisible, and publishing shows it', async ({ page }) => {
   test.setTimeout(240_000)
 
   const slug = `e2e-admin-draft-${suffix}`
@@ -191,7 +191,7 @@ test('a draft is invisible, and publishing shows it (FR-011)', async ({ page }) 
   await expect(page.getByText('The original sentence.')).toBeHidden()
 })
 
-test('correcting the body does not move the effective date (FR-008)', async ({ page }) => {
+test('correcting the body does not move the effective date', async ({ page }) => {
   test.setTimeout(120_000)
 
   const document = await make({
@@ -301,7 +301,7 @@ test.describe('the cookie categories', () => {
     necessary: true,
   }
 
-  test('the owner rewrites what the banner says, with no deploy (FR-025)', async ({ page }) => {
+  test('the owner rewrites what the banner says, with no deploy', async ({ page }) => {
     /*
       The one part of the banner that is content. The heading and the three button labels are fixed
       in the component — they name controls — so this is the whole editable surface, and it is the
@@ -358,7 +358,7 @@ test.describe('the cookie categories', () => {
     ).toBeVisible()
   })
 
-  test('rewording a category changes the chooser, with no deploy (SC-007)', async ({ page }) => {
+  test('rewording a category changes the chooser, with no deploy', async ({ page }) => {
     await setCategories([{ ...NECESSARY, purpose: 'A freshly reworded explanation.' }])
 
     await page.goto('/')
@@ -406,7 +406,7 @@ test.describe('the cookie categories', () => {
     await expect(dialog.getByRole('switch', { name: 'Analytics' })).not.toBeChecked()
   })
 
-  test('removing a category drops it from the chooser without error (FR-041)', async ({ page }) => {
+  test('removing a category drops it from the chooser without error', async ({ page }) => {
     await setCategories([NECESSARY])
 
     await page.goto('/')
@@ -417,7 +417,7 @@ test.describe('the cookie categories', () => {
     await expect(dialog.getByText('Analytics')).toHaveCount(0)
   })
 
-  test('advancing the consent version asks everyone again, keeping their answers (FR-042)', async ({
+  test('advancing the consent version asks everyone again, keeping their answers', async ({
     page,
   }) => {
     await setCategories([NECESSARY], 1)

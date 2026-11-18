@@ -6,7 +6,7 @@ import { getCustomer } from '@/lib/auth/dal'
 import { formatPostalAddress, type CustomerAddress } from '@/lib/addresses/types'
 
 /**
- * What the shop already knows about whoever is checking out (spec 005, T055, FR-043 – FR-046).
+ * What the shop already knows about whoever is checking out.
  *
  * A signed-in customer may have saved a name and a delivery address on their profile — spec 004
  * built both. Sending the seller a request that omits them, when the customer has already typed
@@ -18,7 +18,7 @@ import { formatPostalAddress, type CustomerAddress } from '@/lib/addresses/types
  * design, and arriving only for the visitors least likely to report it. The lookup is optional by
  * construction: this returns `null` and the message is composed without a customer block.
  *
- * **Degradation is per field, not per auth state** (FR-045). "Signed in" is not the condition —
+ * **Degradation is per field, not per auth state**. "Signed in" is not the condition —
  * *having the datum* is. A customer who registered and never opened their profile has an account,
  * no name and no address, and their message is identical to an anonymous visitor's. One rule to
  * implement and one to test, instead of four states.
@@ -53,7 +53,7 @@ export async function messageCustomerFor(
   })
 
   // Exactly one address is the default: spec 004's `assignFirstAddressAsDefault` and
-  // `keepOneDefault` hooks are what make that true, so this is a find rather than a sort (FR-044).
+  // `keepOneDefault` hooks are what make that true, so this is a find rather than a sort.
   const chosen = docs.find((doc) => doc.isDefault) ?? null
 
   const name = [customer.firstName, customer.lastName].filter(Boolean).join(' ').trim()

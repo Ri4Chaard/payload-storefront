@@ -5,7 +5,7 @@ import { env } from '@/env'
 
 /**
  * The thing the browser holds between "the code was right" and "here is my new password"
- * (spec 004, contracts/auth-actions.md).
+ *.
  *
  * **The reset flow is two screens, so something has to survive the gap.** The obvious candidate is
  * Payload's reset token — it is right there, `verifyResetCode` has just resolved it, and putting it

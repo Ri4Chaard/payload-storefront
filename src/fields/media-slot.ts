@@ -1,7 +1,7 @@
 import type { Field } from 'payload'
 
 /**
- * A photograph or a video, in the same frame (spec 006, FR-018 – FR-025).
+ * A photograph or a video, in the same frame.
  *
  * One definition, used by every block that shows imagery — the media plate, the closer-look panel,
  * the banner's backdrop and each process step. The drawn page uses seven of them. Constitution II
@@ -10,7 +10,7 @@ import type { Field } from 'payload'
  *
  * **`kind` decides, never presence.** An editor who switches to video and back leaves both a
  * photograph and a video behind, and "whichever is filled in" would then render whichever the last
- * person happened to touch. The stored kind is the answer (FR-020).
+ * person happened to touch. The stored kind is the answer.
  *
  * **Video comes from the media library and nowhere else.** Both branches are `upload` relationships
  * to `media`. There is no text field in this config, which is the structural form of FR-021: an
@@ -20,8 +20,8 @@ import type { Field } from 'payload'
  * background video that actually behaves.
  *
  * **The poster is required for a video, and it is doing four jobs.** It holds the slot's box before
- * anything loads (FR-024b), it is what a reduced-motion visitor sees instead of playback (FR-024),
- * it is what shows while the file is still being withheld below the fold (FR-024a), and it is what
+ * anything loads, it is what a reduced-motion visitor sees instead of playback,
+ * it is what shows while the file is still being withheld below the fold, and it is what
  * survives a video deleted from the library. Requiring it is what lets one render path serve both
  * kinds — see `src/components/ui/media/`.
  *
@@ -32,7 +32,7 @@ import type { Field } from 'payload'
  * Payload renders it against the field, inside the block, in the admin.
  *
  * Alternative text is deliberately NOT a field here. It lives on the `media` document, where it is
- * already required, so one asset carries one description wherever it is used (FR-025). A copy per
+ * already required, so one asset carries one description wherever it is used. A copy per
  * slot would be seven chances to describe the same photograph differently.
  */
 

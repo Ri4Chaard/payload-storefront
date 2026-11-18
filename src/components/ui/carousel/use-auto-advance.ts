@@ -4,7 +4,7 @@ import React from 'react'
 
 /**
  * A timer that advances something, and every rule that makes an auto-advancing thing acceptable
- * (003/T267, T260).
+ *.
  *
  * Extracted rather than left inside `Carousel` because the product gallery needs the same timer
  * over a DIFFERENT root. Its photograph is a `Carousel`, but its thumbnail rail, its dots and its

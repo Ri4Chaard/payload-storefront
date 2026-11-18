@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * The locale segment, end to end (spec 010, T018, T019 — FR-012, FR-013, FR-015).
+ * The locale segment, end to end.
  *
  * **The load-bearing assertion in this file is the one about old addresses.** Every address the site
  * published before this feature is indexed and linked, and `localePrefix: 'as-needed'` exists to

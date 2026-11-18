@@ -29,7 +29,7 @@ export const Collections: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  // Publishing invalidates the cached routes (003/T294). A collection decides what _Complete the Collection_ shows beside a product.
+  // Publishing invalidates the cached routes. A collection decides what _Complete the Collection_ shows beside a product.
   hooks: {
     afterChange: [revalidateOnChange],
     afterDelete: [revalidateOnDelete],

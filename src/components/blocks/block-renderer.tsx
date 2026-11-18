@@ -10,13 +10,13 @@ import { PageHeaderBlock } from './page-header'
 import { ProcessStepsBlock } from './process-steps'
 
 /**
- * The composed page (006/T033).
+ * The composed page.
  *
  * **An exhaustive switch with a `never` check, not a lookup table.** A `Record<BlockType, FC>`
  * would be shorter and would fail at runtime — as a blank band on a live page — the day somebody
  * adds a block type to `src/blocks/` without a renderer. The `never` assignment below makes that
  * same mistake a type error in the editor, which is where a mistake this cheap to prevent belongs.
- * `contracts/blocks.md` §2 lists the six steps in full; step 6 is this file.
+ * "Adding a block type" in `docs/overview.md` lists the six steps; step 6 is this file.
  *
  * **A renderer never decides whether it should exist.** The mapper has already dropped the empty
  * bands and resolved the questions, so there is nothing here that asks "is this worth showing" —
@@ -78,7 +78,7 @@ function renderBlock(block: StoryBlock, first: boolean): React.ReactNode {
       )
     default: {
       // A block variant with no renderer. If this line stops compiling, the six-step checklist in
-      // contracts/blocks.md §2 was stopped at step 5.
+      // docs/overview.md was stopped at step 5.
       const unreachable: never = block
       return unreachable
     }

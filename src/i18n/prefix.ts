@@ -1,7 +1,7 @@
 import { DEFAULT_LOCALE, LOCALES, type Locale } from './routing'
 
 /**
- * Path arithmetic for the locale prefix (spec 010, FR-006, FR-008).
+ * Path arithmetic for the locale prefix.
  *
  * Pure, and deliberately so: `src/proxy.ts` cannot be imported by a test — next-intl's middleware
  * reaches for `next/server`, which only resolves inside a Next build — so the decisions it makes

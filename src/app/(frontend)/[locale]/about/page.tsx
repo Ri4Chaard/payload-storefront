@@ -8,7 +8,7 @@ import { BlockRenderer } from '@/components/blocks'
 import { getStoryPage } from '@/lib/story/queries'
 
 /**
- * The Our Story page (006/T035), from Figma section `220:699`.
+ * The Our Story page, from Figma section `220:699`.
  *
  * **This route closes three dead links.** The header's "About us", the footer's "Our Story" and the
  * home page's "Discover our story" have all pointed at `/about` since spec 001, and until now it
@@ -28,7 +28,7 @@ import { getStoryPage } from '@/lib/story/queries'
  * **It also removes a staleness bug rather than solving one.** `src/lib/revalidate.ts` invalidates
  * by walking every product slug, so hooking the story page into it would evict the entire catalogue
  * because somebody fixed a typo in a paragraph. Nothing is cached here, so a publish is visible to
- * the next visitor with no invalidation at all (FR-016, FR-041).
+ * the next visitor with no invalidation at all.
  */
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +36,7 @@ export const dynamic = 'force-dynamic'
 const HREF = '/about'
 
 /**
- * Editor-controlled metadata, falling back to what the page itself says (FR-039, FR-040).
+ * Editor-controlled metadata, falling back to what the page itself says.
  *
  * Constitution V requires the owner rather than a developer to decide how this appears in a search
  * result, and requires a canonical URL. Every SEO field is optional, so the fallbacks are what an
@@ -92,7 +92,7 @@ export default async function AboutPage() {
   /*
     `null` means the database was unreachable — a container build, and nothing else. An empty
     composition means the owner has not written the page yet. Both render the chrome and nothing
-    between (FR-053), and neither is a 404: three places on this site link here, and answering a
+    between, and neither is a 404: three places on this site link here, and answering a
     link the site itself publishes with "not found" is worse than a thin page.
   */
   /*

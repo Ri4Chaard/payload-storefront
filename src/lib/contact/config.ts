@@ -1,5 +1,5 @@
 /**
- * The numbers behind the contact form (spec 008, T023).
+ * The numbers behind the contact form.
  *
  * **One place, deliberately** — the shape and the reasoning `src/lib/auth/config.ts` established for
  * the account flow. FR-029d requires the retention period to be "defined in one place rather than
@@ -9,7 +9,7 @@
 
 /**
  * Field maxima, enforced twice from here: as `maxLength` on the collection so invalid content
- * cannot be published (Constitution IV), and in `enquiry-schema.ts` so the server action refuses it
+ * cannot be published, and in `enquiry-schema.ts` so the server action refuses it
  * before Payload is ever asked.
  *
  * 254 for the address is the RFC 5321 ceiling. The other two are judgement: a name longer than 100
@@ -23,7 +23,7 @@ export const ENQUIRY_MAX = {
 } as const
 
 /**
- * How many enquiries one sender may have accepted inside the window (FR-027).
+ * How many enquiries one sender may have accepted inside the window.
  *
  * Five is generous for a person — nobody with a genuine question sends a sixth within the hour —
  * and tight enough that the enquiry list cannot be filled from one source. Flagged in the spec's
@@ -38,7 +38,7 @@ export const ENQUIRY_RATE_LIMIT = 5
 export const ENQUIRY_RATE_WINDOW_MS = 60 * 60 * 1000
 
 /**
- * How long an enquiry is kept (FR-029d).
+ * How long an enquiry is kept.
  *
  * Twelve months: long enough that an enquiry about a product somebody is still considering survives
  * the decision, short enough to be defensible as a retention period. Stated in days as well as

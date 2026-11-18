@@ -1,5 +1,5 @@
 /**
- * Specimen content for the four home-page bands' stories (spec 010).
+ * Specimen content for the four home-page bands' stories.
  *
  * **This is what `src/mocks/home.ts` became.** That file was the last of the fixture content spec
  * 002 staged as a deviation from Constitution I, and the home page read it for real — the hero, the

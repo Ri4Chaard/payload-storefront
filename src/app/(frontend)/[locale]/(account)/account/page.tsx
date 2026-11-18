@@ -14,7 +14,7 @@ import { requireCustomer } from '@/lib/auth/dal'
 import { getAccountSettings, offeredCountries } from '@/lib/auth/settings'
 
 /**
- * The profile — node `261:4066`, card `266:5096` (spec 004, US4).
+ * The profile — node `261:4066`, card `266:5096`.
  *
  * Six rows in the order FR-022 fixes: email, full name, addresses, marketing preference, security,
  * and the sign-out control. The order is a requirement rather than a layout choice, so the rows are
@@ -23,7 +23,7 @@ import { getAccountSettings, offeredCountries } from '@/lib/auth/settings'
  * **`requireCustomer` is the guard, and it is here rather than in a layout.** `src/lib/auth/dal.ts`
  * explains why at length; the short version is that a layout does not decide whether its children
  * render. `src/proxy.ts` sends anonymous visitors away before this runs, but that is a courtesy — a
- * forged cookie passes the proxy and is refused on this line (FR-015).
+ * forged cookie passes the proxy and is refused on this line.
  *
  * **The page keeps a visible heading the design does not draw.** `261:4066` starts straight in on
  * the Email row, which leaves the one page reached from the header's account icon with no title at
@@ -45,7 +45,7 @@ export default async function AccountPage() {
   const t_account = await getTranslations('account')
 
   /**
-   * The address form's two settings, resolved on the server (FR-028, FR-030).
+   * The address form's two settings, resolved on the server.
    *
    * `offeredCountries` turns the shop's list into the options the modal renders, so the client
    * never sees the narrowing rule — only its result. `getAccountSettings` and

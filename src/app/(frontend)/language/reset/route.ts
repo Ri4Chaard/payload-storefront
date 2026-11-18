@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { LOCALE_COOKIE } from '@/i18n/routing'
 
 /**
- * Forgetting a language the site no longer offers (spec 010, FR-027, research R6).
+ * Forgetting a language the site no longer offers.
  *
  * **This route exists to break a redirect loop, and the loop is worth stating.** A visitor who chose
  * Ukrainian holds `NEXT_LOCALE=uk`. The owner switches Ukrainian off. The visitor returns to `/`;

@@ -5,7 +5,7 @@ import { LOCALES } from '@/i18n/routing'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * Longer words in a layout drawn for English (spec 010, T106).
+ * Longer words in a layout drawn for English.
  *
  * Russian runs roughly 15% longer than English and Ukrainian a little more, and this site draws
  * several controls to fixed widths — `product-purchase.tsx` says so in its own comment about the

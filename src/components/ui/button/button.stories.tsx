@@ -11,7 +11,7 @@ import { Button } from './button'
  * them on the default ground would fail CI for a bug that is not in the component.
  */
 
-/** The real `plus` glyph from src/assets/icons/plus.svg, inlined until `Icon` (T057) exists. */
+/** The real `plus` glyph from src/assets/icons/plus.svg, inlined until `Icon` exists. */
 function PlusIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

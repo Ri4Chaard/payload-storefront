@@ -6,7 +6,7 @@ import { LOCALES } from '@/i18n/routing'
 import { skipRevalidation } from '@/lib/revalidate'
 
 /**
- * A half-translated site is the normal state, not the broken one (spec 010, T100 — FR-046, FR-048).
+ * A half-translated site is the normal state, not the broken one.
  *
  * **`fallback: true` is what makes this work, and it is worth testing rather than trusting.** It is
  * Payload's default, so nothing in a diff would show it being switched off — the config states it

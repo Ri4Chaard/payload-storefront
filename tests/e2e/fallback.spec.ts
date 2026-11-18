@@ -5,7 +5,7 @@ import { LOCALES } from '@/i18n/routing'
 import { acquireSharedContentLock } from '../shared-content-lock'
 
 /**
- * A half-translated page renders whole (spec 010, T101 — FR-047, SC-009).
+ * A half-translated page renders whole.
  *
  * **The integration suite proves the DATA falls back; this proves the PAGE does.** They are not the
  * same claim. `fallback: true` guarantees a field returns the English value, and a component that

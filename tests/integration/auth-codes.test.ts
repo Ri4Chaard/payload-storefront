@@ -6,7 +6,7 @@ import { consumeCode, issueCode } from '@/lib/auth/codes'
 import { CODE_MAX_ATTEMPTS, CODE_TTL_MS } from '@/lib/auth/config'
 
 /**
- * The code lifecycle (spec 004, FR-005, contracts/auth-actions.md C1–C7).
+ * The code lifecycle.
  *
  * These live in the integration suite rather than `tests/unit` because the four terminal states are
  * database state, not arithmetic — the whole point of the design is that single-use is enforced by

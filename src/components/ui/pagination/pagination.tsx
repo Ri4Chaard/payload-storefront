@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/cn'
 
 /**
- * Numbered pages (003/T255, FR-018).
+ * Numbered pages.
  *
  * **Nothing is drawn for this.** The listing frames stop at twelve cards with no pagination, no
  * "load more", and a carousel arrow parked in the grid with `hidden` set on it (spec inconsistency
@@ -70,7 +70,7 @@ export function Pagination({
 }: PaginationProps) {
   const t_catalog = useTranslations('catalog')
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

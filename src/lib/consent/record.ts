@@ -28,7 +28,7 @@ export const serialise = (record: ConsentRecord): string =>
 /**
  * A stored value to a record, or `null` for anything that is not one.
  *
- * Every rejection here means "ask again" (FR-039). Being strict is the point: a half-understood
+ * Every rejection here means "ask again". Being strict is the point: a half-understood
  * record is worse than no record, because it would be treated as an answer nobody gave.
  */
 export const parse = (raw: string | undefined | null): ConsentRecord | null => {
@@ -105,11 +105,11 @@ export const readState = (
   const record = parse(raw)
   if (!record) return { status: 'ask' }
 
-  // The notice materially changed and the owner said so (FR-042).
+  // The notice materially changed and the owner said so.
   if (record.v < consentVersion) return { status: 'ask-with-previous', previous: record.a }
 
   /*
-    A category exists that this visitor was never offered (FR-040).
+    A category exists that this visitor was never offered.
 
     **This is the guard on the owner's "always three buttons" decision.** With one category
     configured, *Agree* and *Allow Technical Cookies* have identical effect — accepted, and recorded
@@ -122,7 +122,7 @@ export const readState = (
   if (unasked) return { status: 'ask-with-previous', previous: record.a }
 
   /*
-    A key in the record that is no longer configured is IGNORED (FR-041) — not an error, and not a
+    A key in the record that is no longer configured is IGNORED — not an error, and not a
     reason to ask again. A removed category is not a question anybody still needs answered.
   */
   return { status: 'decided', record }

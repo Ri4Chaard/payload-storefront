@@ -1,5 +1,5 @@
 /**
- * Validates every permitted colour pairing against WCAG 2.2 (FR-012, SC-003).
+ * Validates every permitted colour pairing against WCAG 2.2.
  *
  * This checks the DECLARED pairings, not the cartesian product. A combination absent from the list
  * is not a failure — it is simply not permitted, and using one is a review defect. That distinction

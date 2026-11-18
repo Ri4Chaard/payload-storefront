@@ -15,17 +15,17 @@ import type {
 } from './types'
 
 /**
- * Documents to view models for the story page (spec 006, T021).
+ * Documents to view models for the story page.
  *
  * Three rules run through everything below, and each one exists so that no component downstream has
  * to think about it:
  *
- * 1. **An empty band is dropped, not rendered empty** (FR-004). A renderer that also checks would be
+ * 1. **An empty band is dropped, not rendered empty**. A renderer that also checks would be
  *    a second place for the rule to live, and the two would drift.
- * 2. **A block type the code no longer knows is dropped, not thrown on** (contracts/blocks.md §4).
+ * 2. **A block type the code no longer knows is dropped, not thrown on**.
  *    Content outlives a deployment; a page must not fail to render because of a band somebody
  *    removed from the codebase.
- * 3. **Heading levels are assigned here** (FR-051), so the "exactly one h1" invariant is a property
+ * 3. **Heading levels are assigned here**, so the "exactly one h1" invariant is a property
  *    of one testable function rather than an agreement between six components.
  */
 
@@ -108,7 +108,7 @@ const media = (slot: SlotDocument | undefined): StoryMedia | undefined => {
 /**
  * The questions a FAQ band shows.
  *
- * **The mapping itself moved to `@/lib/questions/mappers`** (008/T008), where `/contact` and `/faq`
+ * **The mapping itself moved to `@/lib/questions/mappers`**, where `/contact` and `/faq`
  * read it too. What was a local helper with a paragraph of reasoning attached is now one shared
  * function with the same paragraph — see that module for the de-duplication and draft rules.
  */
@@ -234,7 +234,7 @@ const CAN_OWN_TOP_HEADING: ReadonlySet<string> = new Set([
 ])
 
 /**
- * The composition, levelled and filtered (FR-006, FR-051).
+ * The composition, levelled and filtered.
  *
  * **The first `page-header` owns the top level.** Failing that — an editor deleted it, or dragged a
  * banner above it — the first block with a heading of any kind owns it instead, so a composition
@@ -272,7 +272,7 @@ const seo = (value: StoryPageDocument['seo']): StorySeo => {
 }
 
 /**
- * What the page says about itself when the editor has set no metadata (FR-039).
+ * What the page says about itself when the editor has set no metadata.
  *
  * Read off the MAPPED blocks, so every fallback describes something a visitor can actually see. A
  * headline the mapper dropped as empty must not become the page's `<title>`, and a photograph in a

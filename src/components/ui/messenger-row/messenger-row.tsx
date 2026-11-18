@@ -5,7 +5,7 @@ import type { IconName } from '@/lib/icon-registry'
 import { cn } from '@/lib/cn'
 
 /**
- * One way to reach the seller (spec 005, T058). Nodes `590:13188` (1920), `590:13879` (390).
+ * One way to reach the seller. Nodes `590:13188` (1920), `590:13879` (390).
  *
  * A circular platform mark, the platform name over its handle, and a chevron — drawn as a row the
  * whole of which is the target, which is why this renders an `<a>` rather than a card containing
@@ -17,7 +17,7 @@ import { cn } from '@/lib/cn'
  *
  * **`note` is how a row admits it cannot carry the message.** Instagram has no documented way to
  * pre-fill a direct message, so its row says so and the modal puts the text on the clipboard
- * instead (FR-021). Saying nothing would let a customer arrive at an empty chat believing their
+ * instead. Saying nothing would let a customer arrive at an empty chat believing their
  * selection travelled with them, which is a failure of the interface rather than of Instagram.
  */
 export interface MessengerRowProps extends Omit<React.ComponentProps<'a'>, 'children'> {

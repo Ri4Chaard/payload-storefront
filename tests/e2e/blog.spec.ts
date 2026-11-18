@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /**
- * The blog, end to end (007/T035, T048, T068, T077).
+ * The blog, end to end.
  *
  * **Read-only against the seeded blog.** Unlike `about.spec.ts`, which has to compose a global
  * before every assertion, everything here is a property of seven published articles that
@@ -31,7 +31,7 @@ test.describe('the index', () => {
     const cards = page.locator('ul[aria-label="Latest articles"] > li')
     await expect(cards).toHaveCount(7)
 
-    // The whole card is one link (FR-005), so a card contributes exactly one destination.
+    // The whole card is one link, so a card contributes exactly one destination.
     await expect(cards.first().getByRole('link')).toHaveCount(1)
 
     await cards.first().getByRole('link').click()
@@ -108,7 +108,7 @@ test.describe('narrowing by category', () => {
     const tab = page.getByRole('link', { name: 'Topic 3', exact: true })
     await expect(tab).toHaveAttribute('aria-current', 'page')
 
-    // Distinguished by more than colour (FR-013) — the rule beneath the current tab.
+    // Distinguished by more than colour — the rule beneath the current tab.
     const border = await tab.evaluate((el) => getComputedStyle(el).borderBottomColor)
     const sibling = await page
       .getByRole('link', { name: 'Topic 2', exact: true })
@@ -150,7 +150,7 @@ test.describe('an article', () => {
     await expect(chapters).toHaveCount(4)
     await expect(chapters.first()).toHaveText('Chapter heading 1')
 
-    // The pull quote is announced as a quotation rather than as body copy (FR-025).
+    // The pull quote is announced as a quotation rather than as body copy.
     await expect(page.locator('blockquote')).toContainText('A short pull quote')
   })
 

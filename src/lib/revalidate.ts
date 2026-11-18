@@ -1,5 +1,5 @@
 /**
- * Publishing invalidates the pages that draw the published thing (003/T294).
+ * Publishing invalidates the pages that draw the published thing.
  *
  * Constitution V calls stale content after a publish a defect, and one of this site's routes can go
  * stale that way: **every product page is cached**, whether it was prerendered from
@@ -14,7 +14,7 @@
  * The absent ones are absent because they are not cached. `/[category]` and `/all-products` read
  * `searchParams` — a filtered grid is a function of the query string — and `/`, `/about` and
  * `/blog` are `force-dynamic` because a page prerendered from a database the container build cannot
- * reach would bake empty and stay empty. `/cart` (spec 005) is the sixth: it reads the session and
+ * reach would bake empty and stay empty. `/cart` is the sixth: it reads the session and
  * the cart cookie, so it is per-visitor by construction and there is no shared entry to invalidate.
  * A cart mutation settles with `refresh()` instead, which refreshes the one client that asked —
  * `revalidatePath` there would evict catalogue pages for everybody because somebody changed a
@@ -48,7 +48,7 @@ import type {
 export const skipRevalidation: RequestContext = { disableRevalidate: true }
 
 /**
- * One path becomes three (spec 010, FR-052, research R17).
+ * One path becomes three.
  *
  * Every cached page now exists once per language, so invalidating `/products/x` alone would leave
  * `/ru/products/x` and `/uk/products/x` serving yesterday's price.
@@ -261,7 +261,7 @@ export const revalidateGlobalOnChange: GlobalAfterChangeHook = async ({ context,
 }
 
 /**
- * Attach to `afterChange` on `articles` (spec 007, T051/T053).
+ * Attach to `afterChange` on `articles`.
  *
  * Publishing, unpublishing, editing and restoring from trash all arrive here, and all of them
  * change what `/blog/<slug>` should serve — including unpublishing, which has to make a page that

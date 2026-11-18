@@ -4,7 +4,7 @@ import { seoField } from '@/fields/seo'
 import { isAdmin } from '@/lib/access'
 
 /**
- * The blog index's own copy (spec 007, FR-003, FR-012, FR-042).
+ * The blog index's own copy.
  *
  * **Flat fields, not a block composition — and that is a deliberate departure from `/about`.**
  * `story-page` is `blockReferences` because that page is seven bands whose order is genuinely the
@@ -19,7 +19,7 @@ import { isAdmin } from '@/lib/access'
  * something an editor can change without a deploy, which is what Constitution I actually asks for.
  * The same mechanism `story-page` uses, for the same reason.
  *
- * **No revalidation hook.** `/blog` is `force-dynamic` (007/research.md R6), so there is nothing
+ * **No revalidation hook.** `/blog` is `force-dynamic`, so there is nothing
  * cached to invalidate, and the shared `invalidate()` would evict every product page in the shop
  * over a heading edit.
  */

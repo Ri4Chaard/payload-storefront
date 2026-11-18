@@ -11,7 +11,7 @@ import type { IconName } from '@/lib/icon-registry'
  * HERE rather than beside one page because two pages now draw them, and a second copy is how the
  * two quietly drift apart.
  *
- * **A function of the translator rather than a constant** (spec 010). The words are interface
+ * **A function of the translator rather than a constant**. The words are interface
  * chrome by the rule in the README — nobody would ask an editor to reword "Free shipping" — so they
  * belong in `src/i18n/messages/`, and a module constant cannot read a translator. The icons stay
  * here: an icon is not language.

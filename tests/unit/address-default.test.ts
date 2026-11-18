@@ -8,7 +8,7 @@ import {
 } from '@/fields/address-hooks'
 
 /**
- * FR-031 — exactly one address is the default, at any time (spec 004, US5, T516).
+ * FR-031 — exactly one address is the default, at any time.
  *
  * **Unit rather than integration, because what is being tested is the DECISION.** The companion
  * suite `tests/integration/us5-addresses.test.ts` runs the same hooks against a real collection and

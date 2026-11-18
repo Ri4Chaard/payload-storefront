@@ -21,7 +21,7 @@ import { LOGIN_LOCK_MS, LOGIN_MAX_ATTEMPTS, SESSION_TTL_SECONDS } from '@/lib/au
  *
  * This collection arrived in 003 for one structural reason: the e-commerce plugin's
  * `customers.slug` is a required config key, and its carts collection builds a relationship field
- * against it. Payload will not boot without the collection existing (003/research.md R5). It sat
+ * against it. Payload will not boot without the collection existing. It sat
  * there with `create: isAdmin` and a single `name` field, and its comment listed registration,
  * verification, password reset and profile screens as "deliberately absent … those are the customer
  * accounts spec". Those have landed.
@@ -40,7 +40,7 @@ export const Customers: CollectionConfig = {
   slug: 'customers',
   auth: {
     /**
-     * An address must be proved before the account works (FR-004, FR-008).
+     * An address must be proved before the account works.
      *
      * Turning this on is also what makes `login` throw `UnverifiedEmail` rather than succeeding
      * (`payload/dist/auth/operations/login.js:184`), which is the mechanism behind FR-011's one
@@ -112,7 +112,7 @@ export const Customers: CollectionConfig = {
      */
     afterChange: [syncMarketingChoice],
     /**
-     * The customer's cart goes with them (spec 005, FR-049).
+     * The customer's cart goes with them.
      *
      * Two hooks because `carts.customer_id` is `ON DELETE SET NULL`: the ids have to be captured
      * while the relationship still exists, and deleted only once the customer actually went. See
@@ -157,10 +157,10 @@ export const Customers: CollectionConfig = {
      *
      * It matters because of how this shop actually works: an order is a conversation on WhatsApp or
      * Telegram, and the seller fulfilling it needs the address the customer already typed. Asking
-     * them for it again is the thing saved addresses exist to prevent (FR-027).
+     * them for it again is the thing saved addresses exist to prevent.
      *
      * **Default first**, then oldest, so the address that will be used at checkout is the one at
-     * the top and the rest keep a stable order (FR-031). `createdAt` is the tiebreak because two
+     * the top and the rest keep a stable order. `createdAt` is the tiebreak because two
      * non-default addresses would otherwise come back in whatever order the database chose.
      *
      * `allowCreate` is left on. A seller taking a new address down mid-conversation should be able
@@ -183,7 +183,7 @@ export const Customers: CollectionConfig = {
     },
     {
       /*
-        The language this customer reads the site in (spec 010, FR-044).
+        The language this customer reads the site in.
 
         Recorded at registration from the page they registered on. Two uses: marketing campaigns can
         be segmented by it — which is what FR-044 asks for — and it is the fallback for any mail sent

@@ -3,7 +3,7 @@ import type { Block } from 'payload'
 import { mediaSlot } from '@/fields/media-slot'
 
 /**
- * The band that says what the shop is about, in detail (spec 006, FR-010).
+ * The band that says what the shop is about, in detail.
  *
  * Drawn at nodes `205:1870` / `413:7680` / `413:7985`: a paragraph, a wrapping row of subject
  * chips, three figures — a word over a caption — and a media panel beside them at desktop, beneath
@@ -38,7 +38,7 @@ export const closerLook: Block = {
         description: 'Small pills beneath the paragraph. Any number, or none — the row wraps.',
       },
       /*
-        **Required, but not in every language** (spec 010, T110).
+        **Required, but not in every language**.
 
         A row in this array is shared across all three locales — arrays are not localized, the words
         inside them are — so a `required` localized child has to be filled in EVERY language before

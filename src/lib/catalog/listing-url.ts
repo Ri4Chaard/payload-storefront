@@ -57,7 +57,7 @@ export function listingHref(
  * and once redirected they agree, so this cannot cycle.
  *
  * **It refuses to move anything it would lose.** A URL carrying a value the catalogue rejected has
- * a notice to render (FR-030), and that notice is built from the raw query — redirecting would
+ * a notice to render, and that notice is built from the raw query — redirecting would
  * rewrite the query from the parsed state and silently drop the very thing being reported. So a
  * request with anything dropped stays where it is and explains itself.
  */

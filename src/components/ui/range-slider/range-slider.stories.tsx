@@ -61,7 +61,7 @@ export const Disabled: Story = { args: { disabled: true } }
 
 /**
  * With names, the pair is two ordinary form controls and the drawer submits without JavaScript
- * (FR-029). Submitting this story appends `?minPrice=…&maxPrice=…` exactly as the drawer does.
+ *. Submitting this story appends `?minPrice=…&maxPrice=…` exactly as the drawer does.
  */
 export const InAForm: Story = {
   args: { nameMin: 'minPrice', nameMax: 'maxPrice' },

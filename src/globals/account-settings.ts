@@ -4,7 +4,7 @@ import { isAdmin } from '@/lib/access'
 import { DEFAULT_COUNTRY, countryOptions } from '@/lib/countries'
 
 /**
- * How the accounts feature behaves — not what it says (spec 004, R11).
+ * How the accounts feature behaves — not what it says.
  *
  * The distinction is the whole point of this file. An `Account` global holding every heading and
  * button label shipped once and was removed: authentication copy is functional UI whose wording is
@@ -54,7 +54,7 @@ export const AccountSettings: GlobalConfig = {
       label: 'Default country',
       admin: {
         description:
-          'Pre-selected when a customer adds an address (FR-030). The design draws “United Kingdom”, which is placeholder content. Consumed by the address form in US5.',
+          'Pre-selected when a customer adds an address. The design draws “United Kingdom”, which is placeholder content. Consumed by the address form in US5.',
       },
     },
     {

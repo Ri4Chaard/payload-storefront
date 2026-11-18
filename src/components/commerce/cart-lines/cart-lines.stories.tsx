@@ -69,7 +69,7 @@ export const Filled: Story = {
 }
 
 /**
- * Something changed underneath the cart (FR-014). The row stays, says why in words rather than in
+ * Something changed underneath the cart. The row stays, says why in words rather than in
  * colour alone, and the summary beside it leaves it out of the total.
  */
 export const StaleLine: Story = {

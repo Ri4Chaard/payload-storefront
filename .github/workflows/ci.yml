@@ -5,8 +5,8 @@ on:
   push:
     branches: [main]
 
-# Every gate here blocks merge. A gate that has never failed is unproven — see T086 in
-# specs/001-design-system-foundation/tasks.md, which deliberately breaks each one.
+# Every gate here blocks merge. A gate that has never failed is unproven, so break each one on
+# purpose once when you change it.
 jobs:
   verify:
     runs-on: ubuntu-latest

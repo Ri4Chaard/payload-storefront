@@ -17,7 +17,7 @@ import { changePasswordSchema, type ChangePasswordValues } from '@/lib/auth/sche
 
 /**
  * The Security row's `change password`, and the modal behind it — nodes `426:11615` and
- * `426:11616` (spec 004, US7, FR-020).
+ * `426:11616`.
  *
  * **Labels are visible here, unlike every other form in this feature.** That is what the frame
  * draws, and it is right: three password boxes that differ only in placeholder are three boxes a
@@ -32,7 +32,7 @@ import { changePasswordSchema, type ChangePasswordValues } from '@/lib/auth/sche
  * **The trigger lives here with the modal it opens**, as `NameRow` does, so `triggerRef` never
  * has to leave this file for focus to return to the link on close.
  *
- * **Success is a second state of this dialog, not a vanishing act** (FR-045). It used to close on
+ * **Success is a second state of this dialog, not a vanishing act**. It used to close on
  * save and announce the result in a visually hidden live region — correct for a screen reader and
  * nothing at all for everybody else, so the reported experience was a modal that disappeared and no
  * feedback until the confirmation email arrived minutes later. The Security row is the worst place

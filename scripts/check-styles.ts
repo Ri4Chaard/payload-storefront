@@ -1,5 +1,5 @@
 /**
- * The CSS half of the no-magic-values rules (FR-010, FR-016, FR-018).
+ * The CSS half of the no-magic-values rules.
  *
  * ESLint does not parse CSS, so the custom lint rules in eslint-rules/design-tokens.mjs cover only
  * TS and TSX. This closes the other half: a raw hex in a stylesheet would otherwise slip through
@@ -32,7 +32,7 @@ const CHECKS = [
   },
 ]
 
-/** rgb()/hsl() inside a token definition or a shadow is fine; a bare hex is not. */
+/** rgb/hsl inside a token definition or a shadow is fine; a bare hex is not. */
 const ALLOW_LINE = /^\s*(\/\*|\*|--|@import|@theme|@utility|@media|@layer)/
 
 function walk(dir: string): string[] {
@@ -61,7 +61,7 @@ for (const file of walk(SRC)) {
 }
 
 if (violations > 0) {
-  console.error(`\n✗ ${violations} magic value(s) in CSS. See contracts/design-tokens.md.`)
+  console.error(`\n✗ ${violations} magic value(s) in CSS. See design/tokens/mapping.ts.`)
   process.exit(1)
 }
 console.log('✓ No magic values in CSS')

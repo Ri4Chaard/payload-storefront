@@ -3,7 +3,7 @@ import type { StoryMedia } from '@/lib/story/types'
 import type { Article, ArticleCategory } from '@/payload-types'
 
 /**
- * The view models for the blog (spec 007, T017) — what a component is allowed to see.
+ * The view models for the blog — what a component is allowed to see.
  *
  * The third instance of the tier `src/lib/catalog/types.ts` and `src/lib/story/types.ts` already
  * are, and it exists for the same enforced reason: `catalog/no-document-types` forbids components
@@ -53,7 +53,7 @@ export interface ArticleCard {
    *
    * Two flags rather than one because each breakpoint draws a different rhythm — a card can lead
    * the tablet grid and be narrow on desktop — which is precisely why an editorial "feature this
-   * one" checkbox could not express the design (007/research.md R4).
+   * one" checkbox could not express the design.
    */
   emphasis: CardEmphasis
 }
@@ -73,7 +73,7 @@ export interface ContentsEntry {
 
 /** One named section of an article. */
 export interface Chapter {
-  /** Unique within the article, even when two headings read alike (FR-026). */
+  /** Unique within the article, even when two headings read alike. */
   anchor: string
   heading: string
   lede?: string
@@ -109,7 +109,7 @@ export interface ArticleView {
   category?: BlogCategory
   hero?: StoryMedia
   chapters: Chapter[]
-  /** Empty below two chapters (FR-028). The renderer never has to ask. */
+  /** Empty below two chapters. The renderer never has to ask. */
   contents: ContentsEntry[]
   seo: BlogSeo
   fallbacks: BlogFallbacks

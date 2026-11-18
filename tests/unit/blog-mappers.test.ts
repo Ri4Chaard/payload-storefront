@@ -5,7 +5,7 @@ import { BLOG_PAGE_SIZE, blogHref, parseCategory, parsePage } from '@/lib/blog/b
 import type { Article } from '@/payload-types'
 
 /**
- * The blog's mapper (007/T034, T047, T076).
+ * The blog's mapper.
  *
  * Four derivations live in `src/lib/blog/mappers.ts`, and each one exists because the alternative
  * was to store something an editor would then have to maintain by hand:

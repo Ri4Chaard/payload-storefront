@@ -1,7 +1,7 @@
 import type { CatalogImage } from '@/lib/catalog/types'
 
 /**
- * What the home page renders, with no Payload document in sight (spec 010).
+ * What the home page renders, with no Payload document in sight.
  *
  * **The shapes are the components' props, not the global's fields.** `Hero`, `CategoryBand`,
  * `ProductCarousel` and `AboutBand` were built against `src/mocks/home.ts` and are unchanged by this

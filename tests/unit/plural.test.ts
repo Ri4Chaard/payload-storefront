@@ -6,7 +6,7 @@ import ru from '@/i18n/messages/ru.json' with { type: 'json' }
 import uk from '@/i18n/messages/uk.json' with { type: 'json' }
 
 /**
- * Three plural categories where English has two (spec 010, T071 — FR-036, SC-012).
+ * Three plural categories where English has two.
  *
  * **This is the test that would have caught the old cart label.** `count === 1 ? 'item' : 'items'`
  * is correct English and wrong for both other languages: Russian and Ukrainian pick a different

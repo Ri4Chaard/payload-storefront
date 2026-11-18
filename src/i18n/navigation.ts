@@ -3,7 +3,7 @@ import { createNavigation } from 'next-intl/navigation'
 import { routing } from './routing'
 
 /**
- * Locale-aware navigation (spec 010, FR-006).
+ * Locale-aware navigation.
  *
  * These are the plain `next/navigation` exports with one behaviour added: an href keeps the prefix
  * of the locale the visitor is reading. `<Link href="/cart">` from a Russian page goes to

@@ -352,7 +352,7 @@ async function expectDiscToCover(control: import('@playwright/test').Locator) {
  * nothing. The class list looked right. Only the rendered value showed it was not.
  */
 
-/** Works for whatever colour space the browser computes into — `rgb()` or `oklab()`. */
+/** Works for whatever colour space the browser computes into — `rgb` or `oklab`. */
 function lightnessOf(colour: string): number {
   const numbers = (colour.match(/[\d.]+/g) ?? []).map(Number)
   if (colour.startsWith('oklab') || colour.startsWith('oklch')) return numbers[0] ?? 0
@@ -1466,7 +1466,7 @@ test('the container renders the element it is told to', async ({ page }) => {
 })
 
 /**
- * The menu (002/T139–T144), from nodes 440:13282 and 440:14517.
+ * The menu, from nodes 440:13282 and 440:14517.
  *
  * Driven through the header rather than through a story of its own, because the component is
  * defined by where it sits: it measures the header's bottom edge to know where to start, and the
@@ -1791,7 +1791,7 @@ test('Escape closes the language menu without closing the drawer under it', asyn
 })
 
 /**
- * The three primitives spec 003 adds (T241–T243). What is tested here is what the drawing cannot
+ * The three primitives spec 003 adds. What is tested here is what the drawing cannot
  * show: a slider whose handles have collapsed onto one another, a dialog's focus, and a viewer
  * driven from the keyboard.
  */
@@ -1915,7 +1915,7 @@ const LIGHTBOX_STORY = `${STORYBOOK}/iframe.html?id=ui-lightbox--default&viewMod
 const PRODUCT = 'Product 1'
 
 /**
- * The viewer is PhotoSwipe (003/R11), which renders into the document rather than into the story,
+ * The viewer is PhotoSwipe, which renders into the document rather than into the story,
  * and reports the showing photograph by leaving exactly one slide `aria-hidden="false"`. That is
  * what these read: the alt text of the photograph actually on screen, not a counter we control.
  */
@@ -1951,7 +1951,7 @@ test('the viewer moves between photographs with the arrow keys, and wraps', asyn
 /**
  * Zoom is the reason the viewer is PhotoSwipe at all. The control is here even though node
  * 308:6392 draws none — the frame predates the feature, and pinch, double-tap and the wheel are all
- * pointer gestures, which would leave a keyboard with no route to it (SC-006).
+ * pointer gestures, which would leave a keyboard with no route to it.
  */
 test('the viewer zooms, and does it from the keyboard', async ({ page }) => {
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
@@ -1960,7 +1960,7 @@ test('the viewer zooms, and does it from the keyboard', async ({ page }) => {
   await focused(page)
 
   // No magnifier is drawn — the frame has two controls and draws two. `+` and `-` are what keep the
-  // feature reachable without a pointer (SC-006).
+  // feature reachable without a pointer.
   await expect(page.locator('.pswp__button--zoom')).toHaveCount(0)
 
   await page.keyboard.press('+')
@@ -2385,7 +2385,7 @@ test('the gallery loop copies are hidden from assistive technology', async ({ pa
 })
 
 /**
- * `OtpInput` (spec 004, FR-043, contracts/ui-kit-additions.md O1–O3).
+ * `OtpInput`.
  *
  * The paste behaviour is the reason this component exists rather than six inputs in a row, and it
  * is invisible to the render sweep above: a control that pastes one character into box four looks

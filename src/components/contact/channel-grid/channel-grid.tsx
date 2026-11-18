@@ -5,7 +5,7 @@ import { Container, FeatureCard } from '@/components/ui'
 import type { IconName } from '@/lib/icon-registry'
 
 /**
- * The four ways to reach the shop (008/T036, T037), from nodes `312:8535`, `419:10765`, `419:10847`.
+ * The four ways to reach the shop, from nodes `312:8535`, `419:10765`, `419:10847`.
  *
  * **Every value here is derived, and none of it is written on this page.** The messenger cards are
  * the `messengers` rows of `contact-settings`; the email card is that global's `email`. Both arrive
@@ -13,7 +13,7 @@ import type { IconName } from '@/lib/icon-registry'
  * modal already use. FR-008 forbids a second place to write the shop's own accounts, and the
  * structural form of that rule is that `contact-page` has no field to write them into.
  *
- * **The card is `FeatureCard`, extended rather than copied** (008/T012). `get_design_context` on
+ * **The card is `FeatureCard`, extended rather than copied**. `get_design_context` on
  * `312:8535` showed the drawn card is the service-promise card: a 50px glyph above a title and a
  * line of copy on a `background/container` panel, 290 tall with 30px padding — measurements the kit
  * component already had. The two differences are props: the value is a link, and the title is not

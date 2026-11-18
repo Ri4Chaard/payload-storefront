@@ -9,7 +9,7 @@ import { Link } from '@/components/ui/link'
 import { getCustomer } from '@/lib/auth/dal'
 import { safeNextPath } from '@/lib/auth/schemas'
 
-/** Node `408:7412` (spec 004, US2). `noindex` like every account route. */
+/** Node `408:7412`. `noindex` like every account route. */
 export async function generateMetadata(): Promise<Metadata> {
   const t_account = await getTranslations('account')
   return { title: t_account('signIn'), robots: { follow: false, index: false } }

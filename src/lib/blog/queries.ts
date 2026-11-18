@@ -10,7 +10,7 @@ import { toArticleView, toBlogCategories, toBlogIndex } from './mappers'
 import type { ArticleView, BlogCategory, BlogIndexView } from './types'
 
 /**
- * Reading the blog (spec 007, T023 – T025, contracts/blog-loader.md).
+ * Reading the blog.
  *
  * **The only module that knows the blog came from Payload.** Everything above it sees the view
  * models in `./types.ts` — the same seam `src/lib/catalog/queries.ts` and `src/lib/story/queries.ts`
@@ -85,7 +85,7 @@ export const getBlogCategories = cache(async (locale: Locale): Promise<BlogCateg
 export const getArticleSlugs = cache(async (): Promise<string[]> => {
   const payload = await client()
   const { docs } = await payload.find({
-    /* No locale: `slug` is shared across languages (spec 010, R7), so this read is language-free. */
+    /* No locale: `slug` is shared across languages, so this read is language-free. */
     collection: 'articles',
     depth: 0,
     limit: 0,
@@ -102,7 +102,7 @@ export const getArticleSlugs = cache(async (): Promise<string[]> => {
  *
  * `null` for a slug that does not exist AND for one that exists only as a draft, and the caller
  * cannot tell the two apart — which is the point. The route answers both with `notFound()`, so an
- * unpublished address is indistinguishable from a nonexistent one from outside (FR-037).
+ * unpublished address is indistinguishable from a nonexistent one from outside.
  *
  * Never throws for a missing slug. A URL somebody mistyped is not an error condition.
  */
@@ -127,7 +127,7 @@ export const getArticle = cache(
 )
 
 export interface BlogIndexRequest {
-  /** The language the index is rendered in (spec 010, FR-019). */
+  /** The language the index is rendered in. */
   locale: Locale
   /** A category slug, already known to exist — the route 404s before it gets here. */
   category?: string

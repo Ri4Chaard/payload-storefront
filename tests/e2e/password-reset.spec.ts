@@ -5,7 +5,7 @@ import { getPayload } from 'payload'
 import { issueCode } from '@/lib/auth/codes'
 
 /**
- * US3 end to end (spec 004, FR-017 – FR-021) — the three screens a customer who has forgotten their
+ * US3 end to end — the three screens a customer who has forgotten their
  * password actually walks through.
  *
  * **The code is minted rather than read out of an inbox**, exactly as in `registration.spec.ts`: it

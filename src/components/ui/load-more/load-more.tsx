@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 
 /**
- * How a listing goes past its first twelve (003/T255, FR-018).
+ * How a listing goes past its first twelve.
  *
  * Nothing is drawn for this — spec inconsistency 7, and Open Question 1's stated default, which is
  * where this arrives after a detour through numbered pages. The pattern is the one every shop
@@ -18,7 +18,7 @@ import { cn } from '@/lib/cn'
  * the server renders it. Three things fall out of that and none of them had to be built:
  *
  * - It works with scripting off. The link is followed, the server renders the longer grid, and the
- *   visitor is where they expected (FR-029). No fetch, no API route, no second code path.
+ *   visitor is where they expected. No fetch, no API route, no second code path.
  * - The position is shareable and survives the back button, which is what FR-018 asks for.
  * - With scripting, `next/link` navigates on the client and `scroll={false}` leaves the page where
  *   it was, so the grid grows under the visitor's eye rather than jumping to the top.
@@ -54,7 +54,7 @@ export function LoadMore({
 }: LoadMoreProps) {
   const t_catalog = useTranslations('catalog')
   /*
-    Resolved in the body, not as a default parameter: `useTranslations` is a hook (spec 010). The
+    Resolved in the body, not as a default parameter: `useTranslations` is a hook. The
     prop stays overridable, so a caller with its own words still wins — what changed is that the
     fallback is translated instead of being an English literal.
   */

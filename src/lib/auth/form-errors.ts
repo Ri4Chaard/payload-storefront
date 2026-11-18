@@ -3,7 +3,7 @@ import type { FieldValues, Path, UseFormReturn } from 'react-hook-form'
 import type { ActionResult } from '@/lib/auth/actions'
 
 /**
- * Put a server action's failure back where the customer is looking (spec 004).
+ * Put a server action's failure back where the customer is looking.
  *
  * The forms validate with zod before submitting, so most of what arrives here could not have been
  * caught in the browser: an address that is already taken, a code that expired between the paste

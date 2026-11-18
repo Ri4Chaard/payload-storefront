@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 /**
  * The story page global: drafts, versions, access, and the one refusal the media slot exists to
- * make (006/T043, T051 — FR-015, FR-017, FR-022, FR-027).
+ * make.
  *
  * **The video/poster rule is the important one here.** `mediaSlot()` cannot use `required`, because
  * a statically-required field that is conditionally hidden makes the OTHER branch unsavable — a
@@ -55,7 +55,7 @@ afterAll(async () => {
   await payload.delete({ collection: 'admins', id: admin.id, overrideAccess: true }).catch(() => undefined)
 })
 
-describe('drafts and versions (FR-015)', () => {
+describe('drafts and versions', () => {
   it('leaves the published page untouched when a draft is saved', async () => {
     await payload.updateGlobal({
       slug: 'story-page',
@@ -96,7 +96,7 @@ describe('drafts and versions (FR-015)', () => {
   })
 })
 
-describe('the media slot refuses a video with no still (FR-022, FR-027)', () => {
+describe('the media slot refuses a video with no still', () => {
   it('will not publish a slot set to video without a poster', async () => {
     await expect(
       payload.updateGlobal({
@@ -127,7 +127,7 @@ describe('the media slot refuses a video with no still (FR-022, FR-027)', () => 
   })
 })
 
-describe('who may change the page (FR-017)', () => {
+describe('who may change the page', () => {
   it('refuses an update from an anonymous caller', async () => {
     await expect(
       payload.updateGlobal({

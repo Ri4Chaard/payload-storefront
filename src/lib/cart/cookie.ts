@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { CART_COOKIE, CART_COUNT_COOKIE } from './types'
 
 /**
- * Where a guest's claim on their cart is kept (spec 005, T006, research R2).
+ * Where a guest's claim on their cart is kept.
  *
  * Two cookies, and the difference between them is the whole design.
  *
@@ -16,14 +16,14 @@ import { CART_COOKIE, CART_COUNT_COOKIE } from './types'
  *
  * **`aurum-cart-count` is a number and is deliberately readable.** It exists so the header badge
  * can be drawn without the root layout calling `cookies()`, which would opt every route into
- * dynamic rendering and cost the prerendered catalogue (research R8). It carries no id and no
+ * dynamic rendering and cost the prerendered catalogue. It carries no id and no
  * secret; losing it costs a stale number, never a cart.
  *
  * **`sameSite: 'lax'`, not `'strict'`.** The customer leaves for WhatsApp and comes back, and a
  * strict cookie is not sent on that return — the cart would appear empty in front of somebody who
  * had just built it. `lax` covers the top-level navigation that brings them home.
  *
- * **Neither is gated behind cookie consent (FR-050).** The constitution gates *non-essential*
+ * **Neither is gated behind cookie consent.** The constitution gates *non-essential*
  * cookies; one of these is the credential without which a visitor cannot reopen their own cart and
  * the other is a count. Neither is used for analytics and neither identifies a person to anything
  * but the cart they already own. A cart the visitor cannot keep is not a cart.
@@ -35,7 +35,7 @@ import { CART_COOKIE, CART_COUNT_COOKIE } from './types'
 
 export { CART_COOKIE, CART_COUNT_COOKIE }
 
-/** Thirty days, matching the guest-cart retention period exactly (FR-047). */
+/** Thirty days, matching the guest-cart retention period exactly. */
 export const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 
 export interface CartCookie {
@@ -87,7 +87,7 @@ export async function writeCartCookie(value: CartCookie): Promise<void> {
 }
 
 /**
- * The badge's number, readable by the client on purpose (research R8).
+ * The badge's number, readable by the client on purpose.
  *
  * Written alongside every cart mutation. It is allowed to be briefly wrong — the cart page is the
  * authority — and it is never read back by anything that decides what a customer may do.

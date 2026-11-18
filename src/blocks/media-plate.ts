@@ -3,7 +3,7 @@ import type { Block } from 'payload'
 import { mediaSlot } from '@/fields/media-slot'
 
 /**
- * A full-bleed photograph or video, edge to edge (spec 006, FR-018, FR-049).
+ * A full-bleed photograph or video, edge to edge.
  *
  * Drawn at nodes `310:6772` / `413:7679` / `413:7984` — 530px tall at desktop, 400 at tablet, 240
  * on a phone, with nothing over it.

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { signOutCustomer } from '@/lib/auth/actions'
 
 /**
- * Ends the session (FR-013).
+ * Ends the session.
  *
  * **`replace`, not `push`.** Pushing leaves the profile in the history stack, so Back walks
  * straight onto a page the customer just left on purpose. Replacing means Back goes to whatever

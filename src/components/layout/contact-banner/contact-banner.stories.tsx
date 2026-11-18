@@ -11,7 +11,7 @@ import { ContactBanner } from './contact-banner'
  * canvas. That is the correct result, not a broken story.
  */
 /**
- * The shop's accounts now come from the `contact-settings` global (spec 005, FR-052), so a story
+ * The shop's accounts now come from the `contact-settings` global, so a story
  * supplies them rather than the component defaulting to a hardcoded list. The list it used to
  * default to pointed at bare `wa.me/` and `instagram.com/` roots on every page of the site.
  */

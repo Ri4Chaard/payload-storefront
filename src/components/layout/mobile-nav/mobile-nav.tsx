@@ -14,7 +14,7 @@ import { cn } from '@/lib/cn'
 import { type IconName } from '@/lib/icon-registry'
 
 /**
- * The hamburger and the menu it opens (002/T139–T144), from Figma nodes 440:13282 (tablet) and
+ * The hamburger and the menu it opens, from Figma nodes 440:13282 (tablet) and
  * 440:14517 (mobile).
  *
  * **This replaces the plain dropdown spec 001 shipped.** That panel was explicitly a placeholder —
@@ -89,7 +89,7 @@ export interface MobileNavProps {
   phone: string
   phoneHref: string
   /**
-   * The shop's accounts, from the `contact-settings` global via the layout (spec 005, FR-052).
+   * The shop's accounts, from the `contact-settings` global via the layout.
    *
    * Empty by default rather than falling back to a hardcoded list: a placeholder that renders
    * looks like a working link, and the one this replaced pointed at a bare `wa.me/` on every page
@@ -131,7 +131,7 @@ export function MobileNav({
   }, [])
 
   /**
-   * Escape, the scroll lock, the initial focus and the inert regions are all `useOverlay` (003/T240)
+   * Escape, the scroll lock, the initial focus and the inert regions are all `useOverlay`
    * — this component is where they were written and the hook is where they now live.
    *
    * Two options are what make this a disclosure rather than a dialog, and both were deliberate in

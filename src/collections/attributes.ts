@@ -13,7 +13,7 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
  * **Attributes are descriptive, not selectable, and not filterable.** The six filters the design
  * draws — category, collection, colour, price, size, shape — are first-class indexed fields
  * on the product instead. Making every attribute filterable means a join per active filter on the
- * query that runs on every listing page view, under a 2.5s LCP budget (003/research.md R4).
+ * query that runs on every listing page view, under a 2.5s LCP budget.
  *
  * Promoting an attribute to a filter later is a bounded developer change: a field, a filter group, a
  * migration. That it is a developer change is recorded here rather than discovered in a hurry.
@@ -32,7 +32,7 @@ export const Attributes: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  // Publishing invalidates the cached routes (003/T294). An attribute supplies the labels in the product-details accordion.
+  // Publishing invalidates the cached routes. An attribute supplies the labels in the product-details accordion.
   hooks: {
     afterChange: [revalidateOnChange],
     afterDelete: [revalidateOnDelete],
@@ -80,7 +80,7 @@ export const Attributes: CollectionConfig = {
         description: 'The values a product may choose from.',
       },
       /*
-        The row's `value` is the machine key a filter matches on (FR-041), so it is NOT localized —
+        The row's `value` is the machine key a filter matches on, so it is NOT localized —
         translating it would mean a Russian visitor's filter matched nothing. The human-readable
         label above it is the localized half.
       */

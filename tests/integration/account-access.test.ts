@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import { afterAll, describe, expect, it } from 'vitest'
 
 /**
- * Who can reach whose data (spec 004, FR-026, FR-032, FR-039; SC-007, SC-008).
+ * Who can reach whose data.
  *
  * **Deliberately all negative.** A passing positive test proves a feature works; these prove it is
  * not open, which is the only property here whose failure is a privacy incident rather than a bug

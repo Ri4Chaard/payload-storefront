@@ -10,7 +10,7 @@ import type { CartOwner } from '@/lib/cart/session'
 
 /**
  * How long a cart is kept, and how it is erased —
- * [data-model.md §4a](../../specs/005-checkout-handoff/data-model.md). FR-047 – FR-049, SC-014.
+ *. FR-047 – FR-049, SC-014.
  *
  * **Every test puts a row that must survive beside the row that must not**, and asserts both
  * outcomes from the same run. `purge-accounts.test.ts` records why: a `where` clause one operator
@@ -99,7 +99,7 @@ async function runExpiry() {
 
 const DAY = 24 * 60 * 60 * 1000
 
-describe('guest carts (FR-047)', () => {
+describe('guest carts', () => {
   it('deletes one past its window and keeps one inside it', async () => {
     const stale = await cartAged({ kind: 'none' }, GUEST_CART_TTL_MS + DAY)
     const fresh = await cartAged({ kind: 'none' }, GUEST_CART_TTL_MS - DAY)
@@ -111,7 +111,7 @@ describe('guest carts (FR-047)', () => {
   })
 })
 
-describe('customer carts (FR-048)', () => {
+describe('customer carts', () => {
   it('deletes one past its window and keeps one inside it', async () => {
     const alice = await customer()
     const bob = await customer()
@@ -149,7 +149,7 @@ describe('customer carts (FR-048)', () => {
   })
 })
 
-describe('erasure (FR-049)', () => {
+describe('erasure', () => {
   it('takes a customer cart with the customer, in the same operation', async () => {
     const alice = await customer()
     const bob = await customer()
@@ -179,7 +179,7 @@ describe('erasure (FR-049)', () => {
  * FR-051: the periods are configuration, not constants. A retention period that exists only in a
  * source file is one nobody outside this repository can read or change.
  */
-describe('the periods are configurable (FR-051)', () => {
+describe('the periods are configurable', () => {
   it('ships the documented defaults', () => {
     expect(GUEST_CART_TTL_MS).toBe(30 * DAY)
     expect(CUSTOMER_CART_TTL_MS).toBe(365 * DAY)

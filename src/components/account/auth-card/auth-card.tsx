@@ -11,7 +11,7 @@ import { cn } from '@/lib/cn'
  * of onward text underneath. Drawn at 500px wide in a 1920 frame.
  *
  * **`max-w`, not `w`.** The design has no frames below 1920 — unlike spec 003, which drew all three
- * breakpoints — so the smaller widths are derived rather than transcribed (FR-042). A fixed 500px
+ * breakpoints — so the smaller widths are derived rather than transcribed. A fixed 500px
  * column is a horizontal scrollbar on a 390px phone, and the only thing the drawn width actually
  * says is "do not let this line get longer than this".
  *

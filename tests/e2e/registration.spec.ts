@@ -5,7 +5,7 @@ import { getPayload } from 'payload'
 import { issueCode } from '@/lib/auth/codes'
 
 /**
- * US1 end to end (spec 004) — the journey a first-time customer actually takes.
+ * US1 end to end — the journey a first-time customer actually takes.
  *
  * **The code is minted rather than read out of an inbox.** It is stored as a keyed hash, so nothing
  * can read it back; the test does what the resend path does — issues a fresh code against the same
@@ -76,7 +76,7 @@ test('a visitor registers, pastes the code, and reaches the success screen', asy
   await page.getByPlaceholder('Password', { exact: true }).fill(password)
   await page.getByPlaceholder('Confirm Password').fill(password)
 
-  // Unticked, and registration still succeeds (FR-036a).
+  // Unticked, and registration still succeeds.
   await expect(page.getByRole('checkbox')).not.toBeChecked()
   await page.getByRole('button', { name: 'Create Account' }).click()
 
@@ -151,7 +151,7 @@ test('the verification screen cannot be entered without an address', async ({ pa
  * Deliberately driven with an address that has NO account: `resendCode` does nothing for an unknown
  * address, so this exercises the whole control without putting a real Resend send in the suite — and
  * the fact that it behaves identically either way is the requirement, not a convenience. A countdown
- * that appeared only for registered addresses would say which ones those are (FR-009).
+ * that appeared only for registered addresses would say which ones those are.
  */
 test('the resend control counts down once it has been used', async ({ page }) => {
   await page.goto(`/verify-email?email=${encodeURIComponent(fresh())}`)

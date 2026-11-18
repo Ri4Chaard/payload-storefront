@@ -4,7 +4,7 @@ import { isProductAvailable, isVariantAvailable } from '@/lib/catalog/mappers'
 import type { Product, Variant } from '@/payload-types'
 
 /**
- * Who may be sold, and how many (spec 011, US1, FR-002, FR-003, FR-005, FR-008).
+ * Who may be sold, and how many.
  *
  * **The rule this file pins used to say the opposite.** `isVariantAvailable` was documented as
  * deciding on the option's own count "whatever the parent's availability mode says", which meant a
@@ -31,7 +31,7 @@ const productWith = (availability: Product['availability'], options: Variant[]) 
     variants: { docs: options },
   })
 
-describe('an option, against its product (FR-002, FR-005)', () => {
+describe('an option, against its product', () => {
   it('is available on a made-to-order product however empty its quantity', () => {
     expect(isVariantAvailable(option(0), 'made-to-order')).toBe(true)
     expect(isVariantAvailable(option(null), 'made-to-order')).toBe(true)
@@ -55,7 +55,7 @@ describe('an option, against its product (FR-002, FR-005)', () => {
   })
 })
 
-describe('a product, against its options (FR-008)', () => {
+describe('a product, against its options', () => {
   it('is unavailable when it is stock tracked and every option is empty', () => {
     expect(isProductAvailable(productWith('stock-tracked', [option(0), option(0)]))).toBe(false)
   })

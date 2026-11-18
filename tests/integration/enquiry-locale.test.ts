@@ -6,7 +6,7 @@ import { LOCALES } from '@/i18n/routing'
 import { enquirySchema, readEnquiryForm } from '@/lib/contact/enquiry-schema'
 
 /**
- * An enquiry remembers the language it was written in (spec 010, T094 — FR-043).
+ * An enquiry remembers the language it was written in.
  *
  * The shop answers by hand, in a messenger, hours later — so the language has to be recorded on the
  * enquiry rather than inferred from the prose when somebody gets round to reading it.

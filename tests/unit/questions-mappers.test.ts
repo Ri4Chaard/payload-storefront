@@ -4,7 +4,7 @@ import { toQuestion, toQuestions } from '@/lib/questions/mappers'
 import type { Question as QuestionDocument } from '@/payload-types'
 
 /**
- * The shared question mapper (008/T028).
+ * The shared question mapper.
  *
  * **This file's real job is to prove the promotion was a move.** The rules below were worked out in
  * spec 006 for the FAQ band on `/about`; they now serve three pages from `src/lib/questions/`, and

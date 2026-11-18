@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 /**
- * One suite at a time may rewrite the site's shared singletons (008/T103).
+ * One suite at a time may rewrite the site's shared singletons.
  *
  * **`test.describe.configure({ mode: 'serial' })` only reaches inside a file**, and this feature
  * has three suites that mutate the same rows from three workers: `contact.spec.ts` and

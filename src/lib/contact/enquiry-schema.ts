@@ -7,8 +7,7 @@ import { EMAIL_SHAPE } from '@/lib/auth/schemas'
 import { ENQUIRY_MAX } from './config'
 
 /**
- * The one shape both sides of the contact form agree on (spec 008, T050,
- * contracts/enquiry-action.md §3).
+ * The one shape both sides of the contact form agree on.
  *
  * **The maxima come from `./config.ts`, never from literals here.** The same numbers are
  * `maxLength` on the `enquiries` collection, so a value this schema accepts can never be one Payload
@@ -49,7 +48,7 @@ export const enquirySchema = z.object({
     .min(1, 'messageRequired')
     .max(ENQUIRY_MAX.message, 'messageTooLong'),
   /**
-   * The honeypot (FR-027).
+   * The honeypot.
    *
    * Named `website` because that is a field name a form-filling bot recognises and wants to
    * complete. A visitor cannot reach it — it is off-screen, `tabindex="-1"` and `aria-hidden` — so
@@ -59,7 +58,7 @@ export const enquirySchema = z.object({
    */
   website: z.string().optional(),
   /**
-   * The language the sender was reading in (spec 010, FR-043).
+   * The language the sender was reading in.
    *
    * **Carried in the form rather than read from the cookie**, because a visitor who arrived on
    * `/ru/contact` from a link and never touched the switcher has no cookie — and their

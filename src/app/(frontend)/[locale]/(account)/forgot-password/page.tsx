@@ -7,7 +7,7 @@ import { ForgotPasswordForm } from '@/components/account/forgot-password-form'
 import { Link } from '@/components/ui/link'
 import { getCustomer } from '@/lib/auth/dal'
 
-/** Nodes `429:12087` and `614:13323` (spec 004, US3). `noindex` like every account route. */
+/** Nodes `429:12087` and `614:13323`. `noindex` like every account route. */
 export async function generateMetadata(): Promise<Metadata> {
   const t_account = await getTranslations('account')
   return { title: t_account('metaForgotPassword'), robots: { follow: false, index: false } }
@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Step one of three.
  *
  * The footer reads "Back to sign in"; the frame draws `Вернуться к авторизации`, which is design
- * defect 1 (FR-047). `614:13323` is this same screen with the site footer's newsletter box in its
+ * defect 1. `614:13323` is this same screen with the site footer's newsletter box in its
  * error state — a different component's state, and nothing to build here.
  *
  * **The way out depends on who is asking, and this screen has two kinds of visitor.** The drawn one

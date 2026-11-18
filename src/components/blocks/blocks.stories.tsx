@@ -5,7 +5,7 @@ import type { StoryBlock, StoryMedia } from '@/lib/story/types'
 import { BlockRenderer } from './block-renderer'
 
 /**
- * The bands of the story page, composed (006/T034, T057).
+ * The bands of the story page, composed.
  *
  * **One stories file for all six, rather than six files.** These are not independent kit
  * components — they are variants of one thing, "a band the editor placed", and the questions worth

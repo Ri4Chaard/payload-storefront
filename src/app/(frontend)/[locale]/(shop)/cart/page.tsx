@@ -10,7 +10,7 @@ import { beginCheckout, removeLine, setLineQuantity } from '@/lib/cart/actions'
 import { getCart } from '@/lib/cart/loader'
 
 /**
- * SHOPPING CART (spec 005, T034, T035, US2). Nodes `255:3635` (1920), `425:11164` (768),
+ * SHOPPING CART. Nodes `255:3635` (1920), `425:11164` (768),
  * `425:11269` (390).
  *
  * **A server component that composes three client islands.** The photographs, the names, the prices
