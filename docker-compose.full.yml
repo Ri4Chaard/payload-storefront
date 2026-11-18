@@ -1,0 +1,52 @@
+# The app and its own Postgres, together:
+#
+#   docker compose -f docker-compose.full.yml up -d --build
+#
+# Postgres is not published to the host; the app reaches it on the internal network. Migrations
+# run when the app container starts. Variables are read from .env next to this file.
+
+name: aurum-full
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aurum}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aurum}
+      POSTGRES_DB: ${POSTGRES_DB:-aurum}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?set NEXT_PUBLIC_SERVER_URL in .env}
+    restart: unless-stopped
+    init: true
+    ports:
+      - '127.0.0.1:${APP_PORT:-3000}:3000'
+    environment:
+      DATABASE_URI: postgres://${POSTGRES_USER:-aurum}:${POSTGRES_PASSWORD:-aurum}@db:5432/${POSTGRES_DB:-aurum}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?set NEXT_PUBLIC_SERVER_URL in .env}
+      RESEND_API_KEY: ${RESEND_API_KEY:?set RESEND_API_KEY in .env}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?set EMAIL_FROM_ADDRESS in .env}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
+      EMAIL_OVERRIDE_RECIPIENT: ${EMAIL_OVERRIDE_RECIPIENT:-}
+      RESEND_AUDIENCE_ID: ${RESEND_AUDIENCE_ID:-}
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  media:

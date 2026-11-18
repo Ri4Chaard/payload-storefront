@@ -1,7 +1,7 @@
 /**
  * What a route prerenders when there is no database to ask (003/T294, deployment).
  *
- * **The production image is built without one.** `docker compose --profile dev up -d --build` runs
+ * **The production image is built without one.** `docker compose --profile prod up -d --build` runs
  * `next build` inside a container, then `pnpm payload migrate`, then `pnpm start` — so at build time
  * the deployment database is not merely unreachable, on a first deploy its tables do not exist yet.
  * Making the build depend on it puts a chicken-and-egg in front of every new environment: the

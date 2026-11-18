@@ -1,16 +1,15 @@
 # syntax=docker/dockerfile:1
 
-# The production image for the storefront and the Payload admin.
+# Production image for the storefront and the Payload admin.
 #
-# Built on the target machine (`docker compose --profile dev up -d --build`), so the architecture
-# always matches the host and sharp's platform binaries resolve without cross-build tricks.
+# The image is built on the machine it runs on (`docker compose ... up -d --build`), so the
+# architecture always matches the host and sharp's native binaries resolve without cross-builds.
 
 ARG NODE_VERSION=22.21.0
 
 FROM node:${NODE_VERSION}-alpine AS base
-# COREPACK_HOME is set explicitly because the default lives in the invoking user's home: pnpm
-# fetched by root during the build would be invisible to the `node` user at runtime, and corepack
-# would silently re-download it on every container start.
+# COREPACK_HOME lives outside root's home so the pnpm prepared at build time is visible to the
+# unprivileged `node` user at runtime instead of being re-downloaded on every start.
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
     COREPACK_HOME=/opt/corepack \
@@ -18,44 +17,34 @@ ENV PNPM_HOME=/pnpm \
 RUN corepack enable
 WORKDIR /app
 
-# --- dependencies ---------------------------------------------------------------------------
-# `--config.strict-dep-builds=false` because pnpm otherwise fails the install over esbuild's
-# unapproved postinstall (see pnpm-workspace.yaml — esbuild ships prebuilt binaries and does not
-# need it). It downgrades that error to the warning it is; nothing else is relaxed.
-#
+# --- dependencies ------------------------------------------------------------------------------
+# `strict-dep-builds=false` downgrades pnpm's error about esbuild's unapproved postinstall (see
+# pnpm-workspace.yaml) to a warning. esbuild ships prebuilt binaries and does not need it.
+
 # Everything, dev dependencies included: the build needs Tailwind, TypeScript and tsx.
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --config.strict-dep-builds=false
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile --config.strict-dep-builds=false
 
 # Runtime dependencies only — this is what the final image ships.
 FROM base AS prod-deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --prod --config.strict-dep-builds=false
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile --prod --config.strict-dep-builds=false
 
-# --- build ----------------------------------------------------------------------------------
+# --- build -------------------------------------------------------------------------------------
 FROM base AS build
 
-# `next build` inlines every NEXT_PUBLIC_* reference into the bundle, so the public origin is a
-# build input rather than a runtime one. docker-compose.yml passes the deployment's value here;
-# rebuild the image when it changes.
+# `next build` inlines NEXT_PUBLIC_* into the client bundle, so the public origin is a build input.
+# Changing it requires a rebuild, not a restart.
 ARG NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 
-# src/env.ts throws on a missing variable (FR-006) and payload.config.ts imports it at module
-# scope, so every command below needs the whole REQUIRED list present before it does anything at
-# all. None of these values is *used* while building — nothing connects to Postgres, nothing
-# encrypts, nothing sends mail — so placeholders satisfy the check.
-#
-# **One declaration, not one per command.** They were previously repeated inline on each RUN, which
-# put the list in three places while src/env.ts kept it in one: spec 004 added RESEND_API_KEY and
-# EMAIL_FROM_ADDRESS to the requirement and the image stopped building, several commits later, with
-# a message buried above the failing step. A variable added to src/env.ts now needs one line here.
-#
-# These do survive into this stage's environment, which the per-RUN form avoided. That is the whole
-# trade and it costs nothing real: the runner stage below starts from `base` and copies files, never
-# environment, so no stand-in reaches the shipped image — and none of them is a secret to begin
-# with. `docker history` on an intermediate stage would have shown the inline form just as plainly.
+# src/env.ts throws on any missing REQUIRED variable at import time, and payload.config.ts imports
+# it. Nothing connects, encrypts or sends mail during the build, so placeholders are enough. They
+# stay in this stage: the runner below starts from `base` and never inherits them.
+# Keep this list in sync with REQUIRED in src/env.ts.
 ENV DATABASE_URI=postgres://build:build@127.0.0.1:5432/build \
     PAYLOAD_SECRET=build-only-not-a-real-secret \
     RESEND_API_KEY=build-only-not-a-real-key \
@@ -64,43 +53,41 @@ ENV DATABASE_URI=postgres://build:build@127.0.0.1:5432/build \
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# The admin's import map is gitignored and NOT regenerated by `next build` — the build simply fails
-# on the missing module. It has to be generated here, in the image, from this image's dependencies.
-# Copying a developer's local copy would bake in whatever was on their machine, which is how a stale
-# map reached production once already.
+# The admin import map is gitignored and not produced by `next build`; generate it from this
+# image's dependencies rather than trusting a local copy.
 RUN pnpm payload generate:importmap
-
 RUN pnpm build
 
-# --- runner ---------------------------------------------------------------------------------
+# --- runner ------------------------------------------------------------------------------------
 FROM base AS runner
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
-# `payload migrate` reads the config and the committed migrations from source, so they ship too.
-# src comes from the build stage, not the context: the Payload admin import map is generated
-# during the build and lives under src/app/(payload).
+# The Payload CLI (`payload migrate`, `payload run` for seeding) reads the TypeScript config,
+# migrations and scripts from source. src comes from the build stage because it holds the
+# generated admin import map; design/ backs the @tokens/* alias.
 COPY --from=build /app/src ./src
 COPY --from=build /app/migrations ./migrations
-# The @tokens/* alias resolves here; the Payload CLI reads TypeScript source, so keep it resolvable.
 COPY --from=build /app/design ./design
-# `pnpm seed` is how a fresh environment gets a catalogue, and it runs through `payload run` in this
-# container so that uploads land in the mounted media volume rather than on whichever machine
-# invoked it. `tsx` arrives as a dependency of payload itself, so nothing else is needed for it.
 COPY --from=build /app/scripts ./scripts
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml next.config.mjs tsconfig.json ./
 
-# Bake in the pnpm that package.json pins. `corepack enable` alone only installs a shim, which
-# downloads pnpm on first use — that would put the npm registry on the critical path of every
-# container start.
+# Bake in the pnpm version pinned by package.json so a container start never hits the registry.
 RUN corepack prepare --activate && chmod -R a+rX /opt/corepack
 
-# Uploads land in ./media, relative to the working directory (Payload defaults staticDir to the
-# collection slug). Created here so the named volume mounted over it inherits node's ownership.
+# Uploads go to ./media. Creating it here lets a named volume mounted over it inherit ownership.
 RUN mkdir -p media && chown -R node:node media .next
 
 USER node
 EXPOSE 3000
-CMD ["pnpm", "start"]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
+    CMD wget -q --spider http://127.0.0.1:3000/ || exit 1
+
+# Apply committed migrations, then start. A failed migration stops the container instead of
+# booting the app against the wrong schema. `exec` hands the process over for clean shutdowns.
+CMD ["sh", "-c", "pnpm payload migrate && exec pnpm start"]

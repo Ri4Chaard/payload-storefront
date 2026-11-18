@@ -1,65 +1,65 @@
-# Nothing starts without a profile, because the two environments this file describes want
-# different things:
+# Two profiles; nothing starts without one.
 #
-#   docker compose --profile local up -d           Postgres alone, for an app running on the host
-#                                                  (`pnpm dev`) against localhost:5432.
+#   docker compose --profile local up -d          Postgres only, on 127.0.0.1:5432, for the app
+#                                                 running on the host (`pnpm dev`).
 #
-#   docker compose --profile dev up -d --build     The app alone. This is the VPS deployment: an
-#                                                  image built from this checkout, migrations
-#                                                  applied, `next start`. The database is provided
-#                                                  separately and reached through DATABASE_URI.
+#   docker compose --profile prod up -d --build   The app only, built from this checkout. The
+#                                                 database is provisioned separately and reached
+#                                                 through DATABASE_URI. Migrations run on start.
 #
-# `dev` names a deployed environment, not a development one — it is the first stop for a commit
-# that has left a laptop, and it runs the production build.
+# For the app *and* its own Postgres in one command, use docker-compose.full.yml.
 #
-# Variables come from .env, which docker compose reads from this directory. `local` needs nothing
-# in it; `dev` requires everything `src/env.ts` lists as REQUIRED, and refuses to start without
-# them.
-#
-# **`environment:` below is an allowlist, not a pass-through.** Compose reads .env to interpolate
-# `${...}` *in this file*; a variable this file never names is read by nobody and reaches no
-# container. That is how spec 004's two mail variables came to be set in a deployment's .env and
-# still missing inside the container, which failed the deploy at `payload migrate` — src/env.ts
-# throws on the missing name, and there is no .env in the image for Payload's loader to fall back
-# to (.dockerignore, deliberately). A variable added to src/env.ts needs a line here too.
+# Variables are read from .env next to this file. `environment:` is an allowlist: a variable not
+# named here never reaches the container. Everything REQUIRED by src/env.ts must be listed.
+# Missing required values are not guarded here (that would break the `local` profile too);
+# src/env.ts refuses to start and names the missing variable.
+
+name: aurum
 
 services:
   db:
+    profiles: [local]
     image: postgres:17-alpine
-    container_name: aurum-dev-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-aurum}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aurum}
       POSTGRES_DB: ${POSTGRES_DB:-aurum}
+    ports:
+      - '127.0.0.1:5432:5432'
     volumes:
-      - aurum-dev-db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-aurum} -d ${POSTGRES_DB:-aurum}']
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 10
 
   app:
+    profiles: [prod]
     build:
       context: .
-      dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
-    container_name: aurum-dev-app
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
     restart: unless-stopped
+    init: true
     ports:
-      - '127.0.0.1:3000:3000'
+      - '127.0.0.1:${APP_PORT:-3000}:3000'
+    # Lets DATABASE_URI point at a Postgres running on the host as host.docker.internal.
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     environment:
-      DATABASE_URI: ${DATABASE_URI}
-      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
-      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+      DATABASE_URI: ${DATABASE_URI:-}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:-}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
+      EMAIL_OVERRIDE_RECIPIENT: ${EMAIL_OVERRIDE_RECIPIENT:-}
+      RESEND_AUDIENCE_ID: ${RESEND_AUDIENCE_ID:-}
     volumes:
-      - aurum-dev-media:/app/media
-    depends_on:
-      db:
-        condition: service_healthy
+      - media:/app/media
 
 volumes:
-  aurum-dev-db-data:
-  aurum-dev-media:
+  db-data:
+  media:

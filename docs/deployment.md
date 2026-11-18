@@ -10,9 +10,9 @@ database is yours to provide.
 | Profile | Starts | Where it runs |
 | --- | --- | --- |
 | `local` | Postgres on `127.0.0.1:5432` | A developer's machine, with the app on the host |
-| `dev` | The app | The VPS |
+| `prod` | The app | The server |
 
-The `dev` profile does **not** bring a database. Point it at one you have provisioned — managed
+The `prod` profile does **not** bring a database. Point it at one you have provisioned — managed
 Postgres, or a Postgres you run separately on the same host.
 
 ## Requirements
@@ -34,7 +34,8 @@ NEXT_PUBLIC_SERVER_URL=https://example.com
 APP_PORT=3000              # optional; the port published for the reverse proxy
 ```
 
-All three of the first values are required — compose refuses to start naming any that is missing.
+`RESEND_API_KEY` and `EMAIL_FROM_ADDRESS` are required too (see `.env.example`). The app refuses to
+start and names any required variable that is missing.
 
 - `DATABASE_URI` — if Postgres runs on the same host but outside this compose project, use
   `host.docker.internal` as the host; the compose file maps it to the host gateway.
@@ -46,17 +47,22 @@ All three of the first values are required — compose refuses to start naming a
 ## Deploy
 
 ```bash
-docker compose --profile dev up -d --build
+docker compose --profile prod up -d --build
 ```
 
 The container applies the committed database migrations and then starts the server. A failed
 migration stops the deploy — the app does not boot against the wrong schema.
 
-**The `dev` environment does not use this path.** `.github/workflows/deploy-dev.yml` deploys on
-every push to `dev` over SSH, and it uses `docker-compose.dev.yml` — a separate file that brings its
-own Postgres alongside the app and runs `pnpm payload migrate` as a step after the containers are
-up, rather than as the container's command. Both files are real; this section describes the manual
-path, and the workflow describes the automatic one.
+**All-in-one alternative.** `docker-compose.full.yml` brings its own Postgres alongside the app
+(not published to the host) and runs the same image, migrations included:
+
+```bash
+docker compose -f docker-compose.full.yml up -d --build
+```
+
+`.github/workflows/deploy.yml` runs exactly that over SSH. It is manual (`workflow_dispatch`) and
+needs the `DEPLOY_HOST`, `DEPLOY_USER` and `DEPLOY_SSH_KEY` secrets plus an optional `DEPLOY_PATH`
+variable.
 
 ## Content
 
@@ -68,7 +74,7 @@ Fill it once, from inside the container, so uploads land in the mounted media vo
 whichever machine ran the command:
 
 ```bash
-docker compose -f docker-compose.dev.yml exec -T app pnpm seed
+docker compose --profile prod exec -T app pnpm seed
 ```
 
 It is idempotent, so it is safe to re-run — but it updates products **in place**, which means it
@@ -78,8 +84,8 @@ deploy. Once the owner starts writing real content, stop running it.
 Check it came up:
 
 ```bash
-docker compose --profile dev ps
-docker compose --profile dev logs -f app
+docker compose --profile prod ps
+docker compose --profile prod logs -f app
 curl -I http://127.0.0.1:3000
 ```
 
@@ -90,7 +96,7 @@ The storefront is at `/`, the admin panel at `/admin`. On a brand-new database, 
 
 ```bash
 git pull
-docker compose --profile dev up -d --build
+docker compose --profile prod up -d --build
 ```
 
 Same command every time. Compose rebuilds the image, applies any new migrations, and replaces the
@@ -103,22 +109,22 @@ front of it. Proxy to `http://127.0.0.1:3000` and forward the usual headers. Two
 
 - Allow request bodies of at least 25 MB — the admin panel uploads images (`client_max_body_size`
   in nginx).
-- Once the proxy is in place, bind the published port to loopback only: change the app's port
-  mapping to `'127.0.0.1:${APP_PORT:-3000}:3000'`.
+- The port is published on loopback only (`127.0.0.1:${APP_PORT:-3000}`), so the proxy must run on
+  the same host.
 
 ## State to back up
 
 | What | Where |
 | --- | --- |
 | Content, users, orders | Your Postgres database |
-| Uploaded images | The `aurum-media` Docker volume, mounted at `/app/media` |
+| Uploaded images | The `aurum_media` Docker volume, mounted at `/app/media` |
 
 Both matter. The database references files by name; a database restored without its media volume
 renders broken images.
 
 ```bash
 # media snapshot
-docker run --rm -v aurum_aurum-media:/media -v "$PWD:/backup" alpine \
+docker run --rm -v aurum_media:/media -v "$PWD:/backup" alpine \
   tar czf /backup/media-$(date +%F).tar.gz -C /media .
 ```
 
@@ -126,7 +132,7 @@ docker run --rm -v aurum_aurum-media:/media -v "$PWD:/backup" alpine \
 
 | Symptom | Cause |
 | --- | --- |
-| `error while interpolating services.app.environment` naming a variable | That variable is missing from `.env` |
+| Container exits at startup naming a missing variable | That variable is missing from `.env` |
 | Container exits during startup, logs end in a migration error | Migration failed — the schema is untouched, fix the database and redeploy |
 | `ECONNREFUSED` on boot | `DATABASE_URI` unreachable from inside the container; `localhost` there means the container, not the host |
 | Site loads but links and metadata point at `localhost` | `NEXT_PUBLIC_SERVER_URL` was wrong at build time — fix `.env` and rebuild |
@@ -134,5 +140,5 @@ docker run --rm -v aurum_aurum-media:/media -v "$PWD:/backup" alpine \
 
 ## Not yet in place
 
-There is no automated deploy pipeline, no health check endpoint, and no log shipping. Deploys are
-the manual command above. Say if you want any of that and it can be added.
+No log shipping and no dedicated health endpoint: the image's Docker `HEALTHCHECK` requests `/`.
+The only pipeline is the manual `deploy.yml` workflow.

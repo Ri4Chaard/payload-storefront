@@ -111,8 +111,10 @@ automatically: the deploy workflow builds, starts and migrates, and that is all.
 had authored in the admin since the last one.
 
 ```bash
-# on the VPS, in ~/aurum_frontend
-docker compose -f docker-compose.dev.yml exec -T app pnpm seed
+# on the server, in the clone of this repository
+docker compose --profile prod exec -T app pnpm seed
+# or, for the all-in-one stack:
+docker compose -f docker-compose.full.yml exec -T app pnpm seed
 ```
 
 Not from a laptop against the deployment's database. Payload's local storage writes uploads to
@@ -129,7 +131,7 @@ is a different process whose cache it could not have invalidated anyway.
 ## Deployment
 
 `docker-compose.yml` carries two profiles and starts nothing without one. The `local` profile above
-is Postgres alone, for an app running on the host. The `dev` profile is the deployed environment:
+is Postgres alone, for an app running on the host. The `prod` profile is the deployed environment:
 the app, built from the checkout on the machine it runs on. It brings no database — point it at one
 that is provisioned separately.
 
@@ -137,8 +139,10 @@ that is provisioned separately.
 # on the VPS, in a clone of this repository
 cp .env.example .env          # DATABASE_URI, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL,
                               # RESEND_API_KEY, EMAIL_FROM_ADDRESS
-docker compose --profile dev up -d --build
+docker compose --profile prod up -d --build
 ```
+
+Or the app together with its own Postgres: `docker compose -f docker-compose.full.yml up -d --build`.
 
 The container applies the committed migrations before `next start`, so a failed migration stops the
 deploy rather than booting against the wrong schema. To ship a new commit: `git pull` and repeat the
@@ -152,7 +156,7 @@ Three things to know:
 - A database running elsewhere on the same host is reachable as `host.docker.internal` — the
   compose file maps it to the host gateway.
 - The app publishes `${APP_PORT:-3000}` for a reverse proxy (nginx, Caddy) to terminate TLS in
-  front of. Uploads live in the `aurum-media` volume.
+  front of. Uploads live in the `aurum_media` volume.
 - The nightly cleanup of unverified accounts and spent codes runs **inside this container**, on
   Payload's own job queue — there is no cron service to install. It stops running on a serverless
   host, silently, because a function that only exists during a request cannot hold a timer.

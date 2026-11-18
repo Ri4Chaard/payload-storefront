@@ -1,0 +1,23 @@
+name: Deploy
+
+# Manual only: needs DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY secrets, and a clone of this
+# repository with a filled-in .env on the server (path in the DEPLOY_PATH variable).
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd ${{ vars.DEPLOY_PATH || '~/aurum' }}
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+            docker compose -f docker-compose.full.yml up -d --build
