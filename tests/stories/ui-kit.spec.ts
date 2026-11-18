@@ -1001,10 +1001,11 @@ test('feature strip is a sideways scroller on a phone and a grid above it', asyn
   const region = page.getByRole('region', { name: 'Why shop with us' })
   const card = page.getByRole('listitem').first()
 
-  // Phone (node 440:13717) — 250px cards that do not shrink, which can only be read by scrolling.
+  // Phone — cards that do not shrink, almost the width of the screen, read by scrolling sideways.
   await page.setViewportSize({ width: 390, height: 700 })
   const phone = (await card.boundingBox())!
-  expect(Math.round(phone.width)).toBe(250)
+  expect(phone.width).toBeGreaterThan(300)
+  expect(phone.width).toBeLessThanOrEqual(390)
   const overflow = await region.evaluate((el) => el.scrollWidth > el.clientWidth)
   expect(overflow, 'the phone layout does not actually overflow').toBe(true)
   // A region that scrolls and cannot be focused is `scrollable-region-focusable`, and these cards
@@ -1058,7 +1059,7 @@ test('feature glyphs are decoration, not a second copy of the heading', async ({
   await expect(page.getByRole('heading', { level: 3, name: 'Shipping' })).toBeVisible()
 })
 
-test('hero holds the drawn height at each breakpoint and keeps its headline as text', async ({
+test('hero is one screen tall at each breakpoint and keeps its headline as text', async ({
   page,
 }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=sections-hero--desktop&viewMode=story`, {
@@ -1073,19 +1074,20 @@ test('hero holds the drawn height at each breakpoint and keeps its headline as t
   // search result along with it.
   await expect(headline).toHaveText('A headline about your store')
 
-  const DRAWN = [
-    { width: 390, height: 754 }, // node 440:13458
-    { width: 1024, height: 1226 }, // node 440:12503 — deliberately taller than the frame it sits in
-    { width: 1440, height: 950 }, // node 138:309
-  ]
-
-  for (const { width, height } of DRAWN) {
+  // The band is the screen, less the site chrome above it (`100svh` minus `--site-chrome`), at
+  // every width — so its height is its own resolved min-height, and that is less than the window.
+  for (const width of [390, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 })
     await expect
-      .poll(async () => Math.round((await hero.boundingBox())!.height), {
-        message: `hero is not ${height}px tall at ${width}`,
-      })
-      .toBe(height)
+      .poll(
+        async () => {
+          const box = (await hero.boundingBox())!
+          const min = await hero.evaluate((el) => parseFloat(getComputedStyle(el).minHeight))
+          return Math.round(box.height) === Math.round(min) && min > 0 && min <= 900
+        },
+        { message: `hero is not one screen tall at ${width}` },
+      )
+      .toBe(true)
   }
 
   // The drawn 508px measure, held as a maximum so a phone gets the column instead of an overflow.

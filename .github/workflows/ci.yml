@@ -27,6 +27,11 @@ jobs:
       DATABASE_URI: postgres://aurum:aurum@localhost:5432/aurum
       PAYLOAD_SECRET: ci-only-not-a-real-secret
       NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      # src/env.ts requires both at import time. Nothing is sent: EMAIL_TRANSPORT=log swaps the
+      # Resend adapter for one that only logs.
+      RESEND_API_KEY: ci-only-not-a-real-key
+      EMAIL_FROM_ADDRESS: ci@example.invalid
+      EMAIL_TRANSPORT: log
 
     steps:
       - uses: actions/checkout@v4
@@ -66,7 +71,10 @@ jobs:
         run: pnpm payload migrate
 
       - name: Development catalogue
-        run: pnpm seed
+        run: |
+          pnpm seed
+          pnpm seed:policies
+          pnpm seed:translations
 
       - name: Design tokens are current
         run: pnpm check:tokens

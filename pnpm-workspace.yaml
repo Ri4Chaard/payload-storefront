@@ -1,18 +1,19 @@
+# pnpm 11 refuses to install (ERR_PNPM_IGNORED_BUILDS) while any dependency with an install
+# script is neither allowed nor denied. Every entry is decided explicitly:
+#   true  — the package needs its script (sharp, @tailwindcss/oxide and unrs-resolver fetch or
+#           link native binaries).
+#   false — the package ships prebuilt platform binaries through optional dependencies, so its
+#           script only re-checks what is already installed.
 allowBuilds:
-  '@parcel/watcher': set this to true or false
-  '@swc/core': set this to true or false
-  esbuild: set this to true or false
+  sharp: true
+  '@tailwindcss/oxide': true
+  unrs-resolver: true
+  esbuild: false
+  '@swc/core': false
+  '@parcel/watcher': false
 minimumReleaseAgeExclude:
   - icu-minify@4.14.4
   - next-intl-swc-plugin-extractor@4.14.4
   - next-intl@4.14.4
   - use-intl@4.14.4
-# pnpm 11 reads settings from here rather than package.json.
-# esbuild ships prebuilt platform binaries via optional deps, so its postinstall is unnecessary —
-# but pnpm's pre-run check aborts every `pnpm run` unless the build is approved or the check is off.
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - '@tailwindcss/oxide'
-  - unrs-resolver
 verifyDepsBeforeRun: false
