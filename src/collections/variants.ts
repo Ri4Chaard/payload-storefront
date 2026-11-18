@@ -5,14 +5,14 @@ import { stampAvailability } from '@/collections/product-hooks'
 import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
- * A stone a customer can choose — one row per option under "Choose Your Diamond:".
+ * An option a customer can choose — one row per entry in the product page's option selector.
  *
  * **This is the price-bearing row.** The plugin's variant model is a matrix of option combinations,
- * and the combination is what carries price and inventory. Diamond is the only variant type on this
- * store, so a variant is a stone: its own price, its own availability, its own photograph.
+ * and the combination is what carries price and inventory. One option type is used on this
+ * store, so a variant is a single option: its own price, its own availability, its own photograph.
  *
- * **Size is deliberately not a variant type.** Making it one would multiply every stone by every
- * size — five stones and fifteen ring sizes is seventy-five documents the owner creates by hand, in
+ * **Size is deliberately not a variant type.** Making it one would multiply every option by every
+ * size — five options and fifteen sizes is seventy-five documents the owner creates by hand, in
  * a Payload version with no bulk generator, for an axis that never changes the price
  * (003/research.md R3). Size is a field on the product instead.
  *
@@ -22,9 +22,9 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 /**
  * The plugin's `inventory` field, shown only where a number means something (spec 011, FR-001).
  *
- * A made-to-order stone has no quantity to hold, and an editable field whose value is ignored is
+ * A made-to-order variant has no quantity to hold, and an editable field whose value is ignored is
  * worse than no field: it invites the owner to type a number and believe it matters. The condition
- * reads the stone's OWN `availability` — mirrored from the parent by `stampAvailability` — because
+ * reads the variant's OWN `availability` — mirrored from the parent by `stampAvailability` — because
  * `admin.condition` is synchronous and cannot fetch the parent to ask (011/research.md R5).
  *
  * The same narrowing `adjustInventory` does on products, and for the same reason: `Field` is a union
@@ -40,7 +40,7 @@ const adjustInventory = (field: Field): Field => {
       ...field.admin,
       condition: (data) => data?.availability === 'stock-tracked',
       description:
-        'How many of this stone exist. At zero it is shown as unavailable. Made-to-order pieces do not ask.',
+        'How many of this option exist. At zero it is shown as unavailable. Made-to-order products do not ask.',
     },
   }
 }
@@ -71,7 +71,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
    */
   hooks: {
     ...defaultCollection.hooks,
-    // Stamps this stone with its parent's availability as it is created, so one added to a piece
+    // Stamps this variant with its parent's availability as it is created, so one added to a product
     // that is already made to order is right immediately (spec 011, FR-001).
     beforeChange: [...(defaultCollection.hooks?.beforeChange ?? []), stampAvailability],
     afterChange: [...(defaultCollection.hooks?.afterChange ?? []), revalidateOnChange],
@@ -82,18 +82,18 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
     ...defaultCollection.fields.map(adjustInventory),
 
     /**
-     * What this stone is, where it differs from the piece it sits in (spec 011, US2, FR-009).
+     * What this variant is, where it differs from the product it belongs to (spec 011, US2, FR-009).
      *
-     * **The product's own array, copied rather than reinvented.** Two stones in one ring have
-     * different carat weights and different certificates — properties that describe the stone, not
-     * the setting — and an owner meeting an identically-shaped row wherever they set one is the
-     * point of copying it. The merge rule lives in `src/lib/catalog/mappers.ts`: a stone's value
-     * replaces the piece's for the same attribute, and an attribute only the stone carries is
+     * **The product's own array, copied rather than reinvented.** Two variants of one product can have
+     * different weights and different certificates — properties that describe the variant, not
+     * the product — and an owner meeting an identically-shaped row wherever they set one is the
+     * point of copying it. The merge rule lives in `src/lib/catalog/mappers.ts`: a variant's value
+     * replaces the product's for the same attribute, and an attribute only the variant carries is
      * appended.
      *
-     * The piece's own "Product details" prose and its short description stay on the piece and do
-     * NOT vary by stone (011/spec.md FR-009a). A stone differs from its siblings in carat, clarity
-     * and certificate; prose that changed underneath a customer comparing two stones would make
+     * The product's own "Product details" prose and its short description stay on the product and do
+     * NOT vary by variant (011/spec.md FR-009a). A variant differs from its siblings in weight, grade
+     * and certificate; prose that changed underneath a customer comparing two variants would make
      * them harder to compare, not easier.
      */
     {
@@ -103,7 +103,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
       labels: { singular: 'Attribute', plural: 'Attributes' },
       admin: {
         description:
-          'Only what differs from the piece — carat weight, certificate. Anything left out is inherited from the product.',
+          'Only what differs from the product — weight, material. Anything left out is inherited from the product.',
       },
       fields: [
         {
@@ -122,7 +122,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
 
         A row in this array is shared across all three locales — arrays are not localized, the words
         inside them are — so a `required` localized child has to be filled in EVERY language before
-        the document can be saved in ANY of them. An editor who opened a stone in Russian to change
+        the document can be saved in ANY of them. An editor who opened a variant in Russian to change
         one word met "This field is required" on a row they had not touched, and could not save at
         all.
 
@@ -136,12 +136,12 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
     },
 
     /**
-     * The piece's availability, mirrored (spec 011, US1, FR-001; research R5).
+     * The product's availability, mirrored (spec 011, US1, FR-001; research R5).
      *
      * **This exists for the admin form and for nothing else.** `admin.condition` is synchronous and
      * receives only the document being edited (`payload/dist/fields/config/types.d.ts:111`), so a
-     * stone holding its parent as an id cannot ask what mode that parent is in. Without a value on
-     * the stone itself, the quantity field below cannot hide — and FR-001 says it must.
+     * variant holding its parent as an id cannot ask what mode that parent is in. Without a value on
+     * the variant itself, the quantity field below cannot hide — and FR-001 says it must.
      *
      * **It is never the storefront's source of truth.** `mappers.ts` has the parent product in hand
      * when it maps its variants and reads availability from there, so a stale mirror can misdraw an
@@ -162,7 +162,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
         position: 'sidebar',
         readOnly: true,
         description:
-          'Follows the product. Set it on the piece, not here — every stone of a made-to-order piece is made to order.',
+          'Follows the product. Set it on the product, not here — every option of a made-to-order product is made to order.',
       },
     },
 
@@ -173,7 +173,7 @@ export const variantsCollectionOverride: CollectionOverride = ({ defaultCollecti
       label: 'Photograph',
       admin: {
         description:
-          'Optional. A photograph of this particular stone, shown when it is selected. Falls back to the product gallery.',
+          'Optional. A photograph of this particular option, shown when it is selected. Falls back to the product gallery.',
       },
     },
   ],

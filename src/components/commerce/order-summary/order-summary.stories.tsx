@@ -41,7 +41,7 @@ type Story = StoryObj<typeof meta>
 /** As drawn. Press CHECKOUT without ticking the agreement to see the refusal (FR-018). */
 export const Default: Story = {}
 
-/** One piece, so the row reads "1 item" rather than "1 items". */
+/** One product, so the row reads "1 item" rather than "1 items". */
 export const SingleItem: Story = {
   args: { cart: cart({ itemCount: 1, subtotal: '$24,900' }) },
 }

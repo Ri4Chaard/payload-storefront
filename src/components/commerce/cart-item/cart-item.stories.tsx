@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
-import earrings from '@/components/ui/image-carousel/sample-earrings.webp'
-import pendant from '@/components/ui/image-carousel/sample-pendant.webp'
+import sampleA from '@/components/ui/image-carousel/sample-1.webp'
+import sampleB from '@/components/ui/image-carousel/sample-2.webp'
 
 import { CartItem } from './cart-item'
 
@@ -12,11 +12,11 @@ const meta = {
   component: CartItem,
   parameters: { layout: 'padded' },
   args: {
-    name: 'BUTTERFLY DIAMOND PENDANT',
+    name: 'PRODUCT 3',
     price: '$ 24,900',
-    image: { src: pendant.src },
+    image: { src: sampleB.src },
     quantity: 1,
-    href: '/products/butterfly-diamond-pendant',
+    href: '/products/product-3',
     onQuantityChange: () => {},
     onRemove: () => {},
   },
@@ -41,8 +41,8 @@ export const Default: Story = {}
 /** A name long enough to prove it truncates instead of shoving the stepper off the row. */
 export const LongName: Story = {
   args: {
-    name: 'Fancy Vivid Pink Heart Lab Grown Category 3 – Rare Shades Collection, 18k Rose Gold, IGI Certified',
-    image: { src: earrings.src },
+    name: 'Product 6 with a much longer name – Collection A, Option B, Material, Weight and Origin',
+    image: { src: sampleA.src },
   },
 }
 
@@ -53,8 +53,8 @@ export const AtTheStockLimit: Story = { args: { quantity: 3, max: 3 } }
 export const ABasket: Story = {
   render: function Render(args) {
     const [rows, setRows] = React.useState([
-      { id: 'a', name: 'BUTTERFLY DIAMOND PENDANT', price: '$ 24,900', src: pendant.src, qty: 1 },
-      { id: 'b', name: 'PINK HEART EARRINGS', price: '$ 18,400', src: earrings.src, qty: 2 },
+      { id: 'a', name: 'PRODUCT 3', price: '$ 24,900', src: sampleB.src, qty: 1 },
+      { id: 'b', name: 'PRODUCT 6', price: '$ 18,400', src: sampleA.src, qty: 2 },
     ])
     // No `<ul>` here — the meta decorator already supplies one, and nesting them puts a list
     // directly inside a list, which is invalid and which the axe sweep caught.

@@ -15,13 +15,13 @@ import { HandoffModal } from './handoff-modal'
  */
 const MESSAGE = `Hello Aurum, I would like to order:
 
-1 × Paragon Emerald Cut Diamond Engagement Ring — Lab 1.5 ct D VS1, size 6 — $38,320
-2 × Butterfly Diamond Pendant — $49,800
+1 × Product 1 — Option A — $38,320
+2 × Product 3 — $49,800
 
 Total: $88,120
 
 Name: Aisha Karimova
-Delivery address: Mangilik el 22, Astana, 010000, Kazakhstan`
+Delivery address: 1 Main Street, Springfield, 12345, Country`
 
 const link = (
   platform: MessengerLink['platform'],

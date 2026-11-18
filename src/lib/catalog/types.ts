@@ -17,7 +17,7 @@
  *                in `mappers.ts` and travels as a boolean.
  *
  * `price` is a formatted string everywhere except `VariantOption.priceMinor`, which exists because
- * the stone selector has to compare stones. That one is an integer count of minor units, never a
+ * the variant selector has to compare variants. That one is an integer count of minor units, never a
  * float and never a parsed display string (Constitution VI).
  */
 
@@ -32,7 +32,7 @@ export interface CatalogImage {
 }
 
 /**
- * A colour's stable identifier — `black`, `rose-gold` — as it appears in `?colour=`.
+ * A colour's stable identifier — `black`, `navy` — as it appears in `?colour=`.
  *
  * **A string as of spec 011, where it used to be a union derived from the enum.** Colour is an
  * owner-managed vocabulary now, so the set is a fact about the database rather than about the
@@ -47,13 +47,13 @@ export interface ProductSummary {
   slug: string
   title: string
   href: string
-  /** Formatted. The lowest price across stones where the piece offers a choice. */
+  /** Formatted. The lowest price across variants where the product offers a choice. */
   price: string
   images: CatalogImage[]
   available: boolean
 }
 
-/** One selectable stone. The only view model carrying a raw amount, and it is an integer. */
+/** One selectable variant. The only view model carrying a raw amount, and it is an integer. */
 export interface VariantOption {
   id: number
   label: string
@@ -61,15 +61,15 @@ export interface VariantOption {
   priceMinor: number
   available: boolean
   /**
-   * What this stone says about itself (spec 011, FR-009).
+   * What this variant says about itself (spec 011, FR-009).
    *
-   * Only what DIFFERS from the piece — carat weight, certificate. The product page lays these over
-   * the piece's own rows when the stone is selected; see `mergeAttributes`. Empty is the ordinary
-   * case and means "this stone is described entirely by its piece".
+   * Only what DIFFERS from the product — weight, certificate. The product page lays these over
+   * the product's own rows when the variant is selected; see `mergeAttributes`. Empty is the ordinary
+   * case and means "this variant is described entirely by its product".
    */
   attributes: ProductAttribute[]
   /**
-   * The most a customer may order OF THIS STONE. Absent where nothing is counted.
+   * The most a customer may order OF THIS VARIANT. Absent where nothing is counted.
    *
    * Not the same thing as `inventory`, which the note at the top of this file keeps out on purpose.
    * That exclusion is about the AVAILABILITY rule: a component that can see a stock number will
@@ -105,18 +105,18 @@ export interface ProductDetail extends ProductSummary {
   priceMinor: number
   currency: string
   /**
-   * The ceiling for a piece that has no stones — the same question `VariantOption.maxQuantity`
-   * answers for one that does. Absent where the piece is made to order, which has no ceiling.
+   * The ceiling for a product that has no variants — the same question `VariantOption.maxQuantity`
+   * answers for one that does. Absent where the product is made to order, which has no ceiling.
    */
   maxQuantity?: number
   description: string | null
   /**
-   * Whether the piece is made to order (spec 011, FR-007).
+   * Whether the product is made to order (spec 011, FR-007).
    *
-   * A boolean about the piece's MODE, not a count — the rule at the top of this file still holds,
+   * A boolean about the product's MODE, not a count — the rule at the top of this file still holds,
    * and a component still has no way to learn how many of anything exist. It is here so the page can
    * say "made to order" once, under the price, rather than leaving a customer to infer it from the
-   * absence of an out-of-stock label on four stones.
+   * absence of an out-of-stock label on four variants.
    */
   madeToOrder: boolean
   gallery: CatalogImage[]
@@ -125,8 +125,8 @@ export interface ProductDetail extends ProductSummary {
   variantOptions: VariantOption[]
   attributes: ProductAttribute[]
   /**
-   * `"From $2,400"`-style prefix money, set only where stones differ in price. `null` means the
-   * piece has one price and the label above it should not say "from".
+   * `"From $2,400"`-style prefix money, set only where variants differ in price. `null` means the
+   * product has one price and the label above it should not say "from".
    */
   fromPrice: string | null
   collectionIds: number[]

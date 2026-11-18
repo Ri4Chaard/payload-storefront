@@ -4,9 +4,9 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payl
  * Hooks for `products` and `variants` (spec 011, US1).
  *
  * Both exist for one reason: a variant cannot see its parent. `admin.condition` is synchronous and
- * receives only the document being edited (`payload/dist/fields/config/types.d.ts:111`), so a stone
+ * receives only the document being edited (`payload/dist/fields/config/types.d.ts:111`), so a variant
  * holding its product as an id has no way to ask what mode that product is in — and FR-001 says the
- * quantity field must not be offered on a made-to-order piece.
+ * quantity field must not be offered on a made-to-order product.
  *
  * So the parent tells it. `variants.availability` is a mirror of the product's own value, written
  * here and read only by the admin form (011/research.md R5).
@@ -33,7 +33,7 @@ function productId(value: unknown): null | number | string {
 }
 
 /**
- * A piece's availability reaches every stone it already has.
+ * A product's availability reaches every variant it already has.
  *
  * **Only when the value actually changed.** A product is saved on every edit — a typo in the title,
  * a new photograph — and rewriting every variant each time would turn one save into six, each with
@@ -61,12 +61,12 @@ export const cascadeAvailability: CollectionAfterChangeHook = async ({
 }
 
 /**
- * A stone is stamped with its parent's mode as it is created.
+ * A variant is stamped with its parent's mode as it is created.
  *
- * Without this, a stone added to a piece that is ALREADY made to order would be born with no
+ * Without this, a variant added to a product that is ALREADY made to order would be born with no
  * availability at all — `cascadeAvailability` only fires when a product changes, and nothing about
  * the product changes when a variant is added to it. The result would be a quantity field appearing
- * on exactly the stones an owner adds in the ordinary way, which is the common case rather than an
+ * on exactly the variants an owner adds in the ordinary way, which is the common case rather than an
  * edge one.
  *
  * On update it re-reads rather than trusting what arrived: the field is `readOnly` in the admin, but

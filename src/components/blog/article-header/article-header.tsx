@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn'
  * An article's opening (007/T026), from nodes `312:8484`, `418:8632`, `418:8933`.
  *
  * An eyebrow, the page's only `h1`, and the standfirst — the sentence that tells a visitor whether
- * this is the piece they wanted before they commit to the scroll.
+ * this is the article they wanted before they commit to the scroll.
  *
  * **The eyebrow is drawn at every width, including desktop, and the desktop frame does not draw
  * it.** Tablet (`418:8633`) and mobile (`418:8934`) both open with `OUR BLOG`; the desktop frame

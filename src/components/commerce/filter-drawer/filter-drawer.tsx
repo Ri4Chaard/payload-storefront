@@ -34,7 +34,7 @@ import './filter-drawer.css'
  * the next time the panel opens.
  *
  * **The seventh group is not drawn.** Figma draws six — CATEGORY, COLOR, PRICE, SIZE, COLLECTION,
- * DIAMOND SHAPE — and puts IN-STOCK ONLY in the toolbar instead. But the toolbar only carries it at
+ * SHAPE — and puts IN-STOCK ONLY in the toolbar instead. But the toolbar only carries it at
  * `xl`; below that width the drawing drops it, and a filter that exists on a desktop and nowhere
  * else is a filter a phone cannot turn off. It is here, hidden at `xl` where the toolbar owns it.
  * `display: none` still submits, so the state survives either way.
@@ -172,7 +172,7 @@ export function FilterDrawer({
 
       <Group legend={t_catalog('category')}>
         {/*
-          "All jewelry" is the absence of a category rather than one of them, so it carries no name
+          "All products" is the absence of a category rather than one of them, so it carries no name
           and submits nothing: without scripting, unticking the others is what widens the listing.
           Drawn as a checkbox beside its siblings, and left that way — a radio group would have said
           "exactly one", which is wrong for a filter that combines.
@@ -261,7 +261,7 @@ export function FilterDrawer({
  *
  * A `<fieldset>` rather than a `<div>` with a heading: these are groups of controls, and the group
  * name is what a screen reader repeats for each box inside it. "Category 1" alone in a panel with four
- * such lists is not an answer to "rings of what".
+ * such lists is not an answer to "products of what".
  */
 function Group({
   legend,

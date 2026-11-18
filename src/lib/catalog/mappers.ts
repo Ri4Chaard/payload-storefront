@@ -16,11 +16,11 @@
  * **Computing `available`.** The rule lives here and nowhere else:
  *
  *   made-to-order    always available. The count is meaningless and is not consulted.
- *   stock-tracked    available above zero. At zero the piece is still SHOWN — visible and clearly
+ *   stock-tracked    available above zero. At zero the product is still SHOWN — visible and clearly
  *                    unavailable is what the owner asked for, not hidden.
- *   with variants    available when any stone is. A stone's own `inventory` decides it, whatever
- *                    the parent's mode says: made-to-order describes the setting, not the stone,
- *                    and a stone at zero is one somebody already bought (FR-040).
+ *   with variants    available when any variant is. A variant's own `inventory` decides it, whatever
+ *                    the parent's mode says: made-to-order describes the product, not the variant,
+ *                    and a variant at zero is one somebody already bought (FR-040).
  *
  * A component never sees an `inventory` number, so it is never in a position to answer this
  * differently somewhere else.
@@ -125,16 +125,16 @@ function html(value: Product['details'] | Shop['warranty']): string | null {
 // ---------------------------------------------------------------------------------------------
 
 /**
- * A stone is available if its piece is made to order, or if it has one left (spec 011, FR-002).
+ * A variant is available if its product is made to order, or if it has one left (spec 011, FR-002).
  *
  * **This used to read "above its own zero, whatever the parent's availability mode says", and that
- * comment was the defect.** It is the honest rule for a stock-tracked piece and the wrong one for a
- * made-to-order piece, where there is no quantity to type in: an owner who marked a ring
- * always-available and added five stones got five stones at zero, and a page that refused to sell
- * any of them. Nothing on screen explained why, because from the storefront's side the piece looked
+ * comment was the defect.** It is the honest rule for a stock-tracked product and the wrong one for a
+ * made-to-order product, where there is no quantity to type in: an owner who marked a product
+ * always-available and added five variants got five variants at zero, and a page that refused to sell
+ * any of them. Nothing on screen explained why, because from the storefront's side the product looked
  * exactly like one that had genuinely sold out.
  *
- * The piece's mode is passed rather than read from a parent pointer because every caller already
+ * The product's mode is passed rather than read from a parent pointer because every caller already
  * has the product in hand. That is also what keeps `variants.availability` — the denormalised column
  * the admin form needs — out of the storefront's path entirely: a mirror that fell out of step can
  * misdraw a form, and can never sell what should not be sold (011/research.md R5, R6).
@@ -171,10 +171,10 @@ export function isProductAvailable(product: Product): boolean {
   }
 
   /*
-    No stones left to offer — which covers a piece that never had any, AND a made-to-order piece
-    whose every stone has been taken off sale (FR-008). Unpublished stones never reach this mapper,
+    No variants left to offer — which covers a product that never had any, AND a made-to-order product
+    whose every variant has been taken off sale (FR-008). Unpublished variants never reach this mapper,
     so by the time the question is asked the two are indistinguishable, and falling back to the
-    piece's own mode is right for both: a selector with nothing in it is not a thing to draw.
+    product's own mode is right for both: a selector with nothing in it is not a thing to draw.
   */
   if (product.availability === 'made-to-order') return true
   return (product.inventory ?? 0) > 0
@@ -185,11 +185,11 @@ export function isProductAvailable(product: Product): boolean {
 // ---------------------------------------------------------------------------------------------
 
 /**
- * What the card shows. With stones that is the cheapest one — the listing advertises the price a
+ * What the card shows. With variants that is the cheapest one — the listing advertises the price a
  * visitor can actually reach, and the product page repeats it under "From".
  *
- * Stones that are sold out still count. A price that moves because somebody else bought the cheap
- * stone is a listing that contradicts itself between two loads.
+ * Variants that are sold out still count. A price that moves because somebody else bought the cheap
+ * variant is a listing that contradicts itself between two loads.
  */
 export function lowestPriceMinor(product: Product): number {
   const variants = productVariants(product)
@@ -240,7 +240,7 @@ function toVariantOption(
     label: label === '' ? (variant.title ?? `Option ${variant.id}`) : label,
     price: formatPriceFor(locale, priceMinor),
     /*
-      No ceiling on a made-to-order stone (FR-003). A count stored from when the piece was stock
+      No ceiling on a made-to-order variant (FR-003). A count stored from when the product was stock
       tracked is deliberately still there — switching modes does not erase it (FR-004) — so the mode
       has to be consulted here rather than the number trusted.
     */
@@ -249,8 +249,8 @@ function toVariantOption(
       : { maxQuantity: ceiling(variant.inventory) }),
     priceMinor,
     available: isVariantAvailable(variant, availability),
-    // What this stone says about itself, where it differs from its piece (FR-009). Empty for a
-    // stone carrying none, which is every stone until an owner fills one in.
+    // What this variant says about itself, where it differs from its product (FR-009). Empty for a
+    // variant carrying none, which is every variant until an owner fills one in.
     attributes: toAttributes(variant.attributes),
     ...(image ? { image } : {}),
   }
@@ -258,7 +258,7 @@ function toVariantOption(
 
 
 /**
- * The owner-defined rows on a piece or on a stone (spec 011, FR-009).
+ * The owner-defined rows on a product or on a variant (spec 011, FR-009).
  *
  * Takes the array rather than the document, because as of 011 a variant carries an identically
  * shaped one and the two must be read the same way. A second reader would be a second place for the
@@ -285,28 +285,28 @@ function toAttributes(
 }
 
 /**
- * The piece's rows, with the selected stone's laid over them (spec 011, FR-010, FR-011, FR-016).
+ * The product's rows, with the selected variant's laid over them (spec 011, FR-010, FR-011, FR-016).
  *
- * **By attribute, never by position.** Two rows for one attribute is the outcome to avoid — a stone
- * showing two carat weights is worse than one showing neither — and matching on the attribute's own
+ * **By attribute, never by position.** Two rows for one attribute is the outcome to avoid — a variant
+ * showing two weights is worse than one showing neither — and matching on the attribute's own
  * `name` is what makes "replace" mean replace.
  *
  * **Order is the attribute's, not the row's.** A value must not jump up the list because it happened
- * to come from the stone rather than from the piece; the customer is comparing two stones, and a
- * list that reshuffles between them is a list they have to re-read rather than scan. The piece's
- * order is kept for everything it defines, and anything only the stone carries follows it.
+ * to come from the variant rather than from the product; the customer is comparing two variants, and a
+ * list that reshuffles between them is a list they have to re-read rather than scan. The product's
+ * order is kept for everything it defines, and anything only the variant carries follows it.
  */
 export function mergeAttributes(
-  piece: ProductAttribute[],
-  stone: ProductAttribute[],
+  base: ProductAttribute[],
+  override: ProductAttribute[],
 ): ProductAttribute[] {
-  if (stone.length === 0) return piece
+  if (override.length === 0) return base
 
-  const overrides = new Map(stone.map((row) => [row.name, row]))
-  const merged = piece.map((row) => overrides.get(row.name) ?? row)
-  const seen = new Set(piece.map((row) => row.name))
+  const overrides = new Map(override.map((row) => [row.name, row]))
+  const merged = base.map((row) => overrides.get(row.name) ?? row)
+  const seen = new Set(base.map((row) => row.name))
 
-  return [...merged, ...stone.filter((row) => !seen.has(row.name))]
+  return [...merged, ...override.filter((row) => !seen.has(row.name))]
 }
 
 export function toProductDetail(product: Product, locale: Locale): ProductDetail {
@@ -326,7 +326,7 @@ export function toProductDetail(product: Product, locale: Locale): ProductDetail
     categorySlug: category.slug,
     priceMinor: lowestPriceMinor(product),
     currency: CATALOG_CURRENCY,
-    // Only for a piece with no stones, and only when it is counted. With stones the ceiling belongs
+    // Only for a product with no variants, and only when it is counted. With variants the ceiling belongs
     // to whichever one is chosen, and a product-level number would contradict it.
     ...(variantOptions.length === 0 &&
     product.availability === 'stock-tracked' &&

@@ -30,8 +30,8 @@ import { cn } from '@/lib/cn'
  * already a button. `aria-activedescendant` is the alternative and would mean keeping the rows
  * unfocusable and tracking a virtual cursor, for no gain here.
  *
- * **A disabled option is rendered and skipped, never hidden** (FR-040). A stone that cannot be
- * bought is information — it tells the visitor the piece exists in that stone — and removing it
+ * **A disabled option is rendered and skipped, never hidden** (FR-040). An option that cannot be
+ * bought is information — it tells the visitor the product exists in that option — and removing it
  * turns a temporary shortage into a catalogue that looks smaller than it is.
  *
  * **Nothing here works without scripting**, and that is the accepted cost of the drawn panel. The

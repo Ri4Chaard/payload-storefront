@@ -13,7 +13,7 @@ import { typeScale } from '@tokens/mapping'
  *    text. Every remapped style shows what it was called before, so a designer reading this page
  *    can find the style they know.
  */
-const SPECIMEN = 'Ceylon sapphire, hand-set in eighteen-carat gold'
+const SPECIMEN = 'Short product description, set in the type scale'
 
 function Row({ token }: { token: (typeof typeScale)[number] }) {
   const size = Array.isArray(token.size)

@@ -13,34 +13,34 @@ import { ProductGallery } from './product-gallery'
  */
 const PHOTOGRAPHS: CatalogImage[] = [
   {
-    src: '/photography/product-ring-packshot.webp',
+    src: '/photography/product-1-a.webp',
     width: 1274,
     height: 1600,
-    alt: 'Paragon emerald cut diamond engagement ring',
+    alt: 'Product 1',
   },
   {
-    src: '/photography/product-ring-jacket.webp',
+    src: '/photography/product-1-c.webp',
     width: 1000,
     height: 1000,
-    alt: 'The ring worn with a tailored jacket',
+    alt: 'Product 1, photograph 2',
   },
   {
-    src: '/photography/product-ring-arm.webp',
+    src: '/photography/product-1-d.webp',
     width: 1000,
     height: 1000,
-    alt: 'The ring on a resting hand',
+    alt: 'Product 1, photograph 3',
   },
   {
-    src: '/photography/product-ring-portrait.webp',
+    src: '/photography/product-1-b.webp',
     width: 1274,
     height: 1600,
-    alt: 'The ring worn, in portrait',
+    alt: 'Product 1, photograph 4',
   },
   {
-    src: '/photography/product-ring-denim.webp',
+    src: '/photography/product-1-e.webp',
     width: 1274,
     height: 1600,
-    alt: 'The ring against denim',
+    alt: 'Product 1, photograph 5',
   },
 ]
 
@@ -50,7 +50,7 @@ const meta = {
   parameters: { layout: 'padded', nextjs: { appDirectory: true } },
   args: {
     images: PHOTOGRAPHS,
-    label: 'Paragon Emerald Cut Diamond Engagement Ring',
+    label: 'Product 1',
   },
 } satisfies Meta<typeof ProductGallery>
 
@@ -89,7 +89,7 @@ export const LongerThanTheRail: Story = {
 }
 
 /**
- * A piece the owner has not photographed yet. Not a broken image and not a "no photo" sign: a
+ * A product the owner has not photographed yet. Not a broken image and not a "no photo" sign: a
  * neutral box that holds the column's shape so the information beside it does not move.
  */
 export const NoPhotography: Story = {

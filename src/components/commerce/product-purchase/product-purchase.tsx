@@ -23,7 +23,7 @@ import { ProductOptions } from '../product-options'
  * `301:5028` (1920), `410:7314`–`410:7371` (1024), `410:7647`–`410:7703` (390).
  *
  * **It spans the price as well as the controls, and that is the point.** FR-039 says the displayed
- * price follows the selected stone, so the price and the selector have to share a state — and the
+ * price follows the selected option, so the price and the selector have to share a state — and the
  * description sits between them in the drawn order (FR-035). Splitting them would mean lifting the
  * choice into the route, which is a server component, or duplicating it. So this owns the whole
  * run from the price down to BUY NOW, and takes the description as copy to render in its place.
@@ -31,12 +31,12 @@ import { ProductOptions } from '../product-options'
  * Above it the route still renders the eyebrow and the name on the server, which is what keeps the
  * page's only `h1` and its structured data out of a client bundle.
  *
- * **"From" belongs to the unchosen state.** Before a stone is picked the piece has a range and the
+ * **"From" belongs to the unchosen state.** Before an option is picked the product has a range and the
  * label says so; after one is picked it has a price, and continuing to say "from" would be quoting
  * a range the visitor has already resolved.
  *
  * **Both actions are live** (spec 005, T021, T069). Each builds a `CartIntent` — identifiers only,
- * never a price — and hands it to a Server Action, which re-reads the piece from the published
+ * never a price — and hands it to a Server Action, which re-reads the product from the published
  * catalogue and validates the choice again before doing anything. Nothing here is trusted: this
  * component's only job is to say what was chosen and to render whatever comes back.
  *
@@ -55,24 +55,24 @@ import { ProductOptions } from '../product-options'
  * a browser, which is what its stories depend on.
  *
  * **BUY NOW never touches the cart** (FR-020). It validates the same choices and opens the same
- * handoff modal for this one piece; a customer with a basket already assembled finds it exactly as
+ * handoff modal for this one product; a customer with a basket already assembled finds it exactly as
  * they left it. That is a property of the action's code path rather than a check inside it — see
  * `buyNow` in `src/lib/cart/actions.ts`.
  */
 export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
-  /** Which piece this is. The one identifier the intent cannot be built without. */
+  /** Which product this is. The one identifier the intent cannot be built without. */
   productId: number
-  /** The piece's own price, formatted — what shows before a stone narrows it. */
+  /** The product's own price, formatted — what shows before an option narrows it. */
   price: string
-  /** Set only where the stones differ, in which case the label reads "From …". */
+  /** Set only where the options differ, in which case the label reads "From …". */
   fromPrice: string | null
   description: string | null
-  /** FR-007. Whether to say so under the price — a fact about the piece, never a count. */
+  /** FR-007. Whether to say so under the price — a fact about the product, never a count. */
   madeToOrder?: boolean
   variantChoices: VariantOption[]
-  /** The piece as a whole. An unavailable one says so in text, not in colour (FR-040). */
+  /** The product as a whole. An unavailable one says so in text, not in colour (FR-040). */
   available: boolean
-  /** The ceiling for a piece with no stones. With stones, each stone carries its own. */
+  /** The ceiling for a product with no options. With options, each option carries its own. */
   maxQuantity?: number
   /**
    * The Server Action, handed down by the route. Omitted in a story, where there is no server —
@@ -87,7 +87,7 @@ export interface ProductPurchaseProps extends React.ComponentProps<'div'> {
     language, so the page says.
   */
   onAddToCart?: (intent: CartIntent, locale: Locale) => Promise<CartActionResult>
-  /** Opens the handoff for this piece alone, leaving the cart untouched (FR-020). */
+  /** Opens the handoff for this product alone, leaving the cart untouched (FR-020). */
   onBuyNow?: (intent: CartIntent, locale: Locale) => Promise<CheckoutResult>
 }
 
@@ -109,7 +109,7 @@ export function ProductPurchase({
   const locale = useLocale() as Locale
   const [variantChoice, setVariantChoice] = React.useState<number | null>(null)
   /*
-    The details beside this column show the selected stone's own properties (spec 011, FR-013), and
+    The details beside this column show the selected option's own properties (spec 011, FR-013), and
     they are a sibling in the server-rendered page rather than a child. Publishing the id is the
     whole of the coupling — see `SelectedVariantProvider` for why it is not a bigger one.
   */
@@ -126,18 +126,18 @@ export function ProductPurchase({
   const shown = chosen ? chosen.price : fromPrice ? `From ${fromPrice}` : price
 
   /**
-   * How high the stepper may go: the chosen stone's ceiling, or the piece's own where there are no
-   * stones. Undefined for anything made to order, which has no ceiling to reach.
+   * How high the stepper may go: the chosen option's ceiling, or the product's own where there are no
+   * options. Undefined for anything made to order, which has no ceiling to reach.
    */
   const ceiling = chosen ? chosen.maxQuantity : maxQuantity
 
   /**
    * Clamped on the way OUT rather than corrected in an effect.
    *
-   * The ceiling moves when the stone does — three of one, twenty of another — so a quantity stored
+   * The ceiling moves when the option does — three of one, twenty of another — so a quantity stored
    * as final would need watching and rewriting every time. Storing what was ASKED FOR and capping
    * it at the moment of use means the number can never exceed the stock even for a frame, and a
-   * visitor who wanted five, moved to a stone with two, then moved to one with ten, gets their five
+   * visitor who wanted five, moved to an option with two, then moved to one with ten, gets their five
    * back rather than being silently left at two.
    */
   const quantity = ceiling === undefined ? wanted : Math.min(wanted, ceiling)
@@ -240,14 +240,14 @@ export function ProductPurchase({
       </p>
 
       {/*
-        FR-007 — the piece says how it is made, once.
+        FR-007 — the product says how it is made, once.
 
-        Made to order is a property of the PIECE, not of a stone (011/spec.md Assumptions), so it is
-        stated here rather than repeated beside every option in the selector below. Four stones each
+        Made to order is a property of the PRODUCT, not of an option (011/spec.md Assumptions), so it is
+        stated here rather than repeated beside every option in the selector below. Four options each
         captioned "Made to order" would be four copies of one fact, and would crowd out the price,
         which is the reason to choose between them at all.
 
-        Without it the mode is only inferable from an absence — no stone ever reads "Out of stock" —
+        Without it the mode is only inferable from an absence — no option ever reads "Out of stock" —
         which is not something a customer should have to notice.
       */}
       {madeToOrder ? (
@@ -288,10 +288,10 @@ export function ProductPurchase({
           value={quantity}
           onChange={setWanted}
           min={1}
-          // Absent for a made-to-order piece, which is exactly how `QuantityStepper` reads "no
+          // Absent for a made-to-order product, which is exactly how `QuantityStepper` reads "no
           // ceiling" — it stops disabling the plus and stops clamping.
           {...(ceiling === undefined ? {} : { max: ceiling })}
-          label="pieces"
+          label="items"
           disabled={!available}
           className="shrink-0"
         />
@@ -334,9 +334,9 @@ export function ProductPurchase({
       ) : null}
 
       {/*
-        The reason in TEXT, never in colour alone (FR-040). Only for a piece that genuinely cannot
+        The reason in TEXT, never in colour alone (FR-040). Only for a product that genuinely cannot
         be bought — BUY NOW being disabled while the handoff is still being built is a fact about
-        this deployment, not about the piece, and saying so on the page would be noise.
+        this deployment, not about the product, and saying so on the page would be noise.
       */}
       {!available ? (
         <p role="status" className="text-body-small text-neutral-primary mt-3">
@@ -347,7 +347,7 @@ export function ProductPurchase({
       {/*
         One live region for both outcomes (FR-002, FR-003, T022).
         `role="status"` rather than `alert`: this is the consequence of something the visitor just
-        did, announced politely, in the same way the price above announces itself when a stone
+        did, announced politely, in the same way the price above announces itself when an option
         changes. A refusal names the control to go and fix rather than saying the action failed.
       */}
       {status && available ? (

@@ -376,7 +376,7 @@ export interface CloserLook {
       }[]
     | null;
   /**
-   * A word over a caption, e.g. “CERTIFIED” / “selected diamonds”.
+   * A word over a caption, e.g. “QUALITY” / “in every detail”.
    */
   figures?:
     | {
@@ -463,7 +463,7 @@ export interface Banner {
  */
 export interface ProcessSteps {
   /**
-   * Centred above the steps, e.g. “FROM DIAMOND TO JEWEL”.
+   * Centred above the steps, e.g. “HOW IT WORKS”.
    */
   heading: string;
   /**
@@ -955,7 +955,7 @@ export interface Category {
    */
   slug: string;
   /**
-   * The sentence beneath the heading, e.g. "Timeless brilliance, made for every moment".
+   * The sentence beneath the heading, e.g. "A short line about this category".
    */
   subtitle?: string | null;
   /**
@@ -993,7 +993,7 @@ export interface Category {
 export interface Collection {
   id: number;
   /**
-   * The collection’s name, e.g. "Molten".
+   * The collection’s name, e.g. "Collection A".
    */
   title: string;
   /**
@@ -1012,7 +1012,7 @@ export interface Collection {
   createdAt: string;
 }
 /**
- * The colours a piece can be filtered by. Renaming a label never changes its link.
+ * The colours a product can be filtered by. Renaming a label never changes its link.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "colours".
@@ -1024,7 +1024,7 @@ export interface Colour {
    */
   label: string;
   /**
-   * What appears in the address bar when this colour is filtered on. Keep it lowercase and hyphenated — "rose-gold". Changing it breaks links that already exist.
+   * What appears in the address bar when this colour is filtered on. Keep it lowercase and hyphenated — "light-blue". Changing it breaks links that already exist.
    */
   value: string;
   /**
@@ -1043,11 +1043,11 @@ export interface Colour {
 export interface Attribute {
   id: number;
   /**
-   * What the customer reads, e.g. "Chain length".
+   * What the customer reads, e.g. "Material".
    */
   label: string;
   /**
-   * A short machine-readable key, e.g. "chain-length". Renaming it is safe; deleting it is not.
+   * A short machine-readable key, e.g. "material". Renaming it is safe; deleting it is not.
    */
   name: string;
   /**
@@ -1195,7 +1195,7 @@ export interface Article {
          */
         tocLabel?: string | null;
         /**
-         * Optional. The chapter’s one summary line, e.g. “What defines a diamond”. Any further emphasis belongs in the body as bold text.
+         * Optional. The chapter’s one summary line, e.g. “What to look for”. Any further emphasis belongs in the body as bold text.
          */
         lede?: string | null;
         /**
@@ -1358,13 +1358,13 @@ export interface Variant {
   product: number | Product;
   options: (number | VariantOption)[];
   /**
-   * How many of this stone exist. At zero it is shown as unavailable. Made-to-order pieces do not ask.
+   * How many of this option exist. At zero it is shown as unavailable. Made-to-order products do not ask.
    */
   inventory?: number | null;
   priceInUSDEnabled?: boolean | null;
   priceInUSD?: number | null;
   /**
-   * Only what differs from the piece — carat weight, certificate. Anything left out is inherited from the product.
+   * Only what differs from the product — weight, material. Anything left out is inherited from the product.
    */
   attributes?:
     | {
@@ -1374,11 +1374,11 @@ export interface Variant {
       }[]
     | null;
   /**
-   * Follows the product. Set it on the piece, not here — every stone of a made-to-order piece is made to order.
+   * Follows the product. Set it on the product, not here — every option of a made-to-order product is made to order.
    */
   availability?: ('made-to-order' | 'stock-tracked') | null;
   /**
-   * Optional. A photograph of this particular stone, shown when it is selected. Falls back to the product gallery.
+   * Optional. A photograph of this particular option, shown when it is selected. Falls back to the product gallery.
    */
   image?: (number | null) | Media;
   updatedAt: string;
@@ -1397,11 +1397,11 @@ export interface Product {
    */
   slug: string;
   /**
-   * Made to order ignores the quantity entirely. Stock tracked shows the piece as unavailable at zero — visible, but not orderable.
+   * Made to order ignores the quantity entirely. Stock tracked shows the product as unavailable at zero — visible, but not orderable.
    */
   availability: 'made-to-order' | 'stock-tracked';
   /**
-   * How many exist. At zero the piece is shown as unavailable.
+   * How many exist. At zero the product is shown as unavailable.
    */
   inventory?: number | null;
   /**
@@ -1435,7 +1435,7 @@ export interface Product {
     [k: string]: unknown;
   } | null;
   /**
-   * Metal, carat weight, provenance. Define new ones under Attributes and they appear here with no deployment.
+   * Material, weight, origin. Define new ones under Attributes and they appear here with no deployment.
    */
   attributes?:
     | {
@@ -1445,7 +1445,7 @@ export interface Product {
       }[]
     | null;
   /**
-   * Exactly one. Decides which listing the piece appears on and the label above its name.
+   * Exactly one. Decides which listing the product appears on and the label above its name.
    */
   category: number | Category;
   /**
@@ -2333,7 +2333,7 @@ export interface Shop {
    */
   deliveryTitle?: string | null;
   /**
-   * The "3 year warranty + free returns" accordion, shown on every product.
+   * The "Warranty and returns" accordion, shown on every product.
    */
   warranty?: {
     root: {
@@ -2369,7 +2369,7 @@ export interface Shop {
     [k: string]: unknown;
   } | null;
   /**
-   * The sentence beneath a listing heading when a category has not set its own, and on "All jewelry".
+   * The sentence beneath a listing heading when a category has not set its own, and on "All products".
    */
   listingSubtitle?: string | null;
   updatedAt?: string | null;
@@ -2990,7 +2990,7 @@ export interface HomePage {
    */
   categoriesHeading: string;
   /**
-   * Above the featured row. The pieces are whichever are marked Featured in Catalogue → Products.
+   * Above the featured row. The products are whichever are marked Featured in Catalogue → Products.
    */
   featuredHeading: string;
   /**

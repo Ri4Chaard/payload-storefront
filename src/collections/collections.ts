@@ -5,7 +5,7 @@ import { isAdmin } from '@/lib/access'
 import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
- * A merchandising grouping a piece belongs to: Deia, Marvel, Molten, Spartan. Zero or more per
+ * A merchandising grouping a product belongs to: Deia, Marvel, Molten, Spartan. Zero or more per
  * product, unlike a category, of which there is exactly one.
  *
  * Read by the COLLECTION filter group and by "Complete the Collection" on a product page.
@@ -29,7 +29,7 @@ export const Collections: CollectionConfig = {
     update: isAdmin,
     delete: isAdmin,
   },
-  // Publishing invalidates the cached routes (003/T294). A collection decides what _Complete the Collection_ shows beside a piece.
+  // Publishing invalidates the cached routes (003/T294). A collection decides what _Complete the Collection_ shows beside a product.
   hooks: {
     afterChange: [revalidateOnChange],
     afterDelete: [revalidateOnDelete],
@@ -41,7 +41,7 @@ export const Collections: CollectionConfig = {
       localized: true,
       required: true,
       label: 'Title',
-      admin: { description: 'The collection’s name, e.g. "Molten".' },
+      admin: { description: 'The collection’s name, e.g. "Collection A".' },
     },
     slugField(),
     {

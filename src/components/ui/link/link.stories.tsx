@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>
 export const Inline: Story = {
   render: (args) => (
     <p className="text-body-base max-w-prose">
-      Every piece is made to order in our atelier. <Link {...args} /> to read how we work.
+      A sentence with a link inside it. <Link {...args} /> to read how we work.
     </p>
   ),
 }

@@ -6,7 +6,7 @@ import { revalidateGlobalOnChange } from '@/lib/revalidate'
 /**
  * Shop-wide copy that is not per-product.
  *
- * A product page draws three accordions. "Product details" differs for every piece and lives on the
+ * A product page draws three accordions. "Product details" differs for every product and lives on the
  * product. "3 year warranty + free returns" and "Delivery" are the same words on every product in
  * the store — and hardcoding them in a component would be exactly the hardcoded user-visible content
  * Constitution I forbids, converting an editor task into a deployment.
@@ -50,7 +50,7 @@ export const Shop: GlobalConfig = {
       type: 'text',
       localized: true,
       label: 'Warranty heading',
-      defaultValue: '3 YEAR WARRANTY + FREE RETURNS',
+      defaultValue: 'WARRANTY AND RETURNS',
       admin: {
         description:
           'The second accordion’s heading. It states the warranty length, so it is editable.',
@@ -70,7 +70,7 @@ export const Shop: GlobalConfig = {
       localized: true,
       label: 'Warranty and returns',
       admin: {
-        description: 'The "3 year warranty + free returns" accordion, shown on every product.',
+        description: 'The "Warranty and returns" accordion, shown on every product.',
       },
     },
     {
@@ -87,7 +87,7 @@ export const Shop: GlobalConfig = {
       label: 'Default listing subtitle',
       admin: {
         description:
-          'The sentence beneath a listing heading when a category has not set its own, and on "All jewelry".',
+          'The sentence beneath a listing heading when a category has not set its own, and on "All products".',
       },
     },
   ],

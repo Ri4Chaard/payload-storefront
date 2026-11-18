@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn'
  * How a listing goes past its first twelve (003/T255, FR-018).
  *
  * Nothing is drawn for this — spec inconsistency 7, and Open Question 1's stated default, which is
- * where this arrives after a detour through numbered pages. The pattern is the one every jeweller
+ * where this arrives after a detour through numbered pages. The pattern is the one every shop
  * of this size uses: a count of what is on screen against what there is, and one control that adds
  * to it.
  *
@@ -38,7 +38,7 @@ export interface LoadMoreProps extends Omit<React.ComponentProps<'div'>, 'childr
   total: number
   /** The next set's address, or `null` when everything is already shown. */
   moreHref: string | null
-  /** What is being counted. The shop calls them pieces; a caller may disagree. */
+  /** What is being counted. Defaults to products; a caller may pass its own noun. */
   noun?: string
   label?: string
 }
@@ -47,7 +47,7 @@ export function LoadMore({
   shown,
   total,
   moreHref,
-  noun = 'pieces',
+  noun = 'products',
   label: labelProp,
   className,
   ...props

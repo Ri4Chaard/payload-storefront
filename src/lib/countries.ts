@@ -2,10 +2,9 @@
  * Every country, as ISO 3166-1 alpha-2 codes (spec 004, research R6).
  *
  * **Why this file exists at all.** The e-commerce plugin ships `defaultCountries`, and it has forty
- * entries containing neither Kazakhstan nor the United Arab Emirates. The shop's own address in the
- * footer is in Dubai, and the sample address drawn in the profile design is "Kazakhstan, Astana,
- * Mangilik el 22" — so shipping the plugin's list would make the design's own example address
- * impossible to save. That is a defect, not a preference.
+ * entries and leaves out many countries a customer may live in — including the one in the sample
+ * address the profile design draws (node `266:5096`) — so shipping the plugin's list would make the
+ * design's own example address impossible to save. That is a defect, not a preference.
  *
  * **Why codes here and names from `Intl`.** The codes are a fixed international standard, so they
  * are data rather than the user-visible copy Constitution I keeps in Payload — nobody edits the

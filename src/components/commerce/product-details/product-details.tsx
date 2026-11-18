@@ -15,7 +15,7 @@ import { cn } from '@/lib/cn'
  * states: **the copy comes from the catalogue or from the shop global, never from here.**
  *
  *   PRODUCT DETAILS   the product's own rich text, plus its owner-defined attributes
- *   warranty          the `shop` global — the same words on every piece
+ *   warranty          the `shop` global — the same words on every product
  *   delivery          the `shop` global
  *
  * **A row with nothing in it does not render.** An accordion that opens onto blank space is a
@@ -31,7 +31,7 @@ import { cn } from '@/lib/cn'
 export interface ProductDetailsProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   /** Serialised rich text from the product. `null` where the owner left it empty. */
   detailsHtml: string | null
-  /** Owner-defined descriptive properties — metal, carat, setting. Not filters. */
+  /** Owner-defined descriptive properties — material, weight, finish. Not filters. */
   attributes: ProductAttribute[]
   warrantyHtml: string | null
   deliveryHtml: string | null

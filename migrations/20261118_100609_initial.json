@@ -6591,104 +6591,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.products_diamond_shape": {
-      "name": "products_diamond_shape",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum_products_diamond_shape",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "products_diamond_shape_order_idx": {
-          "name": "products_diamond_shape_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "products_diamond_shape_parent_idx": {
-          "name": "products_diamond_shape_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "products_diamond_shape_value_idx": {
-          "name": "products_diamond_shape_value_idx",
-          "columns": [
-            {
-              "expression": "value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "products_diamond_shape_parent_fk": {
-          "name": "products_diamond_shape_parent_fk",
-          "tableFrom": "products_diamond_shape",
-          "tableTo": "products",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.products": {
       "name": "products",
       "schema": "",
@@ -7442,104 +7344,6 @@
           "tableTo": "_products_v_version_attributes",
           "columnsFrom": [
             "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public._products_v_version_diamond_shape": {
-      "name": "_products_v_version_diamond_shape",
-      "schema": "",
-      "columns": {
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "enum__products_v_version_diamond_shape",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "_products_v_version_diamond_shape_order_idx": {
-          "name": "_products_v_version_diamond_shape_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_products_v_version_diamond_shape_parent_idx": {
-          "name": "_products_v_version_diamond_shape_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_products_v_version_diamond_shape_value_idx": {
-          "name": "_products_v_version_diamond_shape_value_idx",
-          "columns": [
-            {
-              "expression": "value",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "_products_v_version_diamond_shape_parent_fk": {
-          "name": "_products_v_version_diamond_shape_parent_fk",
-          "tableFrom": "_products_v_version_diamond_shape",
-          "tableTo": "_products_v",
-          "columnsFrom": [
-            "parent_id"
           ],
           "columnsTo": [
             "id"
@@ -10197,7 +10001,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'3 YEAR WARRANTY + FREE RETURNS'"
+          "default": "'WARRANTY AND RETURNS'"
         },
         "delivery_title": {
           "name": "delivery_title",
@@ -10975,14 +10779,14 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'The beauty of lab-grown diamonds'"
+          "default": "'A headline about your store'"
         },
         "hero_lede": {
           "name": "hero_lede",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Each diamond is created with care for the future, without compromising on quality or brilliance. Modern luxury that combines flawless craftsmanship, sustainability, and affordability'"
+          "default": "'A short sentence under the headline that says what your store offers.'"
         },
         "hero_cta_label": {
           "name": "hero_cta_label",
@@ -11003,7 +10807,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'All jewelry'"
+          "default": "'All products'"
         },
         "featured_cta_label": {
           "name": "featured_cta_label",
@@ -11540,14 +11344,14 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'The beauty of lab-grown diamonds'"
+          "default": "'A headline about your store'"
         },
         "version_hero_lede": {
           "name": "version_hero_lede",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Each diamond is created with care for the future, without compromising on quality or brilliance. Modern luxury that combines flawless craftsmanship, sustainability, and affordability'"
+          "default": "'A short sentence under the headline that says what your store offers.'"
         },
         "version_hero_cta_label": {
           "name": "version_hero_cta_label",
@@ -11568,7 +11372,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'All jewelry'"
+          "default": "'All products'"
         },
         "version_featured_cta_label": {
           "name": "version_featured_cta_label",
@@ -16448,7 +16252,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Stories of diamonds, craftsmanship, and timeless beauty'"
+          "default": "'A headline for your blog'"
         },
         "empty_title": {
           "name": "empty_title",
@@ -16754,7 +16558,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Stories of diamonds, craftsmanship, and timeless beauty'"
+          "default": "'A headline for your blog'"
         },
         "version_empty_title": {
           "name": "version_empty_title",
@@ -16993,7 +16797,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Questions, custom requests, or styling advice — our team is here for you'"
+          "default": "'A short line about how your team can help'"
         },
         "form_heading": {
           "name": "form_heading",
@@ -17007,7 +16811,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'To make an enquiry, please use the contact form below. Our Aurum team will be happy to assist you with diamonds, orders, delivery, or any other questions.'"
+          "default": "'To make an enquiry, please use the contact form below. Our team will be happy to help with orders, delivery, or any other questions.'"
         },
         "form_name_label": {
           "name": "form_name_label",
@@ -17527,7 +17331,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'Questions, custom requests, or styling advice — our team is here for you'"
+          "default": "'A short line about how your team can help'"
         },
         "version_form_heading": {
           "name": "version_form_heading",
@@ -17541,7 +17345,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false,
-          "default": "'To make an enquiry, please use the contact form below. Our Aurum team will be happy to assist you with diamonds, orders, delivery, or any other questions.'"
+          "default": "'To make an enquiry, please use the contact form below. Our team will be happy to help with orders, delivery, or any other questions.'"
         },
         "version_form_name_label": {
           "name": "version_form_name_label",
@@ -19656,19 +19460,6 @@
         "uk"
       ]
     },
-    "public.enum_products_diamond_shape": {
-      "name": "enum_products_diamond_shape",
-      "schema": "public",
-      "values": [
-        "round",
-        "oval",
-        "emerald",
-        "pear",
-        "marquise",
-        "princess",
-        "baguette"
-      ]
-    },
     "public.enum_products_availability": {
       "name": "enum_products_availability",
       "schema": "public",
@@ -19683,19 +19474,6 @@
       "values": [
         "draft",
         "published"
-      ]
-    },
-    "public.enum__products_v_version_diamond_shape": {
-      "name": "enum__products_v_version_diamond_shape",
-      "schema": "public",
-      "values": [
-        "round",
-        "oval",
-        "emerald",
-        "pear",
-        "marquise",
-        "princess",
-        "baguette"
       ]
     },
     "public.enum__products_v_version_availability": {
@@ -20518,6 +20296,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "9df4f855-4538-44ea-9888-0054446824bf",
+  "id": "cce1e4e7-703b-4072-ab74-214f703dae52",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

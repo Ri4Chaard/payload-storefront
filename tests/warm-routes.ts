@@ -19,7 +19,7 @@ const ROUTES = [
   '/',
   '/all-products',
   '/category-1',
-  '/products/paragon-emerald-cut-diamond-engagement-ring',
+  '/products/product-1',
   // The account flow (004). Three specs and the a11y sweep all open these, so whichever worker gets
   // there first was paying the compilation inside an assertion.
   '/sign-in',
@@ -32,7 +32,7 @@ const ROUTES = [
   // was paying the route compilation inside an assertion about a contents rail that had not been
   // hydrated yet.
   '/blog',
-  '/blog/how-to-choose-the-perfect-diamond',
+  '/blog/article-1',
   // Contact and FAQ (008). `contact.spec.ts`, `contact-admin.spec.ts` and the a11y sweep all open
   // `/contact`; `faq.spec.ts` and the a11y sweep both open `/faq`. The contact form is the reason
   // this matters more here than elsewhere — a submit pressed before the route has hydrated fails as

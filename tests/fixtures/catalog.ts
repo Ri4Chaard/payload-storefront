@@ -88,15 +88,15 @@ function photograph(id: number, filename: string, width: number, height: number,
 }
 
 export const mediaFixtures: Media[] = [
-  photograph(1, 'product-ring-packshot.webp', 1274, 1600, 'Paragon emerald cut diamond engagement ring'),
-  photograph(2, 'product-ring-jacket.webp', 1000, 1000, 'The ring worn with a tailored jacket'),
-  photograph(3, 'product-ring-arm.webp', 1000, 1000, 'The ring on a resting hand'),
-  photograph(4, 'product-ring-portrait.webp', 1274, 1600, 'The ring worn, in portrait'),
-  photograph(5, 'product-ring-denim.webp', 1274, 1600, 'The ring against denim'),
-  photograph(6, 'product-bracelet.webp', 830, 830, 'Pavé butterfly diamond bracelet'),
-  photograph(7, 'product-pendant.webp', 830, 830, 'Butterfly diamond pendant'),
-  photograph(8, 'product-ear-climbers.webp', 830, 830, 'Butterfly ruby and pink sapphire ear climbers'),
-  photograph(9, 'product-mini-pendant.webp', 830, 830, 'Butterfly ruby and pink sapphire mini pendant'),
+  photograph(1, 'product-1-a.webp', 1274, 1600, 'Product 1'),
+  photograph(2, 'product-1-c.webp', 1000, 1000, 'Product 1, second view'),
+  photograph(3, 'product-1-d.webp', 1000, 1000, 'Product 1, third view'),
+  photograph(4, 'product-1-b.webp', 1274, 1600, 'Product 1, fourth view'),
+  photograph(5, 'product-1-e.webp', 1274, 1600, 'Product 1, fifth view'),
+  photograph(6, 'product-2.webp', 830, 830, 'Product 2'),
+  photograph(7, 'product-3.webp', 830, 830, 'Product 3'),
+  photograph(8, 'product-4.webp', 830, 830, 'Product 4'),
+  photograph(9, 'product-5.webp', 830, 830, 'Product 5'),
 ]
 
 const image = (index: number): Media => {
@@ -153,10 +153,10 @@ const category = (slug: string): Category => {
 }
 
 export const collectionFixtures: Collection[] = [
-  { id: 1, title: 'Deia', slug: 'deia', order: 1, ...STAMPS },
-  { id: 2, title: 'Marvel', slug: 'marvel', order: 2, ...STAMPS },
-  { id: 3, title: 'Molten', slug: 'molten', order: 3, ...STAMPS },
-  { id: 4, title: 'Spartan', slug: 'spartan', order: 4, ...STAMPS },
+  { id: 1, title: 'Collection A', slug: 'collection-a', order: 1, ...STAMPS },
+  { id: 2, title: 'Collection B', slug: 'collection-b', order: 2, ...STAMPS },
+  { id: 3, title: 'Collection C', slug: 'collection-c', order: 3, ...STAMPS },
+  { id: 4, title: 'Collection D', slug: 'collection-d', order: 4, ...STAMPS },
 ]
 
 const collection = (slug: string): Collection => {
@@ -185,9 +185,9 @@ const colour = (value: string): Colour => {
 }
 
 export const attributeFixtures: Attribute[] = [
-  { id: 1, label: 'Metal', name: 'metal', type: 'text', order: 1, ...STAMPS },
-  { id: 2, label: 'Carat weight', name: 'carat', type: 'text', order: 2, ...STAMPS },
-  { id: 3, label: 'Provenance', name: 'provenance', type: 'text', order: 3, ...STAMPS },
+  { id: 1, label: 'Material', name: 'material', type: 'text', order: 1, ...STAMPS },
+  { id: 2, label: 'Weight', name: 'weight', type: 'text', order: 2, ...STAMPS },
+  { id: 3, label: 'Origin', name: 'origin', type: 'text', order: 3, ...STAMPS },
 ]
 
 const attribute = (name: string): Attribute => {
@@ -201,16 +201,16 @@ const attribute = (name: string): Attribute => {
 // ---------------------------------------------------------------------------------------------
 
 export const variantTypeFixtures: VariantType[] = [
-  { id: 1, name: 'variant', label: 'Choose Your Diamond:', ...STAMPS },
+  { id: 1, name: 'variant', label: 'Option', ...STAMPS },
 ]
 
 /** `surcharge` is dollars ON TOP of the piece's base price — the same arithmetic the seed does. */
 const STONES: { label: string; value: string; surcharge: number; inventory: number }[] = [
-  { label: 'Lab 1.0 ct D VS1', value: 'lab-1-0-d-vs1', surcharge: 0, inventory: 4 },
-  { label: 'Lab 1.5 ct each D VS1 With Halo', value: 'lab-1-5-d-vs1-halo', surcharge: 4200, inventory: 2 },
-  { label: 'Lab 2.0 ct D VVS2', value: 'lab-2-0-d-vvs2', surcharge: 9600, inventory: 1 },
+  { label: 'Option A', value: 'option-a', surcharge: 0, inventory: 4 },
+  { label: 'Option B', value: 'option-b', surcharge: 4200, inventory: 2 },
+  { label: 'Option C', value: 'option-c', surcharge: 9600, inventory: 1 },
   // Deliberately taken. FR-040 needs a stone that is drawn and cannot be chosen.
-  { label: 'Natural 1.5 ct E VS2', value: 'natural-1-5-e-vs2', surcharge: 18400, inventory: 0 },
+  { label: 'Option D', value: 'option-d', surcharge: 18400, inventory: 0 },
 ]
 
 export const variantOptionFixtures: VariantOption[] = STONES.map((stone, index) => ({
@@ -309,80 +309,80 @@ const DRAWN: Piece[] = [
     // The piece the product page is drawn around (node 231:1901). BOTH option paths: stones that
     // move the price. Sizes were the other axis until spec 011 deprecated them.
     id: 1,
-    slug: 'paragon-emerald-cut-diamond-engagement-ring',
-    title: 'Paragon Emerald Cut Diamond Engagement Ring',
+    slug: 'product-1',
+    title: 'Product 1',
     categorySlug: 'category-1',
     gallery: RING_GALLERY,
     price: 38320,
     description:
       'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
-    collectionSlugs: ['deia'],
+    collectionSlugs: ['collection-a'],
     colour: ['clear'],
     availability: 'made-to-order',
     withVariants: true,
     attributes: [
-      { name: 'metal', value: '18k white gold' },
-      { name: 'carat', value: '1.5 ct centre stone' },
-      { name: 'provenance', value: 'Lab grown, IGI certified' },
+      { name: 'material', value: 'Sample material' },
+      { name: 'weight', value: '1.0 kg' },
+      { name: 'origin', value: 'Sample origin' },
     ],
   },
   {
     // No stones at all — a piece with no choice to make.
     id: 2,
-    slug: 'pave-butterfly-diamond-bracelet',
-    title: 'Pavé Butterfly Diamond Bracelet',
+    slug: 'product-2',
+    title: 'Product 2',
     categorySlug: 'category-2',
     gallery: [image(5), image(6)],
     price: 37400,
     description: 'Butterflies in pavé diamonds, set along a flexible band.',
-    collectionSlugs: ['molten'],
+    collectionSlugs: ['collection-c'],
     colour: ['clear'],
     attributes: [
-      { name: 'metal', value: '18k white gold' },
-      { name: 'carat', value: '4.2 ct total' },
+      { name: 'material', value: 'Sample material' },
+      { name: 'weight', value: '1.0 kg' },
     ],
   },
   {
     // No stones, and stock-tracked at a real count.
     id: 3,
-    slug: 'butterfly-diamond-pendant',
-    title: 'Butterfly Diamond Pendant',
+    slug: 'product-3',
+    title: 'Product 3',
     categorySlug: 'category-4',
     gallery: [image(6)],
     price: 12400,
     description: 'A single butterfly, pavé set, on a fine chain.',
-    collectionSlugs: ['marvel'],
+    collectionSlugs: ['collection-b'],
     colour: ['clear'],
     availability: 'stock-tracked',
     inventory: 3,
-    attributes: [{ name: 'metal', value: '18k white gold' }],
+    attributes: [{ name: 'material', value: 'Sample material' }],
   },
   {
     id: 4,
-    slug: 'butterfly-ruby-pink-sapphire-diamond-ear-climbers',
-    title: 'Butterfly Ruby, Pink Sapphire and Diamond Ear Climbers',
+    slug: 'product-4',
+    title: 'Product 4',
     categorySlug: 'category-3',
     gallery: [image(7)],
     price: 21800,
     description: 'Ruby and pink sapphire butterflies that climb the ear.',
-    collectionSlugs: ['spartan'],
+    collectionSlugs: ['collection-d'],
     colour: ['multicolor'],
-    attributes: [{ name: 'metal', value: '18k rose gold' }],
+    attributes: [{ name: 'material', value: 'Sample material' }],
   },
   {
     // Stock-tracked AT ZERO — visible, priced, and not orderable (FR-039).
     id: 5,
-    slug: 'butterfly-ruby-pink-sapphire-diamond-mini-pendant',
-    title: 'Butterfly Ruby, Pink Sapphire and Diamond Mini Pendant',
+    slug: 'product-5',
+    title: 'Product 5',
     categorySlug: 'category-4',
     gallery: [image(8)],
     price: 9600,
     description: 'The mini butterfly, in ruby and pink sapphire.',
-    collectionSlugs: ['spartan'],
+    collectionSlugs: ['collection-d'],
     colour: ['multicolor'],
     availability: 'stock-tracked',
     inventory: 0,
-    attributes: [{ name: 'metal', value: '18k rose gold' }],
+    attributes: [{ name: 'material', value: 'Sample material' }],
   },
 ]
 
@@ -402,30 +402,30 @@ const DRAWN: Piece[] = [
  * see — which is exactly the sort of thing development content is for.
  */
 const FILLER_PIECES: { title: string; categorySlug: string }[] = [
-  { title: 'Halo Solitaire Ring', categorySlug: 'category-1' },
-  { title: 'Baguette Eternity Band', categorySlug: 'category-1' },
-  { title: 'Marquise Cluster Ring', categorySlug: 'category-1' },
-  { title: 'Princess Cut Signet Ring', categorySlug: 'category-1' },
-  { title: 'Oval Trilogy Ring', categorySlug: 'category-1' },
-  { title: 'Cushion Halo Ring', categorySlug: 'category-1' },
-  { title: 'Twisted Pavé Ring', categorySlug: 'category-1' },
-  { title: 'Tennis Bracelet', categorySlug: 'category-2' },
-  { title: 'Bezel Link Bracelet', categorySlug: 'category-2' },
-  { title: 'Pear Drop Bracelet', categorySlug: 'category-2' },
-  { title: 'Emerald Bar Bracelet', categorySlug: 'category-2' },
-  { title: 'Open Cuff Bracelet', categorySlug: 'category-2' },
-  { title: 'Round Stud Earrings', categorySlug: 'category-3' },
-  { title: 'Baguette Huggie Earrings', categorySlug: 'category-3' },
-  { title: 'Oval Drop Earrings', categorySlug: 'category-3' },
-  { title: 'Marquise Threader Earrings', categorySlug: 'category-3' },
-  { title: 'Princess Halo Earrings', categorySlug: 'category-3' },
-  { title: 'Double Hoop Earrings', categorySlug: 'category-3' },
-  { title: 'Solitaire Necklace', categorySlug: 'category-4' },
-  { title: 'Riviera Necklace', categorySlug: 'category-4' },
-  { title: 'Pear Pendant Necklace', categorySlug: 'category-4' },
-  { title: 'Baguette Bar Necklace', categorySlug: 'category-4' },
-  { title: 'Emerald Station Necklace', categorySlug: 'category-4' },
-  { title: 'Layered Chain Necklace', categorySlug: 'category-4' },
+  { title: 'Product 7', categorySlug: 'category-1' },
+  { title: 'Product 8', categorySlug: 'category-1' },
+  { title: 'Product 9', categorySlug: 'category-1' },
+  { title: 'Product 10', categorySlug: 'category-1' },
+  { title: 'Product 11', categorySlug: 'category-1' },
+  { title: 'Product 12', categorySlug: 'category-1' },
+  { title: 'Product 13', categorySlug: 'category-1' },
+  { title: 'Product 14', categorySlug: 'category-2' },
+  { title: 'Product 15', categorySlug: 'category-2' },
+  { title: 'Product 16', categorySlug: 'category-2' },
+  { title: 'Product 17', categorySlug: 'category-2' },
+  { title: 'Product 18', categorySlug: 'category-2' },
+  { title: 'Product 19', categorySlug: 'category-3' },
+  { title: 'Product 20', categorySlug: 'category-3' },
+  { title: 'Product 21', categorySlug: 'category-3' },
+  { title: 'Product 22', categorySlug: 'category-3' },
+  { title: 'Product 23', categorySlug: 'category-3' },
+  { title: 'Product 24', categorySlug: 'category-3' },
+  { title: 'Product 25', categorySlug: 'category-4' },
+  { title: 'Product 26', categorySlug: 'category-4' },
+  { title: 'Product 27', categorySlug: 'category-4' },
+  { title: 'Product 28', categorySlug: 'category-4' },
+  { title: 'Product 29', categorySlug: 'category-4' },
+  { title: 'Product 30', categorySlug: 'category-4' },
 ]
 
 // Colour VALUES, resolved to rows by the builder — the same strings a URL carries.
@@ -462,12 +462,12 @@ const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
     // 1,200 → 46,000 in even steps, so a price filter always has something on each side of it.
     price: 1200 + index * 1950,
     description: `${title}, made to order in our atelier.`,
-    collectionSlugs: [pick(['deia', 'marvel', 'molten', 'spartan'], index)],
+    collectionSlugs: [pick(['collection-a', 'collection-b', 'collection-c', 'collection-d'], index)],
     colour: pick(FILLER_COLOURS, index),
     availability: stocked ? 'stock-tracked' : 'made-to-order',
     // Every fourth is tracked, and one of those is empty — the IN-STOCK ONLY filter needs both.
     inventory: index === 7 ? 0 : 2,
-    attributes: [{ name: 'metal', value: index % 2 === 0 ? '18k white gold' : '18k yellow gold' }],
+    attributes: [{ name: 'material', value: index % 2 === 0 ? 'Material A' : 'Material B' }],
   }
 })
 
@@ -478,13 +478,13 @@ const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
  */
 const UNPUBLISHED: Piece = {
   id: 999,
-  slug: 'unreleased-spartan-cuff',
-  title: 'Unreleased Spartan Cuff',
+  slug: 'unreleased-product',
+  title: 'Unreleased Product',
   categorySlug: 'category-2',
   gallery: [image(5)],
   price: 28000,
   description: 'Not yet announced.',
-  collectionSlugs: ['spartan'],
+  collectionSlugs: ['collection-d'],
   colour: ['clear'],
   status: 'draft',
 }
@@ -504,6 +504,6 @@ export const shopFixture: Shop = {
     'Made-to-order pieces ship within 3 to 4 weeks. Pieces in stock ship the next working day.',
     'Delivery is insured and signature required, worldwide.',
   ]),
-  listingSubtitle: 'Timeless brilliance, made for every moment',
+  listingSubtitle: 'A short description of this listing',
   ...STAMPS,
 }

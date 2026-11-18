@@ -10,8 +10,8 @@ import type { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
  * would only be somewhere for a value nothing can produce.
  *
  * **`cartItemMatcher` went with it, and that is the part worth noticing.** Two lines used to be the
- * same line only if the product, the stone AND the size matched — the plugin's own extension point,
- * used so that one ring in two sizes could not merge into a quantity of two the seller could not
+ * same line only if the product, the variant AND the size matched — the plugin's own extension point,
+ * used so that one product in two sizes could not merge into a quantity of two the seller could not
  * fulfil. With size gone the plugin's default matcher is correct again, so the override is deleted
  * rather than left as a function that compares one fewer thing. A line saved before this change
  * keeps working; two lines that differed only by size merge on their next meeting, which is the

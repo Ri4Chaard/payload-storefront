@@ -46,7 +46,7 @@ export function minorUnitDigits(currency: string = DEFAULT_CURRENCY, locale?: st
 /**
  * `2490000` → `"$24,900"`.
  *
- * Whole amounts lose their decimals, because that is what the design draws and jewellery is priced
+ * Whole amounts lose their decimals, because that is what the design draws and the catalogue is priced
  * in round numbers. An amount with cents keeps them rather than being rounded away — a silent
  * `$24,899.50 → $24,900` is the kind of rounding that ends up in a dispute.
  *

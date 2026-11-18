@@ -20,8 +20,8 @@ export interface FixtureImage {
 }
 
 export const heroFixture = {
-  headline: 'The beauty of lab-grown diamonds',
-  lede: 'Each diamond is created with care for the future, without compromising on quality or brilliance. Modern luxury that combines flawless craftsmanship, sustainability, and affordability',
+  headline: 'A headline about your store',
+  lede: 'A short sentence under the headline that says what your store offers.',
   cta: { label: 'Shop now', href: '/all-products' },
   // Decorative: a backdrop for the headline that sits on top of it, not a picture of anything the
   // headline does not already say.
@@ -71,38 +71,38 @@ export const categoryBandFixture = {
 }
 
 /**
- * Four pieces, which is what the design draws — and the reason its desktop frame parks the
+ * Four products, which is what the design draws — and the reason its desktop frame parks the
  * "scroll right" control at `hidden`. Four cards fill the 1720px content width exactly, so there is
- * nowhere to page and the control correctly disappears. It reappears the moment a fifth piece
+ * nowhere to page and the control correctly disappears. It reappears the moment a fifth product
  * exists, and it is already earning its keep at 1024 and 390, where four cards overflow.
  */
 export const featuredFixture = {
-  heading: 'All jewelry',
+  heading: 'All products',
   cta: { label: 'View all', href: '/all-products' },
   items: [
     {
-      name: 'Butterfly diamond pendant',
+      name: 'Product 3',
       price: '$ 24,900',
-      href: '/all-products/butterfly-diamond-pendant',
-      images: [{ src: '/photography/product-pendant.webp', width: 830, height: 830 }],
+      href: '/all-products/product-3',
+      images: [{ src: '/photography/product-3.webp', width: 830, height: 830 }],
     },
     {
-      name: 'Pavé butterfly diamond bracelet',
+      name: 'Product 2',
       price: '$ 37,400',
-      href: '/all-products/pave-butterfly-diamond-bracelet',
-      images: [{ src: '/photography/product-bracelet.webp', width: 830, height: 830 }],
+      href: '/all-products/product-2',
+      images: [{ src: '/photography/product-2.webp', width: 830, height: 830 }],
     },
     {
-      name: 'Butterfly ruby, pink sapphire and diamond ear climbers',
+      name: 'Product 4',
       price: '$ 38,000',
-      href: '/all-products/butterfly-ruby-pink-sapphire-diamond-ear-climbers',
-      images: [{ src: '/photography/product-ear-climbers.webp', width: 830, height: 830 }],
+      href: '/all-products/product-4',
+      images: [{ src: '/photography/product-4.webp', width: 830, height: 830 }],
     },
     {
-      name: 'Butterfly ruby, pink sapphire and diamond mini pendant',
+      name: 'Product 5',
       price: '$ 19,000',
-      href: '/all-products/butterfly-ruby-pink-sapphire-diamond-mini-pendant',
-      images: [{ src: '/photography/product-mini-pendant.webp', width: 830, height: 830 }],
+      href: '/all-products/product-5',
+      images: [{ src: '/photography/product-5.webp', width: 830, height: 830 }],
     },
   ],
 }
@@ -110,8 +110,8 @@ export const featuredFixture = {
 export const aboutFixture = {
   heading: { lead: 'About', emphasis: 'Aurum' },
   body: [
-    'Discover our collection of lab-grown diamond rings, where timeless beauty meets a responsible approach.',
-    'Perfect for engagements, weddings, or special occasions, each piece combines exceptional brilliance, refined luxury, and timeless elegance',
+    'A short paragraph about your store.',
+    'A second paragraph about what you sell and why it is worth a look.',
   ],
   cta: { label: 'Discover our story', href: '/about' },
   image: {
@@ -120,6 +120,6 @@ export const aboutFixture = {
     height: 1254,
     // Not decoration: this one stands beside the copy rather than behind it, and the copy never
     // describes it.
-    alt: 'A ruby and diamond collar from the Aurum collection',
+    alt: 'A placeholder photograph for the About band',
   } as FixtureImage,
 }

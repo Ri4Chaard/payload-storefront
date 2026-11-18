@@ -4,7 +4,7 @@ import { LoadMore } from './load-more'
 
 /**
  * Undrawn (spec inconsistency 7, Open Question 1). A count of what is on screen against what there
- * is, and one control that adds twelve more — the pattern every jeweller of this size uses.
+ * is, and one control that adds twelve more — the pattern every shop of this size uses.
  *
  * The control is a link to `?page=N`, not a fetch: the listing already lives in its URL, so the
  * server renders the longer grid and the whole thing works with scripting off.

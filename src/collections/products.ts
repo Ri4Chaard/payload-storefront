@@ -9,12 +9,12 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 /**
  * The plugin's own `inventory` field, shown only when it means something.
  *
- * It is meaningless on a made-to-order piece, and meaningless on a product whose stones each carry
+ * It is meaningless on a made-to-order product, and meaningless on a product whose variants each carry
  * their own count, so it appears for neither.
  *
  * It is NOT hidden from public reads. An earlier draft of data-model.md put `adminOnlyFieldAccess`
  * on it — which would strip the field from the same access-controlled query the storefront uses to
- * decide whether a piece is orderable, leaving the page unable to tell. A stock count is not
+ * decide whether a product is orderable, leaving the page unable to tell. A stock count is not
  * personal data, and "unavailable" has to be derived from something.
  *
  * Narrowing on `type === 'number'` before spreading is not defensive noise: `Field` is a union of
@@ -30,7 +30,7 @@ const adjustInventory = (field: Field): Field => {
       ...field.admin,
       position: 'sidebar',
       condition: (data) => data?.availability === 'stock-tracked' && !data?.enableVariants,
-      description: 'How many exist. At zero the piece is shown as unavailable.',
+      description: 'How many exist. At zero the product is shown as unavailable.',
     },
   }
 }
@@ -38,11 +38,11 @@ const adjustInventory = (field: Field): Field => {
 const isInventory = (field: Field) => field.type === 'number' && field.name === 'inventory'
 
 /**
- * The stones table under "Available variants" shows the PRICE by default.
+ * The variants table under "Available variants" shows the PRICE by default.
  *
  * Left alone, the join renders whatever the variants collection nominates, which is its title — so
  * the one column that matters most is the one the owner has to add by hand, on every visit, for
- * every product. A stone exists to carry a price; a table of stones that does not show prices
+ * every product. A variant exists to carry a price; a table of variants that does not show prices
  * cannot answer "is this ladder right" at a glance, which is the whole reason to look at it.
  *
  * Set on the JOIN rather than on the variants collection deliberately. That collection's `admin` is
@@ -60,14 +60,14 @@ const adjustVariantsJoin = (field: Field): Field => {
     ...field,
     admin: {
       ...field.admin,
-      // The stone, what it costs, and how many there are — the three things a variant IS.
+      // The option, what it costs, and how many there are — the three things a variant IS.
       defaultColumns: ['title', 'priceInUSD', 'inventory'],
     },
   }
 }
 
 /**
- * A piece of jewelry.
+ * A product in the catalogue.
  *
  * The e-commerce plugin's own `products` collection is **nearly empty** — it contributes
  * `inventory`, `enableVariants`, `variantTypes`, a `variants` join, and one price group per
@@ -88,8 +88,8 @@ const adjustVariantsJoin = (field: Field): Field => {
  *
  * The four tabs follow the storefront rather than the schema, because that is what an editor is
  * looking at while they fill the form in: **Content** is everything above the fold, **Details** is
- * the accordion beneath it, **Categorisation** is every filter the piece answers to, and
- * **Price & stones** is the two selectors and what they cost.
+ * the accordion beneath it, **Categorisation** is every filter the product answers to, and
+ * **Price & options** is the two selectors and what they cost.
  *
  * Three fields stay outside the tabs, in the sidebar, because they are the document's status rather
  * than its content: the slug, whether it is made to order, and how many exist.
@@ -109,7 +109,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
     afterChange: [
       ...(defaultCollection.hooks?.afterChange ?? []),
       revalidateOnChange,
-      // Carries `availability` down to every stone, so the quantity field can hide itself on one
+      // Carries `availability` down to every variant, so the quantity field can hide itself on one
       // (spec 011, FR-001). See `./product-hooks.ts` for why a variant cannot just ask its parent.
       cascadeAvailability,
     ],
@@ -141,7 +141,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
       admin: {
         position: 'sidebar',
         description:
-          'Made to order ignores the quantity entirely. Stock tracked shows the piece as unavailable at zero — visible, but not orderable.',
+          'Made to order ignores the quantity entirely. Stock tracked shows the product as unavailable at zero — visible, but not orderable.',
       },
     },
 
@@ -212,7 +212,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
               labels: { singular: 'Attribute', plural: 'Attributes' },
               admin: {
                 description:
-                  'Metal, carat weight, provenance. Define new ones under Attributes and they appear here with no deployment.',
+                  'Material, weight, origin. Define new ones under Attributes and they appear here with no deployment.',
               },
               fields: [
                 {
@@ -248,7 +248,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
 
         {
           label: 'Categorisation',
-          description: 'Everything the piece can be filtered by.',
+          description: 'Everything the product can be filtered by.',
           fields: [
             {
               type: 'row',
@@ -262,7 +262,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                   label: 'Category',
                   admin: {
                     description:
-                      'Exactly one. Decides which listing the piece appears on and the label above its name.',
+                      'Exactly one. Decides which listing the product appears on and the label above its name.',
                   },
                 },
                 {
@@ -284,7 +284,7 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
                   /*
                     **The owner's list as of spec 011, not four values in this file.**
 
-                    It was a `select` whose options were written here, which made adding rose gold a
+                    It was a `select` whose options were written here, which made adding navy a
                     developer task and a deployment — the one arrangement every other descriptive
                     vocabulary in this shop avoids. A relationship gets the picker, the localized
                     labels and referential integrity for free.
@@ -314,9 +314,9 @@ export const productsCollectionOverride: CollectionOverride = ({ defaultCollecti
         },
 
         {
-          label: 'Price & stones',
+          label: 'Price & options',
           description:
-            'The price, and the stones a customer chooses between. Add stones under "Available variants" — each carries its own price and quantity.',
+            'The price, and the options a customer chooses between. Add options under "Available variants" — each carries its own price and quantity.',
           // Everything the plugin contributes except `inventory`, which is in the sidebar above.
           fields: defaultCollection.fields.filter((field) => !isInventory(field)).map(adjustVariantsJoin),
         },

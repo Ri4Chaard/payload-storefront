@@ -46,7 +46,7 @@ import { cn } from '@/lib/cn'
  * than only when the rail happens to overflow.
  *
  * **The set is a loop.** Next from the last photograph is the first. Three photographs of one
- * piece have no natural end to stop dead at — the same reasoning `ImageCarousel` uses for `wrap`,
+ * product have no natural end to stop dead at — the same reasoning `ImageCarousel` uses for `wrap`,
  * and the opposite of a row of products, where wrapping hides whether you have seen everything.
  *
  * The loop is the SWIPE's as well as the controls'. `Carousel`'s `loop` puts a copy of the last
@@ -158,7 +158,7 @@ export function ProductGallery({
   useAutoAdvance(rootRef, open || images.length < 2 ? undefined : autoAdvance, () => step(1))
 
   if (images.length === 0) {
-    // A piece with no photography is a content problem, not a rendering one. The box keeps the
+    // A product with no photography is a content problem, not a rendering one. The box keeps the
     // column's proportions so the information beside it does not jump, and says nothing.
     return (
       <div
@@ -191,7 +191,7 @@ export function ProductGallery({
         'self-start',
         // 990px — the 120px rail, the 20px gap and the 850px photograph the design draws at 1920
         // (`297:4567`). Without it the photograph is a square that grows with the viewport, so a
-        // 2560px monitor renders a 1200px picture of a ring. `Container` deliberately has no
+        // 2560px monitor renders a 1200px picture of a product. `Container` deliberately has no
         // max-width; this is the one element that needs its own, because it is the one whose
         // height follows its width.
         'xl:block xl:max-w-247.5',
@@ -324,7 +324,7 @@ export function ProductGallery({
               type="button"
               // The photograph's own description PLUS what pressing it does. An `aria-label` alone
               // would replace the alt text rather than add to it, and the alt is the only place the
-              // piece is described to someone who cannot see it.
+              // product is described to someone who cannot see it.
               aria-label={`${image.alt ?? label} — open full screen`}
               onClick={() => {
                 trigger.current = photographs.current[position] ?? null

@@ -76,7 +76,7 @@ export const WithUnavailableOptions: Story = {
   },
 }
 
-/** The whole control off, for a piece that cannot be ordered at all. */
+/** The whole control off, for a product that cannot be ordered at all. */
 export const Disabled: Story = {
   args: { disabled: true },
 }

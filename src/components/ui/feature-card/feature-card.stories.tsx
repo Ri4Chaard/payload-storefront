@@ -11,24 +11,23 @@ import { FeatureCard, FeatureStrip } from './feature-card'
 const ITEMS = [
   {
     icon: 'shipping' as const,
-    title: 'Free shipping',
-    description: 'Carefully packaged and delivered with guaranteed protection',
+    title: 'Shipping',
+    description: 'A short sentence about how orders are delivered.',
   },
   {
     icon: 'seal-check' as const,
-    title: 'Quality guarantee',
-    description:
-      'If your piece doesn’t meet your expectations, we’ll assist you with a return or exchange',
+    title: 'Warranty',
+    description: 'A short sentence about your warranty or returns.',
   },
   {
     icon: 'customer-support' as const,
-    title: 'Personal support',
-    description: 'Our specialists will help you choose the perfect piece and answer any questions',
+    title: 'Support',
+    description: 'A short sentence about how customers can reach you.',
   },
   {
     icon: 'secure-payment' as const,
-    title: 'Secure payments',
-    description: 'Your information is protected with modern encryption technology',
+    title: 'Payments',
+    description: 'A short sentence about how customers pay.',
   },
 ]
 
@@ -59,9 +58,9 @@ export const WithLongerCopy: Story = {
         ? {
             ...item,
             description:
-              'Every order is packed by hand in a lined case, insured for its full value, and ' +
-              'delivered by a courier who will wait for a signature — anywhere in the Emirates, ' +
-              'within two working days.',
+              'A short sentence about how orders are delivered, followed by a second sentence ' +
+              'that runs far longer than the card was drawn for, so the card has to grow ' +
+              'rather than clip its own copy.',
           }
         : item,
     ),
@@ -75,8 +74,8 @@ export const OneCard: Story = {
       <FeatureCard
         as="div"
         icon="seal-check"
-        title="Quality guarantee"
-        description="If your piece doesn’t meet your expectations, we’ll assist you with a return or exchange"
+        title="Warranty"
+        description="A short sentence about your warranty or returns."
         className="max-w-104"
       />
     </div>

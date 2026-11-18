@@ -15,7 +15,7 @@ import { cn } from '@/lib/cn'
  * **Not a `<input type="number">`.** The design draws a plain count, and a number input at 30px wide
  * brings native spinners that have to be hidden, a keyboard that accepts `-1e5`, and a value that
  * can be typed empty. What it gains — typing 12 rather than pressing plus eleven times — matters for
- * a stock system, not for jewellery bought one at a time. `max` is what stops the count exceeding
+ * a stock system, not for products bought one at a time. `max` is what stops the count exceeding
  * what is available.
  *
  * The count is a live region, because pressing a button that changes a number elsewhere on screen

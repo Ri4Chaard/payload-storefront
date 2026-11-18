@@ -16,12 +16,12 @@ import { Lightbox } from './lightbox'
  * Dimensions are real. PhotoSwipe computes the fitted size and the zoom ceiling from them, and a
  * wrong pair produces a photograph that zooms to the wrong place.
  */
-const RING = [
-  { src: '/photography/product-ring-packshot.webp', width: 1274, height: 1600, alt: 'The ring, photographed on white' },
-  { src: '/photography/product-ring-jacket.webp', width: 1000, height: 1000, alt: 'The ring worn with a tailored jacket' },
-  { src: '/photography/product-ring-arm.webp', width: 1000, height: 1000, alt: 'The ring on a resting hand' },
-  { src: '/photography/product-ring-portrait.webp', width: 1274, height: 1600, alt: 'The ring worn, in portrait' },
-  { src: '/photography/product-ring-denim.webp', width: 1274, height: 1600, alt: 'The ring against denim' },
+const PHOTOS = [
+  { src: '/photography/product-1-a.webp', width: 1274, height: 1600, alt: 'Product 1, photograph 1' },
+  { src: '/photography/product-1-c.webp', width: 1000, height: 1000, alt: 'Product 1, photograph 2' },
+  { src: '/photography/product-1-d.webp', width: 1000, height: 1000, alt: 'Product 1, photograph 3' },
+  { src: '/photography/product-1-b.webp', width: 1274, height: 1600, alt: 'Product 1, photograph 4' },
+  { src: '/photography/product-1-e.webp', width: 1274, height: 1600, alt: 'Product 1, photograph 5' },
 ]
 
 const meta = {
@@ -32,9 +32,9 @@ const meta = {
     open: true,
     onClose: () => {},
     onIndexChange: () => {},
-    images: RING,
+    images: PHOTOS,
     index: 0,
-    label: 'Paragon Emerald Cut Diamond Engagement Ring',
+    label: 'Product 1',
   },
   render: function Render(args) {
     const [open, setOpen] = React.useState(args.open)
@@ -72,7 +72,7 @@ export const Default: Story = {}
 export const MidSequence: Story = { args: { index: 2 } }
 
 /** One photograph: the arrows are not drawn at all rather than drawn and inert. */
-export const SinglePhotograph: Story = { args: { images: [RING[0]!] } }
+export const SinglePhotograph: Story = { args: { images: [PHOTOS[0]!] } }
 
 /**
  * With `thumbnailFor`, the viewer grows out of the picture that was pressed instead of fading in.
@@ -87,7 +87,7 @@ export const FromAThumbnail: Story = {
 
     return (
       <div className="flex min-h-svh flex-wrap gap-4 p-10">
-        {RING.map((image, position) => (
+        {PHOTOS.map((image, position) => (
           <button
             key={image.src}
             ref={(node) => {

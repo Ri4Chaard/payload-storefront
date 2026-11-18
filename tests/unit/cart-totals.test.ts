@@ -32,11 +32,11 @@ const RING: ProductDetail = {
   gallery: [],
   detailsHtml: null,
   variantOptions: [
-    { id: 11, label: 'Lab 1.0 ct D VS1', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
+    { id: 11, label: 'Option A', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
     { id: 12, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
     {
       id: 13,
-      label: 'Lab 1.5 ct D VS1',
+      label: 'Option B',
       price: '$38,320',
       priceMinor: 3832000,
       available: true,
@@ -78,7 +78,7 @@ describe('resolveLine', () => {
 
     expect(resolved.unitMinor).toBe(3832000)
     expect(resolved.unitPrice).toBe('$38,320')
-    expect(resolved.variantChoice).toBe('Lab 1.5 ct D VS1')
+    expect(resolved.variantChoice).toBe('Option B')
   })
 
   it('prices a piece with no stones from the piece itself', () => {

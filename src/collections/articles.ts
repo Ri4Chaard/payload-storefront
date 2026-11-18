@@ -175,7 +175,7 @@ export const Articles: CollectionConfig = {
                   label: 'Lede',
                   admin: {
                     description:
-                      'Optional. The chapter’s one summary line, e.g. “What defines a diamond”. Any further emphasis belongs in the body as bold text.',
+                      'Optional. The chapter’s one summary line, e.g. “What to look for”. Any further emphasis belongs in the body as bold text.',
                   },
                 },
                 {

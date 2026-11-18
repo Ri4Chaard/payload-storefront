@@ -10,8 +10,8 @@ import { Header } from './header'
 const BREADCRUMBS = [
   { label: 'Home', href: '/' },
   { label: 'Category 1', href: '/category-1' },
-  { label: 'Engagement', href: '/category-1/engagement' },
-  { label: 'Solitaire in 18ct gold' },
+  { label: 'Subcategory', href: '/category-1/subcategory' },
+  { label: 'Product 1' },
 ]
 
 /**
@@ -75,7 +75,7 @@ export const OnAPage: Story = {
     <div>
       <Header {...args} />
       <main className="p-8">
-        <h1 className="text-heading-1">Engagement rings</h1>
+        <h1 className="text-heading-1">Category 1</h1>
         <p className="text-body-base text-neutral-secondary mt-4 max-w-prose">
           Placeholder content, so the header has something to sit above.
         </p>

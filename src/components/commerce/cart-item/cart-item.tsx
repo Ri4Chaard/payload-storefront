@@ -20,7 +20,7 @@ import { cn } from '@/lib/cn'
  * `IconButton` for the bin (node 258:3980). What is new is the arrangement.
  *
  * **Extended by spec 005 rather than copied** (Principle II). The cart page needs three things this
- * did not have: the chosen stone and size on the line, a line total, and a way to look busy while a
+ * did not have: the chosen option and size on the line, a line total, and a way to look busy while a
  * Server Action is in flight. All three are additions; a `CartLine` sibling would have been the
  * duplication Principle II calls the most expensive violation.
  *
@@ -29,8 +29,8 @@ import { cn } from '@/lib/cn'
  * carries the unit price alone (node `425:11276`). Dropping the total there is the design's
  * decision, not an omission — the summary below still adds up.
  *
- * The name carries the accessible context for both controls — "Decrease quantity of BUTTERFLY
- * DIAMOND PENDANT", "Remove BUTTERFLY DIAMOND PENDANT". A basket of three rows otherwise offers
+ * The name carries the accessible context for both controls — "Decrease quantity of PRODUCT 1",
+ * "Remove PRODUCT 1". A basket of three rows otherwise offers
  * three identical "Increase quantity" buttons and three identical bins, which is unusable by voice
  * or by screen reader and looks perfectly fine on screen.
  *
@@ -42,7 +42,7 @@ export interface CartItemProps extends Omit<React.ComponentProps<'li'>, 'onChang
   /** Formatted for display; currency and grouping belong to the caller's locale. */
   price: string
   /**
-   * `null` where the product is gone and there is no photograph to show — a withdrawn piece keeps
+   * `null` where the product is gone and there is no photograph to show — a withdrawn product keeps
    * its row (FR-014) and the row still needs a box where the picture was. Passing `{ src: '' }`
    * instead makes `next/image` request the current page as an image; the story sweep caught it.
    */
@@ -55,7 +55,7 @@ export interface CartItemProps extends Omit<React.ComponentProps<'li'>, 'onChang
   /** Usually the stock level. */
   max?: number
   as?: 'li' | 'div'
-  /** The chosen stone and size, already worded. Absent where the piece offers neither. */
+  /** The chosen option and size, already worded. Absent where the product offers neither. */
   options?: React.ReactNode
   /** `unitPrice × quantity`, formatted. Drawn at `xl` only. */
   lineTotal?: string
@@ -65,7 +65,7 @@ export interface CartItemProps extends Omit<React.ComponentProps<'li'>, 'onChang
    * Something changed under this line — sold out, withdrawn, repriced (FR-014).
    *
    * Rendered as text beneath the price, never as colour alone, and it does not remove the row: a
-   * cart that quietly loses a piece is one the customer cannot reason about.
+   * cart that quietly loses a product is one the customer cannot reason about.
    */
   issue?: React.ReactNode
 }

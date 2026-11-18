@@ -49,7 +49,7 @@ export const BlogPage: GlobalConfig = {
       type: 'textarea',
       localized: true,
       required: true,
-      defaultValue: 'Stories of diamonds, craftsmanship, and timeless beauty',
+      defaultValue: 'A headline for your blog',
       label: 'Headline',
       admin: { description: 'The blog’s main statement. Drawn over two lines.' },
     },

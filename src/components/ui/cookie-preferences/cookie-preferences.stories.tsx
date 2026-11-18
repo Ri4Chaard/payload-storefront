@@ -29,7 +29,7 @@ const ANALYTICS = {
 const MARKETING = {
   key: 'marketing',
   name: 'Marketing',
-  purpose: 'Let us show you our pieces on other websites you visit.',
+  purpose: 'Let us show you our products on other websites you visit.',
   necessary: false,
 }
 

@@ -35,7 +35,7 @@ export const AllStates: Story = {
 export const AsASearchSuggestionRow: Story = {
   render: () => (
     <div className="flex max-w-prose flex-wrap items-center gap-3">
-      {['engagement rings', 'sapphire', 'made to order', 'gold bands', 'gift under 1000'].map(
+      {['category 1', 'option a', 'made to order', 'collection a', 'gift under 1000'].map(
         (term, index) => (
           <Chip key={term} selected={index === 1}>
             {term}

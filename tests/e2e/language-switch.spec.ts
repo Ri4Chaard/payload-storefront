@@ -150,7 +150,7 @@ test.describe('switching language', () => {
       assertion compared the label before and after and passed anyway, because "Cart, empty" equals
       "Cart, empty".
     */
-    await page.goto('/products/butterfly-diamond-pendant')
+    await page.goto('/products/product-3')
     await page.getByRole('button', { name: /add to cart/i }).click()
     await expect(page.getByText(/added to your cart/i)).toBeVisible()
 

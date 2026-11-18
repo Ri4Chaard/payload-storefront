@@ -20,7 +20,7 @@ import { expect, test } from '@playwright/test'
  *   - LOAD MORE, where `?page=2` means the first fourteen rather than the second seven.
  */
 
-const ARTICLE = '/blog/how-to-choose-the-perfect-diamond'
+const ARTICLE = '/blog/article-1'
 
 test.describe('the index', () => {
   test('lists the seeded articles, newest first, each reachable in one click', async ({ page }) => {
@@ -229,7 +229,7 @@ test.describe('the address list', () => {
 
     const xml = await response.text()
     expect(xml).toContain('/blog</loc>')
-    expect(xml).toContain('/blog/how-to-choose-the-perfect-diamond</loc>')
+    expect(xml).toContain('/blog/article-1</loc>')
 
     // Absolute, as the sitemap protocol requires.
     expect(xml).toMatch(/<loc>https?:\/\/[^<]+\/blog<\/loc>/)

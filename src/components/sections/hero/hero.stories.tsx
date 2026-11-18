@@ -44,11 +44,11 @@ export const WithoutScrim: Story = { args: { scrim: false } }
  */
 export const WithLongerCopy: Story = {
   args: {
-    headline: 'The beauty of lab-grown diamonds, cut and certified in the Emirates',
+    headline: 'A headline about your store, much longer than the drawing allows',
     lede:
-      'Each diamond is created with care for the future, without compromising on quality or ' +
-      'brilliance. Modern luxury that combines flawless craftsmanship, sustainability and ' +
-      'affordability — with every stone independently graded, and every setting finished by hand ' +
-      'in our own workshop.',
+      'A short sentence under the headline that says what your store offers, followed by a ' +
+      'second, longer sentence that keeps going well past the length of the drawing, so the ' +
+      'band has to grow taller than the screen to hold it rather than clipping its own copy ' +
+      'at the bottom edge.',
   },
 }

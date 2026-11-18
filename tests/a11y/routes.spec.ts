@@ -26,8 +26,8 @@ const ROUTES = [
   // A piece with stones and sizes, and one with neither: the selectors, the quantity stepper and
   // the two actions only exist on the first, and the second is what proves the column closes over
   // them rather than leaving labelled controls behind (003/T296).
-  '/products/paragon-emerald-cut-diamond-engagement-ring',
-  '/products/butterfly-diamond-pendant',
+  '/products/product-1',
+  '/products/product-3',
   // The account flow (004/T459). A form is where a keyboard or a screen reader has the most to
   // lose — an unlabelled field or an error nobody announces is the difference between registering
   // and giving up — and these two are the only pages on the site a visitor MUST complete.
@@ -66,7 +66,7 @@ const ROUTES = [
    */
   '/blog',
   '/blog?category=guides',
-  '/blog/how-to-choose-the-perfect-diamond',
+  '/blog/article-1',
   // Contact and FAQ (008). `/contact` is the only route on this site carrying a form a visitor can
   // submit without an account, so it is the one whose error and pending states an automated scan
   // has never seen before. `/faq` is a column of expandable rows and nothing else.
@@ -189,7 +189,7 @@ for (const { name, width, height } of [
 ]) {
   test(`the open lightbox has no accessibility violations at ${name} width`, async ({ page }) => {
     await page.setViewportSize({ width, height })
-    await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+    await page.goto('/products/product-1')
     await page.waitForLoadState('networkidle')
 
     await page.getByRole('button', { name: /open full screen$/ }).first().click()
@@ -378,7 +378,7 @@ for (const { name, width, height } of [
     test.setTimeout(120_000)
     await page.setViewportSize({ width, height })
 
-    await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+    await page.goto('/products/product-1')
     await page.getByRole('combobox', { name: /variantChoice/i }).click()
     await page.getByRole('option').first().click()
     await page.getByRole('button', { name: /add to cart/i }).click()

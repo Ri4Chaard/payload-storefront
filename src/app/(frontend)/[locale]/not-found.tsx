@@ -11,7 +11,7 @@ import { Container } from '@/components/ui/container'
  * now, so Next's own unstyled page was never reached and never missed. `/[category]` and, shortly,
  * `/products/[slug]` both call it deliberately: an unknown category, a slug that names nothing, and
  * a draft requested anonymously all arrive here, and all three must be indistinguishable from
- * outside. A 403 on an unpublished slug tells a stranger the piece exists.
+ * outside. A 403 on an unpublished slug tells a stranger the product exists.
  *
  * It renders inside the storefront layout, so the header, the footer and the navigation come with
  * it — which is the difference between a dead end and a wrong turn.

@@ -57,8 +57,8 @@ let ring: ProductDetail
 let pendant: ProductDetail
 
 beforeAll(async () => {
-  const withOptions = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
-  const withNone = await getProduct('butterfly-diamond-pendant', 'en')
+  const withOptions = await getProduct('product-1', 'en')
+  const withNone = await getProduct('product-3', 'en')
   if (!withOptions || !withNone) {
     throw new Error('Seed the catalogue first: pnpm seed')
   }
@@ -124,7 +124,7 @@ describe('what may be added (FR-002, FR-003)', () => {
   it('refuses a draft, which the published catalogue cannot even see', async () => {
     const draft = await payload.find({
       collection: 'products',
-      where: { slug: { equals: 'unreleased-spartan-cuff' } },
+      where: { slug: { equals: 'unreleased-product' } },
       limit: 1,
       overrideAccess: true,
     })
@@ -166,7 +166,7 @@ describe('what may be added (FR-002, FR-003)', () => {
    * page. FR-002 wants the refusal to name the piece rather than send the visitor to fix a stone.
    */
   it('refuses a piece that is stock tracked and sold out, naming the piece', async () => {
-    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-ear-climbers', 'en')
+    const soldOut = await getProduct('product-4', 'en')
     expect(soldOut, 'the seed keeps one sold-out piece so this rule is exercised').not.toBeNull()
     expect(soldOut!.available).toBe(false)
 

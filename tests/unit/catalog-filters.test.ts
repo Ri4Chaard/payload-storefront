@@ -20,7 +20,7 @@ import type { FilterState } from '@/lib/catalog/types'
  */
 const FULL: FilterState = {
   category: ['category-1', 'category-3'],
-  collection: ['molten'],
+  collection: ['collection-c'],
   colour: ['black', 'clear'],
   minPrice: 120000,
   maxPrice: 730000,
@@ -166,10 +166,10 @@ describe('toggleFilter', () => {
 
   it('leaves every other group alone', () => {
     const filters = { ...DEFAULT_FILTERS, category: ['category-1'], colour: ['black' as const] }
-    expect(toggleFilter(filters, 'collection', 'molten')).toMatchObject({
+    expect(toggleFilter(filters, 'collection', 'collection-c')).toMatchObject({
       category: ['category-1'],
       colour: ['black'],
-      collection: ['molten'],
+      collection: ['collection-c'],
     })
   })
 })

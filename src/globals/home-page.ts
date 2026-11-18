@@ -51,7 +51,7 @@ export const HomePage: GlobalConfig = {
           type: 'textarea',
           localized: true,
           required: true,
-          defaultValue: 'The beauty of lab-grown diamonds',
+          defaultValue: 'A headline about your store',
           label: 'Headline',
           admin: { description: 'The page’s `h1`. Real text over the photograph, never part of it.' },
         },
@@ -61,7 +61,7 @@ export const HomePage: GlobalConfig = {
           localized: true,
           required: true,
           defaultValue:
-            'Each diamond is created with care for the future, without compromising on quality or brilliance. Modern luxury that combines flawless craftsmanship, sustainability, and affordability',
+            'A short sentence under the headline that says what your store offers.',
           label: 'Lede',
           admin: { description: 'The sentence under the headline.' },
         },
@@ -103,11 +103,11 @@ export const HomePage: GlobalConfig = {
       type: 'text',
       localized: true,
       required: true,
-      defaultValue: 'All jewelry',
+      defaultValue: 'All products',
       label: 'Featured heading',
       admin: {
         description:
-          'Above the featured row. The pieces are whichever are marked Featured in Catalogue → Products.',
+          'Above the featured row. The products are whichever are marked Featured in Catalogue → Products.',
       },
     },
     {
@@ -162,10 +162,10 @@ export const HomePage: GlobalConfig = {
           minRows: 1,
           defaultValue: [
             {
-              text: 'Discover our collection of lab-grown diamond rings, where timeless beauty meets a responsible approach.',
+              text: 'A short paragraph about your store.',
             },
             {
-              text: 'Perfect for engagements, weddings, or special occasions, each piece combines exceptional brilliance, refined luxury, and timeless elegance',
+              text: 'A second paragraph about what you sell and why it is worth a look.',
             },
           ],
           admin: { description: 'One box per paragraph. The band draws two.' },

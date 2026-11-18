@@ -13,7 +13,7 @@ const photo = {
   src: '/photography/about.webp',
   width: 1920,
   height: 1080,
-  alt: 'A hand wearing a solitaire ring',
+  alt: 'A placeholder photograph',
 }
 
 const meta = {
@@ -46,7 +46,7 @@ export const Background: Story = {
     <div className="relative">
       <Media {...args} />
       <p className="text-neutral-white text-display absolute inset-0 flex items-center p-10 uppercase">
-        Selected for brilliance
+        A headline over the photograph
       </p>
     </div>
   ),

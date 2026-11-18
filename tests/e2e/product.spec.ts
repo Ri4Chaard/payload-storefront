@@ -7,8 +7,8 @@ import { expect, test, type Page } from '@playwright/test'
  * every assertion about controls turns on: a control that pages a set of one is a lie, and the
  * only way to catch it is to render a piece that has one.
  */
-const RING = '/products/paragon-emerald-cut-diamond-engagement-ring'
-const PENDANT = '/products/butterfly-diamond-pendant'
+const RING = '/products/product-1'
+const PENDANT = '/products/product-3'
 
 const WIDTHS = {
   desktop: { width: 1920, height: 1080 },
@@ -252,7 +252,7 @@ test('an unknown slug is the branded 404', async ({ page }) => {
 
 /** A draft is indistinguishable from a slug that does not exist (FR-009). */
 test('a draft is unreachable by its own URL', async ({ page }) => {
-  const response = await page.goto('/products/unreleased-spartan-cuff')
+  const response = await page.goto('/products/unreleased-product')
   expect(response?.status()).toBe(404)
 })
 

@@ -12,13 +12,13 @@ const ITEMS = [
     id: 'description',
     title: 'Description',
     content:
-      'A solitaire in 18ct gold, set with a 1.2ct brilliant-cut diamond. Each stone is chosen in ' +
-      'person and comes with its own certificate.',
+      'Short product description. A second sentence with a little more detail about the ' +
+      'product.',
   },
   {
     id: 'delivery',
     title: 'Delivery & returns',
-    content: 'Insured delivery within the UAE in two working days. Returns accepted for 30 days.',
+    content: 'Insured delivery within the country in two working days. Returns accepted for 30 days.',
   },
   {
     id: 'warranty',
@@ -77,7 +77,7 @@ export const WithADisabledRow: Story = {
 export const OneRowAlone: Story = {
   render: () => (
     <AccordionItem title="Description" defaultOpen>
-      A solitaire in 18ct gold, set with a 1.2ct brilliant-cut diamond.
+      Short product description.
     </AccordionItem>
   ),
 }

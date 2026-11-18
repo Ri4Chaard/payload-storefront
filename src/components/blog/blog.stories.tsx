@@ -24,30 +24,30 @@ import { TableOfContents } from './table-of-contents'
  */
 
 const PHOTOGRAPHS = [
-  ['blog-diamond-in-tweezers.webp', 'An oval diamond held in tweezers over red velvet'],
-  ['blog-rings-on-linen.webp', 'Five diamond rings arranged on linen'],
-  ['blog-rings-on-blocks.webp', 'Three diamond rings on pale blue and pink blocks'],
-  ['blog-diamond-under-glass.webp', 'A diamond held under a magnifying glass'],
-  ['blog-coloured-gemstones.webp', 'Coloured gemstones scattered on a grey ground'],
-  ['blog-bracelet-worn.webp', 'A diamond bracelet worn on a raised wrist'],
-  ['blog-ring-at-dusk.webp', 'A solitaire ring on a desk against a city skyline at dusk'],
+  ['blog-3.webp', 'Article photograph 1'],
+  ['blog-8.webp', 'Article photograph 2'],
+  ['blog-7.webp', 'Article photograph 3'],
+  ['blog-4.webp', 'Article photograph 4'],
+  ['blog-2.webp', 'Article photograph 5'],
+  ['blog-1.webp', 'Article photograph 6'],
+  ['blog-6.webp', 'Article photograph 7'],
 ] as const
 
 const CATEGORIES: BlogCategory[] = [
-  { id: 1, title: 'Diamonds', slug: 'diamonds', href: '/blog?category=diamonds' },
-  { id: 2, title: 'Jewelry', slug: 'jewelry', href: '/blog?category=jewelry' },
-  { id: 3, title: 'Guides', slug: 'guides', href: '/blog?category=guides' },
-  { id: 4, title: 'Stories', slug: 'stories', href: '/blog?category=stories' },
+  { id: 1, title: 'Topic 1', slug: 'topic-1', href: '/blog?category=topic-1' },
+  { id: 2, title: 'Topic 2', slug: 'topic-2', href: '/blog?category=topic-2' },
+  { id: 3, title: 'Topic 3', slug: 'topic-3', href: '/blog?category=topic-3' },
+  { id: 4, title: 'Topic 4', slug: 'topic-4', href: '/blog?category=topic-4' },
 ]
 
 const TITLES = [
-  'How to Choose the Perfect Diamond: A Guide to Cut, Clarity, Color & Carat',
-  'Lab-Grown Diamonds: Beauty Reimagined',
-  'The Art of Choosing the Perfect Diamond',
-  'A Guide to Diamond Shapes',
-  'Reading a Diamond Certificate',
-  'Behind the Craftsmanship: Hand-Set Pavé',
-  'The Pieces That Mark a Moment',
+  'Article title 1: a longer title that runs onto a second line',
+  'Article title 2',
+  'Article title 3',
+  'Article title 4',
+  'Article title 5',
+  'Article title 6',
+  'Article title 7',
 ]
 
 /** `emphasisFor` rather than a literal, so a story cannot disagree with the page about the rhythm. */
@@ -132,20 +132,20 @@ export const Tabs: StoryObj<typeof CategoryTabs> = {
 }
 
 export const TabsNarrowed: StoryObj<typeof CategoryTabs> = {
-  render: () => <CategoryTabs categories={CATEGORIES} active="guides" allHref="/blog" />,
+  render: () => <CategoryTabs categories={CATEGORIES} active="topic-3" allHref="/blog" />,
 }
 
 const CONTENTS: ContentsEntry[] = [
-  { anchor: 'key-takeaways', label: 'Key Takeaways' },
-  { anchor: 'understanding-the-4cs', label: 'Understanding the 4Cs' },
-  { anchor: 'diamond-cut-brilliance', label: 'Diamond Cut & Brilliance' },
-  { anchor: 'color-what-to-look-for', label: 'Color: What to Look For' },
-  { anchor: 'understanding-diamond-clarity', label: 'Understanding Diamond Clarity' },
-  { anchor: 'choosing-the-right-carat-weight', label: 'Choosing the Right Carat Weight' },
-  { anchor: 'diamond-shapes-their-character', label: 'Diamond Shapes & Their Character' },
-  { anchor: 'lab-grown-vs-natural-diamonds', label: 'Lab-Grown vs. Natural Diamonds' },
-  { anchor: 'diamond-certification', label: 'Diamond Certification' },
-  { anchor: 'how-aurum-selects-diamonds', label: 'How Aurum Selects Diamonds' },
+  { anchor: 'chapter-1', label: 'Chapter 1' },
+  { anchor: 'chapter-2', label: 'Chapter 2' },
+  { anchor: 'chapter-3', label: 'Chapter 3' },
+  { anchor: 'chapter-4', label: 'Chapter 4' },
+  { anchor: 'chapter-5', label: 'Chapter 5' },
+  { anchor: 'chapter-6', label: 'Chapter 6' },
+  { anchor: 'chapter-7', label: 'Chapter 7' },
+  { anchor: 'chapter-8', label: 'Chapter 8' },
+  { anchor: 'chapter-9', label: 'Chapter 9' },
+  { anchor: 'chapter-10', label: 'Chapter 10' },
 ]
 
 /**

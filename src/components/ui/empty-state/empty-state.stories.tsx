@@ -20,7 +20,7 @@ const meta = {
   args: {
     title: 'Nothing matches those filters',
     description:
-      'Every piece is made in small numbers, so a narrow search can come up empty. Widening it usually helps.',
+      'A narrow search can come up empty. Widening it usually helps.',
     action: { href: '/all-products', label: 'Clear all filters' },
   },
 } satisfies Meta<typeof EmptyState>
@@ -49,8 +49,8 @@ export const WithActiveFilters: Story = {
 export const EmptyCategory: Story = {
   args: {
     title: 'Nothing here yet',
-    description: 'This category has no pieces published. There is plenty elsewhere.',
-    action: { href: '/all-products', label: 'See all jewelry' },
+    description: 'This category has no products published. There is plenty elsewhere.',
+    action: { href: '/all-products', label: 'See all products' },
   },
 }
 

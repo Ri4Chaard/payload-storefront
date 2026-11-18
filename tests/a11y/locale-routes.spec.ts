@@ -22,7 +22,7 @@ import { LOCALES } from '@/i18n/routing'
  * 3. **Contrast and truncation from longer text.** Russian runs roughly 15% longer than English, and
  *    this site draws several controls to fixed widths.
  */
-const ROUTES = ['/', '/all-products', '/products/butterfly-diamond-pendant', '/sign-in', '/legal/privacy']
+const ROUTES = ['/', '/all-products', '/products/product-3', '/sign-in', '/legal/privacy']
 
 const SECONDARY = LOCALES.filter((locale) => locale !== 'en')
 

@@ -127,7 +127,7 @@ const PAGES = [
   '/category-1',
   '/products/layered-chain-necklace',
   '/blog',
-  '/blog/how-to-choose-the-perfect-diamond',
+  '/blog/article-1',
   '/cart',
   '/sign-in',
   '/create-account',

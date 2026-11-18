@@ -59,7 +59,7 @@ import type {
 } from './types'
 
 /**
- * Twelve — how many pieces each press of LOAD MORE adds.
+ * Twelve — how many products each press of LOAD MORE adds.
  *
  * A 1920 grid is four across, so a set is three complete rows and never a ragged one; the same
  * number divides cleanly by the two-across phone layout and the three-across tablet.
@@ -69,10 +69,10 @@ export const PAGE_SIZE = 12
 const client = cache(async () => getPayload({ config }))
 
 /**
- * Every published piece, with its relationships resolved.
+ * Every published product, with its relationships resolved.
  *
  * **`overrideAccess: false` is the whole of the draft rule.** The Local API bypasses access control
- * by default, which would serve unpublished pieces to anonymous visitors — the exact leak FR-009 is
+ * by default, which would serve unpublished products to anonymous visitors — the exact leak FR-009 is
  * written against. Passing `false` hands the query to `adminOrPublishedStatus`, which narrows it to
  * published for a request with no user. The fixture body needed a `published()` predicate because
  * an array has no access control; there is deliberately no equivalent line here, because asking
@@ -81,16 +81,16 @@ const client = cache(async () => getPayload({ config }))
  * **`depth: 2` is chosen, not defaulted.** The mappers read `category.slug`, `collections[].slug`,
  * `sizes[].value`, `gallery[]` as media, `attributes[].attribute.label` and `variants.docs[].options[].label`
  * — that last one is two hops from the product, and depth 1 would leave it as a number and the
- * stone selector empty.
+ * variant selector empty.
  *
  * **The narrowing happens in JavaScript, and that is a considered trade rather than an oversight.**
  * The two things every listing sorts and filters on — the price and the availability — are derived
- * from the variant matrix: the price is the LOWEST across a piece's stones and availability is
+ * from the variant matrix: the price is the LOWEST across a product's variants and availability is
  * whether ANY of them has stock. Neither is a column, so neither can appear in a `where`, and a
  * query that narrowed on the product's own `priceInUSD` would quietly answer a different question
- * for every piece that has stones. Correct in memory beats wrong in the database.
+ * for every product that has variants. Correct in memory beats wrong in the database.
  *
- * It is bounded work at this size — a jeweller's catalogue is tens of pieces, not tens of
+ * It is bounded work at this size — a small shop's catalogue is tens of products, not tens of
  * thousands — and it has a known upgrade path: denormalise `priceMinor` and `available` onto the
  * product with an `afterChange` hook, then the `where` becomes possible and `limit`/`sort` move
  * into the query. That is recorded as T304 rather than guessed at now, because the hook has to be
@@ -214,7 +214,7 @@ function matches(product: Product, filters: FilterState): boolean {
   if (filters.minPrice !== undefined && price < filters.minPrice) return false
   if (filters.maxPrice !== undefined && price > filters.maxPrice) return false
 
-  // IN-STOCK ONLY hides what cannot be ordered. Without it, an unavailable piece is still SHOWN —
+  // IN-STOCK ONLY hides what cannot be ordered. Without it, an unavailable product is still SHOWN —
   // the owner wants it seen, and that is the default (spec Edge Cases).
   if (filters.inStock && !isProductAvailable(product)) return false
 
@@ -336,14 +336,14 @@ export async function getListing(filters: FilterState, locale: Locale): Promise<
    * `page` counts how many sets are SHOWN, not which one is.
    *
    * The listing extends rather than replacing (FR-018, spec Open Question 1), so `page=3` is the
-   * first thirty-six pieces and not the third twelve. Keeping the arithmetic here rather than
+   * first thirty-six products and not the third twelve. Keeping the arithmetic here rather than
    * letting the route ask three times is what makes the swap in 004 one query — `limit: page *
    * PAGE_SIZE` — instead of a loop.
    */
   /**
    * Clamped, not refused. Numbered pagination could answer a page past the end with a 404, because
    * there was genuinely nothing there. Under LOAD MORE a large `page` means "everything up to
-   * this much", and a link that asked for sixty pieces should show forty-five when three got
+   * this much", and a link that asked for sixty products should show forty-five when three got
    * unpublished rather than turning into a dead end in someone's inbox.
    *
    * It is also what keeps `limit: page * PAGE_SIZE` from becoming a query for ten million rows
@@ -370,7 +370,7 @@ export async function getListing(filters: FilterState, locale: Locale): Promise<
 /**
  * `null` is the branded 404 — for a slug that names nothing AND for a draft asked for anonymously.
  * The two are deliberately indistinguishable from outside: a 403 on an unpublished slug tells a
- * stranger the piece exists, which is the leak FR-009 is written against.
+ * stranger the product exists, which is the leak FR-009 is written against.
  */
 export async function getProduct(slug: string, locale: Locale): Promise<ProductDetail | null> {
   const payload = await client()
@@ -382,7 +382,7 @@ export async function getProduct(slug: string, locale: Locale): Promise<ProductD
     limit: 1,
     where: { slug: { equals: slug } },
     // The access rule is what makes a draft indistinguishable from a slug that names nothing: it
-    // narrows the QUERY rather than rejecting the result, so an unpublished piece simply is not
+    // narrows the QUERY rather than rejecting the result, so an unpublished product simply is not
     // there. A `_status` check here would reach the same 404 down a path that has to be kept right
     // by hand.
     overrideAccess: false,
@@ -393,18 +393,18 @@ export async function getProduct(slug: string, locale: Locale): Promise<ProductD
 }
 
 /**
- * The same read, by id, for a set of pieces at once (spec 005, T008).
+ * The same read, by id, for a set of products at once (spec 005, T008).
  *
- * The cart stores product ids, not slugs, and it needs the resolved detail — the stones with their
+ * The cart stores product ids, not slugs, and it needs the resolved detail — the variants with their
  * prices and stock, the sizes with their labels — to say what a line costs and whether it can still
  * be bought. That is exactly `ProductDetail`, so this is `getProduct` with a different `where` and
  * a set rather than a single document.
  *
  * **`overrideAccess: false` is doing the same work here as everywhere else in this file, and it
- * matters more.** A piece unpublished after it was added to somebody's cart must come back missing
+ * matters more.** A product unpublished after it was added to somebody's cart must come back missing
  * rather than resolved, because the cart page's whole staleness story (FR-014) is built on the
  * difference between "this id resolved" and "this id did not". Reading with access overridden would
- * quietly keep selling a piece the owner had withdrawn.
+ * quietly keep selling a product the owner had withdrawn.
  *
  * Returned as a `Map` because the caller is iterating cart lines and asking "and this one?" — a
  * list would make every line a linear scan of the catalogue.
@@ -548,7 +548,7 @@ export async function getRelated(
 }
 
 /**
- * The pieces the home page puts in front of a first-time visitor.
+ * The products the home page puts in front of a first-time visitor.
  *
  * **Catalogue order, which is the order the owner arranged in the admin.** There is no "featured"
  * flag on a product, and adding one is a schema decision rather than a query decision — so this

@@ -21,32 +21,32 @@ const photo: StoryMedia = {
   src: '/photography/about.webp',
   width: 1920,
   height: 1080,
-  alt: 'A hand wearing a solitaire ring',
+  alt: 'A placeholder photograph',
 }
 
 const pageHeader: StoryBlock = {
   type: 'page-header',
   headingLevel: 1,
   eyebrow: 'OUR STORY',
-  heading: 'IMMORTALIZING MEMORIES AND EMOTIONS IN EXTRAORDINARY, TIMELESS CREATIONS',
+  heading: 'A HEADLINE ABOUT YOUR STORE',
 }
 
 const closerLook: StoryBlock = {
   type: 'closer-look',
   headingLevel: 2,
-  body: 'Exceptional diamonds begin with exceptional standards. Aurum combines innovation, timeless design, and uncompromising attention to detail',
+  body: 'A short paragraph about what your store offers and what sets it apart.',
   chips: [
-    'Lab-Grown Diamonds',
-    'Fine Jewelry',
-    'Exceptional Quality',
-    'Timeless Design',
-    'Craftsmanship',
-    'Certified Diamonds',
+    'Feature 1',
+    'Feature 2',
+    'Feature 3',
+    'Feature 4',
+    'Feature 5',
+    'Feature 6',
   ],
   figures: [
-    { word: 'CERTIFIED', caption: 'selected diamonds' },
-    { word: 'EXCEPTIONAL', caption: 'quality standards' },
-    { word: 'TIMELESS', caption: 'designed to last' },
+    { word: 'WORD 1', caption: 'a short caption' },
+    { word: 'WORD 2', caption: 'a short caption' },
+    { word: 'WORD 3', caption: 'a short caption' },
   ],
   media: photo,
 }
@@ -55,8 +55,8 @@ const standard: StoryBlock = {
   type: 'banner',
   headingLevel: 2,
   eyebrow: 'THE AURUM STANDARD',
-  heading: 'SELECTED FOR BRILLIANCE. CRAFTED WITHOUT COMPROMISE.',
-  body: 'Every diamond is carefully considered for its beauty, character, and exceptional quality.',
+  heading: 'A HEADLINE FOR THIS BAND',
+  body: 'A short paragraph that supports the headline above.',
   cta: { label: 'EXPLORE THE COLLECTION', href: '/all-products' },
   media: photo,
   textSide: 'left',
@@ -65,8 +65,8 @@ const standard: StoryBlock = {
 const craftedToLast: StoryBlock = {
   type: 'banner',
   headingLevel: 2,
-  heading: 'CRAFTED TO LAST',
-  body: 'Jewelry made for the moments that become memories.',
+  heading: 'A SECOND HEADLINE',
+  body: 'A short sentence for this band.',
   media: photo,
   textSide: 'right',
 }
@@ -74,11 +74,11 @@ const craftedToLast: StoryBlock = {
 const steps: StoryBlock = {
   type: 'process-steps',
   headingLevel: 2,
-  heading: 'FROM DIAMOND TO JEWEL',
+  heading: 'HOW IT WORKS',
   steps: [
-    { title: 'SELECT', caption: 'Exceptional diamonds, carefully chosen', media: photo },
-    { title: 'CRAFT', caption: 'Precision and attention in every detail', media: photo },
-    { title: 'CREATE', caption: 'Timeless jewelry made to be yours', media: photo },
+    { title: 'STEP 1', caption: 'A short caption for this step', media: photo },
+    { title: 'STEP 2', caption: 'A short caption for this step', media: photo },
+    { title: 'STEP 3', caption: 'A short caption for this step', media: photo },
   ],
 }
 
@@ -86,21 +86,21 @@ const faq: StoryBlock = {
   type: 'faq',
   headingLevel: 2,
   heading: 'EVERY DETAIL, ANSWERED',
-  body: 'From choosing the perfect diamond to delivery and jewelry care, we’re here to make every step simple and effortless.',
+  body: 'A short paragraph introducing the questions below.',
   cta: { label: 'CONTACT US', href: '/contact' },
   questions: [
     {
       id: 1,
-      question: 'Do you ship internationally?',
+      question: 'Question 1?',
       answerHtml:
-        '<p>Yes, we ship all over the world. Shipping costs will apply and are added at checkout.</p>',
+        '<p>A short answer to the first question.</p>',
     },
-    { id: 2, question: 'How long will my order take?', answerHtml: '<p>Five to seven days.</p>' },
+    { id: 2, question: 'Question 2?', answerHtml: '<p>A short answer.</p>' },
     {
       id: 3,
-      question: 'Are your diamonds certified?',
+      question: 'Question 3?',
       answerHtml:
-        '<p>Every stone arrives with:</p><ul><li>An independent grading report</li><li>A certificate of authenticity</li></ul>',
+        '<p>An answer with a list:</p><ul><li>Point one</li><li>Point two</li></ul>',
     },
   ],
 }
@@ -177,10 +177,10 @@ export const OverfilledCopy: Story = {
     blocks: [
       {
         ...closerLook,
-        body: `${closerLook.type === 'closer-look' ? closerLook.body : ''} Every stone is independently graded, every setting finished by hand, and every piece delivered with the paperwork to prove it.`,
-        chips: [...(closerLook.type === 'closer-look' ? closerLook.chips : []), 'Responsibly Sourced'],
+        body: `${closerLook.type === 'closer-look' ? closerLook.body : ''} A second sentence, much longer than the drawing allows, to prove the band grows rather than clipping its copy.`,
+        chips: [...(closerLook.type === 'closer-look' ? closerLook.chips : []), 'Feature 7'],
       } as StoryBlock,
-      { ...standard, heading: 'SELECTED FOR BRILLIANCE, CRAFTED WITHOUT COMPROMISE, AND MADE TO OUTLAST EVERY PASSING TREND' } as StoryBlock,
+      { ...standard, heading: 'A HEADLINE FOR THIS BAND, MUCH LONGER THAN THE DRAWING ALLOWS, TO PROVE IT WRAPS RATHER THAN CLIPS' } as StoryBlock,
     ],
   },
 }

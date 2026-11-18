@@ -9,11 +9,13 @@
  * **Keyed by slug, never by id.** Ids differ between every database this runs against; a slug is the
  * same thing the English seed uses to find a document, so the two files agree by construction.
  *
- * **What is deliberately NOT here: the legal bodies.** `policies` gets its title and subtitle
- * translated and a short, plainly-marked placeholder paragraph for its body. A privacy policy is a
- * legal document, and a seed script inventing 1,600 words of Russian legal prose would produce
- * something that looks authoritative and is not — the worst possible failure for that particular
- * page. The owner writes those, in the admin, like the English ones.
+ * **Long-form text is keyed by its English wording** (`TEXT` at the bottom). Story-page bands,
+ * article chapters, product details and policy bodies live in arrays, blocks and rich text whose rows
+ * have no slug; the apply script reads the English document, swaps every string it finds here, and
+ * writes the result into the other language — so the structure stays identical and only the words
+ * change. An English string with no entry here stays English, and the script says so.
+ *
+ * Everything here is placeholder copy for a store template. The owner replaces it in the admin.
  */
 
 export type Pair = { ru: string; uk: string }
@@ -21,425 +23,154 @@ export type Pair = { ru: string; uk: string }
 /** `{ en: { ru, uk } }` for a single field. */
 export type Translated<T extends string> = Record<string, Record<'ru' | 'uk', Record<T, string>>>
 
-export const CATEGORIES: Translated<'subtitle' | 'title'> = {
-  'category-1': {
-    ru: { title: 'Категория 1', subtitle: 'Краткое описание категории' },
-    uk: { title: 'Категорія 1', subtitle: 'Короткий опис категорії' },
-  },
-  'category-2': {
-    ru: { title: 'Категория 2', subtitle: 'Краткое описание категории' },
-    uk: { title: 'Категорія 2', subtitle: 'Короткий опис категорії' },
-  },
-  'category-3': {
-    ru: { title: 'Категория 3', subtitle: 'Краткое описание категории' },
-    uk: { title: 'Категорія 3', subtitle: 'Короткий опис категорії' },
-  },
-  'category-4': {
-    ru: { title: 'Категория 4', subtitle: 'Краткое описание категории' },
-    uk: { title: 'Категорія 4', subtitle: 'Короткий опис категорії' },
-  },
-}
+/** `n` from 1 to `count`, for the numbered placeholders below. */
+const numbered = (count: number) => Array.from({ length: count }, (_, index) => index + 1)
 
-/**
- * The four collections keep their names in every language.
- *
- * Deia, Marvel, Molten and Spartan are proper names rather than descriptions — transliterating them
- * would invent four products that do not exist. They are listed so the file is a complete record of
- * what was considered, rather than leaving a reader to wonder whether they were missed.
- */
-export const COLLECTIONS: Translated<'title'> = {
-  deia: { ru: { title: 'Deia' }, uk: { title: 'Deia' } },
-  marvel: { ru: { title: 'Marvel' }, uk: { title: 'Marvel' } },
-  molten: { ru: { title: 'Molten' }, uk: { title: 'Molten' } },
-  spartan: { ru: { title: 'Spartan' }, uk: { title: 'Spartan' } },
-}
+export const CATEGORIES: Translated<'subtitle' | 'title'> = Object.fromEntries(
+  numbered(4).map((n) => [
+    `category-${n}`,
+    {
+      ru: { title: `Категория ${n}`, subtitle: 'Краткое описание категории' },
+      uk: { title: `Категорія ${n}`, subtitle: 'Короткий опис категорії' },
+    },
+  ]),
+)
 
-export const ARTICLE_CATEGORIES: Translated<'title'> = {
-  variantChoices: { ru: { title: 'Бриллианты' }, uk: { title: 'Діаманти' } },
-  guides: { ru: { title: 'Руководства' }, uk: { title: 'Посібники' } },
-  jewelry: { ru: { title: 'Украшения' }, uk: { title: 'Прикраси' } },
-  stories: { ru: { title: 'Истории' }, uk: { title: 'Історії' } },
+export const COLLECTIONS: Translated<'title'> = Object.fromEntries(
+  ['A', 'B', 'C', 'D'].map((letter) => [
+    `collection-${letter.toLowerCase()}`,
+    { ru: { title: `Коллекция ${letter}` }, uk: { title: `Колекція ${letter}` } },
+  ]),
+)
+
+export const ARTICLE_CATEGORIES: Translated<'title'> = Object.fromEntries(
+  numbered(4).map((n) => [`topic-${n}`, { ru: { title: `Тема ${n}` }, uk: { title: `Тема ${n}` } }]),
+)
+
+/** Keyed by the colour's `value`, which is what the English seed and every saved link use. */
+export const COLOURS: Translated<'label'> = {
+  black: { ru: { label: 'Чёрный' }, uk: { label: 'Чорний' } },
+  clear: { ru: { label: 'Прозрачный' }, uk: { label: 'Прозорий' } },
+  green: { ru: { label: 'Зелёный' }, uk: { label: 'Зелений' } },
+  multicolor: { ru: { label: 'Разноцветный' }, uk: { label: 'Різнокольоровий' } },
 }
 
 /** Keyed by the attribute's `name`, which is what the English seed calls it. */
 export const ATTRIBUTES: Translated<'label'> = {
-  metal: { ru: { label: 'Металл' }, uk: { label: 'Метал' } },
-  'carat-weight': { ru: { label: 'Вес в каратах' }, uk: { label: 'Вага в каратах' } },
-  provenance: { ru: { label: 'Происхождение' }, uk: { label: 'Походження' } },
+  material: { ru: { label: 'Материал' }, uk: { label: 'Матеріал' } },
+  weight: { ru: { label: 'Вес' }, uk: { label: 'Вага' } },
+  origin: { ru: { label: 'Происхождение' }, uk: { label: 'Походження' } },
+}
+
+/** Every product's description — the English seed gives them all the same placeholder sentence. */
+const DESCRIPTION: Pair = {
+  ru: 'Краткое описание товара. Замените его своим текстом.',
+  uk: 'Короткий опис товару. Замініть його своїм текстом.',
 }
 
 /**
- * The catalogue.
- *
- * Twenty-five of these share one English description — "…, made to order in our atelier" — and
- * they share one translated description too. That repetition is the English seed's, not an
- * abbreviation introduced here: a translation that varied where the original does not would make the
- * Russian site look more finished than the English one.
+ * The catalogue: `product-1` … `product-30` (there is no `product-6` — the sixth hand-written
+ * product is the Cyrillic one), the Cyrillic title, and the draft.
  */
-export const PRODUCTS: Translated<'description' | 'title'> = {
-  'pave-butterfly-diamond-bracelet': {
-    ru: {
-      title: 'Браслет «Бабочка» с бриллиантовым паве',
-      description: 'Бабочки в бриллиантовом паве на гибком браслете.',
-    },
-    uk: {
-      title: 'Браслет «Метелик» з діамантовим паве',
-      description: 'Метелики в діамантовому паве на гнучкому браслеті.',
-    },
-  },
-  'butterfly-diamond-pendant': {
-    ru: {
-      title: 'Подвеска «Бабочка» с бриллиантами',
-      description: 'Одна бабочка в бриллиантовом паве на тонкой цепочке.',
-    },
-    uk: {
-      title: 'Підвіска «Метелик» з діамантами',
-      description: 'Один метелик у діамантовому паве на тонкому ланцюжку.',
-    },
-  },
-  'butterfly-ruby-pink-sapphire-diamond-ear-climbers': {
-    ru: {
-      title: 'Серьги-климберы «Бабочка» с рубинами, розовыми сапфирами и бриллиантами',
-      description:
-        'Рубины и розовые сапфиры поднимаются вдоль уха в оправе в форме летящей бабочки.',
-    },
-    uk: {
-      title: 'Сережки-кліммери «Метелик» з рубінами, рожевими сапфірами та діамантами',
-      description: 'Рубіни та рожеві сапфіри піднімаються вздовж вуха в оправі летючого метелика.',
-    },
-  },
-  'butterfly-ruby-pink-sapphire-diamond-mini-pendant': {
-    ru: {
-      title: 'Мини-подвеска «Бабочка» с рубинами, розовыми сапфирами и бриллиантами',
-      description: 'Бабочка в самом малом размере — рубин и розовый сапфир.',
-    },
-    uk: {
-      title: 'Міні-підвіска «Метелик» з рубінами, рожевими сапфірами та діамантами',
-      description: 'Метелик у найменшому розмірі — рубін і рожевий сапфір.',
-    },
-  },
-  'paragon-emerald-cut-diamond-engagement-ring': {
-    ru: {
-      title: 'Помолвочное кольцо Paragon с бриллиантом изумрудной огранки',
-      description:
-        'Доступно в разном весе камней; каждый камень закрепляется вручную. Размер, вес в каратах и количество камней слегка отличаются от кольца к кольцу.',
-    },
-    uk: {
-      title: 'Заручинова каблучка Paragon з діамантом смарагдової огранки',
-      description:
-        'Доступна в різній вазі каменів; кожен камінь закріплюється вручну. Розмір, вага в каратах і кількість каменів дещо відрізняються від каблучки до каблучки.',
-    },
-  },
-  'unreleased-spartan-cuff': {
-    ru: { title: 'Неанонсированный браслет Spartan', description: 'Ещё не анонсировано.' },
-    uk: { title: 'Неанонсований браслет Spartan', description: 'Ще не анонсовано.' },
-  },
-  'zolotoe-kolco-s-brilliantom': {
-    ru: {
-      title: 'Золотое кольцо с бриллиантом',
-      description: 'Кольцо из белого золота с бриллиантом огранки «принцесса».',
-    },
-    uk: {
-      title: 'Золота каблучка з діамантом',
-      description: 'Каблучка з білого золота з діамантом огранки «принцеса».',
-    },
-  },
+export const PRODUCTS: Translated<'description' | 'title'> = Object.fromEntries(
+  numbered(30)
+    .filter((n) => n !== 6)
+    .map((n) => [
+      `product-${n}`,
+      {
+        ru: { title: `Товар ${n}`, description: DESCRIPTION.ru },
+        uk: { title: `Товар ${n}`, description: DESCRIPTION.uk },
+      },
+    ]),
+)
+
+PRODUCTS['tovar-s-kirillicheskim-nazvaniem'] = {
+  ru: { title: 'Товар с кириллическим названием', description: DESCRIPTION.ru },
+  uk: { title: 'Товар з кириличною назвою', description: DESCRIPTION.uk },
 }
 
-/**
- * The twenty-four pieces whose English description is their own title followed by one fixed phrase.
- *
- * Only the titles are written out. The description is composed from the title the same way the
- * English seed composes it — `"${title}, made to order in our atelier."` — because writing the
- * same sentence twenty-four times in two languages is twenty-four chances to let one of them drift.
- */
-const MADE_TO_ORDER: Record<string, Pair> = {
-  'halo-solitaire-ring': { ru: 'Кольцо-солитер с ореолом', uk: 'Каблучка-солітер з ореолом' },
-  'baguette-eternity-band': {
-    ru: 'Кольцо вечности с багетами',
-    uk: 'Каблучка вічності з багетами',
-  },
-  'marquise-cluster-ring': {
-    ru: 'Кольцо-кластер с маркизами',
-    uk: 'Каблучка-кластер з маркізами',
-  },
-  'princess-cut-signet-ring': {
-    ru: 'Перстень с бриллиантом огранки «принцесса»',
-    uk: 'Перстень з діамантом огранки «принцеса»',
-  },
-  'oval-trilogy-ring': {
-    ru: 'Кольцо-трилогия с овальными бриллиантами',
-    uk: 'Каблучка-трилогія з овальними діамантами',
-  },
-  'cushion-halo-ring': {
-    ru: 'Кольцо с ореолом и бриллиантом огранки «кушон»',
-    uk: 'Каблучка з ореолом і діамантом огранки «кушон»',
-  },
-  'twisted-pave-ring': { ru: 'Витое кольцо с паве', uk: 'Кручена каблучка з паве' },
-  'tennis-bracelet': { ru: 'Теннисный браслет', uk: 'Тенісний браслет' },
-  'bezel-link-bracelet': {
-    ru: 'Браслет со звеньями в глухой закрепке',
-    uk: 'Браслет із ланками в глухій закріпці',
-  },
-  'pear-drop-bracelet': {
-    ru: 'Браслет с каплевидными бриллиантами',
-    uk: 'Браслет із краплеподібними діамантами',
-  },
-  'emerald-bar-bracelet': {
-    ru: 'Браслет с бриллиантами изумрудной огранки',
-    uk: 'Браслет із діамантами смарагдової огранки',
-  },
-  'open-cuff-bracelet': { ru: 'Открытый браслет-кафф', uk: 'Відкритий браслет-каф' },
-  'round-stud-earrings': {
-    ru: 'Серьги-пусеты с круглыми бриллиантами',
-    uk: 'Сережки-пусети з круглими діамантами',
-  },
-  'baguette-huggie-earrings': { ru: 'Серьги-хаггис с багетами', uk: 'Сережки-хаггі з багетами' },
-  'oval-drop-earrings': {
-    ru: 'Серьги-подвески с овальными бриллиантами',
-    uk: 'Сережки-підвіски з овальними діамантами',
-  },
-  'marquise-threader-earrings': {
-    ru: 'Серьги-протяжки с маркизами',
-    uk: 'Сережки-протяжки з маркізами',
-  },
-  'princess-halo-earrings': {
-    ru: 'Серьги с ореолом и огранкой «принцесса»',
-    uk: 'Сережки з ореолом і огранкою «принцеса»',
-  },
-  'double-hoop-earrings': { ru: 'Двойные серьги-кольца', uk: 'Подвійні сережки-кільця' },
-  'solitaire-necklace': { ru: 'Колье-солитер', uk: 'Намисто-солітер' },
-  'riviera-necklace': { ru: 'Колье «Ривьера»', uk: 'Намисто «Рив’єра»' },
-  'pear-pendant-necklace': {
-    ru: 'Колье с каплевидной подвеской',
-    uk: 'Намисто з краплеподібною підвіскою',
-  },
-  'baguette-bar-necklace': {
-    ru: 'Колье с планкой из багетов',
-    uk: 'Намисто з планкою з багетів',
-  },
-  'emerald-station-necklace': {
-    ru: 'Категория 4 изумрудной огранки',
-    uk: 'Намисто з діамантами смарагдової огранки',
-  },
-  'layered-chain-necklace': {
-    ru: 'Многослойное колье-цепочка',
-    uk: 'Багатошарове намисто-ланцюжок',
-  },
+PRODUCTS['unreleased-product'] = {
+  ru: { title: 'Неанонсированный товар', description: 'Ещё не анонсировано.' },
+  uk: { title: 'Неанонсований товар', description: 'Ще не анонсовано.' },
 }
 
-const MADE_TO_ORDER_SUFFIX: Pair = {
-  ru: 'изготавливается на заказ в нашей мастерской.',
-  uk: 'виготовляється на замовлення в нашій майстерні.',
-}
-
-for (const [slug, title] of Object.entries(MADE_TO_ORDER)) {
-  PRODUCTS[slug] = {
-    ru: { title: title.ru, description: `${title.ru}, ${MADE_TO_ORDER_SUFFIX.ru}` },
-    uk: { title: title.uk, description: `${title.uk}, ${MADE_TO_ORDER_SUFFIX.uk}` },
-  }
-}
-
-/** The blog's seven articles — card and header only; chapter bodies fall back (see below). */
-export const ARTICLES: Translated<'standfirst' | 'title'> = {
-  'how-to-choose-the-perfect-diamond': {
-    ru: {
-      title: 'Как выбрать идеальный бриллиант: огранка, чистота, цвет и караты',
-      standfirst:
-        'Что отличает исключительный бриллиант и как выбрать камень, в котором сходятся красота, игра света и характер.',
+/** The blog's seven articles — card and header. Chapters are translated through `TEXT`. */
+export const ARTICLES: Translated<'standfirst' | 'title'> = Object.fromEntries(
+  numbered(7).map((n) => [
+    `article-${n}`,
+    {
+      ru: {
+        title: `Заголовок статьи ${n}`,
+        standfirst:
+          'Краткий анонс, который представляет статью. Замените его своим текстом в панели администратора.',
+      },
+      uk: {
+        title: `Заголовок статті ${n}`,
+        standfirst:
+          'Короткий анонс, що представляє статтю. Замініть його своїм текстом у панелі адміністратора.',
+      },
     },
-    uk: {
-      title: 'Як обрати ідеальний діамант: огранка, чистота, колір і карати',
-      standfirst:
-        'Що вирізняє винятковий діамант і як обрати камінь, у якому сходяться краса, гра світла та характер.',
-    },
-  },
-  'lab-grown-diamonds-beauty-reimagined': {
-    ru: {
-      title: 'Выращенные бриллианты: красота заново',
-      standfirst:
-        'Выращены, а не добыты, и одинаковы во всём, что имеет значение. Что такое выращенный камень — и чем он не является.',
-    },
-    uk: {
-      title: 'Вирощені діаманти: краса наново',
-      standfirst:
-        'Вирощені, а не видобуті, й однакові в усьому, що має значення. Що таке вирощений камінь — і чим він не є.',
-    },
-  },
-  'the-art-of-choosing-the-perfect-diamond': {
-    ru: {
-      title: 'Искусство выбора идеального бриллианта',
-      standfirst:
-        'Пропорции, симметрия и свет. Почему два камня одинакового веса могут выглядеть совершенно по-разному.',
-    },
-    uk: {
-      title: 'Мистецтво вибору ідеального діаманта',
-      standfirst:
-        'Пропорції, симетрія та світло. Чому два камені однакової ваги можуть виглядати зовсім по-різному.',
-    },
-  },
-  'a-guide-to-diamond-shapes': {
-    ru: {
-      title: 'Путеводитель по формам огранки',
-      standfirst:
-        'Круг, овал, изумруд, груша. Что каждая форма делает со светом и кому какая идёт.',
-    },
-    uk: {
-      title: 'Путівник формами огранки',
-      standfirst: 'Круг, овал, смарагд, груша. Що кожна форма робить зі світлом і кому яка личить.',
-    },
-  },
-  'reading-a-diamond-certificate': {
-    ru: {
-      title: 'Как читать сертификат на бриллиант',
-      standfirst:
-        'К каждому камню прилагаются документы. Вот что на самом деле означает каждая их строка.',
-    },
-    uk: {
-      title: 'Як читати сертифікат на діамант',
-      standfirst:
-        'До кожного каменя додаються документи. Ось що насправді означає кожен їхній рядок.',
-    },
-  },
-  'behind-the-craftsmanship-hand-set-pave': {
-    ru: {
-      title: 'Изнанка мастерства: паве, закреплённое вручную',
-      standfirst:
-        'Шестьдесят камней, один закрепщик и неделя работы. Внутри самой медленной части создания кольца.',
-    },
-    uk: {
-      title: 'Виворіт майстерності: паве, закріплене вручну',
-      standfirst:
-        'Шістдесят каменів, один закріплювач і тиждень роботи. Усередині найповільнішої частини створення каблучки.',
-    },
-  },
-  'the-pieces-that-mark-a-moment': {
-    ru: {
-      title: 'Украшения, которые отмечают момент',
-      standfirst:
-        'Помолвки, годовщины и поводы потише. Что люди покупают на самом деле — и почему.',
-    },
-    uk: {
-      title: 'Прикраси, що відзначають мить',
-      standfirst:
-        'Заручини, річниці та тихіші приводи. Що люди купують насправді — і чому.',
-    },
-  },
-}
+  ]),
+)
 
 /** Photograph descriptions, keyed by filename — the one field on `media` that carries words. */
 export const MEDIA: Record<string, Pair> = {
-  'product-bracelet.webp': {
-    ru: 'Браслет «Бабочка» с бриллиантовым паве',
-    uk: 'Браслет «Метелик» з діамантовим паве',
-  },
-  'product-ear-climbers.webp': {
-    ru: 'Серьги-климберы «Бабочка» с рубинами, розовыми сапфирами и бриллиантами',
-    uk: 'Сережки-кліммери «Метелик» з рубінами, рожевими сапфірами та діамантами',
-  },
-  'product-pendant.webp': {
-    ru: 'Подвеска «Бабочка» с бриллиантами',
-    uk: 'Підвіска «Метелик» з діамантами',
-  },
-  'product-mini-pendant.webp': {
-    ru: 'Мини-подвеска «Бабочка» с рубинами, розовыми сапфирами и бриллиантами',
-    uk: 'Міні-підвіска «Метелик» з рубінами, рожевими сапфірами та діамантами',
-  },
-  'product-ring-packshot.webp': {
-    ru: 'Помолвочное кольцо Paragon с бриллиантом изумрудной огранки',
-    uk: 'Заручинова каблучка Paragon з діамантом смарагдової огранки',
-  },
-  'product-ring-jacket.webp': {
-    ru: 'Кольцо на руке, на фоне коричневого жакета',
-    uk: 'Каблучка на руці, на тлі коричневого жакета',
-  },
-  'product-ring-arm.webp': {
-    ru: 'Кольцо на руке, скрещённой на чёрном верхе',
-    uk: 'Каблучка на руці, схрещеній на чорному верху',
-  },
-  'product-ring-portrait.webp': {
-    ru: 'Кольцо на руке, поднятой к лицу',
-    uk: 'Каблучка на руці, піднятій до обличчя',
-  },
-  'product-ring-denim.webp': {
-    ru: 'Кольцо в наборе с другими, рука на джинсовой ткани',
-    uk: 'Каблучка в наборі з іншими, рука на джинсовій тканині',
-  },
-  'category-1.webp': {
-    ru: 'Рука с бриллиантовым кольцом',
-    uk: 'Рука з діамантовою каблучкою',
-  },
-  'category-2.webp': {
-    ru: 'Бриллиантовый браслет на запястье',
-    uk: 'Діамантовий браслет на зап’ясті',
-  },
-  'category-3.webp': { ru: 'Бриллиантовые серьги', uk: 'Діамантові сережки' },
-  'category-4.webp': { ru: 'Бриллиантовое колье', uk: 'Діамантове намисто' },
-  'story-opening-plate.webp': {
-    ru: 'Кольцо-солитер на красном шёлке',
-    uk: 'Каблучка-солітер на червоному шовку',
-  },
-  'story-closer-look.webp': {
-    ru: 'Колье-ошейник с бриллиантами и рубинами',
-    uk: 'Намисто-чокер з діамантами та рубінами',
-  },
-  'story-standard-banner.webp': {
-    ru: 'Бриллиант круглой огранки в пинцете',
-    uk: 'Діамант круглої огранки в пінцеті',
-  },
-  'story-crafted-to-last.webp': {
-    ru: 'Подвеска и кольцо, надетые вместе',
-    uk: 'Підвіска й каблучка, вдягнені разом',
-  },
-  '2026-09-10 14.36.18.mp4': {
-    ru: 'Россыпь бриллиантов, разбираемая пинцетом',
-    uk: 'Розсип діамантів, що розбирається пінцетом',
-  },
-  'story-step-2-craft.webp': {
-    ru: 'Ювелир закрепляет камень вручную',
-    uk: 'Ювелір закріплює камінь вручну',
-  },
-  'story-step-3-create.webp': {
-    ru: 'Готовое кольцо с ореолом на красном шёлке',
-    uk: 'Готова каблучка з ореолом на червоному шовку',
-  },
-  'slot-1.mp4': { ru: 'Ювелир закрепляет камень', uk: 'Ювелір закріплює камінь' },
-  'poster.png': { ru: 'Ювелир за верстаком', uk: 'Ювелір за верстатом' },
-  'blog-rings-on-linen.webp': {
-    ru: 'Пять бриллиантовых колец на льне',
-    uk: 'П’ять діамантових каблучок на льоні',
-  },
-  'blog-rings-on-blocks.webp': {
-    ru: 'Три бриллиантовых кольца на бледно-голубых и розовых блоках',
-    uk: 'Три діамантові каблучки на блідо-блакитних і рожевих блоках',
-  },
-  'blog-diamond-under-glass.webp': {
-    ru: 'Бриллиант под увеличительным стеклом',
-    uk: 'Діамант під збільшувальним склом',
-  },
-  'blog-halo-ring-in-hand.webp': {
-    ru: 'Кольцо с ореолом в кончиках пальцев',
-    uk: 'Каблучка з ореолом у кінчиках пальців',
-  },
-  'blog-coloured-gemstones.webp': {
-    ru: 'Цветные драгоценные камни на сером фоне',
-    uk: 'Кольорові дорогоцінні камені на сірому тлі',
-  },
-  'blog-bracelet-worn.webp': {
-    ru: 'Бриллиантовый браслет на поднятом запястье',
-    uk: 'Діамантовий браслет на піднятому зап’ясті',
-  },
-  'blog-ring-at-dusk.webp': {
-    ru: 'Кольцо-солитер на столе на фоне города в сумерках',
-    uk: 'Каблучка-солітер на столі на тлі міста в сутінках',
-  },
-  'blog-diamond-in-tweezers.webp': {
-    ru: 'Овальный бриллиант в пинцете над красным бархатом',
-    uk: 'Овальний діамант у пінцеті над червоним оксамитом',
-  },
+  ...Object.fromEntries(
+    numbered(4).map((n) => [
+      `category-${n}.webp`,
+      { ru: `Изображение категории ${n}`, uk: `Зображення категорії ${n}` },
+    ]),
+  ),
+  ...Object.fromEntries(
+    [
+      'product-1-a.webp',
+      'product-1-c.webp',
+      'product-1-d.webp',
+      'product-1-b.webp',
+      'product-1-e.webp',
+      'product-2.webp',
+      'product-4.webp',
+      'product-3.webp',
+      'product-5.webp',
+    ].map((file, index) => [
+      file,
+      { ru: `Изображение товара ${index + 1}`, uk: `Зображення товару ${index + 1}` },
+    ]),
+  ),
+  ...Object.fromEntries(
+    [
+      'story-opening-plate.webp',
+      'story-closer-look.webp',
+      'story-standard-banner.webp',
+      'story-crafted-to-last.webp',
+      'story-step-1-select.webp',
+      'story-step-2-craft.webp',
+      'story-step-3-create.webp',
+    ].map((file, index) => [
+      file,
+      { ru: `Изображение для страницы «О нас» ${index + 1}`, uk: `Зображення для сторінки «Про нас» ${index + 1}` },
+    ]),
+  ),
+  ...Object.fromEntries(
+    [
+      'blog-8.webp',
+      'blog-7.webp',
+      'blog-4.webp',
+      'blog-5.webp',
+      'blog-2.webp',
+      'blog-1.webp',
+      'blog-6.webp',
+      'blog-3.webp',
+    ].map((file, index) => [
+      file,
+      { ru: `Изображение для блога ${index + 1}`, uk: `Зображення для блогу ${index + 1}` },
+    ]),
+  ),
+  'hero.webp': { ru: 'Главное изображение', uk: 'Головне зображення' },
+  'about.webp': { ru: 'Изображение для раздела «О нас»', uk: 'Зображення для розділу «Про нас»' },
   'contact-send-us-a-message.webp': {
-    ru: 'Бриллиантовое колье и серьги в раскрытом футляре',
-    uk: 'Діамантове намисто та сережки у розкритому футлярі',
+    ru: 'Изображение для страницы контактов',
+    uk: 'Зображення для сторінки контактів',
   },
 }
 
@@ -450,102 +181,42 @@ export const MEDIA: Record<string, Pair> = {
  * `answer` is one paragraph everywhere, so it is stored as a plain string and wrapped in Lexical's
  * shape by the apply script rather than being written out as a node tree twelve times.
  */
-export const QUESTIONS: Translated<'answer' | 'question'> = {
-  'Do you ship internationally?': {
-    ru: {
-      question: 'Вы доставляете за границу?',
-      answer:
-        'Да, мы доставляем по всему миру. Стоимость доставки рассчитывается и добавляется при оформлении заказа.',
+export const QUESTIONS: Translated<'answer' | 'question'> = Object.fromEntries(
+  numbered(6).map((n) => [
+    `Question ${n}?`,
+    {
+      ru: {
+        question: `Вопрос ${n}?`,
+        answer: `Пример ответа на вопрос ${n}. Замените его своим текстом в панели администратора.`,
+      },
+      uk: {
+        question: `Запитання ${n}?`,
+        answer: `Приклад відповіді на запитання ${n}. Замініть його своїм текстом у панелі адміністратора.`,
+      },
     },
-    uk: {
-      question: 'Ви доставляєте за кордон?',
-      answer:
-        'Так, ми доставляємо по всьому світу. Вартість доставки розраховується й додається під час оформлення замовлення.',
-    },
-  },
-  'How long will my order take?': {
-    ru: {
-      question: 'Сколько будет идти мой заказ?',
-      answer:
-        'Готовые изделия отправляются в течение двух рабочих дней. Изделия на заказ занимают от трёх до четырёх недель.',
-    },
-    uk: {
-      question: 'Скільки триватиме моє замовлення?',
-      answer:
-        'Готові вироби відправляються протягом двох робочих днів. Вироби на замовлення потребують від трьох до чотирьох тижнів.',
-    },
-  },
-  'Are your diamonds certified?': {
-    ru: {
-      question: 'Ваши бриллианты сертифицированы?',
-      answer: 'Каждый камень проходит независимую оценку и поставляется с сертификатом.',
-    },
-    uk: {
-      question: 'Ваші діаманти сертифіковані?',
-      answer: 'Кожен камінь проходить незалежну оцінку й постачається із сертифікатом.',
-    },
-  },
-  'What are lab-grown diamonds?': {
-    ru: {
-      question: 'Что такое выращенные бриллианты?',
-      answer:
-        'Они химически, физически и оптически идентичны добытым бриллиантам — выращены, а не извлечены из земли.',
-    },
-    uk: {
-      question: 'Що таке вирощені діаманти?',
-      answer:
-        'Вони хімічно, фізично та оптично ідентичні видобутим діамантам — вирощені, а не видобуті із землі.',
-    },
-  },
-  'Can I return or exchange my order?': {
-    ru: {
-      question: 'Можно ли вернуть или обменять заказ?',
-      answer:
-        'Возврат бесплатен в течение тридцати дней — в первоначальном состоянии и с документами, с которыми изделие пришло.',
-    },
-    uk: {
-      question: 'Чи можна повернути або обміняти замовлення?',
-      answer:
-        'Повернення безкоштовне протягом тридцяти днів — у первісному стані та з документами, з якими виріб надійшов.',
-    },
-  },
-  'How should I care for my jewelry?': {
-    ru: {
-      question: 'Как ухаживать за украшениями?',
-      answer:
-        'Тёплая вода, капля мягкого мыла и мягкая щётка. Мы с радостью почистим и проверим любое изделие за вас.',
-    },
-    uk: {
-      question: 'Як доглядати за прикрасами?',
-      answer:
-        'Тепла вода, крапля м’якого мила та м’яка щітка. Ми з радістю почистимо й перевіримо будь-який виріб для вас.',
-    },
-  },
-}
+  ]),
+)
 
-/**
- * The policies — **title and subtitle only. The bodies fall back to English on purpose.**
- *
- * See this file's header. A placeholder paragraph was tried first and is worse than the fallback in
- * the one place it matters most: it replaces the legal text a visitor came to read with a note about
- * its absence. Falling back leaves them able to read the terms.
- */
+/** The policies' titles and subtitles. Their bodies are translated through `TEXT`. */
 export const POLICIES: Translated<'subtitle' | 'title'> = {
   privacy: {
-    ru: { title: 'ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ', subtitle: 'Обновлено: август 2026' },
-    uk: { title: 'ПОЛІТИКА КОНФІДЕНЦІЙНОСТІ', subtitle: 'Оновлено: серпень 2026' },
+    ru: { title: 'Политика конфиденциальности', subtitle: 'Обновлено: сентябрь 2026' },
+    uk: { title: 'Політика конфіденційності', subtitle: 'Оновлено: вересень 2026' },
   },
   terms: {
-    ru: { title: 'УСЛОВИЯ И ПОЛОЖЕНИЯ', subtitle: 'Обновлено: август 2026' },
-    uk: { title: 'УМОВИ ТА ПОЛОЖЕННЯ', subtitle: 'Оновлено: серпень 2026' },
+    ru: { title: 'Условия и положения', subtitle: 'Обновлено: сентябрь 2026' },
+    uk: { title: 'Умови та положення', subtitle: 'Оновлено: вересень 2026' },
   },
   shipping: {
-    ru: { title: 'ДОСТАВКА И ВОЗВРАТ', subtitle: 'Застрахованная доставка по всему миру' },
-    uk: { title: 'ДОСТАВКА ТА ПОВЕРНЕННЯ', subtitle: 'Застрахована доставка по всьому світу' },
+    ru: { title: 'Доставка и возврат', subtitle: 'Бесплатная доставка и возврат для всех заказов' },
+    uk: {
+      title: 'Доставка та повернення',
+      subtitle: 'Безкоштовна доставка та повернення для всіх замовлень',
+    },
   },
   cookies: {
-    ru: { title: 'ПОЛИТИКА COOKIE', subtitle: 'Обновлено: август 2026' },
-    uk: { title: 'ПОЛІТИКА COOKIE', subtitle: 'Оновлено: серпень 2026' },
+    ru: { title: 'Политика cookie', subtitle: 'Обновлено: сентябрь 2026' },
+    uk: { title: 'Політика cookie', subtitle: 'Оновлено: вересень 2026' },
   },
 }
 
@@ -557,31 +228,31 @@ export const POLICIES: Translated<'subtitle' | 'title'> = {
  */
 export const SHOP: Record<'ru' | 'uk', Record<string, string | string[]>> = {
   ru: {
-    detailsTitle: 'ОПИСАНИЕ ИЗДЕЛИЯ',
-    warrantyTitle: 'ГАРАНТИЯ 3 ГОДА + БЕСПЛАТНЫЙ ВОЗВРАТ',
+    detailsTitle: 'ОПИСАНИЕ ТОВАРА',
+    warrantyTitle: 'ГАРАНТИЯ И ВОЗВРАТ',
     deliveryTitle: 'ДОСТАВКА',
-    listingSubtitle: 'Вечное сияние для любого момента',
+    listingSubtitle: 'Короткий подзаголовок для каталога товаров',
     warranty: [
-      'На каждое изделие действует трёхлетняя гарантия от производственных дефектов.',
-      'Возврат бесплатен в течение тридцати дней, в первоначальном состоянии.',
+      'Опишите здесь вашу гарантию: что она покрывает и на какой срок.',
+      'Опишите здесь условия возврата: сколько дней есть у покупателя и в каком состоянии должен быть товар.',
     ],
     delivery: [
-      'Застрахованная доставка по всему миру, отправка в течение двух рабочих дней.',
-      'Изделия на заказ отправляются через три-четыре недели.',
+      'Опишите здесь способы доставки: куда вы доставляете и как быстро.',
+      'Опишите, сколько времени занимает изготовление товаров на заказ до отправки.',
     ],
   },
   uk: {
-    detailsTitle: 'ОПИС ВИРОБУ',
-    warrantyTitle: 'ГАРАНТІЯ 3 РОКИ + БЕЗКОШТОВНЕ ПОВЕРНЕННЯ',
+    detailsTitle: 'ОПИС ТОВАРУ',
+    warrantyTitle: 'ГАРАНТІЯ ТА ПОВЕРНЕННЯ',
     deliveryTitle: 'ДОСТАВКА',
-    listingSubtitle: 'Вічне сяйво для будь-якої миті',
+    listingSubtitle: 'Короткий підзаголовок для каталогу товарів',
     warranty: [
-      'На кожен виріб діє трирічна гарантія від виробничих дефектів.',
-      'Повернення безкоштовне протягом тридцяти днів, у первісному стані.',
+      'Опишіть тут вашу гарантію: що вона покриває і на який термін.',
+      'Опишіть тут умови повернення: скільки днів має покупець і в якому стані має бути товар.',
     ],
     delivery: [
-      'Застрахована доставка по всьому світу, відправлення протягом двох робочих днів.',
-      'Вироби на замовлення відправляються через три-чотири тижні.',
+      'Опишіть тут способи доставки: куди ви доставляєте і як швидко.',
+      'Опишіть, скільки часу потрібно на виготовлення товарів на замовлення до відправлення.',
     ],
   },
 }
@@ -589,13 +260,13 @@ export const SHOP: Record<'ru' | 'uk', Record<string, string | string[]>> = {
 export const BLOG_PAGE: Record<'ru' | 'uk', Record<string, string>> = {
   ru: {
     eyebrow: 'НАШ БЛОГ',
-    heading: 'Истории о бриллиантах, мастерстве и вечной красоте',
+    heading: 'Заголовок для вашего блога',
     emptyTitle: 'Пока ничего не опубликовано',
     emptyDescription: 'Первые истории уже пишутся. Загляните позже.',
   },
   uk: {
     eyebrow: 'НАШ БЛОГ',
-    heading: 'Історії про діаманти, майстерність і вічну красу',
+    heading: 'Заголовок для вашого блогу',
     emptyTitle: 'Поки що нічого не опубліковано',
     emptyDescription: 'Перші історії вже пишуться. Завітайте пізніше.',
   },
@@ -616,17 +287,18 @@ export const FAQ_PAGE: Record<'ru' | 'uk', Record<string, string>> = {
   },
 }
 
+/** The contact page's top-level words. `faqHeading` is the `faq.heading` group field. */
 export const CONTACT_PAGE: Record<'ru' | 'uk', Record<string, string>> = {
   ru: {
     eyebrow: 'СВЯЖИТЕСЬ С НАМИ',
     heading: 'МЫ ЗДЕСЬ, ЧТОБЫ ПОМОЧЬ',
-    intro: 'Вопросы, индивидуальные заказы или совет по подбору — наша команда рядом',
+    intro: 'Короткая строка о том, чем может помочь ваша команда',
     faqHeading: 'Частые вопросы',
   },
   uk: {
     eyebrow: 'ЗВ’ЯЖІТЬСЯ З НАМИ',
     heading: 'МИ ТУТ, ЩОБ ДОПОМОГТИ',
-    intro: 'Запитання, індивідуальні замовлення чи порада щодо добору — наша команда поруч',
+    intro: 'Короткий рядок про те, чим може допомогти ваша команда',
     faqHeading: 'Часті запитання',
   },
 }
@@ -635,7 +307,7 @@ export const CONTACT_PAGE: Record<'ru' | 'uk', Record<string, string>> = {
 export const CONTACT_FORM: Record<'ru' | 'uk', Record<string, string>> = {
   ru: {
     heading: 'НАПИШИТЕ НАМ',
-    body: 'Чтобы сделать запрос, заполните форму ниже. Команда Aurum с радостью поможет с бриллиантами, заказами, доставкой и любыми другими вопросами.',
+    body: 'Чтобы сделать запрос, заполните форму ниже. Наша команда с радостью поможет с заказами, доставкой и любыми другими вопросами.',
     nameLabel: 'Имя',
     emailLabel: 'Эл. почта',
     messageLabel: 'Сообщение',
@@ -647,7 +319,7 @@ export const CONTACT_FORM: Record<'ru' | 'uk', Record<string, string>> = {
   },
   uk: {
     heading: 'НАПИШІТЬ НАМ',
-    body: 'Щоб зробити запит, заповніть форму нижче. Команда Aurum з радістю допоможе з діамантами, замовленнями, доставкою та будь-якими іншими питаннями.',
+    body: 'Щоб зробити запит, заповніть форму нижче. Наша команда з радістю допоможе із замовленнями, доставкою та будь-якими іншими питаннями.',
     nameLabel: 'Ім’я',
     emailLabel: 'Ел. пошта',
     messageLabel: 'Повідомлення',
@@ -664,40 +336,417 @@ export const CONTACT_FORM: Record<'ru' | 'uk', Record<string, string>> = {
  * The home page, which stopped being a fixture file in spec 010.
  *
  * `about.body` is an array of paragraphs in the global; it is held here as an array of strings and
- * wrapped into `{ text }` rows by the apply script, the same way the FAQ's answers are wrapped into
- * Lexical nodes.
+ * written into the English rows by the apply script, the same way the FAQ's answers are wrapped
+ * into Lexical nodes.
  */
 export const HOME_PAGE: Record<'ru' | 'uk', Record<string, string | string[]>> = {
   ru: {
-    heroHeadline: 'Красота выращенных бриллиантов',
-    heroLede:
-      'Каждый бриллиант создаётся с заботой о будущем, без компромиссов в качестве и игре света. Современная роскошь, в которой сходятся безупречная работа, ответственность и доступность',
+    heroHeadline: 'Заголовок о вашем магазине',
+    heroLede: 'Короткое предложение под заголовком о том, что предлагает ваш магазин.',
     heroCtaLabel: 'В магазин',
     categoriesHeading: 'Категории',
-    featuredHeading: 'Все украшения',
+    featuredHeading: 'Все товары',
     featuredCtaLabel: 'Смотреть все',
-    aboutHeadingLead: 'О бренде',
-    aboutHeadingEmphasis: 'Aurum',
+    aboutHeadingLead: 'О',
+    aboutHeadingEmphasis: 'нас',
     aboutCtaLabel: 'Наша история',
     aboutBody: [
-      'Откройте для себя коллекцию колец с выращенными бриллиантами, где вечная красота встречается с ответственным подходом.',
-      'Идеальны для помолвки, свадьбы или особого случая: в каждом изделии сходятся исключительная игра света, сдержанная роскошь и вневременная элегантность',
+      'Короткий абзац о вашем магазине.',
+      'Второй абзац о том, что вы продаёте и почему на это стоит взглянуть.',
     ],
   },
   uk: {
-    heroHeadline: 'Краса вирощених діамантів',
-    heroLede:
-      'Кожен діамант створюється з турботою про майбутнє, без компромісів у якості та грі світла. Сучасна розкіш, у якій сходяться бездоганна робота, відповідальність і доступність',
+    heroHeadline: 'Заголовок про ваш магазин',
+    heroLede: 'Коротке речення під заголовком про те, що пропонує ваш магазин.',
     heroCtaLabel: 'До магазину',
     categoriesHeading: 'Категорії',
-    featuredHeading: 'Усі прикраси',
+    featuredHeading: 'Усі товари',
     featuredCtaLabel: 'Дивитися все',
-    aboutHeadingLead: 'Про бренд',
-    aboutHeadingEmphasis: 'Aurum',
+    aboutHeadingLead: 'Про',
+    aboutHeadingEmphasis: 'нас',
     aboutCtaLabel: 'Наша історія',
     aboutBody: [
-      'Відкрийте для себе колекцію каблучок з вирощеними діамантами, де вічна краса зустрічається з відповідальним підходом.',
-      'Ідеальні для заручин, весілля чи особливої нагоди: у кожному виробі сходяться виняткова гра світла, стримана розкіш і позачасова елегантність',
+      'Короткий абзац про ваш магазин.',
+      'Другий абзац про те, що ви продаєте і чому на це варто поглянути.',
     ],
   },
+}
+
+/**
+ * Long-form text, keyed by the exact English the seeds write: the Story page's bands, the feature
+ * article's chapters, product details and attribute values, and the policy bodies.
+ */
+export const TEXT: Record<string, Pair> = {
+  // ---- products ----------------------------------------------------------------------------------
+  'Short product description. Replace it with your own text.': DESCRIPTION,
+  'Краткое описание товара. Замените его своим текстом.': DESCRIPTION,
+  'Not yet announced.': { ru: 'Ещё не анонсировано.', uk: 'Ще не анонсовано.' },
+  'Add product details, specifications and care instructions here.': {
+    ru: 'Добавьте здесь подробности о товаре, характеристики и инструкции по уходу.',
+    uk: 'Додайте тут подробиці про товар, характеристики та інструкції з догляду.',
+  },
+  'Material A': { ru: 'Материал A', uk: 'Матеріал A' },
+  'Material B': { ru: 'Материал B', uk: 'Матеріал B' },
+  'Material C': { ru: 'Материал C', uk: 'Матеріал C' },
+  '1.0 kg': { ru: '1,0 кг', uk: '1,0 кг' },
+  '2.5 kg': { ru: '2,5 кг', uk: '2,5 кг' },
+  'Sample origin': { ru: 'Пример происхождения', uk: 'Приклад походження' },
+
+  // ---- the Story page ------------------------------------------------------------------------------
+  'OUR STORY': { ru: 'НАША ИСТОРИЯ', uk: 'НАША ІСТОРІЯ' },
+  'A HEADLINE ABOUT YOUR STORE': { ru: 'ЗАГОЛОВОК О ВАШЕМ МАГАЗИНЕ', uk: 'ЗАГОЛОВОК ПРО ВАШ МАГАЗИН' },
+  'A short paragraph about what your store offers and what sets it apart.': {
+    ru: 'Короткий абзац о том, что предлагает ваш магазин и чем он отличается от других.',
+    uk: 'Короткий абзац про те, що пропонує ваш магазин і чим він відрізняється від інших.',
+  },
+  ...Object.fromEntries(
+    numbered(6).map((n) => [`Feature ${n}`, { ru: `Особенность ${n}`, uk: `Особливість ${n}` }]),
+  ),
+  ...Object.fromEntries(
+    numbered(3).map((n) => [`WORD ${n}`, { ru: `СЛОВО ${n}`, uk: `СЛОВО ${n}` }]),
+  ),
+  'a short caption': { ru: 'короткая подпись', uk: 'короткий підпис' },
+  'SECTION LABEL': { ru: 'МЕТКА РАЗДЕЛА', uk: 'МІТКА РОЗДІЛУ' },
+  'A HEADLINE FOR THIS BAND': { ru: 'ЗАГОЛОВОК ЭТОГО БЛОКА', uk: 'ЗАГОЛОВОК ЦЬОГО БЛОКУ' },
+  'A short paragraph that supports the headline above.': {
+    ru: 'Короткий абзац, который поддерживает заголовок выше.',
+    uk: 'Короткий абзац, що підтримує заголовок вище.',
+  },
+  'VIEW ALL PRODUCTS': { ru: 'СМОТРЕТЬ ВСЕ ТОВАРЫ', uk: 'ДИВИТИСЯ ВСІ ТОВАРИ' },
+  'HOW IT WORKS': { ru: 'КАК ЭТО РАБОТАЕТ', uk: 'ЯК ЦЕ ПРАЦЮЄ' },
+  ...Object.fromEntries(
+    numbered(3).map((n) => [`STEP ${n}`, { ru: `ШАГ ${n}`, uk: `КРОК ${n}` }]),
+  ),
+  'A short caption for this step': {
+    ru: 'Короткая подпись к этому шагу',
+    uk: 'Короткий підпис до цього кроку',
+  },
+  'A SECOND HEADLINE': { ru: 'ВТОРОЙ ЗАГОЛОВОК', uk: 'ДРУГИЙ ЗАГОЛОВОК' },
+  'A short sentence for this band.': {
+    ru: 'Короткое предложение для этого блока.',
+    uk: 'Коротке речення для цього блоку.',
+  },
+  'EVERY DETAIL, ANSWERED': { ru: 'ОТВЕТЫ НА ВСЕ ВОПРОСЫ', uk: 'ВІДПОВІДІ НА ВСІ ЗАПИТАННЯ' },
+  'A short paragraph introducing the questions below. Have a question you can’t find here? Our team is always ready to help.':
+    {
+      ru: 'Короткий абзац, который представляет вопросы ниже. Не нашли ответа на свой вопрос? Наша команда всегда готова помочь.',
+      uk: 'Короткий абзац, що представляє запитання нижче. Не знайшли відповіді на своє запитання? Наша команда завжди готова допомогти.',
+    },
+  'CONTACT US': { ru: 'СВЯЖИТЕСЬ С НАМИ', uk: 'ЗВ’ЯЖІТЬСЯ З НАМИ' },
+
+  // ---- the feature article -------------------------------------------------------------------------
+  ...Object.fromEntries(
+    numbered(4).flatMap((n) => [
+      [`Chapter heading ${n}`, { ru: `Заголовок главы ${n}`, uk: `Заголовок розділу ${n}` }],
+      [`Chapter ${n}`, { ru: `Глава ${n}`, uk: `Розділ ${n}` }],
+    ]),
+  ),
+  'A short lede for this chapter': {
+    ru: 'Короткий подзаголовок этой главы',
+    uk: 'Короткий підзаголовок цього розділу',
+  },
+  'Another short lede for this chapter.': {
+    ru: 'Ещё один короткий подзаголовок этой главы.',
+    uk: 'Ще один короткий підзаголовок цього розділу.',
+  },
+  'This is placeholder text for an article section. Replace it with your own content in the admin panel.':
+    {
+      ru: 'Это текст-заполнитель для раздела статьи. Замените его своим содержимым в панели администратора.',
+      uk: 'Це текст-заповнювач для розділу статті. Замініть його своїм вмістом у панелі адміністратора.',
+    },
+  'Use this paragraph to expand on the topic: add details, examples or anything your readers need to know.':
+    {
+      ru: 'Используйте этот абзац, чтобы раскрыть тему: добавьте подробности, примеры или всё, что нужно знать читателям.',
+      uk: 'Використайте цей абзац, щоб розкрити тему: додайте подробиці, приклади або все, що потрібно знати читачам.',
+    },
+  'A short pull quote that stands out from the rest of the text.': {
+    ru: 'Короткая цитата, которая выделяется на фоне остального текста.',
+    uk: 'Коротка цитата, що вирізняється на тлі решти тексту.',
+  },
+  'A second paragraph can list the key points of the section, one after another.': {
+    ru: 'Второй абзац может перечислить ключевые моменты раздела один за другим.',
+    uk: 'Другий абзац може перелічити ключові моменти розділу один за одним.',
+  },
+  'A closing paragraph can sum up the article and point the reader to what to do next.': {
+    ru: 'Заключительный абзац может подвести итог статьи и подсказать читателю, что делать дальше.',
+    uk: 'Завершальний абзац може підсумувати статтю й підказати читачеві, що робити далі.',
+  },
+
+  // ---- policies: shared ----------------------------------------------------------------------------
+  'This is a sample policy. Review it, adapt it to your business and replace it with your own text before the store opens.':
+    {
+      ru: 'Это пример политики. Проверьте его, адаптируйте под свой бизнес и замените своим текстом до открытия магазина.',
+      uk: 'Це приклад політики. Перевірте його, адаптуйте до свого бізнесу та замініть своїм текстом до відкриття магазину.',
+    },
+  'Contact us': { ru: 'Свяжитесь с нами', uk: 'Зв’яжіться з нами' },
+
+  // ---- policies: privacy ---------------------------------------------------------------------------
+  'We respect your privacy and are committed to protecting the personal information you share with us. This policy explains what we collect, why we collect it, and what you can ask us to do with it.':
+    {
+      ru: 'Мы уважаем вашу конфиденциальность и стремимся защищать персональные данные, которыми вы с нами делитесь. Эта политика объясняет, что мы собираем, зачем и что вы можете попросить нас с этим сделать.',
+      uk: 'Ми поважаємо вашу конфіденційність і прагнемо захищати персональні дані, якими ви з нами ділитеся. Ця політика пояснює, що ми збираємо, навіщо і що ви можете попросити нас із цим зробити.',
+    },
+  'Information we collect': { ru: 'Какие данные мы собираем', uk: 'Які дані ми збираємо' },
+  'When you interact with our store, we may collect:': {
+    ru: 'Когда вы взаимодействуете с нашим магазином, мы можем собирать:',
+    uk: 'Коли ви взаємодієте з нашим магазином, ми можемо збирати:',
+  },
+  'Your name and contact details': {
+    ru: 'Ваше имя и контактные данные',
+    uk: 'Ваше ім’я та контактні дані',
+  },
+  'Your delivery and billing address': {
+    ru: 'Ваш адрес доставки и платёжный адрес',
+    uk: 'Вашу адресу доставки та платіжну адресу',
+  },
+  'Your order and enquiry history': {
+    ru: 'Историю ваших заказов и запросов',
+    uk: 'Історію ваших замовлень і запитів',
+  },
+  'Your account details, if you create an account': {
+    ru: 'Данные вашей учётной записи, если вы её создадите',
+    uk: 'Дані вашого облікового запису, якщо ви його створите',
+  },
+  'Messages you send us through the website or a messaging app': {
+    ru: 'Сообщения, которые вы отправляете нам через сайт или мессенджер',
+    uk: 'Повідомлення, які ви надсилаєте нам через сайт або месенджер',
+  },
+  'We only collect information that is necessary to answer you and to fulfil your order.': {
+    ru: 'Мы собираем только те данные, которые нужны, чтобы ответить вам и выполнить ваш заказ.',
+    uk: 'Ми збираємо лише ті дані, які потрібні, щоб відповісти вам і виконати ваше замовлення.',
+  },
+  'How we use your information': {
+    ru: 'Как мы используем ваши данные',
+    uk: 'Як ми використовуємо ваші дані',
+  },
+  'To process and fulfil your order': {
+    ru: 'Чтобы обработать и выполнить ваш заказ',
+    uk: 'Щоб обробити та виконати ваше замовлення',
+  },
+  'To answer your enquiries and provide customer support': {
+    ru: 'Чтобы отвечать на ваши запросы и поддерживать вас',
+    uk: 'Щоб відповідати на ваші запити та підтримувати вас',
+  },
+  'To manage your account, if you have one': {
+    ru: 'Чтобы вести вашу учётную запись, если она у вас есть',
+    uk: 'Щоб вести ваш обліковий запис, якщо він у вас є',
+  },
+  'To send you the offers you have asked to receive, and no others': {
+    ru: 'Чтобы присылать вам только те предложения, которые вы просили получать',
+    uk: 'Щоб надсилати вам лише ті пропозиції, які ви просили отримувати',
+  },
+  'To meet our legal and accounting obligations': {
+    ru: 'Чтобы выполнять наши юридические и бухгалтерские обязательства',
+    uk: 'Щоб виконувати наші юридичні та бухгалтерські зобов’язання',
+  },
+  'Payment information': { ru: 'Платёжные данные', uk: 'Платіжні дані' },
+  'This website does not take payment. We do not collect, store, or process card details anywhere on this site.':
+    {
+      ru: 'Этот сайт не принимает оплату. Мы нигде на сайте не собираем, не храним и не обрабатываем данные карт.',
+      uk: 'Цей сайт не приймає оплату. Ми ніде на сайті не збираємо, не зберігаємо й не обробляємо дані карток.',
+    },
+  'How we share your information': {
+    ru: 'Кому мы передаём ваши данные',
+    uk: 'Кому ми передаємо ваші дані',
+  },
+  'We do not sell your personal information. We share it only with the delivery and service providers needed to complete your order, and where the law requires it.':
+    {
+      ru: 'Мы не продаём ваши персональные данные. Мы передаём их только службам доставки и поставщикам услуг, без которых нельзя выполнить заказ, и там, где этого требует закон.',
+      uk: 'Ми не продаємо ваші персональні дані. Ми передаємо їх лише службам доставки та постачальникам послуг, без яких не можна виконати замовлення, і там, де цього вимагає закон.',
+    },
+  'Your privacy rights': { ru: 'Ваши права', uk: 'Ваші права' },
+  'You can ask us for a copy of the information we hold about you, ask us to correct it, or ask us to delete it. Contact us and we will act on your request.':
+    {
+      ru: 'Вы можете запросить копию данных, которые мы о вас храним, попросить исправить или удалить их. Свяжитесь с нами, и мы выполним ваш запрос.',
+      uk: 'Ви можете запросити копію даних, які ми про вас зберігаємо, попросити виправити або видалити їх. Зв’яжіться з нами, і ми виконаємо ваш запит.',
+    },
+  Cookies: { ru: 'Файлы cookie', uk: 'Файли cookie' },
+  'This website uses a small number of cookies that are necessary for it to work. Our Cookie Policy explains each one.':
+    {
+      ru: 'Этот сайт использует небольшое число файлов cookie, без которых он не работает. Каждый из них описан в нашей Политике cookie.',
+      uk: 'Цей сайт використовує невелику кількість файлів cookie, без яких він не працює. Кожен із них описано в нашій Політиці cookie.',
+    },
+  'Changes to this policy': { ru: 'Изменения этой политики', uk: 'Зміни цієї політики' },
+  'We may update this Privacy Policy from time to time. The latest version is always published on this page.':
+    {
+      ru: 'Мы можем время от времени обновлять эту Политику конфиденциальности. Актуальная версия всегда опубликована на этой странице.',
+      uk: 'Ми можемо час від часу оновлювати цю Політику конфіденційності. Актуальна версія завжди опублікована на цій сторінці.',
+    },
+  'If you have questions about this Privacy Policy, or want to make a request about your information, please contact us using the details on our contact page.':
+    {
+      ru: 'Если у вас есть вопросы об этой Политике конфиденциальности или запрос о ваших данных, свяжитесь с нами по контактам на странице контактов.',
+      uk: 'Якщо у вас є запитання щодо цієї Політики конфіденційності або запит щодо ваших даних, зв’яжіться з нами за контактами на сторінці контактів.',
+    },
+
+  // ---- policies: terms -----------------------------------------------------------------------------
+  'These terms govern your access to and use of our website, our online services, our products, and their related features. By using our website, you agree to these terms.':
+    {
+      ru: 'Эти условия регулируют доступ к нашему сайту, онлайн-сервисам, товарам и связанным с ними функциям, а также их использование. Пользуясь сайтом, вы соглашаетесь с этими условиями.',
+      uk: 'Ці умови регулюють доступ до нашого сайту, онлайн-сервісів, товарів і пов’язаних із ними функцій, а також їх використання. Користуючись сайтом, ви погоджуєтеся з цими умовами.',
+    },
+  'Use of our website': { ru: 'Использование сайта', uk: 'Використання сайту' },
+  'You may use this website for lawful, personal, and non-commercial purposes. You agree not to misuse the website, interfere with its operation, or attempt unauthorised access.':
+    {
+      ru: 'Вы можете пользоваться сайтом в законных, личных и некоммерческих целях. Вы обязуетесь не злоупотреблять сайтом, не мешать его работе и не пытаться получить несанкционированный доступ.',
+      uk: 'Ви можете користуватися сайтом у законних, особистих і некомерційних цілях. Ви зобов’язуєтеся не зловживати сайтом, не заважати його роботі й не намагатися отримати несанкціонований доступ.',
+    },
+  'Products and availability': { ru: 'Товары и наличие', uk: 'Товари та наявність' },
+  'We make reasonable efforts to display our products accurately. Colours, proportions, dimensions, and appearance may vary slightly depending on your screen. All products are subject to availability, and we reserve the right to limit quantities.':
+    {
+      ru: 'Мы стараемся показывать наши товары точно. Цвета, пропорции, размеры и внешний вид могут немного отличаться в зависимости от экрана. Все товары предлагаются при наличии, и мы оставляем за собой право ограничивать количество.',
+      uk: 'Ми намагаємося показувати наші товари точно. Кольори, пропорції, розміри та зовнішній вигляд можуть дещо відрізнятися залежно від екрана. Усі товари пропонуються за наявності, і ми залишаємо за собою право обмежувати кількість.',
+    },
+  Pricing: { ru: 'Цены', uk: 'Ціни' },
+  'Prices are displayed on our website and may change without prior notice. We make reasonable efforts to ensure pricing and product information are accurate. If an error occurs, we reserve the right to correct it and to cancel any affected order.':
+    {
+      ru: 'Цены указаны на сайте и могут меняться без предварительного уведомления. Мы стараемся, чтобы цены и сведения о товарах были точными. Если произойдёт ошибка, мы оставляем за собой право исправить её и отменить затронутый заказ.',
+      uk: 'Ціни вказано на сайті, і вони можуть змінюватися без попереднього повідомлення. Ми намагаємося, щоб ціни та відомості про товари були точними. Якщо станеться помилка, ми залишаємо за собою право виправити її та скасувати відповідне замовлення.',
+    },
+  'Enquiries and orders': { ru: 'Запросы и заказы', uk: 'Запити та замовлення' },
+  'This website does not take payment. Enquiries and orders are completed with our team directly, and the terms of each order are confirmed with you before anything is agreed.':
+    {
+      ru: 'Этот сайт не принимает оплату. Запросы и заказы оформляются напрямую с нашей командой, и условия каждого заказа согласуются с вами заранее.',
+      uk: 'Цей сайт не приймає оплату. Запити та замовлення оформлюються безпосередньо з нашою командою, і умови кожного замовлення погоджуються з вами заздалегідь.',
+    },
+  'Shipping and returns': { ru: 'Доставка и возврат', uk: 'Доставка та повернення' },
+  'Delivery, exchanges, and returns are covered by our Shipping & Returns policy, which forms part of these terms.':
+    {
+      ru: 'Доставка, обмен и возврат регулируются нашей политикой «Доставка и возврат», которая является частью этих условий.',
+      uk: 'Доставку, обмін і повернення регулює наша політика «Доставка та повернення», яка є частиною цих умов.',
+    },
+  'Intellectual property': { ru: 'Интеллектуальная собственность', uk: 'Інтелектуальна власність' },
+  'All content on this website — including our name, branding, photographs, graphics, text, layouts, and other materials — is owned by or licensed to us and is protected by law.':
+    {
+      ru: 'Все материалы сайта — включая название, фирменный стиль, фотографии, графику, тексты, макеты и прочее — принадлежат нам или используются по лицензии и охраняются законом.',
+      uk: 'Усі матеріали сайту — зокрема назва, фірмовий стиль, фотографії, графіка, тексти, макети тощо — належать нам або використовуються за ліцензією та охороняються законом.',
+    },
+  Accounts: { ru: 'Учётные записи', uk: 'Облікові записи' },
+  'If you create an account, you are responsible for keeping your password confidential and for everything done through your account. Please contact us if you believe your account has been accessed without your authorisation.':
+    {
+      ru: 'Если вы создаёте учётную запись, вы отвечаете за сохранность пароля и за всё, что делается через вашу учётную запись. Свяжитесь с нами, если считаете, что в неё вошли без вашего разрешения.',
+      uk: 'Якщо ви створюєте обліковий запис, ви відповідаєте за збереження пароля та за все, що робиться через ваш обліковий запис. Зв’яжіться з нами, якщо вважаєте, що до нього увійшли без вашого дозволу.',
+    },
+  'Limitation of liability': { ru: 'Ограничение ответственности', uk: 'Обмеження відповідальності' },
+  'To the fullest extent permitted by applicable law, we are not liable for indirect, incidental, special, or consequential losses arising from the use of, or inability to use, our website or our products.':
+    {
+      ru: 'В максимальной степени, допустимой применимым правом, мы не несём ответственности за косвенные, случайные, особые или последующие убытки, связанные с использованием или невозможностью использования сайта или товаров.',
+      uk: 'Наскільки це дозволяє чинне право, ми не несемо відповідальності за непрямі, випадкові, особливі чи подальші збитки, пов’язані з використанням або неможливістю використання сайту чи товарів.',
+    },
+  'Changes to these terms': { ru: 'Изменения условий', uk: 'Зміни умов' },
+  'We may update these terms from time to time. Changes take effect when the revised version is published on our website, and your continued use of the website means you accept them.':
+    {
+      ru: 'Мы можем время от времени обновлять эти условия. Изменения вступают в силу с публикацией новой версии на сайте, а продолжение пользования сайтом означает ваше согласие с ними.',
+      uk: 'Ми можемо час від часу оновлювати ці умови. Зміни набувають чинності з публікацією нової версії на сайті, а подальше користування сайтом означає вашу згоду з ними.',
+    },
+  'If you have questions about these terms, please contact us using the details on our contact page.':
+    {
+      ru: 'Если у вас есть вопросы об этих условиях, свяжитесь с нами по контактам на странице контактов.',
+      uk: 'Якщо у вас є запитання щодо цих умов, зв’яжіться з нами за контактами на сторінці контактів.',
+    },
+
+  // ---- policies: cookies ---------------------------------------------------------------------------
+  'This Cookie Policy explains how we use cookies when you visit our website. It is short because our use of cookies is small.':
+    {
+      ru: 'Эта Политика cookie объясняет, как мы используем файлы cookie, когда вы посещаете наш сайт. Она короткая, потому что cookie у нас мало.',
+      uk: 'Ця Політика cookie пояснює, як ми використовуємо файли cookie, коли ви відвідуєте наш сайт. Вона коротка, бо cookie у нас мало.',
+    },
+  'What are cookies?': { ru: 'Что такое cookie?', uk: 'Що таке cookie?' },
+  'Cookies are small text files stored on your device when you visit a website. They allow a website to remember things about your visit, such as what you have put in your bag or that you are signed in.':
+    {
+      ru: 'Cookie — это небольшие текстовые файлы, которые сохраняются на вашем устройстве при посещении сайта. Они позволяют сайту запомнить что-то о вашем визите — например, что лежит в корзине или что вы вошли в систему.',
+      uk: 'Cookie — це невеликі текстові файли, що зберігаються на вашому пристрої під час відвідування сайту. Вони дозволяють сайту запам’ятати щось про ваш візит — наприклад, що лежить у кошику або що ви увійшли в систему.',
+    },
+  'We do not use analytics or advertising cookies': {
+    ru: 'Мы не используем аналитические и рекламные cookie',
+    uk: 'Ми не використовуємо аналітичні та рекламні cookie',
+  },
+  'This website does not use Google Analytics or any other analytics service. We do not use advertising cookies, tracking pixels, or social media trackers, and we do not share your browsing behaviour with any third party. No third-party script runs on this website.':
+    {
+      ru: 'Этот сайт не использует Google Analytics или другие сервисы аналитики. Мы не используем рекламные cookie, пиксели отслеживания или трекеры соцсетей и не передаём данные о ваших действиях третьим лицам. На сайте не работает ни один сторонний скрипт.',
+      uk: 'Цей сайт не використовує Google Analytics чи інші сервіси аналітики. Ми не використовуємо рекламні cookie, пікселі відстеження чи трекери соцмереж і не передаємо дані про ваші дії третім особам. На сайті не працює жоден сторонній скрипт.',
+    },
+  'The cookies we do use': { ru: 'Какие cookie мы используем', uk: 'Які cookie ми використовуємо' },
+  'Every cookie this website sets is strictly necessary — the site cannot do what you asked of it without them:':
+    {
+      ru: 'Каждый cookie, который устанавливает этот сайт, строго необходим — без них сайт не сможет сделать то, о чём вы его просите:',
+      uk: 'Кожен cookie, який встановлює цей сайт, суворо необхідний — без них сайт не зможе зробити те, про що ви його просите:',
+    },
+  'A session cookie, set when you sign in, which keeps you signed in as you move between pages. It is removed when you sign out.':
+    {
+      ru: 'Cookie сеанса: устанавливается при входе и сохраняет вход при переходе между страницами. Удаляется при выходе.',
+      uk: 'Cookie сеансу: встановлюється під час входу та зберігає вхід під час переходу між сторінками. Видаляється під час виходу.',
+    },
+  'A shopping bag cookie, which is how the website knows which bag is yours so you can come back to it later. It expires after 30 days.':
+    {
+      ru: 'Cookie корзины: по нему сайт узнаёт вашу корзину, чтобы вы могли вернуться к ней позже. Срок действия — 30 дней.',
+      uk: 'Cookie кошика: за ним сайт впізнає ваш кошик, щоб ви могли повернутися до нього пізніше. Термін дії — 30 днів.',
+    },
+  'A shopping bag count, which is the number shown on the bag icon in the header. It holds no personal information.':
+    {
+      ru: 'Счётчик корзины: число на значке корзины в шапке сайта. Не содержит персональных данных.',
+      uk: 'Лічильник кошика: число на значку кошика в шапці сайту. Не містить персональних даних.',
+    },
+  'A consent cookie, which records the choice you made about cookies so that you are not asked again. It expires after 180 days.':
+    {
+      ru: 'Cookie согласия: запоминает ваш выбор относительно cookie, чтобы не спрашивать снова. Срок действия — 180 дней.',
+      uk: 'Cookie згоди: запам’ятовує ваш вибір щодо cookie, щоб не питати знову. Термін дії — 180 днів.',
+    },
+  'Managing cookies': { ru: 'Управление cookie', uk: 'Керування cookie' },
+  'You can review or change your choice at any time using the cookie settings link in the footer of every page. You can also delete cookies through your browser settings — though if you remove the ones above, the website may not remember your bag or keep you signed in.':
+    {
+      ru: 'Вы можете в любой момент проверить или изменить свой выбор по ссылке настроек cookie в подвале каждой страницы. Также cookie можно удалить в настройках браузера — но без перечисленных выше сайт может не запомнить корзину или вход.',
+      uk: 'Ви можете будь-коли переглянути або змінити свій вибір за посиланням налаштувань cookie в підвалі кожної сторінки. Також cookie можна видалити в налаштуваннях браузера — але без перелічених вище сайт може не запам’ятати кошик або вхід.',
+    },
+  'If this changes': { ru: 'Если что-то изменится', uk: 'Якщо щось зміниться' },
+  'If we ever introduce analytics or any other optional cookie, it will appear in the cookie chooser switched off, this page will describe it, and we will ask you again before it is used.':
+    {
+      ru: 'Если мы когда-нибудь добавим аналитику или другой необязательный cookie, он появится в настройках выключенным, эта страница его опишет, и мы снова спросим вас перед его использованием.',
+      uk: 'Якщо ми колись додамо аналітику чи інший необов’язковий cookie, він з’явиться в налаштуваннях вимкненим, ця сторінка його опише, і ми знову запитаємо вас перед його використанням.',
+    },
+  'If you have questions about our use of cookies, please contact us using the details on our contact page.':
+    {
+      ru: 'Если у вас есть вопросы о том, как мы используем cookie, свяжитесь с нами по контактам на странице контактов.',
+      uk: 'Якщо у вас є запитання щодо того, як ми використовуємо cookie, зв’яжіться з нами за контактами на сторінці контактів.',
+    },
+
+  // ---- policies: shipping --------------------------------------------------------------------------
+  'Shipping policy': { ru: 'Условия доставки', uk: 'Умови доставки' },
+  'We work with trusted delivery partners to make sure your order arrives safely. Describe your shipping costs and the regions you deliver to here.':
+    {
+      ru: 'Мы работаем с надёжными службами доставки, чтобы ваш заказ прибыл в целости. Опишите здесь стоимость доставки и регионы, куда вы доставляете.',
+      uk: 'Ми працюємо з надійними службами доставки, щоб ваше замовлення прибуло неушкодженим. Опишіть тут вартість доставки та регіони, куди ви доставляєте.',
+    },
+  'Describe how your parcels are tracked and insured, and whether a signature is required on delivery.':
+    {
+      ru: 'Опишите, как отслеживаются и страхуются посылки и нужна ли подпись при получении.',
+      uk: 'Опишіть, як відстежуються та страхуються посилки і чи потрібен підпис під час отримання.',
+    },
+  'Products in stock are delivered within 3 to 7 business days. Products made to order are dispatched within 25 business days.':
+    {
+      ru: 'Товары в наличии доставляются за 3–7 рабочих дней. Товары на заказ отправляются в течение 25 рабочих дней.',
+      uk: 'Товари в наявності доставляються за 3–7 робочих днів. Товари на замовлення відправляються протягом 25 робочих днів.',
+    },
+  'Return policy': { ru: 'Условия возврата', uk: 'Умови повернення' },
+  'Exchanges or refunds are offered within 30 days of receiving your order.': {
+    ru: 'Обмен или возврат средств возможен в течение 30 дней после получения заказа.',
+    uk: 'Обмін або повернення коштів можливі протягом 30 днів після отримання замовлення.',
+  },
+  Exchanges: { ru: 'Обмен', uk: 'Обмін' },
+  'Exchanges are available for an item of equal or greater value. To proceed with an exchange, please contact us.':
+    {
+      ru: 'Обмен возможен на товар равной или большей стоимости. Чтобы оформить обмен, свяжитесь с нами.',
+      uk: 'Обмін можливий на товар рівної або більшої вартості. Щоб оформити обмін, зв’яжіться з нами.',
+    },
+  Refunds: { ru: 'Возврат средств', uk: 'Повернення коштів' },
+  'Refunds are available to the original purchaser and are issued to the payment method used for the initial purchase. Processing may take up to 14 days from receipt of the returned product.':
+    {
+      ru: 'Средства возвращаются первоначальному покупателю тем же способом, которым была произведена оплата. Обработка может занять до 14 дней с момента получения возвращённого товара.',
+      uk: 'Кошти повертаються початковому покупцеві тим самим способом, яким було здійснено оплату. Обробка може тривати до 14 днів з моменту отримання поверненого товару.',
+    },
+  Conditions: { ru: 'Условия', uk: 'Умови' },
+  'Items must be returned in perfect condition, in their original packaging, along with the receipt and all accessories. No exchanges or refunds are accepted for personalised products.':
+    {
+      ru: 'Товары должны быть возвращены в идеальном состоянии, в оригинальной упаковке, с чеком и всеми комплектующими. Персонализированные товары обмену и возврату не подлежат.',
+      uk: 'Товари мають бути повернені в ідеальному стані, в оригінальному пакуванні, з чеком і всіма комплектуючими. Персоналізовані товари обміну та поверненню не підлягають.',
+    },
 }

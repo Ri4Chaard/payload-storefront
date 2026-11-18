@@ -8,17 +8,17 @@ import { cn } from '@/lib/cn'
 import { SectionHeading } from '../section-heading'
 
 /**
- * The featured-pieces band (002/T123), from Figma nodes 144:839, 440:12540 and 440:13525 — a
+ * The featured-products band (002/T123), from Figma nodes 144:839, 440:12540 and 440:13525 — a
  * heading, a row of product cards, and a route to the full catalogue.
  *
  * **The drawing says "carousel" without saying it.** The desktop frame parks a 50px "scroll right"
  * control at `hidden` beside the last card. That control is real; it is hidden because four cards
- * fill the 1720px content width exactly, so at four pieces there is nowhere to page. Add a fifth
+ * fill the 1720px content width exactly, so at four products there is nowhere to page. Add a fifth
  * and it appears. Below `xl` the cards keep their drawn widths — 400px at 1024, 174px at 390 — and
  * overflow the frame, which is the same control doing visible work.
  *
  * That is why the arrows are clamped rather than wrapping, and why they are absent when the track
- * does not overflow. Wrapping from the last piece back to the first would leave a visitor unable to
+ * does not overflow. Wrapping from the last product back to the first would leave a visitor unable to
  * tell whether they had seen everything; three photographs of ONE product are the case where
  * wrapping is right, and that is `ImageCarousel`'s job, not this one's.
  *
@@ -39,7 +39,7 @@ export interface ProductCarouselProps extends React.ComponentProps<'section'> {
    * The route to the full catalogue, drawn beneath the row on the home page (node 144:839).
    *
    * Optional because the product page reuses this band for _Complete the Collection_ (FR-037) and
-   * draws no button there (node `242:2585`): the pieces in the row already ARE the destinations,
+   * draws no button there (node `242:2585`): the products in the row already ARE the destinations,
    * and "view all" would point at a listing the visitor did not ask for.
    */
   cta?: { label: string; href: string }
@@ -53,7 +53,7 @@ export interface ProductCarouselProps extends React.ComponentProps<'section'> {
    * Milliseconds between automatic pages, passed straight to `Carousel`. Off by default.
    *
    * On for _Complete the Collection_ on the product page, where the row is a shop window beside a
-   * piece someone is already looking at, and off on the home page, where the same band is the
+   * product someone is already looking at, and off on the home page, where the same band is the
    * visitor's first sight of the catalogue and moving it under them is not a welcome.
    */
   autoAdvance?: number

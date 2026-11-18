@@ -45,7 +45,7 @@ const COMMON_PASSWORDS = new Set([
   'trustno1',
   'starwars',
   'whatever',
-  'jewelry1',
+  'shopping1',
   'aurum1',
   'aurum123',
 ])

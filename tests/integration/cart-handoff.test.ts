@@ -186,7 +186,7 @@ describe('the message a signed-in customer actually gets', () => {
       {
         id: 'row-1',
         title: 'Butterfly Diamond Pendant',
-        href: '/products/butterfly-diamond-pendant',
+        href: '/products/product-3',
         image: null,
         variantChoice: null,
         unitPrice: '$24,900',

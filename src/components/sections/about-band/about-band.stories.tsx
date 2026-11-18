@@ -29,8 +29,8 @@ export const WithLongerCopy: Story = {
   args: {
     body: [
       ...aboutFixture.body,
-      'Every stone is independently graded, every setting finished by hand, and every piece ' +
-        'delivered with the paperwork to prove it.',
+      'A third paragraph about your store, which the drawing never shows, so the band has ' +
+        'to grow to hold it.',
     ],
   },
 }

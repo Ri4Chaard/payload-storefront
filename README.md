@@ -1,66 +1,14 @@
 # Aurum
 
-An online jewelry store with an integrated content platform, built on Payload CMS.
+A store template: a multilingual (en/ru/uk) storefront with an integrated content platform, built on
+Next.js and Payload CMS. Every product, category, page and image in the seed data is a placeholder —
+replace them in the admin panel (or in `scripts/seed-*.ts`) to turn it into any kind of shop.
 
-> This repository implements
-> [`001-design-system-foundation`](./specs/001-design-system-foundation/spec.md) (tokens, UI kit,
-> layout shell), [`002-home-page`](./specs/002-home-page/spec.md), and
-> [`003-shop-catalog`](./specs/003-shop-catalog/spec.md) — the listing, the filters and the product
-> page, **reading from Payload**. There is no cart and no checkout yet: the two purchase buttons are
-> drawn and disabled, and `004` picks them up at the seam in `src/lib/catalog/cart-intent.ts`. See
-> [`docs/mvp-brief.md`](./docs/mvp-brief.md) for the whole picture.
->
-> `src/mocks/` still exists and is now **fixture data for stories and unit tests only**. An ESLint
-> rule stops application code importing it; the home page's hero and about band are the last two
-> pieces of copy not modelled in Payload, and they are named in that rule rather than covered by a
-> wildcard so that how much is left stays visible.
-
-## Prerequisites
-
-- Node 22+ (see `.nvmrc`)
-- pnpm (`corepack enable pnpm`)
-- Docker, for local Postgres
-
-## Setup
-
-```bash
-pnpm install
-docker compose --profile local up -d   # Postgres on 127.0.0.1:5432
-cp .env.example .env                   # then fill in PAYLOAD_SECRET and RESEND_API_KEY
-pnpm payload migrate
-pnpm build:tokens
-pnpm seed                              # a development catalogue — see below
-pnpm dev
-```
-
-- Storefront — http://localhost:3000
-- Admin — http://localhost:3000/admin
-- Storybook — `pnpm storybook`, http://localhost:6006
-
-Create the first admin user at `/admin` on the first visit; Payload asks for one when the collection
-is empty.
-
-### Email
-
-Customer accounts do not work without a mail transport — registration cannot finish if the
-verification code never arrives — so `RESEND_API_KEY` and `EMAIL_FROM_ADDRESS` are **required** and
-the app refuses to start naming whichever is missing.
-
-Locally you can leave `EMAIL_FROM_ADDRESS=onboarding@resend.dev`, which Resend accepts without a
-verified domain. It only delivers to the address that owns the API key — enough to run every flow on
-your own machine, and **not** enough for a shared environment, where every tester would receive
-nobody's codes.
-
-Three optional variables, all documented in `.env.example`:
-
-| Variable | What it does |
-| --- | --- |
-| `EMAIL_FROM_NAME` | The name beside the address in the inbox. Defaults to `Aurum`. Set it to `Aurum (staging)` on staging so a stray message is obvious. |
-| `EMAIL_OVERRIDE_RECIPIENT` | Redirects every message to one address. **Must be unset in production.** Set it on any environment whose database may hold real customer addresses — a restored production dump on staging is the usual way a test run mails real people. |
-| `RESEND_AUDIENCE_ID` | The Resend audience that marketing consent is mirrored into. Unset is supported: consent is still recorded and shown, Payload remains the source of truth, and there is simply nowhere to mirror it to. Point each environment at its **own** audience — the override variable above does not protect marketing sends, because those are composed and sent from Resend and never pass through this application. |
-
-`EMAIL_TRANSPORT=log` swaps the transport for one that writes recipients and subjects to the log and
-sends nothing. The test runners set it themselves; do not set it anywhere expected to mail anybody.
+What is included: catalogue with categories, collections, colours, attributes and per-product
+options (variants with their own price and stock), filters and sorting, cart with a messenger
+hand-off (WhatsApp / Telegram / Instagram), customer accounts with email verification, blog,
+about/FAQ/contact pages, legal pages and cookie consent, a design-token system and a Storybook UI
+kit.
 
 ## The storefront
 
@@ -68,8 +16,8 @@ sends nothing. The test runners set it themselves; do not set it anywhere expect
 | --- | --- | --- |
 | `/` | Home. The category band and the featured row read the catalogue | Per request |
 | `/all-products` | The whole shop, with filters, sort and LOAD MORE | Per request |
-| `/<category>` | One category — `/rings`, `/bracelets`, … | Per request |
-| `/products/<slug>` | One piece: gallery, stones, sizes, the details accordions | Cached, and invalidated on publish |
+| `/<category>` | One category — `/category-1`, `/category-2`, … | Per request |
+| `/products/<slug>` | One product: gallery, options, the details accordions | Cached, and invalidated on publish |
 | `/admin` | Payload | Per request |
 
 **The category segment is validated against the catalogue, not against a list in the code.** A
@@ -98,10 +46,10 @@ It is idempotent — everything is looked up by slug or name and updated in plac
 fixed by what references what:
 
 1. **Photographs** (`media`), uploaded first because everything below points at them
-2. **Reference data** — `categories`, `collections`, `sizes`, `attributes`
-3. **The diamond variant type and its stones** — `variantTypes`, then `variantOptions`
+2. **Reference data** — `categories`, `collections`, `colours`, `attributes`
+3. **The option variant type and its options** — `variantTypes`, then `variantOptions`
 4. **Products**, which reference all of the above
-5. **Variants**, after their product: the plugin checks that each stone's variant type is enabled on
+5. **Variants**, after their product: the plugin checks that each option's variant type is enabled on
    the parent, so a variant created first is rejected
 6. **Shop settings**, the global holding the accordion headings and the warranty and delivery copy
 
@@ -221,7 +169,7 @@ switch: it is what everything falls back to.
 ### Things that will surprise you
 
 - **Slugs are always English**, in every language. A Cyrillic title is transliterated —
-  "Каблучка з діамантом" becomes `kabluchka-z-diamantom`.
+  "Зимова куртка" becomes `zimova-kurtka`.
 - **A visitor's language is never guessed.** Browser settings and IP are not read. Everyone starts in
   English; the switcher is the only way to change it, and the choice is remembered for a year.
 - **A `required` field that is also localized must be filled in every language** before a document

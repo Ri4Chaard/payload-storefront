@@ -140,12 +140,12 @@ export function CartLines({
 }
 
 /**
- * "Emerald 1.5 ct · Size 6".
+ * "Option A · Size 6".
  *
- * Returns `undefined` rather than an empty string where a piece offers neither, so the row renders
+ * Returns `undefined` rather than an empty string where a product offers neither, so the row renders
  * nothing at all instead of an empty paragraph holding open a gap.
  */
 function optionsLabel(line: CartLineView): string | undefined {
-  // Just the stone since spec 011 — size was the other half until it was deprecated.
+  // Just the option since spec 011 — size was the other half until it was deprecated.
   return line.variantChoice ?? undefined
 }

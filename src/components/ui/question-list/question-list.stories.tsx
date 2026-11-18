@@ -19,17 +19,15 @@ const QUESTIONS = [
   },
   {
     id: 2,
-    question: 'How long will it take to get my order?',
+    question: 'Question 2?',
     answerHtml:
-      '<p>Insured delivery within the UAE takes two working days. International orders take ' +
-      'between five and ten.</p>',
+      '<p>A short answer to the second question.</p>',
   },
   {
     id: 3,
-    question: 'Can I customise a piece?',
+    question: 'Question 3?',
     answerHtml:
-      '<p>Almost always. Write to us with what you have in mind and we will tell you what is ' +
-      'possible.</p>',
+      '<p>A short answer to the third question.</p>',
   },
 ]
 
@@ -66,15 +64,14 @@ export const LongAnswer: Story = {
     questions: [
       {
         id: 1,
-        question: 'How do you choose your diamonds?',
+        question: 'Question 1, with a much longer answer?',
         answerHtml:
-          '<p>Every stone is selected in person against four criteria, and we reject far more ' +
-          'than we keep.</p><ul><li>Cut, which decides how the stone returns light</li>' +
-          '<li>Colour, graded against master stones in controlled light</li>' +
-          '<li>Clarity, assessed under 10x magnification</li>' +
-          '<li>Carat, chosen to suit the setting rather than to hit a number</li></ul>' +
-          '<p>Each diamond arrives with its own certificate, and we are happy to walk you ' +
-          'through it.</p>',
+          '<p>A long answer that runs past the fold, so the list has something to expand ' +
+          'in place.</p><ul><li>Point one, with a sentence of explanation</li>' +
+          '<li>Point two, with a sentence of explanation</li>' +
+          '<li>Point three, with a sentence of explanation</li>' +
+          '<li>Point four, with a sentence of explanation</li></ul>' +
+          '<p>A closing paragraph that ends the answer.</p>',
       },
       ...QUESTIONS.slice(1),
     ],

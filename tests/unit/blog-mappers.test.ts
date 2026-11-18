@@ -66,7 +66,7 @@ const article = (overrides: Partial<Article> = {}): Article =>
   ({
     id: 1,
     title: 'How to Choose the Perfect Diamond',
-    slug: 'how-to-choose-the-perfect-diamond',
+    slug: 'article-1',
     standfirst: 'What defines an exceptional stone.',
     category: 7,
     publishedOn: '2026-08-08T00:00:00.000Z',
@@ -293,7 +293,7 @@ describe('a category that has been deleted', () => {
     expect(card.category).toBeUndefined()
     expect(card.title).toBe('How to Choose the Perfect Diamond')
     expect(view.category).toBeUndefined()
-    expect(view.href).toBe('/blog/how-to-choose-the-perfect-diamond')
+    expect(view.href).toBe('/blog/article-1')
   })
 })
 

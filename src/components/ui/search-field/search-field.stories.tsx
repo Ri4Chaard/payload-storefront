@@ -35,7 +35,7 @@ export const Disabled: Story = { args: { defaultValue: 'Category 1', disabled: t
 /** Controlled, which is how a real search page drives it. */
 export const Controlled: Story = {
   render: (args) => {
-    const [value, setValue] = React.useState('Diamond')
+    const [value, setValue] = React.useState('Product')
     return (
       <div className="flex flex-col gap-5">
         <SearchField

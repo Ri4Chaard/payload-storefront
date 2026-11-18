@@ -24,7 +24,7 @@ import { cn } from '@/lib/cn'
  * both of those, and it went into `ProductCard` rather than into a second card here — FR-017 says
  * that when the listing cannot reuse the card, the card is what gets fixed.
  *
- * **Availability is not drawn on a card and is not rendered on one.** A stock-tracked piece at zero
+ * **Availability is not drawn on a card and is not rendered on one.** A stock-tracked product at zero
  * still appears in the grid — the owner wants it seen — and says so on its own page.
  */
 export interface ProductGridProps extends React.ComponentProps<'div'> {
@@ -37,8 +37,8 @@ export interface ProductGridProps extends React.ComponentProps<'div'> {
   /** The heading this grid answers to, for assistive technology. The listing's `h1` by default. */
   label?: string
   /**
-   * The action under every card. It reads "Buy now" as drawn, and it goes to the piece's own page
-   * rather than to a basket — a size and a stone cannot be chosen from a grid, and FR-038 will not
+   * The action under every card. It reads "Buy now" as drawn, and it goes to the product's own page
+   * rather than to a basket — a size and an option cannot be chosen from a grid, and FR-038 will not
    * let anything be bought until they are.
    */
   cta?: string

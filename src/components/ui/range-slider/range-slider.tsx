@@ -48,7 +48,7 @@ import { cn } from '@/lib/cn'
  *
  * **The value is the model's, not the browser's** — amounts here are integer minor units, which is
  * also why `formatValue` exists. A screen reader reading `aria-valuenow` would otherwise announce
- * "seven hundred and thirty thousand" for a $7,300 ring.
+ * "seven hundred and thirty thousand" for a $7,300 product.
  */
 export interface RangeSliderProps extends Omit<React.ComponentProps<'div'>, 'onChange' | 'defaultValue'> {
   min: number

@@ -18,7 +18,7 @@ import { shopPromises } from '@/lib/shop-promises'
  * itself would have made that a rewrite.
  *
  * **Every word on this page now comes from Payload** (spec 010). The hero, the two band headings
- * and the about band read `home-page`; the tiles and the pieces read the catalogue. `src/mocks/`
+ * and the about band read `home-page`; the tiles and the products read the catalogue. `src/mocks/`
  * is gone, and with it the last of the fixture content spec 002 opened — `payload.config.ts`,
  * `story-page.ts` and the catalogue-boundary lint rule each named it as the outstanding one.
  *
@@ -40,7 +40,7 @@ import { shopPromises } from '@/lib/shop-promises'
  * The two dynamic routes degrade by prerendering nothing and rendering on demand instead, which
  * costs the first visitor one render and nothing after that. A page with no dynamic segment has no
  * such middle ground: Next prerenders it at build if it can, so a build with no database would bake
- * a home page with no categories and no featured pieces, and it would stay that way until somebody
+ * a home page with no categories and no featured products, and it would stay that way until somebody
  * happened to edit something in the admin. An empty band that never heals is worse than two queries.
  *
  * Those two queries are the whole cost — the categories and the first few products, both small,
@@ -67,7 +67,7 @@ export default async function HomePage() {
     It moved out of a module constant when it became a translation (spec 010).
   */
   const CATEGORY_CTA = (await getTranslations('catalog'))('viewCollectionShort')
-  const [content, pieces, shopCategories] = await Promise.all([
+  const [content, featured, shopCategories] = await Promise.all([
     getHomeContent(locale),
     getFeatured(locale),
     getCategories(locale),
@@ -108,20 +108,20 @@ export default async function HomePage() {
       ) : null}
 
       {/*
-        Real pieces, with the band's copy still coming from the fixtures. `ProductCarousel` takes
+        Real products, with the band's copy still coming from the fixtures. `ProductCarousel` takes
         the shape it always did, so nothing about the component changed — the swap is this prop.
 
-        Absent rather than empty when the catalogue is: a heading and a "View all" over no pieces
+        Absent rather than empty when the catalogue is: a heading and a "View all" over no products
         advertises a shop with nothing in it, which is worse than a page that is one band shorter.
       */}
-      {content && pieces.length > 0 ? (
+      {content && featured.length > 0 ? (
         <ProductCarousel
           {...content.featured}
-          items={pieces.map((piece) => ({
-            name: piece.title,
-            price: piece.price,
-            href: piece.href,
-            images: piece.images,
+          items={featured.map((product) => ({
+            name: product.title,
+            price: product.price,
+            href: product.href,
+            images: product.images,
           }))}
         />
       ) : null}

@@ -132,7 +132,7 @@ export function parseFilters(input: SearchParamsInput): ParsedFilters {
     category: unique(valuesFor(input, 'category')),
     collection: unique(valuesFor(input, 'collection')),
     /*
-      An OPEN set as of spec 011 — the same treatment `category` and `collection` already get. Whether `colour=rose-gold` names a real colour depends on the catalogue, which this pure
+      An OPEN set as of spec 011 — the same treatment `category` and `collection` already get. Whether `colour=navy` names a real colour depends on the catalogue, which this pure
       module has never seen, so `getListing` finishes the job and merges its own drops into the same
       list. Nothing a visitor can observe changes: same key, same repeats, same chips.
     */
@@ -295,7 +295,7 @@ export function applyChange(filters: FilterState, patch: Partial<FilterState>): 
  * Both ends are always submitted — the slider is a pair of native inputs inside a
  * `<form method="GET">`, which is what makes the price reachable without scripting (FR-029). So a
  * visitor who never touched it sends the catalogue's own minimum and maximum, and one who pulled
- * only the top handle down still sends the minimum. Neither of those removes a single piece from
+ * only the top handle down still sends the minimum. Neither of those removes a single product from
  * the grid, and a chip claiming otherwise is a filter the visitor did not apply.
  *
  * Each end is judged on its own, which is also what produces the drawn chip: `Up to $7,300` rather

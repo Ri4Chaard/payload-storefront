@@ -4,9 +4,9 @@ import { isAdmin } from '@/lib/access'
 import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
- * A colour a piece can be, and a customer can filter by (spec 011, US3, FR-017).
+ * A colour a product can be, and a customer can filter by (spec 011, US3, FR-017).
  *
- * **This used to be four values in a `select`**, which meant adding rose gold was a developer task
+ * **This used to be four values in a `select`**, which meant adding navy was a developer task
  * and a deployment — the one arrangement every other descriptive vocabulary in this shop avoids.
  * Now it is the owner's.
  *
@@ -25,12 +25,12 @@ import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 /**
  * A colour still in use cannot be deleted (FR-023).
  *
- * The two alternatives are both worse. Letting it go leaves published pieces pointing at a row that
+ * The two alternatives are both worse. Letting it go leaves published products pointing at a row that
  * no longer exists — the exact state a relationship is here to prevent, and one that would show as
- * a filter value nothing can match. Silently stripping the colour from those pieces is a content
+ * a filter value nothing can match. Silently stripping the colour from those products is a content
  * change the owner did not ask for and would not see.
  *
- * So it refuses, and says how many pieces are in the way, because "cannot delete" without a number
+ * So it refuses, and says how many products are in the way, because "cannot delete" without a number
  * is an error message that sends somebody hunting.
  */
 const refuseWhileInUse: CollectionBeforeDeleteHook = async ({ id, req }) => {
@@ -55,7 +55,7 @@ export const Colours: CollectionConfig = {
     useAsTitle: 'label',
     defaultColumns: ['label', 'value', 'order'],
     group: 'Shop',
-    description: 'The colours a piece can be filtered by. Renaming a label never changes its link.',
+    description: 'The colours a product can be filtered by. Renaming a label never changes its link.',
   },
   access: {
     read: () => true,
@@ -88,7 +88,7 @@ export const Colours: CollectionConfig = {
       label: 'Value',
       admin: {
         description:
-          'What appears in the address bar when this colour is filtered on. Keep it lowercase and hyphenated — "rose-gold". Changing it breaks links that already exist.',
+          'What appears in the address bar when this colour is filtered on. Keep it lowercase and hyphenated — "light-blue". Changing it breaks links that already exist.',
       },
     },
     {

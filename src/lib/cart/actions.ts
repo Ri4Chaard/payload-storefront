@@ -76,7 +76,7 @@ async function settle(): Promise<number> {
 }
 
 /**
- * Put a chosen piece in the cart (FR-001 – FR-004).
+ * Put a chosen product in the cart (FR-001 – FR-004).
  *
  * The intent carries identifiers and nothing else — no price, no title, no formatted string. That
  * is not defensive style, it is what stops a displayed price from becoming a charged one:
@@ -195,15 +195,15 @@ export async function beginCheckout(locale: Locale): Promise<CheckoutResult> {
 }
 
 /**
- * One piece, straight to the seller, without touching the cart (FR-019, FR-020, T068).
+ * One product, straight to the seller, without touching the cart (FR-019, FR-020, T068).
  *
  * **FR-020 is a property of this code path, not a check inside one.** The cart is never read and
  * never written here: no `resolveCartOwner`, no `ensureCart`, no `addLine`, no `settle`. That is
- * the whole guarantee — a customer with three pieces in their basket who presses BUY NOW on a
+ * the whole guarantee — a customer with three products in their basket who presses BUY NOW on a
  * fourth must find their three exactly as they left them, and the surest way to promise that is to
  * have no code that could disturb them.
  *
- * The piece is validated exactly as ADD TO CART validates it, against the published catalogue, then
+ * The product is validated exactly as ADD TO CART validates it, against the published catalogue, then
  * described to the composer as a one-line cart. It never becomes a row anywhere.
  */
 export async function buyNow(intent: CartIntent, locale: Locale): Promise<CheckoutResult> {
@@ -236,7 +236,7 @@ export async function buyNow(intent: CartIntent, locale: Locale): Promise<Checko
 }
 
 /**
- * The chosen piece, shaped as the one-line cart the composer takes.
+ * The chosen product, shaped as the one-line cart the composer takes.
  *
  * Built here rather than by adding a row and reading it back, which would be the obvious
  * implementation and would violate FR-020 on the way. Every amount still comes from the published

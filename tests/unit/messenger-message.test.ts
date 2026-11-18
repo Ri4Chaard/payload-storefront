@@ -27,7 +27,7 @@ Total: {{total}}
 const line = (over: Partial<CartLineView> = {}): CartLineView => ({
   id: 'row-1',
   title: 'Butterfly Diamond Pendant',
-  href: '/products/butterfly-diamond-pendant',
+  href: '/products/product-3',
   image: null,
   variantChoice: null,
   unitPrice: '$24,900',
@@ -56,7 +56,7 @@ describe('what the seller is told (SC-002)', () => {
         line({
           id: 'a',
           title: 'Paragon Emerald Cut Diamond Engagement Ring',
-          variantChoice: 'Lab 1.5 ct D VS1',
+          variantChoice: 'Option B',
           quantity: 2,
           lineTotal: '$76,640',
         }),
@@ -67,18 +67,18 @@ describe('what the seller is told (SC-002)', () => {
     )
 
     expect(message).toContain('2 × Paragon Emerald Cut Diamond Engagement Ring')
-    expect(message).toContain('Lab 1.5 ct D VS1')
+    expect(message).toContain('Option B')
     expect(message).toContain('$76,640')
     expect(message).toContain('1 × Butterfly Diamond Pendant')
   })
 
   it('works for a piece with one option and for one with neither', () => {
     const variantOnly = composeMessage(
-      cart([line({ variantChoice: 'Lab 1.0 ct D VS1' })]),
+      cart([line({ variantChoice: 'Option A' })]),
       TEMPLATE,
       null,
     )
-    expect(variantOnly).toContain('— Lab 1.0 ct D VS1 —')
+    expect(variantOnly).toContain('— Option A —')
 
     const neither = composeMessage(cart([line()]), TEMPLATE, null)
     expect(neither).toContain('1 × Butterfly Diamond Pendant — $24,900')
@@ -160,7 +160,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
 
   it('leaves an ordinary cart alone', () => {
     const message = composeMessage(longCart('Butterfly Diamond Pendant', 3), TEMPLATE, null)
-    expect(message).not.toContain('more pieces')
+    expect(message).not.toContain('more items')
     expect(linkLength(message)).toBeLessThanOrEqual(LINK_BUDGET)
   })
 
@@ -172,8 +172,8 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
     const cyrillic = composeMessage(longCart('Золотое кольцо с бриллиантом', 20), TEMPLATE, null)
     const latin = composeMessage(longCart('Butterfly Diamond Pendant', 20), TEMPLATE, null)
 
-    expect(cyrillic).toMatch(/more pieces in my cart/)
-    expect(latin).not.toContain('more pieces')
+    expect(cyrillic).toMatch(/more items in my cart/)
+    expect(latin).not.toContain('more items')
 
     // And both fit — which is the assertion that matters, not merely that one was cut.
     expect(linkLength(cyrillic)).toBeLessThanOrEqual(LINK_BUDGET)
@@ -188,9 +188,9 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
     expect(linkLength(cyrillic)).toBeGreaterThan(cyrillic.length * 3)
   })
 
-  it('cuts at a line boundary and says how many pieces it dropped', () => {
+  it('cuts at a line boundary and says how many items it dropped', () => {
     const message = composeMessage(longCart('Золотое кольцо с бриллиантом', 20), TEMPLATE, null)
-    const dropped = message.match(/…and (\d+) more pieces in my cart/)
+    const dropped = message.match(/…and (\d+) more items in my cart/)
 
     expect(dropped).not.toBeNull()
     const listed = message.split('\n').filter((row) => row.startsWith('1 × ')).length
@@ -205,13 +205,13 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
   it('survives a single piece too long to fit at all, rather than looping', () => {
     const message = composeMessage(longCart('З'.repeat(600), 1), TEMPLATE, null)
     expect(linkLength(message)).toBeLessThanOrEqual(LINK_BUDGET)
-    expect(message).toContain('more piece')
+    expect(message).toContain('more item')
   })
 })
 
 describe('composing is deterministic (FR-026, SC-004)', () => {
   it('produces the same message every time from the same cart', () => {
-    const one = cart([line({ variantChoice: 'Lab 1.5 ct D VS1' })])
+    const one = cart([line({ variantChoice: 'Option B' })])
     const customer = { name: 'Aisha Karimova', address: 'Astana' }
 
     const first = composeMessage(one, TEMPLATE, customer)
@@ -234,7 +234,7 @@ describe('a single-piece message', () => {
         [
           line({
             title: 'Paragon Emerald Cut Diamond Engagement Ring',
-            variantChoice: 'Lab 1.5 ct D VS1',
+            variantChoice: 'Option B',
             quantity: 1,
             lineTotal: '$38,320',
           }),
@@ -247,7 +247,7 @@ describe('a single-piece message', () => {
 
     const items = message.split('\n').filter((row) => /^\d+ × /.test(row))
     expect(items).toHaveLength(1)
-    expect(items[0]).toContain('Lab 1.5 ct D VS1')
+    expect(items[0]).toContain('Option B')
     expect(message).toContain('Total: $38,320')
   })
 })

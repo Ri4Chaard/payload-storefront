@@ -13,7 +13,7 @@ import './lightbox.css'
  *
  * The frame draws paging, a close control and nothing else, and an earlier version of this file
  * implemented exactly that on top of `useOverlay`. Zoom was then added to the brief — people buy
- * jewellery on the stone, and a viewer they cannot look into is the wrong viewer. Pinch, pan with
+ * on the detail, and a viewer they cannot look into is the wrong viewer. Pinch, pan with
  * momentum, bounded panning and a wheel that zooms instead of scrolling are the class of thing that
  * takes a week to write and a year to get right on real devices, so this is the case where
  * Constitution II's "reuse before creation" points at a dependency. See research.md R11.

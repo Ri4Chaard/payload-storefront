@@ -23,14 +23,14 @@ export const InANavigation: Story = {
       <ul className="flex items-center gap-6">
         <li>
           <NavLink href="/category-1" current>
-            Rings
+            Category 1
           </NavLink>
         </li>
         <li>
-          <NavLink href="/category-4">Necklaces</NavLink>
+          <NavLink href="/category-4">Category 4</NavLink>
         </li>
         <li>
-          <NavLink href="/category-3">Earrings</NavLink>
+          <NavLink href="/category-3">Category 3</NavLink>
         </li>
         <li>
           <NavLink href="/about">About</NavLink>

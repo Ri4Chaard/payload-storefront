@@ -24,7 +24,7 @@ import { cn } from '@/lib/cn'
  * listing URL. That is also what lets it live in `ui/` rather than in `commerce/`.
  *
  * The window is first, last, the current page and its neighbours, with a gap where numbers were
- * dropped. A hundred pages of rings should not produce a hundred links, and the two ends are what
+ * dropped. A hundred pages of products should not produce a hundred links, and the two ends are what
  * people actually jump to.
  */
 export interface PaginationProps extends Omit<React.ComponentProps<'nav'>, 'children'> {

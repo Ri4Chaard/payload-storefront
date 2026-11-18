@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
-import earrings from '@/components/ui/image-carousel/sample-earrings.webp'
-import pendant from '@/components/ui/image-carousel/sample-pendant.webp'
+import sampleA from '@/components/ui/image-carousel/sample-1.webp'
+import sampleB from '@/components/ui/image-carousel/sample-2.webp'
 
 import { ProductCard } from './product-card'
 
@@ -11,15 +11,15 @@ import { ProductCard } from './product-card'
  * the CTA. Variant3 is the compact size.
  */
 const NAME =
-  'Fancy Vivid Pink Heart Lab Grown Category 3 – Rare Shades Collection, 18k Rose Gold, IGI Certified'
+  'Product 6 with a much longer name – Collection A, Option B, Material, Weight and Origin'
 
-const IMAGES = [{ src: earrings.src }, { src: pendant.src }]
+const IMAGES = [{ src: sampleA.src }, { src: sampleB.src }]
 
 const meta = {
   title: 'Commerce/ProductCard',
   component: ProductCard,
   parameters: { layout: 'centered' },
-  args: { name: NAME, price: '$24,900', href: '/products/pink-heart-earrings', images: IMAGES },
+  args: { name: NAME, price: '$24,900', href: '/products/product-6', images: IMAGES },
   decorators: [
     (Story) => (
       <div className="w-104 max-w-full">
@@ -48,9 +48,9 @@ export const Compact: Story = {
 }
 
 /** One photograph: the carousel drops its arrows rather than offering dead controls. */
-export const SingleImage: Story = { args: { images: [{ src: pendant.src }] } }
+export const SingleImage: Story = { args: { images: [{ src: sampleB.src }] } }
 
-export const ShortName: Story = { args: { name: 'Butterfly diamond pendant' } }
+export const ShortName: Story = { args: { name: 'Product 3' } }
 
 /** How they appear in a listing — and where the hidden CTA has to behave. */
 export const InAGrid: Story = {
@@ -64,20 +64,20 @@ export const InAGrid: Story = {
   render: (args) => (
     <div className="grid grid-cols-2 gap-5">
       <ProductCard {...args} />
-      <ProductCard {...args} name="Butterfly diamond pendant" images={[{ src: pendant.src }]} />
+      <ProductCard {...args} name="Product 3" images={[{ src: sampleB.src }]} />
     </div>
   ),
 }
 
 /**
  * The listing's card (nodes 412:7714 at 768, 412:7860 at 375). The action is solid at every width
- * rather than absent below `xl`, and it is a link to the piece — marked `aria-hidden` so the tile
+ * rather than absent below `xl`, and it is a link to the product — marked `aria-hidden` so the tile
  * stays one control for a keyboard and a screen reader.
  */
 export const OnAListing: Story = {
   args: {
     cta: 'Buy now',
     ctaVisibility: 'always',
-    ctaHref: '/products/paragon-emerald-cut-diamond-engagement-ring',
+    ctaHref: '/products/product-1',
   },
 }

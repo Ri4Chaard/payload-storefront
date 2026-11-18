@@ -6,7 +6,7 @@ import type { CollectionConfig } from 'payload'
  * **Why this exists.** Payload's email verification and password reset are link-based: it mints a
  * token and mails a URL containing it. The brief and the design both want a code. The tempting move
  * is to build a parallel credential — generate our own secret, compare it, expire it, and flip
- * `_verified` ourselves — which means reimplementing the one piece of this feature most worth not
+ * `_verified` ourselves — which means reimplementing the one part of this feature most worth not
  * writing twice.
  *
  * So a row here is an ALIAS, not a credential of its own standing. Payload still mints the token,

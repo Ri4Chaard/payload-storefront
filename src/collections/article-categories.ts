@@ -4,15 +4,15 @@ import { slugField } from '@/fields/slug'
 import { isAdmin } from '@/lib/access'
 
 /**
- * What an article is *about* — Diamonds, Jewelry, Guides, Stories (spec 007, FR-013, FR-014,
+ * What an article is *about* — Materials, Care, Guides, Stories (spec 007, FR-013, FR-014,
  * FR-039 – FR-041).
  *
  * **Not the shop's `categories`, and the distinction is load-bearing.** That collection answers
- * *what is this piece* — rings, bracelets, earrings, necklaces — and each of its rows drives three
+ * *what is this product* — its kind, one per product — and each of its rows drives three
  * things that have nothing to do with writing: a `/category-1` route, the eyebrow above a product, and
  * the CATEGORY group in the filter drawer. Adding `Guides` there would give it a product listing at
  * `/guides` and put it in the drawer beside "Category 2". `src/collections/categories.ts` already
- * records the same reasoning from the other direction, in its note about why "All jewelry" is not a
+ * records the same reasoning from the other direction, in its note about why "All products" is not a
  * row.
  *
  * **A tab is a filter, not a page.** The slug is what appears in `?category=…` on `/blog`, which is

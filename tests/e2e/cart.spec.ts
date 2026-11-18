@@ -26,13 +26,13 @@ const WIDTHS = [
 test('a visitor fills a cart and reads it back at every width', async ({ page }) => {
   // Built through the interface rather than seeded, so the cookie, the rows and the badge are all
   // the real ones. A piece that offers a stone, then a piece that offers no choice at all.
-  await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+  await page.goto('/products/product-1')
   await page.getByRole('combobox', { name: /diamond/i }).click()
   await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
@@ -58,7 +58,7 @@ test('a visitor fills a cart and reads it back at every width', async ({ page })
 
 /** FR-010: the bin asks first, and every way out of the dialog leaves the line alone. */
 test('removing a line asks first', async ({ page }) => {
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
@@ -82,7 +82,7 @@ test('removing a line asks first', async ({ page }) => {
 
 /** FR-018: checkout is refused until the agreement is ticked, and the refusal names it. */
 test('checkout is refused until the terms are agreed', async ({ page }) => {
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
@@ -100,7 +100,7 @@ test('checkout is refused until the terms are agreed', async ({ page }) => {
  * the customer cannot get back.
  */
 test('checkout hands the cart to the seller and leaves it alone', async ({ page }) => {
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
@@ -151,16 +151,16 @@ test('checkout hands the cart to the seller and leaves it alone', async ({ page 
  */
 test('buy now opens the handoff for one piece and leaves the cart alone', async ({ page }) => {
   // A cart of two, built first, so there is something to disturb.
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
-  await page.goto('/products/pave-butterfly-diamond-bracelet')
+  await page.goto('/products/product-2')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
   // Now BUY NOW on a third, unrelated piece.
-  await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+  await page.goto('/products/product-1')
   await page.getByRole('combobox', { name: /diamond/i }).click()
   await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /buy now/i }).click()
@@ -183,7 +183,7 @@ test('buy now opens the handoff for one piece and leaves the cart alone', async 
 
 /** FR-003 on the BUY NOW path: the refusal names the control the visitor has to go and fix. */
 test('buy now names an unmade choice rather than refusing vaguely', async ({ page }) => {
-  await page.goto('/products/paragon-emerald-cut-diamond-engagement-ring')
+  await page.goto('/products/product-1')
   await page.getByRole('button', { name: /buy now/i }).click()
 
   // The status region, not the select's own placeholder — which also reads "Choose a diamond".
@@ -224,7 +224,7 @@ test('the chrome points at the configured accounts, not a placeholder root', asy
 test('the messenger order the owner set is the order customers see', async ({ page, request }) => {
   test.setTimeout(120_000)
 
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
@@ -272,7 +272,7 @@ test('the messenger order the owner set is the order customers see', async ({ pa
  * comes back to the control that opened it rather than to the top of the document.
  */
 test('the cart and its dialogs are operable by keyboard alone', async ({ page }) => {
-  await page.goto('/products/butterfly-diamond-pendant')
+  await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 

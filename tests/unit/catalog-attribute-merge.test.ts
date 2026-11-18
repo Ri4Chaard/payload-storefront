@@ -19,30 +19,30 @@ const row = (name: string, value: string): ProductAttribute => ({
   value,
 })
 
-const PIECE = [row('metal', '18k gold'), row('carat', '1.0 ct'), row('setting', 'prong')]
+const PIECE = [row('material', 'Sample material'), row('weight', '1.0 kg'), row('finish', 'matte')]
 
 describe('a stone laid over its piece', () => {
   it('replaces the piece’s value for the same attribute (FR-010)', () => {
-    const merged = mergeAttributes(PIECE, [row('carat', '1.5 ct')])
+    const merged = mergeAttributes(PIECE, [row('weight', '1.5 kg')])
 
-    expect(merged.map((entry) => entry.value)).toEqual(['18k gold', '1.5 ct', 'prong'])
-    expect(merged.filter((entry) => entry.name === 'carat')).toHaveLength(1)
+    expect(merged.map((entry) => entry.value)).toEqual(['Sample material', '1.5 kg', 'matte'])
+    expect(merged.filter((entry) => entry.name === 'weight')).toHaveLength(1)
   })
 
   it('appends an attribute the piece does not carry (FR-011)', () => {
-    const merged = mergeAttributes(PIECE, [row('certificate', 'GIA 22')])
+    const merged = mergeAttributes(PIECE, [row('warranty', '2 years')])
 
-    expect(merged.map((entry) => entry.name)).toEqual(['metal', 'carat', 'setting', 'certificate'])
+    expect(merged.map((entry) => entry.name)).toEqual(['material', 'weight', 'finish', 'warranty'])
   })
 
   it('does both at once, which is the ordinary case', () => {
-    const merged = mergeAttributes(PIECE, [row('carat', '1.5 ct'), row('certificate', 'GIA 22')])
+    const merged = mergeAttributes(PIECE, [row('weight', '1.5 kg'), row('warranty', '2 years')])
 
     expect(merged).toEqual([
-      row('metal', '18k gold'),
-      row('carat', '1.5 ct'),
-      row('setting', 'prong'),
-      row('certificate', 'GIA 22'),
+      row('material', 'Sample material'),
+      row('weight', '1.5 kg'),
+      row('finish', 'matte'),
+      row('warranty', '2 years'),
     ])
   })
 
@@ -53,10 +53,10 @@ describe('a stone laid over its piece', () => {
    * to re-read rather than scan, and the one row that moved is the one they were looking at.
    */
   it('never moves a row because of where its value came from', () => {
-    const merged = mergeAttributes(PIECE, [row('metal', 'platinum')])
+    const merged = mergeAttributes(PIECE, [row('material', 'Other material')])
 
-    expect(merged.map((entry) => entry.name)).toEqual(['metal', 'carat', 'setting'])
-    expect(merged[0]!.value).toBe('platinum')
+    expect(merged.map((entry) => entry.name)).toEqual(['material', 'weight', 'finish'])
+    expect(merged[0]!.value).toBe('Other material')
   })
 
   it('leaves the piece untouched when the stone carries nothing', () => {
@@ -64,15 +64,15 @@ describe('a stone laid over its piece', () => {
   })
 
   it('shows a stone’s rows when the piece has none of its own', () => {
-    expect(mergeAttributes([], [row('carat', '1.5 ct')])).toEqual([row('carat', '1.5 ct')])
+    expect(mergeAttributes([], [row('weight', '1.5 kg')])).toEqual([row('weight', '1.5 kg')])
   })
 
   it('mutates neither input', () => {
     const piece = [...PIECE]
-    const stone = [row('carat', '1.5 ct')]
+    const stone = [row('weight', '1.5 kg')]
     mergeAttributes(piece, stone)
 
     expect(piece).toEqual(PIECE)
-    expect(stone).toEqual([row('carat', '1.5 ct')])
+    expect(stone).toEqual([row('weight', '1.5 kg')])
   })
 })

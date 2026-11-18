@@ -9,9 +9,9 @@ import { ProductDetails } from './product-details'
  * text, then two fields of the `shop` global (FR-036). The stories vary what the owner has filled
  * in, because that is the only thing about this component that varies.
  */
-const DETAILS = `<p>Set by hand in 18ct white gold, with a brilliant-cut centre stone.</p><ul><li>Hallmarked at the Assay Office</li><li>Presented in an Aurum case</li></ul>`
-const WARRANTY = `<p>Every piece carries a three-year warranty against manufacturing defects. Returns are free within 30 days.</p>`
-const DELIVERY = `<p>Free shipping on all orders. Standard delivery takes 5 to 7 business days; express is available at checkout.</p>`
+const DETAILS = `<p>Short product description.</p><ul><li>Detail one</li><li>Detail two</li></ul>`
+const WARRANTY = `<p>A short paragraph about your warranty and returns.</p>`
+const DELIVERY = `<p>A short paragraph about delivery.</p>`
 
 const meta = {
   title: 'Commerce/ProductDetails',
@@ -20,9 +20,9 @@ const meta = {
   args: {
     detailsHtml: DETAILS,
     attributes: [
-      { name: 'metal', label: 'Metal', value: '18ct white gold' },
-      { name: 'carat', label: 'Total carat weight', value: '1.20ct' },
-      { name: 'setting', label: 'Setting', value: 'Claw' },
+      { name: 'material', label: 'Material', value: 'Material A' },
+      { name: 'weight', label: 'Weight', value: '1.2 kg' },
+      { name: 'origin', label: 'Origin', value: 'Country A' },
     ],
     warrantyHtml: WARRANTY,
     deliveryHtml: DELIVERY,
@@ -35,12 +35,12 @@ type Story = StoryObj<typeof meta>
 /** All three rows, as drawn. */
 export const Default: Story = {}
 
-/** A piece whose details are attributes alone — no prose written, properties still worth showing. */
+/** A product whose details are attributes alone — no prose written, properties still worth showing. */
 export const AttributesOnly: Story = {
   args: { detailsHtml: null },
 }
 
-/** Prose alone, which is the commoner case for a piece with nothing to tabulate. */
+/** Prose alone, which is the commoner case for a product with nothing to tabulate. */
 export const ProseOnly: Story = {
   args: { attributes: [] },
 }

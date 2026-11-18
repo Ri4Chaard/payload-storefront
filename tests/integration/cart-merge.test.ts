@@ -27,8 +27,8 @@ let ring: ProductDetail
 let pendant: ProductDetail
 
 beforeAll(async () => {
-  const withOptions = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
-  const withNone = await getProduct('butterfly-diamond-pendant', 'en')
+  const withOptions = await getProduct('product-1', 'en')
+  const withNone = await getProduct('product-3', 'en')
   if (!withOptions || !withNone) throw new Error('Seed the catalogue first: pnpm seed')
   ring = withOptions
   pendant = withNone

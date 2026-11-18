@@ -52,7 +52,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Open, with nothing applied — "All jewelry" ticked because no category is. */
+/** Open, with nothing applied — "All products" ticked because no category is. */
 export const Default: Story = {}
 
 /** Arrived from a filtered URL: the panel opens pre-ticked to match it (US4, scenario 5). */

@@ -1,5 +1,5 @@
 /**
- * What a chosen piece is, and whether it may be bought (003/T284, contract §6).
+ * What a chosen product is, and whether it may be bought (003/T284, contract §6).
  *
  * **The seam this file opened has been consumed** (spec 005, T011). Spec 003 left `addToCart`,
  * `buyNow` and an empty `submit` here, holding a shape for the cart to arrive into. The cart has
@@ -33,7 +33,7 @@
 /** What the customer has chosen, as identifiers the server can resolve. */
 export interface CartIntent {
   productId: number
-  /** The chosen stone. Absent where the piece offers none. */
+  /** The chosen variant. Absent where the product offers none. */
   variantId?: number
   quantity: number
 }
@@ -43,13 +43,13 @@ export type CartIntentFailure = 'unavailable' | 'missing-option' | 'error'
 export type CartIntentResult = { ok: true } | { ok: false; reason: CartIntentFailure }
 
 /**
- * What the piece requires and what it can currently supply — read from the catalogue by the
+ * What the product requires and what it can currently supply — read from the catalogue by the
  * caller, never from the intent, because an intent is client-supplied and this is what checks it.
  */
 export interface PurchasableProduct {
   id: number
   available: boolean
-  /** Stone ids the piece offers, and whether each can currently be bought. */
+  /** Variant ids the product offers, and whether each can currently be bought. */
   variantChoices: { id: number; available: boolean }[]
 }
 
@@ -70,15 +70,15 @@ export function validateIntent(
   intent: CartIntent,
   product: PurchasableProduct,
 ): UnmetRequirement | null {
-  // The piece first. A sold-out piece cannot be rescued by choosing a stone for it, and reporting
-  // the stone would send the visitor to fix the wrong control.
+  // The product first. A sold-out product cannot be rescued by choosing a variant for it, and reporting
+  // the variant would send the visitor to fix the wrong control.
   if (!product.available) return { field: 'product', reason: 'unavailable' }
 
   if (product.variantChoices.length > 0) {
     if (intent.variantId === undefined) return { field: 'variant', reason: 'missing-option' }
 
     const chosen = product.variantChoices.find((variantChoice) => variantChoice.id === intent.variantId)
-    // An id that names no stone of THIS piece is treated exactly as an unavailable one. It can only
+    // An id that names no variant of THIS product is treated exactly as an unavailable one. It can only
     // arrive from a stale page or a hand-edited request, and neither deserves a distinct message.
     if (!chosen || !chosen.available) return { field: 'variant', reason: 'unavailable' }
   }
@@ -95,7 +95,7 @@ export function validateIntent(
  * What the product page holds, turned into an intent (spec 005, T020, research R16).
  *
  * **It used to earn its keep by catching a size trap, and spec 011 removed the trap with the
- * sizes.** The two selects beside each other used opposite conventions — the stone's options were
+ * sizes.** The two selects beside each other used opposite conventions — the variant's options were
  * built as `value: String(option.id)` with a handler doing `Number(value)`, the size's as
  * `value: option.value` — so the component held `"6.5"`, a label, where the database wanted an id.
  * `Number("6.5")` is `6.5`: not an id, no error, a broken relationship stored. That is gone.

@@ -3,16 +3,16 @@
 import React from 'react'
 
 /**
- * Which stone the customer is looking at (spec 011, US2, FR-013; research R8).
+ * Which option the customer is looking at (spec 011, US2, FR-013; research R8).
  *
  * **It exists because two siblings need one answer.** `ProductPurchase` already owns the selection —
- * FR-039 makes the price follow the chosen stone — and `ProductDetails` renders beside it in the
+ * FR-039 makes the price follow the chosen option — and `ProductDetails` renders beside it in the
  * server-rendered page. The details have to change when the selection does, without a reload, and
  * neither component can reach the other.
  *
  * Three ways to do that, and the cheapest is not the obvious one. Moving `ProductDetails` inside
  * `ProductPurchase` is the smallest diff and the wrong shape: it puts the warranty and delivery
- * accordions — which have nothing to do with a stone — inside the purchase client component, and
+ * accordions — which have nothing to do with an option — inside the purchase client component, and
  * pushes server-rendered rich text across the boundary for no reason. Lifting both into one client
  * component is the same mistake, larger. This leaves both where they are.
  *
@@ -20,7 +20,7 @@ import React from 'react'
  * state container, and the quantity, the handoff modal and the add-to-cart status all have exactly
  * one consumer each. They stay where they are.
  *
- * Safe to read outside a provider: a page with no stones renders no provider, and
+ * Safe to read outside a provider: a page with no options renders no provider, and
  * `useSelectedVariant` returning `null` is the correct answer there rather than an error.
  */
 const SelectedVariantContext = React.createContext<number | null>(null)
@@ -45,12 +45,12 @@ export function SelectedVariantProvider({ children }: SelectedVariantProviderPro
   )
 }
 
-/** The selected stone's id, or `null` before one is chosen — which is the page's initial state. */
+/** The selected option's id, or `null` before one is chosen — which is the page's initial state. */
 export function useSelectedVariant(): number | null {
   return React.useContext(SelectedVariantContext)
 }
 
-/** Publish the selection. A no-op outside a provider, which is what a page with no stones wants. */
+/** Publish the selection. A no-op outside a provider, which is what a page with no options wants. */
 export function usePublishSelectedVariant(): (id: number | null) => void {
   return React.useContext(SetSelectedVariantContext)
 }

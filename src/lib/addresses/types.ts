@@ -23,7 +23,7 @@ export interface CustomerAddress {
 }
 
 /**
- * One line, as the profile draws it: `Kazakhstan, Astana, Mangilik el 22` (node `266:5096`).
+ * One line, as the profile draws it: `Country, City, 1 Main Street` (node `266:5096`).
  *
  * The design's example has three parts, and this adds the two optional ones when they are filled.
  * That is a deliberate departure: the drawn row shows a customer with one address, and the whole
@@ -48,7 +48,7 @@ export function formatAddress(address: CustomerAddress, locale: Locale = DEFAULT
 }
 
 /**
- * The same address, for somebody who has to post a ring to it (spec 005, T054, research R18).
+ * The same address, for somebody who has to post an order to it (spec 005, T054, research R18).
  *
  * **Not `formatAddress`, and the difference is the postcode.** That one drops it deliberately, and
  * its reasoning is sound for the profile: the postcode distinguishes nothing a customer looks at,

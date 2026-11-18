@@ -13,12 +13,12 @@ import type { Platform } from './normalise'
  * the part that gets written wrong. A Latin cart spends roughly one character of budget per
  * character of message; a Cyrillic one spends **six**, because each character is two UTF-8 bytes
  * and each byte becomes a three-character `%XX` escape. So a `message.length` check passes every
- * test written in English and truncates nothing for the customers in this shop's own market, which
- * is Kazakhstan and the UAE. `tests/unit/messenger-message.test.ts` exercises the rule against a
+ * test written in English and truncates nothing for the customers who write in Russian or
+ * Ukrainian. `tests/unit/messenger-message.test.ts` exercises the rule against a
  * Cyrillic cart for exactly that reason.
  *
  * **Truncation cuts at a line boundary and says what it dropped.** A message that quietly loses its
- * last three pieces is worse than one that is visibly shorter: the seller cannot know to ask.
+ * last three lines is worse than one that is visibly shorter: the seller cannot know to ask.
  *
  * **Composed once per checkout** (FR-026). `beginCheckout` calls this a single time and holds the
  * result for the life of the modal, so a double-click cannot produce two messages built from two
@@ -39,9 +39,9 @@ interface ComposeOptions {
   destination?: string
 }
 
-/** "2 × Paragon Emerald Cut Diamond Engagement Ring — Lab 1.5 ct D VS1 — $76,640" */
+/** "2 × Product 1 — Option 1 — $76,640" */
 function itemLine(line: CartView['lines'][number]): string {
-  // The stone, where one was chosen. Size travelled here too until spec 011 deprecated it.
+  // The variant, where one was chosen. Size travelled here too until spec 011 deprecated it.
   const described = line.variantChoice ? ` — ${line.variantChoice}` : ''
 
   return `${line.quantity} × ${line.title}${described} — ${line.lineTotal}`
@@ -98,7 +98,7 @@ function encodedLength(message: string, options: ComposeOptions): number {
  * Drop whole item lines from the end until the link fits, and say how many went.
  *
  * Line-at-a-time rather than character-at-a-time: a message cut mid-word reads as a fault, and a
- * message cut mid-line loses a piece without admitting it.
+ * message cut mid-line loses a line without admitting it.
  */
 function truncateItems(
   lines: string[],
@@ -125,14 +125,14 @@ export function composeMessage(
   customer: MessageCustomer | null,
   options: ComposeOptions = {},
 ): string {
-  // The seller must not receive a request for a piece the customer was just told is unavailable.
+  // The seller must not receive a request for a product the customer was just told is unavailable.
   const lines = cart.lines.filter((line) => line.available).map(itemLine)
   const block = customerBlock(customer)
 
   const build = (items: string[], omitted: number): string => {
     const listed =
       omitted > 0
-        ? [...items, `…and ${omitted} more ${omitted === 1 ? 'piece' : 'pieces'} in my cart`]
+        ? [...items, `…and ${omitted} more ${omitted === 1 ? 'item' : 'items'} in my cart`]
         : items
 
     return fill(template, listed.join('\n'), cart.subtotal, block)

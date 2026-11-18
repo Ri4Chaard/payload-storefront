@@ -207,7 +207,7 @@ export function toArticleCard(document: Article, index: number, locale: Locale):
 /**
  * The chapters, each with an anchor that is unique within the article (FR-026).
  *
- * **Two chapters can legitimately share a heading** — "Summary" twice in a long piece — and a
+ * **Two chapters can legitimately share a heading** — "Summary" twice in a long article — and a
  * visitor choosing the second entry in the contents list must not land on the first. So a repeated
  * slug takes `-2`, `-3` in document order, which is the same convention a file system uses and the
  * one a reader is least surprised by.

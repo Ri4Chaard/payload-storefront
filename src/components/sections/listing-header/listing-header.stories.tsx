@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /** `/all-products` — the same block, a different name. Node 355:7142. */
-export const AllJewelry: Story = { args: { title: 'All jewelry' } }
+export const AllProducts: Story = { args: { title: 'All products' } }
 
 /** No sentence set on the category and none in shop settings: the block closes over it. */
 export const WithoutSubtitle: Story = { args: { subtitle: null } }
@@ -28,7 +28,7 @@ export const WithoutSubtitle: Story = { args: { subtitle: null } }
 export const LongSubtitle: Story = {
   args: {
     subtitle:
-      'Timeless brilliance and exquisite designs, handcrafted for every milestone — each stone ' +
-      'chosen by hand, set by hand, and certified before it ever reaches you.',
+      'A short line about this category, made much longer than usual so that it would run the ' +
+      'full width of the page if nothing set a measure for it.',
   },
 }

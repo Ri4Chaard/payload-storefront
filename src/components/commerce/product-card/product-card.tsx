@@ -66,7 +66,7 @@ export interface ProductCardProps extends Omit<React.ComponentProps<'article'>, 
    */
   ctaVisibility?: 'desktop-hover' | 'always'
   /**
-   * Makes the action a link to the piece's own page rather than a button.
+   * Makes the action a link to the product's own page rather than a button.
    *
    * It is marked `aria-hidden` and taken out of the tab order on purpose. It goes exactly where the
    * card's own stretched anchor goes, so to a screen reader or a keyboard it is a second copy of a
@@ -85,7 +85,7 @@ export interface ProductCardProps extends Omit<React.ComponentProps<'article'>, 
    * many lines as it needs. Two different answers to the same question in the same file, and both
    * are deliberate rather than a slip — the home row is a rail of fixed-width cards where ragged
    * names would make the rail ragged, and the listing is a grid where the name is the only thing
-   * telling one piece from another. At 174px wide, one truncated line of 16px type is about eleven
+   * telling one product from another. At 174px wide, one truncated line of 16px type is about eleven
    * characters: "PARAGON EMERAL…". That is not a name.
    *
    * At `xl` both drawings agree again, so both settings truncate at 16px there.
@@ -119,12 +119,12 @@ export function ProductCard({
     of being an English literal in the signature.
   */
   /*
-    "View piece" since spec 011. It read "Select size" while the product page opened on a size
-    selector — the card promised the next step. Sizes are deprecated, so the promise was to a
-    control that no longer exists, and the honest label is what the card actually does: open the
-    piece.
+    "View product" (`viewProduct`) since spec 011. It read "Select size" while the product page
+    opened on a size selector — the card promised the next step. Sizes are deprecated, so the
+    promise was to a control that no longer exists, and the honest label is what the card actually
+    does: open the product.
   */
-  const cta = ctaProp ?? t_product('viewPiece')
+  const cta = ctaProp ?? t_product('viewProduct')
 
   const compact = size === 'compact'
 

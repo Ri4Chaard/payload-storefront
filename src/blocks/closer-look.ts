@@ -14,7 +14,7 @@ import { mediaSlot } from '@/fields/media-slot'
  * So the chip row takes any number and wraps, and disappears entirely at zero rather than reserving
  * its height (spec Edge Cases). The same goes for the figures.
  *
- * A figure is a `word` and a `caption` — `CERTIFIED` over `selected diamonds` — and not a number
+ * A figure is a `word` and a `caption` — `CERTIFIED` over `selected materials` — and not a number
  * and a unit. Nothing here is a statistic, and modelling it as one would invite an editor to type
  * “99%” into a field designed for “EXCEPTIONAL”.
  */
@@ -57,7 +57,7 @@ export const closerLook: Block = {
       type: 'array',
       label: 'Figures',
       labels: { singular: 'Figure', plural: 'Figures' },
-      admin: { description: 'A word over a caption, e.g. “CERTIFIED” / “selected diamonds”.' },
+      admin: { description: 'A word over a caption, e.g. “QUALITY” / “in every detail”.' },
       /*
         `word` is localized for the same reason `caption` is: it is copy, not a key. Left shared, it
         was one value across all three locales, so saving the page in Russian rewrote the English

@@ -8,6 +8,7 @@ import {
   ARTICLES,
   ARTICLE_CATEGORIES,
   ATTRIBUTES,
+  COLOURS,
   BLOG_PAGE,
   CATEGORIES,
   COLLECTIONS,
@@ -20,6 +21,7 @@ import {
   PRODUCTS,
   QUESTIONS,
   SHOP,
+  TEXT,
 } from './seed-translations-data'
 
 /**
@@ -40,11 +42,13 @@ import {
  * missing` rather than doing nothing — and a dev server running alongside is a different process
  * whose cache this one could not invalidate anyway. The same rule every other seed script follows.
  *
- * **What it deliberately leaves in English**, so that a reviewer can see the fallback working on a
- * real page rather than only in a test: the article chapter bodies, the policy bodies (see
- * `seed-translations-data.ts` for why those are a special case), and the Story page's blocks. Those
- * are the long-form editorial that a real site spends months translating, and a seed that hid that
- * state would be lying about what the site looks like the week after this ships.
+ * **Long-form text is translated by its English wording.** Story-page bands, article chapters,
+ * product details and attributes, and policy bodies sit in arrays, blocks and rich text whose rows
+ * have no slug. For those the English document is read, every string found in `TEXT` is swapped for
+ * its translation, and the result is written back in the other language — row ids included, because
+ * an array's rows are shared across languages and a row written without its id is a NEW row, which
+ * would take the English words with the old one. An English string with no translation is reported
+ * and left as it is, which is the per-field fallback doing its job.
  */
 
 /** Lexical's node shape, as Payload's generated type describes it. */
@@ -73,18 +77,62 @@ const richText = (...paragraphs: string[]) => ({
 })
 
 /** What happened, counted rather than narrated — one line per collection instead of per document. */
-type Tally = { missing: string[]; refused: string[]; written: number }
+type Tally = { missing: string[]; refused: string[]; untranslated: Set<string>; written: number }
 
-const tally = (): Tally => ({ missing: [], refused: [], written: 0 })
+const tally = (): Tally => ({ missing: [], refused: [], untranslated: new Set(), written: 0 })
+
+/** The keys under which a string is words a reader sees, rather than a value, a key or a URL. */
+const WORDS = new Set([
+  'body',
+  'caption',
+  'eyebrow',
+  'heading',
+  'label',
+  'lede',
+  'pullQuote',
+  'text',
+  'title',
+  'tocLabel',
+  'value',
+  'word',
+])
+
+/**
+ * A copy of `value` with every string that `TEXT` knows replaced by its `locale` twin. Everything
+ * else — ids, relationship ids, block types, Lexical's own bookkeeping — is copied as it is, so the
+ * structure written back is exactly the structure read.
+ */
+function translateDeep(value: unknown, locale: 'ru' | 'uk', counts: Tally, key = ''): unknown {
+  if (typeof value === 'string') {
+    const pair = TEXT[value]
+    if (pair) return pair[locale]
+    if (WORDS.has(key) && value.trim() !== '') counts.untranslated.add(value)
+    return value
+  }
+  if (Array.isArray(value)) return value.map((item) => translateDeep(item, locale, counts, key))
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, translateDeep(v, locale, counts, k)]),
+    )
+  }
+  return value
+}
 
 const report = (label: string, locale: Locale, counts: Tally): void => {
   const parts = [`${counts.written} written`]
   if (counts.missing.length > 0) parts.push(`${counts.missing.length} not found`)
   if (counts.refused.length > 0) parts.push(`${counts.refused.length} refused`)
-  const mark = counts.refused.length > 0 ? '!' : counts.missing.length > 0 ? '–' : '✓'
+  if (counts.untranslated.size > 0) parts.push(`${counts.untranslated.size} strings left in English`)
+  const mark =
+    counts.refused.length > 0
+      ? '!'
+      : counts.missing.length > 0 || counts.untranslated.size > 0
+        ? '–'
+        : '✓'
   console.log(`  ${mark} ${locale}: ${label} — ${parts.join(', ')}`)
   for (const slug of counts.missing) console.log(`      not found: ${slug}`)
   for (const detail of counts.refused) console.log(`      refused: ${detail}`)
+  for (const text of counts.untranslated) console.log(`      no translation: ${JSON.stringify(text)}`)
 }
 
 /**
@@ -93,6 +141,9 @@ const report = (label: string, locale: Locale, counts: Tally): void => {
  * `field` is `slug` for almost everything; `media` has no slug and is found by `filename`, and
  * `questions` and `attributes` by the English text itself. Passing the lookup field in is what lets
  * one function serve all six collections.
+ *
+ * `deep` names fields copied from the English document through `translateDeep` — the arrays, blocks
+ * and rich text that have no key of their own to translate by.
  */
 async function translateCollection(
   payload: Payload,
@@ -101,6 +152,7 @@ async function translateCollection(
   locale: Locale,
   entries: Record<string, Record<string, unknown>>,
   label: string,
+  deep: string[] = [],
 ): Promise<void> {
   const counts = tally()
 
@@ -112,10 +164,28 @@ async function translateCollection(
       overrideAccess: true,
     })
 
-    const doc = docs[0] as { id: number | string } | undefined
+    const doc = docs[0] as ({ id: number | string } & Record<string, unknown>) | undefined
     if (!doc) {
       counts.missing.push(key)
       continue
+    }
+
+    const translated: Record<string, unknown> = { ...data }
+    if (deep.length > 0) {
+      // Read in English, at depth 0, so relationships come back as the ids they are written as.
+      const english = (await payload.findByID({
+        collection: collection as never,
+        id: doc.id,
+        locale: 'en',
+        depth: 0,
+        draft: true,
+        overrideAccess: true,
+      })) as unknown as Record<string, unknown>
+      for (const name of deep) {
+        if (english[name] != null && locale !== 'en') {
+          translated[name] = translateDeep(english[name], locale, counts, name)
+        }
+      }
     }
 
     try {
@@ -123,7 +193,7 @@ async function translateCollection(
         collection: collection as never,
         id: doc.id,
         locale,
-        data: data as never,
+        data: translated as never,
         context: skipRevalidation,
         overrideAccess: true,
       })
@@ -143,8 +213,8 @@ async function translateGlobal(
   locale: Locale,
   data: Record<string, unknown>,
   label: string,
+  counts: Tally = tally(),
 ): Promise<void> {
-  const counts = tally()
   try {
     await payload.updateGlobal({
       slug: slug as never,
@@ -178,8 +248,9 @@ async function seed(): Promise<void> {
     await translateCollection(payload, 'collections', 'slug', locale, forLocale(COLLECTIONS, locale), 'collections')
     await translateCollection(payload, 'article-categories', 'slug', locale, forLocale(ARTICLE_CATEGORIES, locale), 'article categories')
     await translateCollection(payload, 'attributes', 'name', locale, forLocale(ATTRIBUTES, locale), 'attributes')
-    await translateCollection(payload, 'products', 'slug', locale, forLocale(PRODUCTS, locale), 'products')
-    await translateCollection(payload, 'articles', 'slug', locale, forLocale(ARTICLES, locale), 'articles')
+    await translateCollection(payload, 'colours', 'value', locale, forLocale(COLOURS, locale), 'colours')
+    await translateCollection(payload, 'products', 'slug', locale, forLocale(PRODUCTS, locale), 'products', ['details', 'attributes'])
+    await translateCollection(payload, 'articles', 'slug', locale, forLocale(ARTICLES, locale), 'articles', ['chapters'])
 
     // `media` is found by filename, and carries exactly one word-bearing field.
     await translateCollection(
@@ -207,17 +278,11 @@ async function seed(): Promise<void> {
     )
 
     /*
-      **Titles and subtitles only — the bodies fall back, and that is the product decision.**
-
-      The first version of this wrote a short paragraph saying "the translation is not ready yet".
-      That is worse than the fallback in the one place it matters most: it REPLACES the legal text a
-      visitor came to read with a note about its absence. A policy falling back to the authoritative
-      English is a reader who can still read the terms; a placeholder is a reader who cannot.
-
-      It is also what `tests/e2e/fallback.spec.ts` measures — `/legal/terms` must render the same
-      number of blocks in all three languages — and that test was right to fail on the placeholder.
+      Titles and subtitles by slug; the bodies through `TEXT`, keeping every heading, paragraph and
+      list item where it is — `tests/e2e/fallback.spec.ts` measures that `/legal/terms` is built from
+      the same number of blocks in all three languages.
     */
-    await translateCollection(payload, 'policies', 'slug', locale, forLocale(POLICIES, locale), 'policies')
+    await translateCollection(payload, 'policies', 'slug', locale, forLocale(POLICIES, locale), 'policies', ['body'])
 
     const shop = SHOP[locale]
     await translateGlobal(
@@ -236,6 +301,13 @@ async function seed(): Promise<void> {
     )
 
     const home = HOME_PAGE[locale]
+    const englishHome = await payload.findGlobal({
+      slug: 'home-page',
+      locale: 'en',
+      depth: 0,
+      overrideAccess: true,
+    })
+    const aboutBody = home.aboutBody as string[]
     await translateGlobal(
       payload,
       'home-page',
@@ -253,8 +325,13 @@ async function seed(): Promise<void> {
           headingLead: home.aboutHeadingLead,
           headingEmphasis: home.aboutHeadingEmphasis,
           ctaLabel: home.aboutCtaLabel,
-          // The array's ROWS are shared across locales; only the text inside them is localized.
-          body: (home.aboutBody as string[]).map((text) => ({ text })),
+          // The array's ROWS are shared across locales; only the text inside them is localized. So
+          // the English rows are written back with their ids — a row without one is a new row, and
+          // the English words would go with the old.
+          body: (englishHome.about?.body ?? []).map((row, index) => ({
+            ...row,
+            text: aboutBody[index] ?? row.text,
+          })),
         },
       },
       'the home page',
@@ -262,21 +339,37 @@ async function seed(): Promise<void> {
 
     await translateGlobal(payload, 'blog-page', locale, BLOG_PAGE[locale], 'the blog page')
     await translateGlobal(payload, 'faq-page', locale, FAQ_PAGE[locale], 'the FAQ page')
+    const { faqHeading, ...contact } = CONTACT_PAGE[locale]
     await translateGlobal(
       payload,
       'contact-page',
       locale,
-      { ...CONTACT_PAGE[locale], form: CONTACT_FORM[locale] },
+      { ...contact, form: CONTACT_FORM[locale], faq: { heading: faqHeading } },
       'the contact page',
+    )
+
+    // The Story page's bands: read in English, every known string swapped, written back whole.
+    const story = await payload.findGlobal({
+      slug: 'story-page',
+      locale: 'en',
+      depth: 0,
+      overrideAccess: true,
+    })
+    const storyCounts = tally()
+    const storyBody = translateDeep(story.body, locale, storyCounts, 'body')
+    await translateGlobal(
+      payload,
+      'story-page',
+      locale,
+      { body: storyBody, _status: 'published' },
+      'the story page',
+      storyCounts,
     )
 
     console.log('')
   }
 
-  console.log(
-    'Done. Article bodies, policy bodies and the Story page stay English on purpose — that is the\n' +
-      'per-field fallback, and it is what a half-translated site actually looks like.',
-  )
+  console.log('Done.')
   process.exit(0)
 }
 

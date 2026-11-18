@@ -78,13 +78,13 @@ export function localised(path: string): string[] {
  * rendered on demand it works. It does not touch a page that `generateStaticParams` prerendered at
  * build: with the pattern, a product whose title had changed in the database kept serving the old
  * HTML through repeated requests, `x-nextjs-cache: HIT` every time, and the literal path fixed it
- * on the next request. Since every published piece IS prerendered, the pattern would have
+ * on the next request. Since every published product IS prerendered, the pattern would have
  * invalidated almost nothing.
  *
  * **Every product page, rather than only the one that changed.** A product page draws its own
- * piece, the shop settings, the category name in its eyebrow, and its collection-mates in _Complete
+ * product, the shop settings, the category name in its eyebrow, and its collection-mates in _Complete
  * the Collection_ — so editing one product changes its mates' pages, editing a category changes the
- * eyebrow on every piece in it, and re-uploading a photograph can change any of them. One cheap
+ * eyebrow on every product in it, and re-uploading a photograph can change any of them. One cheap
  * query for the slugs is honest about that; working out exactly which pages are affected would take
  * several.
  *
@@ -93,8 +93,8 @@ export function localised(path: string): string[] {
  * each for the pages someone actually opens.
  *
  * **Drafts are included on purpose**, which is why this query does not pass `overrideAccess:
- * false` like every read in `queries.ts` does. A piece that was just unpublished is exactly the one
- * whose page must stop being served, and asking only for published pieces would leave it up.
+ * false` like every read in `queries.ts` does. A product that was just unpublished is exactly the one
+ * whose page must stop being served, and asking only for published products would leave it up.
  *
  * `next/cache` is imported here rather than at the top of the file so that a process with no Next
  * server around it — `payload run`, a migration — never loads it at all.
@@ -114,8 +114,8 @@ async function invalidate(payload: Payload, orphanedSlug?: string): Promise<void
   for (const product of docs)
     for (const path of localised(`/products/${product.slug}`)) revalidatePath(path)
 
-  // A renamed piece leaves a page at an address no query will ever return again. It has to go, or
-  // the old URL keeps serving a piece that has moved.
+  // A renamed product leaves a page at an address no query will ever return again. It has to go, or
+  // the old URL keeps serving a product that has moved.
   if (orphanedSlug) for (const path of localised(`/products/${orphanedSlug}`)) revalidatePath(path)
 
   /*
@@ -237,9 +237,9 @@ export const revalidateOnChange: CollectionAfterChangeHook = async ({
 }
 
 /**
- * The same for a deletion, which takes a piece off the page as surely as unpublishing it.
+ * The same for a deletion, which takes a product off the page as surely as unpublishing it.
  *
- * The deleted piece is already gone from the query inside `invalidate`, so its own path is passed
+ * The deleted product is already gone from the query inside `invalidate`, so its own path is passed
  * in the same way a renamed one is — otherwise its page would keep being served after the document
  * behind it stopped existing.
  */

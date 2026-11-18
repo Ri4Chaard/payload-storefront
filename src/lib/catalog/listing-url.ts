@@ -4,7 +4,7 @@
  * One rule, in one function: **a single category is a path, and everything else is a query.**
  * `/category-1?colour=black` rather than `/all-products?category=category-1&colour=black`, because the two
  * would otherwise be two addresses for one grid — two cache entries, two things for a crawler to
- * index, and two answers to "what is the canonical URL of the ring listing".
+ * index, and two answers to "what is the canonical URL of a category listing".
  *
  * Every control that commits goes through here — the chips, the shape row, the in-stock link, the
  * sort menu, the drawer's APPLY, and the pagination. That is deliberate. The alternative is each of
@@ -12,8 +12,8 @@
  * route's own category must not be written twice, which is a rule six places would eventually
  * disagree about.
  *
- * **Zero categories, or more than one, is the whole shop.** There is no route for "rings and
- * bracelets" and inventing one would mean a page per combination; `/all-products?category=category-1&
+ * **Zero categories, or more than one, is the whole shop.** There is no route for "category 1 and
+ * category 2" and inventing one would mean a page per combination; `/all-products?category=category-1&
  * category=category-2` says exactly what it is.
  */
 

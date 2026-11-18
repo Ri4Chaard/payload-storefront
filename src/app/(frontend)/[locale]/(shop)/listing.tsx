@@ -27,7 +27,7 @@ import type { DroppedFilter, FilterState } from '@/lib/catalog/types'
  *
  * The two routes differ in exactly two ways — the name in the title block, and whether a category
  * is seeded — so they are one renderer and two thin `page.tsx` files rather than two pages that
- * drift apart. Node `222:706` (a category) · node `355:7139` (all jewelry), which are the same
+ * drift apart. Node `222:706` (a category) · node `355:7139` (all products), which are the same
  * frame with a different heading.
  *
  * **This file reads content; nothing below it does.** `getListing` is called once, and every
@@ -65,7 +65,7 @@ export async function Listing({
 
   const [categories, facets] = await Promise.all([
     getCategories(locale),
-    // Scoped to the category being looked at, so SIZE offers ring sizes on `/category-1`. More than one
+    // Scoped to the category being looked at, so SIZE offers that category's sizes on `/category-1`. More than one
     // category applied has no single scope, and the whole catalogue is the honest answer.
     getFilterFacets(locale, seeded.category.length === 1 ? seeded.category[0] : undefined),
   ])
@@ -171,7 +171,7 @@ export async function Listing({
  *
  * **Both strings used to be defaults inside the component** and moved here when `ListingEmpty`
  * became the kit's `EmptyState` (007/T007). That is the right side of the line: the copy is this
- * page's, and a kit component holding a sentence about jewellery is user-visible copy in a
+ * page's, and a kit component holding a sentence about the catalogue is user-visible copy in a
  * component, which Constitution I permits only for developer-facing errors.
  */
 function emptyState(
@@ -203,11 +203,11 @@ function emptyState(
  *
  * **The canonical URL is the bare route.** A filtered listing is a view of a catalogue rather than
  * a page of its own, and letting every combination of five filter groups become its own indexable
- * address is how a shop of forty pieces reports ten thousand pages.
+ * address is how a shop of forty products reports ten thousand pages.
  *
  * `page` goes the same way, and that is a change from the numbered pagination this replaced. Under
  * LOAD MORE the deeper views are not separate pages — `?page=3` CONTAINS `?page=1`, so indexing
- * both would file the same twelve pieces twice. The control is a real `<a href>`, so a crawler
+ * both would file the same twelve products twice. The control is a real `<a href>`, so a crawler
  * still walks the whole catalogue by following it; it simply reports one address for the listing
  * it walked.
  */

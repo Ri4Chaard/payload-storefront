@@ -14,10 +14,10 @@ import { Drawer } from './drawer'
  * the sweep in `tests/a11y/ui-kit.spec.ts` has to see the panel to audit it.
  */
 const GROUPS = [
-  { label: 'CATEGORY:', options: ['All jewelry', 'Category 1', 'Category 2', 'Category 3', 'Category 4'] },
+  { label: 'CATEGORY:', options: ['All products', 'Category 1', 'Category 2', 'Category 3', 'Category 4'] },
   { label: 'COLOR:', options: ['Black', 'Clear', 'Green', 'Multicolor'] },
-  { label: 'SHAPE:', options: ['Round', 'Oval', 'Emerald', 'Pear', 'Marquise'] },
-  { label: 'COLLECTION:', options: ['Deia', 'Marvel', 'Molten', 'Spartan'] },
+  { label: 'OPTION:', options: ['Option A', 'Option B', 'Option C', 'Option D', 'Option E'] },
+  { label: 'COLLECTION:', options: ['Collection A', 'Collection B', 'Collection C', 'Collection D'] },
 ]
 
 function Groups() {

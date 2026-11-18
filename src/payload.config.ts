@@ -163,7 +163,7 @@ export default buildConfig({
         carts: {
           allowGuestCarts: true,
           // `cartItemMatcher` left with sizes in spec 011 — the plugin's default is correct again
-          // now that a line is a product and a stone. See `./collections/carts.ts`.
+          // now that a line is a product and a variant. See `./collections/carts.ts`.
           cartsCollectionOverride,
         },
 
@@ -183,8 +183,8 @@ export default buildConfig({
          * it, it configures it (004/research.md R5).
          *
          * `supportedCountries` is replaced because the plugin's default list has forty entries and
-         * contains neither Kazakhstan nor the UAE — the shop's own market, and the country in the
-         * sample address the design draws (R6).
+         * leaves out many countries a customer may live in, including the one in the sample address the
+         * design draws (R6).
          */
         addresses: {
           addressFields,

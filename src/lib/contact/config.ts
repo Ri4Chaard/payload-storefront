@@ -40,7 +40,7 @@ export const ENQUIRY_RATE_WINDOW_MS = 60 * 60 * 1000
 /**
  * How long an enquiry is kept (FR-029d).
  *
- * Twelve months: long enough that an enquiry about a piece somebody is still considering survives
+ * Twelve months: long enough that an enquiry about a product somebody is still considering survives
  * the decision, short enough to be defensible as a retention period. Stated in days as well as
  * milliseconds because the collection's admin description says it in words to the owner, and one
  * constant feeding both is what stops the policy and the code drifting apart.

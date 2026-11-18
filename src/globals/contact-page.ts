@@ -70,7 +70,7 @@ export const ContactPage: GlobalConfig = {
       name: 'intro',
       type: 'textarea',
       localized: true,
-      defaultValue: 'Questions, custom requests, or styling advice — our team is here for you',
+      defaultValue: 'A short line about how your team can help',
       label: 'Intro paragraph',
       admin: { description: 'One line under the headline.' },
     },
@@ -95,7 +95,7 @@ export const ContactPage: GlobalConfig = {
           type: 'textarea',
           localized: true,
           defaultValue:
-            'To make an enquiry, please use the contact form below. Our Aurum team will be happy to assist you with diamonds, orders, delivery, or any other questions.',
+            'To make an enquiry, please use the contact form below. Our team will be happy to help with orders, delivery, or any other questions.',
           label: 'Intro paragraph',
         },
         /*

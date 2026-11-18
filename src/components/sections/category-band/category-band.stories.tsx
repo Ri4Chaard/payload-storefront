@@ -31,7 +31,7 @@ export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 export const WithLongerNames: Story = {
   args: {
     items: categoryBandFixture.items.map((item, index) =>
-      index === 0 ? { ...item, title: 'Engagement rings' } : item,
+      index === 0 ? { ...item, title: 'A longer category title' } : item,
     ),
   },
 }

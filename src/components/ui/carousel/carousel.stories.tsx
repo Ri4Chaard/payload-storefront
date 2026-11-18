@@ -4,7 +4,7 @@ import React from 'react'
 import { Carousel } from './carousel'
 
 /**
- * The scroll-snap mechanism behind `ImageCarousel` and the home page's jewelry row. Shown here with
+ * The scroll-snap mechanism behind `ImageCarousel` and the home page's product row. Shown here with
  * plain panels, because the point of the component is the track and the arrows, not the contents.
  */
 function Panel({ n }: { n: number }) {
@@ -40,7 +40,7 @@ export const Default: Story = {}
 
 /**
  * Nothing overflows, so no arrow ever appears. This is the state the home page's desktop frame is
- * in with four pieces, and why its drawn scroll control sits at `hidden`.
+ * in with four products, and why its drawn scroll control sits at `hidden`.
  */
 export const NothingToPage: Story = {
   args: { items: Array.from({ length: 2 }, (_, i) => <Panel key={i} n={i + 1} />) },

@@ -9,16 +9,16 @@ import { Carousel } from '@/components/ui/carousel'
  *
  * This is now a thin caller of `Carousel` (002/T121). The scroll-snap machinery it used to own —
  * the hidden scrollbar, `tabIndex` on the track, the arrows, the reasoning about why there is no
- * carousel library here — moved into the primitive when the home page's jewelry row needed the same
+ * carousel library here — moved into the primitive when the home page's product row needed the same
  * mechanism over different children. Two copies of that logic is what Constitution II forbids.
  *
  * What stayed behind is everything specific to photographs of one product:
  *
- * - **`wrap`**. Three photographs of a single piece form a loop; stopping dead on the third reads
+ * - **`wrap`**. Three photographs of a single product form a loop; stopping dead on the third reads
  *   as broken, and the arrows are the only affordance saying there are more. A row of products is
  *   the opposite case, which is why the primitive defaults the other way.
  * - **Square cells.** The card's photograph is square at every breakpoint.
- * - **Names built from the product.** "Previous photograph of Butterfly diamond pendant" is what
+ * - **Names built from the product.** "Previous photograph of Product 1" is what
  *   distinguishes one card's arrows from the next card's in a listing of twenty.
  *
  * No `'use client'` here any more: this component is now pure markup and the interactivity lives in

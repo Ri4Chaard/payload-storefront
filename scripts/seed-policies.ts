@@ -9,7 +9,7 @@
  * difference matters: this is the owner's legal text, and a second run of a seed script must not
  * silently revert a lawyer's edit.
  *
- * **The content here is a truthful starting point, not the Figma copy** (FR-016). The drawn banner
+ * **The content here is a truthful sample, not the Figma copy** (FR-016). The drawn banner
  * and Cookie Policy describe a site using "third-party cookies, pixels", "various Google services"
  * and sending "advertising materials" — none of which is true of this site, and shipping it would
  * be publishing a false statement about data processing. What is seeded below describes the three
@@ -101,6 +101,17 @@ interface Seed {
 
 const LAST_UPDATED = 'Last Updated: September 2026'
 
+/**
+ * The line every policy opens with. These are sample texts for a store template: they describe what
+ * this codebase actually does, but they are not legal advice, and the owner must review them.
+ */
+const SAMPLE_NOTE =
+  'This is a sample policy. Review it, adapt it to your business and replace it with your own text before the store opens.'
+
+/*
+  Every string below has a Russian and a Ukrainian twin in `seed-translations-data.ts` (`TEXT`),
+  found by this exact English wording — change one and change the other.
+*/
 const POLICIES: Seed[] = [
   {
     slug: 'privacy',
@@ -109,11 +120,12 @@ const POLICIES: Seed[] = [
     footerPlacement: 'legal',
     footerOrder: 10,
     body: body([
+      paragraph(SAMPLE_NOTE),
       paragraph(
-        'At Aurum we respect your privacy and are committed to protecting the personal information you share with us. This policy explains what we collect, why we collect it, and what you can ask us to do with it.',
+        'We respect your privacy and are committed to protecting the personal information you share with us. This policy explains what we collect, why we collect it, and what you can ask us to do with it.',
       ),
       heading('Information we collect'),
-      paragraph('When you interact with Aurum, we may collect:'),
+      paragraph('When you interact with our store, we may collect:'),
       list([
         'Your name and contact details',
         'Your delivery and billing address',
@@ -134,7 +146,7 @@ const POLICIES: Seed[] = [
       ]),
       heading('Payment information'),
       paragraph(
-        'Aurum does not take payment through this website. We do not collect, store, or process card details anywhere on this site.',
+        'This website does not take payment. We do not collect, store, or process card details anywhere on this site.',
       ),
       heading('How we share your information'),
       paragraph(
@@ -156,8 +168,6 @@ const POLICIES: Seed[] = [
       paragraph(
         'If you have questions about this Privacy Policy, or want to make a request about your information, please contact us using the details on our contact page.',
       ),
-      paragraph('Aurum'),
-      paragraph('Timeless brilliance. Modern responsibility.'),
     ]),
   },
   {
@@ -167,16 +177,17 @@ const POLICIES: Seed[] = [
     footerPlacement: 'legal',
     footerOrder: 20,
     body: body([
+      paragraph(SAMPLE_NOTE),
       paragraph(
-        'Welcome to Aurum. These terms govern your access to and use of our website, our online services, our products, and their related features. By using our website, you agree to these terms.',
+        'These terms govern your access to and use of our website, our online services, our products, and their related features. By using our website, you agree to these terms.',
       ),
       heading('Use of our website'),
       paragraph(
-        'You may use the Aurum website for lawful, personal, and non-commercial purposes. You agree not to misuse the website, interfere with its operation, or attempt unauthorised access.',
+        'You may use this website for lawful, personal, and non-commercial purposes. You agree not to misuse the website, interfere with its operation, or attempt unauthorised access.',
       ),
       heading('Products and availability'),
       paragraph(
-        'We make reasonable efforts to display our jewellery accurately. Colours, proportions, dimensions, and appearance may vary slightly depending on your screen. All products are subject to availability, and we reserve the right to limit quantities.',
+        'We make reasonable efforts to display our products accurately. Colours, proportions, dimensions, and appearance may vary slightly depending on your screen. All products are subject to availability, and we reserve the right to limit quantities.',
       ),
       heading('Pricing'),
       paragraph(
@@ -192,7 +203,7 @@ const POLICIES: Seed[] = [
       ),
       heading('Intellectual property'),
       paragraph(
-        'All content on the Aurum website — including our name, branding, photographs, graphics, product designs, text, layouts, and other materials — is owned by or licensed to Aurum and is protected by law.',
+        'All content on this website — including our name, branding, photographs, graphics, text, layouts, and other materials — is owned by or licensed to us and is protected by law.',
       ),
       heading('Accounts'),
       paragraph(
@@ -200,7 +211,7 @@ const POLICIES: Seed[] = [
       ),
       heading('Limitation of liability'),
       paragraph(
-        'To the fullest extent permitted by applicable law, Aurum is not liable for indirect, incidental, special, or consequential losses arising from the use of, or inability to use, our website or our products.',
+        'To the fullest extent permitted by applicable law, we are not liable for indirect, incidental, special, or consequential losses arising from the use of, or inability to use, our website or our products.',
       ),
       heading('Changes to these terms'),
       paragraph(
@@ -210,8 +221,6 @@ const POLICIES: Seed[] = [
       paragraph(
         'If you have questions about these terms, please contact us using the details on our contact page.',
       ),
-      paragraph('Aurum'),
-      paragraph('Timeless brilliance. Modern responsibility.'),
     ]),
   },
   {
@@ -221,8 +230,9 @@ const POLICIES: Seed[] = [
     footerPlacement: 'legal',
     footerOrder: 30,
     body: body([
+      paragraph(SAMPLE_NOTE),
       paragraph(
-        'This Cookie Policy explains how Aurum uses cookies when you visit our website. It is short because our use of cookies is small.',
+        'This Cookie Policy explains how we use cookies when you visit our website. It is short because our use of cookies is small.',
       ),
       heading('What are cookies?'),
       paragraph(
@@ -230,7 +240,7 @@ const POLICIES: Seed[] = [
       ),
       heading('We do not use analytics or advertising cookies'),
       paragraph(
-        'Aurum does not use Google Analytics or any other analytics service. We do not use advertising cookies, tracking pixels, or social media trackers, and we do not share your browsing behaviour with any third party. No third-party script runs on this website.',
+        'This website does not use Google Analytics or any other analytics service. We do not use advertising cookies, tracking pixels, or social media trackers, and we do not share your browsing behaviour with any third party. No third-party script runs on this website.',
       ),
       heading('The cookies we do use'),
       paragraph(
@@ -254,8 +264,6 @@ const POLICIES: Seed[] = [
       paragraph(
         'If you have questions about our use of cookies, please contact us using the details on our contact page.',
       ),
-      paragraph('Aurum'),
-      paragraph('Timeless brilliance. Modern responsibility.'),
     ]),
   },
   {
@@ -265,15 +273,16 @@ const POLICIES: Seed[] = [
     footerPlacement: 'customer-care',
     footerOrder: 10,
     body: body([
+      paragraph(SAMPLE_NOTE),
       heading('Shipping policy'),
       paragraph(
-        'Aurum partners with DHL, FedEx, Ferrari, and Brinks to ensure your order arrives safely. We offer complimentary shipping on all deliveries.',
+        'We work with trusted delivery partners to make sure your order arrives safely. Describe your shipping costs and the regions you deliver to here.',
       ),
       paragraph(
-        'Your shipment is fully insured and requires a signature when it is delivered. Insurance coverage ends once the parcel is delivered and signed for.',
+        'Describe how your parcels are tracked and insured, and whether a signature is required on delivery.',
       ),
       paragraph(
-        'Jewellery in stock is delivered within 3 to 7 business days. If it is not, our master artisans begin crafting your jewel immediately and will ship directly from our atelier within 25 business days.',
+        'Products in stock are delivered within 3 to 7 business days. Products made to order are dispatched within 25 business days.',
       ),
       heading('Return policy'),
       paragraph('Exchanges or refunds are offered within 30 days of receiving your order.'),
@@ -287,7 +296,7 @@ const POLICIES: Seed[] = [
       ),
       heading('Conditions'),
       paragraph(
-        'Items must be returned in perfect condition, in their original packaging, along with the receipt and all accessories: boxes, booklets, tags, and protective elements. No exchanges or refunds are accepted for personalised products.',
+        'Items must be returned in perfect condition, in their original packaging, along with the receipt and all accessories. No exchanges or refunds are accepted for personalised products.',
       ),
     ]),
   },

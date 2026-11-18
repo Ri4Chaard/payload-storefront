@@ -70,9 +70,9 @@ export interface CategoryCardProps extends Omit<React.ComponentProps<'a'>, 'href
   href: string
   /**
    * The photograph. `alt` defaults to empty and should usually stay that way: the card is one link,
-   * and anything in `alt` lands in front of the title in the link's accessible name — "A ring on
-   * dark velvet, Rings, view the collection" for a tile whose meaning is "Category 1". Inside a link
-   * that carries its own text, the picture is decoration. Fill it in only when the photograph
+   * and anything in `alt` lands in front of the title in the link's accessible name — "A product
+   * on a dark backdrop, Category 1, view the collection" for a tile whose meaning is "Category 1".
+   * Inside a link that carries its own text, the picture is decoration. Fill it in only when the photograph
    * carries something the title does not.
    */
   image: { src: string; alt?: string }

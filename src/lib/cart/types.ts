@@ -31,7 +31,7 @@ export interface CartLineView {
   /** `null` once the product is gone — the line still renders, it just has nowhere to go. */
   href: string | null
   image: CatalogImage | null
-  /** The chosen stone's label. `null` where the piece offers no choice. */
+  /** The chosen variant's label. `null` where the product offers no choice. */
   variantChoice: string | null
   /** Formatted. */
   unitPrice: string
@@ -45,7 +45,7 @@ export interface CartLineView {
    */
   unitMinor: number
   quantity: number
-  /** How high the stepper may go. `undefined` for a made-to-order piece, which has no ceiling. */
+  /** How high the stepper may go. `undefined` for a made-to-order product, which has no ceiling. */
   maxQuantity: number | undefined
   /** `false` excludes the line from the totals; it does not remove it from the page. */
   available: boolean
@@ -54,7 +54,7 @@ export interface CartLineView {
 /**
  * Something changed underneath the cart since the line was added (FR-014).
  *
- * Reported per line and surfaced on it. A cart that quietly loses a piece is a cart the customer
+ * Reported per line and surfaced on it. A cart that quietly loses a product is a cart the customer
  * cannot reason about, so nothing here is a reason to drop a line — only a reason to exclude it
  * from the total and to say so in words.
  */

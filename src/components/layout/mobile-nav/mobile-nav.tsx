@@ -30,7 +30,7 @@ import { type IconName } from '@/lib/icon-registry'
  *
  * The header row it sits under is already pixel-identical to the one drawn here: 70px and a 24px
  * gutter at tablet, 60px and 16px on a phone. So the menu's own gutter is `Container`'s, and the
- * cross at the top lines up with `ALL JEWELRY` beneath it without either being positioned.
+ * cross at the top lines up with `ALL PRODUCTS` beneath it without either being positioned.
  *
  * **What the phone carries that the tablet does not.** The contact strip is `hidden` below `md`, so
  * on a phone the menu is the only route to the address, the number and the language — which is why

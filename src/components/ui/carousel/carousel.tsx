@@ -10,7 +10,7 @@ import { useAutoAdvance } from './use-auto-advance'
 /**
  * A scroll-snap track with arrows (002/T119), extracted from `ImageCarousel`.
  *
- * The home page's jewelry row needs the same mechanism over different children — cards instead of
+ * The home page's product row needs the same mechanism over different children — cards instead of
  * photographs. Copying it would be the near-duplicate Constitution II exists to prevent, so the
  * mechanism moved here and `ImageCarousel` became its first caller.
  *
@@ -32,7 +32,7 @@ import { useAutoAdvance } from './use-auto-advance'
  *
  *   `wrap`     three photographs of one product. Stopping dead on the third reads as broken, and
  *              the arrows are the only affordance saying there are more.
- *   clamped    a row of products. Wrapping from the last piece back to the first is disorienting —
+ *   clamped    a row of products. Wrapping from the last product back to the first is disorienting —
  *              a visitor cannot tell whether they have seen everything — so the arrows stop, and
  *              each one disappears when there is nothing on that side.
  *

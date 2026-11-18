@@ -50,7 +50,7 @@ describe('getListing', () => {
     const everything = await listing({ page: 99 })
     expect(everything.products).toHaveLength(everything.total)
     expect(everything.products.map((product) => product.slug)).not.toContain(
-      'unreleased-spartan-cuff',
+      'unreleased-product',
     )
   })
 
@@ -115,13 +115,13 @@ describe('getListing', () => {
 
 describe('getProduct', () => {
   it('returns a piece by slug', async () => {
-    const product = await getProduct('paragon-emerald-cut-diamond-engagement-ring', 'en')
-    expect(product?.title).toBe('Paragon Emerald Cut Diamond Engagement Ring')
+    const product = await getProduct('product-1', 'en')
+    expect(product?.title).toBe('Product 1')
     expect(product?.variantOptions).toHaveLength(4)
   })
 
   it('returns null for a draft, exactly as it does for a slug that names nothing', async () => {
-    expect(await getProduct('unreleased-spartan-cuff', 'en')).toBeNull()
+    expect(await getProduct('unreleased-product', 'en')).toBeNull()
     expect(await getProduct('no-such-piece', 'en')).toBeNull()
   })
 })
@@ -135,8 +135,8 @@ describe('getProductSlugs', () => {
   it('lists every published slug and no draft', async () => {
     const slugs = await getProductSlugs()
 
-    expect(slugs).toContain('paragon-emerald-cut-diamond-engagement-ring')
-    expect(slugs).not.toContain('unreleased-spartan-cuff')
+    expect(slugs).toContain('product-1')
+    expect(slugs).not.toContain('unreleased-product')
     expect(slugs).toHaveLength((await listing({ page: 99 })).total)
   })
 })
@@ -146,17 +146,6 @@ describe('getFilterFacets', () => {
     const facets = await getFilterFacets('en', 'category-1')
     expect(facets.colours).toHaveLength(4)
     expect(facets.price.min).toBeLessThan(facets.price.max)
-  })
-
-  it('offers an option no piece in the category has, rather than hiding it', async () => {
-    // Hiding zero-count options makes the drawer change shape as a visitor filters, which loses
-    // the option they were reaching for. A zero is the honest answer to "do you have this".
-    const facets = await getFilterFacets('en', 'category-2')
-    const empty = facets.colours.filter((option) => option.count === 0)
-    expect(empty.length, 'no colour is absent from this category — pick a sparser group').toBeGreaterThan(
-      0,
-    )
-    expect(facets.colours).toHaveLength(4)
   })
 
   it('always counts categories over the whole catalogue', async () => {

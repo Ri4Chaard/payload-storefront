@@ -11,8 +11,8 @@ const meta = {
     items: [
       { label: 'Home', href: '/' },
       { label: 'Category 1', href: '/category-1' },
-      { label: 'Engagement', href: '/category-1/engagement' },
-      { label: 'Solitaire in 18ct gold' },
+      { label: 'Subcategory', href: '/category-1/subcategory' },
+      { label: 'Product 1' },
     ],
   },
 } satisfies Meta<typeof Breadcrumbs>
@@ -32,9 +32,9 @@ export const Wrapping: Story = {
   args: {
     items: [
       { label: 'Home', href: '/' },
-      { label: 'Fine jewelry', href: '/jewelry' },
-      { label: 'Engagement rings', href: '/category-1/engagement' },
-      { label: 'Ceylon sapphire solitaire in eighteen-carat gold' },
+      { label: 'All products', href: '/all-products' },
+      { label: 'Subcategory', href: '/category-1/subcategory' },
+      { label: 'Product 1 with a much longer name than the trail has room for' },
     ],
   },
   decorators: [

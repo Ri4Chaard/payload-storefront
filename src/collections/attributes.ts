@@ -4,14 +4,14 @@ import { isAdmin } from '@/lib/access'
 import { revalidateOnChange, revalidateOnDelete } from '@/lib/revalidate'
 
 /**
- * A descriptive property the owner invents: metal, carat weight, finish, provenance, chain length.
+ * A descriptive property the owner invents: material, weight, finish, provenance, dimensions.
  *
  * This is the collection that keeps the brief's promise — the owner defines a new attribute, applies
  * it to a product, and it appears on the storefront with no code change and no deployment. The
  * definition lives here; the value lives in each product's `attributes` array.
  *
  * **Attributes are descriptive, not selectable, and not filterable.** The six filters the design
- * draws — category, collection, colour, price, size, diamond shape — are first-class indexed fields
+ * draws — category, collection, colour, price, size, shape — are first-class indexed fields
  * on the product instead. Making every attribute filterable means a join per active filter on the
  * query that runs on every listing page view, under a 2.5s LCP budget (003/research.md R4).
  *
@@ -44,7 +44,7 @@ export const Attributes: CollectionConfig = {
       localized: true,
       required: true,
       label: 'Label',
-      admin: { description: 'What the customer reads, e.g. "Chain length".' },
+      admin: { description: 'What the customer reads, e.g. "Material".' },
     },
     {
       name: 'name',
@@ -55,7 +55,7 @@ export const Attributes: CollectionConfig = {
       label: 'Name',
       admin: {
         description:
-          'A short machine-readable key, e.g. "chain-length". Renaming it is safe; deleting it is not.',
+          'A short machine-readable key, e.g. "material". Renaming it is safe; deleting it is not.',
       },
     },
     {

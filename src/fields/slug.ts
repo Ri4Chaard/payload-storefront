@@ -4,7 +4,7 @@ import type { Field } from 'payload'
  * Cyrillic → Latin, so a Russian or Ukrainian title produces an address (spec 010, FR-014, R7).
  *
  * **Without this the field is a trap.** `slugify` strips everything outside `a-z0-9`, so
- * "Каблучка з діамантом" reduced to the empty string — against a field that is `required` AND
+ * "Зимова куртка" reduced to the empty string — against a field that is `required` AND
  * `unique`. The owner's first attempt at creating a document while the admin is set to Russian was
  * an unexplained save error, and FR-014 exists to say that must not happen.
  *
@@ -44,7 +44,7 @@ const slugify = (value: string): string =>
  * become a reusable config, and four collections need this one.
  *
  * **Derived on create, never after.** Spec FR-013 requires a slug that survives a rename: retitling
- * "Paragon Ring" to "Polygon Ring" must not silently break every link to it. So the title seeds the
+ * "Summer Jacket" to "Linen Jacket" must not silently break every link to it. So the title seeds the
  * slug once, and from then on it is the editor's to change on purpose.
  */
 export const slugField = ({ from = 'title' }: { from?: string } = {}): Field => ({

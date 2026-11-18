@@ -35,11 +35,11 @@ function purchasable(product: ProductDetail): PurchasableProduct {
 }
 
 /**
- * Is this intent one we may honour, and what is the piece behind it?
+ * Is this intent one we may honour, and what is the product behind it?
  *
  * The product is read from the **published** catalogue, so unpublished, deleted and never-real are
  * one answer — which is the point. Reading with access overridden would quietly keep selling a
- * piece the owner had withdrawn.
+ * product the owner had withdrawn.
  */
 export async function checkIntent(
   intent: CartIntent,
@@ -107,8 +107,8 @@ export async function addLine(
       The plugin's DEFAULT matcher, as of spec 011.
 
       A custom one used to be passed here because size was a product field rather than a variant
-      type, so two sizes of one ring would otherwise merge into a quantity of two the seller could
-      not fulfil. Sizes are gone; a line is a product and a stone, which is exactly what the default
+      type, so two sizes of one product would otherwise merge into a quantity of two the seller could
+      not fulfil. Sizes are gone; a line is a product and a variant, which is exactly what the default
       compares. See `src/collections/carts.ts`.
     */
     item: {

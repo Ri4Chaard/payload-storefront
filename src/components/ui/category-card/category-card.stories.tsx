@@ -31,7 +31,7 @@ type Story = StoryObj<typeof meta>
 /** Node 138:509 at the drawn size — 415x480, 30px inset. */
 export const Default: Story = {}
 
-export const LongerTitle: Story = { args: { title: 'Engagement rings' } }
+export const LongerTitle: Story = { args: { title: 'A longer category title' } }
 
 /**
  * The scrim is not in the drawing. It is on by default because the image comes from the CMS, and

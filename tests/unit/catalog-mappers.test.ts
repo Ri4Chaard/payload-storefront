@@ -28,10 +28,10 @@ const first = <T>(list: T[], what: string): T => {
   return found
 }
 
-const RING = bySlug('paragon-emerald-cut-diamond-engagement-ring')
-const BRACELET = bySlug('pave-butterfly-diamond-bracelet')
-const IN_STOCK = bySlug('butterfly-diamond-pendant')
-const SOLD_OUT = bySlug('butterfly-ruby-pink-sapphire-diamond-mini-pendant')
+const RING = bySlug('product-1')
+const BRACELET = bySlug('product-2')
+const IN_STOCK = bySlug('product-3')
+const SOLD_OUT = bySlug('product-5')
 
 describe('availability is decided once', () => {
   it('is true for a made-to-order piece whatever the count says', () => {
@@ -99,7 +99,7 @@ describe('relationship unions are narrowed, loudly', () => {
 
   it('names the document in the error, so the cause is not three files away', () => {
     const shallow: Product = { ...RING, category: 1 }
-    expect(() => toProductDetail(shallow, 'en')).toThrow(/paragon-emerald-cut/)
+    expect(() => toProductDetail(shallow, 'en')).toThrow(/product-1/)
   })
 })
 
@@ -117,7 +117,7 @@ describe('prices', () => {
   it('orders the stones cheapest first and keeps the one with no count', () => {
     const options = toProductDetail(RING, 'en').variantOptions
     expect(options.map((option) => option.priceMinor)).toEqual([3832000, 4252000, 4792000, 5672000])
-    expect(options.at(-1)?.label).toBe('Natural 1.5 ct E VS2')
+    expect(options.at(-1)?.label).toBe('Option D')
 
     /*
       The ring is made to order, so the stone at zero is offered like every other (011/FR-002) and
@@ -137,10 +137,10 @@ describe('prices', () => {
 describe('images', () => {
   it('carries intrinsic dimensions through', () => {
     expect(toProductSummary(RING, 'en').images[0]).toEqual({
-      src: '/photography/product-ring-packshot.webp',
+      src: '/photography/product-1-a.webp',
       width: 1274,
       height: 1600,
-      alt: 'Paragon emerald cut diamond engagement ring',
+      alt: 'Product 1',
     })
   })
 
@@ -165,7 +165,7 @@ describe('rich text', () => {
     const content = toShopContent(shopFixture)
     expect(content.warrantyHtml).toContain('three years')
     expect(content.deliveryHtml).toContain('3 to 4 weeks')
-    expect(content.listingSubtitle).toBe('Timeless brilliance, made for every moment')
+    expect(content.listingSubtitle).toBe('A short description of this listing')
   })
 })
 

@@ -44,13 +44,13 @@ export const relationId = (value: unknown): number | undefined => {
  * A line whose product no longer resolves.
  *
  * It keeps its row id and says the little it can — the name lived on the product. Dropping it is
- * what the spec's edge case forbids: a cart that quietly loses a piece is a cart the customer
+ * what the spec's edge case forbids: a cart that quietly loses a product is a cart the customer
  * cannot reason about, and the row still has to be removable.
  */
 function orphanLine(row: RawCartLine, quantity: number): CartLineView {
   return {
     id: String(row.id),
-    title: 'This piece is no longer available',
+    title: 'This item is no longer available',
     href: null,
     image: null,
     variantChoice: null,
@@ -83,7 +83,7 @@ export function resolveLine(
         {
           lineId,
           kind: 'unpublished',
-          message: 'This piece is no longer on sale and has been left out of your total.',
+          message: 'This item is no longer on sale and has been left out of your total.',
         },
       ],
       line: orphanLine(row, quantity),
@@ -96,13 +96,13 @@ export function resolveLine(
     (option) => option.id === variantId,
   )
 
-  // The stone's price where the piece has stones, the piece's own where it does not. `carts_items`
+  // The variant's price where the product has variants, the product's own where it does not. `carts_items`
   // carries no price of its own by design (research R6) — FR-012 wants the current one, and a
   // stored one would be a snapshot of a kind FR-029 has ruled out.
   const unitMinor = chosen ? chosen.priceMinor : product.priceMinor
   const maxQuantity = chosen ? chosen.maxQuantity : product.maxQuantity
 
-  // A piece with stones is only buyable through one of them, so a chosen stone that no longer
+  // A product with variants is only buyable through one of them, so a chosen variant that no longer
   // exists is treated exactly as an unavailable one — it can only arrive from a stale page or a
   // hand-edited request, and neither deserves a distinct message.
   const available =
@@ -114,7 +114,7 @@ export function resolveLine(
       kind: 'unavailable',
       message: chosen
         ? `${chosen.label} is no longer available and has been left out of your total.`
-        : 'This piece is no longer available and has been left out of your total.',
+        : 'This item is no longer available and has been left out of your total.',
     })
   }
 

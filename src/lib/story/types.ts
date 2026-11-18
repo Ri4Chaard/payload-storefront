@@ -44,7 +44,7 @@ export interface Cta {
   href: string
 }
 
-/** A word over a caption — `CERTIFIED` / `selected diamonds`. Never a number and a unit. */
+/** A word over a caption — `CERTIFIED` / `selected materials`. Never a number and a unit. */
 export interface Figure {
   word: string
   caption: string

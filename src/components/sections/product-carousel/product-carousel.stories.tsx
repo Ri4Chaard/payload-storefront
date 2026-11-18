@@ -28,7 +28,7 @@ export const Tablet: Story = { globals: { viewport: { value: 'lg' } } }
 export const Mobile: Story = { globals: { viewport: { value: 'mobile' } } }
 
 /**
- * Eight pieces on a desktop. This is the state the drawn-but-hidden control exists for: the arrows
+ * Eight products on a desktop. This is the state the drawn-but-hidden control exists for: the arrows
  * appear, they clamp at both ends rather than wrapping, and each disappears when its side runs out.
  */
 export const MoreThanFits: Story = {
@@ -40,7 +40,7 @@ export const MoreThanFits: Story = {
   },
 }
 
-/** Two pieces. Nothing overflows at any width above a phone, so no arrow ever appears. */
+/** Two products. Nothing overflows at any width above a phone, so no arrow ever appears. */
 export const Few: Story = {
   args: { items: featuredFixture.items.slice(0, 2) },
 }

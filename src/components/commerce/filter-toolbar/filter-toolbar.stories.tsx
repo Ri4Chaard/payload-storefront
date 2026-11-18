@@ -33,7 +33,7 @@ export const Default: Story = {}
 
 /**
  * Three filters applied. The phone trigger reads `FILTERS (3)` (FR-028, node `412:7875`), an oval
- * stone is marked in the shape row, and the price slider sits inside the catalogue's ends.
+ * shape is marked in the shape row, and the price slider sits inside the catalogue's ends.
  */
 export const WithFiltersApplied: Story = {
   args: {

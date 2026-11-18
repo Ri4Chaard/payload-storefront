@@ -21,7 +21,7 @@ import type { ProductDetail } from '@/lib/catalog/types'
 import { shopPromises } from '@/lib/shop-promises'
 
 /**
- * One piece (003/T264, T266–T268). Nodes `231:1901` (1920), `410:7283` (1024), `410:7626` (390).
+ * One product (003/T264, T266–T268). Nodes `231:1901` (1920), `410:7283` (1024), `410:7626` (390).
  *
  * **The information column is composed here, not in a component.** Everything on it that repeats —
  * the gallery, the accordions, the related row — is a component with its own stories; what is left
@@ -35,22 +35,22 @@ import { shopPromises } from '@/lib/shop-promises'
  *
  * **`null` from `getProduct` is the branded 404 and says nothing else.** A missing slug and a draft
  * asked for anonymously are indistinguishable from out here on purpose — telling a stranger that an
- * unpublished piece exists is the leak FR-009 is written against, and the loader is where that
+ * unpublished product exists is the leak FR-009 is written against, and the loader is where that
  * decision is made, not this file.
  */
 /**
- * **Every published piece is prerendered** (003/T294), and stays fresh because publishing says so.
+ * **Every published product is prerendered** (003/T294), and stays fresh because publishing says so.
  *
  * This is the route the performance budget is written about (SC-008): the photograph above the
  * fold is the LCP element, and prerendering means it is already in the HTML that the first byte
- * carries rather than waiting on a query. The catalogue is tens of pieces, so the whole set costs
+ * carries rather than waiting on a query. The catalogue is tens of products, so the whole set costs
  * a few seconds of build.
  *
- * **A piece published after the build is still served.** `dynamicParams` is left at its default, so
+ * **A product published after the build is still served.** `dynamicParams` is left at its default, so
  * a slug that is not in this list renders on demand and is cached from then on — the list decides
  * what is ready before the first visitor, not what exists. That is also why `prerenderable` can
  * hand back nothing when the container image is built with no database to read: the list empties,
- * and every page takes the path a newly published piece already takes.
+ * and every page takes the path a newly published product already takes.
  *
  * Both halves of that would go stale on their own. `src/lib/revalidate.ts` is the other half: a
  * write in the admin marks this whole route pattern for regeneration, so the prerendered page and
@@ -150,7 +150,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             {/*
               The price down to BUY NOW, in one client component. They share the visitor's choice:
-              FR-039 makes the price follow the selected stone, and the description sits between the
+              FR-039 makes the price follow the selected option, and the description sits between the
               two in the drawn order — so the run is contiguous and belongs together.
 
               The description is drawn at 1920 (`231:2339`) and absent from the 1024 and 390 frames,
@@ -172,7 +172,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               />
 
               {/*
-              The details follow the selected stone (spec 011, FR-013). The provider wraps both
+              The details follow the selected option (spec 011, FR-013). The provider wraps both
               because the selection is made in one and read in the other; `ProductDetails` itself is
               untouched, and the wrapper only decides which attribute list it is handed.
             */}
@@ -196,15 +196,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       {/*
         _Complete the Collection_ (FR-037) — the home page's band, consumed unchanged apart from
-        the button it does not draw here. Absent rather than empty: a piece in no collection, or the
-        only piece in its collection, gets no strip at all rather than a heading over nothing.
+        the button it does not draw here. Absent rather than empty: a product in no collection, or the
+        only product in its collection, gets no strip at all rather than a heading over nothing.
       */}
       {related.length > 0 ? (
         <ProductCarousel
           heading={t_product('completeCollection')}
           headingId="complete-the-collection"
           trackLabel={t_product('moreFromCollection')}
-          // Five seconds. The row is a shop window beside a piece the visitor is already reading
+          // Five seconds. The row is a shop window beside a product the visitor is already reading
           // about, so it offers rather than demands: it never starts for someone who asked for
           // reduced motion, holds while it is hovered or focused, and stops for good the moment
           // anyone pages it themselves.
@@ -231,7 +231,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
  * a price it does not charge.
  *
  * Availability is the same boolean the page draws, so the two cannot disagree. `offerCount` and the
- * low/high pair appear only where the stones actually differ — an `AggregateOffer` over one price
+ * low/high pair appear only where the options actually differ — an `AggregateOffer` over one price
  * is noise.
  */
 function ProductSchema({ product }: { product: ProductDetail }) {

@@ -57,7 +57,7 @@ export const LongLabel: Story = {
     <div className="max-w-prose">
       <Checkbox
         {...args}
-        label="Include a printed certificate of authenticity with the order, dispatched separately from the piece itself."
+        label="Include a printed certificate of authenticity with the order, dispatched separately from the product itself."
       />
     </div>
   ),

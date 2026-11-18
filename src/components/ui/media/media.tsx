@@ -46,7 +46,7 @@ export interface MediaProps extends Omit<React.ComponentProps<'div'>, 'children'
    *
    * `cover` is right for a plate whose job is to fill the width — cropping a full-bleed photograph
    * is what makes it full-bleed. `contain` is right when the subject IS the picture and must not be
-   * cut: the detail band's side panel shows one necklace on its own ground, and covering it crops
+   * cut: the detail band's side panel shows one product on its own ground, and covering it crops
    * the ends off.
    */
   fit?: 'cover' | 'contain'
@@ -111,8 +111,8 @@ export function Media({
         **Flat below `lg`, directional above it — and that split came from looking at the page.** A
         single left-to-right fade is right at desktop, where the text occupies one half of the band
         and the photograph's subject the other. On a phone the text spans the full width, so its
-        last lines sat over the transparent end of the gradient and, on the Standard banner, over a
-        brilliant-cut diamond. Legible in the design's own mobile frame, unreadable with a real
+        last lines sat over the transparent end of the gradient and, on the Standard banner, over the
+        product itself. Legible in the design's own mobile frame, unreadable with a real
         photograph behind it.
       */}
       {background ? (

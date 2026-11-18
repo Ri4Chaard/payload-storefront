@@ -13,7 +13,7 @@ const poster = {
   src: '/photography/about.webp',
   width: 1920,
   height: 1080,
-  alt: 'A hand wearing a solitaire ring',
+  alt: 'A placeholder photograph',
 }
 
 const meta = {
@@ -44,7 +44,7 @@ export const Default: Story = {}
 
 /**
  * The same component behind a step tile, which is where controls looked worst: a scrub bar and a
- * play button laid across a photograph of a jeweller's bench.
+ * play button laid across a photograph of a workbench.
  *
  * There is no `controls` story to compare it against any more, because there is no longer a slot
  * that would use one — see the component's note on FR-023 and on what removing them costs.

@@ -30,7 +30,7 @@ export const Default: Story = {}
 export const Filled: Story = {
   args: {
     defaultValue:
-      'I am looking for an emerald-cut solitaire, around 1.5ct, and I would like to know what you have available.',
+      'I am looking for a particular product in a particular option, and I would like to know what you have available.',
   },
 }
 

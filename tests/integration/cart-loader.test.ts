@@ -38,7 +38,7 @@ const restore: (() => Promise<unknown>)[] = []
 let pendant: ProductDetail
 
 beforeAll(async () => {
-  const withNone = await getProduct('butterfly-diamond-pendant', 'en')
+  const withNone = await getProduct('product-3', 'en')
   if (!withNone) throw new Error('Seed the catalogue first: pnpm seed')
   pendant = withNone
 })
@@ -132,7 +132,7 @@ describe('a line whose product is withdrawn (FR-014)', () => {
 describe('a line whose stock has gone (FR-014)', () => {
   it('is excluded from the total but still rendered, with the reason in words', async () => {
     const owner = await guest()
-    const soldOut = await getProduct('butterfly-ruby-pink-sapphire-diamond-mini-pendant', 'en')
+    const soldOut = await getProduct('product-5', 'en')
     expect(soldOut, 'the seed keeps a stock-tracked piece with stock').not.toBeNull()
 
     await addLine(owner, owner.cartId, intentFor(soldOut!, 1))
@@ -173,7 +173,7 @@ describe('a line priced differently than when it was added (FR-014)', () => {
 describe('a line asking for more than is left (FR-014)', () => {
   it('clamps the quantity to what remains and says by how much', async () => {
     const owner = await guest()
-    const stocked = await getProduct('butterfly-ruby-pink-sapphire-diamond-mini-pendant', 'en')
+    const stocked = await getProduct('product-5', 'en')
 
     await addLine(owner, owner.cartId, intentFor(stocked!, 3))
 

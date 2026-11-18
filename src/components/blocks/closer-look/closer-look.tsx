@@ -20,8 +20,8 @@ import type { StoryBlock } from '@/lib/story/types'
  * is the narrower frame running out of room rather than a rule about how many exist.
  *
  * **The side panel is `contain`, not `cover`** — the one media slot on the page that is a subject
- * rather than a backdrop. It shows a single piece photographed on its own ground, and cropping it
- * to fill the frame takes the ends off the necklace. Every other slot covers, because filling the
+ * rather than a backdrop. It shows a single product photographed on its own ground, and cropping it
+ * to fill the frame takes the ends off the product. Every other slot covers, because filling the
  * width is the whole job of a full-bleed plate.
  */
 export type CloserLookBlockProps = Extract<StoryBlock, { type: 'closer-look' }>

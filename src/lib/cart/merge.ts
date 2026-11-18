@@ -9,8 +9,8 @@ import { relationId, type RawCartLine } from './totals'
  * **The plugin ships a merge and it is wrong for this schema**, which is why this exists.
  * `createCartsCollection` registers `mergeCartEndpoint({ cartsSlug })` — note the absent
  * `cartItemMatcher` — above a comment saying it "uses its own matcher". That matcher,
- * `defaultMergeItemMatcher`, compares product and variant and stops. So a ring in size 6 meeting
- * the same ring in size 7 becomes one line of quantity two: an order the seller cannot fulfil, and
+ * `defaultMergeItemMatcher`, compares product and variant and stops. So a product in size 6 meeting
+ * the same product in size 7 becomes one line of quantity two: an order the seller cannot fulfil, and
  * precisely the defect `src/collections/carts.ts` was written to prevent on the `addItem` path,
  * reappearing on a different one. `mergeCart` is not exported from the package root either, so the
  * correct matcher cannot be injected even by calling it directly.
@@ -122,7 +122,7 @@ export async function mergeGuestCart(
     if (typeof newItem.product !== 'number') continue
 
     /*
-      Same product, same stone, same line — the plugin's own rule, applied here by hand because the
+      Same product, same variant, same line — the plugin's own rule, applied here by hand because the
       merge works on plain data rather than through `addItem`.
 
       This used to call a custom `cartItemMatcher` that also compared size. Sizes left in spec 011,

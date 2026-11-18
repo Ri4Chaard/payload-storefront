@@ -18,10 +18,10 @@ export const storyFacets: FilterFacets = {
     option('category-4', 'Category 4', 8),
   ],
   collections: [
-    option('deia', 'Deia'),
-    option('marvel', 'Marvel'),
-    option('molten', 'Molten'),
-    option('spartan', 'Spartan', 0),
+    option('collection-a', 'Collection A'),
+    option('collection-b', 'Collection B'),
+    option('collection-c', 'Collection C'),
+    option('collection-d', 'Collection D', 0),
   ],
   colours: [
     option('black', 'Black'),

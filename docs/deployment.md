@@ -67,7 +67,7 @@ variable.
 ## Content
 
 **Neither path seeds.** A fresh environment comes up with a schema and no shop: no categories, so
-every `/rings`-style route is a 404 and the header's four navigation links are dead; no products, so
+every `/category-1`-style route is a 404 and the header's four navigation links are dead; no products, so
 the listing shows its empty state and the home page drops both bands.
 
 Fill it once, from inside the container, so uploads land in the mounted media volume rather than on

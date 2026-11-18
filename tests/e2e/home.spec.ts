@@ -155,7 +155,7 @@ test('nothing animates when the visitor asks for less motion', async ({ browser 
   const track = page.getByRole('list', { name: 'Featured jewelry' })
   await expect(track).toHaveCSS('scroll-behavior', 'auto')
 
-  await page.getByRole('button', { name: 'Show more pieces' }).click()
+  await page.getByRole('button', { name: 'Show more products' }).click()
   // With smooth scrolling off the jump is immediate, so one frame later it is already done.
   await page.waitForTimeout(50)
   const settled = await track.evaluate((el) => el.scrollLeft)

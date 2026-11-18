@@ -86,7 +86,7 @@ test.describe('a page whose content is not translated', () => {
     // `/legal/privacy` has a Russian title and no Russian body, which is exactly the state this
     // requirement is about.
     await page.goto('/ru/legal/privacy')
-    await expect(page.locator('h1')).toHaveText(/ПОЛИТИКА/)
+    await expect(page.locator('h1')).toHaveText(/Политика/i)
 
     const body = await page.locator('main').innerText()
     expect(body.length).toBeGreaterThan(200)

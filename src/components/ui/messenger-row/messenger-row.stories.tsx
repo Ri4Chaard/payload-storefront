@@ -51,5 +51,5 @@ export const CannotCarryTheMessage: Story = {
 
 /** A long handle truncates rather than pushing the chevron off the row. */
 export const LongHandle: Story = {
-  args: { handle: '@aurum-fine-jewellery-a-very-long-handle-example' },
+  args: { handle: '@aurum-online-store-a-very-long-handle-example' },
 }

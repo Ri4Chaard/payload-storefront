@@ -38,7 +38,7 @@ export interface ChipProps extends Omit<React.ComponentProps<'button'>, 'type'> 
   /**
    * `'span'` renders a plain label instead of a control (006/T030).
    *
-   * The detail band on the story page draws these pills as subject labels — "Lab-Grown Diamonds",
+   * The detail band on the story page draws these pills as subject labels — "Materials",
    * "Craftsmanship" — and pressing one does nothing. A `<button>` that does nothing is a control a
    * keyboard user has to tab through and a screen reader announces as actionable, which is an
    * accessibility defect rather than a cosmetic one.

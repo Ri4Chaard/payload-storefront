@@ -36,8 +36,8 @@ export const Paragraphs: Story = {
 export const LinkAndList: Story = {
   args: {
     html:
-      '<p>Every stone arrives with paperwork. You can expect:</p>' +
-      '<ul><li>An independent grading report</li><li>A certificate of authenticity</li>' +
+      '<p>An answer with a list. You can expect:</p>' +
+      '<ul><li>Point one</li><li>Point two</li>' +
       '<li>Care instructions, or <a href="/contact">ask our team</a></li></ul>',
   },
 }

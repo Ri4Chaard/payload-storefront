@@ -5,7 +5,7 @@ import React from 'react'
 import { CART_COUNT_COOKIE } from '@/lib/cart/types'
 
 /**
- * How many pieces the header badge should show (spec 005, T023, research R8).
+ * How many products the header badge should show (spec 005, T023, research R8).
  *
  * **Why a client provider rather than a number the layout reads.** `cookies()` is a request-time
  * API: reading it in the root layout would opt *every* route into dynamic rendering, and
