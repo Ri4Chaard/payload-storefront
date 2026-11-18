@@ -24,7 +24,7 @@ import { skipRevalidation } from '@/lib/revalidate'
  * `revalidatePath` throws rather than doing nothing.
  *
  * **Each test undoes its own edit before it ends**, rather than queueing the undo for `afterAll`.
- * Deferring cost a run: the first test left the pendant unpublished, and the price test three
+ * Deferring cost a run: the first test left the product unpublished, and the price test three
  * blocks later was then asserting against a product the published catalogue could no longer see.
  * The `restore` list survives as a safety net for a test that throws part way.
  */
@@ -35,12 +35,12 @@ const carts: number[] = []
 /** Products edited by this suite, and what to restore. */
 const restore: (() => Promise<unknown>)[] = []
 
-let pendant: ProductDetail
+let plain: ProductDetail
 
 beforeAll(async () => {
   const withNone = await getProduct('product-3', 'en')
   if (!withNone) throw new Error('Seed the catalogue first: pnpm seed')
-  pendant = withNone
+  plain = withNone
 })
 
 afterAll(async () => {
@@ -109,13 +109,13 @@ async function whileChanged(
 describe('a line whose product is withdrawn (FR-014)', () => {
   it('keeps the row, names it, gives it nowhere to go, and drops it from the total', async () => {
     const owner = await guest()
-    await addLine(owner, owner.cartId, intentFor(pendant, 2))
+    await addLine(owner, owner.cartId, intentFor(plain, 2))
 
     const before = await view(owner)
     expect(before.itemCount).toBe(2)
     expect(before.subtotal).not.toBe(formatPrice(0))
 
-    await whileChanged(pendant.id, { _status: 'draft' }, { _status: 'published' }, async () => {
+    await whileChanged(plain.id, { _status: 'draft' }, { _status: 'published' }, async () => {
       const after = await view(owner)
       expect(after.lines).toHaveLength(1)
       expect(after.lines[0]?.href).toBeNull()
@@ -133,7 +133,7 @@ describe('a line whose stock has gone (FR-014)', () => {
   it('is excluded from the total but still rendered, with the reason in words', async () => {
     const owner = await guest()
     const soldOut = await getProduct('product-5', 'en')
-    expect(soldOut, 'the seed keeps a stock-tracked piece with stock').not.toBeNull()
+    expect(soldOut, 'the seed keeps a stock-tracked product with stock').not.toBeNull()
 
     await addLine(owner, owner.cartId, intentFor(soldOut!, 1))
     expect((await view(owner)).itemCount).toBe(1)
@@ -152,13 +152,13 @@ describe('a line whose stock has gone (FR-014)', () => {
 describe('a line priced differently than when it was added (FR-014)', () => {
   it('uses the current price, not the one the cart was built at', async () => {
     const owner = await guest()
-    await addLine(owner, owner.cartId, intentFor(pendant, 1))
+    await addLine(owner, owner.cartId, intentFor(plain, 1))
 
     const before = await view(owner)
     const wasMinor = before.lines[0]!.unitMinor
 
     await whileChanged(
-      pendant.id,
+      plain.id,
       { priceInUSD: wasMinor + 100_000 },
       { priceInUSD: wasMinor },
       async () => {
@@ -192,14 +192,14 @@ describe('a line whose product has been deleted outright', () => {
     const doomed = await payload.create({
       collection: 'products',
       data: {
-        title: 'Temporary piece for the deletion test',
+        title: 'Temporary product for the deletion test',
         slug: `temp-${Date.now()}`,
         priceInUSDEnabled: true,
         priceInUSD: 100_000,
         availability: 'made-to-order',
         category: (await payload.find({ collection: 'categories', limit: 1, overrideAccess: true }))
           .docs[0]!.id,
-        // Required by the collection. Any existing upload will do — this piece exists for one
+        // Required by the collection. Any existing upload will do — this product exists for one
         // assertion and is deleted inside the test.
         gallery: [
           (await payload.find({ collection: 'media', limit: 1, overrideAccess: true })).docs[0]!.id,

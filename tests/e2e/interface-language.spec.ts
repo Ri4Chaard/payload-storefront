@@ -125,7 +125,7 @@ const PAGES = [
   '/',
   '/all-products',
   '/category-1',
-  '/products/layered-chain-necklace',
+  '/products/product-30',
   '/blog',
   '/blog/article-1',
   '/cart',

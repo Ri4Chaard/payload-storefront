@@ -130,7 +130,7 @@ describe('an address belongs to one policy', () => {
   it('accepts a slug that matches a catalogue category — the /legal/ prefix owns its namespace', async () => {
     // The check an earlier design needed, deliberately absent (009/research.md R2). `/legal/category-1`
     // shadows nothing, so this must be allowed rather than rejected by a stale reserved-word list.
-    const document = await make({ slug: `rings-${Date.now()}`, title: 'Category 1 Care Guide' })
+    const document = await make({ slug: `care-${Date.now()}`, title: 'Category 1 Care Guide' })
     expect(document.id).toBeTruthy()
   })
 })

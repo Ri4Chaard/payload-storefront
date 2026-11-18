@@ -35,13 +35,12 @@ test.afterAll(async () => {
 /*
   Pages with NO translation at all, which is what this file is about.
 
-  `/legal/privacy` and `/products/layered-chain-necklace` are deliberately absent: `pnpm
-  seed:translations` gives them Russian and Ukrainian text, so they are translated content of a
-  legitimately different length — the sample Russian policy is two paragraphs where the English one
+  `/legal/privacy` is deliberately absent: `pnpm seed:translations` gives it Russian and Ukrainian
+  text, so it is translated content of a legitimately different length — the sample Russian policy is two paragraphs where the English one
   is a page. Asserting they match would be asserting that a translation must be the same size as its
   original, which is both false and the opposite of the point.
 */
-const PAGES = ['/legal/terms', '/products/emerald-station-necklace', '/blog']
+const PAGES = ['/legal/terms', '/products/product-29', '/blog']
 
 test.describe('a page whose content is not translated', () => {
   for (const path of PAGES) {

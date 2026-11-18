@@ -147,7 +147,7 @@ for (const width of WIDTHS) {
  *
  * Asserted on computed style rather than by watching an animation: the rule sets 0.01ms, so a test
  * that measured elapsed time would be timing the test runner. What matters is that the declaration
- * wins, including on the modal entrance — the one piece of motion a customer cannot dismiss.
+ * wins, including on the modal entrance — the one bit of motion a customer cannot dismiss.
  */
 test.describe('reduced motion', () => {
   test('every transition this feature added is collapsed', async ({ page }) => {

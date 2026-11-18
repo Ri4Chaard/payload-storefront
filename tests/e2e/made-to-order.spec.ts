@@ -3,14 +3,14 @@ import { expect, test, type Page } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * A made-to-order piece is orderable without inventing stock (spec 011, US1).
+ * A made-to-order product is orderable without inventing stock (spec 011, US1).
  *
- * **This is the journey that was broken.** The owner marks a ring always-available, adds the stones
- * a customer chooses between, and types no quantity — because a made-to-order stone has none. Before
- * this feature every one of those stones was offered as unavailable and the piece could not be
+ * **This is the journey that was broken.** The owner marks a product always-available, adds the options
+ * a customer chooses between, and types no quantity — because a made-to-order option has none. Before
+ * this feature every one of those options was offered as unavailable and the product could not be
  * ordered at all, with nothing on the page explaining why.
  *
- * Fixtures are built here rather than seeded: the whole point is a piece whose stones have never
+ * Fixtures are built here rather than seeded: the whole point is a product whose options have never
  * been given a number, and no seeded product is in that state. `disableRevalidate` because
  * `revalidatePath` throws outside a request, which is where a test runner lives.
  */
@@ -53,7 +53,7 @@ async function build(availability: 'made-to-order' | 'stock-tracked', quantities
       await payload.create({
         collection: 'variants',
         context,
-        // A stone's options must be unique within its piece, so each takes its own.
+        // A variant's options must be unique within its product, so each takes its own.
         data: {
           inventory,
           options: [options[index]!.id],
@@ -70,12 +70,12 @@ async function build(availability: 'made-to-order' | 'stock-tracked', quantities
 }
 
 /**
- * The stone selector is the kit's `Select` — a `role="combobox"` button over a `role="listbox"`,
+ * The option selector is the kit's `Select` — a `role="combobox"` button over a `role="listbox"`,
  * not a native `<select>`, so the options only exist once it is opened.
  */
-const variantTrigger = (page: Page) => page.getByRole('combobox', { name: /diamond/i })
+const variantTrigger = (page: Page) => page.getByRole('combobox', { name: /choose an option/i })
 
-async function stoneOptions(page: Page) {
+async function variantChoices(page: Page) {
   await variantTrigger(page).click()
   return page.getByRole('option')
 }
@@ -92,36 +92,36 @@ test.afterAll(async () => {
 })
 
 /** FR-002, FR-007 — the regression, end to end. */
-test('a made-to-order piece sells stones nobody gave a quantity', async ({ page }) => {
+test('a made-to-order product sells options nobody gave a quantity', async ({ page }) => {
   const { slug } = await build('made-to-order', [0, 0])
 
   await page.goto(`/products/${slug}`)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   /*
-    The piece says how it is made, once, under the price.
+    The product says how it is made, once, under the price.
 
-    `exact` matters: the shop's own delivery copy in the accordion below says "made to order in our
-    atelier", so a loose match finds prose as well as the label and cannot tell a labelled
-    page from an unlabelled one.
+    `exact` matters: the shop's own delivery copy in the accordion below is free text an owner may
+    well write "made to order" into, so a loose match could find prose as well as the label and
+    could not tell a labelled page from an unlabelled one.
   */
   await expect(page.getByText('Made to order', { exact: true })).toHaveCount(1)
 
-  // Neither stone is disabled — before this feature both were, and the piece was unsellable.
-  const options = await stoneOptions(page)
+  // Neither option is disabled — before this feature both were, and the product was unsellable.
+  const options = await variantChoices(page)
   await expect(options).toHaveCount(2)
   await expect(options.filter({ hasText: /out of stock/i })).toHaveCount(0)
   expect(
     await options.evaluateAll((nodes) => nodes.filter((node) => node.ariaDisabled === 'true').length),
-    'a made-to-order stone must never be offered as unavailable',
+    'a made-to-order option must never be offered as unavailable',
   ).toBe(0)
   await page.keyboard.press('Escape')
 
   await expect(page.getByRole('button', { name: /add to cart/i })).toBeEnabled()
 })
 
-/** FR-005 — the other half, unchanged: a stock-tracked piece still follows its counts. */
-test('a stock-tracked piece at zero is still refused', async ({ page }) => {
+/** FR-005 — the other half, unchanged: a stock-tracked product still follows its counts. */
+test('a stock-tracked product at zero is still refused', async ({ page }) => {
   const { slug } = await build('stock-tracked', [0, 0])
 
   await page.goto(`/products/${slug}`)
@@ -131,13 +131,13 @@ test('a stock-tracked piece at zero is still refused', async ({ page }) => {
   await expect(page.getByRole('button', { name: /add to cart/i })).toBeDisabled()
 })
 
-/** FR-006 — withdrawing one stone, without reintroducing a quantity. */
-test('unpublishing a stone removes it while the others still sell', async ({ page }) => {
+/** FR-006 — withdrawing one option, without reintroducing a quantity. */
+test('unpublishing an option removes it while the others still sell', async ({ page }) => {
   const { slug, variants } = await build('made-to-order', [0, 0, 0])
   const payload = await getPayload({ config })
 
   await page.goto(`/products/${slug}`)
-  await expect(await stoneOptions(page)).toHaveCount(3)
+  await expect(await variantChoices(page)).toHaveCount(3)
   await page.keyboard.press('Escape')
 
   await payload.update({
@@ -149,7 +149,7 @@ test('unpublishing a stone removes it while the others still sell', async ({ pag
   })
 
   await page.reload()
-  await expect(await stoneOptions(page)).toHaveCount(2)
+  await expect(await variantChoices(page)).toHaveCount(2)
   await page.keyboard.press('Escape')
   await expect(page.getByRole('button', { name: /add to cart/i })).toBeEnabled()
 })

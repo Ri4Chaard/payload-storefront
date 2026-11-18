@@ -92,7 +92,7 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
     })
     products.push(product.id)
 
-    const stone = await payload.create({
+    const variant = await payload.create({
       collection: 'variants',
       context,
       data: {
@@ -105,7 +105,7 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
       overrideAccess: true,
     })
 
-    return { product, stone }
+    return { product, variant }
   }
 
   const madeToOrder = await build('made-to-order')
@@ -131,15 +131,15 @@ test('the catalogue’s editable surface behaves as the spec says', async ({ pag
   await expect(page.locator('#field-sizes')).toHaveCount(0)
 
   /**
-   * FR-001, and the point of the whole mirror: a stone of a made-to-order piece is not asked how
+   * FR-001, and the point of the whole mirror: a variant of a made-to-order product is not asked how
    * many of it exist.
    */
-  await page.goto(`/admin/collections/variants/${madeToOrder.stone.id}`)
+  await page.goto(`/admin/collections/variants/${madeToOrder.variant.id}`)
   await expect(page.locator('#field-availability')).toBeVisible({ timeout: 120_000 })
   await expect(page.locator('#field-inventory')).toHaveCount(0)
 
   /** FR-005 — and a stock-tracked one still is, unchanged. */
-  await page.goto(`/admin/collections/variants/${stockTracked.stone.id}`)
+  await page.goto(`/admin/collections/variants/${stockTracked.variant.id}`)
   await expect(page.locator('#field-inventory')).toBeVisible({ timeout: 120_000 })
 
   /**

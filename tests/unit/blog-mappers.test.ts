@@ -65,9 +65,9 @@ const chapter = (input: ChapterInput): Chapters[number] =>
 const article = (overrides: Partial<Article> = {}): Article =>
   ({
     id: 1,
-    title: 'How to Choose the Perfect Diamond',
+    title: 'Article title 1',
     slug: 'article-1',
-    standfirst: 'What defines an exceptional stone.',
+    standfirst: 'What defines an exceptional product.',
     category: 7,
     publishedOn: '2026-08-08T00:00:00.000Z',
     updatedAt: '2026-09-01T09:00:00.000Z',
@@ -92,7 +92,7 @@ describe('anchors', () => {
   })
 
   /**
-   * Two chapters can legitimately share a heading — "Summary" twice in a long piece — and a visitor
+   * Two chapters can legitimately share a heading — "Summary" twice in a long article — and a visitor
    * choosing the second entry in the contents list must not land on the first. This is FR-026, and
    * it is the assertion the whole dedupe pass exists for.
    */
@@ -138,7 +138,7 @@ describe('contents', () => {
         chapters: [
           chapter({
             heading: 'Cut: Where Brilliance Begins',
-            tocLabel: 'Diamond Cut & Brilliance',
+            tocLabel: 'Materials & Finish',
           }),
           chapter({ heading: 'Colour' }),
         ],
@@ -146,10 +146,7 @@ describe('contents', () => {
       'en',
     )
 
-    expect(view.contents.map((entry) => entry.label)).toEqual([
-      'Diamond Cut & Brilliance',
-      'Colour',
-    ])
+    expect(view.contents.map((entry) => entry.label)).toEqual(['Materials & Finish', 'Colour'])
     // The chapter still renders its real heading — the short form is for the rail only.
     expect(view.chapters[0]?.heading).toBe('Cut: Where Brilliance Begins')
   })
@@ -187,8 +184,8 @@ describe('chapter content', () => {
           chapter({
             heading: 'Cut',
             lede: 'The most important detail is not always size.',
-            pullQuote: 'A great diamond comes alive in the light.',
-            body: body('A beautifully cut diamond captures light.'),
+            pullQuote: 'A great product earns its place in use.',
+            body: body('A well-made product lasts for years.'),
           }),
           chapter({ heading: 'Colour' }),
         ],
@@ -196,9 +193,9 @@ describe('chapter content', () => {
       'en',
     )
 
-    expect(view.chapters[0]?.bodyHtml).toContain('<p>A beautifully cut diamond captures light.</p>')
+    expect(view.chapters[0]?.bodyHtml).toContain('<p>A well-made product lasts for years.</p>')
     expect(view.chapters[0]?.lede).toBe('The most important detail is not always size.')
-    expect(view.chapters[0]?.pullQuote).toBe('A great diamond comes alive in the light.')
+    expect(view.chapters[0]?.pullQuote).toBe('A great product earns its place in use.')
     // Absent rather than empty, so a renderer closes the layout over them.
     expect(view.chapters[1]?.lede).toBeUndefined()
     expect(view.chapters[1]?.pullQuote).toBeUndefined()
@@ -291,7 +288,7 @@ describe('a category that has been deleted', () => {
     const view = toArticleView(article({ category: 42 }), 'en')
 
     expect(card.category).toBeUndefined()
-    expect(card.title).toBe('How to Choose the Perfect Diamond')
+    expect(card.title).toBe('Article title 1')
     expect(view.category).toBeUndefined()
     expect(view.href).toBe('/blog/article-1')
   })
@@ -302,8 +299,8 @@ describe('metadata fallbacks', () => {
     const view = toArticleView(article({}), 'en')
 
     expect(view.seo).toEqual({})
-    expect(view.fallbacks.title).toBe('How to Choose the Perfect Diamond')
-    expect(view.fallbacks.description).toBe('What defines an exceptional stone.')
+    expect(view.fallbacks.title).toBe('Article title 1')
+    expect(view.fallbacks.description).toBe('What defines an exceptional product.')
   })
 
   it('keeps the editor overrides separate from the fallbacks so the route can prefer them', () => {
@@ -316,7 +313,7 @@ describe('metadata fallbacks', () => {
 
     expect(view.seo.title).toBe('A better title')
     expect(view.seo.description).toBe('A better description')
-    expect(view.fallbacks.title).toBe('How to Choose the Perfect Diamond')
+    expect(view.fallbacks.title).toBe('Article title 1')
   })
 })
 

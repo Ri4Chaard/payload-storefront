@@ -26,9 +26,7 @@ test.describe('the index', () => {
   test('lists the seeded articles, newest first, each reachable in one click', async ({ page }) => {
     await page.goto('/blog')
 
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      /Stories of diamonds, craftsmanship, and timeless beauty/i,
-    )
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/A headline for your blog/i)
 
     const cards = page.locator('ul[aria-label="Latest articles"] > li')
     await expect(cards).toHaveCount(7)
@@ -104,25 +102,25 @@ test.describe('narrowing by category', () => {
   test('narrows the grid and puts the choice in the address', async ({ page }) => {
     await page.goto('/blog')
 
-    await page.getByRole('link', { name: 'Guides', exact: true }).click()
-    await expect(page).toHaveURL(/\/blog\?category=guides/)
+    await page.getByRole('link', { name: 'Topic 3', exact: true }).click()
+    await expect(page).toHaveURL(/\/blog\?category=topic-3/)
 
-    const tab = page.getByRole('link', { name: 'Guides', exact: true })
+    const tab = page.getByRole('link', { name: 'Topic 3', exact: true })
     await expect(tab).toHaveAttribute('aria-current', 'page')
 
     // Distinguished by more than colour (FR-013) — the rule beneath the current tab.
     const border = await tab.evaluate((el) => getComputedStyle(el).borderBottomColor)
     const sibling = await page
-      .getByRole('link', { name: 'Jewelry', exact: true })
+      .getByRole('link', { name: 'Topic 2', exact: true })
       .evaluate((el) => getComputedStyle(el).borderBottomColor)
     expect(border).not.toBe(sibling)
 
-    await expect(page.locator('ul[aria-label="Articles in Guides"] > li')).toHaveCount(2)
+    await expect(page.locator('ul[aria-label="Articles in Topic 3"] > li')).toHaveCount(2)
   })
 
   test('reproduces the narrowed view from its address alone', async ({ page }) => {
-    await page.goto('/blog?category=stories')
-    await expect(page.locator('ul[aria-label="Articles in Stories"] > li')).toHaveCount(2)
+    await page.goto('/blog?category=topic-4')
+    await expect(page.locator('ul[aria-label="Articles in Topic 4"] > li')).toHaveCount(2)
   })
 
   test('answers a category that does not exist the way any unknown address is answered', async ({
@@ -135,7 +133,7 @@ test.describe('narrowing by category', () => {
   test('offers a way out of an empty category, and none from an empty blog', async ({ page }) => {
     // Every seeded category has articles in it, so this asserts the shape of the control rather
     // than an empty result: LATEST is always reachable from a narrowed view.
-    await page.goto('/blog?category=guides')
+    await page.goto('/blog?category=topic-3')
     await expect(page.getByRole('link', { name: 'Latest', exact: true })).toBeVisible()
   })
 })
@@ -145,15 +143,15 @@ test.describe('an article', () => {
     await page.goto(ARTICLE)
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('How to Choose the Perfect Diamond')
-    await expect(page.getByText(/Discover what defines an exceptional diamond/)).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Article title 1')
+    await expect(page.getByText(/A short excerpt that introduces the article/)).toBeVisible()
 
     const chapters = page.locator('article section[aria-labelledby] > h2')
     await expect(chapters).toHaveCount(4)
-    await expect(chapters.first()).toHaveText('Understanding the 4Cs')
+    await expect(chapters.first()).toHaveText('Chapter heading 1')
 
     // The pull quote is announced as a quotation rather than as body copy (FR-025).
-    await expect(page.locator('blockquote')).toContainText('A great diamond')
+    await expect(page.locator('blockquote')).toContainText('A short pull quote')
   })
 
   test('answers an address nobody has published with a 404', async ({ page }) => {
@@ -186,17 +184,17 @@ test.describe('an article', () => {
     await page.setViewportSize({ width: 1920, height: 1080 })
     await page.goto(ARTICLE)
 
-    await page.click('[data-toc="color-finding-the-right-balance"]')
+    await page.click('[data-toc="chapter-heading-3"]')
     await page.waitForTimeout(800)
 
-    await expect(page).toHaveURL(/#color-finding-the-right-balance$/)
+    await expect(page).toHaveURL(/#chapter-heading-3$/)
 
     // Focus lands on the chapter, so a keyboard visitor continues from there rather than from the
     // rail they just left.
     const focused = await page.evaluate(() => document.activeElement?.id)
-    expect(focused).toBe('color-finding-the-right-balance')
+    expect(focused).toBe('chapter-heading-3')
 
-    const heading = page.locator('#color-finding-the-right-balance')
+    const heading = page.locator('#chapter-heading-3')
     const box = await heading.boundingBox()
     expect(box?.y ?? 0).toBeLessThan(1080)
   })
@@ -209,7 +207,7 @@ test.describe('an article', () => {
 
     const rail = page.locator('nav[aria-labelledby="contents-title"]')
     const railBox = await rail.boundingBox()
-    const firstChapter = await page.locator('#understanding-the-4cs').boundingBox()
+    const firstChapter = await page.locator('#chapter-heading-1').boundingBox()
 
     // Above the article, which is the order it is read in.
     expect(railBox?.y ?? 0).toBeLessThan(firstChapter?.y ?? 0)

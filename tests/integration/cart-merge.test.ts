@@ -14,7 +14,7 @@ import type { ProductDetail } from '@/lib/catalog/types'
  * A guest cart meeting an account cart at sign-in — FR-005.
  *
  * **The first test is the whole reason this module exists.** The plugin ships a merge whose matcher
- * compares product and variant and stops, so a ring in size 6 meeting the same ring in size 7 comes
+ * compares product and variant and stops, so a product in size 6 meeting the same product in size 7 comes
  * out as one line of quantity two — an order the seller cannot fulfil. FR-005 says the merge must
  * drop nothing from either side, and a matcher that collapses two sizes drops a size.
  */
@@ -23,15 +23,15 @@ const payload = await getPayload({ config })
 
 const carts: number[] = []
 
-let ring: ProductDetail
-let pendant: ProductDetail
+let optioned: ProductDetail
+let plain: ProductDetail
 
 beforeAll(async () => {
   const withOptions = await getProduct('product-1', 'en')
   const withNone = await getProduct('product-3', 'en')
   if (!withOptions || !withNone) throw new Error('Seed the catalogue first: pnpm seed')
-  ring = withOptions
-  pendant = withNone
+  optioned = withOptions
+  plain = withNone
 })
 
 afterAll(async () => {
@@ -94,22 +94,22 @@ const intentFor = (
 
 describe('mergeGuestCart', () => {
   /**
-   * **Two STONES, where this used to say two sizes** (spec 011).
+   * **Two OPTIONS, where this used to say two sizes** (spec 011).
    *
    * The claim is the same and the axis moved: a merge must not collapse two lines a customer
-   * deliberately made distinct. Size was that axis until it was deprecated, and the stone is what
+   * deliberately made distinct. Size was that axis until it was deprecated, and the option is what
    * remains — so the test follows the rule rather than the removed field.
    */
-  it('keeps two stones of one ring rather than collapsing them into a quantity of two', async () => {
+  it('keeps two options of one product rather than collapsing them into a quantity of two', async () => {
     const alice = await customer()
     const anon = await guest()
-    const [first, second] = ring.variantOptions
-    expect(second, 'the seeded ring needs two stones').toBeDefined()
+    const [first, second] = optioned.variantOptions
+    expect(second, 'the seeded product needs two options').toBeDefined()
 
     const accountCart = (await createCartFor(alice)).cartId
     carts.push(accountCart)
-    await addLine(alice, accountCart, intentFor(ring, { variantId: first!.id }))
-    await addLine(anon, anon.cartId, intentFor(ring, { variantId: second!.id }))
+    await addLine(alice, accountCart, intentFor(optioned, { variantId: first!.id }))
+    await addLine(anon, anon.cartId, intentFor(optioned, { variantId: second!.id }))
 
     const { cartId } = await mergeGuestCart(alice, { cartId: anon.cartId, secret: anon.secret })
 
@@ -127,8 +127,8 @@ describe('mergeGuestCart', () => {
 
     const accountCart = (await createCartFor(alice)).cartId
     carts.push(accountCart)
-    await addLine(alice, accountCart, intentFor(ring, { quantity: 2 }))
-    await addLine(anon, anon.cartId, intentFor(ring, { quantity: 3 }))
+    await addLine(alice, accountCart, intentFor(optioned, { quantity: 2 }))
+    await addLine(anon, anon.cartId, intentFor(optioned, { quantity: 3 }))
 
     const { cartId } = await mergeGuestCart(alice, { cartId: anon.cartId, secret: anon.secret })
 
@@ -143,19 +143,19 @@ describe('mergeGuestCart', () => {
 
     const accountCart = (await createCartFor(alice)).cartId
     carts.push(accountCart)
-    await addLine(alice, accountCart, intentFor(ring))
-    await addLine(anon, anon.cartId, intentFor(pendant))
+    await addLine(alice, accountCart, intentFor(optioned))
+    await addLine(anon, anon.cartId, intentFor(plain))
 
     const { cartId } = await mergeGuestCart(alice, { cartId: anon.cartId, secret: anon.secret })
 
     const products = (await rowsOf(alice, cartId)).map((row) => relationId(row.product))
-    expect(new Set(products)).toEqual(new Set([ring.id, pendant.id]))
+    expect(new Set(products)).toEqual(new Set([optioned.id, plain.id]))
   })
 
   it('gives a customer with no cart one, carrying the guest lines into it', async () => {
     const alice = await customer()
     const anon = await guest()
-    await addLine(anon, anon.cartId, intentFor(pendant, { quantity: 4 }))
+    await addLine(anon, anon.cartId, intentFor(plain, { quantity: 4 }))
 
     expect(await findCartId(alice)).toBeNull()
 
@@ -172,7 +172,7 @@ describe('mergeGuestCart', () => {
   it('deletes the guest cart afterwards, so nothing is left holding a secret', async () => {
     const alice = await customer()
     const anon = await guest()
-    await addLine(anon, anon.cartId, intentFor(pendant))
+    await addLine(anon, anon.cartId, intentFor(plain))
 
     await mergeGuestCart(alice, { cartId: anon.cartId, secret: anon.secret })
 
@@ -199,7 +199,7 @@ describe('mergeGuestCart', () => {
   it('refuses to carry lines across on a wrong secret', async () => {
     const alice = await customer()
     const anon = await guest()
-    await addLine(anon, anon.cartId, intentFor(pendant))
+    await addLine(anon, anon.cartId, intentFor(plain))
 
     const { cartId, merged } = await mergeGuestCart(alice, {
       cartId: anon.cartId,
@@ -214,7 +214,7 @@ describe('mergeGuestCart', () => {
   it('gives the account cart fresh row ids rather than reusing the guest cart ones', async () => {
     const alice = await customer()
     const anon = await guest()
-    await addLine(anon, anon.cartId, intentFor(ring))
+    await addLine(anon, anon.cartId, intentFor(optioned))
 
     const guestRowId = (await rowsOf(anon, anon.cartId))[0]?.id
     const { cartId } = await mergeGuestCart(alice, { cartId: anon.cartId, secret: anon.secret })

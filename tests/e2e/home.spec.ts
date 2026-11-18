@@ -20,9 +20,9 @@ test('the page has a title, a description, and exactly one first-level heading',
 }) => {
   await page.goto('/')
 
-  await expect(page).toHaveTitle('Aurum | Lab-grown diamond jewelry')
+  await expect(page).toHaveTitle('Aurum | Online store')
   const description = page.locator('meta[name="description"]')
-  await expect(description).toHaveAttribute('content', /lab-grown diamond/i)
+  await expect(description).toHaveAttribute('content', /description of your store/i)
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
 })
@@ -56,7 +56,7 @@ test('every band is a landmark or a region that names itself', async ({ page }) 
   await expect(page.getByRole('contentinfo')).toHaveCount(1)
 
   // Named regions are what let someone jump between bands instead of scrolling through them.
-  for (const name of ['Shop by category', 'All jewelry', 'About Aurum']) {
+  for (const name of ['Shop by category', 'All products', 'About us']) {
     await expect(page.getByRole('region', { name })).toHaveCount(1)
   }
 })
@@ -127,8 +127,8 @@ test('the page renders and every link works with JavaScript disabled', async ({ 
   // default": if any of these needed the client to appear, it would be missing here.
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Shop by category' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'All jewelry' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'About Aurum' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'All products' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'About us' })).toBeVisible()
   // Scoped to the band: the header navigation has a "Category 1" link too, and matching both is a
   // strict-mode violation rather than a stronger assertion.
   await expect(
@@ -137,10 +137,10 @@ test('the page renders and every link works with JavaScript disabled', async ({ 
 
   // The carousel degrades to a plain scroller rather than disappearing: its arrows depend on a
   // measurement only the client can take, so they are simply absent — and the track still scrolls.
-  const track = page.getByRole('list', { name: 'Featured jewelry' })
+  const track = page.getByRole('list', { name: 'Featured products' })
   await expect(track).toBeVisible()
   await expect(track).toHaveAttribute('tabindex', '0')
-  await expect(page.getByRole('button', { name: /pieces$/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Show (more|previous) products$/ })).toHaveCount(0)
 
   await context.close()
 })
@@ -152,7 +152,7 @@ test('nothing animates when the visitor asks for less motion', async ({ browser 
 
   // Smooth scrolling has to be suppressed in BOTH places it can be expressed: the CSS declaration
   // on the track, and the `behavior` a script passes to `scrollTo`, which overrides it.
-  const track = page.getByRole('list', { name: 'Featured jewelry' })
+  const track = page.getByRole('list', { name: 'Featured products' })
   await expect(track).toHaveCSS('scroll-behavior', 'auto')
 
   await page.getByRole('button', { name: 'Show more products' }).click()
@@ -364,14 +364,14 @@ test('a small movement near the top of the page does not take the header away', 
 /**
  * The featured row is the catalogue, not a fixture (003/T290).
  *
- * Asserted through the links rather than the names: a piece's title is content the owner may change
+ * Asserted through the links rather than the names: a product's title is content the owner may change
  * at any moment, but every card on this band must point at a real product page, and that page must
  * exist. A fixture row would have passed the first half and failed the second.
  */
-test('the featured row shows real pieces that resolve to real pages', async ({ page }) => {
+test('the featured row shows real products that resolve to real pages', async ({ page }) => {
   await page.goto('/')
 
-  const band = page.getByRole('region', { name: 'All jewelry' })
+  const band = page.getByRole('region', { name: 'All products' })
   const links = band.getByRole('link').filter({ hasNot: page.getByText('View all') })
 
   const hrefs = await links.evaluateAll((nodes) =>

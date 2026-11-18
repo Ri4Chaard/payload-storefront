@@ -47,7 +47,7 @@ const form = (overrides: Record<string, string> = {}) => {
   const data = new FormData()
   data.set('name', 'Yara')
   data.set('email', `yara-${Math.random().toString(36).slice(2)}@aurum-testing.dev`)
-  data.set('message', 'Do you have this in a 1.5ct emerald cut?')
+  data.set('message', 'Do you have this in Option B?')
   data.set('website', '')
   for (const [key, value] of Object.entries(overrides)) data.set(key, value)
   return data

@@ -14,14 +14,14 @@ import type { ProductDetail } from '@/lib/catalog/types'
  * what the integration tier is for.
  */
 
-const RING: ProductDetail = {
+const OPTIONED: ProductDetail = {
   id: 1,
-  slug: 'ring',
-  title: 'Paragon Emerald Cut Diamond Engagement Ring',
-  href: '/products/ring',
+  slug: 'product-1',
+  title: 'Product 1',
+  href: '/products/product-1',
   madeToOrder: false,
   price: '$24,900',
-  images: [{ src: '/ring.webp', width: 800, height: 800 }],
+  images: [{ src: '/product-1.webp', width: 800, height: 800 }],
   available: true,
   categoryName: 'Category 1',
   categorySlug: 'category-1',
@@ -33,7 +33,7 @@ const RING: ProductDetail = {
   detailsHtml: null,
   variantOptions: [
     { id: 11, label: 'Option A', price: '$24,900', priceMinor: 2490000, available: true, attributes: [] },
-    { id: 12, label: 'Lab 2.0 ct D VVS2', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
+    { id: 12, label: 'Option D', price: '$52,600', priceMinor: 5260000, available: false, attributes: [] },
     {
       id: 13,
       label: 'Option B',
@@ -50,13 +50,13 @@ const RING: ProductDetail = {
   seo: { title: null, description: null, image: null },
 }
 
-/** A piece with no stones and no sizes — priced from the product itself. */
-const PENDANT: ProductDetail = {
-  ...RING,
+/** A product with no options and no sizes — priced from the product itself. */
+const PLAIN: ProductDetail = {
+  ...OPTIONED,
   id: 2,
-  slug: 'pendant',
-  title: 'Butterfly Diamond Pendant',
-  href: '/products/pendant',
+  slug: 'product-3',
+  title: 'Product 3',
+  href: '/products/product-3',
   priceMinor: 2490000,
   variantOptions: [],
 }
@@ -73,18 +73,18 @@ const catalogue = (...products: ProductDetail[]) =>
   new Map(products.map((product) => [product.id, product]))
 
 describe('resolveLine', () => {
-  it('prices a line from the chosen stone, not from the piece', () => {
-    const { line: resolved } = resolveLine(line({ variant: 13 }), RING)
+  it('prices a line from the chosen option, not from the product', () => {
+    const { line: resolved } = resolveLine(line({ variant: 13 }), OPTIONED)
 
     expect(resolved.unitMinor).toBe(3832000)
     expect(resolved.unitPrice).toBe('$38,320')
     expect(resolved.variantChoice).toBe('Option B')
   })
 
-  it('prices a piece with no stones from the piece itself', () => {
+  it('prices a product with no options from the product itself', () => {
     const { line: resolved } = resolveLine(
       line({ product: 2, variant: null }),
-      PENDANT,
+      PLAIN,
     )
 
     expect(resolved.unitMinor).toBe(2490000)
@@ -93,7 +93,7 @@ describe('resolveLine', () => {
 
   /**
    * The line still renders. Dropping it is what the spec's edge case forbids — a cart that quietly
-   * loses a piece is one the customer cannot reason about, and the row still has to be removable.
+   * loses a product is one the customer cannot reason about, and the row still has to be removable.
    */
   it('keeps a line whose product has gone, names it, and gives it nowhere to go', () => {
     const { issues, line: resolved } = resolveLine(line(), undefined)
@@ -106,25 +106,25 @@ describe('resolveLine', () => {
     ])
   })
 
-  it('marks a line whose chosen stone is sold out, and says which stone', () => {
-    const { issues, line: resolved } = resolveLine(line({ variant: 12 }), RING)
+  it('marks a line whose chosen option is sold out, and says which option', () => {
+    const { issues, line: resolved } = resolveLine(line({ variant: 12 }), OPTIONED)
 
     expect(resolved.available).toBe(false)
     expect(issues[0]?.kind).toBe('unavailable')
-    expect(issues[0]?.message).toContain('Lab 2.0 ct D VVS2')
+    expect(issues[0]?.message).toContain('Option D')
   })
 
   /**
-   * A stone id that names no stone of THIS piece is treated exactly as an unavailable one. It can
+   * An option id that names no option of THIS product is treated exactly as an unavailable one. It can
    * only arrive from a stale page or a hand-edited request, and neither deserves its own message.
    */
-  it('treats a stone that is not on the piece as unavailable', () => {
-    const { line: resolved } = resolveLine(line({ variant: 999 }), RING)
+  it('treats an option that is not on the product as unavailable', () => {
+    const { line: resolved } = resolveLine(line({ variant: 999 }), OPTIONED)
     expect(resolved.available).toBe(false)
   })
 
-  it('clamps a quantity above the stone stock and says so', () => {
-    const { issues, line: resolved } = resolveLine(line({ variant: 13, quantity: 7 }), RING)
+  it('clamps a quantity above the option stock and says so', () => {
+    const { issues, line: resolved } = resolveLine(line({ variant: 13, quantity: 7 }), OPTIONED)
 
     expect(resolved.quantity).toBe(2)
     expect(issues).toEqual([
@@ -133,7 +133,7 @@ describe('resolveLine', () => {
   })
 
   it('leaves a made-to-order line uncapped', () => {
-    const { issues, line: resolved } = resolveLine(line({ quantity: 40 }), RING)
+    const { issues, line: resolved } = resolveLine(line({ quantity: 40 }), OPTIONED)
 
     expect(resolved.quantity).toBe(40)
     expect(resolved.maxQuantity).toBeUndefined()
@@ -148,7 +148,7 @@ describe('resolveCart', () => {
         line({ id: 'a', quantity: 2 }),
         line({ id: 'b', product: 2, variant: null, quantity: 1 }),
       ],
-      catalogue(RING, PENDANT),
+      catalogue(OPTIONED, PLAIN),
     )
 
     // 2 × 2,490,000 + 1 × 2,490,000, in minor units, before it ever becomes a string.
@@ -164,7 +164,7 @@ describe('resolveCart', () => {
   it('leaves an unavailable line out of the subtotal and the item count, but not off the page', () => {
     const view = resolveCart(
       [line({ id: 'a', quantity: 1 }), line({ id: 'b', variant: 12, quantity: 5 })],
-      catalogue(RING),
+      catalogue(OPTIONED),
     )
 
     expect(view.lines).toHaveLength(2)
@@ -174,7 +174,7 @@ describe('resolveCart', () => {
   })
 
   it('excludes a vanished product from the total while keeping its row addressable', () => {
-    const view = resolveCart([line({ id: 'gone', product: 99 })], catalogue(RING))
+    const view = resolveCart([line({ id: 'gone', product: 99 })], catalogue(OPTIONED))
 
     expect(view.lines[0]?.id).toBe('gone')
     expect(view.subtotal).toBe(formatPrice(0))
@@ -182,7 +182,7 @@ describe('resolveCart', () => {
   })
 
   it('reports an empty cart rather than a zero-line one', () => {
-    const view = resolveCart([], catalogue(RING))
+    const view = resolveCart([], catalogue(OPTIONED))
 
     expect(view.empty).toBe(true)
     expect(view.lines).toEqual([])
@@ -191,12 +191,12 @@ describe('resolveCart', () => {
   })
 
   it('skips a row with no id, which no mutation could ever address', () => {
-    const view = resolveCart([{ product: 1, variant: 11, quantity: 1 }], catalogue(RING))
+    const view = resolveCart([{ product: 1, variant: 11, quantity: 1 }], catalogue(OPTIONED))
     expect(view.empty).toBe(true)
   })
 
   it('always reports shipping as nothing — it is arranged with the seller', () => {
-    const view = resolveCart([line()], catalogue(RING))
+    const view = resolveCart([line()], catalogue(OPTIONED))
     expect(view.shipping).toBe(formatPrice(0))
   })
 })

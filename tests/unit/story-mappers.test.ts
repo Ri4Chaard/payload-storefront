@@ -42,8 +42,8 @@ const photo = (): Slot =>
     kind: 'photo',
     photo: {
       id: 1,
-      alt: 'A solitaire ring on red silk',
-      url: '/media/ring.webp',
+      alt: 'A product on a plain background',
+      url: '/media/product-1.webp',
       width: 1920,
       height: 530,
       updatedAt: '',
@@ -53,8 +53,8 @@ const photo = (): Slot =>
 
 const steps = (): Block => ({
   blockType: 'process-steps',
-  heading: 'FROM DIAMOND TO JEWEL',
-  steps: [{ title: 'SELECT', caption: 'Exceptional diamonds', media: emptySlot }],
+  heading: 'FROM IDEA TO PRODUCT',
+  steps: [{ title: 'SELECT', caption: 'Carefully chosen materials', media: emptySlot }],
 })
 
 /** The level each surviving block renders its own heading at. */
@@ -122,7 +122,7 @@ describe('empty bands are dropped, not rendered empty (FR-004)', () => {
   })
 
   it('drops a numbered band with a heading but no steps', () => {
-    const body: Body = [{ blockType: 'process-steps', heading: 'FROM DIAMOND TO JEWEL', steps: [] }]
+    const body: Body = [{ blockType: 'process-steps', heading: 'FROM IDEA TO PRODUCT', steps: [] }]
     expect(toStoryBlocks(body)).toEqual([])
   })
 

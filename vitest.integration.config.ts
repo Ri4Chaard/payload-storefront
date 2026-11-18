@@ -15,8 +15,8 @@ import { defineConfig } from 'vitest/config'
  * them be pointed at a database without being rewritten — a better proof of the seam than anything
  * they assert individually.
  *
- * The seventeenth named `necklaces`, which passed because that is where the fixtures' sold-out
- * piece happened to sit. It now asks the whole catalogue: the rule was never about necklaces, and
+ * The seventeenth named one category, which passed because that is where the fixtures' sold-out
+ * product happened to sit. It now asks the whole catalogue: the rule was never about one category, and
  * an assertion that depends on which shelf is empty reports a filter bug when the only thing that
  * changed was a number in the admin.
  *

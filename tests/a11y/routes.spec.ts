@@ -22,8 +22,8 @@ const ROUTES = [
   // The empty state and the branded 404 are both pages a visitor reaches by accident, which is
   // exactly when they can least afford to be unusable.
   '/all-products?maxPrice=1',
-  '/rungs',
-  // A piece with stones and sizes, and one with neither: the selectors, the quantity stepper and
+  '/no-such-category',
+  // A product with options, and one with none: the selectors, the quantity stepper and
   // the two actions only exist on the first, and the second is what proves the column closes over
   // them rather than leaving labelled controls behind (003/T296).
   '/products/product-1',
@@ -379,7 +379,7 @@ for (const { name, width, height } of [
     await page.setViewportSize({ width, height })
 
     await page.goto('/products/product-1')
-    await page.getByRole('combobox', { name: /variantChoice/i }).click()
+    await page.getByRole('combobox', { name: /choose an option/i }).click()
     await page.getByRole('option').first().click()
     await page.getByRole('button', { name: /add to cart/i }).click()
     await expect(page.getByText(/added to your cart/i)).toBeVisible()

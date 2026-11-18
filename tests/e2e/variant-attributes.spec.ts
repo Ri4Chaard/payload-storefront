@@ -3,22 +3,22 @@ import { expect, test, type Page } from '@playwright/test'
 import { getPayload } from 'payload'
 
 /**
- * Properties that differ per stone (spec 011, US2, FR-010 – FR-013).
+ * Properties that differ per option (spec 011, US2, FR-010 – FR-013).
  *
- * **The claim only a browser can check is that the list CHANGES under the customer.** That a stone
+ * **The claim only a browser can check is that the list CHANGES under the customer.** That an option
  * can carry a value is the collection's business, and that two lists merge correctly is
  * `tests/unit/catalog-attribute-merge.test.ts`. What is left is the seam: the selection is made in
  * one component and the details are drawn by its sibling, and nothing but a real page proves the
  * message gets across without a reload.
  *
- * It also guards FR-009a from the other side — the piece's PROSE must not move when the selection
+ * It also guards FR-009a from the other side — the product's PROSE must not move when the selection
  * does, which is the easiest thing to widen by accident while wiring the two together.
  */
 const context = { disableRevalidate: true }
 
 const made: number[] = []
 
-const DESCRIPTION = 'A setting made once, in our atelier.'
+const DESCRIPTION = 'A product described once, in its own words.'
 
 async function build() {
   const payload = await getPayload({ config })
@@ -47,8 +47,8 @@ async function build() {
     })
   }
 
-  const metal = await attribute('metal', 'Metal')
-  const carat = await attribute('carat-weight', 'Carat weight')
+  const material = await attribute('material', 'Material')
+  const weight = await attribute('weight', 'Weight')
   const certificate = await attribute(`certificate-${Date.now()}`, 'Certificate')
 
   const product = await payload.create({
@@ -56,10 +56,10 @@ async function build() {
     context,
     data: {
       availability: 'made-to-order',
-      // The piece speaks for itself until a stone is chosen (FR-012).
+      // The product speaks for itself until an option is chosen (FR-012).
       attributes: [
-        { attribute: metal.id, value: '18k gold' },
-        { attribute: carat.id, value: '1.0 ct' },
+        { attribute: material.id, value: 'Material A' },
+        { attribute: weight.id, value: '1.0 kg' },
       ],
       category: category!.id,
       description: DESCRIPTION,
@@ -67,7 +67,7 @@ async function build() {
       gallery: [image!.id],
       priceInUSD: 250_000,
       slug,
-      title: 'Attribute Fixture Ring',
+      title: 'Attribute Fixture Product',
       _status: 'published',
     } as never,
     overrideAccess: true,
@@ -75,14 +75,14 @@ async function build() {
 
   made.push(product.id)
 
-  // Stone A replaces the carat and adds a certificate. Stone B says nothing of its own.
+  // Option A replaces the weight and adds a certificate. Option B says nothing of its own.
   await payload.create({
     collection: 'variants',
     context,
     data: {
       attributes: [
-        { attribute: carat.id, value: '1.5 ct' },
-        { attribute: certificate.id, value: 'GIA 22' },
+        { attribute: weight.id, value: '1.5 kg' },
+        { attribute: certificate.id, value: 'CERT-22' },
       ],
       inventory: 0,
       options: [options[0]!.id],
@@ -123,8 +123,8 @@ async function openDetails(page: Page) {
   await expect(details(page)).toBeVisible()
 }
 
-async function chooseStone(page: Page, index: number) {
-  await page.getByRole('combobox', { name: /diamond/i }).click()
+async function chooseOption(page: Page, index: number) {
+  await page.getByRole('combobox', { name: /choose an option/i }).click()
   await page.getByRole('option').nth(index).click()
 }
 
@@ -139,34 +139,34 @@ test.afterAll(async () => {
   })
 })
 
-test('the details follow the selected stone, and the prose does not', async ({ page }) => {
+test('the details follow the selected option, and the prose does not', async ({ page }) => {
   const slug = await build()
   await page.goto(`/products/${slug}`)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   await openDetails(page)
 
-  // FR-012 — before any choice, the piece's own values.
-  await expect(details(page)).toContainText('18k gold')
-  await expect(details(page)).toContainText('1.0 ct')
-  await expect(details(page)).not.toContainText('GIA 22')
+  // FR-012 — before any choice, the product's own values.
+  await expect(details(page)).toContainText('Material A')
+  await expect(details(page)).toContainText('1.0 kg')
+  await expect(details(page)).not.toContainText('CERT-22')
 
-  // FR-010, FR-011 — the stone replaces one row and adds another, with no reload.
-  await chooseStone(page, 0)
-  await expect(details(page)).toContainText('1.5 ct')
-  await expect(details(page)).toContainText('GIA 22')
-  await expect(details(page)).toContainText('18k gold')
-  await expect(details(page)).not.toContainText('1.0 ct')
+  // FR-010, FR-011 — the option replaces one row and adds another, with no reload.
+  await chooseOption(page, 0)
+  await expect(details(page)).toContainText('1.5 kg')
+  await expect(details(page)).toContainText('CERT-22')
+  await expect(details(page)).toContainText('Material A')
+  await expect(details(page)).not.toContainText('1.0 kg')
 
   /*
-    FR-009a — the piece's prose is the piece's, whichever stone is selected. This is the assertion
+    FR-009a — the product's prose is the product's, whichever option is selected. This is the assertion
     that fails if the wrapper is ever widened from "pick the attribute list" to "pick the content".
   */
   await expect(page.getByText(DESCRIPTION)).toBeVisible()
 
-  // A stone that says nothing of its own falls back to the piece (US2 scenario 4).
-  await chooseStone(page, 1)
-  await expect(details(page)).toContainText('1.0 ct')
-  await expect(details(page)).not.toContainText('GIA 22')
+  // An option that says nothing of its own falls back to the product (US2 scenario 4).
+  await chooseOption(page, 1)
+  await expect(details(page)).toContainText('1.0 kg')
+  await expect(details(page)).not.toContainText('CERT-22')
   await expect(page.getByText(DESCRIPTION)).toBeVisible()
 })

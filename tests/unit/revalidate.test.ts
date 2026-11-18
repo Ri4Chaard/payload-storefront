@@ -8,7 +8,7 @@ const { revalidateGlobalOnChange, revalidateOnChange, revalidateOnDelete, skipRe
 
 /**
  * 003/T294. These are about the rules the caching strategy rests on: that a write in the admin
- * invalidates every cached path by name, that a piece which has left an address takes its page with
+ * invalidates every cached path by name, that a product which has left an address takes its page with
  * it, and that a write from a process with no request scope invalidates nothing rather than
  * throwing.
  *
@@ -16,7 +16,7 @@ const { revalidateGlobalOnChange, revalidateOnChange, revalidateOnDelete, skipRe
  * test that assembled a whole `PayloadRequest` would be asserting the shape of Payload's arguments
  * rather than the behaviour of this module.
  */
-const CATALOGUE = [{ slug: 'first-piece' }, { slug: 'second-piece' }]
+const CATALOGUE = [{ slug: 'first-product' }, { slug: 'second-product' }]
 const find = vi.fn(async () => ({ docs: CATALOGUE }))
 const req = { payload: { find } }
 
@@ -29,10 +29,10 @@ describe('revalidation hooks', () => {
   it('names every product page, one literal path at a time', async () => {
     await change()
 
-    expect(revalidatePath).toHaveBeenCalledWith('/products/first-piece')
-    expect(revalidatePath).toHaveBeenCalledWith('/products/second-piece')
+    expect(revalidatePath).toHaveBeenCalledWith('/products/first-product')
+    expect(revalidatePath).toHaveBeenCalledWith('/products/second-product')
     // Not `/products/[slug]`. The pattern form leaves a prerendered page untouched, which is every
-    // published piece — see the note on `invalidate`.
+    // published product — see the note on `invalidate`.
     expect(revalidatePath).not.toHaveBeenCalledWith('/products/[slug]', 'page')
   })
 
@@ -47,14 +47,14 @@ describe('revalidation hooks', () => {
     expect(revalidatePath).not.toHaveBeenCalledWith('/all-products')
   })
 
-  it('asks for drafts too, so an unpublished piece stops being served', async () => {
+  it('asks for drafts too, so an unpublished product stops being served', async () => {
     await change()
     expect(find).toHaveBeenCalledWith(
       expect.not.objectContaining({ overrideAccess: expect.anything() }),
     )
   })
 
-  it('invalidates the address a renamed piece has left behind', async () => {
+  it('invalidates the address a renamed product has left behind', async () => {
     await change({ doc: { slug: 'new-address' }, previousDoc: { slug: 'old-address' } })
     expect(revalidatePath).toHaveBeenCalledWith('/products/old-address')
   })
@@ -68,7 +68,7 @@ describe('revalidation hooks', () => {
     expect(revalidatePath).not.toHaveBeenCalledWith('/products/category-1')
   })
 
-  it('invalidates a deleted piece, which the catalogue query can no longer name', async () => {
+  it('invalidates a deleted product, which the catalogue query can no longer name', async () => {
     await revalidateOnDelete({
       collection: { slug: 'products' },
       context: {},
@@ -83,7 +83,7 @@ describe('revalidation hooks', () => {
     const doc = { detailsTitle: 'PRODUCT DETAILS' }
     expect(await revalidateGlobalOnChange({ context: {}, doc, req } as never)).toBe(doc)
     // The shop settings are on every product page, so a change to them reaches all of them.
-    expect(revalidatePath).toHaveBeenCalledWith('/products/first-piece')
+    expect(revalidatePath).toHaveBeenCalledWith('/products/first-product')
   })
 
   /**

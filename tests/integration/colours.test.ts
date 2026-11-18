@@ -52,7 +52,7 @@ describe('the four colours that were an enum (FR-020)', () => {
 
     expect(ignored).toEqual([])
     expect(appliedChips).toContainEqual({ key: 'colour', value: 'clear', label: 'Clear' })
-    expect(products.length, 'the seeded catalogue has clear pieces').toBeGreaterThan(0)
+    expect(products.length, 'the seeded catalogue has clear products').toBeGreaterThan(0)
   })
 
   it('carry a localized label, which is what the drawer shows', async () => {
@@ -116,7 +116,7 @@ describe('the facets read from the catalogue (FR-022)', () => {
 })
 
 describe('a colour still in use cannot be deleted (FR-023)', () => {
-  it('refuses, and says how many pieces are in the way', async () => {
+  it('refuses, and says how many products are in the way', async () => {
     const [clear] = (
       await payload.find({
         collection: 'colours',

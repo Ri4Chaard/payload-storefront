@@ -14,7 +14,7 @@ import { enquirySchema, readEnquiryForm } from '@/lib/contact/enquiry-schema'
 const valid = {
   name: 'Yara',
   email: 'yara@example.com',
-  message: 'Do you have this in a 1.5ct emerald cut?',
+  message: 'Do you have this in Option B?',
   website: '',
 }
 
@@ -63,7 +63,7 @@ describe('enquirySchema', () => {
       it "good enough to catch a typo, and not an attempt to out-parse RFC 5322" — so a plus-address
       and a subdomain must both pass.
     */
-    it.each(['yara+jewellery@example.com', 'yara@mail.example.co.uk'])('accepts %s', (email) => {
+    it.each(['yara+store@example.com', 'yara@mail.example.co.uk'])('accepts %s', (email) => {
       expect(parse({ email }).success).toBe(true)
     })
 

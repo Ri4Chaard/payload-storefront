@@ -7,7 +7,7 @@ import type { FilterState } from '@/lib/catalog/types'
 /**
  * The one rule this module exists for: a single category is a PATH, and everything else is a query.
  * Two addresses for one grid is two cache entries, two indexed pages and two answers to "what is
- * the canonical URL of the ring listing".
+ * the canonical URL of the category-1 listing".
  */
 const CATEGORIES = [
   { slug: 'category-1', href: '/category-1' },
@@ -28,7 +28,7 @@ describe('listingHref', () => {
     expect(listingHref(state(), CATEGORIES)).toBe(ALL_PRODUCTS)
   })
 
-  /** There is no route for "rings and bracelets", and inventing one is a page per combination. */
+  /** There is no route for "category 1 and category 2", and inventing one is a page per combination. */
   it('keeps two categories in the query, on the shop-wide route', () => {
     expect(listingHref(state({ category: ['category-1', 'category-2'] }), CATEGORIES)).toBe(
       '/all-products?category=category-1&category=category-2',

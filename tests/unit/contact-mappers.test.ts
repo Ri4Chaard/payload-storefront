@@ -46,7 +46,7 @@ const question = (id: number, text: string): QuestionDocument =>
 const photo = () =>
   ({
     id: 1,
-    alt: 'A necklace and earrings in a case',
+    alt: 'Two products in a gift box',
     url: '/media/contact.webp',
     width: 960,
     height: 750,

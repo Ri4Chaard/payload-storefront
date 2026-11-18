@@ -15,7 +15,7 @@ import {
  * it. A type cannot — an extra property assigned at a call site is structurally fine — so the shape
  * is inspected at runtime.
  */
-const RING: PurchasableProduct = {
+const OPTIONED: PurchasableProduct = {
   id: 1,
   available: true,
   variantChoices: [
@@ -24,7 +24,7 @@ const RING: PurchasableProduct = {
   ],
 }
 
-const PLAIN_BAND: PurchasableProduct = { id: 2, available: true, variantChoices: [] }
+const PLAIN: PurchasableProduct = { id: 2, available: true, variantChoices: [] }
 
 const good: CartIntent = { productId: 1, variantId: 10, quantity: 1 }
 
@@ -33,23 +33,23 @@ const withoutVariant: CartIntent = { productId: 1, quantity: 1 }
 
 describe('validateIntent', () => {
   it('accepts an intent with every choice made', () => {
-    expect(validateIntent(good, RING)).toBeNull()
+    expect(validateIntent(good, OPTIONED)).toBeNull()
   })
 
-  it('accepts a piece that offers no choices at all', () => {
-    expect(validateIntent({ productId: 2, quantity: 1 }, PLAIN_BAND)).toBeNull()
+  it('accepts a product that offers no choices at all', () => {
+    expect(validateIntent({ productId: 2, quantity: 1 }, PLAIN)).toBeNull()
   })
 
-  it('names the diamond when it has not been chosen', () => {
-    expect(validateIntent(withoutVariant, RING)).toEqual({
+  it('names the option when it has not been chosen', () => {
+    expect(validateIntent(withoutVariant, OPTIONED)).toEqual({
       field: 'variant',
       reason: 'missing-option',
     })
   })
 
-  /** FR-040 — an unavailable stone is offered, and refused if it is somehow chosen anyway. */
-  it('refuses a stone that cannot be bought', () => {
-    expect(validateIntent({ ...good, variantId: 11 }, RING)).toEqual({
+  /** FR-040 — an unavailable option is offered, and refused if it is somehow chosen anyway. */
+  it('refuses an option that cannot be bought', () => {
+    expect(validateIntent({ ...good, variantId: 11 }, OPTIONED)).toEqual({
       field: 'variant',
       reason: 'unavailable',
     })
@@ -59,8 +59,8 @@ describe('validateIntent', () => {
    * A stale page or a hand-edited request. Treated as unavailable rather than given a message of
    * its own — the visitor's remedy is identical either way.
    */
-  it('refuses a stone that belongs to no piece', () => {
-    expect(validateIntent({ ...good, variantId: 999 }, RING)).toEqual({
+  it('refuses an option that belongs to no product', () => {
+    expect(validateIntent({ ...good, variantId: 999 }, OPTIONED)).toEqual({
       field: 'variant',
       reason: 'unavailable',
     })
@@ -68,12 +68,12 @@ describe('validateIntent', () => {
 
 
   /**
-   * The piece before its parts. A sold-out ring cannot be rescued by choosing a stone for it, and
-   * naming the stone would send the visitor to fix the wrong control.
+   * The product before its parts. A sold-out product cannot be rescued by choosing an option for it, and
+   * naming the option would send the visitor to fix the wrong control.
    */
-  it('reports the piece, not the stone, when the piece is unavailable', () => {
+  it('reports the product, not the option, when the product is unavailable', () => {
     const soldOut: PurchasableProduct = {
-      ...RING,
+      ...OPTIONED,
       available: false,
       variantChoices: [{ id: 10, available: false }],
     }
@@ -81,7 +81,7 @@ describe('validateIntent', () => {
   })
 
   it.each([0, -1, 1.5, Number.NaN])('refuses a quantity of %s', (quantity) => {
-    expect(validateIntent({ ...good, quantity }, RING)).toEqual({
+    expect(validateIntent({ ...good, quantity }, OPTIONED)).toEqual({
       field: 'quantity',
       reason: 'error',
     })
@@ -123,7 +123,7 @@ describe('the intent that crosses the seam', () => {
  *
  * **This block used to be about the size trap** (spec 005, T015, research R16), and the trap went
  * with the sizes in spec 011. Two selects sat beside each other on the product page using opposite
- * conventions — the stone's options carried `String(option.id)` with a handler doing
+ * conventions — the option select's entries carried `String(option.id)` with a handler doing
  * `Number(value)`, the size's carried `option.value`, a label — so `Number("6.5")` produced `6.5`:
  * not an id, not an error, and stored as a broken relationship. There is one select now.
  *
@@ -131,7 +131,7 @@ describe('the intent that crosses the seam', () => {
  * lines of a component, and a choice nobody made is omitted rather than sent as a placeholder.
  */
 describe('intentFrom', () => {
-  it('carries the stone id through as it stands', () => {
+  it('carries the option id through as it stands', () => {
     const intent = intentFrom({ productId: 1, quantity: 2, variantChoiceId: 11 })
 
     expect(intent).toEqual({ productId: 1, quantity: 2, variantId: 11 })

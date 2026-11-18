@@ -25,17 +25,17 @@ const derive = (title: string): unknown => {
 
 describe('slug derivation', () => {
   it('leaves an English title as it always did', () => {
-    expect(derive('Paragon Ring')).toBe('paragon-ring')
+    expect(derive('Summer Jacket')).toBe('summer-jacket')
     expect(derive('Shipping & Returns')).toBe('shipping-returns')
   })
 
   it('transliterates a Ukrainian title instead of emptying it', () => {
-    expect(derive('Каблучка з діамантом')).toBe('kabluchka-z-diamantom')
+    expect(derive('Зимова куртка')).toBe('zimova-kurtka')
   })
 
   it('transliterates a Russian title, guillemets and all', () => {
     // «» are removed rather than turned into separators, or the name would gain a leading dash.
-    expect(derive('Кольцо «Парагон»')).toBe('kolco-paragon')
+    expect(derive('Куртка «Парагон»')).toBe('kurtka-paragon')
   })
 
   it('handles the letters the two alphabets do not share', () => {
@@ -45,7 +45,7 @@ describe('slug derivation', () => {
   })
 
   it('never produces an empty or non-conforming slug from a titled document', () => {
-    for (const title of ['Каблучка', 'Ring', 'Кольцо 18K', 'Сережки — золото']) {
+    for (const title of ['Куртка', 'Jacket', 'Пальто XL', 'Шапка — вовна']) {
       const slug = derive(title)
       expect(typeof slug).toBe('string')
       expect(slug as string).toMatch(/^[a-z0-9-]+$/)

@@ -208,7 +208,7 @@ describe('the address is permanent (FR-035)', () => {
     const created = await payload.create({
       collection: 'articles',
       data: {
-        title: `Paragon Ring Guide ${suffix}`,
+        title: `Product Care Guide ${suffix}`,
         standfirst: 'A standfirst.',
         category: category.id,
         publishedOn: '2026-08-08T00:00:00.000Z',
@@ -219,18 +219,18 @@ describe('the address is permanent (FR-035)', () => {
     })
     articles.push(created.id)
 
-    expect(created.slug).toBe(`paragon-ring-guide-${suffix}`)
+    expect(created.slug).toBe(`product-care-guide-${suffix}`)
 
     const renamed = await payload.update({
       collection: 'articles',
       id: created.id,
-      data: { title: 'Polygon Ring Guide' },
+      data: { title: 'Renamed Care Guide' },
       overrideAccess: true,
       context: skipRevalidation,
     })
 
     // A rename that moved the address would break every link ever shared to this article.
-    expect(renamed.slug).toBe(`paragon-ring-guide-${suffix}`)
+    expect(renamed.slug).toBe(`product-care-guide-${suffix}`)
   })
 })
 

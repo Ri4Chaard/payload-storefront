@@ -62,13 +62,13 @@ const PAGE_HEADER = { blockType: 'page-header', eyebrow: 'OUR STORY', heading: '
 const BANNER = {
   blockType: 'banner',
   heading: 'SELECTED FOR BRILLIANCE',
-  body: 'Every diamond is carefully considered.',
+  body: 'Every product is carefully considered.',
   media: { kind: 'photo' },
   textSide: 'left',
 }
 const STEPS = {
   blockType: 'process-steps',
-  heading: 'FROM DIAMOND TO JEWEL',
+  heading: 'FROM IDEA TO PRODUCT',
   steps: [
     { title: 'SELECT', caption: 'Carefully chosen', media: { kind: 'photo' } },
     { title: 'CRAFT', caption: 'Every detail', media: { kind: 'photo' } },
@@ -130,7 +130,7 @@ test.describe('the page a visitor reads (US1)', () => {
     await expect(headings).toHaveText([
       'OUR STORY, TOLD',
       'SELECTED FOR BRILLIANCE',
-      'FROM DIAMOND TO JEWEL',
+      'FROM IDEA TO PRODUCT',
     ])
   })
 
@@ -150,16 +150,16 @@ test.describe('the page a visitor reads (US1)', () => {
       PAGE_HEADER,
       {
         blockType: 'closer-look',
-        body: 'Exceptional diamonds begin with exceptional standards.',
-        chips: [{ label: 'Lab-Grown Diamonds' }],
-        figures: [{ word: 'CERTIFIED', caption: 'selected diamonds' }],
+        body: 'Exceptional products begin with exceptional standards.',
+        chips: [{ label: 'Feature 1' }],
+        figures: [{ word: 'CERTIFIED', caption: 'selected materials' }],
         media: { kind: 'photo', photo },
       },
     ])
     await page.goto('/about')
 
-    // The one slot on the page whose media is a subject rather than a backdrop: covering it takes
-    // the ends off the necklace.
+    // The one slot on the page whose media is a subject rather than a backdrop: covering it crops
+    // the edges off the product.
     const fit = await page
       .locator('main img')
       .last()
@@ -185,14 +185,14 @@ test.describe('the page an owner composes (US2)', () => {
     await expect(page.locator('main :is(h1,h2)')).toHaveText([
       'OUR STORY, TOLD',
       'SELECTED FOR BRILLIANCE',
-      'FROM DIAMOND TO JEWEL',
+      'FROM IDEA TO PRODUCT',
     ])
 
     await compose([PAGE_HEADER, STEPS, BANNER])
     await page.goto('/about')
     await expect(page.locator('main :is(h1,h2)')).toHaveText([
       'OUR STORY, TOLD',
-      'FROM DIAMOND TO JEWEL',
+      'FROM IDEA TO PRODUCT',
       'SELECTED FOR BRILLIANCE',
     ])
   })
@@ -238,7 +238,7 @@ test.describe('the page an owner composes (US2)', () => {
 
     expect(response?.status()).toBe(200)
     await expect(page.getByRole('contentinfo')).toBeVisible()
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/IMMORTALIZING/)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/A HEADLINE ABOUT YOUR STORE/)
   })
 })
 
@@ -377,7 +377,7 @@ test.describe('the questions band (US4)', () => {
   })
 
   test('shows a question picked twice only once', async ({ page }) => {
-    const id = await question('Are your diamonds certified?', 'Every one of them.')
+    const id = await question('Are your products certified?', 'Every one of them.')
 
     await compose([PAGE_HEADER, band([id, id])])
     await page.goto('/about')
@@ -430,7 +430,7 @@ test.describe('how the page presents itself (US5)', () => {
     )
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       'content',
-      /Every diamond is carefully considered/,
+      /Every product is carefully considered/,
     )
   })
 
@@ -477,14 +477,14 @@ test.describe('a video where a photograph was drawn (US3)', () => {
     */
     const video = await payload.create({
       collection: 'media',
-      data: { alt: 'A slow pan across a polished stone' },
+      data: { alt: 'A slow pan across a product' },
       filePath: resolve(FIXTURES, 'slot.mp4'),
       context: skipRevalidation,
       overrideAccess: true,
     })
     const poster = await payload.create({
       collection: 'media',
-      data: { alt: 'A polished stone on dark silk' },
+      data: { alt: 'A product on a plain backdrop' },
       filePath: resolve(FIXTURES, 'poster.png'),
       context: skipRevalidation,
       overrideAccess: true,
@@ -569,7 +569,7 @@ test.describe('a video where a photograph was drawn (US3)', () => {
   test('never shows player chrome, in a step tile or anywhere else', async ({ page }) => {
     /*
       A step tile is where controls looked worst — a scrub bar and a play button across a
-      photograph of a jeweller's bench — but the rule is not about that band. Every slot on this
+      photograph of a workbench — but the rule is not about that band. Every slot on this
       page is imagery, so no video in any of them is something a visitor operates.
     */
     await compose([
@@ -577,7 +577,7 @@ test.describe('a video where a photograph was drawn (US3)', () => {
       withVideo(),
       {
         blockType: 'process-steps',
-        heading: 'FROM DIAMOND TO JEWEL',
+        heading: 'FROM IDEA TO PRODUCT',
         steps: [
           { title: 'SELECT', caption: 'Carefully chosen', media: { kind: 'video', video: videoId, poster: posterId } },
         ],

@@ -3,12 +3,12 @@ import { expect, test, type Page } from '@playwright/test'
 /**
  * The product route (003/T269) — `/products/[slug]`.
  *
- * The fixtures give the engagement ring five photographs and the pendant one, which is the split
+ * The fixtures give Product 1 five photographs and Product 3 one, which is the split
  * every assertion about controls turns on: a control that pages a set of one is a lie, and the
- * only way to catch it is to render a piece that has one.
+ * only way to catch it is to render a product that has one.
  */
-const RING = '/products/product-1'
-const PENDANT = '/products/product-3'
+const PRODUCT = '/products/product-1'
+const SINGLE_PHOTO = '/products/product-3'
 
 const WIDTHS = {
   desktop: { width: 1920, height: 1080 },
@@ -20,10 +20,10 @@ const WIDTHS = {
 const rail = (page: Page) => page.getByRole('button', { name: /^Show photograph \d+ of \d+$/ })
 
 test('the name is the page’s only first-level heading', async ({ page }) => {
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/paragon emerald cut diamond engagement ring/i)
+  await expect(h1).toHaveText(/^product 1$/i)
   expect(await h1.count(), 'more than one h1').toBe(1)
 })
 
@@ -32,7 +32,7 @@ test('the name is the page’s only first-level heading', async ({ page }) => {
  * under the name, and the promises strip's cards are `h3` under those.
  */
 test('the heading outline descends one level at a time', async ({ page }) => {
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const levels = await page
     .locator('main h1, main h2, main h3, main h4')
@@ -47,7 +47,7 @@ test('the heading outline descends one level at a time', async ({ page }) => {
 for (const [name, size] of Object.entries(WIDTHS)) {
   test(`the gallery pages from its own controls at ${name} width`, async ({ page }) => {
     await page.setViewportSize(size)
-    await page.goto(RING)
+    await page.goto(PRODUCT)
 
     // Whichever control this width draws — the rail above 768, the dots below it — carries the
     // same name, because both answer the same question: which photograph am I looking at. The
@@ -71,7 +71,7 @@ for (const [name, size] of Object.entries(WIDTHS)) {
 }
 
 test('the photograph opens full screen, pages, and gives focus back', async ({ page }) => {
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const opener = page.getByRole('button', { name: /open full screen$/ }).first()
   await opener.click()
@@ -100,7 +100,7 @@ test('the photograph opens full screen, pages, and gives focus back', async ({ p
  * the assertion that catches the track being dragged back to the opening photograph.
  */
 test('closing the viewer leaves the gallery on the photograph you paged to', async ({ page }) => {
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   await page.getByRole('button', { name: /open full screen$/ }).first().click()
   const viewer = page.getByRole('dialog')
@@ -117,11 +117,11 @@ test('closing the viewer leaves the gallery on the photograph you paged to', asy
 
 /**
  * The photograph is a square whose height follows its width, so an uncapped one turns a wide
- * monitor into a 1200px picture of a ring. 990px is the rail, the gap and the drawn 850px.
+ * monitor into a 1200px picture of a product. 990px is the rail, the gap and the drawn 850px.
  */
 test('the gallery stops growing past the width it is drawn at', async ({ page }) => {
   await page.setViewportSize({ width: 2560, height: 1080 })
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const photograph = page.getByRole('button', { name: /open full screen$/ }).first()
 
@@ -154,7 +154,7 @@ test('the gallery stops growing past the width it is drawn at', async ({ page })
  */
 test('opening an accordion does not move the gallery’s controls', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 1400 })
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const geometry = () =>
     page.evaluate(() => {
@@ -185,8 +185,8 @@ test('opening an accordion does not move the gallery’s controls', async ({ pag
  * The case that decides whether the controls are affordances. One photograph means no rail, no
  * dots and no rail paging — but the photograph still opens.
  */
-test('a single-photograph piece offers no dead controls', async ({ page }) => {
-  await page.goto(PENDANT)
+test('a single-photograph product offers no dead controls', async ({ page }) => {
+  await page.goto(SINGLE_PHOTO)
 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   expect(await rail(page).count(), 'a rail for one photograph').toBe(0)
@@ -199,7 +199,7 @@ test('a single-photograph piece offers no dead controls', async ({ page }) => {
 })
 
 test('the accordions open one at a time and their copy comes from the catalogue', async ({ page }) => {
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const details = page.getByRole('button', { name: 'PRODUCT DETAILS' })
   await expect(details).toHaveAttribute('aria-expanded', 'false')
@@ -208,7 +208,7 @@ test('the accordions open one at a time and their copy comes from the catalogue'
   await expect(details).toHaveAttribute('aria-expanded', 'true')
 
   const panel = page.getByRole('region', { name: 'PRODUCT DETAILS' })
-  await expect(panel).toContainText(/gold/i)
+  await expect(panel).toContainText(/Material A/)
 
   // Closing has to ANIMATE, not vanish: the copy stays on screen, clipped by the collapsing row,
   // and leaves the accessibility tree only once the row has finished closing.
@@ -229,9 +229,9 @@ test('the accordions open one at a time and their copy comes from the catalogue'
   await expect(page.getByRole('button', { name: 'DELIVERY' })).toBeVisible()
 })
 
-/** FR-037 — the band is the home page's, populated from the piece's own collection. */
-test('Complete the Collection shows other pieces and never the piece itself', async ({ page }) => {
-  await page.goto(RING)
+/** FR-037 — the band is the home page's, populated from the product's own collection. */
+test('Complete the Collection shows other products and never the product itself', async ({ page }) => {
+  await page.goto(PRODUCT)
 
   const band = page.getByRole('region', { name: 'Complete the Collection' })
   const links = band.getByRole('link')
@@ -239,13 +239,13 @@ test('Complete the Collection shows other pieces and never the piece itself', as
   expect(count, 'an empty collection band was drawn').toBeGreaterThan(0)
 
   for (let index = 0; index < count; index += 1) {
-    await expect(links.nth(index)).not.toHaveAttribute('href', RING)
+    await expect(links.nth(index)).not.toHaveAttribute('href', PRODUCT)
   }
 })
 
 /** A slug that names nothing is the branded 404, not a crash and not an empty page. */
 test('an unknown slug is the branded 404', async ({ page }) => {
-  const response = await page.goto('/products/no-such-piece')
+  const response = await page.goto('/products/no-such-product')
   expect(response?.status()).toBe(404)
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 })
@@ -261,7 +261,7 @@ test('a draft is unreachable by its own URL', async ({ page }) => {
  * quoting a parsed `"$38,320"` is how a shop advertises a price it does not charge.
  */
 test('the page emits Product, Offer and a breadcrumb trail', async ({ page }) => {
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const blocks = await page.locator('script[type="application/ld+json"]').allTextContents()
   const documents = blocks.flatMap((block) => {
@@ -271,7 +271,7 @@ test('the page emits Product, Offer and a breadcrumb trail', async ({ page }) =>
 
   const product = documents.find((entry) => entry['@type'] === 'Product')
   expect(product, 'no Product in the structured data').toBeDefined()
-  expect(product!.name).toMatch(/paragon/i)
+  expect(product!.name).toBe('Product 1')
 
   const offers = product!.offers as Record<string, unknown>
   expect(offers.priceCurrency).toBe('USD')
@@ -284,36 +284,36 @@ test('the page emits Product, Offer and a breadcrumb trail', async ({ page }) =>
 })
 
 /**
- * FR-039 — the price follows the chosen stone. Until one is chosen the piece has a range and says
+ * FR-039 — the price follows the chosen option. Until one is chosen the product has a range and says
  * "From"; afterwards it has a price, and continuing to say "from" would quote a range the visitor
  * has already resolved.
  */
-test('choosing a diamond changes the price', async ({ page }) => {
-  await page.goto(RING)
+test('choosing an option changes the price', async ({ page }) => {
+  await page.goto(PRODUCT)
 
   const price = page.getByText(/^From \$|^\$/).first()
   await expect(price).toHaveText(/^From \$/)
 
-  const stones = page.getByRole('combobox', { name: /diamond/i })
-  await stones.click()
+  const picker = page.getByRole('combobox', { name: /choose an option/i })
+  await picker.click()
 
   const options = page.getByRole('option')
   const chosen = await options.first().textContent()
   await options.first().click()
 
-  // The trigger now carries the value, which is what makes a screen reader say "Diamond, Lab 1.0"
-  // rather than "Diamond, button".
-  await expect(stones).toContainText(chosen!.split('$')[0]!.trim())
+  // The trigger now carries the value, which is what makes a screen reader say "Choose an option, Option A"
+  // rather than "Choose an option, button".
+  await expect(picker).toContainText(chosen!.split('$')[0]!.trim())
   await expect(page.getByText(/^From \$/)).toHaveCount(0)
 })
 
-/** FR-040 — an unavailable stone is drawn, announced as unavailable, and cannot be chosen. */
-test('an unavailable diamond is shown and cannot be selected', async ({ page }) => {
-  await page.goto(RING)
+/** FR-040 — an unavailable option is drawn, announced as unavailable, and cannot be chosen. */
+test('an unavailable option is shown and cannot be selected', async ({ page }) => {
+  await page.goto(PRODUCT)
 
-  await page.getByRole('combobox', { name: /diamond/i }).click()
+  await page.getByRole('combobox', { name: /choose an option/i }).click()
   const options = page.getByRole('option')
-  expect(await options.count(), 'no stones offered').toBeGreaterThan(0)
+  expect(await options.count(), 'no options offered').toBeGreaterThan(0)
 
   const unavailable = options.filter({ hasText: /out of stock/i })
   if ((await unavailable.count()) > 0) {
@@ -330,8 +330,8 @@ test('an unavailable diamond is shown and cannot be selected', async ({ page }) 
  * refusing to let anything be ordered before a size was picked, which is not what it claims to
  * measure. Removing sizes took that prop away and the staleness surfaced.
  */
-test('the two actions are live on a piece that can be ordered', async ({ page }) => {
-  await page.goto(RING)
+test('the two actions are live on a product that can be ordered', async ({ page }) => {
+  await page.goto(PRODUCT)
 
   await expect(page.getByRole('button', { name: 'Add to cart' })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Buy now' })).toBeEnabled()
@@ -344,50 +344,50 @@ test('the two actions are live on a piece that can be ordered', async ({ page })
 /**
  * The picker is a listbox, not a menu: it has a value, and it says so.
  *
- * Asserted on the STONE picker since spec 011 removed sizes. The claim is about the kit's `Select`
- * — expanded state, value on the trigger, focus returning — and the stone selector is the one that
+ * Asserted on the OPTION picker since spec 011 removed sizes. The claim is about the kit's `Select`
+ * — expanded state, value on the trigger, focus returning — and the option selector is the one that
  * remains to make it against.
  */
-test('the stone picker exposes its value and its state', async ({ page }) => {
-  await page.goto(RING)
+test('the option picker exposes its value and its state', async ({ page }) => {
+  await page.goto(PRODUCT)
 
-  const stones = page.getByRole('combobox', { name: /diamond/i })
-  await expect(stones).toHaveAttribute('aria-expanded', 'false')
+  const picker = page.getByRole('combobox', { name: /choose an option/i })
+  await expect(picker).toHaveAttribute('aria-expanded', 'false')
 
-  await stones.click()
-  await expect(stones).toHaveAttribute('aria-expanded', 'true')
+  await picker.click()
+  await expect(picker).toHaveAttribute('aria-expanded', 'true')
   await expect(page.getByRole('listbox')).toBeVisible()
 
   const first = page.getByRole('option').first()
   const label = (await first.textContent())!.trim()
   await first.click()
 
-  await expect(stones).toHaveAttribute('aria-expanded', 'false')
-  await expect(stones).toContainText(label.split('$')[0]!.trim())
+  await expect(picker).toHaveAttribute('aria-expanded', 'false')
+  await expect(picker).toContainText(label.split('$')[0]!.trim())
   // Focus comes back to the trigger rather than being stranded in a panel that has gone.
-  await expect(stones).toBeFocused()
+  await expect(picker).toBeFocused()
 })
 
-/** FR-025 — a piece adds to the cart in one action now that no size is demanded first. */
-test('a piece can be added to the cart without choosing a size', async ({ page }) => {
-  await page.goto(RING)
+/** FR-025 — a product adds to the cart in one action now that no size is demanded first. */
+test('a product can be added to the cart without choosing a size', async ({ page }) => {
+  await page.goto(PRODUCT)
 
   await expect(page.getByRole('combobox', { name: /size/i })).toHaveCount(0)
 
-  await page.getByRole('combobox', { name: /diamond/i }).click()
+  await page.getByRole('combobox', { name: /choose an option/i }).click()
   await page.getByRole('option').first().click()
   await expect(page.getByRole('button', { name: /add to cart/i })).toBeEnabled()
 })
 
 /**
- * A piece with counted stock cannot be ordered past it (owner, 2026-09-01).
+ * A product with counted stock cannot be ordered past it (owner, 2026-09-01).
  *
- * The signet ring is stock-tracked with two in the shop and offers no stones, so its ceiling is the
+ * Product 10 is stock-tracked with two in the shop and offers no options, so its ceiling is the
  * product's own. Pressing past the ceiling must not merely clamp the number — the control has to
  * say it has stopped, which for a stepper means the plus goes disabled.
  */
-test('the quantity stepper stops at the stock a piece actually has', async ({ page }) => {
-  await page.goto('/products/princess-cut-signet-ring')
+test('the quantity stepper stops at the stock a product actually has', async ({ page }) => {
+  await page.goto('/products/product-10')
 
   const increase = page.getByRole('button', { name: /increase/i })
   const decrease = page.getByRole('button', { name: /decrease/i })
@@ -401,9 +401,9 @@ test('the quantity stepper stops at the stock a piece actually has', async ({ pa
   await expect(increase, 'the stepper went past the stock').toBeDisabled()
 })
 
-/** A made-to-order piece has no ceiling to reach, so the control never stops. */
-test('a made-to-order piece counts past any stock number', async ({ page }) => {
-  await page.goto(RING)
+/** A made-to-order product has no ceiling to reach, so the control never stops. */
+test('a made-to-order product counts past any stock number', async ({ page }) => {
+  await page.goto(PRODUCT)
 
   const increase = page.getByRole('button', { name: /increase/i })
   const count = page.locator('[role="group"] span[aria-live="polite"]')
@@ -414,32 +414,32 @@ test('a made-to-order piece counts past any stock number', async ({ page }) => {
 })
 
 /**
- * The ceiling belongs to the chosen stone — **on a stock-tracked piece**.
+ * The ceiling belongs to the chosen option — **on a stock-tracked product**.
  *
- * This used to be asserted against the engagement ring, which is MADE TO ORDER. That passed only
- * because of the defect spec 011/US1 fixes: a made-to-order stone was gated on a count it has no
- * business having, so picking the scarcest one clamped the quantity to 1. A made-to-order piece has
+ * This used to be asserted against Product 1, which is MADE TO ORDER. That passed only
+ * because of the defect spec 011/US1 fixes: a made-to-order option was gated on a count it has no
+ * business having, so picking the scarcest one clamped the quantity to 1. A made-to-order product has
  * nothing to run out of and now has no ceiling at all (011/FR-003) — which the test above this one
  * has always said, and the two contradicted each other.
  *
- * The claim itself still holds and still matters, so it moves to a piece where a count means
+ * The claim itself still holds and still matters, so it moves to a product where a count means
  * something. The quantity is stored as what was ASKED FOR and capped at the moment of use, so moving
- * to a scarcer stone lowers it rather than leaving the visitor stuck at the low mark.
+ * to a scarcer option lowers it rather than leaving the visitor stuck at the low mark.
  */
-test('a made-to-order piece keeps no ceiling whichever stone is chosen', async ({ page }) => {
-  await page.goto(RING)
+test('a made-to-order product keeps no ceiling whichever option is chosen', async ({ page }) => {
+  await page.goto(PRODUCT)
 
   const count = page.locator('[role="group"] span[aria-live="polite"]')
   const increase = page.getByRole('button', { name: /increase/i })
   for (let press = 0; press < 3; press += 1) await increase.click()
   await expect(count).toHaveText('4')
 
-  // The stone with the smallest count in the shop. It changes nothing: nothing is being counted.
-  await page.getByRole('combobox', { name: /diamond/i }).click()
-  const scarce = page.getByRole('option').filter({ hasText: /2\.0 ct/ })
+  // The option with the smallest count in the shop. It changes nothing: nothing is being counted.
+  await page.getByRole('combobox', { name: /choose an option/i }).click()
+  const scarce = page.getByRole('option').filter({ hasText: /Option C/ })
   await scarce.first().click()
 
-  await expect(count, 'a made-to-order stone has no count to be capped by').toHaveText('4')
+  await expect(count, 'a made-to-order option has no count to be capped by').toHaveText('4')
   await expect(increase).toBeEnabled()
 })
 
@@ -460,7 +460,7 @@ test('a made-to-order piece keeps no ceiling whichever stone is chosen', async (
 test('the page is fully readable with JavaScript disabled', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })
   const page = await context.newPage()
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   await expect(page.getByText('$38,320').first()).toBeVisible()
@@ -484,7 +484,7 @@ test('the page is fully readable with JavaScript disabled', async ({ browser }) 
 test('without JavaScript the full-screen viewer is the only thing missing', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })
   const page = await context.newPage()
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   await page.getByRole('button', { name: /open full screen$/ }).first().click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -502,7 +502,7 @@ test('the page reflows at 320px and at 200% zoom without scrolling sideways', as
     )
 
   await page.setViewportSize({ width: 320, height: 800 })
-  await page.goto(RING)
+  await page.goto(PRODUCT)
   expect(await scrollsSideways(), 'the page scrolls horizontally at 320px').toBe(false)
 
   // 200% zoom on a 1280 screen presents as a 640px viewport — the width at which the gallery is
@@ -532,7 +532,7 @@ test('the gallery neither advances by itself nor travels when asked for less mot
     viewport: { width: 1024, height: 900 },
   })
   const page = await context.newPage()
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   const first = rail(page).first()
   await expect(first).toHaveAttribute('aria-current', 'true')
@@ -570,7 +570,7 @@ test('the full-screen viewer opens without animating when asked for less motion'
     viewport: { width: 1280, height: 900 },
   })
   const page = await context.newPage()
-  await page.goto(RING)
+  await page.goto(PRODUCT)
 
   await page.getByRole('button', { name: /open full screen$/ }).first().click()
   await expect(page.getByRole('dialog')).toBeVisible()

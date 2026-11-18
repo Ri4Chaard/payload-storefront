@@ -55,12 +55,12 @@ describe('getListing', () => {
   })
 
   it('combines groups with AND and values within a group with OR', async () => {
-    const rings = await listing({ category: ['category-1'] })
+    const firstCategory = await listing({ category: ['category-1'] })
     const both = await listing({ category: ['category-1', 'category-2'] })
-    expect(both.total).toBeGreaterThan(rings.total)
+    expect(both.total).toBeGreaterThan(firstCategory.total)
 
     const narrowed = await listing({ category: ['category-1'], colour: ['clear'] })
-    expect(narrowed.total).toBeLessThanOrEqual(rings.total)
+    expect(narrowed.total).toBeLessThanOrEqual(firstCategory.total)
   })
 
   it('sorts by price in both directions, across the whole result and not just the page', async () => {
@@ -93,7 +93,7 @@ describe('getListing', () => {
    * Asked over the whole catalogue rather than one category.
    *
    * It used to name `category-4`, which passed against the fixtures because that is where their
-   * sold-out piece happened to sit. The rule has nothing to do with necklaces — an assertion that
+   * sold-out product happened to sit. The rule has nothing to do with category 4 — an assertion that
    * depends on WHICH category holds the empty shelf breaks when the shop is restocked, and reports
    * a filter bug when the only thing that changed was a number in the admin.
    *
@@ -114,7 +114,7 @@ describe('getListing', () => {
 })
 
 describe('getProduct', () => {
-  it('returns a piece by slug', async () => {
+  it('returns a product by slug', async () => {
     const product = await getProduct('product-1', 'en')
     expect(product?.title).toBe('Product 1')
     expect(product?.variantOptions).toHaveLength(4)
@@ -122,7 +122,7 @@ describe('getProduct', () => {
 
   it('returns null for a draft, exactly as it does for a slug that names nothing', async () => {
     expect(await getProduct('unreleased-product', 'en')).toBeNull()
-    expect(await getProduct('no-such-piece', 'en')).toBeNull()
+    expect(await getProduct('no-such-product', 'en')).toBeNull()
   })
 })
 
@@ -156,13 +156,13 @@ describe('getFilterFacets', () => {
 })
 
 describe('getRelated', () => {
-  it('returns pieces sharing a collection, never the piece itself', async () => {
+  it('returns products sharing a collection, never the product itself', async () => {
     const related = await getRelated(1, 'en')
     expect(related.length).toBeGreaterThan(0)
     expect(related.map((product) => product.id)).not.toContain(1)
   })
 
-  it('returns nothing for a piece in no collection, so the band does not render', async () => {
+  it('returns nothing for a product in no collection, so the band does not render', async () => {
     expect(await getRelated(999, 'en')).toEqual([])
     expect(await getRelated(-1, 'en')).toEqual([])
   })

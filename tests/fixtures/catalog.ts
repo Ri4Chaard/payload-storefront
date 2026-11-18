@@ -14,15 +14,15 @@
  *   `id`/`createdAt`/`updatedAt`/`_status` are on every fixture. Verbose. Also what a document is.
  *   Relationships are unions — `category: number | Category` — and these use the POPULATED branch,
  *     which is what `depth: 1` returns. Variant options are populated too (`depth: 2`), because the
- *     stone selector needs their labels.
+ *     option selector needs their labels.
  *   `variants` is the plugin's paginated join shape, not a bare array.
  *
  * The one place the populated branch is deliberately NOT used is `Variant.product`, which stays a
  * number. Populating both ends makes a cycle, and a cycle in a fixture is a stack overflow in
  * whatever first tries to serialise it.
  *
- * **The catalogue mirrors `scripts/seed-catalog.ts`.** Same slugs, same prices, same stones. The
- * five drawn pieces are first and carry the real copy; the rest are filler, generated below, whose
+ * **The catalogue mirrors `scripts/seed-catalog.ts`.** Same slugs, same prices, same options. The
+ * five drawn products are first and carry the real copy; the rest are filler, generated below, whose
  * only job is to make the grid long enough that paging and sorting have something to do.
  */
 
@@ -105,7 +105,7 @@ const image = (index: number): Media => {
   return found
 }
 
-const RING_GALLERY = [image(0), image(1), image(2), image(3), image(4)]
+const PRODUCT_1_GALLERY = [image(0), image(1), image(2), image(3), image(4)]
 
 // ---------------------------------------------------------------------------------------------
 // Reference collections
@@ -197,27 +197,27 @@ const attribute = (name: string): Attribute => {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The diamond variant type and its stones
+// The variant type and its options
 // ---------------------------------------------------------------------------------------------
 
 export const variantTypeFixtures: VariantType[] = [
   { id: 1, name: 'variant', label: 'Option', ...STAMPS },
 ]
 
-/** `surcharge` is dollars ON TOP of the piece's base price — the same arithmetic the seed does. */
-const STONES: { label: string; value: string; surcharge: number; inventory: number }[] = [
+/** `surcharge` is dollars ON TOP of the product's base price — the same arithmetic the seed does. */
+const OPTIONS: { label: string; value: string; surcharge: number; inventory: number }[] = [
   { label: 'Option A', value: 'option-a', surcharge: 0, inventory: 4 },
   { label: 'Option B', value: 'option-b', surcharge: 4200, inventory: 2 },
   { label: 'Option C', value: 'option-c', surcharge: 9600, inventory: 1 },
-  // Deliberately taken. FR-040 needs a stone that is drawn and cannot be chosen.
+  // Deliberately taken. FR-040 needs an option that is drawn and cannot be chosen.
   { label: 'Option D', value: 'option-d', surcharge: 18400, inventory: 0 },
 ]
 
-export const variantOptionFixtures: VariantOption[] = STONES.map((stone, index) => ({
+export const variantOptionFixtures: VariantOption[] = OPTIONS.map((entry, index) => ({
   id: index + 1,
   variantType: 1,
-  label: stone.label,
-  value: stone.value,
+  label: entry.label,
+  value: entry.value,
   ...STAMPS,
 }))
 
@@ -225,7 +225,7 @@ export const variantOptionFixtures: VariantOption[] = STONES.map((stone, index) 
 // Products
 // ---------------------------------------------------------------------------------------------
 
-interface Piece {
+interface ProductSeed {
   id: number
   slug: string
   title: string
@@ -246,23 +246,23 @@ interface Piece {
 /** Filled as products are built, because a variant needs its parent's id and its base price. */
 const variants: Variant[] = []
 
-function build(piece: Piece): Product {
-  const base = usd(piece.price)
-  const stocked = piece.availability === 'stock-tracked'
+function build(seed: ProductSeed): Product {
+  const base = usd(seed.price)
+  const stocked = seed.availability === 'stock-tracked'
 
-  const own: Variant[] = piece.withVariants
-    ? STONES.map((stone, index) => {
+  const own: Variant[] = seed.withVariants
+    ? OPTIONS.map((entry, index) => {
         const option = variantOptionFixtures[index]
-        if (!option) throw new Error(`no stone at index ${index}`)
+        if (!option) throw new Error(`no option at index ${index}`)
         return {
           id: variants.length + index + 1,
-          title: `${piece.title} — ${stone.label}`,
+          title: `${seed.title} — ${entry.label}`,
           // A number, not the product. See the note at the top of the file.
-          product: piece.id,
+          product: seed.id,
           options: [option],
-          inventory: stone.inventory,
+          inventory: entry.inventory,
           priceInUSDEnabled: true,
-          priceInUSD: usd(piece.price + stone.surcharge),
+          priceInUSD: usd(seed.price + entry.surcharge),
           _status: 'published',
           ...STAMPS,
         }
@@ -272,50 +272,50 @@ function build(piece: Piece): Product {
   variants.push(...own)
 
   return {
-    id: piece.id,
-    slug: piece.slug,
-    title: piece.title,
-    availability: piece.availability ?? 'made-to-order',
-    ...(stocked ? { inventory: piece.inventory ?? 0 } : {}),
-    description: piece.description ?? null,
-    gallery: piece.gallery,
+    id: seed.id,
+    slug: seed.slug,
+    title: seed.title,
+    availability: seed.availability ?? 'made-to-order',
+    ...(stocked ? { inventory: seed.inventory ?? 0 } : {}),
+    description: seed.description ?? null,
+    gallery: seed.gallery,
     details: richText(
-      [piece.description, 'Handcrafted in our atelier.'].filter(
+      [seed.description, 'Handcrafted in our atelier.'].filter(
         (line): line is string => typeof line === 'string',
       ),
     ),
     attributes:
-      piece.attributes?.map((entry, index) => ({
-        id: `${piece.slug}-${index}`,
+      seed.attributes?.map((entry, index) => ({
+        id: `${seed.slug}-${index}`,
         attribute: attribute(entry.name),
         value: entry.value,
       })) ?? [],
-    category: category(piece.categorySlug),
-    collections: (piece.collectionSlugs ?? []).map(collection),
-    colour: (piece.colour ?? []).map(colour),
-    enableVariants: Boolean(piece.withVariants),
-    variantTypes: piece.withVariants ? variantTypeFixtures : [],
+    category: category(seed.categorySlug),
+    collections: (seed.collectionSlugs ?? []).map(collection),
+    colour: (seed.colour ?? []).map(colour),
+    enableVariants: Boolean(seed.withVariants),
+    variantTypes: seed.withVariants ? variantTypeFixtures : [],
     variants: { docs: own, hasNextPage: false, totalDocs: own.length },
     priceInUSDEnabled: true,
     priceInUSD: base,
-    _status: piece.status ?? 'published',
+    _status: seed.status ?? 'published',
     ...STAMPS,
   }
 }
 
-/** The five pieces the design draws, with the copy the seed uses. */
-const DRAWN: Piece[] = [
+/** The five products the design draws, with the copy the seed uses. */
+const DRAWN: ProductSeed[] = [
   {
-    // The piece the product page is drawn around (node 231:1901). BOTH option paths: stones that
+    // The product the product page is drawn around (node 231:1901). BOTH option paths: options that
     // move the price. Sizes were the other axis until spec 011 deprecated them.
     id: 1,
     slug: 'product-1',
     title: 'Product 1',
     categorySlug: 'category-1',
-    gallery: RING_GALLERY,
+    gallery: PRODUCT_1_GALLERY,
     price: 38320,
     description:
-      'Available in a variety of carat weights, every stone is set by hand. Carat weight and stone quantities vary slightly from one ring to another.',
+      'Available in several options. Weight and finish vary slightly from one item to another.',
     collectionSlugs: ['collection-a'],
     colour: ['clear'],
     availability: 'made-to-order',
@@ -327,14 +327,14 @@ const DRAWN: Piece[] = [
     ],
   },
   {
-    // No stones at all — a piece with no choice to make.
+    // No options at all — a product with no choice to make.
     id: 2,
     slug: 'product-2',
     title: 'Product 2',
     categorySlug: 'category-2',
     gallery: [image(5), image(6)],
     price: 37400,
-    description: 'Butterflies in pavé diamonds, set along a flexible band.',
+    description: 'Short product description. Replace it with your own text.',
     collectionSlugs: ['collection-c'],
     colour: ['clear'],
     attributes: [
@@ -343,14 +343,14 @@ const DRAWN: Piece[] = [
     ],
   },
   {
-    // No stones, and stock-tracked at a real count.
+    // No options, and stock-tracked at a real count.
     id: 3,
     slug: 'product-3',
     title: 'Product 3',
     categorySlug: 'category-4',
     gallery: [image(6)],
     price: 12400,
-    description: 'A single butterfly, pavé set, on a fine chain.',
+    description: 'Short product description. Replace it with your own text.',
     collectionSlugs: ['collection-b'],
     colour: ['clear'],
     availability: 'stock-tracked',
@@ -364,7 +364,7 @@ const DRAWN: Piece[] = [
     categorySlug: 'category-3',
     gallery: [image(7)],
     price: 21800,
-    description: 'Ruby and pink sapphire butterflies that climb the ear.',
+    description: 'Short product description. Replace it with your own text.',
     collectionSlugs: ['collection-d'],
     colour: ['multicolor'],
     attributes: [{ name: 'material', value: 'Sample material' }],
@@ -377,7 +377,7 @@ const DRAWN: Piece[] = [
     categorySlug: 'category-4',
     gallery: [image(8)],
     price: 9600,
-    description: 'The mini butterfly, in ruby and pink sapphire.',
+    description: 'Short product description. Replace it with your own text.',
     collectionSlugs: ['collection-d'],
     colour: ['multicolor'],
     availability: 'stock-tracked',
@@ -388,20 +388,20 @@ const DRAWN: Piece[] = [
 
 /**
  * Filler. A 1920 grid is four across and the listing pages at twelve, so a grid that pages needs
- * more than two dozen pieces — and sorting by price proves nothing over five. These carry generated
+ * more than two dozen products — and sorting by price proves nothing over five. These carry generated
  * names and rotate through the categories, colours, shapes and price bands so that every filter in
  * the drawer matches something and excludes something.
  */
 /**
  * Filler. A 1920 grid is four across and the listing pages at twelve, so a grid that pages needs
- * more than two dozen pieces — and sorting by price proves nothing over five.
+ * more than two dozen products — and sorting by price proves nothing over five.
  *
  * **The name and the category are one entry, not two rotating lists.** An earlier version picked
- * the category from the index and the name from a parallel array, which put an "Emerald Bar
- * Bracelet" in Category 1. Nothing was broken except the fixture, and it took a screenshot to
+ * the category from the index and the name from a parallel array, which put a product
+ * named for Category 3 in Category 1. Nothing was broken except the fixture, and it took a screenshot to
  * see — which is exactly the sort of thing development content is for.
  */
-const FILLER_PIECES: { title: string; categorySlug: string }[] = [
+const FILLER_PRODUCTS: { title: string; categorySlug: string }[] = [
   { title: 'Product 7', categorySlug: 'category-1' },
   { title: 'Product 8', categorySlug: 'category-1' },
   { title: 'Product 9', categorySlug: 'category-1' },
@@ -436,7 +436,7 @@ const FILLER_COLOURS: string[][] = [
   ['multicolor'],
   ['clear', 'black'],
 ]
-/** A piece is photographed as what it is. Rings get the ring, necklaces get a necklace. */
+/** A product is photographed as what it is: each category gets its own pictures. */
 const GALLERY_FOR: Record<string, Media[]> = {
   'category-1': [image(0), image(1)],
   'category-2': [image(5)],
@@ -450,7 +450,7 @@ const pick = <T,>(list: readonly T[], index: number): T => {
   return found
 }
 
-const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
+const FILLER: ProductSeed[] = FILLER_PRODUCTS.map(({ title, categorySlug }, index) => {
   const stocked = index % 4 === 3
 
   return {
@@ -476,7 +476,7 @@ const FILLER: Piece[] = FILLER_PIECES.map(({ title, categorySlug }, index) => {
  * `null` for it and the listing never contains it. Keeping one here is what stops FR-009 from being
  * a rule nobody ever exercises.
  */
-const UNPUBLISHED: Piece = {
+const UNPUBLISHED: ProductSeed = {
   id: 999,
   slug: 'unreleased-product',
   title: 'Unreleased Product',
@@ -497,11 +497,11 @@ export const variantFixtures: Variant[] = variants
 export const shopFixture: Shop = {
   id: 1,
   warranty: richText([
-    'Every piece is covered for three years against manufacturing defects.',
+    'Every product is covered for three years against manufacturing defects.',
     'Returns are free within 30 days, in the original packaging.',
   ]),
   delivery: richText([
-    'Made-to-order pieces ship within 3 to 4 weeks. Pieces in stock ship the next working day.',
+    'Made-to-order products ship within 3 to 4 weeks. Products in stock ship the next working day.',
     'Delivery is insured and signature required, worldwide.',
   ]),
   listingSubtitle: 'A short description of this listing',

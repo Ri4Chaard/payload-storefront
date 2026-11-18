@@ -147,7 +147,7 @@ test('mobile navigation opens, closes on Escape, and returns focus', async ({ pa
   await expect(nav).toBeVisible()
 
   // Focus lands inside what was just opened, rather than leaving the user to tab to it.
-  await expect(page.getByRole('link', { name: 'All jewelry' })).toBeFocused()
+  await expect(page.getByRole('link', { name: 'All products' })).toBeFocused()
 
   await page.keyboard.press('Escape')
   await expect(nav).toBeHidden()
@@ -272,7 +272,7 @@ test('footer does not scroll horizontally at 320px', async ({ page }) => {
  * assertion catches that class of bug.
  */
 const WHITE = 'rgb(255, 255, 255)'
-const INK = 'rgb(5, 3, 1)'
+const INK = 'rgb(15, 17, 21)'
 
 async function labelColour(button: import('@playwright/test').Locator) {
   return button.evaluate((el) => getComputedStyle(el).color)
@@ -377,7 +377,7 @@ test('footer newsletter field uses the inverse tone', async ({ page }) => {
   expect(text).toBe('rgb(255, 255, 255)')
 })
 
-test('footer social marks carry a ring and invert on hover', async ({ page }) => {
+test('footer social marks carry an outline and invert on hover', async ({ page }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
@@ -388,15 +388,15 @@ test('footer social marks carry a ring and invert on hover', async ({ page }) =>
     return { border: s.borderColor, width: s.borderWidth, colour: s.color }
   })
 
-  expect(resting.width, 'social mark has no ring').not.toBe('0px')
-  expect(lightnessOf(resting.border), `ring is dark: ${resting.border}`).toBeGreaterThan(0.5)
+  expect(resting.width, 'social mark has no outline').not.toBe('0px')
+  expect(lightnessOf(resting.border), `outline is dark: ${resting.border}`).toBeGreaterThan(0.5)
   expect(resting.colour).toBe('rgb(255, 255, 255)')
 
   await mark.hover()
-  await expect.poll(() => mark.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(5, 3, 1)')
+  await expect.poll(() => mark.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(15, 17, 21)')
 })
 
-test('footer link rules are white, not brand maroon', async ({ page }) => {
+test('footer link rules are white, not the brand colour', async ({ page }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=layout-footer--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
@@ -418,7 +418,7 @@ test('social reveal disc covers the whole mark', async ({ page }) => {
 
   const mark = page.getByRole('link', { name: /WhatsApp/ })
   await mark.hover()
-  await expect.poll(() => mark.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(5, 3, 1)')
+  await expect.poll(() => mark.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(15, 17, 21)')
 
   // The disc must also actually PAINT. It sits at `-z-10`, and without an isolation context on the
   // control it renders behind the footer's own background — present, correctly sized, invisible.
@@ -527,14 +527,14 @@ test('accordion rows wire their panel to their header and toggle it', async ({ p
 
   // Closed copy must be out of the accessibility tree, not merely clipped — a `0fr` grid row still
   // leaves readable text behind for a screen reader if the inner wrapper is not hidden.
-  await expect(page.getByText(/solitaire in 18ct gold/)).toBeHidden()
+  await expect(page.getByText(/A second sentence with a little more detail/)).toBeHidden()
 
   await header.click()
   await expect(header).toHaveAttribute('aria-expanded', 'true')
 
   const region = page.getByRole('region', { name: 'Description' })
   await expect(region).toBeVisible()
-  await expect(region).toContainText('solitaire in 18ct gold')
+  await expect(region).toContainText('A second sentence with a little more detail')
 
   // The header owns the panel by id, which is what makes "expanded" mean anything.
   const controls = await header.getAttribute('aria-controls')
@@ -559,7 +559,7 @@ test('accordion single mode closes the row that was open', async ({ page }) => {
   await expect(description).toHaveAttribute('aria-expanded', 'false')
 })
 
-test('accordion rows take the maroon rule on hover and on keyboard focus', async ({ page }) => {
+test('accordion rows take the primary rule on hover and on keyboard focus', async ({ page }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=ui-accordion--default&viewMode=story`, {
     waitUntil: 'load',
   })
@@ -568,17 +568,17 @@ test('accordion rows take the maroon rule on hover and on keyboard focus', async
     .locator('#storybook-root div[class*="border-b"]')
     .filter({ has: page.getByRole('button', { name: 'Warranty' }) })
   // `black/10` computes as an oklab colour in this build, so the resting value is matched loosely
-  // and the assertion that matters is the CHANGE to maroon below.
+  // and the assertion that matters is the CHANGE to the primary colour below.
   await expect(row).toHaveCSS('border-bottom-color', /oklab\(0 0 0 \/ 0\.1\)|rgba\(0, 0, 0, 0\.1\)/)
 
   await row.hover()
-  await expect(row).toHaveCSS('border-bottom-color', 'rgb(59, 23, 26)')
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(30, 42, 58)')
 
   // Figma draws this state for a pointer only. A keyboard visitor gets the same signal, which is
   // the entire reason `focus-within` is on the row rather than `hover` alone.
   await page.mouse.move(0, 0)
   await page.getByRole('button', { name: 'Warranty' }).focus()
-  await expect(row).toHaveCSS('border-bottom-color', 'rgb(59, 23, 26)')
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(30, 42, 58)')
 })
 
 test('search field clears by pointer and by Escape, keeping focus', async ({ page }) => {
@@ -607,13 +607,13 @@ test('search field rule is the focus indicator', async ({ page }) => {
   })
 
   const row = page.locator('#storybook-root input').locator('xpath=..')
-  await expect(row).toHaveCSS('border-bottom-color', 'rgb(5, 3, 1)')
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(15, 17, 21)')
 
   // The input suppresses the global focus ring, so if this rule did not change there would be no
   // focus indicator on the control at all.
   await page.keyboard.press('Tab')
   await expect(page.getByRole('searchbox')).toBeFocused()
-  await expect(row).toHaveCSS('border-bottom-color', 'rgb(59, 23, 26)')
+  await expect(row).toHaveCSS('border-bottom-color', 'rgb(30, 42, 58)')
 })
 
 test('category card is one link covering the whole tile', async ({ page }) => {
@@ -732,7 +732,7 @@ test('search placeholder keeps the drawn grey', async ({ page }) => {
   const colour = await page
     .locator('#storybook-root input')
     .evaluate((el) => getComputedStyle(el, '::placeholder').color)
-  expect(colour).toBe('rgb(167, 165, 163)')
+  expect(colour).toBe('rgb(156, 161, 170)')
 })
 
 test('quantity stepper names its buttons per item and stops at both ends', async ({ page }) => {
@@ -806,7 +806,7 @@ test('product card CTA is hidden but never trapped', async ({ page }) => {
     waitUntil: 'load',
   })
 
-  const cta = page.getByRole('button', { name: 'View piece' })
+  const cta = page.getByRole('button', { name: 'View product' })
   const opacity = () => cta.evaluate((el) => getComputedStyle(el).opacity)
   await expect.poll(opacity).toBe('0')
 
@@ -830,7 +830,7 @@ test('product card is one link with the arrows and CTA above it', async ({ page 
 
   await expect(page.locator('#storybook-root a')).toHaveCount(1)
   const link = page.getByRole('link')
-  await expect(link).toHaveAttribute('href', '/products/pink-heart-earrings')
+  await expect(link).toHaveAttribute('href', '/products/product-6')
 
   // The photograph is part of the link...
   const box = (await page.locator('#storybook-root article').boundingBox())!
@@ -841,7 +841,7 @@ test('product card is one link with the arrows and CTA above it', async ({ page 
   expect(overPhoto, 'the photograph is not part of the product link').toBe(true)
 
   // ...but the arrows and the CTA are not, or they would be dead controls under the overlay.
-  for (const name of [/^Next photograph/, 'View piece']) {
+  for (const name of [/^Next photograph/, 'View product']) {
     const control = page.getByRole('button', { name })
     const cb = (await control.boundingBox())!
     const hit = await page.evaluate(
@@ -863,14 +863,14 @@ test('cart item controls carry the row they belong to', async ({ page }) => {
 
   // Two rows, and every control names its own. Without this a basket offers identical bins and
   // identical plus buttons — unusable by voice or screen reader, and perfect on screen.
-  await expect(page.getByRole('button', { name: 'Remove BUTTERFLY DIAMOND PENDANT' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Remove PINK HEART EARRINGS' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Remove PRODUCT 3' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Remove PRODUCT 6' })).toBeVisible()
   await expect(
-    page.getByRole('button', { name: 'Increase quantity of PINK HEART EARRINGS' }),
+    page.getByRole('button', { name: 'Increase quantity of PRODUCT 6' }),
   ).toBeVisible()
 
   await expect(page.getByRole('listitem')).toHaveCount(2)
-  await page.getByRole('button', { name: 'Remove BUTTERFLY DIAMOND PENDANT' }).click()
+  await page.getByRole('button', { name: 'Remove PRODUCT 3' }).click()
   await expect(page.getByRole('listitem')).toHaveCount(1)
 })
 
@@ -917,7 +917,7 @@ test('product card reveals its controls at rest on a touch device', async ({ bro
   await expect
     .poll(() =>
       page
-        .getByRole('button', { name: 'View piece' })
+        .getByRole('button', { name: 'View product' })
         .evaluate((el) => getComputedStyle(el).opacity),
     )
     .toBe('1')
@@ -951,7 +951,7 @@ test('the phone card drops its action rather than hiding one nobody can reach', 
   // What matters is HOW it is absent: `display: none`, so it is gone from the tab order too. An
   // `opacity-0` button here would be invisible, focusable and 174px wide — the exact trap the
   // three-way reveal exists to prevent, reintroduced by the fix for it.
-  await expect(page.getByRole('button', { name: 'View piece' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'View product' })).toHaveCount(0)
 
   // The carousel arrows are a different matter — they stay, and stay revealed, because a phone is
   // where swiping through a product's photographs matters most.
@@ -1028,7 +1028,7 @@ test('feature glyphs are decoration, not a second copy of the heading', async ({
   }
 
   // The headings are what carries the meaning, and they are real headings.
-  await expect(page.getByRole('heading', { level: 3, name: 'Free shipping' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 3, name: 'Shipping' })).toBeVisible()
 })
 
 test('hero holds the drawn height at each breakpoint and keeps its headline as text', async ({
@@ -1044,7 +1044,7 @@ test('hero holds the drawn height at each breakpoint and keeps its headline as t
   // The headline is REAL TEXT, not part of the photograph. If this ever fails it means someone
   // exported the frame as one picture, and the page has lost its h1, its translations and its
   // search result along with it.
-  await expect(headline).toHaveText('The beauty of lab-grown diamonds')
+  await expect(headline).toHaveText('A headline about your store')
 
   const DRAWN = [
     { width: 390, height: 754 }, // node 440:13458
@@ -1148,7 +1148,7 @@ test('about band grows for copy the drawing never showed', async ({ page }) => {
   // The drawn 750px is a floor. A third paragraph must push it down, not spill out of it.
   const clipped = await section.evaluate((el) => el.scrollHeight > el.clientHeight + 1)
   expect(clipped, 'the extra paragraph is clipped').toBe(false)
-  await expect(page.getByText('independently graded')).toBeVisible()
+  await expect(page.getByText('which the drawing never shows')).toBeVisible()
 })
 
 test('category tiles change proportion, not just size, across the breakpoints', async ({
@@ -1305,7 +1305,7 @@ test('a carousel with nothing to page shows no arrows at all', async ({ page }) 
   })
 
   await page.getByRole('list', { name: 'Example panels' }).waitFor()
-  // This is the drawn desktop state of the jewelry row: four cards, four fit, control hidden.
+  // This is the drawn desktop state of the product row: four cards, four fit, control hidden.
   await expect(page.getByRole('button', { name: /panels$/ })).toHaveCount(0)
 })
 
@@ -1326,14 +1326,14 @@ test('a wrapping carousel keeps both arrows and comes back round', async ({ page
   await expect.poll(() => track.evaluate((el) => el.scrollLeft > 0)).toBe(true)
 })
 
-test('the jewelry row keeps the drawn card at every width and pages only when it must', async ({
+test('the product row keeps the drawn card at every width and pages only when it must', async ({
   page,
 }) => {
   await page.goto(`${STORYBOOK}/iframe.html?id=sections-productcarousel--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
 
-  const track = page.getByRole('list', { name: 'Featured jewelry' })
+  const track = page.getByRole('list', { name: 'Featured products' })
   const card = page.locator('#storybook-root li').first()
 
   const DRAWN = [
@@ -1358,16 +1358,16 @@ test('the jewelry row keeps the drawn card at every width and pages only when it
   }
 
   // 1920 is the state the drawing shows: four cards, nothing beyond the edge, control hidden.
-  await expect(page.getByRole('button', { name: /pieces$/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /products$/ })).toHaveCount(0)
 })
 
-test('the jewelry row is reachable and pageable by keyboard alone', async ({ page }) => {
+test('the product row is reachable and pageable by keyboard alone', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 900 })
   await page.goto(`${STORYBOOK}/iframe.html?id=sections-productcarousel--desktop&viewMode=story`, {
     waitUntil: 'load',
   })
 
-  const track = page.getByRole('list', { name: 'Featured jewelry' })
+  const track = page.getByRole('list', { name: 'Featured products' })
   // A scrolling region a keyboard cannot reach is `scrollable-region-focusable`. This is what makes
   // the arrow keys work, and it is the only way to move the row without a pointer or a swipe.
   await expect(track).toHaveAttribute('tabindex', '0')
@@ -1528,7 +1528,7 @@ for (const { name, width, height, gutter, disc } of [
 
     // The drawn order. Uppercasing is CSS, so the accessible names stay sentence case.
     await expect(links).toHaveText([
-      'All jewelry',
+      'All products',
       'Category 1',
       'Category 2',
       'Category 3',
@@ -1545,7 +1545,7 @@ for (const { name, width, height, gutter, disc } of [
     )
 
     // Every row ends in the arrow the design draws, and it is decorative — the link is already
-    // named by its label, and "Rings, image" would be a worse name than "Category 1".
+    // named by its label, and "Category 1, image" would be a worse name than "Category 1".
     const arrows = nav.locator('svg')
     await expect(arrows).toHaveCount(7)
     expect(await arrows.first().getAttribute('aria-hidden')).toBe('true')
@@ -1912,7 +1912,7 @@ test('a closed drawer is out of the tab order entirely', async ({ page }) => {
 })
 
 const LIGHTBOX_STORY = `${STORYBOOK}/iframe.html?id=ui-lightbox--default&viewMode=story`
-const RING = 'Paragon Emerald Cut Diamond Engagement Ring'
+const PRODUCT = 'Product 1'
 
 /**
  * The viewer is PhotoSwipe (003/R11), which renders into the document rather than into the story,
@@ -1936,16 +1936,16 @@ test('the viewer moves between photographs with the arrow keys, and wraps', asyn
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
   await focused(page)
 
-  await expect.poll(() => showing(page)).toBe('The ring, photographed on white')
+  await expect.poll(() => showing(page)).toBe('Product 1, photograph 1')
 
   await page.keyboard.press('ArrowRight')
-  await expect.poll(() => showing(page)).toBe('The ring worn with a tailored jacket')
+  await expect.poll(() => showing(page)).toBe('Product 1, photograph 2')
 
   // Backwards past the first: a viewer that stops dead there makes the press do nothing, with no
   // visible end marker to explain why.
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowLeft')
-  await expect.poll(() => showing(page)).toBe('The ring against denim')
+  await expect.poll(() => showing(page)).toBe('Product 1, photograph 5')
 })
 
 /**
@@ -1966,7 +1966,7 @@ test('the viewer zooms, and does it from the keyboard', async ({ page }) => {
   await page.keyboard.press('+')
   await expect(viewer).toHaveClass(/pswp--zoomed-in/)
 
-  // Shallow on purpose — a stone wants a closer look, not a pixel inspection.
+  // Shallow on purpose — a product photograph wants a closer look, not a pixel inspection.
   const scale = await page
     .locator('.pswp__item[aria-hidden="false"] img')
     .first()
@@ -1984,14 +1984,14 @@ test('the viewer draws no arrows for a single photograph', async ({ page }) => {
     waitUntil: 'networkidle',
   })
   await page.locator('.pswp--ui-visible').waitFor()
-  await expect(page.getByRole('button', { name: `Next photograph of ${RING}` })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: `Next photograph of ${PRODUCT}` })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Close' })).toBeVisible()
 })
 
 test('the viewer closes on Escape and returns focus to what opened it', async ({ page }) => {
   await page.goto(LIGHTBOX_STORY, { waitUntil: 'networkidle' })
 
-  const dialog = page.getByRole('dialog', { name: `Photographs of ${RING}` })
+  const dialog = page.getByRole('dialog', { name: `Photographs of ${PRODUCT}` })
   await expect(dialog).toBeVisible()
 
   await page.keyboard.press('Escape')
@@ -2057,7 +2057,7 @@ test("the viewer's controls actually draw their glyphs", async ({ page }) => {
   // And painted in the ink the theme asked for, not in the library's. Every glyph in the registry
   // declares `currentColor`, so this is the assertion that `color` reaches them at all.
   const closeShape = page.locator('.pswp__button--close .pswp__icn path').first()
-  await expect(closeShape).toHaveCSS('fill', 'rgb(5, 3, 1)')
+  await expect(closeShape).toHaveCSS('fill', 'rgb(15, 17, 21)')
 })
 
 /**
@@ -2101,19 +2101,19 @@ test('the viewer survives being paged from a caller that re-renders', async ({ p
 
   // By name, not by position — the Storybook iframe carries hidden buttons of its own ahead of the
   // story, and a thumbnail's accessible name is its photograph's alt text.
-  await page.getByRole('button', { name: 'The ring, photographed on white' }).click()
-  const dialog = page.getByRole('dialog', { name: `Photographs of ${RING}` })
+  await page.getByRole('button', { name: 'Product 1, photograph 1' }).click()
+  const dialog = page.getByRole('dialog', { name: `Photographs of ${PRODUCT}` })
   await expect(dialog).toBeVisible()
 
   await focused(page)
 
   // Each of these reports a new index, which re-renders the caller.
   await page.keyboard.press('ArrowRight')
-  await expect.poll(() => showing(page)).toBe('The ring worn with a tailored jacket')
+  await expect.poll(() => showing(page)).toBe('Product 1, photograph 2')
   await expect(dialog, 'the viewer closed itself when the index moved').toBeVisible()
 
   await page.keyboard.press('ArrowRight')
-  await expect.poll(() => showing(page)).toBe('The ring on a resting hand')
+  await expect.poll(() => showing(page)).toBe('Product 1, photograph 3')
   await expect(dialog).toBeVisible()
 
   // And the same through a pointer drag, which is the gesture the report came from.
@@ -2125,7 +2125,7 @@ test('the viewer survives being paged from a caller that re-renders', async ({ p
   await page.mouse.up()
 
   await expect(dialog, 'the viewer closed itself on a swipe').toBeVisible()
-  await expect.poll(() => showing(page)).toBe('The ring worn, in portrait')
+  await expect.poll(() => showing(page)).toBe('Product 1, photograph 4')
 })
 
 /**

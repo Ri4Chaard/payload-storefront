@@ -101,7 +101,7 @@ describe('which address the seller is given (FR-044)', () => {
 
   /**
    * Research R18. `formatAddress` drops the postcode on purpose — it distinguishes nothing on a
-   * profile row and is the part most likely to overflow the box. For an address a ring is posted
+   * profile row and is the part most likely to overflow the box. For an address an order is posted
    * to, that reasoning inverts, and reusing it would produce something that looks right in review
    * and is missing what the courier needs.
    */
@@ -185,7 +185,7 @@ describe('the message a signed-in customer actually gets', () => {
     lines: [
       {
         id: 'row-1',
-        title: 'Butterfly Diamond Pendant',
+        title: 'Product 3',
         href: '/products/product-3',
         image: null,
         variantChoice: null,
@@ -211,7 +211,7 @@ describe('the message a signed-in customer actually gets', () => {
 
     const message = composeMessage(cart(), await getMessageTemplate(), await messageCustomerFor(alice))
 
-    expect(message).toContain('Butterfly Diamond Pendant')
+    expect(message).toContain('Product 3')
     expect(message).toContain('Aisha Karimova')
     expect(message).toContain('Mangilik el 22')
     expect(message).toContain('010042')

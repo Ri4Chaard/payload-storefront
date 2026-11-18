@@ -26,7 +26,7 @@ Total: {{total}}
 
 const line = (over: Partial<CartLineView> = {}): CartLineView => ({
   id: 'row-1',
-  title: 'Butterfly Diamond Pendant',
+  title: 'Product 3',
   href: '/products/product-3',
   image: null,
   variantChoice: null,
@@ -50,12 +50,12 @@ const cart = (lines: CartLineView[], subtotal = '$24,900'): CartView => ({
 })
 
 describe('what the seller is told (SC-002)', () => {
-  it('names every piece, its stone and how many', () => {
+  it('names every product, its option and how many', () => {
     const message = composeMessage(
       cart([
         line({
           id: 'a',
-          title: 'Paragon Emerald Cut Diamond Engagement Ring',
+          title: 'Product 1',
           variantChoice: 'Option B',
           quantity: 2,
           lineTotal: '$76,640',
@@ -66,13 +66,13 @@ describe('what the seller is told (SC-002)', () => {
       null,
     )
 
-    expect(message).toContain('2 × Paragon Emerald Cut Diamond Engagement Ring')
+    expect(message).toContain('2 × Product 1')
     expect(message).toContain('Option B')
     expect(message).toContain('$76,640')
-    expect(message).toContain('1 × Butterfly Diamond Pendant')
+    expect(message).toContain('1 × Product 3')
   })
 
-  it('works for a piece with one option and for one with neither', () => {
+  it('works for a product with one option and for one with neither', () => {
     const variantOnly = composeMessage(
       cart([line({ variantChoice: 'Option A' })]),
       TEMPLATE,
@@ -81,25 +81,25 @@ describe('what the seller is told (SC-002)', () => {
     expect(variantOnly).toContain('— Option A —')
 
     const neither = composeMessage(cart([line()]), TEMPLATE, null)
-    expect(neither).toContain('1 × Butterfly Diamond Pendant — $24,900')
+    expect(neither).toContain('1 × Product 3 — $24,900')
     // No dangling separator where the options would have been.
-    expect(neither).not.toMatch(/Pendant —\s+—/)
+    expect(neither).not.toMatch(/Product 3 —\s+—/)
   })
 
   it('carries the total', () => {
     expect(composeMessage(cart([line()], '$63,220'), TEMPLATE, null)).toContain('Total: $63,220')
   })
 
-  /** The seller must not be sent a request for a piece the customer was just told is gone. */
+  /** The seller must not be sent a request for a product the customer was just told is gone. */
   it('leaves out a line the loader flagged unavailable', () => {
     const message = composeMessage(
-      cart([line({ id: 'a' }), line({ id: 'b', title: 'Withdrawn Piece', available: false })]),
+      cart([line({ id: 'a' }), line({ id: 'b', title: 'Withdrawn Product', available: false })]),
       TEMPLATE,
       null,
     )
 
-    expect(message).toContain('Butterfly Diamond Pendant')
-    expect(message).not.toContain('Withdrawn Piece')
+    expect(message).toContain('Product 3')
+    expect(message).not.toContain('Withdrawn Product')
   })
 })
 
@@ -159,7 +159,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
     buildLink('telegram', 'a'.repeat(32), message).href.length
 
   it('leaves an ordinary cart alone', () => {
-    const message = composeMessage(longCart('Butterfly Diamond Pendant', 3), TEMPLATE, null)
+    const message = composeMessage(longCart('Product 3', 3), TEMPLATE, null)
     expect(message).not.toContain('more items')
     expect(linkLength(message)).toBeLessThanOrEqual(LINK_BUDGET)
   })
@@ -169,8 +169,8 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
    * `message.length` check would treat them identically and truncate neither.
    */
   it('truncates a twenty-line Cyrillic cart and leaves the Latin one untouched', () => {
-    const cyrillic = composeMessage(longCart('Золотое кольцо с бриллиантом', 20), TEMPLATE, null)
-    const latin = composeMessage(longCart('Butterfly Diamond Pendant', 20), TEMPLATE, null)
+    const cyrillic = composeMessage(longCart('Шерстяное пальто с капюшоном', 20), TEMPLATE, null)
+    const latin = composeMessage(longCart('A product with a Latin title', 20), TEMPLATE, null)
 
     expect(cyrillic).toMatch(/more items in my cart/)
     expect(latin).not.toContain('more items')
@@ -181,7 +181,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
   })
 
   it('measures the encoded link, not the message — the two disagree by a factor of six', () => {
-    const cyrillic = composeMessage(longCart('Золотое кольцо с бриллиантом', 20), TEMPLATE, null)
+    const cyrillic = composeMessage(longCart('Шерстяное пальто с капюшоном', 20), TEMPLATE, null)
 
     // Comfortably inside the budget as a string, and only inside it as a URL because it was cut.
     expect(cyrillic.length).toBeLessThan(LINK_BUDGET)
@@ -189,7 +189,7 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
   })
 
   it('cuts at a line boundary and says how many items it dropped', () => {
-    const message = composeMessage(longCart('Золотое кольцо с бриллиантом', 20), TEMPLATE, null)
+    const message = composeMessage(longCart('Шерстяное пальто с капюшоном', 20), TEMPLATE, null)
     const dropped = message.match(/…and (\d+) more items in my cart/)
 
     expect(dropped).not.toBeNull()
@@ -198,11 +198,11 @@ describe('the length budget (FR-028, FR-028a, SC-015)', () => {
 
     // Never a title cut in half.
     for (const row of message.split('\n')) {
-      if (row.startsWith('1 × ')) expect(row).toContain('Золотое кольцо с бриллиантом')
+      if (row.startsWith('1 × ')) expect(row).toContain('Шерстяное пальто с капюшоном')
     }
   })
 
-  it('survives a single piece too long to fit at all, rather than looping', () => {
+  it('survives a single product too long to fit at all, rather than looping', () => {
     const message = composeMessage(longCart('З'.repeat(600), 1), TEMPLATE, null)
     expect(linkLength(message)).toBeLessThanOrEqual(LINK_BUDGET)
     expect(message).toContain('more item')
@@ -224,16 +224,16 @@ describe('composing is deterministic (FR-026, SC-004)', () => {
 /**
  * A BUY NOW message (T067).
  *
- * One piece, its chosen options, and the total for that piece alone — never whatever else the
+ * One product, its chosen options, and the total for that product alone — never whatever else the
  * customer happens to be holding.
  */
-describe('a single-piece message', () => {
-  it('describes exactly one piece with its chosen options', () => {
+describe('a single-product message', () => {
+  it('describes exactly one product with its chosen options', () => {
     const message = composeMessage(
       cart(
         [
           line({
-            title: 'Paragon Emerald Cut Diamond Engagement Ring',
+            title: 'Product 1',
             variantChoice: 'Option B',
             quantity: 1,
             lineTotal: '$38,320',

@@ -16,7 +16,7 @@ import { acquireSharedContentLock } from '../shared-content-lock'
  * only question that matters — is there text the box cannot show?
  *
  * **Asked as a COMPARISON, not an absolute.** English already clips in one place — a product card
- * whose title is "Paragon Emerald Cut Diamond Engagement Ring" — and that predates this feature by
+ * whose title is longer than the card is wide — and that predates this feature by
  * seven specs. A test that failed on it would be failing on somebody else's design decision and
  * would have to be suppressed or ignored, which is how a gate stops being a gate. The question that
  * belongs to spec 010 is narrower and sharper: **does a longer language clip anything English does

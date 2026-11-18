@@ -25,9 +25,9 @@ const WIDTHS = [
 
 test('a visitor fills a cart and reads it back at every width', async ({ page }) => {
   // Built through the interface rather than seeded, so the cookie, the rows and the badge are all
-  // the real ones. A piece that offers a stone, then a piece that offers no choice at all.
+  // the real ones. A product that offers an option, then a product that offers no choice at all.
   await page.goto('/products/product-1')
-  await page.getByRole('combobox', { name: /diamond/i }).click()
+  await page.getByRole('combobox', { name: /choose an option/i }).click()
   await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
@@ -46,8 +46,8 @@ test('a visitor fills a cart and reads it back at every width', async ({ page })
 
     await expect(page.getByRole('heading', { name: /shopping cart/i })).toBeVisible()
     await expect(cartRows(page)).toHaveCount(2)
-    // The chosen stone travels onto the line (FR-008). Size did too until spec 011 removed it.
-    await expect(cartRows(page).first()).toContainText(/ct/)
+    // The chosen option travels onto the line (FR-008). Size did too until spec 011 removed it.
+    await expect(cartRows(page).first()).toContainText(/Option A/)
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -128,9 +128,9 @@ test('checkout hands the cart to the seller and leaves it alone', async ({ page 
 
   // FR-024 / SC-017: the copy affordance is here even though messengers are configured.
   await expect(dialog.getByRole('button', { name: /copy order/i })).toBeVisible()
-  await expect(dialog.getByLabel(/ready to copy/i)).toHaveValue(/Butterfly Diamond Pendant/)
+  await expect(dialog.getByLabel(/ready to copy/i)).toHaveValue(/1 × Product 3 —/)
 
-  // The message the seller would receive names the piece and the total.
+  // The message the seller would receive names the product and the total.
   await expect(dialog.getByLabel(/ready to copy/i)).toHaveValue(/Total: \$/)
 
   await page.keyboard.press('Escape')
@@ -139,17 +139,17 @@ test('checkout hands the cart to the seller and leaves it alone', async ({ page 
   // FR-027: byte for byte, the cart the customer had before they pressed anything.
   await page.reload()
   await expect(cartRows(page)).toHaveCount(1)
-  await expect(page.getByText(/butterfly diamond pendant/i).first()).toBeVisible()
+  await expect(page.getByText(/^Product 3$/i).first()).toBeVisible()
 })
 
 /**
  * BUY NOW (spec 005, US4 — T069). FR-019, FR-020, SC-005.
  *
  * **The last assertion is the requirement.** A visitor who has assembled a cart and then uses BUY
- * NOW on a different piece must find that cart exactly as they left it — a shortcut that quietly
+ * NOW on a different product must find that cart exactly as they left it — a shortcut that quietly
  * submits or empties the basket destroys work they never offered up.
  */
-test('buy now opens the handoff for one piece and leaves the cart alone', async ({ page }) => {
+test('buy now opens the handoff for one product and leaves the cart alone', async ({ page }) => {
   // A cart of two, built first, so there is something to disturb.
   await page.goto('/products/product-3')
   await page.getByRole('button', { name: /add to cart/i }).click()
@@ -159,24 +159,24 @@ test('buy now opens the handoff for one piece and leaves the cart alone', async 
   await page.getByRole('button', { name: /add to cart/i }).click()
   await expect(page.getByText(/added to your cart/i)).toBeVisible()
 
-  // Now BUY NOW on a third, unrelated piece.
+  // Now BUY NOW on a third, unrelated product.
   await page.goto('/products/product-1')
-  await page.getByRole('combobox', { name: /diamond/i }).click()
+  await page.getByRole('combobox', { name: /choose an option/i }).click()
   await page.getByRole('option').first().click()
   await page.getByRole('button', { name: /buy now/i }).click()
 
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
 
-  // Exactly one piece, and it is the one they pressed BUY NOW on.
+  // Exactly one product, and it is the one they pressed BUY NOW on.
   const message = await dialog.getByLabel(/ready to copy/i).inputValue()
-  expect(message).toContain('Paragon Emerald Cut Diamond Engagement Ring')
-  expect(message).not.toContain('Butterfly Diamond Pendant')
-  expect(message).not.toContain('Pavé Butterfly Diamond Bracelet')
+  expect(message).toContain('Product 1 —')
+  expect(message).not.toContain('Product 3')
+  expect(message).not.toContain('Product 2')
 
   await page.keyboard.press('Escape')
 
-  // FR-020: the cart still holds exactly the two pieces it held before.
+  // FR-020: the cart still holds exactly the two products it held before.
   await page.goto('/cart')
   await expect(cartRows(page)).toHaveCount(2)
 })
@@ -186,8 +186,8 @@ test('buy now names an unmade choice rather than refusing vaguely', async ({ pag
   await page.goto('/products/product-1')
   await page.getByRole('button', { name: /buy now/i }).click()
 
-  // The status region, not the select's own placeholder — which also reads "Choose a diamond".
-  await expect(page.getByRole('status')).toHaveText(/choose a diamond before ordering/i)
+  // The status region, not the select's own placeholder — which also reads "Choose an option".
+  await expect(page.getByRole('status')).toHaveText(/choose an option before ordering/i)
   await expect(page.getByRole('dialog')).toBeHidden()
 })
 

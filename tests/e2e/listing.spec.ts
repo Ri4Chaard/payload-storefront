@@ -3,8 +3,8 @@ import { expect, test, type Page } from '@playwright/test'
 /**
  * The listing routes (003/T257) — `/all-products` and the four categories.
  *
- * The fixtures put 29 published pieces in the shop and page at twelve, so `/all-products` is three
- * pages and `/category-1` is one. Both cases matter: the first proves paging, the second proves the
+ * The fixtures put 30 published products in the shop and page at twelve, so `/all-products` is
+ * three pages and `/category-1` is one. Both cases matter: the first proves paging, the second proves the
  * control disappears rather than offering a single page.
  */
 const WIDTHS = {
@@ -35,7 +35,7 @@ for (const [name, { width, height, columns }] of Object.entries(WIDTHS)) {
 test('a listing is one heading, and each card is one link', async ({ page }) => {
   await page.goto('/category-1')
 
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/diamond rings/i)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^category 1$/i)
   expect(await page.getByRole('heading', { level: 1 }).count(), 'more than one h1').toBe(1)
 
   // The card is a photograph, a name and a price, all covered by one stretched anchor. Carousel
@@ -52,9 +52,9 @@ test('a listing is one heading, and each card is one link', async ({ page }) => 
 })
 
 /**
- * The four categories partition the shop: every piece is in exactly one, and together they are all
- * of it. Counting is what proves that — an earlier fixture put a bracelet in Category 1 and
- * every count-only assertion still passed.
+ * The four categories partition the shop: every product is in exactly one, and together they are
+ * all of it. Counting is what proves that — an earlier fixture put a product in the wrong category
+ * and every count-only assertion still passed.
  */
 test('the categories partition the shop between them', async ({ page }) => {
   const counts: Record<string, number> = {}
@@ -71,7 +71,7 @@ test('the categories partition the shop between them', async ({ page }) => {
 
   expect(Object.values(counts).reduce((sum, count) => sum + count, 0)).toBe(everything)
   expect(everything, 'the shop should be longer than one set').toBeGreaterThan(12)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/all jewelry/i)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^all products$/i)
 })
 
 /**
@@ -107,26 +107,38 @@ test('the desktop card keeps its action until the card is hovered', async ({ pag
     .toBe('1')
 })
 
-test('a category shows the pieces it is named for', async ({ page }) => {
+/**
+ * The seed files every product under one category, so a product the seed puts elsewhere showing up
+ * in Category 1 is a modelling mistake rather than a rendering one — and this is where it shows.
+ */
+const ELSEWHERE = [
+  'product-2',
+  'product-3',
+  'product-4',
+  'product-5',
+  ...Array.from({ length: 17 }, (_, index) => `product-${index + 14}`),
+]
+
+test('a category shows the products filed under it', async ({ page }) => {
   await page.goto('/category-1')
 
-  const names = await page.locator('main article a').allInnerTexts()
-  expect(names.length).toBeGreaterThan(0)
+  const hrefs = await page.locator('main article a').evaluateAll((links) =>
+    links.map((link) => link.getAttribute('href') ?? ''),
+  )
+  expect(hrefs.length).toBeGreaterThan(0)
 
-  // Development fixtures name a piece after what it is, so a necklace in Category 1 is a
-  // modelling mistake rather than a rendering one — and this is where it shows.
-  const strays = names.filter((name) => /bracelet|earring|necklace|pendant/i.test(name))
-  expect(strays, 'these are not rings').toEqual([])
+  const strays = hrefs.filter((href) => ELSEWHERE.some((slug) => href === `/products/${slug}`))
+  expect(strays, 'these belong to another category').toEqual([])
 })
 
 test('an unknown category is the branded 404, inside the shell', async ({ page }) => {
-  const response = await page.goto('/rungs')
+  const response = await page.goto('/category-99')
   expect(response?.status()).toBe(404)
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/does not exist/i)
   // Inside the shell: a wrong turn rather than a dead end.
   await expect(page.getByRole('contentinfo')).toBeVisible()
-  await expect(page.getByRole('link', { name: /browse all jewelry/i })).toBeVisible()
+  await expect(page.getByRole('link', { name: /browse all products/i })).toBeVisible()
 })
 
 const cards = (page: Page) => page.locator('main article')
@@ -143,13 +155,13 @@ test('LOAD MORE extends the grid, counts what is shown, and survives a reload', 
 
   const first = await cards(page).count()
   const firstCardHref = await cards(page).first().locator('a').first().getAttribute('href')
-  await expect(counter(page)).toHaveText(new RegExp(`^Showing ${first} of \\d+ pieces$`))
+  await expect(counter(page)).toHaveText(new RegExp(`^Showing ${first} of \\d+ products$`))
 
   await loadMore(page).click()
 
   await expect(page).toHaveURL(/\?page=2$/)
   await expect(cards(page)).toHaveCount(first * 2)
-  await expect(counter(page)).toHaveText(new RegExp(`^Showing ${first * 2} of \\d+ pieces$`))
+  await expect(counter(page)).toHaveText(new RegExp(`^Showing ${first * 2} of \\d+ products$`))
 
   // Extended, not replaced: what was on screen is still on screen, and still first.
   expect(await cards(page).first().locator('a').first().getAttribute('href')).toBe(firstCardHref)
@@ -164,7 +176,7 @@ test('LOAD MORE goes when there is nothing more to load', async ({ page }) => {
   await page.goto('/all-products?page=99')
 
   const total = await cards(page).count()
-  await expect(counter(page)).toHaveText(`Showing ${total} of ${total} pieces`)
+  await expect(counter(page)).toHaveText(`Showing ${total} of ${total} products`)
   await expect(loadMore(page)).toHaveCount(0)
 })
 
@@ -172,7 +184,7 @@ test('a listing shorter than one set offers no control at all', async ({ page })
   await page.goto('/category-1')
 
   await expect(loadMore(page)).toHaveCount(0)
-  // The count stays. "Showing 8 of 8" is the answer to "is that everything?".
+  // The count stays. "Showing 9 of 9" is the answer to "is that everything?".
   await expect(counter(page)).toBeVisible()
 })
 
@@ -246,13 +258,15 @@ const option = (page: Page, name: string) =>
 test('the toolbar commits immediately, with no APPLY (FR-023)', async ({ page }) => {
   await page.goto('/category-1')
 
-  await page.getByRole('link', { name: 'Oval', exact: true }).click()
-  await expect(page).toHaveURL('/category-1?shape=oval')
-  await expect(page.getByRole('link', { name: 'Remove Oval filter' })).toBeVisible()
-
-  // …and the same for the in-stock toggle, which is a link for exactly this reason.
+  // The in-stock toggle is a link for exactly this reason: pressing it is the new address.
   await page.getByRole('link', { name: 'In-stock only' }).click()
-  await expect(page).toHaveURL('/category-1?shape=oval&inStock=1')
+  await expect(page).toHaveURL('/category-1?inStock=1')
+  await expect(page.getByRole('link', { name: 'Remove In stock only filter' })).toBeVisible()
+
+  // …and pressing it again is the address without it.
+  await page.getByRole('link', { name: 'In-stock only' }).click()
+  await expect(page).toHaveURL('/category-1')
+  await expect(page.getByRole('link', { name: 'Remove In stock only filter' })).toHaveCount(0)
 })
 
 /**
@@ -312,16 +326,16 @@ test('a filtered URL renders the same listing in a fresh context, drawer pre-tic
   const context = await browser.newContext()
   const page = await context.newPage()
 
-  await page.goto('/category-1?colour=clear&shape=round')
+  await page.goto('/category-1?colour=clear&collection=collection-a')
   expect(await page.locator('main article').count()).toBeGreaterThan(0)
 
   await expect(page.getByRole('link', { name: 'Remove Clear filter' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Remove Round filter' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Remove Collection A filter' })).toBeVisible()
 
   // Scenario 5: the panel opens agreeing with the address that was shared.
   await filtersTrigger(page).click()
   await expect(page.getByRole('checkbox', { name: 'Clear' })).toBeChecked()
-  await expect(page.getByRole('checkbox', { name: 'Round' })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Collection A' })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Green' })).not.toBeChecked()
 
   await context.close()
@@ -350,17 +364,17 @@ test('the drawer edits a draft — dismissing discards it, APPLY commits it', as
 })
 
 test('removing a chip drops that filter and no other', async ({ page }) => {
-  await page.goto('/category-1?colour=green&shape=oval')
+  await page.goto('/category-1?collection=collection-c&colour=green')
 
-  await page.getByRole('link', { name: 'Remove Oval filter' }).click()
+  await page.getByRole('link', { name: 'Remove Collection C filter' }).click()
 
   await expect(page).toHaveURL('/category-1?colour=green')
   await expect(page.getByRole('link', { name: 'Remove Green filter' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Remove Oval filter' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Remove Collection C filter' })).toHaveCount(0)
 })
 
 /** The route's category is a chip like any other, and dropping it is the whole shop. */
-test('removing the category chip widens to all jewelry', async ({ page }) => {
+test('removing the category chip widens to all products', async ({ page }) => {
   await page.goto('/category-1?colour=green')
 
   await page.getByRole('link', { name: 'Remove Category 1 filter' }).click()
@@ -368,7 +382,7 @@ test('removing the category chip widens to all jewelry', async ({ page }) => {
 })
 
 test('CLEAR returns to the category it started from', async ({ page }) => {
-  await page.goto('/category-1?colour=green&shape=oval&sort=price-asc')
+  await page.goto('/category-1?collection=collection-c&colour=green&sort=price-asc')
 
   await filtersTrigger(page).click()
   await page.getByRole('link', { name: 'CLEAR', exact: true }).click()
@@ -444,7 +458,7 @@ test('a category in the query is redirected onto its own path', async ({ page })
   await page.goto('/all-products?category=category-1&colour=green')
 
   await expect(page).toHaveURL('/category-1?colour=green')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/diamond rings/i)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^category 1$/i)
 })
 
 /** A stale value has a report to render, and the redirect would rewrite the query that carries it. */
@@ -514,8 +528,10 @@ test('choosing an ordering reorders the grid, records it, and returns focus', as
 test('sorting and filtering hold together (FR-031)', async ({ page }) => {
   await page.goto('/category-1?colour=clear&sort=price-asc')
 
+  // The price is the dollar figure. A name now carries digits of its own ("Product 12"), so the
+  // card's text is read for the amount after the sign rather than for every digit in it.
   const prices = await page.locator('main article').evaluateAll((cards) =>
-    cards.map((card) => Number(card.textContent?.replace(/[^\d]/g, '').slice(0, 8) ?? 0)),
+    cards.map((card) => Number(/\$([\d,]+)/.exec(card.textContent ?? '')?.[1]?.replace(/,/g, '') ?? 0)),
   )
   expect(prices.length).toBeGreaterThan(1)
   expect([...prices].sort((a, b) => a - b)).toEqual(prices)

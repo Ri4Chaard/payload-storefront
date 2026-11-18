@@ -85,10 +85,10 @@ const writeQuestion = async (question: string, order: number) =>
 const DEFAULTS = {
   eyebrow: 'CONTACT US',
   heading: 'WE’RE HERE TO HELP',
-  intro: 'Questions, custom requests, or styling advice — our team is here for you',
+  intro: 'A short line about how your team can help',
   form: {
     heading: 'SEND US A MESSAGE',
-    body: 'To make an enquiry, please use the contact form below. Our Aurum team will be happy to assist you with diamonds, orders, delivery, or any other questions.',
+    body: 'To make an enquiry, please use the contact form below. Our team will be happy to help with orders, delivery, or any other questions.',
     nameLabel: 'Name',
     emailLabel: 'E-mail',
     messageLabel: 'Message',

@@ -144,8 +144,8 @@ test.describe('switching language', () => {
     // FR-011. The cart lives in its own cookie keyed by session; nothing about a locale change
     // should touch it, and this is the test that says so.
     /*
-      A piece with neither a stone nor a size, chosen on purpose — `cart.spec.ts` uses the same one
-      for the same reason. The first product in the grid needs a diamond and a size selected before
+      A product with no options to choose, chosen on purpose — `cart.spec.ts` uses the same one
+      for the same reason. The first product in the grid needs an option selected before
       ADD TO CART is enabled, so clicking it added nothing and the badge stayed empty. The original
       assertion compared the label before and after and passed anyway, because "Cart, empty" equals
       "Cart, empty".

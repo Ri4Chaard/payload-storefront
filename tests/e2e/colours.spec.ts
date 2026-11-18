@@ -26,7 +26,7 @@ test.afterAll(async () => {
 })
 
 /** FR-020, SC-006 — the regression that would be most expensive to find in production. */
-test('a link saved before this feature returns the same pieces', async ({ page }) => {
+test('a link saved before this feature returns the same products', async ({ page }) => {
   await page.goto('/all-products?colour=black&colour=green')
 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -52,7 +52,7 @@ test('a colour the owner adds filters the live site', async ({ page }) => {
   })
   made.push(colour.id)
 
-  const [piece] = (
+  const [product] = (
     await payload.find({
       collection: 'products',
       limit: 1,
@@ -61,12 +61,12 @@ test('a colour the owner adds filters the live site', async ({ page }) => {
     })
   ).docs
 
-  const before = piece!.colour ?? []
+  const before = product!.colour ?? []
   await payload.update({
     collection: 'products',
     context,
     data: { colour: [...before.map((entry) => (typeof entry === 'number' ? entry : entry.id)), colour.id] },
-    id: piece!.id,
+    id: product!.id,
     overrideAccess: true,
   })
 
@@ -75,7 +75,7 @@ test('a colour the owner adds filters the live site', async ({ page }) => {
 
     // The owner's new colour filters, and names itself in the chip from its own label.
     await expect(page.getByRole('link', { name: /Remove Rose gold/i })).toBeVisible()
-    // Exactly the one piece it was applied to — which is the filter doing its job rather than
+    // Exactly the one product it was applied to — which is the filter doing its job rather than
     // being ignored, and is stronger than asserting the grid is merely non-empty.
     await expect(page.getByRole('article')).toHaveCount(1)
   } finally {
@@ -83,7 +83,7 @@ test('a colour the owner adds filters the live site', async ({ page }) => {
       collection: 'products',
       context,
       data: { colour: before.map((entry) => (typeof entry === 'number' ? entry : entry.id)) },
-      id: piece!.id,
+      id: product!.id,
       overrideAccess: true,
     })
   }

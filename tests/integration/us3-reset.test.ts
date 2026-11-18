@@ -320,7 +320,7 @@ describe('completePasswordReset', () => {
 })
 
 /**
- * The handle is the one piece of this flow with no Payload behind it, so it is checked directly:
+ * The handle is the one part of this flow with no Payload behind it, so it is checked directly:
  * what the browser holds must be unforgeable and must expire.
  */
 describe('reset handles', () => {

@@ -228,7 +228,7 @@ test.describe('the message form', () => {
   const fill = async (page: import('@playwright/test').Page, email: string) => {
     await page.getByPlaceholder('Name', { exact: true }).fill('Yara')
     await page.getByPlaceholder('E-mail', { exact: true }).fill(email)
-    await page.getByPlaceholder('Message', { exact: true }).fill('Do you have this in a 1.5ct emerald cut?')
+    await page.getByPlaceholder('Message', { exact: true }).fill('Do you have this in Option B?')
   }
 
   test('a completed form is confirmed, and the enquiry is recorded', async ({ page }) => {
@@ -405,7 +405,7 @@ test.describe('metadata', () => {
       slug: 'contact-page',
       data: {
         heading: 'WE’RE HERE TO HELP',
-        intro: 'Questions, custom requests, or styling advice — our team is here for you',
+        intro: 'A short line about how your team can help',
       } as never,
       context: skipRevalidation,
     })
@@ -415,7 +415,7 @@ test.describe('metadata', () => {
     await expect(page).toHaveTitle(/WE’RE HERE TO HELP/)
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       'content',
-      /Questions, custom requests/,
+      /A short line about how your team can help/,
     )
   })
 
