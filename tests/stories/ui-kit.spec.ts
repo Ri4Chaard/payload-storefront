@@ -246,9 +246,8 @@ test('certification marks carry real alternative text', async ({ page }) => {
     waitUntil: 'load',
   })
 
-  // "GIA" spoken aloud is three letters, not an institution.
-  await expect(page.getByRole('img', { name: 'Gemological Institute of America' })).toBeVisible()
-  await expect(page.getByRole('img', { name: 'International Gemological Institute' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Partner logo 1' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Partner logo 2' })).toBeVisible()
 })
 
 test('footer does not scroll horizontally at 320px', async ({ page }) => {
@@ -435,10 +434,10 @@ test('certification marks stack from tablet up and sit side by side on a phone',
 }) => {
   const marks = async () => {
     const gia = await page
-      .getByRole('img', { name: 'Gemological Institute of America' })
+      .getByRole('img', { name: 'Partner logo 1' })
       .boundingBox()
     const igi = await page
-      .getByRole('img', { name: 'International Gemological Institute' })
+      .getByRole('img', { name: 'Partner logo 2' })
       .boundingBox()
     return { gia: gia!, igi: igi! }
   }

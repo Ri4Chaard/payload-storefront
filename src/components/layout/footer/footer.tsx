@@ -140,25 +140,19 @@ const LIST = 'flex flex-col items-center gap-2.5 md:items-start md:gap-3.5'
  */
 function Certifications() {
   /*
-    **The two `alt` strings here stay English in every language, on purpose** (spec 010).
-
-    They are the registered names of two organisations — the Gemological Institute of America and
-    the International Gemological Institute — not descriptions of the marks. Translating an
-    institution's name invents an institution: a reader looking for "GIA" on a certificate would
-    not find "Геммологический институт Америки" printed on it. They are the only English left in
-    the footer, and `tests/e2e/interface-language.spec.ts` does not flag them because they are not
-    message keys.
+    Placeholder partner / certification marks. Replace the files in public/logos/ and the `alt`
+    text with the real organisations' names (keep them untranslated: they are proper names).
   */
   return (
     <div className="flex items-center gap-2.5 md:flex-col md:items-start">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logos/gia.svg"
-        alt="Gemological Institute of America"
+        src="/logos/partner-1.svg"
+        alt="Partner logo 1"
         width={174}
         height={58}
         // Lazy because they are in the FOOTER. Without it React preloads them from the server
-        // markup, and 96KB of certification marks nobody has scrolled to yet compete with the
+        // markup, and certification marks nobody has scrolled to yet compete with the
         // hero photograph — which is the largest contentful paint on every page that has one.
         loading="lazy"
         decoding="async"
@@ -166,9 +160,9 @@ function Certifications() {
       />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logos/igi.svg"
-        alt="International Gemological Institute"
-        width={173}
+        src="/logos/partner-2.svg"
+        alt="Partner logo 2"
+        width={174}
         height={58}
         loading="lazy"
         decoding="async"
