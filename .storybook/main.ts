@@ -3,7 +3,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import type { StorybookConfig } from '@storybook/nextjs-vite'
 
 /**
- * Storybook is the living style guide (FR-029 – FR-033).
+ * Storybook is the living style guide.
  *
  * It replaces the /style-guide route an earlier revision of the plan chose. The deciding factor is
  * the workflow: components arrive one at a time and are built in isolation before anything consumes

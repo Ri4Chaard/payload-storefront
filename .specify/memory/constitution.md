@@ -1,61 +1,31 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 2.1.0 -> 2.2.0
-Bump rationale: MINOR. Guidance materially expanded — Principle V's JavaScript budget is raised from
-                a flat 200KB gzipped per route to a 300KB total PLUS a 100KB cap on application code
-                above the measured framework baseline, with the measurement method stated.
-Motivation:     The 200KB figure was unmeetable and had stopped being a gate. Measured against a
-                production build on 2026-09-03: a 404 page carrying no application code served
-                181KB, so 90% of the budget was spent before any code was written; catalogue routes
-                sat at 193KB, inside it only by luck; and spec 004's account routes served 265-268KB,
-                over it. The overage is one zod chunk — the shared client/server schema decision
-                recorded in 004/research.md R16 — not an accumulation of waste. Splitting the budget
-                keeps a real ceiling on what a visitor downloads while making the half this team
-                controls tight enough to catch a regression: today's worst route spends 84KB of the
-                100KB delta.
-Impact on in-flight work: none. Spec 004 ships as built; its T568 moves from FAIL to PASS on the
-                revised budget rather than being waived.
-Migration:      no code is rendered non-compliant. Every route passes both clauses as of this
-                amendment. The baseline is re-measured on the next Next.js or React major.
-
-Version change: 2.0.0 -> 2.1.0
-Bump rationale: MINOR. Guidance materially expanded — "Technology Stack & Project Structure" gains
-                a repository-wide kebab-case path convention, split from the existing identifier
-                naming rule so the two are not confused. No principle changed.
-Migration: all non-compliant paths renamed in the same change; `pnpm check:naming` added as a
-                blocking CI gate so the convention cannot drift.
-
-Version change: 1.0.0 → 2.0.0
-Bump rationale: MAJOR. The principle set is redefined around website construction on Payload CMS
-                rather than security engineering. Three of five v1.0.0 principles were removed or
-                merged, which is backward incompatible for any work planned against them.
-
-Principle changes (v1.0.0 → v2.0.0):
-  - I. Customer Trust & Data Protection      → merged into VI. Commerce Correctness & Data Protection
-  - II. Transactional Integrity              → merged into VI. Commerce Correctness & Data Protection
-  - III. Test-First Delivery                 → REMOVED as a principle; testing now lives in
-                                               "Development Workflow & Quality Gates" as CI gates
-  - IV. Performance & Accessibility Budgets  → V. Performance, Accessibility & SEO Budgets (expanded with SEO)
-  - V. Observable, Reversible Releases       → folded into "Development Workflow & Quality Gates"
-  - NEW I.   Payload Is the Single Source of Truth
-  - NEW II.  Reuse Before Creation (NON-NEGOTIABLE)
-  - NEW III. Design Tokens Over Magic Values
-  - NEW IV.  Content Modeling & Schema Evolution
-
-Added sections:
-  - Technology Stack & Project Structure (replaces "Security, Privacy & Compliance Requirements")
-
-Removed sections:
-  - Security, Privacy & Compliance Requirements (essential rules retained in Principle VI)
-
+Version change: 2.2.0 -> 3.0.0
+Bump rationale: MAJOR. The project is redefined from one specific shop into a domain-neutral store
+                template that can be turned into any kind of shop. A new principle (VII. Domain-
+                Neutral Core) constrains every future feature, and i18n parity becomes a principle
+                (VIII) rather than a convention.
+Principle changes:
+  - Preamble rewritten: the constitution governs the template and every shop built from it.
+  - V. Budgets: the measured-baseline history is dropped; the rule and the method stay.
+  - VI. Commerce: the order hand-off (messenger checkout) is named; payment rules apply as soon
+        as a payment provider is added.
+  - NEW VII. Domain-Neutral Core
+  - NEW VIII. Three Languages by Construction
+Runtime guidance: AGENTS.md (read by Codex, imported by CLAUDE.md for Claude Code).
 Deferred TODOs: none
 -->
 
-# Aurum Constitution
+# Store Template Constitution
 
-Aurum is an e-commerce website built on Payload CMS. This constitution governs how the site is
-built: how components are shared, how content is modeled, and how pages are shipped.
+This repository is a **store template**: a domain-neutral e-commerce storefront and content platform
+built on Payload CMS and Next.js, meant to be turned into any kind of shop — clothing, groceries,
+bicycles, jewelry, books. This constitution governs the template and every shop built from it: how
+components are shared, how content is modeled, how the core stays neutral, and how pages ship.
+
+Throughout this document "the shop" means whatever store is being built from the template, and
+"the core" means the code that every such store shares.
 
 ## Core Principles
 
@@ -152,18 +122,14 @@ A storefront that is slow, unreachable, or unindexed does not sell.
 - Field-measured Core Web Vitals MUST stay within LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1 at the 75th
   percentile on mobile for home, category, product-detail, cart, and checkout.
 - Initial JavaScript MUST NOT exceed **300KB gzipped per route**, and MUST NOT exceed **100KB
-  gzipped above the measured framework baseline**. A change that breaches either MUST reduce
-  elsewhere or be rejected.
-  - Two numbers because they police different things. The total is what a visitor on a phone
-    actually downloads. The delta is the only half this team controls: the framework baseline
-    measured 181KB on a page carrying no application code at all, so a single total would be mostly
-    a budget for somebody else's bytes, and would let our own code grow unnoticed until it ran out
-    of room.
+  gzipped above the measured framework baseline** (a page carrying no application code). A change
+  that breaches either MUST reduce elsewhere or be rejected.
+  - Two numbers because they police different things: the total is what a visitor on a phone
+    downloads; the delta is the half this codebase controls.
   - The baseline MUST be re-measured on a framework upgrade rather than carried forward as a
-    constant. It is a fact about the current dependencies, not a target.
-  - Measure against a **production server**, not a build log. Next 16 with Turbopack no longer
-    prints per-route JS, and the figures that matter are what the browser fetches before the load
-    event, gzipped as served.
+    constant.
+  - Measure against a **production server**, not a build log: the figures that matter are what the
+    browser fetches before the load event, gzipped as served.
 - Server components are the default. `use client` MUST be justified by actual interactivity and
   pushed as far down the tree as possible.
 - All images MUST go through the framework's image pipeline with explicit dimensions, responsive
@@ -186,6 +152,9 @@ measured once and then ignored, which is worse than a generous one that is enfor
 
 Money, inventory, and customer data are the parts of a website where mistakes are unrecoverable.
 
+- The template's checkout is a **hand-off**: the cart is sent to the seller through a messenger
+  (WhatsApp, Telegram, Instagram) with every line, option and total composed server-side. The rules
+  below about payments apply in full the moment a payment provider is added.
 - Prices, taxes, discounts, and shipping MUST be computed server-side at order creation. Client
   supplied amounts are display inputs only and MUST NEVER be trusted for charging.
 - Monetary values MUST use integer minor units with an explicit currency code. Floating-point
@@ -209,6 +178,46 @@ Money, inventory, and customer data are the parts of a website where mistakes ar
 Rationale: A visual bug is embarrassing; a pricing, inventory, or privacy bug is a refund, a
 chargeback, or a regulatory notice. These rules are the floor, and the floor does not move for
 schedule.
+
+### VII. Domain-Neutral Core
+
+The core sells "products". It never knows what they are.
+
+- The core MUST NOT contain vocabulary, fields, filters, icons, or logic specific to one kind of
+  shop. Rings, sizes, ISBNs, frame geometries and expiry dates are all *some* shop's concepts, not
+  the template's.
+- What differs between shops is modeled as **data**, not schema: categories, collections, colours,
+  attributes (name/value pairs editors define), and variant types with their options (each option
+  with its own price, stock and photograph). A new kind of shop SHOULD need only admin work and
+  seed changes.
+- When a shop genuinely needs a new structural concept (a filter facet, a field with behaviour), it
+  MUST be added generically — named for what it does ("option", "attribute", "facet"), not for the
+  first product that needed it — and documented in `docs/customizing.md`.
+- Seed data, Storybook stories and test fixtures MUST use neutral placeholders ("Product 1",
+  "Option A", "Collection A"). Real catalogue content belongs in a shop's own database, not in the
+  template.
+- Brand identity — name, palette, typefaces, icon — MUST be swappable from the token sources, the
+  font loader, the wordmark component and the app icon, without touching feature code.
+
+Rationale: every jewelry- or clothing-shaped assumption baked into the core is a rewrite for the
+next shop. Keeping the core neutral is what makes this a template rather than a fork.
+
+### VIII. Three Languages by Construction
+
+The storefront ships in English, Russian and Ukrainian, and every change keeps all three whole.
+
+- Interface strings live in `src/i18n/messages/{en,ru,uk}.json`, and the three files MUST have
+  identical key sets (enforced by a unit test). A key added in one language is added in all three
+  in the same change.
+- Editorial content is localized in Payload; a field an editor writes MUST be `localized: true`
+  unless it is an identifier, a number or a relationship.
+- Seeds MUST provide every locale: English in `scripts/seed-catalog.ts`, Russian and Ukrainian in
+  `scripts/seed-translations-data.ts`.
+- Adding or removing a locale is a configuration change documented in `docs/customizing.md`, not a
+  refactor.
+
+Rationale: a translation added later is a translation never added. Parity enforced at review time
+costs minutes; parity recovered after launch costs a project.
 
 ## Technology Stack & Project Structure
 
@@ -286,13 +295,14 @@ within the window stated in the amendment's migration plan.
 
 **Compliance review**: Every pull request review MUST verify compliance with these principles,
 with particular attention to Principle II — component duplication is the most common and most
-expensive violation. A full audit of the component tree and content model is performed quarterly,
+expensive violation — and Principle VII, since a domain-specific assumption is the easiest one to
+merge without noticing. A full audit of the component tree and content model is performed quarterly,
 and its findings are tracked as blocking work items. Deviations require a documented, time-boxed
 exception approved by the maintainers and recorded in the feature plan's Complexity Tracking
 section; undocumented deviation is a defect.
 
-**Runtime guidance**: `CLAUDE.md` at the repository root carries day-to-day development guidance
-for agents and contributors. It MUST remain consistent with this constitution; on conflict, this
-constitution governs.
+**Runtime guidance**: `AGENTS.md` at the repository root carries day-to-day development guidance
+for agents and contributors — Codex reads it directly and `CLAUDE.md` imports it for Claude Code.
+It MUST remain consistent with this constitution; on conflict, this constitution governs.
 
-**Version**: 2.2.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-09-03
+**Version**: 3.0.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-11-18

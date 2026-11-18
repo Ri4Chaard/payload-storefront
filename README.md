@@ -1,270 +1,177 @@
-# Aurum
+# Aurum — store template
 
-A store template: a multilingual (en/ru/uk) storefront with an integrated content platform, built on
-Next.js and Payload CMS. Every product, category, page and image in the seed data is a placeholder —
-replace them in the admin panel (or in `scripts/seed-*.ts`) to turn it into any kind of shop.
+A production-grade, **domain-neutral e-commerce template**: a multilingual storefront and content
+platform on **Next.js 16 (App Router)**, **Payload CMS 3** and **PostgreSQL**. Every product,
+category, page and image ships as a placeholder, so the same codebase becomes a clothing shop, a
+grocery, a bicycle shop or a jewelry store by editing data in the admin — not by rewriting code.
 
-What is included: catalogue with categories, collections, colours, attributes and per-product
-options (variants with their own price and stock), filters and sorting, cart with a messenger
-hand-off (WhatsApp / Telegram / Instagram), customer accounts with email verification, blog,
-about/FAQ/contact pages, legal pages and cookie consent, a design-token system and a Storybook UI
-kit.
+> "Aurum" is just the template's placeholder name — set `NEXT_PUBLIC_SITE_NAME` and it is gone.
 
-## The storefront
+## Features
 
-| Route | What it is | Rendering |
+- **Catalogue** — categories (one route each), collections, colours, owner-defined attributes,
+  product options (variants with their own price, stock and photo), made-to-order vs stock-tracked
+  availability, filters + sort + LOAD MORE with shareable URLs that work without JavaScript.
+- **Product page** — gallery and lightbox, option picker, quantity limits from stock, details /
+  warranty / delivery accordions, "complete the collection", schema.org `Product`/`Offer`.
+- **Cart and checkout** — server-side cart for guests and customers (merged on sign-in) and a
+  **messenger hand-off**: the order goes to the seller via WhatsApp, Telegram or Instagram with every
+  line and total pre-written.
+- **Accounts** — email verification codes, sign-in, password reset/change, profile, addresses,
+  marketing consent (mirrored to a Resend audience), scheduled purge of unverified accounts.
+- **Content** — blog with topics and chaptered articles, block-composed About page, FAQ, contact
+  page with an enquiry form, legal pages, cookie consent with categories.
+- **Three languages** — English, Russian, Ukrainian; interface strings in JSON, content localized in
+  Payload, per-language on/off switch in the admin, hreflang and per-locale sitemap.
+- **Design system** — generated design tokens, a Storybook UI kit, contrast checks, no magic values
+  (enforced by ESLint and CI scripts).
+- **Quality** — strict TypeScript, unit + integration (real Postgres) + Playwright e2e,
+  accessibility (axe) and story suites, JS budgets.
+- **Ops** — Dockerfile and compose files, migrations on container start, health check.
+- **AI-ready** — [Spec Kit](./docs/spec-kit.md) for spec-driven development with **Claude Code**
+  and **Codex**, a [constitution](./.specify/memory/constitution.md) and `AGENTS.md`.
+
+## Quick start
+
+Requirements: Node 22+ (`.nvmrc`), pnpm (`corepack enable pnpm`), Docker.
+
+```bash
+pnpm install
+docker compose --profile local up -d   # Postgres on 127.0.0.1:5432
+cp .env.example .env                   # set PAYLOAD_SECRET (openssl rand -base64 32)
+pnpm payload migrate                   # create the schema
+pnpm seed && pnpm seed:policies && pnpm seed:translations   # placeholder shop in 3 languages
+pnpm dev
+```
+
+- Storefront: <http://localhost:3000> (`/ru`, `/uk` for the other languages)
+- Admin: <http://localhost:3000/admin> — the first visit asks you to create an administrator
+
+Email: registration sends verification codes through [Resend](https://resend.com). Locally, either
+put a real `RESEND_API_KEY` in `.env` (with `EMAIL_FROM_ADDRESS=onboarding@resend.dev`), or run
+`EMAIL_TRANSPORT=log pnpm dev` to print emails to the console instead of sending them.
+
+### Environment
+
+| Variable | Required | Purpose |
 | --- | --- | --- |
-| `/` | Home. The category band and the featured row read the catalogue | Per request |
-| `/all-products` | The whole shop, with filters, sort and LOAD MORE | Per request |
-| `/<category>` | One category — `/category-1`, `/category-2`, … | Per request |
-| `/products/<slug>` | One product: gallery, options, the details accordions | Cached, and invalidated on publish |
-| `/admin` | Payload | Per request |
+| `DATABASE_URI` | yes | Postgres connection string |
+| `PAYLOAD_SECRET` | yes | Payload encryption secret |
+| `NEXT_PUBLIC_SERVER_URL` | yes | Public origin (canonical URLs, CSRF). Build-time. |
+| `RESEND_API_KEY`, `EMAIL_FROM_ADDRESS` | yes | Transactional email |
+| `NEXT_PUBLIC_SITE_NAME` | no | Shop name everywhere it is printed. Build-time. Default `Aurum`. |
+| `EMAIL_FROM_NAME` | no | Sender name; defaults to the shop name |
+| `EMAIL_OVERRIDE_RECIPIENT` | no | Redirect every email to one address (staging) |
+| `EMAIL_TRANSPORT=log` | no | Log emails instead of sending (tests, local) |
+| `RESEND_AUDIENCE_ID` | no | Resend audience that marketing consent is mirrored into |
 
-**The category segment is validated against the catalogue, not against a list in the code.** A
-category is a document the owner can create, so `/whatever-they-named-it` works the moment they
-publish it, and any unrecognised single segment is the branded 404.
+Details and comments: [`.env.example`](./.env.example).
 
-**Everything except the product page renders per request**, because the two listings read
-`searchParams` and the home page must not be baked from a database the container build cannot reach.
-The product page is the cached one: prerendered per published slug where the build can read the
-catalogue, rendered on demand and kept where it cannot, and invalidated by Payload hooks either way
-— saving anything the storefront reads marks every product page stale, so a publish is never waiting
-on a deployment or an interval. The whole strategy is
-[003/research R13](./specs/003-shop-catalog/research.md).
+## Make it your shop
 
-**`next build` does not need a database.** It uses one when there is one, and prerenders the whole
-catalogue; without one it prerenders nothing and says so. That is deliberate — the image is built
-before `pnpm payload migrate` runs, so on a first deploy the tables do not exist yet.
+The full walkthrough is **[docs/customizing.md](./docs/customizing.md)**. In short:
 
-## Seeding
+1. **Name, icon, wordmark** — `NEXT_PUBLIC_SITE_NAME`, `src/app/icon.svg`, `src/components/layout/logo/`.
+2. **Palette and fonts** — `design/tokens/*.json` → `pnpm build:tokens && pnpm check:contrast`;
+   typefaces in `src/styles/fonts.ts`.
+3. **Catalogue model, in the admin** — categories, collections, attributes, variant types/options,
+   colours. A clothing shop gets *Size → S/M/L*; a grocery *Pack → 500 g / 1 kg*; nothing in code.
+4. **Content, in the admin** — products and photos, home/about/FAQ/blog/contact pages, legal pages,
+   messengers for checkout — in every language you keep.
+5. **Header navigation** — point the category links at your slugs.
+6. **Deploy** — [docs/deployment.md](./docs/deployment.md).
 
-`pnpm seed` (`scripts/seed-catalog.ts`) writes a development catalogue **through Payload's Local
-API**, so every hook, default and access rule a real editor would hit applies to it too. A seed that
-wrote SQL would prove nothing about the model.
+## Documentation
 
-It is idempotent — everything is looked up by slug or name and updated in place — and the order is
-fixed by what references what:
-
-1. **Photographs** (`media`), uploaded first because everything below points at them
-2. **Reference data** — `categories`, `collections`, `colours`, `attributes`
-3. **The option variant type and its options** — `variantTypes`, then `variantOptions`
-4. **Products**, which reference all of the above
-5. **Variants**, after their product: the plugin checks that each option's variant type is enabled on
-   the parent, so a variant created first is rejected
-6. **Shop settings**, the global holding the accordion headings and the warranty and delivery copy
-
-**On a deployed environment, run it once, by hand, inside the container.** Nothing seeds
-automatically: the deploy workflow builds, starts and migrates, and that is all. That is deliberate
-— the seed updates products in place, so running it on every push would overwrite anything the owner
-had authored in the admin since the last one.
-
-```bash
-# on the server, in the clone of this repository
-docker compose --profile prod exec -T app pnpm seed
-# or, for the all-in-one stack:
-docker compose -f docker-compose.full.yml exec -T app pnpm seed
-```
-
-Not from a laptop against the deployment's database. Payload's local storage writes uploads to
-`./media` relative to the working directory, so seeding from outside would put the photographs on
-your machine and leave the site with media rows pointing at files that were never uploaded.
-
-It leaves one product as a **draft** on purpose. A draft that is unreachable by URL is a rule worth
-exercising rather than merely asserting, and several tests reach for that slug.
-
-Every write passes `context: skipRevalidation`. Seeding is not publishing: it runs in its own
-process, where `revalidatePath` has no request scope and throws — and a dev server running alongside
-is a different process whose cache it could not have invalidated anyway.
-
-## Deployment
-
-`docker-compose.yml` carries two profiles and starts nothing without one. The `local` profile above
-is Postgres alone, for an app running on the host. The `prod` profile is the deployed environment:
-the app, built from the checkout on the machine it runs on. It brings no database — point it at one
-that is provisioned separately.
-
-```bash
-# on the VPS, in a clone of this repository
-cp .env.example .env          # DATABASE_URI, PAYLOAD_SECRET, NEXT_PUBLIC_SERVER_URL,
-                              # RESEND_API_KEY, EMAIL_FROM_ADDRESS
-docker compose --profile prod up -d --build
-```
-
-Or the app together with its own Postgres: `docker compose -f docker-compose.full.yml up -d --build`.
-
-The container applies the committed migrations before `next start`, so a failed migration stops the
-deploy rather than booting against the wrong schema. To ship a new commit: `git pull` and repeat the
-`up -d --build`. The full runbook — environment, reverse proxy, backups, troubleshooting — is
-[`docs/deployment.md`](./docs/deployment.md).
-
-Three things to know:
-
-- `NEXT_PUBLIC_SERVER_URL` is inlined into the client bundle by `next build`. Changing it needs a
-  rebuild, not a restart.
-- A database running elsewhere on the same host is reachable as `host.docker.internal` — the
-  compose file maps it to the host gateway.
-- The app publishes `${APP_PORT:-3000}` for a reverse proxy (nginx, Caddy) to terminate TLS in
-  front of. Uploads live in the `aurum_media` volume.
-- The nightly cleanup of unverified accounts and spent codes runs **inside this container**, on
-  Payload's own job queue — there is no cron service to install. It stops running on a serverless
-  host, silently, because a function that only exists during a request cannot hold a timer.
-
-## Three languages
-
-The site is English, Russian and Ukrainian. English lives at the addresses it always did —
-`/legal/privacy` — and the other two sit under a prefix: `/ru/legal/privacy`, `/uk/legal/privacy`.
-Nothing that was published before moved.
-
-### Where a string lives, and how to decide
-
-There is one rule, and it decides every case:
-
-| If it is… | It lives in | Changed by |
-| --- | --- | --- |
-| Something an editor writes — a heading, a policy, a product description, a call to action, an SEO description | **Payload**, as a localized field | The owner, in the admin, without a deploy |
-| Interface chrome — a validation sentence, a form label, an accessible name, "Load more" | **`src/i18n/messages/*.json`** | A developer, in a commit |
-
-The test is whether somebody would reasonably ask an editor to reword it. "ADD TO CART" would be a
-Payload field on a site where marketing rewrites buttons; here it is chrome. "That does not look like
-an email address" is chrome anywhere.
-
-### Adding a string
-
-1. Add the key to `src/i18n/messages/en.json`. English is the type source — a key that is not there
-   does not compile.
-2. Translate it in `ru.json` and `uk.json`. `pnpm test tests/unit/message-keys.test.ts` fails if you
-   forget, if a placeholder goes missing, or if a Russian plural lacks its `few`/`many` cases.
-3. Read it with `getTranslations('namespace')` in a Server Component, `useTranslations('namespace')`
-   in a Client Component.
-
-**If you use a namespace in a Client Component, add it to `CLIENT_NAMESPACES` in
-`src/app/(frontend)/[locale]/layout.tsx`.** A namespace missing from that list does not throw — the
-button renders `product.addToCart` instead of "ADD TO CART", and nothing else notices.
-
-**A key that exists but is never read is the failure mode to watch for.** Adding the English string
-and both translations is the easy half; the half that gets forgotten is calling the translator at
-the place that renders it, and nothing about a half-finished conversion looks wrong — the page still
-says "Email Address", just in the wrong language. `tests/e2e/interface-language.spec.ts` is the
-guard: it reads every value out of `en.json` and fails if any of them renders on a Russian or
-Ukrainian page, in the text OR in an `aria-label`, `placeholder`, `alt` or `title`. Run it after
-adding strings.
-
-### Translating a page
-
-In the admin, switch the locale control at the top of the document and type. Only fields holding
-words are per-language; prices, images, dates and slugs are entered once and shared. Anything left
-untranslated falls back to English, so a half-translated site renders whole.
-
-```bash
-pnpm seed:translations   # sample Russian and Ukrainian content, so three languages can be seen
-```
-
-### Turning a language off
-
-**Settings → Languages** in the admin. Switching Ukrainian off removes it from the switcher, stops
-its addresses serving and drops it from the sitemap, within a minute and without a deploy. Nothing
-you have written in it is lost, and you can keep translating it while it is off. English has no
-switch: it is what everything falls back to.
-
-### Things that will surprise you
-
-- **Slugs are always English**, in every language. A Cyrillic title is transliterated —
-  "Зимова куртка" becomes `zimova-kurtka`.
-- **A visitor's language is never guessed.** Browser settings and IP are not read. Everyone starts in
-  English; the switcher is the only way to change it, and the choice is remembered for a year.
-- **A `required` field that is also localized must be filled in every language** before a document
-  can be saved in any of them. That is why the localized fields inside arrays are not required.
+| Document | What it covers |
+| --- | --- |
+| [docs/overview.md](./docs/overview.md) | Architecture, domain model (collections, globals, blocks), repository layout, quality gates |
+| [docs/customizing.md](./docs/customizing.md) | Turning the template into a specific shop, step by step |
+| [docs/deployment.md](./docs/deployment.md) | Docker, environment, reverse proxy, backups, troubleshooting |
+| [docs/spec-kit.md](./docs/spec-kit.md) | Spec-driven development with Claude Code and Codex |
+| [.specify/memory/constitution.md](./.specify/memory/constitution.md) | The rules every change is checked against |
+| [AGENTS.md](./AGENTS.md) | Day-to-day guidance for coding agents (Codex; Claude Code via `CLAUDE.md`) |
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
 | `pnpm dev` | Storefront and admin |
-| `pnpm seed` | Write a development catalogue through the Local API |
-| `pnpm storybook` | Component workshop |
-| `pnpm build:tokens` | Regenerate `src/styles/tokens.css` from the design exports |
-| `pnpm build:icons` | Regenerate the icon registry from the SVG set |
-| `pnpm check:tokens` | Fail if the committed token file is stale |
-| `pnpm check:contrast` | Validate every permitted colour pairing against WCAG 2.2 AA |
-| `pnpm check:stories` | Fail if a UI-kit component has no stories file |
-| `pnpm check:naming` | Fail on any path that is not kebab-case |
-| `pnpm check:styles` | Fail on a raw colour or an arbitrary size in a stylesheet |
-| `pnpm lint` | ESLint, including the no-magic-values rules |
-| `pnpm typecheck` | Strict TypeScript |
-| `pnpm test` | Unit tests |
-| `pnpm test:integration` | The data layer against a real Postgres, including the US1 acceptance |
-| `pnpm test:e2e` | Playwright, including keyboard traversal |
-| `pnpm test:a11y` | axe-core over stories and routes |
-| `pnpm test:stories` | Every story renders, with no console errors |
-| `pnpm generate:types` | Regenerate `src/payload-types.ts` |
+| `pnpm build` / `pnpm start` | Production build / server |
+| `pnpm seed`, `seed:policies`, `seed:translations` | Placeholder catalogue, legal pages, ru/uk content |
+| `pnpm payload migrate` / `payload migrate:create <name>` | Apply / create database migrations |
+| `pnpm generate:types` | Regenerate `src/payload-types.ts` after a schema change |
+| `pnpm storybook` | Component workshop on :6006 |
+| `pnpm build:tokens`, `build:icons` | Regenerate tokens CSS / icon registry |
+| `pnpm typecheck`, `lint`, `format` | Static checks |
+| `pnpm test`, `test:integration` | Unit tests / data layer against real Postgres |
+| `pnpm test:e2e`, `test:a11y`, `test:stories` | Playwright: journeys, axe, every story |
+| `pnpm check:tokens`, `check:contrast`, `check:naming`, `check:styles`, `check:stories` | CI guards |
+| `pnpm measure:js` | JS budget against a running production server |
 
-The Playwright suites reuse a dev server on port 3000 if one is already running, **including one
-belonging to a different project**, so `tests/warm-routes.ts` refuses to run against a server that
-is not this application and tells you how to move:
+**Running Playwright:** the suites reuse a server already on `PLAYWRIGHT_BASE_URL` (default :3000).
+Account journeys send email, so run the server with `EMAIL_TRANSPORT=log`, and for a production
+build set `NEXT_PUBLIC_SERVER_URL` to the URL you test against (Payload's CSRF check compares them):
 
 ```bash
-PORT=3100 PLAYWRIGHT_BASE_URL=http://localhost:3100 pnpm test:e2e
+NEXT_PUBLIC_SERVER_URL=http://localhost:3100 pnpm build
+EMAIL_TRANSPORT=log PORT=3100 pnpm start &
+PLAYWRIGHT_BASE_URL=http://localhost:3100 EMAIL_TRANSPORT=log pnpm test:e2e
 ```
 
-## Project structure
+## How it is put together
+
+- **Routes**: `/`, `/all-products`, `/<category>`, `/products/<slug>`, `/blog`, `/blog/<slug>`,
+  `/about`, `/faq`, `/contact`, `/legal/<slug>`, `/cart`, account pages, `/admin`. English lives at
+  the root; Russian and Ukrainian under `/ru` and `/uk`.
+- **Rendering**: listings and home render per request; product pages are prerendered when the build
+  can reach a database and invalidated by Payload hooks on publish. `next build` does not need a
+  database.
+- **Data access**: `src/lib/catalog/queries.ts` is the only module that knows where catalogue data
+  comes from; components receive narrow view models (`src/lib/catalog/types.ts`) — no drafts, no raw
+  stock counts.
+- **Seeding** goes through Payload's Local API, idempotently, so every hook and access rule applies.
+  Run it once by hand on a new environment (`docker compose … exec -T app pnpm seed`); it overwrites
+  matching documents, so never on a live shop.
+
+### Where a string lives
+
+| If it is… | It lives in | Changed by |
+| --- | --- | --- |
+| Something an editor writes — a heading, a product description, a policy, an SEO description | **Payload**, as a localized field | The owner, in the admin, without a deploy |
+| Interface chrome — a form label, a validation message, an accessible name, "Load more" | **`src/i18n/messages/{en,ru,uk}.json`** | A developer, in a commit |
+
+Adding a message: add the key to `en.json` (the type source), translate it in `ru.json` and
+`uk.json` (`tests/unit/message-keys.test.ts` checks keys, placeholders and plural forms), read it
+with `getTranslations` / `useTranslations`. A namespace used in a Client Component must be listed in
+`CLIENT_NAMESPACES` in `src/app/(frontend)/[locale]/layout.tsx`.
+`tests/e2e/interface-language.spec.ts` fails if any English string renders on a ru/uk page.
+
+Slugs are always Latin — a Cyrillic title is transliterated ("Зимова куртка" → `zimova-kurtka`). A
+visitor's language is never guessed; the switcher decides and is remembered for a year.
+
+### Design tokens
 
 ```
-design/tokens/     Figma exports (never hand-edited) + the semantic mapping
-scripts/           Token generation and the CI guard scripts
-src/app/(frontend) Storefront routes and the full-Tailwind stylesheet
-src/app/(payload)  Payload admin — Tailwind WITHOUT preflight (see below)
-src/components/ui  The UI kit. Primitives only; no domain components
-src/components/commerce  Catalogue components — the grid, the drawer, the gallery
-src/components/sections  Home-page bands, reused on the product page
-src/components/layout  Header, Footer, Nav, SkipLink
-src/styles/        Generated tokens.css and font declarations
-src/collections/   Payload collections
-src/globals/       Payload globals — shop-wide copy
-src/lib/catalog/   The data layer: queries, mappers, filters, view models
-src/mocks/         Fixtures for stories and tests. NOT read by application code
-tests/             unit, integration (real Postgres), e2e, a11y, stories
+design/tokens/{colors,typography}.json  →  design/tokens/mapping.ts  →  src/styles/tokens.css
+          (sources)                          (semantic roles)            (@theme, generated)
 ```
 
-### Where the storefront gets its data
+Never hand-edit `tokens.css` — `pnpm check:tokens` fails on any drift. The UI kit in
+`src/components/ui/` is the shared vocabulary: search it before creating a component, and ship every
+component with its `*.stories.tsx`.
 
-`src/lib/catalog/queries.ts` is **the only module that knows where a document came from**. Every
-route and every component takes what it renders as props, which is what let the whole storefront
-move from fixtures to Payload in 003 Phase 9 by rewriting one file — no component and no route
-changed. The view models in `src/lib/catalog/types.ts` are deliberately narrower than the documents
-behind them: no `_status`, so nothing downstream can render a draft, and no `inventory`, so
-"available" is decided once and travels as a boolean.
+Tailwind's preflight breaks Payload's admin, so the two entry stylesheets differ on purpose:
+`src/app/(frontend)/[locale]/styles.css` (full Tailwind) and `src/app/(payload)/custom.css` (theme and
+utilities only). Do not merge them.
 
-Reads are deduplicated per request with React `cache()`, not cached across requests; anything
-longer-lived is the route cache's business, and that has an invalidation story (see above).
+## Deployment
 
-## Design tokens
-
-Tokens are **generated**, not hand-written. The pipeline has one writer per stage:
-
-```
-design/tokens/*.json   →   design/tokens/mapping.ts   →   src/styles/tokens.css
-   (Figma export)            (semantic roles, gaps)         (@theme — generated)
+```bash
+cp .env.example .env    # fill in the required variables
+docker compose -f docker-compose.full.yml up -d --build   # app + its own Postgres
+# or: docker compose --profile prod up -d --build         # app only, your own database
 ```
 
-Change a value in the export or the mapping, run `pnpm build:tokens`, and it propagates everywhere.
-**Never hand-edit `src/styles/tokens.css`** — CI regenerates it and fails on any diff.
-
-The full token list, provenance for every value, and the permitted colour pairings live in
-[`contracts/design-tokens.md`](./specs/001-design-system-foundation/contracts/design-tokens.md).
-
-## The UI kit
-
-`src/components/ui/` is the shared vocabulary. Before creating a component, search it — a pull
-request introducing a duplicate is rejected (Constitution II). Variants are props on one component,
-never near-identical siblings. Every component ships with its `*.stories.tsx` in the same change;
-`pnpm check:stories` enforces it.
-
-## A note on Tailwind and the admin panel
-
-Tailwind's preflight is a global reset that visibly breaks Payload's admin UI. The two entry
-stylesheets are therefore deliberately different:
-
-- `src/app/(frontend)/styles.css` — full Tailwind, preflight included
-- `src/app/(payload)/custom.css` — theme and utilities **only, no preflight**
-
-Do not merge them.
+Migrations run when the container starts; a failed migration stops it. Uploads live in a Docker
+volume — back it up together with the database. Full runbook: [docs/deployment.md](./docs/deployment.md).

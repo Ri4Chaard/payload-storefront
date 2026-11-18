@@ -27,7 +27,7 @@ const withBrandFonts: Decorator = (Story) => (
 )
 
 /**
- * Messages reach stories the same way they reach the app (spec 010, T086).
+ * Messages reach stories the same way they reach the app.
  *
  * Components that read `useTranslations` or `useLocale` throw without a provider above them — and
  * since spec 010 the header is one of them. English, because a story is a specimen of the design
@@ -45,7 +45,7 @@ const preview: Preview = {
   parameters: {
     controls: { matchers: { color: /(background|color)$/i, date: /Date$/i } },
     /**
-     * The App Router mock, mounted for every story (spec 010, T105).
+     * The App Router mock, mounted for every story.
      *
      * Since spec 010 the site's links and nav controls come from `@/i18n/navigation` — next-intl's
      * `Link`, `useRouter` and `usePathname`, which are the `next/navigation` ones underneath with a
