@@ -145,19 +145,20 @@ export function FilterDrawer({
       title={t_catalog('filters')}
       closeLabel={t_catalog('closeFilters')}
       id={FILTER_PANEL_ID}
-      // `Drawer` is drawn at 350px, which leaves a 40px strip of listing beside it on a phone.
-      // FR-027 asks the filter panel to COVER the viewport below `md`, so this one widens.
-      className="filter-drawer max-md:w-full"
+      // `Drawer` is drawn at 350px. Below `md` the filter panel covers the viewport; above it, it is
+      // 420px, because the footer's two labels are long in Russian and Ukrainian ("ЗАСТОСУВАТИ")
+      // and a nowrap button cannot shrink to fit 350px.
+      className="filter-drawer max-md:w-full md:w-105"
       closeHref={currentHref}
       triggerRef={triggerRef}
       asForm
       formProps={{ method: 'get', action: ALL_PRODUCTS, onSubmit }}
       footer={
         <>
-          <Button variant="outline" href={clearHref} className="flex-1">
+          <Button variant="outline" href={clearHref} className="min-w-0 flex-1 px-4">
             {t_catalog('clear')}
           </Button>
-          <Button variant="primary" type="submit" className="flex-1">
+          <Button variant="primary" type="submit" className="min-w-0 flex-1 px-4">
             {t_catalog('apply')}
           </Button>
         </>
